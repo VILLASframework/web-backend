@@ -1,7 +1,7 @@
-# <img src="doc/pictures/villas_web.png" width=40 /> VILLASweb-backend
+# <img src="doc/pictures/villas_web.png" width=40 /> VILLASweb-backend-go
 
 ## Description
-This is a rewrite of the server for the VILLASweb website. The term
+This is a rewrite in Go language of the backend for the VILLASweb website. The term
 __frontend__ refers to this project, the server the website (frontend)
 is talking to.  The backend serves the database content to the website,
 handles authentication and persistent storage of content. It does
