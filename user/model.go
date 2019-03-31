@@ -10,13 +10,13 @@ import (
 
 type User struct {
 	gorm.Model
-	Username    string `gorm:"unique"`
-	Password    string
-	Mail        string      `gorm:"default:"`
-	Role        string      `gorm:"default:user"`
-	Projects    []Project   // TODO: association & foreign key
-	Simulations []Simulaion // TODO: association & foreign key
-	Files       []File      // TODO: association & foreign key
+	Username    string `gorm:"unique;not null"`
+	Password    string `gorm:"not null"`
+	Mail        string `gorm:"default:"`
+	Role        string `gorm:"default:user"`
+	Projects    []Project
+	Simulations []Simulaion
+	Files       []File
 }
 
 // TODO: callback for verifying password

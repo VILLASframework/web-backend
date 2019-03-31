@@ -8,10 +8,10 @@ import (
 
 type Simulation struct {
 	gorm.Model
-	Name            string
-	Running         bool              `gorm:"default:false"`
-	Models          []SimulationModel // TODO: association & foreign key
-	Projects        []Project         // TODO: association & foreign key
-	User            []Users           // TODO: association & foreign key
-	StartParameters []string          // TODO: Mixed Type
+	Name            string `gorm:"not null"`
+	Running         bool   `gorm:"default:false"`
+	Models          []SimulationModel
+	Projects        []Project
+	SimulationUser  User     `gorm:"not null"`
+	StartParameters []string // TODO: Mixed Type
 }

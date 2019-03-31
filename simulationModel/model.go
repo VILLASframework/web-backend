@@ -13,6 +13,6 @@ type SimulationModel struct {
 	OutputMapping   []string   // TODO: Mixed Type
 	InputMapping    []string   // TODO: Mixed Type
 	StartParameters []string   // TODO: Mixed Type
-	ModelSimulation Simulation // TODO: association & foreign key
-	ModelSimulator  Simulator  // TODO: association & foreign key
+	ModelSimulation Simulation `gorm:"not null"`
+	ModelSimulator  Simulator  `gorm:"not null"`
 }

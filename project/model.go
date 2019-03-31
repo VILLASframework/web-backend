@@ -8,10 +8,10 @@ import (
 
 type Project struct {
 	gorm.Model
-	Name              string
-	UserProject       User            // XXX: association?
-	Visualizations    []Visualization // TODO: association & foreign key
-	SimulationProject Simulation      // XXX: association?n
+	Name              string `gorm:"not null"`
+	ProjectUser       User   `gorm:"not null"`
+	Visualizations    []Visualization
+	ProjectSimulation Simulation `gorm:"not null"`
 }
 
 // TODO: execute before project.delete()
