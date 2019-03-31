@@ -1,78 +1,52 @@
 package main
 
-    import (
-        "database/sql"
-        "fmt"
-        _ "github.com/lib/pq"
-        //"time"
-    )
+import (
+	"fmt"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/simulator"
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/postgres"
+	"log"
+)
 
-    const (
-        //DB_USER     = "postgres"
-        //DB_PASSWORD = "postgres"
-        //DB_NAME     = "test"
-        DB_USER     = "odiseas"
-        DB_PASSWORD = "toumpacity"
-        DB_NAME     = "mytestdb"
-    )
+type Simulator simulator.Simulator
 
-    func main() {
-        dbinfo := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable",
-            DB_USER, DB_PASSWORD, DB_NAME)
-        db, err := sql.Open("postgres", dbinfo)
-        checkErr(err)
-        defer db.Close()
+const (
+	DB_NAME = "villasdb"
+)
 
-        //fmt.Println("# Inserting values")
+func main() {
+	// Init connection's information
+	dbinfo := fmt.Sprintf("host=/tmp sslmode=disable dbname=%s", DB_NAME)
+	db, err := gorm.Open("postgres", dbinfo)
+	checkErr(err)
+	defer db.Close()
 
-        //var lastInsertId int
-        //err = db.QueryRow("INSERT INTO userinfo(username,departname,created) VALUES($1,$2,$3) returning uid;", "astaxie", "研发部门", "2012-12-09").Scan(&lastInsertId)
-        //checkErr(err)
-        //fmt.Println("last inserted id =", lastInsertId)
+	// Check that db is reachable
+	err = db.DB().Ping()
+	checkErr(err)
 
-        //fmt.Println("# Updating")
-        //stmt, err := db.Prepare("update userinfo set username=$1 where uid=$2")
-        //checkErr(err)
+	// Migrate one model
+	db.AutoMigrate(&Simulator{})
 
-        //res, err := stmt.Exec("astaxieupdate", lastInsertId)
-        //checkErr(err)
+	// Create
+	db.Create(&Simulator{UUID: "12"})
 
-        //affect, err := res.RowsAffected()
-        //checkErr(err)
+	// Read
+	var dummy Simulator
+	db.First(&dummy, 1)
+	fmt.Printf("%s\n", dummy.UUID)
 
-        //fmt.Println(affect, "rows changed")
+	// Update
+	db.Model(&dummy).Update("UUID", "100")
+	db.First(&dummy, 1)
+	fmt.Printf("%s\n", dummy.UUID)
 
-        //fmt.Println("# Querying")
-        //rows, err := db.Query("SELECT * FROM userinfo")
-        //checkErr(err)
+	// Delete
+	db.Unscoped().Delete(&dummy)
+}
 
-        //for rows.Next() {
-            //var uid int
-            //var username string
-            //var department string
-            //var created time.Time
-            //err = rows.Scan(&uid, &username, &department, &created)
-            //checkErr(err)
-            //fmt.Println("uid | username | department | created ")
-            //fmt.Printf("%3v | %8v | %6v | %6v\n", uid, username, department, created)
-        //}
-
-        //fmt.Println("# Deleting")
-        //stmt, err = db.Prepare("delete from userinfo where uid=$1")
-        //checkErr(err)
-
-        //res, err = stmt.Exec(lastInsertId)
-        //checkErr(err)
-
-        //affect, err = res.RowsAffected()
-        //checkErr(err)
-
-        //fmt.Println(affect, "rows changed")
-    }
-
-    func checkErr(err error) {
-        if err != nil {
-            fmt.Println("Something went wrong!!")
-            panic(err)
-        }
-    }
+func checkErr(err error) {
+	if err != nil {
+		log.Fatal(err)
+	}
+}
