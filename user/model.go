@@ -1,9 +1,9 @@
 package user
 
 import (
-	"git.rwth-aachen.de/stemavros/villasweb-backend-go/file"
-	"git.rwth-aachen.de/stemavros/villasweb-backend-go/project"
-	"git.rwth-aachen.de/stemavros/villasweb-backend-go/simulation"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/file"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/project"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/simulation"
 	"github.com/jinzhu/gorm"
 	// TODO: we need also bcrypt
 )

@@ -1,7 +1,7 @@
 package simulation
 
 import (
-	"git.rwth-aachen.de/stemavros/villasweb-backend-go/visualization"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/visualization"
 	"github.com/jinzhu/gorm"
 	// XXX: What about other models??
 )
