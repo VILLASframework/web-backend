@@ -1,9 +1,10 @@
 package project
 
 import (
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/simulation"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/user"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/visualization"
 	"github.com/jinzhu/gorm"
-	// XXX: We don't need also User and Simulation???
 )
 
 type Project struct {

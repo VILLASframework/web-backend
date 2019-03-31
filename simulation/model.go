@@ -1,9 +1,10 @@
 package simulation
 
 import (
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/visualization"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/project"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/simulationModel"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/user"
 	"github.com/jinzhu/gorm"
-	// XXX: What about other models??
 )
 
 type Simulation struct {

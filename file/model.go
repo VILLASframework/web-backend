@@ -1,6 +1,7 @@
 package file
 
 import (
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/user"
 	"github.com/jinzhu/gorm"
 	"time"
 )
