@@ -1,4 +1,4 @@
-package main
+package common
 
 import (
 	"fmt"
@@ -14,7 +14,7 @@ const (
 	DB_NAME = "villasdb"
 )
 
-func main() {
+func StartDB() {
 	// Init connection's information
 	dbinfo := fmt.Sprintf("host=/tmp sslmode=disable dbname=%s", DB_NAME)
 	db, err := gorm.Open("postgres", dbinfo)
