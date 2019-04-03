@@ -2,13 +2,10 @@ package common
 
 import (
 	"fmt"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/simulator"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"log"
 )
-
-type Simulator simulator.Simulator
 
 const (
 	DB_NAME = "villasdb"
