@@ -95,9 +95,9 @@ type Widget struct {
 	Height           uint           `gorm:"not null"`
 	MinWidth         uint           `gorm:"not null"`
 	MinHeight        uint           `gorm:"not null"`
-	x                int            `gorm:"not null"`
-	y                int            `gorm:"not null"`
-	z                int            `gorm:"not null"`
-	isLocked         bool           `gorm:"default:false"`
-	customProperties postgres.Jsonb //TODO: default value?
+	X                int            `gorm:"not null"`
+	Y                int            `gorm:"not null"`
+	Z                int            `gorm:"not null"`
+	IsLocked         bool           `gorm:"default:false"`
+	CustomProperties postgres.Jsonb //TODO: default value?
 }
