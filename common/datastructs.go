@@ -27,15 +27,21 @@ type File struct {
 	ImageHeight 			uint			//only required in case file is an image
 	ImageWidth  			uint			//only required in case file is an image
 	FileUser    			User      		`gorm:"not null"`
-	Date        			time.Time 		`gorm:"default:Time.Now"`
+	FileUserID    			uint      		`gorm:"not null"`
+	Date        			time.Time 
+	UserID					uint
 }
 
 type Project struct {
 	gorm.Model
 	Name              		string 			`gorm:"not null"`
 	ProjectUser       		User   			`gorm:"not null"`
+	ProjectUserID			uint			`gorm:"not null"`
 	Visualizations    		[]Visualization
 	ProjectSimulation 		Simulation 		`gorm:"not null"`
+	ProjectSimulationID		uint			`gorm:"not null"`
+	SimulationID			uint
+	UserID					uint
 }
 
 type Simulation struct {
@@ -45,7 +51,9 @@ type Simulation struct {
 	Models          		[]SimulationModel
 	Projects        		[]Project
 	SimulationUser  		User           	`gorm:"not null"`
+	SimulationUserID		uint			`gorm:"not null"`
 	StartParameters 		postgres.Jsonb 	// TODO default value
+	UserID					uint
 }
 
 type SimulationModel struct {
@@ -57,7 +65,10 @@ type SimulationModel struct {
 	InputMapping    		[]Signal		//order of signals is important
 	StartParameters			postgres.Jsonb 	// TODO: default value?
 	BelongsToSimulation 	Simulation     	`gorm:"not null"`
-	BelongsToSimulator  	Simulator      	`gorm:"not null"`
+	BelongsToSimulationID 	uint			`gorm:"not null"`
+	BelongsToSimulator  	Simulator		`gorm:"not null"`
+	BelongsToSimulatorID 	uint			`gorm:"not null"`
+	SimulationID			uint
 }
 
 type User struct {
@@ -65,7 +76,7 @@ type User struct {
 	Username    			string 			`gorm:"unique;not null"`
 	Password   				string 			`gorm:"not null"`
 	Mail        			string 			`gorm:"default:"`
-	Role        			string 			`gorm:"default:user"`
+	Role        			string 			`gorm:"default:'user'"`
 	Projects    			[]Project
 	Simulations 			[]Simulation
 	Files       			[]File
@@ -75,15 +86,19 @@ type Visualization struct {
 	gorm.Model
 	Name                	string  		`gorm:"not null"`
 	VisualizationProject 	Project 		`gorm:"not null"`
+	VisualizationProjectID 	uint			`gorm:"not null"` 
 	Widgets              	[]Widget
 	Grid                 	int  			`gorm:"default:15"`
 	VisualizationUser    	User 			`gorm:"not null"`
+	VisualizationUserID    	uint 			`gorm:"not null"`
+	ProjectID				uint
 }
 
 type Signal struct {
 	gorm.Model
 	Name 					string 			`gorm:"not null"`
 	Unit 					string 			`gorm:"not null"`
+	SimulationModelID		uint	
 	//IsRecorded			bool 			`gorm:"default:false"`
 }
 
@@ -100,4 +115,5 @@ type Widget struct {
 	Z                		int            `gorm:"not null"`
 	IsLocked         		bool           `gorm:"default:false"`
 	CustomProperties 		postgres.Jsonb //TODO: default value?
+	VisualizationID			uint	
 }
