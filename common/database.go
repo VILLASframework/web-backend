@@ -26,27 +26,27 @@ func StartDB() {
 	db.AutoMigrate(&Simulator{})
 	db.AutoMigrate(&Signal{})
 	db.AutoMigrate(&SimulationModel{})
-	//db.AutoMigrate(&File{})
+	db.AutoMigrate(&File{})
 	db.AutoMigrate(&Project{})
 	db.AutoMigrate(&Simulation{})
-	//db.AutoMigrate(&User{})
+	db.AutoMigrate(&User{})
 	db.AutoMigrate(&Visualization{})
 	db.AutoMigrate(&Signal{})
 	db.AutoMigrate(&Widget{})
 
 	// Create
 	db.Create(&Simulator{UUID: "12"})
-	db.Create(&Signal{Name:"Some", Unit:"314"})
-	fooSimMod := SimulationModel{Name:"buz", 
-		InputMapping: []Signal {
-			{Name:"foo", Unit:"42"},
-			{Name:"buz", Unit:"511"},
+	db.Create(&Signal{Name: "Some", Unit: "314"})
+	fooSimMod := SimulationModel{Name: "buz",
+		InputMapping: []Signal{
+			{Name: "foo", Unit: "42"},
+			{Name: "buz", Unit: "511"},
 		},
-	}	
-	db.Create(&fooSimMod)	
+	}
+	db.Create(&fooSimMod)
 
 	// get number of associations from SimulationModel table InputMapping column
-	fmt.Println( "Number of associations of InputMapping: ",
+	fmt.Println("Number of associations of InputMapping: ",
 		db.Model(&fooSimMod).Association("InputMapping").Count())
 
 	// get the associations from SimulationModel table InputMapping column
