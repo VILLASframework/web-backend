@@ -20,12 +20,12 @@ type Simulator struct {
 
 type File struct {
 	gorm.Model
-	Name        string
-	Path        string `gorm:"not null"`
-	Type        string
-	Size        uint
-	ImageHeight uint
-	ImageWidth  uint
+	Name        string    `gorm:"not null"`
+	Path        string    `gorm:"not null"`
+	Type        string    `gorm:"not null"`
+	Size        uint      `gorm:"not null"`
+	ImageHeight uint      //only required in case file is an image
+	ImageWidth  uint      //only required in case file is an image
 	FileUser    User      `gorm:"not null"`
 	Date        time.Time `gorm:"default:Time.Now"`
 }
@@ -50,14 +50,14 @@ type Simulation struct {
 
 type SimulationModel struct {
 	gorm.Model
-	Name            string
-	OutputLength    int            `gorm:"default:1"`
-	InputLength     int            `gorm:"default:1"`
-	OutputMapping   []Signal       //order of signals is important
-	InputMapping    []Signal       //order of signals is important
-	StartParameters postgres.Jsonb // TODO: default value?
-	ModelSimulation Simulation     `gorm:"not null"`
-	ModelSimulator  Simulator      `gorm:"not null"`
+	Name                string         `gorm:"not null"`
+	OutputLength        int            `gorm:"default:1"`
+	InputLength         int            `gorm:"default:1"`
+	OutputMapping       []Signal       //order of signals is important
+	InputMapping        []Signal       //order of signals is important
+	StartParameters     postgres.Jsonb // TODO: default value?
+	BelongsToSimulation Simulation     `gorm:"not null"`
+	BelongsToSimulator  Simulator      `gorm:"not null"`
 }
 
 type User struct {
@@ -84,7 +84,7 @@ type Signal struct {
 	gorm.Model
 	Name string `gorm:"not null"`
 	Unit string `gorm:"not null"`
-	//IsRecorded			bool 		`gorm:"default:false"`
+	//IsRecorded			bool 			`gorm:"default:false"`
 }
 
 type Widget struct {
