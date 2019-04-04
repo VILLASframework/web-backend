@@ -8,12 +8,15 @@ import (
 )
 
 const (
-	DB_NAME = "villasdb"
+	DB_NAME    = "villasdb"
+	DB_HOST    = "/tmp"
+	DB_SSLMODE = "disable" // TODO: change that for production
 )
 
 func StartDB() {
 	// Init connection's information
-	dbinfo := fmt.Sprintf("host=/tmp sslmode=disable dbname=%s", DB_NAME)
+	dbinfo := fmt.Sprintf("host=%s sslmode=%s dbname=%s",
+		DB_HOST, DB_SSLMODE, DB_NAME)
 	db, err := gorm.Open("postgres", dbinfo)
 	checkErr(err)
 	defer db.Close()
