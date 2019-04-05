@@ -39,6 +39,30 @@ The default `host` for postgres is `\tmp` and the ssl mode is disabled
 in development. The user can change those setting in
 `common/database.go`.
 
+To manage the database one can use [pgAdmin4](https://www.pgadmin.org/).
+Instructions for rpm-based distributions can be found
+[here](https://computingforgeeks.com/how-to-install-pgadmin-4-on-centos-7-fedora-29-fedora-28/).
+The user might have to start pgAdmin as root
+```bash
+$ sudo pythonX /user/lib/pythonX.Y/site-packages/pgadmin4-web/pgAdmin4.py
+```
+where X.Y is the python version. The pgAdmin UI can be accessed by the
+browser at `127.0.0.1:5432`. In case that the user is getting `FATAL:
+Ident authentication failed for user "username"` the authentication for
+local users has to be changed from `ident` to `trust` in `pg_hba.conf`
+file
+```text
+# IPv4 local connections:
+host    all             all             127.0.0.1/32            trust
+# IPv6 local connections:
+host    all             all             ::1/128                 trust
+
+```
+To do that edit the configuration file as root
+```bash
+$ sudo vim /var/lib/pgsql/11/data/pg_hba.conf
+```
+
 The current repo is tested on Fedora 29 and with PostgreSQL 11 and Go
 1.11
 
