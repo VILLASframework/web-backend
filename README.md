@@ -47,7 +47,7 @@ The user might have to start pgAdmin as root
 $ sudo pythonX /user/lib/pythonX.Y/site-packages/pgadmin4-web/pgAdmin4.py
 ```
 where X.Y is the python version. The pgAdmin UI can be accessed by the
-browser at `127.0.0.1:5432`. In case that the user is getting `FATAL:
+browser at `127.0.0.1:5050`. In case that the user is getting `FATAL:
 Ident authentication failed for user "username"` the authentication for
 local users has to be changed from `ident` to `trust` in `pg_hba.conf`
 file
