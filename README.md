@@ -15,6 +15,9 @@ The backend is build upon [gin-gonic](https://github.com/gin-gonic/gin)
 
 ### Database
 
+**The current repo is tested on Fedora 29 and with PostgreSQL 11 and Go
+1.11**
+
 Before running the application the user has to setup and configure
 [PostgreSQL](https://www.postgresql.org/) on the local machine. 
 
@@ -62,9 +65,6 @@ To do that edit the configuration file as root
 ```bash
 $ sudo vim /var/lib/pgsql/11/data/pg_hba.conf
 ```
-
-The current repo is tested on Fedora 29 and with PostgreSQL 11 and Go
-1.11
 
 ## Copyright
 
