@@ -1,0 +1,44 @@
+swagger: "2.0"
+info:
+  title: "VILLASweb API"
+  description: "API for VILLASweb. Documentation in progress... please be patient"
+  version : "1.0.0"
+host: "aaa.bbb.ccc.ddd:port"
+basePath: "/api/v1"
+tags:
+  - name: "simulations"
+    description: "Manage Simulations"
+schemes:
+  - "http"
+paths:
+  /simulations:
+    get:
+      operationId: getSimulations
+      tags:
+        - "simulations"
+      summary: "Get the available simulations"
+      description: "Return a JSON representation of all simulations"
+      produces:
+        - "appilcation/json"
+      responses:
+        200:
+          description: "Success"
+        500:
+          description: "Internal Server Error"
+  /simulations/{userID}:
+    put:
+      operationId: postSimulationForUser
+      tags:
+        - "simulation"
+      summary: "Add simulation for user with ID userID"
+      parameters:
+        - name: "userId"
+          in: path
+          description: "ID of the user to which the simulation shall be added"
+          required: true
+          type: "integer"
+      responses:
+        200:
+          description: "Success"
+        500:
+          description: "Internal server error"
