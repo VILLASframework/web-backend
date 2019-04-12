@@ -6,7 +6,8 @@ import (
 
 func main() {
 	// Testing
-	common.StartDB()
+	db := common.InitDB()
+	defer db.Close()
 
 	//Testing dependencies
 	var testProject common.Project

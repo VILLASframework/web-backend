@@ -9,23 +9,42 @@ import (
 
 const (
 	DB_NAME    = "villasdb"
+	DB_DUMMY   = "testvillasdb"
 	DB_HOST    = "/tmp"
 	DB_SSLMODE = "disable" // TODO: change that for production
 )
 
-func StartDB() {
-	// Init connection's information
+// Initialize connection to the database
+func InitDB() *gorm.DB {
 	dbinfo := fmt.Sprintf("host=%s sslmode=%s dbname=%s",
 		DB_HOST, DB_SSLMODE, DB_NAME)
 	db, err := gorm.Open("postgres", dbinfo)
 	checkErr(err)
-	defer db.Close()
+	return db
+}
 
-	// Check that db is reachable
-	err = db.DB().Ping()
-	checkErr(err)
+// Verify that the database connection is alive
+func VerifyConnection(db *gorm.DB) error {
+	return db.DB().Ping()
+}
 
-	// Migrate one model
+// Drop all the tables of the database
+// TODO: Remove that function from the codebase and substitute the body
+// to the Dummy*() where it is called
+func DropTables(db *gorm.DB) {
+	db.DropTableIfExists(&Simulator{})
+	db.DropTableIfExists(&Signal{})
+	db.DropTableIfExists(&SimulationModel{})
+	db.DropTableIfExists(&File{})
+	db.DropTableIfExists(&Project{})
+	db.DropTableIfExists(&Simulation{})
+	db.DropTableIfExists(&User{})
+	db.DropTableIfExists(&Visualization{})
+	db.DropTableIfExists(&Widget{})
+}
+
+// AutoMigrate the models
+func MigrateModels(db *gorm.DB) {
 	db.AutoMigrate(&Simulator{})
 	db.AutoMigrate(&Signal{})
 	db.AutoMigrate(&SimulationModel{})
@@ -34,43 +53,85 @@ func StartDB() {
 	db.AutoMigrate(&Simulation{})
 	db.AutoMigrate(&User{})
 	db.AutoMigrate(&Visualization{})
-	db.AutoMigrate(&Signal{})
 	db.AutoMigrate(&Widget{})
-
-	// Create
-	db.Create(&Simulator{UUID: "12"})
-	db.Create(&Signal{Name: "Some", Unit: "314"})
-	fooSimMod := SimulationModel{Name: "buz",
-		InputMapping: []Signal{
-			{Name: "foo", Unit: "42"},
-			{Name: "buz", Unit: "511"},
-		},
-	}
-	db.Create(&fooSimMod)
-
-	// get number of associations from SimulationModel table InputMapping column
-	fmt.Println("Number of associations of InputMapping: ",
-		db.Model(&fooSimMod).Association("InputMapping").Count())
-
-	// get the associations from SimulationModel table InputMapping column
-	var inSignals []Signal
-	db.Model(&fooSimMod).Association("InputMapping").Find(&inSignals)
-	fmt.Println(inSignals)
-
-	// Read
-	var dummy Simulator
-	db.First(&dummy, 1)
-	fmt.Printf("%s\n", dummy.UUID)
-
-	// Update
-	db.Model(&dummy).Update("UUID", "100")
-	db.First(&dummy, 1)
-	fmt.Printf("%s\n", dummy.UUID)
-
-	// Delete
-	db.Unscoped().Delete(&dummy)
 }
 
+// Start a dummy database for testing
+func DummyInitDB() *gorm.DB {
+
+	dbinfo := fmt.Sprintf("host=%s sslmode=%s dbname=%s",
+		DB_HOST, DB_SSLMODE, DB_DUMMY)
+	test_db, err := gorm.Open("postgres", dbinfo)
+	checkErr(err)
+
+	// drop tables from previous tests
+	DropTables(test_db)
+
+	return test_db
+}
+
+// Migrates models and populates them with data
+func DummyPopulateDB(test_db *gorm.DB) {
+
+	MigrateModels(test_db)
+
+	// Create two entries of each model
+
+	simr_A := Simulator{UUID: "1", Host: "Host_A"}
+	simr_B := Simulator{UUID: "2", Host: "Host_B"}
+	checkErr(test_db.Create(&simr_A).Error)
+	checkErr(test_db.Create(&simr_B).Error)
+
+	sig_A := Signal{Name: "Signal_A"}
+	sig_B := Signal{Name: "Signal_B"}
+	checkErr(test_db.Create(&sig_A).Error)
+	checkErr(test_db.Create(&sig_B).Error)
+
+	smo_A := SimulationModel{Name: "SimModel_A"}
+	smo_B := SimulationModel{Name: "SimModel_B"}
+	checkErr(test_db.Create(&smo_A).Error)
+	checkErr(test_db.Create(&smo_B).Error)
+
+	file_A := File{Name: "File_A"}
+	file_B := File{Name: "File_B"}
+	checkErr(test_db.Create(&file_A).Error)
+	checkErr(test_db.Create(&file_B).Error)
+
+	proj_A := Project{Name: "Proj_A"}
+	proj_B := Project{Name: "Proj_B"}
+	checkErr(test_db.Create(&proj_A).Error)
+	checkErr(test_db.Create(&proj_B).Error)
+
+	simn_A := Simulation{Name: "Simulation_A"}
+	simn_B := Simulation{Name: "Simulation_B"}
+	checkErr(test_db.Create(&simn_A).Error)
+	checkErr(test_db.Create(&simn_B).Error)
+
+	usr_A := User{Username: "User_A"}
+	usr_B := User{Username: "User_B"}
+	checkErr(test_db.Create(&usr_A).Error)
+	checkErr(test_db.Create(&usr_B).Error)
+
+	vis_A := Visualization{Name: "User_A"}
+	vis_B := Visualization{Name: "User_B"}
+	checkErr(test_db.Create(&vis_A).Error)
+	checkErr(test_db.Create(&vis_B).Error)
+
+	widg_A := Widget{Name: "Widget_A"}
+	widg_B := Widget{Name: "Widget_B"}
+	checkErr(test_db.Create(&widg_A).Error)
+	checkErr(test_db.Create(&widg_B).Error)
+
+	// TODO: Add associations
+}
+
+// Erase tables and glose the testdb
+func DummyCloseDB(test_db *gorm.DB) {
+	test_db.Close()
+}
+
+// Quick error check
+// NOTE: maybe this is not a good idea
 func checkErr(err error) {
 	if err != nil {
 		log.Fatal(err)
