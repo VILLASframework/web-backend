@@ -138,13 +138,13 @@ func DummyPopulateDB(test_db *gorm.DB) {
 	test_db.Model(&simn_A).Association("Projects").Append(&proj_B)
 
 	test_db.Model(&proj_A).Association("Simulation").Append(&simn_A)
-	test_db.Debug().Model(&proj_A).Association("User").Append(&usr_A)
+	test_db.Model(&proj_A).Association("User").Append(&usr_A)
 	test_db.Model(&proj_A).Association("Visualizations").Append(&vis_A)
 	test_db.Model(&proj_A).Association("Visualizations").Append(&vis_B)
 
 	test_db.Model(&usr_A).Association("Projects").Append(&proj_A)
 	test_db.Model(&usr_A).Association("Projects").Append(&proj_B)
-	test_db.Debug().Model(&usr_A).Association("Simulations").Append(&simn_A)
+	test_db.Model(&usr_A).Association("Simulations").Append(&simn_A)
 	test_db.Model(&usr_A).Association("Simulations").Append(&simn_B)
 	test_db.Model(&usr_A).Association("Files").Append(&file_A)
 	test_db.Model(&usr_A).Association("Files").Append(&file_B)
