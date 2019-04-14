@@ -123,6 +123,8 @@ func DummyPopulateDB(test_db *gorm.DB) {
 	checkErr(test_db.Create(&widg_B).Error)
 
 	// Associations betweend models
+	// For `belongs to` use the model with id=1
+	// For `has many` use the models with id=1 and id=2
 
 	test_db.Model(&smo_A).Association("Simulation").Append(&simn_A)
 	test_db.Model(&smo_A).Association("Simulator").Append(&simr_A)
