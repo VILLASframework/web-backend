@@ -79,13 +79,13 @@ type User struct {
 
 type Visualization struct {
 	gorm.Model
-	Name                string  `gorm:"not null"`
-	Project             Project `gorm:"not null"`
-	ProjectID           uint    `gorm:"not null"`
-	Grid                int     `gorm:"default:15"`
-	VisualizationUser   User    `gorm:"not null"`
-	VisualizationUserID uint    `gorm:"not null"`
-	Widgets             []Widget
+	Name      string  `gorm:"not null"`
+	Project   Project `gorm:"not null"`
+	ProjectID uint    `gorm:"not null"`
+	Grid      int     `gorm:"default:15"`
+	User      User    `gorm:"not null"`
+	UserID    uint    `gorm:"not null"`
+	Widgets   []Widget
 }
 
 type Signal struct {
