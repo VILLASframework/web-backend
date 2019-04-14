@@ -122,7 +122,39 @@ func DummyPopulateDB(test_db *gorm.DB) {
 	checkErr(test_db.Create(&widg_A).Error)
 	checkErr(test_db.Create(&widg_B).Error)
 
-	// TODO: Add associations
+	// Associations betweend models
+
+	test_db.Model(&smo_A).Association("Simulation").Append(&simn_A)
+	test_db.Model(&smo_A).Association("Simulator").Append(&simr_A)
+	test_db.Model(&smo_A).Association("OutputMapping").Append(&sig_A)
+	test_db.Model(&smo_A).Association("OutputMapping").Append(&sig_B)
+	test_db.Model(&smo_A).Association("InputMapping").Append(&sig_B)
+	test_db.Model(&smo_A).Association("InputMapping").Append(&sig_A)
+
+	test_db.Model(&simn_A).Association("User").Append(&usr_A)
+	test_db.Model(&simn_A).Association("Models").Append(&smo_A)
+	test_db.Model(&simn_A).Association("Models").Append(&smo_B)
+	test_db.Model(&simn_A).Association("Projects").Append(&proj_A)
+	test_db.Model(&simn_A).Association("Projects").Append(&proj_B)
+
+	test_db.Model(&proj_A).Association("Simulation").Append(&simn_A)
+	test_db.Debug().Model(&proj_A).Association("User").Append(&usr_A)
+	test_db.Model(&proj_A).Association("Visualizations").Append(&vis_A)
+	test_db.Model(&proj_A).Association("Visualizations").Append(&vis_B)
+
+	test_db.Model(&usr_A).Association("Projects").Append(&proj_A)
+	test_db.Model(&usr_A).Association("Projects").Append(&proj_B)
+	test_db.Debug().Model(&usr_A).Association("Simulations").Append(&simn_A)
+	test_db.Model(&usr_A).Association("Simulations").Append(&simn_B)
+	test_db.Model(&usr_A).Association("Files").Append(&file_A)
+	test_db.Model(&usr_A).Association("Files").Append(&file_B)
+
+	test_db.Model(&vis_A).Association("Project").Append(&proj_A)
+	test_db.Model(&vis_A).Association("User").Append(&usr_A)
+	test_db.Model(&vis_A).Association("Widgets").Append(&widg_A)
+	test_db.Model(&vis_A).Association("Widgets").Append(&widg_B)
+
+	test_db.Model(&file_A).Association("User").Append(&usr_A)
 }
 
 // Erase tables and glose the testdb
