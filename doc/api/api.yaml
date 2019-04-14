@@ -1,0 +1,174 @@
+openapi: 3.0.1
+info:
+  title: VILLASweb API
+  description: API for VILLASweb. Documentation in progress... please be patient
+  version: 1.0.0
+servers:
+- url: http://111.222.333.444:5555/api/v1
+tags:
+- name: simulations
+  description: Manage Simulations
+paths:
+  /simulations:
+    get:
+      tags:
+        - simulations
+      summary: Get all available simulations
+      description: Return a JSON representation of all simulations
+      operationId: getSimulations
+      responses:
+        400:
+          description: Unable to receive simulations
+          content: {}
+    post:
+      tags:
+        - simulations
+      summary: Add a new simulation to the database
+      operationId: addSimulation
+      requestBody:
+        description: "Simulation object to add to DB"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Simulation'
+            example:
+              name: Test
+          
+      responses:
+        400:
+          description: Unable to find user or unable to create simulation
+          content: {}
+        500:
+          description: Unable to save user
+          content: {}
+    put:
+      tags:
+        - simulation
+      summary: Add simulation for user with ID userID
+      operationId: putSimulationForUser
+      parameters:
+      - name: userId
+        in: path
+        description: ID of the user to which the simulation shall be added
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: Success
+          content: {}
+        500:
+          description: Internal server error
+          
+          
+components:
+  schemas:
+    Project:
+      required:
+      - name
+      - simulation
+      - user
+      type: object
+      properties:
+        name:
+          type: string
+        user:
+          type: string
+        simulation:
+          type: string
+        visualizations:
+          type: array
+          items:
+            type: string
+    Visualization:
+      required:
+      - name
+      - project
+      - user
+      type: object
+      properties:
+        name:
+          type: string
+        user:
+          type: string
+        project:
+          type: string
+        widgets:
+          type: array
+          items:
+            type: string
+    User:
+      required:
+      - password
+      - role
+      - username
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+        role:
+          type: string
+        projects:
+          type: array
+          items:
+            type: object
+        mail:
+          type: string
+        simulations:
+          type: array
+          items:
+            type: object
+        files:
+          type: array
+          items:
+            type: object
+    Simulation:
+      required:
+      - name
+      type: object
+      properties:
+        name:
+          type: string
+        running:
+          type: boolean
+        models:
+          type: object
+          properties: {}
+        projects:
+          type: array
+          items:
+            $ref: '#/components/schemas/Project'
+        user:
+          $ref: '#/components/schemas/User'
+        startParameters:
+          type: object
+          properties: {}
+    File:
+      required:
+      - date
+      - name
+      - path
+      - size
+      - type
+      - user
+      type: object
+      properties:
+        name:
+          type: string
+        path:
+          type: string
+        type:
+          type: string
+        size:
+          type: integer
+        height:
+          type: integer
+        width:
+          type: integer
+        user:
+          type: string
+        date:
+          type: string
