@@ -12,6 +12,10 @@ tags:
   description: Get counters for database elements
 - name: files
   description: Manage Files
+- name: projects
+  description: Manage Projects
+- name: simulationmodels
+  description: Manage SimulationModels
 paths:
   /simulations:
     get:
@@ -24,6 +28,14 @@ paths:
         400:
           description: Unable to receive simulations
           content: {}
+        200:
+          description: Simulations received successfully TODO CHECK CODE!
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Simulation'
     post:
       tags:
         - simulations
@@ -84,13 +96,16 @@ paths:
           type: integer
       responses:
         200:
-          description: TODO RESPONSES!
-          content: {}
+          description: Simulation received successfully (TODO CHECK CODE)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Simulation'
     delete:
       tags:
         - simulations
       summary: Delete simulation with ID SimulationID
-      operationId: deleteSimulationProperties
+      operationId: deleteSimulation
       parameters:
       - in: path 
         name: SimulationID
@@ -164,8 +179,11 @@ paths:
           type: integer
       responses:
         200:
-          description: TODO RESPONSES!
-          content: {}
+          description: File received successfully (TODO CHECK CODE)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/File'
         400:
           description: GET Unknown file for ID
           content: {}
@@ -173,7 +191,7 @@ paths:
       tags:
         - files
       summary: Delete file with ID FileID
-      operationId: deleteFileProperties
+      operationId: deleteFile
       parameters:
       - in: path 
         name: FileID
@@ -190,6 +208,216 @@ paths:
           content: {}
         500:
           description: Unable to remove file
+          content: {}
+  /projects:
+    get:
+      tags:
+        - projects
+      summary: Get projects of user
+      operationId: getProjects
+      responses:
+        200:
+          description: Projects received successfully TODO CHECK CODE!
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Project'
+        400:
+          description: Unable to receive projects
+          content: {}
+    post:
+      tags:
+        - projects
+      summary: Add a new project to the database
+      operationId: addProject
+      requestBody:
+        description: "Project object to add to DB"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Project'
+      responses:
+        400:
+          description: Unable to find user or unable to save user or unknown project for id
+          content: {}
+        500:
+          description: Unable to create project or unable to save project
+          content: {}
+  /projects/{ProjectID}:
+    put:
+      tags:
+        - projects
+      summary: Update properties of project with ID ProjectID
+      operationId: updateProjectProperties
+      parameters:
+      - in: path 
+        name: ProjectID
+        description: ID of a project
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        description: "Project object with new properties"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Project'
+      responses:
+        500:
+          description: Unable to find user or unable to save user or unable to find simulation of project or unable to save simulation of project or unable to save project
+          content: {}
+        400:
+          description: PUT Simulation Unknown for ID
+          content: {}
+    get:
+      tags:
+        - projects
+      summary: Get properties of project with ID ProjectID
+      operationId: getProjectProperties
+      parameters:
+      - in: path 
+        name: ProjectID
+        description: ID of a project
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: Project received successfully (TODO CHECK CODE)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        400:
+          description: GET Unknown project for ID
+          content: {}
+    delete:
+      tags:
+        - projects
+      summary: Delete project with ID ProjectID
+      operationId: deleteProject
+      parameters:
+      - in: path 
+        name: ProjectID
+        description: ID of a project
+        required: true
+        schema:
+          type: integer
+      responses:
+        400:
+          description: DELETE Unknown project
+          content: {}
+        500:
+          description: Unable to find user or unable to save user or unable to remove project
+          content: {}
+  /models:
+    get:
+      tags:
+        - simulationmodels
+      summary: Get simulation models of user
+      operationId: getSimulationModels
+      responses:
+        200:
+          description: SimulationModel received successfully TODO CHECK CODE!
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SimulationModel'
+        400:
+          description: Unable to find SimulationModel
+          content: {}
+    post:
+      tags:
+        - simulationmodels
+      summary: Add a new SimulationModel to the database
+      operationId: addSimulationModel
+      requestBody:
+        description: "SimulationModel object to add to DB"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimulationModel'
+      responses:
+        400:
+          description: Unable to find Simulation
+          content: {}
+        500:
+          description: Unable to save simulation or unable to create simulation model
+          content: {}
+  /models/{SimulationModelID}:
+    put:
+      tags:
+        - simulationmodels
+      summary: Update properties of SimulationModel with ID SimulationModelID
+      operationId: updateSimulationModelProperties
+      parameters:
+      - in: path 
+        name: SimulationModelID
+        description: ID of a SimulationModel
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        description: "SimulationModel object with new properties"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimulationModel'
+      responses:
+        500:
+          description: Unable to save SimulationModel
+          content: {}
+        400:
+          description: Unable to find SimulationModel
+          content: {}
+    get:
+      tags:
+        - simulationmodels
+      summary: Get properties of SimulationModel with ID SimulationModelID
+      operationId: getSimulationModelProperties
+      parameters:
+      - in: path 
+        name: SimulationModelID
+        description: ID of a SimulationModel
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: SimulationModel received successfully (TODO CHECK CODE)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulationModel'
+        400:
+          description: GET Unknown SimulationModel for ID
+          content: {}
+    delete:
+      tags:
+        - simulationmodels
+      summary: Delete SimulationModel with ID SimulationModelID
+      operationId: deleteSimulationModel
+      parameters:
+      - in: path 
+        name: SimulationModelID
+        description: ID of a SimulationModel
+        required: true
+        schema:
+          type: integer
+      responses:
+        400:
+          description: DELETE Unknown SimulationModel
+          content: {}
+        500:
+          description: Unable to find Simulation or unable to save changed simulation or unable to remove SimulationModel
           content: {}
                 
             
