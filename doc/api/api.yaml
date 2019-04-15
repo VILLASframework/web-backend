@@ -16,6 +16,8 @@ tags:
   description: Manage Projects
 - name: simulationmodels
   description: Manage SimulationModels
+- name: simulators
+  description: Manage Simulators
 paths:
   /simulations:
     get:
@@ -419,7 +421,129 @@ paths:
         500:
           description: Unable to find Simulation or unable to save changed simulation or unable to remove SimulationModel
           content: {}
-                
+  /simulators:
+    get:
+      tags:
+        - simulators
+      summary: Get simulators
+      operationId: getSimulators
+      responses:
+        200:
+          description: Simulators received successfully TODO CHECK CODE!
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Simulator'
+        400:
+          description: Unable to find Simulators
+          content: {}
+    post:
+      tags:
+        - simulators
+      summary: Add a new Simulator to the database
+      operationId: addSimulator
+      requestBody:
+        description: "Simulator object to add to DB"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Simulator'
+      responses:
+        500:
+          description: Unable to create simulator
+          content: {}
+  /simulators/{SimulatorID}:
+    put:
+      tags:
+        - simulators
+      summary: Update properties of Simulator with ID SimulatorID
+      operationId: updateSimulatorProperties
+      parameters:
+      - in: path 
+        name: SimulatorID
+        description: ID of a Simulator
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        description: "Simulator object with new properties"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Simulator'
+      responses:
+        500:
+          description: PUT ERROR finding simulator or Unable to save Simulator
+          content: {}
+        400:
+          description: PUT Unknown simulator
+          content: {}
+    get:
+      tags:
+        - simulators
+      summary: Get properties of Simulator with ID SimulatorID
+      operationId: getSimulatorProperties
+      parameters:
+      - in: path 
+        name: SimulatorID
+        description: ID of a Simulator
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: Simulator received successfully (TODO CHECK CODE)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Simulator'
+        400:
+          description: GET Unknown Simulator for ID
+          content: {}
+    delete:
+      tags:
+        - simulators
+      summary: Delete Simulator with ID SimulatorID
+      operationId: deleteSimulator
+      parameters:
+      - in: path 
+        name: SimulatorID
+        description: ID of a Simulator
+        required: true
+        schema:
+          type: integer
+      responses:
+        400:
+          description: DELETE Unknown Simulator
+          content: {}
+        500:
+          description: Unable to remove Simulator
+          content: {}
+    post:
+      tags:
+        - simulators
+      summary: Send actions to Simulator with ID SimulatorID
+      operationId: sendActionsToSimulator
+      requestBody:
+        description: "Array containing simulator actions"
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+      responses:
+        500:
+          description: Unable to send actions to simulator
+          content: {}
+        400:
+          description: POST unknown simulator
+          content: {}
             
               
             
