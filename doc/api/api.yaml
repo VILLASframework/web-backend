@@ -18,6 +18,8 @@ tags:
   description: Manage SimulationModels
 - name: simulators
   description: Manage Simulators
+- name: uploads
+  description: Manage Uploads
 paths:
   /simulations:
     get:
@@ -528,6 +530,13 @@ paths:
         - simulators
       summary: Send actions to Simulator with ID SimulatorID
       operationId: sendActionsToSimulator
+      parameters:
+      - in: path 
+        name: SimulatorID
+        description: ID of a Simulator
+        required: true
+        schema:
+          type: integer
       requestBody:
         description: "Array containing simulator actions"
         required: true
@@ -544,6 +553,28 @@ paths:
         400:
           description: POST unknown simulator
           content: {}
+  /uploads:
+    post: 
+      tags:
+        - uploads
+      summary: Upload a new file to the database
+      operationId: uploadFile
+      requestBody:
+        description: "File object to upload TODO CHANGE TO FORM"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/File'
+      responses:
+        500:
+          description: File could not be uploaded and GET unable to find user or unable to save reference file or unable to save user or unable to create directory
+          content: {}
+        400:
+          description: File could not be uploaded because unable to process incoming form
+          content: {}
+        
+        
             
               
             
