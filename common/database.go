@@ -126,37 +126,37 @@ func DummyPopulateDB(test_db *gorm.DB) {
 	// For `belongs to` use the model with id=1
 	// For `has many` use the models with id=1 and id=2
 
-	test_db.Model(&smo_A).Association("Simulation").Append(&simn_A)
-	test_db.Model(&smo_A).Association("Simulator").Append(&simr_A)
-	test_db.Model(&smo_A).Association("OutputMapping").Append(&sig_A)
-	test_db.Model(&smo_A).Association("OutputMapping").Append(&sig_B)
-	test_db.Model(&smo_A).Association("InputMapping").Append(&sig_B)
-	test_db.Model(&smo_A).Association("InputMapping").Append(&sig_A)
+	checkErr(test_db.Model(&smo_A).Association("BelongsToSimulation").Append(&simn_A).Error)
+	checkErr(test_db.Model(&smo_A).Association("BelongsToSimulator").Append(&simr_A).Error)
+	checkErr(test_db.Model(&smo_A).Association("OutputMapping").Append(&sig_A).Error)
+	checkErr(test_db.Model(&smo_A).Association("OutputMapping").Append(&sig_B).Error)
+	checkErr(test_db.Model(&smo_A).Association("InputMapping").Append(&sig_B).Error)
+	checkErr(test_db.Model(&smo_A).Association("InputMapping").Append(&sig_A).Error)
 
-	test_db.Model(&simn_A).Association("User").Append(&usr_A)
-	test_db.Model(&simn_A).Association("Models").Append(&smo_A)
-	test_db.Model(&simn_A).Association("Models").Append(&smo_B)
-	test_db.Model(&simn_A).Association("Projects").Append(&proj_A)
-	test_db.Model(&simn_A).Association("Projects").Append(&proj_B)
+	checkErr(test_db.Model(&simn_A).Association("User").Append(&usr_A).Error)
+	checkErr(test_db.Model(&simn_A).Association("Models").Append(&smo_A).Error)
+	checkErr(test_db.Model(&simn_A).Association("Models").Append(&smo_B).Error)
+	checkErr(test_db.Model(&simn_A).Association("Projects").Append(&proj_A).Error)
+	checkErr(test_db.Model(&simn_A).Association("Projects").Append(&proj_B).Error)
 
-	test_db.Model(&proj_A).Association("Simulation").Append(&simn_A)
-	test_db.Model(&proj_A).Association("User").Append(&usr_A)
-	test_db.Model(&proj_A).Association("Visualizations").Append(&vis_A)
-	test_db.Model(&proj_A).Association("Visualizations").Append(&vis_B)
+	checkErr(test_db.Model(&proj_A).Association("Simulation").Append(&simn_A).Error)
+	checkErr(test_db.Model(&proj_A).Association("User").Append(&usr_A).Error)
+	checkErr(test_db.Model(&proj_A).Association("Visualizations").Append(&vis_A).Error)
+	checkErr(test_db.Model(&proj_A).Association("Visualizations").Append(&vis_B).Error)
 
-	test_db.Model(&usr_A).Association("Projects").Append(&proj_A)
-	test_db.Model(&usr_A).Association("Projects").Append(&proj_B)
-	test_db.Model(&usr_A).Association("Simulations").Append(&simn_A)
-	test_db.Model(&usr_A).Association("Simulations").Append(&simn_B)
-	test_db.Model(&usr_A).Association("Files").Append(&file_A)
-	test_db.Model(&usr_A).Association("Files").Append(&file_B)
+	checkErr(test_db.Model(&usr_A).Association("Projects").Append(&proj_A).Error)
+	checkErr(test_db.Model(&usr_A).Association("Projects").Append(&proj_B).Error)
+	checkErr(test_db.Model(&usr_A).Association("Simulations").Append(&simn_A).Error)
+	checkErr(test_db.Model(&usr_A).Association("Simulations").Append(&simn_B).Error)
+	checkErr(test_db.Model(&usr_A).Association("Files").Append(&file_A).Error)
+	checkErr(test_db.Model(&usr_A).Association("Files").Append(&file_B).Error)
 
-	test_db.Model(&vis_A).Association("Project").Append(&proj_A)
-	test_db.Model(&vis_A).Association("User").Append(&usr_A)
-	test_db.Model(&vis_A).Association("Widgets").Append(&widg_A)
-	test_db.Model(&vis_A).Association("Widgets").Append(&widg_B)
+	checkErr(test_db.Model(&vis_A).Association("Project").Append(&proj_A).Error)
+	checkErr(test_db.Model(&vis_A).Association("User").Append(&usr_A).Error)
+	checkErr(test_db.Model(&vis_A).Association("Widgets").Append(&widg_A).Error)
+	checkErr(test_db.Model(&vis_A).Association("Widgets").Append(&widg_B).Error)
 
-	test_db.Model(&file_A).Association("User").Append(&usr_A)
+	checkErr(test_db.Model(&file_A).Association("User").Append(&usr_A).Error)
 }
 
 // Erase tables and glose the testdb
