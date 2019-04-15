@@ -60,6 +60,7 @@ paths:
           content: {}
         500:
           description: Internal server error
+          content: {}
           
           
 components:
@@ -140,9 +141,9 @@ components:
         projects:
           type: array
           items:
-            $ref: '#/components/schemas/Project'
+            type: object
         user:
-          $ref: '#/components/schemas/User'
+          type: object
         startParameters:
           type: object
           properties: {}
