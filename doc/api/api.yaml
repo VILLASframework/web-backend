@@ -67,109 +67,257 @@ components:
   schemas:
     Project:
       required:
-      - name
-      - simulation
-      - user
+      - Name
+      - SimulationID
+      - UserID
       type: object
       properties:
-        name:
+        Name:
           type: string
-        user:
-          type: string
-        simulation:
-          type: string
-        visualizations:
-          type: array
-          items:
-            type: string
-    Visualization:
-      required:
-      - name
-      - project
-      - user
-      type: object
-      properties:
-        name:
-          type: string
-        user:
-          type: string
-        project:
-          type: string
-        widgets:
-          type: array
-          items:
-            type: string
-    User:
-      required:
-      - password
-      - role
-      - username
-      type: object
-      properties:
-        username:
-          type: string
-        password:
-          type: string
-        role:
-          type: string
-        projects:
-          type: array
-          items:
-            type: object
-        mail:
-          type: string
-        simulations:
-          type: array
-          items:
-            type: object
-        files:
-          type: array
-          items:
-            type: object
-    Simulation:
-      required:
-      - name
-      type: object
-      properties:
-        name:
-          type: string
-        running:
-          type: boolean
-        models:
+        UserID:
+          type: integer
+        User:
           type: object
           properties: {}
-        projects:
+        SimulationID:
+          type: integer
+        Simulation:
+          type: object
+          properties: {}
+        Visualizations:
           type: array
           items:
             type: object
-        user:
+            properties: {}
+    Visualization:
+      required:
+      - Name
+      - Grid
+      - ProjectID
+      - UserID
+      type: object
+      properties:
+        Name:
+          type: string
+        Grid:
+          type: integer
+        UserID:
+          type: integer
+        User:
           type: object
-        startParameters:
+          properties: {}
+        ProjectID:
+          type: integer
+        Project:
+          type: object
+          properties: {}
+        Widgets:
+          type: array
+          items:
+            type: object
+            properties: {}
+    User:
+      required:
+      - Username
+      - Password
+      - Role
+      - Mail
+      type: object
+      properties:
+        Username:
+          type: string
+        Password:
+          type: string
+        Role:
+          type: string
+        Mail:
+          type: string
+        Projects:
+          type: array
+          items:
+            type: object
+            properties: {}
+        Simulations:
+          type: array
+          items:
+            type: object
+            properties: {}
+        Files:
+          type: array
+          items:
+            type: object
+            properties: {}
+    Simulation:
+      required:
+      - Name
+      - UserID
+      type: object
+      properties:
+        Name:
+          type: string
+        Running:
+          type: boolean
+        Models:
+          type: array
+          items:
+            type: object
+            properties: {}
+        Projects:
+          type: array
+          items:
+            type: object
+        UserID:
+          type: integer
+        User:
+          type: object
+        StartParameters:
           type: object
           properties: {}
     File:
       required:
-      - date
-      - name
-      - path
-      - size
-      - type
-      - user
+      - Name
+      - Path
+      - Type
+      - Size
+      - Date
+      - UserID
       type: object
       properties:
-        name:
+        Name:
           type: string
-        path:
+        Path:
           type: string
-        type:
+        Type:
           type: string
-        size:
+        Size:
           type: integer
-        height:
+        ImageHeight:
           type: integer
-        width:
+        ImageWidth:
           type: integer
-        user:
+        UserID:
+          type: integer
+        User:
+          type: object
+          properties: {}
+        Date:
           type: string
-        date:
+    Simulator:
+      required:
+      - UUID
+      - Host
+      - ModelType
+      type: object
+      properties:
+        UUID:
           type: string
+        Host:
+          type: string
+        ModelType:
+          type: string
+        UpTime:
+          type: integer
+        State:
+          type: string
+        StateUpdateAt:
+          type: string
+        Properties:
+          type: object
+          properties: {}
+        RawProperties:
+          type: object
+          properties: {}
+    SimulationModel:
+      required:
+      - Name
+      - OutputLength
+      - InputLength
+      - BelongsToSimulationID
+      - BelongsToSimulatorID
+      type: object
+      properties:
+        Name:
+          type: string
+        OutputLength:
+          type: integer
+        InputLength:
+          type: integer
+        BelongsToSimulationID:
+          type: integer
+        Simulation:
+          type: object
+          properties: {}
+        BelongsToSimulatorID:
+          type: integer
+        Simulator:
+          type: object
+          properties: {}
+        StartParameters:
+          type: object
+          properties: {}
+        OutputMapping:
+          type: array
+          items:
+            type: object
+            properties: {}
+        InputMapping:
+          type: array
+            items:
+              type: object
+              properties: {}
+    Signal:
+      required:
+      - Name
+      - Unit
+      - SimulationModelID
+      type: objects
+      properties:
+        Name:
+          type: string
+        Unit:
+          type: string
+        SimulationModelID:
+          type: integer
+    Widget:
+      required:
+      - Name
+      - Type
+      - Width
+      - Height
+      - MinWidth
+      - MinHeight
+      - X
+      - Y
+      - Z
+      - IsLocked
+      - VisualizationID
+      type: object
+      properties:
+        Name:
+          type: string
+        Type:
+          type: string
+        Width:
+          type: integer
+        Height:
+          type: integer
+        MinWidth:
+          type: integer
+        MinHeight:
+          type: integer
+        X:
+          type: integer
+        Y:
+          type: integer
+        Z:
+          type: integer
+        IsLocked:
+          type: boolean
+        VisualizationID:
+          type: integer
+        CustomProperties:
+          type: object
+          properties: {}
+
+
+
