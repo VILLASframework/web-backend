@@ -8,6 +8,10 @@ servers:
 tags:
 - name: simulations
   description: Manage Simulations
+- name: counts
+  description: Get counters for database elements
+- name: files
+  description: Manage Files
 paths:
   /simulations:
     get:
@@ -98,7 +102,99 @@ paths:
         200:
           description: TODO RESPONSES!
           content: {}
-  
+  /counts:
+    get:
+      tags:
+        - counts
+      summary: Get counters for all elements in the database
+      operationId: getCounts
+      responses:
+        200:
+          description: Counts successful (TODO CHECK IF CODE CORRECT!)
+          content: 
+            application/json:
+              schema:
+                type: object
+                properties:
+                  simulations:
+                    type: integer
+                    description: number of simulations
+                  users:
+                    type: integer
+                    description: number of users
+                  simulators:
+                    type: integer
+                    description: number of simulators
+                  projects: 
+                    type: integer
+                    description: number of projects
+                  visualizations:
+                    type: integer
+                    description: number of visualizations
+  /files:
+    get:
+      tags:
+        - files
+      summary: Get files of user
+      operationId: getFilesOfUser
+      responses:
+        200:
+          description: Files obtained successfully (TODO CHECK CODE!)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/File'
+        500:
+          description: Could not retrieve user's files
+          content: {}
+  /files/{FileID}:
+    get:
+      tags:
+        - files
+      summary: Get properties of file with ID FileID
+      operationId: getFileProperties
+      parameters:
+      - in: path 
+        name: FileID
+        description: ID of a file
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: TODO RESPONSES!
+          content: {}
+        400:
+          description: GET Unknown file for ID
+          content: {}
+    delete:
+      tags:
+        - files
+      summary: Delete file with ID FileID
+      operationId: deleteFileProperties
+      parameters:
+      - in: path 
+        name: FileID
+        description: ID of a file
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: TODO RESPONSES!
+          content: {}
+        400:
+          description: DELETE unknown file for id
+          content: {}
+        500:
+          description: Unable to remove file
+          content: {}
+                
+            
+              
+            
         
         
       
