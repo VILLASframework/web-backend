@@ -32,9 +32,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Simulation'
-            example:
-              name: Test
-          
       responses:
         400:
           description: Unable to find user or unable to create simulation
@@ -42,25 +39,69 @@ paths:
         500:
           description: Unable to save user
           content: {}
+  /simulations/{SimulationID}:
     put:
       tags:
-        - simulation
-      summary: Add simulation for user with ID userID
-      operationId: putSimulationForUser
+        - simulations
+      summary: Update properties of simulation with ID SimulationID
+      operationId: updateSimulationProperties
       parameters:
-      - name: userId
-        in: path
-        description: ID of the user to which the simulation shall be added
+      - in: path 
+        name: SimulationID
+        description: ID of a simulation
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        description: "Simulation object with new properties"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Simulation'
+      responses:
+        500:
+          description: Unable to find user or unable to save user or
+          content: {}
+        400:
+          description: PUT Simulation Unknown for ID or unable to save simulation
+          content: {}
+    get:
+      tags:
+        - simulations
+      summary: Get properties of simulation with ID SimulationID
+      operationId: getSimulationProperties
+      parameters:
+      - in: path 
+        name: SimulationID
+        description: ID of a simulation
         required: true
         schema:
           type: integer
       responses:
         200:
-          description: Success
+          description: TODO RESPONSES!
           content: {}
-        500:
-          description: Internal server error
+    delete:
+      tags:
+        - simulations
+      summary: Delete simulation with ID SimulationID
+      operationId: deleteSimulationProperties
+      parameters:
+      - in: path 
+        name: SimulationID
+        description: ID of a simulation
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: TODO RESPONSES!
           content: {}
+  
+        
+        
+      
           
           
 components:
@@ -77,18 +118,15 @@ components:
         UserID:
           type: integer
         User:
-          type: object
-          properties: {}
+          $ref: '#/components/schemas/User'
         SimulationID:
           type: integer
         Simulation:
-          type: object
-          properties: {}
+          $ref: '#/components/schemas/Simulation'
         Visualizations:
           type: array
           items:
-            type: object
-            properties: {}
+            $ref: '#/components/schemas/Visualization'
     Visualization:
       required:
       - Name
@@ -104,18 +142,15 @@ components:
         UserID:
           type: integer
         User:
-          type: object
-          properties: {}
+          $ref: '#/components/schemas/User'
         ProjectID:
           type: integer
         Project:
-          type: object
-          properties: {}
+          $ref: '#/components/schemas/Project'
         Widgets:
           type: array
           items:
-            type: object
-            properties: {}
+            $ref: '#/components/schemas/Widget'
     User:
       required:
       - Username
@@ -135,18 +170,15 @@ components:
         Projects:
           type: array
           items:
-            type: object
-            properties: {}
+            $ref: '#/components/schemas/Project'
         Simulations:
           type: array
           items:
-            type: object
-            properties: {}
+            $ref: '#/components/schemas/Simulation'
         Files:
           type: array
           items:
-            type: object
-            properties: {}
+            $ref: '#/components/schemas/File'
     Simulation:
       required:
       - Name
@@ -160,16 +192,15 @@ components:
         Models:
           type: array
           items:
-            type: object
-            properties: {}
+            $ref: '#/components/schemas/SimulationModel'
         Projects:
           type: array
           items:
-            type: object
+            $ref: '#/components/schemas/Project'
         UserID:
           type: integer
         User:
-          type: object
+          $ref: '#/components/schemas/User'
         StartParameters:
           type: object
           properties: {}
@@ -198,8 +229,7 @@ components:
         UserID:
           type: integer
         User:
-          type: object
-          properties: {}
+          $ref: '#/components/schemas/User'
         Date:
           type: string
     Simulator:
@@ -244,33 +274,29 @@ components:
           type: integer
         BelongsToSimulationID:
           type: integer
-        Simulation:
-          type: object
-          properties: {}
+        BelongsToSimulation:
+          $ref: '#/components/schemas/Simulation'
         BelongsToSimulatorID:
           type: integer
-        Simulator:
-          type: object
-          properties: {}
+        BelongsToSimulator:
+          $ref: '#/components/schemas/Simulator'
         StartParameters:
           type: object
           properties: {}
         OutputMapping:
           type: array
           items:
-            type: object
-            properties: {}
+            $ref: '#/components/schemas/Signal'
         InputMapping:
           type: array
-            items:
-              type: object
-              properties: {}
+          items:
+            $ref: '#/components/schemas/Signal'
     Signal:
       required:
       - Name
       - Unit
       - SimulationModelID
-      type: objects
+      type: object
       properties:
         Name:
           type: string
