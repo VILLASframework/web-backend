@@ -20,6 +20,10 @@ tags:
   description: Manage Simulators
 - name: uploads
   description: Manage Uploads
+- name: users
+  description: Manage Users
+- name: visualizations
+  description: Manage Visualizations
 paths:
   /simulations:
     get:
@@ -573,8 +577,276 @@ paths:
         400:
           description: File could not be uploaded because unable to process incoming form
           content: {}
-        
-        
+  /users:
+    get:
+      tags:
+        - users
+      summary: Get users
+      operationId: getUsers
+      responses:
+        200:
+          description: Users received successfully TODO CHECK CODE!
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        400:
+          description: Unable to receive Users
+          content: {}
+    post:
+      tags:
+        - users
+      summary: Add a new User to the database
+      operationId: addUser
+      requestBody:
+        description: "User object to add to DB"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        500:
+          description: Unable to create user
+          content: {}
+        400:
+          description: Unable to create user with existing username, username is already taken
+          content: {}
+  /users/{UserID}:
+    put:
+      tags:
+        - users
+      summary: Update properties of User with ID UserID
+      operationId: updateUserProperties
+      parameters:
+      - in: path 
+        name: UserID
+        description: ID of a User
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        description: "User object with new properties"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        500:
+          description: PUT Unknown user
+          content: {}
+        404:
+          description: Unable to find user
+          content: {}
+        403:
+          description: Invalid authorization
+          content: {}
+        400:
+          description: Username is already taken
+          content: {}
+    get:
+      tags:
+        - users
+      summary: Get properties of User with ID UserID
+      operationId: getUserProperties
+      parameters:
+      - in: path 
+        name: UserID
+        description: ID of a User
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: User received successfully (TODO CHECK CODE)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        400:
+          description: GET Unknown User for ID
+          content: {}
+    delete:
+      tags:
+        - users
+      summary: Delete User with ID UserID
+      operationId: deleteUser
+      parameters:
+      - in: path 
+        name: UserID
+        description: ID of a User
+        required: true
+        schema:
+          type: integer
+      responses:
+        400:
+          description: DELETE Unknown User
+          content: {}
+        500:
+          description: Unable to remove User
+          content: {}
+  /users/me:
+    get:
+      tags:
+        - users
+      summary: Get properties of user that issues the request
+      operationId: getUserPropertiesCurrent
+      responses:
+        200:
+          description: User received successfully (TODO CHECK CODE)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        400:
+          description: GET Unknown User for ID (TODO CHECK CODE)
+          content: {}
+  /authenticate:
+    post:
+      tags:
+        - users
+      summary: Authenticate a user
+      operationId: authenticateUser
+      requestBody:
+        description: "User object to authenticate"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        500:
+          description: Unable to compare passwords, internal server error
+          content: {}
+        400:
+          description: Unable to create user with existing username, username is already taken
+          content: {}
+        401:
+          description: Invalid or missing credentials, unkown username or wrong password
+          content: {}
+        200:
+          description: Authentication successful (TODO CHECK CODE and TOKEN)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Success:
+                    type: boolean
+                  message:
+                    type: string
+                  token:
+                    type: object
+                    properties: {}
+  /visualizations:
+    get:
+      tags:
+        - visualizations
+      summary: Get all available visualizations
+      description: Return a JSON representation of all visualizations
+      operationId: getVisualizations
+      responses:
+        400:
+          description: Unable to receive visualizations
+          content: {}
+        200:
+          description: Visualizations received successfully TODO CHECK CODE!
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Visualization'
+    post:
+      tags:
+        - visualizations
+      summary: Add a new visualization to the database
+      operationId: addVisualization
+      requestBody:
+        description: "Visualization object to add to DB"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Visualization'
+      responses:
+        400:
+          description: Unable to find project
+          content: {}
+        500:
+          description: Unable to save project or unable to create visualization
+          content: {}
+  /visualization/{VisualizationID}:
+    put:
+      tags:
+        - visualizations
+      summary: Update properties of Visualization with ID VisualizationID
+      operationId: updateVisualizationrProperties
+      parameters:
+      - in: path 
+        name: VisualizationID
+        description: ID of a Visualization
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        description: "Visualization object with new properties"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Visualization'
+      responses:
+        400:
+          description: PUT Unknown Visualization
+          content: {}
+        500:
+          description: Unable to save Visualization
+          content: {}
+    get:
+      tags:
+        - visualizations
+      summary: Get properties of Visualization with ID VisualizationID
+      operationId: getVisualizationProperties
+      parameters:
+      - in: path 
+        name: VisualizationID
+        description: ID of a Visualization
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: Visualization received successfully (TODO CHECK CODE)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Visualization'
+        400:
+          description: GET Unknown Visualization
+          content: {}
+    delete:
+      tags:
+        - visualizations
+      summary: Delete Visualization with ID VisualizationID
+      operationId: deleteVisualization
+      parameters:
+      - in: path 
+        name: VisualizationID
+        description: ID of a Visualization
+        required: true
+        schema:
+          type: integer
+      responses:
+        400:
+          description: DELETE Unknown Visualization or unable to find project
+          content: {}
+        500:
+          description: Unable to remove Visualization or Unable to save project
+          content: {}
             
               
             
