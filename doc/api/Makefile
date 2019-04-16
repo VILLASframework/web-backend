@@ -1,14 +1,14 @@
+REDOC := $(shell command -v redoc-cli 2> /dev/null)
 
+all: index.html
 
-apidoc: index.html
-
-index.html: swagger-codegen-cli.jar api.yaml
-	java -jar swagger-codegen-cli.jar generate -i api.yaml -l html2 -o ./
-
-swagger-codegen-cli.jar:
-	wget http://central.maven.org/maven2/io/swagger/swagger-codegen-cli/3.0.0-rc1/swagger-codegen-cli-3.0.0-rc1.jar -O swagger-codegen-cli.jar
+index.html: api.yaml
+ifndef REDOC
+    $(error "redoc-cli is not available, please install via npm install -g redoc-cli (run as root)")
+endif
+	redoc-cli bundle -o villaswebapi.html api.yaml
 
 clean:
-	rm -rf index.html swagger-codegen-cli.jar
+	rm -rf index.html
 
 .PHONY: docs index.html clean
