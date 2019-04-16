@@ -45,7 +45,7 @@ deploy:upload:
     - rsync --copy-links --chown ${DEPLOY_USER}:${DEPLOY_USER} index.html api.yaml ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}
   dependencies:
     - doc:api
-#  only:
-#    - master
+  only:
+    - master
   tags:
     - shell
