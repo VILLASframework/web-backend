@@ -1,0 +1,51 @@
+variables:
+  DEPLOY_USER: deploy
+  DEPLOY_HOST: acs-os-fein-website
+  DEPLOY_PATH: /var/www/villas/api/web/
+
+stages:
+  - prepare
+  - doc
+  - deploy
+
+# Stage: prepare
+##############################################################################
+
+# Build docker image which is used to build & test VILLASnode
+prepare:redoc:
+  stage: prepare
+  script:
+    - docker build -f doc/api/Dockerfile -t redoc .
+  tags:
+    - shell
+    - linux
+
+# Stage: doc
+##############################################################################
+
+doc:api:
+  stage: doc
+  tags:
+    - docker
+  image: redoc
+  script:
+    - cd doc/api
+    - redoc-cli bundle --cdn --title "VILLASweb Backend API Documentation" --output index.html api.yaml
+  artifacts:
+    paths:
+      - doc/api/index.html
+
+# Stage: deploy
+##############################################################################
+
+deploy:upload:
+  stage: deploy
+  script:
+    - cd doc/api
+    - rsync --copy-links --chown ${DEPLOY_USER}:${DEPLOY_USER} index.html api.yaml ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}
+  dependencies:
+    - doc:api
+  only:
+    - master
+  tags:
+    - shell
