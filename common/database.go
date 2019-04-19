@@ -112,8 +112,8 @@ func DummyPopulateDB(test_db *gorm.DB) {
 	checkErr(test_db.Create(&usr_A).Error)
 	checkErr(test_db.Create(&usr_B).Error)
 
-	vis_A := Visualization{Name: "User_A"}
-	vis_B := Visualization{Name: "User_B"}
+	vis_A := Visualization{Name: "Visualization_A"}
+	vis_B := Visualization{Name: "Visualization_B"}
 	checkErr(test_db.Create(&vis_A).Error)
 	checkErr(test_db.Create(&vis_B).Error)
 
