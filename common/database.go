@@ -97,8 +97,8 @@ func DummyPopulateDB(test_db *gorm.DB) {
 	checkErr(test_db.Create(&file_A).Error)
 	checkErr(test_db.Create(&file_B).Error)
 
-	proj_A := Project{Name: "Proj_A"}
-	proj_B := Project{Name: "Proj_B"}
+	proj_A := Project{Name: "Project_A"}
+	proj_B := Project{Name: "Project_B"}
 	checkErr(test_db.Create(&proj_A).Error)
 	checkErr(test_db.Create(&proj_B).Error)
 
