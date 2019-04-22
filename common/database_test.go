@@ -177,7 +177,7 @@ func TestDummyDBAssociations(t *testing.T) {
 		assert.EqualValues("Widget_B", widgs[1].Name)
 	} else {
 		assert.Fail("Widget Associations",
-			"Expected to have %v Widget. Has %v.", 2, len(files))
+			"Expected to have %v Widget. Has %v.", 2, len(widgs))
 	}
 
 	// File
