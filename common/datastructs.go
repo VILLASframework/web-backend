@@ -1,13 +1,14 @@
 package common
 
 import (
-	"github.com/jinzhu/gorm"
+	//"github.com/jinzhu/gorm"
 	"github.com/jinzhu/gorm/dialects/postgres"
 	"time"
 )
 
 type Simulator struct {
-	gorm.Model
+	//gorm.Model
+	ID            uint   `gorm:"primary_key;auto_increment"`
 	UUID          string `gorm:"unique;not null"`
 	Host          string `gorm:"default:''"`
 	Modeltype     string `gorm:"default:''"`
@@ -19,7 +20,8 @@ type Simulator struct {
 }
 
 type File struct {
-	gorm.Model
+	//gorm.Model
+	ID          uint   `gorm:"primary_key;auto_increment"`
 	Name        string `gorm:"not null"`
 	Path        string `gorm:"not null"`
 	Type        string `gorm:"not null"`
@@ -33,7 +35,8 @@ type File struct {
 }
 
 type Project struct {
-	gorm.Model
+	//gorm.Model
+	ID   uint   `gorm:"primary_key;auto_increment"`
 	Name string `gorm:"not null"`
 
 	User   User `gorm:"not null;association_autoupdate:false"`
@@ -42,11 +45,12 @@ type Project struct {
 	Simulation   Simulation `gorm:"not null;association_autoupdate:false"`
 	SimulationID uint       `gorm:"not null"`
 
-	Visualizations []Visualization //`gorm:"association_autoupdate:false"`
+	Visualizations []Visualization `gorm:"association_autoupdate:false"`
 }
 
 type Simulation struct {
-	gorm.Model
+	//gorm.Model
+	ID              uint           `gorm:"primary_key;auto_increment"`
 	Name            string         `gorm:"not null"`
 	Running         bool           `gorm:"default:false"`
 	StartParameters postgres.Jsonb // TODO default value
@@ -54,12 +58,13 @@ type Simulation struct {
 	User   User `gorm:"not null;association_autoupdate:false"`
 	UserID uint `gorm:"not null"`
 
-	Models   []SimulationModel `gorm:"foreignkey:BelongsToSimulationID"` //;association_autoupdate:false"`
+	Models   []SimulationModel `gorm:"foreignkey:BelongsToSimulationID;association_autoupdate:false"`
 	Projects []Project         `gorm:"association_autoupdate:false"`
 }
 
 type SimulationModel struct {
-	gorm.Model
+	//gorm.Model
+	ID              uint           `gorm:"primary_key;auto_increment"`
 	Name            string         `gorm:"not null"`
 	OutputLength    int            `gorm:"default:1"`
 	InputLength     int            `gorm:"default:1"`
@@ -72,24 +77,26 @@ type SimulationModel struct {
 	BelongsToSimulatorID uint      `gorm:"not null"`
 
 	// NOTE: order of signals is important
-	OutputMapping []Signal //`gorm:"association_autoupdate:false"`
-	InputMapping  []Signal //`gorm:"association_autoupdate:false"`
+	OutputMapping []Signal `gorm:"association_autoupdate:false"`
+	InputMapping  []Signal `gorm:"association_autoupdate:false"`
 }
 
 type User struct {
-	gorm.Model
+	//gorm.Model
+	ID       uint   `gorm:"primary_key;auto_increment"`
 	Username string `gorm:"unique;not null"`
 	Password string `gorm:"not null"`
 	Mail     string `gorm:"default:''"`
 	Role     string `gorm:"default:'user'"`
 
-	Projects    []Project    //`gorm:"association_autoupdate:false"`
-	Simulations []Simulation //`gorm:"association_autoupdate:false"`
-	Files       []File       //`gorm:"association_autoupdate:false"`
+	Projects    []Project    `gorm:"association_autoupdate:false"`
+	Simulations []Simulation `gorm:"association_autoupdate:false"`
+	Files       []File       `gorm:"association_autoupdate:false"`
 }
 
 type Visualization struct {
-	gorm.Model
+	//gorm.Model
+	ID   uint   `gorm:"primary_key;auto_increment"`
 	Name string `gorm:"not null"`
 	Grid int    `gorm:"default:15"`
 
@@ -99,11 +106,12 @@ type Visualization struct {
 	User   User `gorm:"not null;association_autoupdate:false"`
 	UserID uint `gorm:"not null"`
 
-	Widgets []Widget //`gorm:"association_autoupdate:false"`
+	Widgets []Widget `gorm:"association_autoupdate:false"`
 }
 
 type Signal struct {
-	gorm.Model
+	//gorm.Model
+	ID                uint   `gorm:"primary_key;auto_increment"`
 	Name              string `gorm:"not null"`
 	Unit              string `gorm:"not null"`
 	SimulationModelID uint
@@ -111,7 +119,8 @@ type Signal struct {
 }
 
 type Widget struct {
-	gorm.Model
+	//gorm.Model
+	ID               uint           `gorm:"primary_key;auto_increment"`
 	Name             string         `gorm:"not null"`
 	Type             string         `gorm:"not null"`
 	Width            uint           `gorm:"not null"`
