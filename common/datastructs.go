@@ -42,7 +42,7 @@ type Project struct {
 	Simulation   Simulation `gorm:"not null;association_autoupdate:false"`
 	SimulationID uint       `gorm:"not null"`
 
-	Visualizations []Visualization `gorm:"association_autoupdate:false"`
+	Visualizations []Visualization //`gorm:"association_autoupdate:false"`
 }
 
 type Simulation struct {
@@ -54,7 +54,7 @@ type Simulation struct {
 	User   User `gorm:"not null;association_autoupdate:false"`
 	UserID uint `gorm:"not null"`
 
-	Models   []SimulationModel `gorm:"foreignkey:BelongsToSimulationID;association_autoupdate:false"`
+	Models   []SimulationModel `gorm:"foreignkey:BelongsToSimulationID"` //;association_autoupdate:false"`
 	Projects []Project         `gorm:"association_autoupdate:false"`
 }
 
@@ -72,8 +72,8 @@ type SimulationModel struct {
 	BelongsToSimulatorID uint      `gorm:"not null"`
 
 	// NOTE: order of signals is important
-	OutputMapping []Signal `gorm:"association_autoupdate:false"`
-	InputMapping  []Signal `gorm:"association_autoupdate:false"`
+	OutputMapping []Signal //`gorm:"association_autoupdate:false"`
+	InputMapping  []Signal //`gorm:"association_autoupdate:false"`
 }
 
 type User struct {
@@ -83,9 +83,9 @@ type User struct {
 	Mail     string `gorm:"default:''"`
 	Role     string `gorm:"default:'user'"`
 
-	Projects    []Project    `gorm:"association_autoupdate:false"`
-	Simulations []Simulation `gorm:"association_autoupdate:false"`
-	Files       []File       `gorm:"association_autoupdate:false"`
+	Projects    []Project    //`gorm:"association_autoupdate:false"`
+	Simulations []Simulation //`gorm:"association_autoupdate:false"`
+	Files       []File       //`gorm:"association_autoupdate:false"`
 }
 
 type Visualization struct {
@@ -99,7 +99,7 @@ type Visualization struct {
 	User   User `gorm:"not null;association_autoupdate:false"`
 	UserID uint `gorm:"not null"`
 
-	Widgets []Widget `gorm:"association_autoupdate:false"`
+	Widgets []Widget //`gorm:"association_autoupdate:false"`
 }
 
 type Signal struct {
