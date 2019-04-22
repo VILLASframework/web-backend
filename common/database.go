@@ -82,10 +82,14 @@ func DummyPopulateDB(test_db *gorm.DB) {
 	checkErr(test_db.Create(&simr_A).Error)
 	checkErr(test_db.Create(&simr_B).Error)
 
-	sig_A := Signal{Name: "Signal_A"}
-	sig_B := Signal{Name: "Signal_B"}
-	checkErr(test_db.Create(&sig_A).Error)
-	checkErr(test_db.Create(&sig_B).Error)
+	outSig_A := Signal{Name: "outSignal_A"}
+	outSig_B := Signal{Name: "outSignal_B"}
+	inSig_A := Signal{Name: "inSignal_A"}
+	inSig_B := Signal{Name: "inSignal_B"}
+	checkErr(test_db.Create(&outSig_A).Error)
+	checkErr(test_db.Create(&outSig_B).Error)
+	checkErr(test_db.Create(&inSig_A).Error)
+	checkErr(test_db.Create(&inSig_B).Error)
 
 	smo_A := SimulationModel{Name: "SimModel_A"}
 	smo_B := SimulationModel{Name: "SimModel_B"}
@@ -128,10 +132,10 @@ func DummyPopulateDB(test_db *gorm.DB) {
 
 	checkErr(test_db.Model(&smo_A).Association("BelongsToSimulation").Append(&simn_A).Error)
 	checkErr(test_db.Model(&smo_A).Association("BelongsToSimulator").Append(&simr_A).Error)
-	checkErr(test_db.Model(&smo_A).Association("OutputMapping").Append(&sig_A).Error)
-	checkErr(test_db.Model(&smo_A).Association("OutputMapping").Append(&sig_B).Error)
-	checkErr(test_db.Model(&smo_A).Association("InputMapping").Append(&sig_B).Error)
-	checkErr(test_db.Model(&smo_A).Association("InputMapping").Append(&sig_A).Error)
+	checkErr(test_db.Model(&smo_A).Association("OutputMapping").Append(&outSig_A).Error)
+	checkErr(test_db.Model(&smo_A).Association("OutputMapping").Append(&outSig_B).Error)
+	checkErr(test_db.Model(&smo_A).Association("InputMapping").Append(&inSig_B).Error)
+	checkErr(test_db.Model(&smo_A).Association("InputMapping").Append(&inSig_A).Error)
 
 	checkErr(test_db.Model(&simn_A).Association("User").Append(&usr_A).Error)
 	checkErr(test_db.Model(&simn_A).Association("Models").Append(&smo_A).Error)

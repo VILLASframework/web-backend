@@ -58,8 +58,8 @@ func TestDummyDBAssociations(t *testing.T) {
 
 	assert.NoError(db.Model(&smo).Related(&sigs, "OutputMapping").Error)
 	if len(sigs) == 2 {
-		assert.EqualValues("Signal_A", sigs[0].Name, "Expected Signal_A")
-		assert.EqualValues("Signal_B", sigs[1].Name, "Expected Signal_B")
+		assert.EqualValues("outSignal_A", sigs[0].Name, "Expected outSignal_A")
+		assert.EqualValues("outSignal_B", sigs[1].Name, "Expected outSignal_B")
 	} else {
 		assert.Fail("Simulation Model Associations",
 			"Expected to have %v Output Signals. Has %v.", 2, len(sigs))
@@ -67,8 +67,8 @@ func TestDummyDBAssociations(t *testing.T) {
 
 	assert.NoError(db.Model(&smo).Related(&sigs, "InputMapping").Error)
 	if len(sigs) == 2 {
-		assert.EqualValues("Signal_A", sigs[0].Name, "Expected Signal_A")
-		assert.EqualValues("Signal_B", sigs[1].Name, "Expected Signal_B")
+		assert.EqualValues("inSignal_A", sigs[0].Name, "Expected inSignal_A")
+		assert.EqualValues("inSignal_B", sigs[1].Name, "Expected inSignal_B")
 	} else {
 		assert.Fail("Simulation Model Associations",
 			"Expected to have %v Input Signals. Has %v.", 2, len(sigs))
