@@ -23,7 +23,7 @@ prepare:redoc:
 prepare:fedora:
   stage: prepare
   script:
-    - docker build -f Dockerfile.fedora -t VILLASweb-backend-go/fedora
+    - docker build -f Dockerfile.fedora -t villaswebbackendgo/fedora
   tags:
     - shell
     - linux
