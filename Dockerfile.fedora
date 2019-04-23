@@ -1,27 +1,15 @@
-FROM fedora:29
+FROM postgres:11
 
 ARG GIT_REV=unknown
 ARG GIT_BRANCH=unknown
 ARG VERSION=unknown
 ARG VARIANT=unknown
 
+# Golang
+RUN apt-get install -y golang
 
-# Toolchain
-RUN dnf -y install \
-	gcc gcc-c++ \
-	golang
-
-# Install and initialize PostgreSQL 11
-RUN dnf -y install https://download.postgresql.org/pub/repos/yum/11/fedora/fedora-29-x86_64/pgdg-fedora-repo-latest.noarch.rpm && \
-    dnf -y install postgresql11-server postgresql11 && \
-    rpm -qi postgresql11-server && \
-    /usr/pgsql-11/bin/postgresql-11-setup initdb && \
-    systemctl start postgresql-11 && \
-    systemctl enable postgresql-11 && \
-    su - postgres && \
-    psql -c "alter user postgres with password 'postgres'" && \
-    psql -c "CREATE DATABASE villasdb ;"
-
+# Create db
+RUN su - postgres && psql -c "CREATE DATABASE villasdb ;"
 
 WORKDIR /villasweb
 ENTRYPOINT bash
