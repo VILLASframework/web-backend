@@ -11,7 +11,7 @@ stages:
 # Stage: prepare
 ##############################################################################
 
-# Build docker image which is used to build & test VILLASnode
+# Build docker images
 prepare:redoc:
   stage: prepare
   script:
@@ -19,6 +19,15 @@ prepare:redoc:
   tags:
     - shell
     - linux
+
+prepare:fedora:
+  stage: prepare
+  script:
+    - docker build -f Dockerfile.fedora -t VILLASweb-backend-go/fedora
+  tags:
+    - shell
+    - linux
+
 
 # Stage: doc
 ##############################################################################
