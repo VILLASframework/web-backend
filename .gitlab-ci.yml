@@ -6,6 +6,7 @@ variables:
 stages:
   - prepare
   - doc
+  - build
   - deploy
 
 # Stage: prepare
@@ -20,7 +21,7 @@ prepare:redoc:
     - shell
     - linux
 
-prepare:fedora:
+prepare:debian:
   stage: prepare
   script:
     - docker build -f Dockerfile.debian -t villaswebbackendgo:debian .
@@ -43,6 +44,18 @@ doc:api:
   artifacts:
     paths:
       - doc/api/index.html
+
+# Stage: build
+##############################################################################
+
+build:backend:
+  stage: build
+  tags:
+    - docker
+  image: villaswebbackendgo:debian
+  script:
+    go mod tidy
+    go build
 
 # Stage: deploy
 ##############################################################################
