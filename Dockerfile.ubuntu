@@ -42,7 +42,6 @@ RUN echo "listen_addresses='*'" >> /etc/postgresql/11/main/postgresql.conf
 # Expose the PostgreSQL port
 EXPOSE 5432
 
-# Set the default command to run when starting the container
 WORKDIR /villasweb
 ENTRYPOINT bash
 
