@@ -6,6 +6,7 @@ variables:
 stages:
   - prepare
   - build
+  - test
   - deploy
 
 # Stage: prepare
@@ -51,6 +52,22 @@ build:backend:
   script:
     - go mod tidy
     - go build
+
+
+# Stage: test
+##############################################################################
+
+test:backend:
+  stage: test
+  tags:
+    - docker
+  image: villaswebbackendgo:debian
+  script:
+    - go mod tidy
+    - cd common
+    - go test
+  dependencies:
+    - build:backend
 
 # Stage: deploy
 ##############################################################################
