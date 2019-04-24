@@ -5,14 +5,28 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"log"
+	"flag"
 )
 
-const (
-	DB_NAME    = "villasdb"
-	DB_DUMMY   = "testvillasdb"
-	DB_HOST    = "/tmp"
-	DB_SSLMODE = "disable" // TODO: change that for production
-)
+var DB_HOST string
+var DB_NAME string
+var DB_DUMMY string
+var DB_SSLMODE string
+
+
+
+// Initialize input command line flags
+func init() {
+	flag.StringVar(&DB_HOST, "dbhost", "/tmp", "Host of the PostgreSQL database (default is /tmp)")
+	flag.StringVar(&DB_NAME, "dbname", "villasdb", "Name of the database to use (default is villasdb)")
+	flag.StringVar(&DB_DUMMY, "dbdummy", "testvillasdb", "Name of the test database to use (default is testvillasdb)")
+	flag.StringVar(&DB_SSLMODE, "dbsslmode", "disable", "SSL mode of DB (default is disable)") // TODO: change default for production
+	flag.Parse()
+	fmt.Println("DB_HOST has value ", DB_HOST)
+	fmt.Println("DB_NAME has value ", DB_NAME)
+	fmt.Println("DB_DUMMY has value ", DB_DUMMY)
+	fmt.Println("DB_SSLMODE has value ", DB_SSLMODE)
+}
 
 // Initialize connection to the database
 func InitDB() *gorm.DB {

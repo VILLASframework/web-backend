@@ -65,7 +65,7 @@ test:backend:
   script:
     - go mod tidy
     - cd common
-    - go test
+    - go test -v -args -dbhost=/var/lib/postgresql
   dependencies:
     - build:backend
 
