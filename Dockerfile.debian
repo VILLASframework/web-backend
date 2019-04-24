@@ -6,7 +6,7 @@ ARG VERSION=unknown
 ARG VARIANT=unknown
 
 # Golang
-RUN apt-get install -y golang-1.11-go git ca-certificates g++ gcc libc6 libc6-dev pkg-config
+RUN apt-get update && apt-get install -y golang-1.11-go git ca-certificates g++ gcc libc6 libc6-dev pkg-config
 
 # Create db
 RUN su - postgres && psql -c "CREATE DATABASE villasdb ;"
