@@ -1,11 +1,13 @@
 # <img src="doc/pictures/villas_web.png" width=40 /> VILLASweb-backend-go
 
+[![pipeline status](https://git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/badges/master/pipeline.svg)](https://git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/commits/master)
+
 ## Description
 This is a rewrite of the backend for the VILLASweb
 website in Go. 
 
 ## Frameworks
-The backend is build upon [gin-gonic](https://github.com/gin-gonic/gin)
+The backend is build upon [gin-gonic](https://github.com/gin-gonic/gin) and [GORM](http://gorm.io).
 
 ## Quick start
 
