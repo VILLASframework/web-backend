@@ -1,25 +1,60 @@
 # <img src="doc/pictures/villas_web.png" width=40 /> VILLASweb-backend-go
 
 ## Description
-This is a rewrite in Go language of the backend for the VILLASweb
-website. The term __frontend__ refers to this project, the server the
-website (frontend) is talking to.  The backend serves the database
-content to the website, handles authentication and persistent storage of
-content. It does __not__ handle simulation data. For this have a look at
-VILLASnode.
+This is a rewrite of the backend for the VILLASweb
+website in Go. 
 
 ## Frameworks
 The backend is build upon [gin-gonic](https://github.com/gin-gonic/gin)
 
 ## Quick start
 
-### Database
+### Docker 
+You can use the `Dockerfile.ubuntu` for development and testing.
+To build an tag the image call the following in the top level of the repository:
 
-**The current repo is tested on Fedora 29 and with PostgreSQL 11 and Go
-1.11**
+```bash
+$ docker build -f Dockerfile.ubuntu -t villaswebbackendgo:ubuntu .
+```
+
+To run an interactive container based on the image call:
+
+```bash
+$ docker run --rm -it villaswebbackendgo:ubuntu
+```
+
+By using the `--rm` option of docker, the container will be removed upon exit.
+Omit this option if you want the container to persist on your system.
+
+Within the container you need to start the PostgreSQL server by invoking the following command:
+
+```bash
+$ /etc/init.d/postgresql start
+```
+
+Now you are ready to compile an test the code. 
+### Compiling
+
+```bash 
+$ go mod tidy
+$ go build
+```
+
+### Testing
+```bash 
+$ go mod tidy
+$ cd common
+$ go test -v -args -dbhost=/var/run/postgresql
+```
+
+
+## PostgreSQL Database
+
+**The current repo is tested for PostgreSQL 11 and Go 1.11**
 
 Before running the application the user has to setup and configure
-[PostgreSQL](https://www.postgresql.org/) on the local machine. 
+[PostgreSQL](https://www.postgresql.org/).
+Alternatively the provided Dockerfile can be used (see above). 
 
 To create a new database login to user `postgres` and start `psql`
 ```bash
