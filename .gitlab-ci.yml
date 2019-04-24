@@ -49,8 +49,8 @@ build:backend:
     - docker
   image: villaswebbackendgo:debian
   script:
-    go mod tidy
-    go build
+    - go mod tidy
+    - go build
 
 # Stage: deploy
 ##############################################################################
