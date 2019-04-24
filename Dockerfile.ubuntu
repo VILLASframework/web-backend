@@ -35,6 +35,7 @@ USER postgres
 RUN /etc/init.d/postgresql start &&\
     psql --command "CREATE USER villasuser WITH SUPERUSER PASSWORD 'villasuser';" &&\
     createdb -O villasuser testvillasdb
+    createdb -O villasuser villasdb
 
 # Add ``listen_addresses`` to ``/etc/postgresql/11/main/postgresql.conf``
 RUN echo "listen_addresses='*'" >> /etc/postgresql/11/main/postgresql.conf
