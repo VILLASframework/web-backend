@@ -5,11 +5,23 @@ ARG GIT_BRANCH=unknown
 ARG VERSION=unknown
 ARG VARIANT=unknown
 
-# Golang
-RUN apt-get update && apt-get install -y golang-1.11 git ca-certificates g++ gcc libc6 libc6-dev pkg-config
+# Update and Upgrade
+RUN apt-get update && apt-get upgrade -y
 
-# Create db
-RUN su - postgres && psql -c "CREATE DATABASE villasdb ;"
+# Install dependencies
+RUN apt-get install -y git ca-certificates g++ gcc libc6 libc6-dev pkg-config wget tar
+
+# Install Go 1.11
+RUN cd /tmp && mkdir golang && cd golang && \
+    wget https://dl.google.com/go/go1.11.9.linux-amd64.tar.gz && \
+    tar -xvf go1.11.9.linux-amd64.tar.gz && \
+    mv go /usr/local && \
+    rm -rf /tmp/*
+
+ENV GOROOT=/usr/local/go
+ENV PATH=/usr/local/go/bin:${PATH}
+
+RUN go version
 
 WORKDIR /villasweb
 ENTRYPOINT bash
