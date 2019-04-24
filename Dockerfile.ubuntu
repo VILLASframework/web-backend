@@ -9,7 +9,7 @@ ARG VARIANT=unknown
 RUN apt-get update && apt-get upgrade -y
 
 # Install dependencies
-RUN apt-get install -y git ca-certificates g++ gcc libc6 libc6-dev pkg-config wget tar
+RUN apt-get install -y git ca-certificates g++ gcc libc6 libc6-dev pkg-config wget tar lsb-release
 
 # Install Go 1.11
 RUN cd /tmp && mkdir golang && cd golang && \
@@ -27,26 +27,7 @@ RUN go version
 RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - && \
     sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -sc)-pgdg main" > /etc/apt/sources.list.d/PostgreSQL.list'
 
-RUN apt-get update && apt-get install postgresql-11
-
-WORKDIR /villasweb
-ENTRYPOINT bash
-
-LABEL \
-	org.label-schema.schema-version="1.0" \
-	org.label-schema.name="VILLASweb" \
-	org.label-schema.license="GPL-3.0" \
-	org.label-schema.vcs-ref="$GIT_REV" \
-	org.label-schema.vcs-branch="$GIT_BRANCH" \
-	org.label-schema.version="$VERSION" \
-	org.label-schema.variant="$VARIANT" \
-	org.label-schema.vendor="Institute for Automation of Complex Power Systems, RWTH Aachen University" \
-	org.label-schema.author.name="Sonja Happ" \
-	org.label-schema.author.email="sonja.happ@eonerc.rwth-aachen.de" \
-	org.label-schema.description="A image containing all build-time dependencies for VILLASweb-backend-go based on Fedora" \
-	org.label-schema.url="http://fein-aachen.org/projects/villas-framework/" \
-	org.label-schema.vcs-url="https://git.rwth-aachen.de/VILLASframework/VILLASweb-backend-go"
-
+RUN apt-get update && apt-get install -y postgresql-11
 
 # Run the following commands as the ``postgres`` user
 USER postgres
@@ -62,5 +43,21 @@ RUN echo "listen_addresses='*'" >> /etc/postgresql/11/main/postgresql.conf
 EXPOSE 5432
 
 # Set the default command to run when starting the container
-CMD ["/usr/lib/postgresql/11/bin/postgres", "-D", "/var/lib/postgresql/11/main", "-c", "config_file=/etc/postgresql/11/main/postgresql.conf"]
+WORKDIR /villasweb
+ENTRYPOINT bash
+
+LABEL \
+        org.label-schema.schema-version="1.0" \
+        org.label-schema.name="VILLASweb" \
+        org.label-schema.license="GPL-3.0" \
+        org.label-schema.vcs-ref="$GIT_REV" \
+        org.label-schema.vcs-branch="$GIT_BRANCH" \
+        org.label-schema.version="$VERSION" \
+        org.label-schema.variant="$VARIANT" \
+        org.label-schema.vendor="Institute for Automation of Complex Power Systems, RWTH Aachen University" \
+        org.label-schema.author.name="Sonja Happ" \
+        org.label-schema.author.email="sonja.happ@eonerc.rwth-aachen.de" \
+        org.label-schema.description="A image containing all build-time dependencies for VILLASweb-backend-go based on Fedora" \
+        org.label-schema.url="http://fein-aachen.org/projects/villas-framework/" \
+        org.label-schema.vcs-url="https://git.rwth-aachen.de/VILLASframework/VILLASweb-backend-go"
 
