@@ -168,7 +168,7 @@ func DummyPopulateDB(test_db *gorm.DB) {
 	checkErr(test_db.Model(&vis_A).Association("User").Append(&usr_A).Error)
 
 	// Simulator BT SimModel
-	checkErr(test_db.Debug().Model(&smo_A).Association("BelongsToSimulator").Append(&simr_A).Error)
+	checkErr(test_db.Model(&smo_A).Association("BelongsToSimulator").Append(&simr_A).Error)
 
 }
 
