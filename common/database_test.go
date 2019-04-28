@@ -57,21 +57,9 @@ func TestDummyDBAssociations(t *testing.T) {
 	a.EqualValues("Host_A", simr.Host, "Expected Host_A")
 
 	a.NoError(db.Model(&smo).Related(&sigs, "OutputMapping").Error)
-	if len(sigs) == 2 {
-		a.EqualValues("Signal_A", sigs[0].Name, "Expected Signal_A")
-		a.EqualValues("Signal_B", sigs[1].Name, "Expected Signal_B")
-	} else {
+	if len(sigs) != 4 {
 		a.Fail("Simulation Model Associations",
-			"Expected to have %v Output Signals. Has %v.", 2, len(sigs))
-	}
-
-	a.NoError(db.Model(&smo).Related(&sigs, "InputMapping").Error)
-	if len(sigs) == 2 {
-		a.EqualValues("Signal_A", sigs[0].Name, "Expected Signal_A")
-		a.EqualValues("Signal_B", sigs[1].Name, "Expected Signal_B")
-	} else {
-		a.Fail("Simulation Model Associations",
-			"Expected to have %v Input Signals. Has %v.", 2, len(sigs))
+			"Expected to have %v Output AND Input Signals. Has %v.", 4, len(sigs))
 	}
 
 	// Simulation
@@ -85,19 +73,13 @@ func TestDummyDBAssociations(t *testing.T) {
 	a.EqualValues("User_A", usr.Username)
 
 	a.NoError(db.Model(&simn).Related(&smos, "Models").Error)
-	if len(smos) == 2 {
-		a.EqualValues("SimModel_A", smos[0].Name)
-		a.EqualValues("SimModel_B", smos[1].Name)
-	} else {
+	if len(smos) != 2 {
 		a.Fail("Simulation Associations",
 			"Expected to have %v Simulation Models. Has %v.", 2, len(smos))
 	}
 
 	a.NoError(db.Model(&simn).Related(&projs, "Projects").Error)
-	if len(projs) == 2 {
-		a.EqualValues("Project_A", projs[0].Name)
-		a.EqualValues("Project_B", projs[1].Name)
-	} else {
+	if len(projs) != 2 {
 		a.Fail("Simulation Associations",
 			"Expected to have %v Projects. Has %v.", 2, len(projs))
 	}
@@ -116,10 +98,7 @@ func TestDummyDBAssociations(t *testing.T) {
 	a.EqualValues("User_A", usr.Username)
 
 	a.NoError(db.Model(&proj).Related(&viss, "Visualizations").Error)
-	if len(viss) == 2 {
-		a.EqualValues("Visualization_A", viss[0].Name)
-		a.EqualValues("Visualization_B", viss[1].Name)
-	} else {
+	if len(viss) != 2 {
 		a.Fail("Project Associations",
 			"Expected to have %v Visualizations. Has %v.", 2, len(viss))
 	}
@@ -132,28 +111,19 @@ func TestDummyDBAssociations(t *testing.T) {
 	// User Associations
 
 	a.NoError(db.Model(&usr).Related(&projs, "Projects").Error)
-	if len(projs) == 2 {
-		a.EqualValues("Project_A", projs[0].Name)
-		a.EqualValues("Project_B", projs[1].Name)
-	} else {
+	if len(projs) != 2 {
 		a.Fail("User Associations",
 			"Expected to have %v Projects. Has %v.", 2, len(projs))
 	}
 
 	a.NoError(db.Model(&usr).Related(&simns, "Simulations").Error)
-	if len(simns) == 2 {
-		a.EqualValues("Simulation_A", simns[0].Name)
-		a.EqualValues("Simulation_B", simns[1].Name)
-	} else {
+	if len(simns) != 2 {
 		a.Fail("User Associations",
 			"Expected to have %v Simulations. Has %v.", 2, len(simns))
 	}
 
 	a.NoError(db.Model(&usr).Related(&files, "Files").Error)
-	if len(files) == 2 {
-		a.EqualValues("File_A", files[0].Name)
-		a.EqualValues("File_B", files[1].Name)
-	} else {
+	if len(files) != 2 {
 		a.Fail("User Associations",
 			"Expected to have %v Files. Has %v.", 2, len(files))
 	}
@@ -172,10 +142,7 @@ func TestDummyDBAssociations(t *testing.T) {
 	a.EqualValues("User_A", usr.Username)
 
 	a.NoError(db.Model(&vis).Related(&widgs, "Widgets").Error)
-	if len(widgs) == 2 {
-		a.EqualValues("Widget_A", widgs[0].Name)
-		a.EqualValues("Widget_B", widgs[1].Name)
-	} else {
+	if len(widgs) != 2 {
 		a.Fail("Widget Associations",
 			"Expected to have %v Widget. Has %v.", 2, len(widgs))
 	}
