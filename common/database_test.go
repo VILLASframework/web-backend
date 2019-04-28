@@ -57,15 +57,9 @@ func TestDummyDBAssociations(t *testing.T) {
 	a.EqualValues("Host_A", simr.Host, "Expected Host_A")
 
 	a.NoError(db.Model(&smo).Related(&sigs, "OutputMapping").Error)
-	if len(sigs) != 2 {
+	if len(sigs) != 4 {
 		a.Fail("Simulation Model Associations",
-			"Expected to have %v Output Signals. Has %v.", 2, len(sigs))
-	}
-
-	a.NoError(db.Model(&smo).Related(&sigs, "InputMapping").Error)
-	if len(sigs) != 2 {
-		a.Fail("Simulation Model Associations",
-			"Expected to have %v Input Signals. Has %v.", 2, len(sigs))
+			"Expected to have %v Output AND Input Signals. Has %v.", 4, len(sigs))
 	}
 
 	// Simulation
