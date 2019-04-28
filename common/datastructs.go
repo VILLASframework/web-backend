@@ -77,8 +77,8 @@ type SimulationModel struct {
 	BelongsToSimulatorID uint      `gorm:"not null"`
 
 	// NOTE: order of signals is important
-	OutputMapping []Signal `gorm:"association_autoupdate:false"`
-	InputMapping  []Signal `gorm:"association_autoupdate:false"`
+	OutputMapping []Signal `gorm:""`
+	InputMapping  []Signal `gorm:""`
 }
 
 type User struct {
@@ -106,7 +106,7 @@ type Visualization struct {
 	User   User `gorm:"not null;association_autoupdate:false"`
 	UserID uint `gorm:"not null"`
 
-	Widgets []Widget `gorm:"association_autoupdate:false"`
+	Widgets []Widget `gorm:""`
 }
 
 type Signal struct {

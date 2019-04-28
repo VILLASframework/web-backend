@@ -130,37 +130,46 @@ func DummyPopulateDB(test_db *gorm.DB) {
 	// For `belongs to` use the model with id=1
 	// For `has many` use the models with id=1 and id=2
 
-	checkErr(test_db.Model(&smo_A).Association("BelongsToSimulation").Append(&simn_A).Error)
-	checkErr(test_db.Model(&smo_A).Association("BelongsToSimulator").Append(&simr_A).Error)
-	checkErr(test_db.Model(&smo_A).Association("OutputMapping").Append(&outSig_A).Error)
-	checkErr(test_db.Model(&smo_A).Association("OutputMapping").Append(&outSig_B).Error)
-	checkErr(test_db.Model(&smo_A).Association("InputMapping").Append(&inSig_B).Error)
-	checkErr(test_db.Model(&smo_A).Association("InputMapping").Append(&inSig_A).Error)
-
-	checkErr(test_db.Model(&simn_A).Association("User").Append(&usr_A).Error)
-	checkErr(test_db.Model(&simn_A).Association("Models").Append(&smo_A).Error)
-	checkErr(test_db.Model(&simn_A).Association("Models").Append(&smo_B).Error)
-	checkErr(test_db.Model(&simn_A).Association("Projects").Append(&proj_A).Error)
-	checkErr(test_db.Model(&simn_A).Association("Projects").Append(&proj_B).Error)
-
-	checkErr(test_db.Model(&proj_A).Association("Simulation").Append(&simn_A).Error)
-	checkErr(test_db.Model(&proj_A).Association("User").Append(&usr_A).Error)
-	checkErr(test_db.Model(&proj_A).Association("Visualizations").Append(&vis_A).Error)
-	checkErr(test_db.Model(&proj_A).Association("Visualizations").Append(&vis_B).Error)
-
-	checkErr(test_db.Model(&usr_A).Association("Projects").Append(&proj_A).Error)
-	checkErr(test_db.Model(&usr_A).Association("Projects").Append(&proj_B).Error)
-	checkErr(test_db.Model(&usr_A).Association("Simulations").Append(&simn_A).Error)
-	checkErr(test_db.Model(&usr_A).Association("Simulations").Append(&simn_B).Error)
-	checkErr(test_db.Model(&usr_A).Association("Files").Append(&file_A).Error)
-	checkErr(test_db.Model(&usr_A).Association("Files").Append(&file_B).Error)
-
+	// Project HM Visualization, Visualization BT Project
 	checkErr(test_db.Model(&vis_A).Association("Project").Append(&proj_A).Error)
-	checkErr(test_db.Model(&vis_A).Association("User").Append(&usr_A).Error)
+	checkErr(test_db.Model(&vis_B).Association("Project").Append(&proj_A).Error)
+
+	// User HM Project, Project BT User
+	checkErr(test_db.Model(&proj_A).Association("User").Append(&usr_A).Error)
+	checkErr(test_db.Model(&proj_B).Association("User").Append(&usr_A).Error)
+
+	// Simulation HM Project, Project BT Simulation
+	checkErr(test_db.Model(&proj_A).Association("Simulation").Append(&simn_A).Error)
+	checkErr(test_db.Model(&proj_B).Association("Simulation").Append(&simn_A).Error)
+
+	// User HM File, File BT User
+	checkErr(test_db.Model(&file_A).Association("User").Append(&usr_A).Error)
+	checkErr(test_db.Model(&file_B).Association("User").Append(&usr_A).Error)
+
+	// Simulation HM SimModel, SimModel BT Simulation
+	checkErr(test_db.Model(&smo_A).Association("BelongsToSimulation").Append(&simn_A).Error)
+	checkErr(test_db.Model(&smo_B).Association("BelongsToSimulation").Append(&simn_A).Error)
+
+	// User HM Simulation, Simulation BT User
+	checkErr(test_db.Model(&simn_A).Association("User").Append(&usr_A).Error)
+	checkErr(test_db.Model(&simn_B).Association("User").Append(&usr_A).Error)
+
+	// Visualization HM Widget
 	checkErr(test_db.Model(&vis_A).Association("Widgets").Append(&widg_A).Error)
 	checkErr(test_db.Model(&vis_A).Association("Widgets").Append(&widg_B).Error)
 
-	checkErr(test_db.Model(&file_A).Association("User").Append(&usr_A).Error)
+	// SimModel HM Signal
+	checkErr(test_db.Model(&smo_A).Association("InputMapping").Append(&inSig_A).Error)
+	checkErr(test_db.Model(&smo_A).Association("InputMapping").Append(&inSig_B).Error)
+	checkErr(test_db.Model(&smo_A).Association("OutputMapping").Append(&outSig_A).Error)
+	checkErr(test_db.Model(&smo_A).Association("OutputMapping").Append(&outSig_B).Error)
+
+	// Visualization BT User
+	checkErr(test_db.Model(&vis_A).Association("User").Append(&usr_A).Error)
+
+	// Simulator BT SimModel
+	checkErr(test_db.Debug().Model(&smo_A).Association("BelongsToSimulator").Append(&simr_A).Error)
+
 }
 
 // Erase tables and glose the testdb
