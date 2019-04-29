@@ -15,12 +15,11 @@ func UsersRegister(r *gin.RouterGroup) {
 }
 
 func usersReadEp(c *gin.Context) {
+	allUsers, _, _ := FindAllUsers()
+	serializer := UsersSerializer{c, allUsers}
 	c.JSON(http.StatusOK, gin.H{
-		"message": "NOT implemented",
+		"users": serializer.Response(),
 	})
-	// TODO: get all allUsers
-	//serializer := UsersSerializer{c, allUsers}
-	//c.JSON(http.StatusOK, gin.H{"users", serializer.Response()})
 }
 
 func userRegistrationEp(c *gin.Context) {
