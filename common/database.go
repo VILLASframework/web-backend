@@ -1,11 +1,11 @@
 package common
 
 import (
+	"flag"
 	"fmt"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"log"
-	"flag"
 )
 
 var DB_HOST string
@@ -13,7 +13,7 @@ var DB_NAME string
 var DB_DUMMY string
 var DB_SSLMODE string
 
-
+var DBpool *gorm.DB
 
 // Initialize input command line flags
 func init() {
@@ -34,7 +34,13 @@ func InitDB() *gorm.DB {
 		DB_HOST, DB_SSLMODE, DB_NAME)
 	db, err := gorm.Open("postgres", dbinfo)
 	checkErr(err)
+	DBpool = db
 	return db
+}
+
+// Connection pool to already opened DB
+func GetDB() *gorm.DB {
+	return DBpool
 }
 
 // Verify that the database connection is alive
@@ -77,7 +83,7 @@ func DummyInitDB() *gorm.DB {
 		DB_HOST, DB_SSLMODE, DB_DUMMY)
 	test_db, err := gorm.Open("postgres", dbinfo)
 	checkErr(err)
-
+	DBpool = test_db
 	// drop tables from previous tests
 	DropTables(test_db)
 
