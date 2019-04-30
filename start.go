@@ -2,7 +2,7 @@ package main
 
 import (
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
-	"gopkg.in/gin-gonic/gin.v1"
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
