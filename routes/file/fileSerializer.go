@@ -1,53 +1,53 @@
 package file
 
 import (
-	"time"
-
 	"github.com/gin-gonic/gin"
 
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
 )
 
-type FilesSerializer struct {
+// File/s Serializers
+
+type FilesSerializerNoAssoc struct {
 	Ctx   *gin.Context
 	Files []common.File
 }
 
-func (self *FilesSerializer) Response() []FileResponse {
-	response := []FileResponse{}
-	for _, File := range self.Files {
-		serializer := FileSerializer{self.Ctx, File}
+func (self *FilesSerializerNoAssoc) Response() []FileResponseNoAssoc {
+	response := []FileResponseNoAssoc{}
+	for _, files := range self.Files {
+		serializer := FileSerializerNoAssoc{self.Ctx, files}
 		response = append(response, serializer.Response())
 	}
 	return response
 }
 
-type FileSerializer struct {
+type FileSerializerNoAssoc struct {
 	Ctx *gin.Context
 	common.File
 }
 
-type FileResponse struct {
+type FileResponseNoAssoc struct {
 	Name string `json:"Name"`
 	ID   uint   `json:"FileID"`
 	Path string `json:"Path"`
-	Type string `json:"Type"` //MIME type?
+	Type string `json:"Type"`
 	Size uint   `json:"Size"`
 	H    uint   `json:"ImageHeight"`
 	W    uint   `json:"ImageWidth"`
-	Date time.Time `json:"Date"`
+	// Date
 }
 
-func (self *FileSerializer) Response() FileResponse {
-
-	response := FileResponse{
-		Name:    self.Name,
-		Path:    self.Path,
-		Type:    self.Type,
-		Size:    self.Size,
-		Date:    self.Date,
-		H: 	self.ImageHeight,
+func (self *FileSerializerNoAssoc) Response() FileResponseNoAssoc {
+	response := FileResponseNoAssoc{
+		Name: self.Name,
+		ID:   self.ID,
+		Path: self.Path,
+		Type: self.Type,
+		Size: self.Size,
+		H:    self.ImageHeight,
 		W:    self.ImageWidth,
+		// Date
 	}
 	return response
 }

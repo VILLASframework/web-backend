@@ -8,9 +8,9 @@ import (
 func UsersRegister(r *gin.RouterGroup) {
 	r.GET("/", usersReadEp)
 	r.POST("/", userRegistrationEp)
-	r.PUT("/:userID", userUpdateEp)
-	r.GET("/:userID", userReadEp)
-	r.DELETE("/:userID", userDeleteEp)
+	r.PUT("/:UserID", userUpdateEp)
+	r.GET("/:UserID", userReadEp)
+	r.DELETE("/:UserID", userDeleteEp)
 	//r.GET("/me", userSelfEp) // TODO: this conflicts with GET /:userID
 }
 

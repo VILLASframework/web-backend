@@ -8,16 +8,16 @@ import (
 func FilesRegister(r *gin.RouterGroup) {
 	r.GET("/", filesReadEp)
 	//r.POST("/", fileRegistrationEp) // TODO to be added to API
-	//r.PUT("/:fileID", fileUpdateEp) // TODO to be added to API
-	r.GET("/:fileID", fileReadEp)
-	r.DELETE("/:fileID", fileDeleteEp)
+	//r.PUT("/:FileID", fileUpdateEp) // TODO to be added to API
+	r.GET("/:FileID", fileReadEp)
+	r.DELETE("/:FileID", fileDeleteEp)
 }
 
 func filesReadEp(c *gin.Context) {
 	allFiles, _, _ := FindAllFiles()
-	serializer := FilesSerializer{c, allFiles}
+	serializer := FilesSerializerNoAssoc{c, allFiles}
 	c.JSON(http.StatusOK, gin.H{
-		"users": serializer.Response(),
+		"files": serializer.Response(),
 	})
 }
 

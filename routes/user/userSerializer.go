@@ -4,6 +4,9 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/project"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulation"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/file"
 )
 
 type UsersSerializer struct {
@@ -30,21 +33,21 @@ type UserResponse struct {
 	Password    string `json:"Password"` // XXX: ???
 	Role        string `json:"Role"`
 	Mail        string `json:"Mail"`
-	Projects    []ProjectResponseNoAssoc
-	Simulations []SimulationResponseNoAssoc
-	Files       []FileResponseNoAssoc
+	Projects    []project.ProjectResponseNoAssoc
+	Simulations []simulation.SimulationResponseNoAssoc
+	Files       []file.FileResponseNoAssoc
 }
 
 func (self *UserSerializer) Response() UserResponse {
 	// TODO: maybe all those should be made in one transaction
-	projects, _, _ := FindUserProjects(&self.User)
-	projectsSerializer := ProjectsSerializerNoAssoc{self.Ctx, projects}
+	projects, _, _ := project.FindUserProjects(&self.User)
+	projectsSerializer := project.ProjectsSerializerNoAssoc{self.Ctx, projects}
 
-	simulations, _, _ := FindUserSimulations(&self.User)
-	simulationsSerializer := SimulationsSerializerNoAssoc{self.Ctx, simulations}
+	simulations, _, _ := simulation.FindUserSimulations(&self.User)
+	simulationsSerializer := simulation.SimulationsSerializerNoAssoc{self.Ctx, simulations}
 
-	files, _, _ := FindUserFiles(&self.User)
-	filesSerializer := FilesSerializerNoAssoc{self.Ctx, files}
+	files, _, _ := file.FindUserFiles(&self.User)
+	filesSerializer := file.FilesSerializerNoAssoc{self.Ctx, files}
 
 	response := UserResponse{
 		Username:    self.Username,
@@ -58,120 +61,6 @@ func (self *UserSerializer) Response() UserResponse {
 	return response
 }
 
-// Project/s Serializers
 
-type ProjectsSerializerNoAssoc struct {
-	Ctx      *gin.Context
-	Projects []common.Project
-}
 
-func (self *ProjectsSerializerNoAssoc) Response() []ProjectResponseNoAssoc {
-	response := []ProjectResponseNoAssoc{}
-	for _, project := range self.Projects {
-		serializer := ProjectSerializerNoAssoc{self.Ctx, project}
-		response = append(response, serializer.Response())
-	}
-	return response
-}
 
-type ProjectSerializerNoAssoc struct {
-	Ctx *gin.Context
-	common.Project
-}
-
-type ProjectResponseNoAssoc struct {
-	Name string `json:"Name"`
-	ID   uint   `json:"ProjectID"`
-}
-
-func (self *ProjectSerializerNoAssoc) Response() ProjectResponseNoAssoc {
-	response := ProjectResponseNoAssoc{
-		Name: self.Name,
-		ID:   self.ID,
-	}
-	return response
-}
-
-// Simulation/s Serializers
-
-type SimulationsSerializerNoAssoc struct {
-	Ctx         *gin.Context
-	Simulations []common.Simulation
-}
-
-func (self *SimulationsSerializerNoAssoc) Response() []SimulationResponseNoAssoc {
-	response := []SimulationResponseNoAssoc{}
-	for _, simulation := range self.Simulations {
-		serializer := SimulationSerializerNoAssoc{self.Ctx, simulation}
-		response = append(response, serializer.Response())
-	}
-	return response
-}
-
-type SimulationSerializerNoAssoc struct {
-	Ctx *gin.Context
-	common.Simulation
-}
-
-type SimulationResponseNoAssoc struct {
-	Name    string `json:"Name"`
-	ID      uint   `json:"SimulationID"`
-	Running bool   `json:"Running"`
-	//StartParams postgres.Jsonb `json:"Starting Parameters"`
-}
-
-func (self *SimulationSerializerNoAssoc) Response() SimulationResponseNoAssoc {
-	response := SimulationResponseNoAssoc{
-		Name:    self.Name,
-		ID:      self.ID,
-		Running: self.Running,
-		//StartParams: self.StartParameters,
-	}
-	return response
-}
-
-// File/s Serializers
-
-type FilesSerializerNoAssoc struct {
-	Ctx   *gin.Context
-	Files []common.File
-}
-
-func (self *FilesSerializerNoAssoc) Response() []FileResponseNoAssoc {
-	response := []FileResponseNoAssoc{}
-	for _, files := range self.Files {
-		serializer := FileSerializerNoAssoc{self.Ctx, files}
-		response = append(response, serializer.Response())
-	}
-	return response
-}
-
-type FileSerializerNoAssoc struct {
-	Ctx *gin.Context
-	common.File
-}
-
-type FileResponseNoAssoc struct {
-	Name string `json:"Name"`
-	ID   uint   `json:"FileID"`
-	Path string `json:"Path"`
-	Type string `json:"Type"`
-	Size uint   `json:"Size"`
-	H    uint   `json:"ImageHeight"`
-	W    uint   `json:"ImageWidth"`
-	// Date
-}
-
-func (self *FileSerializerNoAssoc) Response() FileResponseNoAssoc {
-	response := FileResponseNoAssoc{
-		Name: self.Name,
-		ID:   self.ID,
-		Path: self.Path,
-		Type: self.Type,
-		Size: self.Size,
-		H:    self.ImageHeight,
-		W:    self.ImageWidth,
-		// Date
-	}
-	return response
-}
