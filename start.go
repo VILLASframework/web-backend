@@ -2,6 +2,8 @@ package main
 
 import (
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/user"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -14,7 +16,7 @@ func main() {
 	r := gin.Default()
 
 	api := r.Group("/api")
-	common.UsersRegister(api.Group("/users"))
+	user.UsersRegister(api.Group("/users"))
 
 	r.Run()
 }

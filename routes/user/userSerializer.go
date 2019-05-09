@@ -1,12 +1,14 @@
-package common
+package user
 
 import (
 	"github.com/gin-gonic/gin"
+
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
 )
 
 type UsersSerializer struct {
 	Ctx   *gin.Context
-	Users []User
+	Users []common.User
 }
 
 func (self *UsersSerializer) Response() []UserResponse {
@@ -20,7 +22,7 @@ func (self *UsersSerializer) Response() []UserResponse {
 
 type UserSerializer struct {
 	Ctx *gin.Context
-	User
+	common.User
 }
 
 type UserResponse struct {
@@ -60,7 +62,7 @@ func (self *UserSerializer) Response() UserResponse {
 
 type ProjectsSerializerNoAssoc struct {
 	Ctx      *gin.Context
-	Projects []Project
+	Projects []common.Project
 }
 
 func (self *ProjectsSerializerNoAssoc) Response() []ProjectResponseNoAssoc {
@@ -74,7 +76,7 @@ func (self *ProjectsSerializerNoAssoc) Response() []ProjectResponseNoAssoc {
 
 type ProjectSerializerNoAssoc struct {
 	Ctx *gin.Context
-	Project
+	common.Project
 }
 
 type ProjectResponseNoAssoc struct {
@@ -94,7 +96,7 @@ func (self *ProjectSerializerNoAssoc) Response() ProjectResponseNoAssoc {
 
 type SimulationsSerializerNoAssoc struct {
 	Ctx         *gin.Context
-	Simulations []Simulation
+	Simulations []common.Simulation
 }
 
 func (self *SimulationsSerializerNoAssoc) Response() []SimulationResponseNoAssoc {
@@ -108,7 +110,7 @@ func (self *SimulationsSerializerNoAssoc) Response() []SimulationResponseNoAssoc
 
 type SimulationSerializerNoAssoc struct {
 	Ctx *gin.Context
-	Simulation
+	common.Simulation
 }
 
 type SimulationResponseNoAssoc struct {
@@ -132,7 +134,7 @@ func (self *SimulationSerializerNoAssoc) Response() SimulationResponseNoAssoc {
 
 type FilesSerializerNoAssoc struct {
 	Ctx   *gin.Context
-	Files []File
+	Files []common.File
 }
 
 func (self *FilesSerializerNoAssoc) Response() []FileResponseNoAssoc {
@@ -146,7 +148,7 @@ func (self *FilesSerializerNoAssoc) Response() []FileResponseNoAssoc {
 
 type FileSerializerNoAssoc struct {
 	Ctx *gin.Context
-	File
+	common.File
 }
 
 type FileResponseNoAssoc struct {
