@@ -2,8 +2,6 @@ package user
 
 import (
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
-	//"github.com/jinzhu/gorm"
-	//"github.com/jinzhu/gorm/dialects/postgres"
 )
 
 func FindAllUsers() ([]common.User, int, error) {
