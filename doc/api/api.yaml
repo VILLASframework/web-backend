@@ -125,6 +125,55 @@ paths:
         200:
           description: TODO RESPONSES!
           content: {}
+  /simulations/{SimulationID}/models/{ModelID}:
+    get:
+      tags:
+        - simulations models
+      summary: Get model associated with simulation with ID SimulationID
+      operationId: getModelFromSimulation
+      parameters:
+      - in: path
+        name: SimulationID
+        description: ID of a simulation
+        required: true
+        schema:
+          type: integer
+      - in: path
+        name: ModelID
+        description: ID of a model
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: Simulation and associated model found (TODO CHECK CODE)
+          content:
+            application/zip:
+          description: "Model file in zip format"
+        400:
+          description: PUT Simulation Unknown for ID or unable to save simulation or Model not associated with Simulation
+          content: {}
+    put:
+      tags:
+        - simulations models
+      summary: Update model file for model with ModelID associated with simulation with SimulationID
+      operationId: updateModelForSimulation
+      parameters:
+      - in: path
+        name: SimulationID
+        description: ID of a simulation
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        description: "Model file in zip format"
+        required: true
+        content:
+          application/xml:
+      responses:
+        400:
+          description: PUT Simulation Unknown for ID or unable to save simulation or Model not associated with Simulation
+          content: {}
   /counts:
     get:
       tags:
