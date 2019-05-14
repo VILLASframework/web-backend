@@ -146,10 +146,9 @@ paths:
           type: integer
       responses:
         200:
-          description: Simulation and associated model found (TODO CHECK CODE)
+          description: "Model file in zip format"
           content:
             application/zip:
-          description: "Model file in zip format"
         400:
           description: PUT Simulation Unknown for ID or unable to save simulation or Model not associated with Simulation
           content: {}
