@@ -32,7 +32,8 @@ type File struct {
 
 	//remove belongs to User relation
 	//User   User `gorm:"not null;association_autoupdate:false"`
-	//UserID uint `gorm:"not null"`
+	UserID uint `gorm:""`
+	SimulationModelID uint `gorm:""`
 }
 
 type Project struct {
