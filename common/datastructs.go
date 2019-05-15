@@ -30,8 +30,9 @@ type File struct {
 	ImageWidth  uint   // only required in case file is an image
 	Date        time.Time
 
-	User   User `gorm:"not null;association_autoupdate:false"`
-	UserID uint `gorm:"not null"`
+	//remove belongs to User relation
+	//User   User `gorm:"not null;association_autoupdate:false"`
+	//UserID uint `gorm:"not null"`
 }
 
 type Project struct {
@@ -76,7 +77,7 @@ type SimulationModel struct {
 	BelongsToSimulator   Simulator `gorm:"not null;association_autoupdate:false"`
 	BelongsToSimulatorID uint      `gorm:"not null"`
 	//new in villasweb 2.0
-	Files 			[]File 			`gorm:"association_autoupdate:false"`
+	Files 			[]File 			`gorm:""`
 
 	// NOTE: order of signals is important
 	OutputMapping []Signal `gorm:""`
@@ -93,7 +94,7 @@ type User struct {
 
 	Projects    []Project    `gorm:"association_autoupdate:false"`
 	Simulations []Simulation `gorm:"association_autoupdate:false"`
-	Files       []File       `gorm:"association_autoupdate:false"`
+	Files       []File       `gorm:""`
 }
 
 type Visualization struct {

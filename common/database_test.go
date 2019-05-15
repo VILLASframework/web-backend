@@ -161,7 +161,7 @@ func TestDummyDBAssociations(t *testing.T) {
 
 	// File Associations
 
-	a.NoError(db.Model(&file).Association("User").Find(&usr).Error)
-	a.EqualValues("User_A", usr.Username)
+	//a.NoError(db.Model(&file).Association("User").Find(&usr).Error)
+	//a.EqualValues("User_A", usr.Username)
 
 }

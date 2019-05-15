@@ -162,9 +162,9 @@ func DummyPopulateDB(test_db *gorm.DB) {
 	checkErr(test_db.Model(&proj_A).Association("Simulation").Append(&simn_A).Error)
 	checkErr(test_db.Model(&proj_B).Association("Simulation").Append(&simn_A).Error)
 
-	// User HM File, File BT User
-	checkErr(test_db.Model(&file_A).Association("User").Append(&usr_A).Error)
-	checkErr(test_db.Model(&file_B).Association("User").Append(&usr_A).Error)
+	// User HM Files
+	checkErr(test_db.Model(&usr_A).Association("Files").Append(&file_A).Error)
+	checkErr(test_db.Model(&usr_A).Association("Files").Append(&file_B).Error)
 
 	// Simulation HM SimModel, SimModel BT Simulation
 	checkErr(test_db.Model(&smo_A).Association("BelongsToSimulation").Append(&simn_A).Error)
