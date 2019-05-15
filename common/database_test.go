@@ -38,6 +38,7 @@ func TestDummyDBAssociations(t *testing.T) {
 	var sigs []Signal
 	var smos []SimulationModel
 	var files []File
+	var files_sm []File
 	var projs []Project
 	var simns []Simulation
 	var viss []Visualization
@@ -60,6 +61,12 @@ func TestDummyDBAssociations(t *testing.T) {
 	if len(sigs) != 4 {
 		a.Fail("Simulation Model Associations",
 			"Expected to have %v Output AND Input Signals. Has %v.", 4, len(sigs))
+	}
+
+	a.NoError(db.Model(&smo).Related(&files_sm, "Files").Error)
+	if len(files_sm) != 2 {
+		a.Fail("Simulation Model Associations",
+			"Expected to have %v Files. Has %v.", 2, len(files_sm))
 	}
 
 	// Simulation

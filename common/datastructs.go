@@ -75,6 +75,8 @@ type SimulationModel struct {
 
 	BelongsToSimulator   Simulator `gorm:"not null;association_autoupdate:false"`
 	BelongsToSimulatorID uint      `gorm:"not null"`
+	//new in villasweb 2.0
+	Files 			[]File 			`gorm:"association_autoupdate:false"`
 
 	// NOTE: order of signals is important
 	OutputMapping []Signal `gorm:""`

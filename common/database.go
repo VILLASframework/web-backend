@@ -184,6 +184,10 @@ func DummyPopulateDB(test_db *gorm.DB) {
 	checkErr(test_db.Model(&smo_A).Association("OutputMapping").Append(&outSig_A).Error)
 	checkErr(test_db.Model(&smo_A).Association("OutputMapping").Append(&outSig_B).Error)
 
+	//SimulationModel HM Files
+	checkErr(test_db.Model(&smo_A).Association("Files").Append(&file_A).Error)
+	checkErr(test_db.Model(&smo_A).Association("Files").Append(&file_B).Error)
+
 	// Visualization BT User
 	checkErr(test_db.Model(&vis_A).Association("User").Append(&usr_A).Error)
 
