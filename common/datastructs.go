@@ -32,7 +32,7 @@ type File struct {
 
 	//remove belongs to User relation
 	//User   User `gorm:"not null;association_autoupdate:false"`
-	UserID uint `gorm:""`
+	UserID uint `gorm:"not null"`
 	SimulationModelID uint `gorm:""`
 }
 
@@ -77,12 +77,14 @@ type SimulationModel struct {
 
 	BelongsToSimulator   Simulator `gorm:"not null;association_autoupdate:false"`
 	BelongsToSimulatorID uint      `gorm:"not null"`
-	//new in villasweb 2.0
-	Files 			[]File 			`gorm:""`
-
 	// NOTE: order of signals is important
 	OutputMapping []Signal `gorm:""`
 	InputMapping  []Signal `gorm:""`
+
+	//new in villasweb 2.0 (for CIM file of simulation model and other model file formats)
+	Files 			[]File 			`gorm:""`
+
+
 }
 
 type User struct {

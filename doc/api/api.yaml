@@ -427,22 +427,16 @@ paths:
         500:
           description: Unable to find Simulation or unable to save changed simulation or unable to remove SimulationModel
           content: {}
-  /models/{SimulationModelID}/file:
+  /models/{SimulationModelID}/cimfile:
     get:
       tags:
-        - simulationmodelfile
-      summary: Get model file from Model with ID SimulationModelID
-      operationId: getModelFromSimulation
+        - simulationmodels
+      summary: Get CIM model file from SimulationModel with ID SimulationModelID
+      operationId: getCIMFileFromSimulationModel
       parameters:
       - in: path
-        name: SimulationID
-        description: ID of a simulation
-        required: true
-        schema:
-          type: integer
-      - in: path
-        name: ModelID
-        description: ID of a model
+        name: SimulationModelID
+        description: ID of a SimulationModel
         required: true
         schema:
           type: integer
@@ -450,20 +444,20 @@ paths:
         200:
           description: "Model file in zip format"
           content:
-            x-model/cim-zip:
+            model/x-cim.zip:
               Zipped model file in CIM format
         400:
           description: PUT Simulation Unknown for ID or unable to save simulation or Model not associated with Simulation
           content: {}
     put:
       tags:
-        - simulationmodelfile
-      summary: Update model file from Model with ID SimulationModelID
-      operationId: updateModelForSimulation
+        - simulationmodels
+      summary: Update (Overwrite) CIM model file from SimulationModel with ID SimulationModelID
+      operationId: updateCIMFileForSimulationModel
       parameters:
       - in: path
-        name: SimulationID
-        description: ID of a simulation
+        name: SimulationModelID
+        description: ID of a SimulationModel
         required: true
         schema:
           type: integer
@@ -471,11 +465,11 @@ paths:
         description: "Model file in zip format"
         required: true
         content:
-          x-model/cim-zip:
+          model/x-cim.zip:
             Zipped model file in CIM format
       responses:
         400:
-          description: PUT Simulation Unknown for ID or unable to save simulation or Model not associated with Simulation
+          description: PUT SimulationModel Unknown for ID or unable to save simulation or Model not associated with Simulation
           content: {}
   /simulators:
     get:
@@ -1012,7 +1006,6 @@ components:
       - Type
       - Size
       - Date
-      - UserID
       type: object
       properties:
         Name:
@@ -1029,8 +1022,8 @@ components:
           type: integer
         UserID:
           type: integer
-        User:
-          $ref: '#/components/schemas/User'
+        SimulationModelID:
+          type: integer
         Date:
           type: string
     Simulator:
