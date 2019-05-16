@@ -6,25 +6,103 @@ info:
 servers:
 - url: http://111.222.333.444:5555/api/v1
 tags:
-- name: simulations
-  description: Manage Simulations
+- name: authentication
+  description: Manage user authentication
 - name: counts
   description: Get counters for database elements
-- name: files
-  description: Manage Files
-- name: projects
-  description: Manage Projects
-- name: simulationmodels
-  description: Manage SimulationModels
-- name: simulators
-  description: Manage Simulators
-- name: uploads
-  description: Manage Uploads
 - name: users
   description: Manage Users
+- name: files
+  description: Manage Files
+- name: simulators
+  description: Manage Simulators
+- name: projects
+  description: Manage Projects
+- name: simulations
+  description: Manage Simulations
+- name: simulationmodels
+  description: Manage SimulationModels
 - name: visualizations
   description: Manage Visualizations
+- name: uploads
+  description: Manage Uploads (REMOVED, now in files)
+
 paths:
+  /authenticate:
+    post:
+      tags:
+        - authentication
+      summary: Authenticate a user
+      operationId: authenticateUser
+      requestBody:
+        description: "User object to authenticate"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        200:
+          description: OK.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Success:
+                    type: boolean
+                  message:
+                    type: string
+                  token:
+                    type: object
+                    properties: {}
+        400:
+          description: Bad request. Unable to create user with existing username, username is already taken
+        401:
+          description: Unauthorized access. Invalid or missing credentials.
+        403:
+          description: Access forbidden.
+        404:
+          description: Not found. User not found.
+        500:
+          description: Internal server error. Unable to compare passwords.
+  /counts:
+    get:
+      tags:
+        - counts
+      summary: Get counters for all elements in the database
+      operationId: getCounts
+      responses:
+        200:
+          description: Counts successful (TODO CHECK IF CODE CORRECT!)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  simulations:
+                    type: integer
+                    description: number of simulations
+                  users:
+                    type: integer
+                    description: number of users
+                  simulators:
+                    type: integer
+                    description: number of simulators
+                  projects:
+                    type: integer
+                    description: number of projects
+                  visualizations:
+                    type: integer
+                    description: number of visualizations
+        401:
+          description: Unauthorized access.
+        403:
+          description: Access forbidden.
+        404:
+          description: Not found. Unable to find at least one of the count targets.
+        500:
+          description: Internal server error.
   /simulations:
     get:
       tags:
@@ -33,17 +111,22 @@ paths:
       description: Return a JSON representation of all simulations
       operationId: getSimulations
       responses:
-        400:
-          description: Unable to receive simulations
-          content: {}
         200:
-          description: Simulations received successfully TODO CHECK CODE!
+          description: OK.
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/Simulation'
+        401:
+          description: Unauthorized access.
+        403:
+          description: Access forbidden.
+        404:
+          description: Not found. No simulations found.
+        500:
+          description: Internal server error.
     post:
       tags:
         - simulations
@@ -57,12 +140,14 @@ paths:
             schema:
               $ref: '#/components/schemas/Simulation'
       responses:
-        400:
-          description: Unable to find user or unable to create simulation
-          content: {}
+        200:
+          description: OK.
+        401:
+          description: Unauthorized access.
+        403:
+          description: Access forbidden.
         500:
-          description: Unable to save user
-          content: {}
+          description: Internal server error.
   /simulations/{SimulationID}:
     put:
       tags:
@@ -84,12 +169,16 @@ paths:
             schema:
               $ref: '#/components/schemas/Simulation'
       responses:
+        200:
+          description: OK.
+        401:
+          description: Unauthorized access.
+        403:
+          description: Access forbidden.
+        404:
+          description: Not found. Unable to find simulation or user.
         500:
-          description: Unable to find user or unable to save user or
-          content: {}
-        400:
-          description: PUT Simulation Unknown for ID or unable to save simulation
-          content: {}
+          description: Internal server error. Unable to save user.
     get:
       tags:
         - simulations
@@ -104,11 +193,19 @@ paths:
           type: integer
       responses:
         200:
-          description: Simulation received successfully (TODO CHECK CODE)
+          description: OK.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Simulation'
+        401:
+          description: Unauthorized access.
+        403:
+          description: Access forbidden.
+        404:
+          description: Not found. Unable to find simulation.
+        500:
+          description: Internal server error.
     delete:
       tags:
         - simulations
@@ -123,37 +220,15 @@ paths:
           type: integer
       responses:
         200:
-          description: TODO RESPONSES!
-          content: {}
-  /counts:
-    get:
-      tags:
-        - counts
-      summary: Get counters for all elements in the database
-      operationId: getCounts
-      responses:
-        200:
-          description: Counts successful (TODO CHECK IF CODE CORRECT!)
-          content: 
-            application/json:
-              schema:
-                type: object
-                properties:
-                  simulations:
-                    type: integer
-                    description: number of simulations
-                  users:
-                    type: integer
-                    description: number of users
-                  simulators:
-                    type: integer
-                    description: number of simulators
-                  projects: 
-                    type: integer
-                    description: number of projects
-                  visualizations:
-                    type: integer
-                    description: number of visualizations
+          description: OK.
+        401:
+          description: Unauthorized access.
+        403:
+          description: Access forbidden.
+        404:
+          description: Not found. Unable to find simulation.
+        500:
+          description: Internal server error.
   /files:
     get:
       tags:
@@ -162,16 +237,21 @@ paths:
       operationId: getFilesOfUser
       responses:
         200:
-          description: Files obtained successfully (TODO CHECK CODE!)
+          description: OK.
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/File'
+        401:
+          description: Unauthorized access.
+        403:
+          description: Access forbidden.
+        404:
+          description: Not found. No files found.
         500:
-          description: Could not retrieve user's files
-          content: {}
+          description: Internal server error. Could not retrieve user's files.
     post:
       tags:
         - files
@@ -186,14 +266,17 @@ paths:
               $ref: '#/components/schemas/File'
       responses:
         200:
-          description: File upload successful!
-          content: {}
-        500:
-          description: File could not be uploaded and GET unable to find user or unable to save reference file or unable to save user or unable to create directory
-          content: {}
+          description: OK.
         400:
-          description: File could not be uploaded because unable to process incoming form
-          content: {}
+          description: Bad request. File could not be uploaded because unable to process incoming form.
+        401:
+          description: Unauthorized access.
+        403:
+          description: Access forbidden.
+        404:
+          description: Not found. User not found.
+        500:
+          description: Internal server error. Unable to save reference file or user OR unable to create directory.
   /files/{FileID}:
     get:
       tags:
@@ -207,16 +290,31 @@ paths:
         required: true
         schema:
           type: integer
+      - in: header
+        name: X-Request-FileDesc
+        description: Set false if file itself, true if file description shall be returned
+        required: true
+        schema:
+          type: boolean
       responses:
         200:
-          description: File received successfully (TODO CHECK CODE)
+          description: OK.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/File'
-        400:
-          description: GET Unknown file for ID
-          content: {}
+            model/x-cim.zip:
+              schema:
+                type: string
+                format: byte
+        401:
+          description: Unauthorized access.
+        403:
+          description: Access forbidden.
+        404:
+          description: Not found. File not found.
+        500:
+          description: Internal server error.
     put:
       tags:
         - files
@@ -238,11 +336,17 @@ paths:
             type: integer
       responses:
         200:
-          description: File updated successfully
-          content: {}
+          description: OK.
         400:
-          description: PUT Unknown file for ID
-          content: {}
+          description: Bad request. File could not be uploaded because unable to process incoming form.
+        401:
+          description: Unauthorized access.
+        403:
+          description: Access forbidden.
+        404:
+          description: Not found. File not found.
+        500:
+          description: Internal server error. Unable to save reference file or user OR unable to create directory.
     delete:
       tags:
         - files
@@ -257,14 +361,15 @@ paths:
           type: integer
       responses:
         200:
-          description: TODO RESPONSES!
-          content: {}
-        400:
-          description: DELETE unknown file for id
-          content: {}
+          description: OK.
+        401:
+          description: Unauthorized access.
+        403:
+          description: Access forbidden.
+        404:
+          description: Not found. File not found.
         500:
-          description: Unable to remove file
-          content: {}
+          description: Internal server error. Unable to remove file.
   /projects:
     get:
       tags:
@@ -273,16 +378,21 @@ paths:
       operationId: getProjects
       responses:
         200:
-          description: Projects received successfully TODO CHECK CODE!
+          description: OK.
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/Project'
-        400:
-          description: Unable to receive projects
-          content: {}
+        401:
+          description: Unauthorized access.
+        403:
+          description: Access forbidden.
+        404:
+          description: Not found. No projects found.
+        500:
+          description: Internal server error.
     post:
       tags:
         - projects
@@ -296,12 +406,16 @@ paths:
             schema:
               $ref: '#/components/schemas/Project'
       responses:
-        400:
-          description: Unable to find user or unable to save user or unknown project for id
-          content: {}
+        200:
+          description: OK.
+        401:
+          description: Unauthorized access.
+        403:
+          description: Access forbidden.
+        404:
+          description: Not found. Unknown user.
         500:
-          description: Unable to create project or unable to save project
-          content: {}
+          description: Internal server error. Unable to save user or project.
   /projects/{ProjectID}:
     put:
       tags:
@@ -323,12 +437,18 @@ paths:
             schema:
               $ref: '#/components/schemas/Project'
       responses:
-        500:
-          description: Unable to find user or unable to save user or unable to find simulation of project or unable to save simulation of project or unable to save project
-          content: {}
+        200:
+          description: OK.
         400:
-          description: PUT Simulation Unknown for ID
-          content: {}
+          description: Bad request. Unable to process incoming form.
+        401:
+          description: Unauthorized access.
+        403:
+          description: Access forbidden.
+        404:
+          description: Not found. Project not found.
+        500:
+          description: Internal server error. Unable to save project or user.
     get:
       tags:
         - projects
@@ -343,14 +463,19 @@ paths:
           type: integer
       responses:
         200:
-          description: Project received successfully (TODO CHECK CODE)
+          description: OK.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Project'
-        400:
-          description: GET Unknown project for ID
-          content: {}
+        401:
+          description: Unauthorized access.
+        403:
+          description: Access forbidden.
+        404:
+          description: Not found. Project not found.
+        500:
+          description: Internal server error.
     delete:
       tags:
         - projects
@@ -364,12 +489,16 @@ paths:
         schema:
           type: integer
       responses:
-        400:
-          description: DELETE Unknown project
-          content: {}
+        200:
+          description: OK.
+        401:
+          description: Unauthorized access.
+        403:
+          description: Access forbidden.
+        404:
+          description: Not found. Project not found.
         500:
-          description: Unable to find user or unable to save user or unable to remove project
-          content: {}
+          description: Internal server error. Unable to remove project.
   /models:
     get:
       tags:
@@ -378,16 +507,21 @@ paths:
       operationId: getSimulationModels
       responses:
         200:
-          description: SimulationModel received successfully TODO CHECK CODE!
+          description: OK.
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/SimulationModel'
-        400:
-          description: Unable to find SimulationModel
-          content: {}
+        401:
+          description: Unauthorized access.
+        403:
+          description: Access forbidden.
+        404:
+          description: Not found. No simulation models found.
+        500:
+          description: Internal server error.
     post:
       tags:
         - simulationmodels
@@ -401,12 +535,16 @@ paths:
             schema:
               $ref: '#/components/schemas/SimulationModel'
       responses:
+        200:
+          description: OK.
         400:
-          description: Unable to find Simulation
-          content: {}
+          description: Bad request. Unable to process incoming form.
+        401:
+          description: Unauthorized access.
+        403:
+          description: Access forbidden.
         500:
-          description: Unable to save simulation or unable to create simulation model
-          content: {}
+          description: Internal server error. Unable to save simulation or simulation model.
   /models/{SimulationModelID}:
     put:
       tags:
@@ -428,12 +566,18 @@ paths:
             schema:
               $ref: '#/components/schemas/SimulationModel'
       responses:
-        500:
-          description: Unable to save SimulationModel
-          content: {}
+        200:
+          description: OK.
         400:
-          description: Unable to find SimulationModel
-          content: {}
+          description: Bad request. Unable to process incoming form.
+        401:
+          description: Unauthorized access.
+        403:
+          description: Access forbidden.
+        404:
+          description: Not found. Simulation model not found.
+        500:
+          description: Internal server error. Unable to save simulation model.
     get:
       tags:
         - simulationmodels
@@ -448,14 +592,19 @@ paths:
           type: integer
       responses:
         200:
-          description: SimulationModel received successfully (TODO CHECK CODE)
+          description: OK.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/SimulationModel'
-        400:
-          description: GET Unknown SimulationModel for ID
-          content: {}
+        401:
+          description: Unauthorized access.
+        403:
+          description: Access forbidden.
+        404:
+          description: Not found. Simulation model not found.
+        500:
+          description: Internal server error.
     delete:
       tags:
         - simulationmodels
@@ -469,12 +618,16 @@ paths:
         schema:
           type: integer
       responses:
-        400:
-          description: DELETE Unknown SimulationModel
-          content: {}
+        200:
+          description: OK.
+        401:
+          description: Unauthorized access.
+        403:
+          description: Access forbidden.
+        404:
+          description: Not found. Simulation or simulation model not found.
         500:
-          description: Unable to find Simulation or unable to save changed simulation or unable to remove SimulationModel
-          content: {}
+          description: Internal server error. Unable to save changed simulation or to remove simulation model.
   /models/{SimulationModelID}/file:
     get:
       tags:
@@ -511,15 +664,20 @@ paths:
                   MIMEType: "model/x-cim.zip"
       responses:
         200:
-          description: "File from simulation model"
+          description: OK.
           content:
             model/x-cim.zip:
               schema:
                 type: string
                 format: byte
-        400:
-          description: PUT Simulation Unknown for ID or unable to save simulation or Model not associated with Simulation
-          content: {}
+        401:
+          description: Unauthorized access.
+        403:
+          description: Access forbidden.
+        404:
+          description: Not found. Simulation model not found.
+        500:
+          description: Internal server error.
     put:
       tags:
         - simulationmodels
@@ -542,10 +700,15 @@ paths:
               format: byte
       responses:
         200:
-          description: Update of File successful
-        400:
-          description: PUT SimulationModel Unknown for ID or unable to save simulation or Model not associated with Simulation
-          content: {}
+          description: OK.
+        401:
+          description: Unauthorized access.
+        403:
+          description: Access forbidden.
+        404:
+          description: Not found. Simulation model not found.
+        500:
+          description: Internal server error. Unable to save simulation model.
   /simulators:
     get:
       tags:
@@ -554,16 +717,21 @@ paths:
       operationId: getSimulators
       responses:
         200:
-          description: Simulators received successfully TODO CHECK CODE!
+          description: OK.
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/Simulator'
-        400:
-          description: Unable to find Simulators
-          content: {}
+        401:
+          description: Unauthorized access.
+        403:
+          description: Access forbidden.
+        404:
+          description: Not found. No simulators found.
+        500:
+          description: Internal server error.
     post:
       tags:
         - simulators
@@ -577,9 +745,16 @@ paths:
             schema:
               $ref: '#/components/schemas/Simulator'
       responses:
+        200:
+          description: OK.
+        400:
+          description: Bad request. Unable to process incoming form.
+        401:
+          description: Unauthorized access.
+        403:
+          description: Access forbidden.
         500:
-          description: Unable to create simulator
-          content: {}
+          description: Internal server error. Unable to save simulator.
   /simulators/{SimulatorID}:
     put:
       tags:
@@ -601,12 +776,16 @@ paths:
             schema:
               $ref: '#/components/schemas/Simulator'
       responses:
+        200:
+          description: OK.
+        401:
+          description: Unauthorized access.
+        403:
+          description: Access forbidden.
+        404:
+          description: Not found. Simulator not found.
         500:
-          description: PUT ERROR finding simulator or Unable to save Simulator
-          content: {}
-        400:
-          description: PUT Unknown simulator
-          content: {}
+          description: Internal server error. Unable to save simulator.
     get:
       tags:
         - simulators
@@ -621,14 +800,19 @@ paths:
           type: integer
       responses:
         200:
-          description: Simulator received successfully (TODO CHECK CODE)
+          description: OK.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Simulator'
-        400:
-          description: GET Unknown Simulator for ID
-          content: {}
+        401:
+          description: Unauthorized access.
+        403:
+          description: Access forbidden.
+        404:
+          description: Not found. Simulator not found.
+        500:
+          description: Internal server error.
     delete:
       tags:
         - simulators
@@ -642,12 +826,16 @@ paths:
         schema:
           type: integer
       responses:
-        400:
-          description: DELETE Unknown Simulator
-          content: {}
+        200:
+          description: OK.
+        401:
+          description: Unauthorized access.
+        403:
+          description: Access forbidden.
+        404:
+          description: Not found. Simulator not found.
         500:
-          description: Unable to remove Simulator
-          content: {}
+          description: Internal server error. Unable to remove simulator.
     post:
       tags:
         - simulators
@@ -670,32 +858,18 @@ paths:
               items:
                 type: string
       responses:
-        500:
-          description: Unable to send actions to simulator
-          content: {}
+        200:
+          description: OK.
         400:
-          description: POST unknown simulator
-          content: {}
-  /uploads:
-    post: 
-      tags:
-        - uploads
-      summary: Upload a new file to the database (REMOVED)
-      operationId: uploadFile
-      requestBody:
-        description: "File object to upload TODO CHANGE TO FORM"
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/File'
-      responses:
+          description: Bad request. Unable to process incoming form.
+        401:
+          description: Unauthorized access.
+        403:
+          description: Access forbidden.
+        404:
+          description: Not found. Simulator not found.
         500:
-          description: File could not be uploaded and GET unable to find user or unable to save reference file or unable to save user or unable to create directory
-          content: {}
-        400:
-          description: File could not be uploaded because unable to process incoming form
-          content: {}
+          description: Internal server error. Unable to send actions to simulator.
   /users:
     get:
       tags:
@@ -704,16 +878,21 @@ paths:
       operationId: getUsers
       responses:
         200:
-          description: Users received successfully TODO CHECK CODE!
+          description: OK.
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/User'
-        400:
-          description: Unable to receive Users
-          content: {}
+        401:
+          description: Unauthorized access.
+        403:
+          description: Access forbidden.
+        404:
+          description: Not found. No users found.
+        500:
+          description: Internal server error.
     post:
       tags:
         - users
@@ -727,12 +906,16 @@ paths:
             schema:
               $ref: '#/components/schemas/User'
       responses:
-        500:
-          description: Unable to create user
-          content: {}
+        200:
+          description: OK.
         400:
-          description: Unable to create user with existing username, username is already taken
-          content: {}
+          description: Bad request. Unable to process incoming form. Username is already taken
+        401:
+          description: Unauthorized access.
+        403:
+          description: Access forbidden.
+        500:
+          description: Internal server error. Unable to save user.
   /users/{UserID}:
     put:
       tags:
@@ -754,18 +937,18 @@ paths:
             schema:
               $ref: '#/components/schemas/User'
       responses:
-        500:
-          description: PUT Unknown user
-          content: {}
-        404:
-          description: Unable to find user
-          content: {}
-        403:
-          description: Invalid authorization
-          content: {}
+        200:
+          description: OK.
         400:
-          description: Username is already taken
-          content: {}
+          description: Bad request. Username is already taken.
+        401:
+          description: Unauthorized access.
+        403:
+          description: Access forbidden.
+        404:
+          description: Not found. User not found.
+        500:
+          description: Internal server error.
     get:
       tags:
         - users
@@ -780,14 +963,19 @@ paths:
           type: integer
       responses:
         200:
-          description: User received successfully (TODO CHECK CODE)
+          description: OK.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
-        400:
-          description: GET Unknown User for ID
-          content: {}
+        401:
+          description: Unauthorized access.
+        403:
+          description: Access forbidden.
+        404:
+          description: Not found. User not found.
+        500:
+          description: Internal server error.
     delete:
       tags:
         - users
@@ -801,65 +989,37 @@ paths:
         schema:
           type: integer
       responses:
-        400:
-          description: DELETE Unknown User
-          content: {}
+        200:
+          description: OK.
+        401:
+          description: Unauthorized access.
+        403:
+          description: Access forbidden.
+        404:
+          description: Not found. User not found.
         500:
-          description: Unable to remove User
-          content: {}
+          description: Internal server error. Unable to remove user.
   /users/me:
     get:
       tags:
         - users
-      summary: Get properties of user that issues the request
+      summary: Get properties of user that issues the request (REMOVED)
       operationId: getUserPropertiesCurrent
       responses:
         200:
-          description: User received successfully (TODO CHECK CODE)
+          description: OK.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
-        400:
-          description: GET Unknown User for ID (TODO CHECK CODE)
-          content: {}
-  /authenticate:
-    post:
-      tags:
-        - users
-      summary: Authenticate a user
-      operationId: authenticateUser
-      requestBody:
-        description: "User object to authenticate"
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/User'
-      responses:
-        500:
-          description: Unable to compare passwords, internal server error
-          content: {}
-        400:
-          description: Unable to create user with existing username, username is already taken
-          content: {}
         401:
-          description: Invalid or missing credentials, unkown username or wrong password
-          content: {}
-        200:
-          description: Authentication successful (TODO CHECK CODE and TOKEN)
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  Success:
-                    type: boolean
-                  message:
-                    type: string
-                  token:
-                    type: object
-                    properties: {}
+          description: Unauthorized access.
+        403:
+          description: Access forbidden.
+        404:
+          description: Not found. User not found.
+        500:
+          description: Internal server error.
   /visualizations:
     get:
       tags:
@@ -868,17 +1028,22 @@ paths:
       description: Return a JSON representation of all visualizations
       operationId: getVisualizations
       responses:
-        400:
-          description: Unable to receive visualizations
-          content: {}
         200:
-          description: Visualizations received successfully TODO CHECK CODE!
+          description: OK.
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/Visualization'
+        401:
+          description: Unauthorized access.
+        403:
+          description: Access forbidden.
+        404:
+          description: Not found. No visualizations found.
+        500:
+          description: Internal server error.
     post:
       tags:
         - visualizations
@@ -892,12 +1057,18 @@ paths:
             schema:
               $ref: '#/components/schemas/Visualization'
       responses:
+        200:
+          description: OK.
         400:
-          description: Unable to find project
-          content: {}
+          description: Bad request. Unable to process incoming form.
+        401:
+          description: Unauthorized access.
+        403:
+          description: Access forbidden.
+        404:
+          description: Not found. Project of visualization not found.
         500:
-          description: Unable to save project or unable to create visualization
-          content: {}
+          description: Internal server error. Unable to save project or visualization.
   /visualization/{VisualizationID}:
     put:
       tags:
@@ -919,12 +1090,18 @@ paths:
             schema:
               $ref: '#/components/schemas/Visualization'
       responses:
+        200:
+          description: OK.
         400:
-          description: PUT Unknown Visualization
-          content: {}
+          description: Bad request. Unable to process incoming form.
+        401:
+          description: Unauthorized access.
+        403:
+          description: Access forbidden.
+        404:
+          description: Not found. Visualization not found.
         500:
-          description: Unable to save Visualization
-          content: {}
+          description: Internal server error. Unable to save Visualization.
     get:
       tags:
         - visualizations
@@ -939,14 +1116,19 @@ paths:
           type: integer
       responses:
         200:
-          description: Visualization received successfully (TODO CHECK CODE)
+          description: OK.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Visualization'
-        400:
-          description: GET Unknown Visualization
-          content: {}
+        401:
+          description: Unauthorized access.
+        403:
+          description: Access forbidden.
+        404:
+          description: Not found. Visualization not found.
+        500:
+          description: Internal server error.
     delete:
       tags:
         - visualizations
@@ -960,20 +1142,44 @@ paths:
         schema:
           type: integer
       responses:
-        400:
-          description: DELETE Unknown Visualization or unable to find project
-          content: {}
+        200:
+          description: OK.
+        401:
+          description: Unauthorized access.
+        403:
+          description: Access forbidden.
+        404:
+          description: Not found. Visualization or project of visualization not found.
         500:
-          description: Unable to remove Visualization or Unable to save project
-          content: {}
-            
-              
-            
-        
-        
-      
-          
-          
+          description: Internal server error. Unable to remove visualization or to save changed project.
+  /uploads:
+    post:
+      tags:
+        - uploads
+      summary: Upload a new file to the database (REMOVED)
+      operationId: uploadFile
+      requestBody:
+        description: "File object to upload TODO CHANGE TO FORM"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/File'
+      responses:
+        200:
+          description: OK.
+        400:
+          description: Bad request. Unable to process incoming form.
+        401:
+          description: Unauthorized access.
+        403:
+          description: Access forbidden.
+        404:
+          description: Not found. User or reference file not found.
+        500:
+          description: Internal server error. Unable to save user or reference file OR unable to create directory.
+
+
 components:
   schemas:
     Project:
@@ -987,16 +1193,8 @@ components:
           type: string
         UserID:
           type: integer
-        User:
-          $ref: '#/components/schemas/User'
         SimulationID:
           type: integer
-        Simulation:
-          $ref: '#/components/schemas/Simulation'
-        Visualizations:
-          type: array
-          items:
-            $ref: '#/components/schemas/Visualization'
     Visualization:
       required:
       - Name
@@ -1011,16 +1209,8 @@ components:
           type: integer
         UserID:
           type: integer
-        User:
-          $ref: '#/components/schemas/User'
         ProjectID:
           type: integer
-        Project:
-          $ref: '#/components/schemas/Project'
-        Widgets:
-          type: array
-          items:
-            $ref: '#/components/schemas/Widget'
     User:
       required:
       - Username
@@ -1037,40 +1227,21 @@ components:
           type: string
         Mail:
           type: string
-        Projects:
-          type: array
-          items:
-            $ref: '#/components/schemas/Project'
-        Simulations:
-          type: array
-          items:
-            $ref: '#/components/schemas/Simulation'
-        Files:
-          type: array
-          items:
-            $ref: '#/components/schemas/File'
     Simulation:
       required:
+      - ID
       - Name
       - UserID
       type: object
       properties:
+        ID:
+          type: integer
         Name:
           type: string
         Running:
           type: boolean
-        Models:
-          type: array
-          items:
-            $ref: '#/components/schemas/SimulationModel'
-        Projects:
-          type: array
-          items:
-            $ref: '#/components/schemas/Project'
         UserID:
           type: integer
-        User:
-          $ref: '#/components/schemas/User'
         StartParameters:
           type: object
           properties: {}
@@ -1142,14 +1313,10 @@ components:
           type: integer
         InputLength:
           type: integer
-        BelongsToSimulationID:
+        SimulationID:
           type: integer
-        BelongsToSimulation:
-          $ref: '#/components/schemas/Simulation'
-        BelongsToSimulatorID:
+        SimulatorID:
           type: integer
-        BelongsToSimulator:
-          $ref: '#/components/schemas/Simulator'
         StartParameters:
           type: object
           properties: {}
