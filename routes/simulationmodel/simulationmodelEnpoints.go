@@ -11,8 +11,8 @@ func SimulationModelsRegister(r *gin.RouterGroup) {
 	r.PUT("/:SimulationModelID", simulationmodelUpdateEp)
 	r.GET("/:SimulationModelID", simulationmodelReadEp)
 	r.DELETE("/:SimulationModelID", simulationmodelDeleteEp)
-	r.GET("/:SimulationModelID/cimfile", simulationmodelReadCIMfileEp)
-	r.PUT("/:SimulationModelID/cimfile", simulationmodelUpdateCIMfileEp)
+	r.GET("/:SimulationModelID/file", simulationmodelReadFileEp) // NEW in API
+	r.PUT("/:SimulationModelID/file", simulationmodelUpdateFileEp) // NEW in API
 }
 
 func simulationmodelsReadEp(c *gin.Context) {
@@ -47,13 +47,13 @@ func simulationmodelDeleteEp(c *gin.Context) {
 	})
 }
 
-func simulationmodelReadCIMfileEp(c *gin.Context) {
+func simulationmodelReadFileEp(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "NOT implemented",
 	})
 }
 
-func simulationmodelUpdateCIMfileEp(c *gin.Context) {
+func simulationmodelUpdateFileEp(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "NOT implemented",
 	})
