@@ -21,7 +21,11 @@ func main() {
 
 	r := gin.Default()
 
-	api := r.Group("/api")
+	api := r.Group("/api/v1")
+
+	// All endpoints require authentication TODO: except /authenticate
+	api.Use(user.Authentication(true))
+
 	user.UsersRegister(api.Group("/users"))
 	file.FilesRegister(api.Group("/files"))
 	project.ProjectsRegister(api.Group("/projects"))
@@ -30,8 +34,6 @@ func main() {
 	simulator.SimulatorsRegister(api.Group("/simulators"))
 	visualization.VisualizationsRegister(api.Group("/visualizations"))
 
-
-
-
-	r.Run()
+	// server at port 4000 to match frontend's redirect path
+	r.Run(":4000")
 }
