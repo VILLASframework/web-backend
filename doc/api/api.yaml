@@ -1,7 +1,7 @@
 openapi: 3.0.1
 info:
-  title: VILLASweb API
-  description: API for VILLASweb. Documentation in progress... please be patient
+  title: VILLASweb Backend API Documentation
+  description: API for VILLASweb Backend implementation in Go. Documentation in progress... please be patient. Removed endpoints are marked with "REMOVED". New endpoints are marked with "NEW".
   version: 1.0.0
 servers:
 - url: http://111.222.333.444:5555/api/v1
@@ -74,7 +74,7 @@ paths:
       operationId: getCounts
       responses:
         200:
-          description: Counts successful (TODO CHECK IF CODE CORRECT!)
+          description: OK.
           content:
             application/json:
               schema:
