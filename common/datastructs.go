@@ -32,8 +32,11 @@ type File struct {
 
 	//remove belongs to User relation
 	//User   User `gorm:"not null;association_autoupdate:false"`
-	UserID uint `gorm:"not null"`
+	//UserID uint `gorm:"not null"`
+
+	//new in villasweb 2.0
 	SimulationModelID uint `gorm:""`
+	WidgetID uint `gorm:""`
 }
 
 type Project struct {
@@ -84,7 +87,6 @@ type SimulationModel struct {
 	//new in villasweb 2.0 (for CIM file of simulation model and other model file formats)
 	Files 			[]File 			`gorm:""`
 
-
 }
 
 type User struct {
@@ -97,7 +99,9 @@ type User struct {
 
 	Projects    []Project    `gorm:"association_autoupdate:false"`
 	Simulations []Simulation `gorm:"association_autoupdate:false"`
-	Files       []File       `gorm:""`
+
+	//remove has many files relation
+	//Files       []File       `gorm:""`
 }
 
 type Visualization struct {
@@ -139,4 +143,6 @@ type Widget struct {
 	IsLocked         bool           `gorm:"default:false"`
 	CustomProperties postgres.Jsonb // TODO: default value?
 	VisualizationID  uint
+	//new in villasweb 2.0
+	Files 			 []File			`gorm:""`
 }

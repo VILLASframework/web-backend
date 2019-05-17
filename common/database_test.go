@@ -34,6 +34,7 @@ func TestDummyDBAssociations(t *testing.T) {
 	var simn Simulation
 	var usr User
 	var vis Visualization
+	var widg Widget
 
 	var sigs []Signal
 	var smos []SimulationModel
@@ -129,11 +130,7 @@ func TestDummyDBAssociations(t *testing.T) {
 			"Expected to have %v Simulations. Has %v.", 2, len(simns))
 	}
 
-	a.NoError(db.Model(&usr).Related(&files, "Files").Error)
-	if len(files) != 2 {
-		a.Fail("User Associations",
-			"Expected to have %v Files. Has %v.", 2, len(files))
-	}
+
 
 	// Visualization
 
@@ -152,6 +149,19 @@ func TestDummyDBAssociations(t *testing.T) {
 	if len(widgs) != 2 {
 		a.Fail("Widget Associations",
 			"Expected to have %v Widget. Has %v.", 2, len(widgs))
+	}
+
+
+	// Widget
+	a.NoError(db.Find(&widg, 1).Error, fM("Widget"))
+	a.EqualValues("Widget_A", vis.Name)
+
+
+	// Widget Association
+	a.NoError(db.Model(&widg).Related(&files, "Files").Error)
+	if len(files) != 2 {
+		a.Fail("Widget Associations",
+			"Expected to have %v Files. Has %v.", 2, len(files))
 	}
 
 	// File
