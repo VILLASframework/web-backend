@@ -154,7 +154,7 @@ func TestDummyDBAssociations(t *testing.T) {
 
 	// Widget
 	a.NoError(db.Find(&widg, 1).Error, fM("Widget"))
-	a.EqualValues("Widget_A", vis.Name)
+	a.EqualValues("Widget_A", widg.Name)
 
 
 	// Widget Association
