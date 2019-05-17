@@ -38,16 +38,3 @@ func FindFile(userID int, fileID string) ( common.File, error) {
 	return file, err
 
 }
-
-func AddFile(m map[string]interface{}) error {
-
-	// TODO deserialize m (JSON file object) to data struct File
-
-	// TODO we need the user here as well to be able to create the association in the DB
-
-	// TODO add deserialized File to DB
-
-	var err error
-	return err
-
-}

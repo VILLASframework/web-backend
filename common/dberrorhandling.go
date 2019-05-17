@@ -10,12 +10,14 @@ import (
 func ProvideErrorResponse(c *gin.Context, err error) bool {
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
+			errormsg := "Record not Found in DB: " + err.Error()
 			c.JSON(http.StatusNotFound, gin.H{
-				"error": "No files found in DB",
+				"error": errormsg,
 			})
 		} else {
+			errormsg := "Error on DB Query or transaction: " + err.Error()
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": "Error on DB Query or transaction",
+				"error": errormsg,
 			})
 		}
 		return true // Error
