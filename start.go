@@ -15,16 +15,18 @@ import (
 
 func main() {
 	// Testing
-	db := common.InitDB()
+	db := common.DummyInitDB()
 	common.MigrateModels(db)
 	defer db.Close()
+
+	common.DummyPopulateDB(db)
 
 	r := gin.Default()
 
 	api := r.Group("/api/v1")
 
 	// All endpoints require authentication TODO: except /authenticate
-	api.Use(user.Authentication(true))
+	//api.Use(user.Authentication(false))
 
 	user.UsersRegister(api.Group("/users"))
 	file.FilesRegister(api.Group("/files"))
