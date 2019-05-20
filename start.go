@@ -25,8 +25,11 @@ func main() {
 
 	api := r.Group("/api/v1")
 
-	// All endpoints require authentication TODO: except /authenticate
-	//api.Use(user.Authentication(false))
+	// All endpoints require authentication except when someone wants to
+	// login (POST /authenticate)
+	user.VisitorAuthenticate(api.Group("/authenticate"))
+
+	api.Use(user.Authentication(true))
 
 	user.UsersRegister(api.Group("/users"))
 	file.FilesRegister(api.Group("/files"))
