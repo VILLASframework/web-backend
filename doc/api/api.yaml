@@ -49,7 +49,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  Success:
+                  success:
                     type: boolean
                   message:
                     type: string
@@ -63,7 +63,18 @@ paths:
         403:
           description: Access forbidden.
         404:
-          description: Not found. User not found.
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: error message
         500:
           description: Internal server error. Unable to compare passwords.
   /counts:
