@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
+	"golang.org/x/crypto/bcrypt"
 	"log"
 )
 
@@ -131,8 +132,19 @@ func DummyPopulateDB(test_db *gorm.DB) {
 	checkErr(test_db.Create(&simn_A).Error)
 	checkErr(test_db.Create(&simn_B).Error)
 
-	usr_A := User{Username: "User_A"}
-	usr_B := User{Username: "User_B"}
+	// Hash passwords with bcrypt algorithm
+	var bcryptCost = 10
+
+	pw_A, err :=
+		bcrypt.GenerateFromPassword([]byte("abc123"), bcryptCost)
+	checkErr(err)
+
+	pw_B, err :=
+		bcrypt.GenerateFromPassword([]byte("bcd234"), bcryptCost)
+	checkErr(err)
+
+	usr_A := User{Username: "User_A", Password: string(pw_A)}
+	usr_B := User{Username: "User_B", Password: string(pw_B)}
 	checkErr(test_db.Create(&usr_A).Error)
 	checkErr(test_db.Create(&usr_B).Error)
 

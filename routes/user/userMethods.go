@@ -1,8 +1,8 @@
 package user
 
 import (
-	"fmt"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // TODO: use validator
@@ -33,8 +33,9 @@ func (u *User) setPassword(password string) error {
 }
 
 func (u *User) validatePassword(password string) error {
-	// TODO: Not implemented
-	return nil
+	loginPassword := []byte(password)
+	hashedPassword := []byte(u.Model.Password)
+	return bcrypt.CompareHashAndPassword(hashedPassword, loginPassword)
 }
 
 func (u *User) update(data interface{}) error {
