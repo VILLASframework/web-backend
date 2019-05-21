@@ -12,3 +12,11 @@ func FindVisualizationWidgets(visualization *common.Visualization) ([]common.Wid
 }
 
 
+func FindWidget(widgetID int) (common.Widget, error){
+	db := common.GetDB()
+	var w common.Widget
+	err := db.First(&w, widgetID).Error
+	return w, err
+}
+
+

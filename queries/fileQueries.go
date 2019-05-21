@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
 )
@@ -100,6 +101,24 @@ func RegisterFile(c *gin.Context, widgetID int, modelID int, simulationID int){
 	foldername := getFolderName(simulationID, modelID, widgetID)
 	size := file_header.Size
 
+	// Check if simulation and widget or model exist in DB
+	_, err = FindSimulation(simulationID)
+	if common.ProvideErrorResponse(c, err) {
+		return
+	}
+
+	if modelID != -1 {
+		_, err = FindModel(modelID)
+		if common.ProvideErrorResponse(c, err) {
+			return
+		}
+	} else if widgetID != -1 {
+		_, err = FindWidget(widgetID)
+		if common.ProvideErrorResponse(c, err) {
+			return
+		}
+	}
+
 	// Save file to local disc (NOT DB!)
 	err = modifyFileOnDisc(file_header, filename, foldername, uint(size), true)
 	if err != nil {
@@ -118,6 +137,15 @@ func RegisterFile(c *gin.Context, widgetID int, modelID int, simulationID int){
 func UpdateFile(c *gin.Context, widgetID int, modelID int, simulationID int){
 
 	// Extract file from PUT request form
+	err := c.Request.ParseForm()
+	if err != nil {
+		errormsg := fmt.Sprintf("Bad request. Get form error: %s", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": errormsg,
+		})
+		return;
+	}
+
 	file_header, err := c.FormFile("file")
 	if err != nil {
 		errormsg := fmt.Sprintf("Bad request. Get form error: %s", err.Error())
@@ -146,7 +174,9 @@ func UpdateFile(c *gin.Context, widgetID int, modelID int, simulationID int){
 
 func ReadFile(c *gin.Context, widgetID int, modelID int, simulationID int){
 
-	contentType := c.GetHeader("Content-Type")
+	//contentType := c.GetHeader("Content-Type")
+
+	//TODO currently returns first file it finds in DB
 
 	db := common.GetDB()
 	var fileInDB common.File
@@ -157,7 +187,7 @@ func ReadFile(c *gin.Context, widgetID int, modelID int, simulationID int){
 		if common.ProvideErrorResponse(c, err) {
 			return
 		}
-		err = db.Model(&wdgt).Related(&fileInDB).Where("Type = ?", contentType).Error
+		err = db.Model(&wdgt).Related(&fileInDB).Error
 		if common.ProvideErrorResponse(c, err) {
 			return
 		}
@@ -170,7 +200,7 @@ func ReadFile(c *gin.Context, widgetID int, modelID int, simulationID int){
 		if common.ProvideErrorResponse(c, err) {
 			return
 		}
-		err = db.Model(&model).Related(&fileInDB).Where("Type = ?", contentType).Error
+		err = db.Model(&model).Related(&fileInDB).Error
 		if common.ProvideErrorResponse(c, err) {
 			return
 		}
@@ -180,7 +210,7 @@ func ReadFile(c *gin.Context, widgetID int, modelID int, simulationID int){
 	c.Header("Content-Description", "File Transfer")
 	c.Header("Content-Transfer-Encoding", "binary")
 	c.Header("Content-Disposition", "attachment; filename="+fileInDB.Name )
-	c.Header("Content-Type", contentType)
+	//c.Header("Content-Type", contentType)
 	c.File(fileInDB.Path)
 
 	c.JSON(http.StatusOK, gin.H{
@@ -356,6 +386,6 @@ func getFolderName(simulationID int, modelID int, widgetID int) string {
 	}
 
 
-	foldername := base_foldername + "simulation_"+ string(simulationID) + elementname + string(elementid) + "/"
+	foldername := base_foldername + "simulation_"+ strconv.Itoa(simulationID) + elementname + strconv.Itoa(elementid) + "/"
 	return foldername
 }

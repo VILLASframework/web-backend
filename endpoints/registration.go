@@ -56,7 +56,7 @@ func SimulationsRegister(r *gin.RouterGroup) {
 	// Files of Models
 	r.GET("/:SimulationID/models/:ModelID/files", fileMReadAllEp) // NEW in API
 	r.POST ("/:SimulationID/models/:ModelID/file", fileMRegistrationEp) // NEW in API
-	r.POST ("/:SimulationID/models/:ModelID/file", fileMCloneEp) // NEW in API
+	//r.POST ("/:SimulationID/models/:ModelID/file", fileMCloneEp) // NEW in API
 	r.GET("/:SimulationID/models/:ModelID/file", fileMReadEp) // NEW in API
 	r.PUT("/:SimulationID/models/:ModelID/file", fileMUpdateEp) // NEW in API
 	r.DELETE("/:SimulationID/models/:ModelID/file", fileMDeleteEp) // NEW in API
@@ -64,7 +64,7 @@ func SimulationsRegister(r *gin.RouterGroup) {
 	// Files of Widgets
 	r.GET("/:SimulationID/visualizations/:VisID/widgets/:WidgetID/files", fileWReadAllEp) // NEW in API
 	r.POST ("/:SimulationID/visualizations/:VisID/widgets/:WidgetID/file", fileWRegistrationEp) // NEW in API
-	r.POST ("/:SimulationID/visualizations/:VisID/widgets/:WidgetID/file", fileWCloneEp) // NEW in API
+	//r.POST ("/:SimulationID/visualizations/:VisID/widgets/:WidgetID/file", fileWCloneEp) // NEW in API
 	r.GET("/:SimulationID/visualizations/:VisID/widgets/:WidgetID/file", fileWReadEp) // NEW in API
 	r.PUT("/:SimulationID/visualizations/:VisID/widgets/:WidgetID/file", fileWUpdateEp) // NEW in API
 	r.DELETE("/:SimulationID/visualizations/:VisID/widgets/:WidgetID/file", fileWDeleteEp) // NEW in API
@@ -77,7 +77,7 @@ func UsersRegister(r *gin.RouterGroup) {
 	r.PUT("/:UserID", userUpdateEp)
 	r.GET("/:UserID", userReadEp)
 	r.DELETE("/:UserID", userDeleteEp)
-	r.GET("/me", userSelfEp)
+	//r.GET("/me", userSelfEp) // TODO redirect to users/:UserID
 }
 
 
