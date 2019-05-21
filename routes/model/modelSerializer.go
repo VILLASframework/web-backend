@@ -29,8 +29,8 @@ type ModelResponseNoAssoc struct {
 	Name    		string `json:"Name"`
 	OutputLength    int   `json:"OutputLength"`
 	InputLength 	int   `json:"InputLength"`
-	BelongsToSimulationID uint `json:"BelongsToSimulationID"`
-	BelongsToSimulatorID uint `json:"BelongsToSimulatiorID"`
+	SimulationID uint `json:"SimulationID"`
+	SimulatorID uint `json:"SimulatiorID"`
 	//StartParams postgres.Jsonb `json:"Starting Parameters"`
 	//Output Mapping
 	//Input Mapping
@@ -41,8 +41,8 @@ func (self *ModelSerializerNoAssoc) Response() ModelResponseNoAssoc {
 		Name:    		self.Name,
 		OutputLength:   self.OutputLength,
 		InputLength: 	self.InputLength,
-		BelongsToSimulationID: self.BelongsToSimulationID,
-		BelongsToSimulatorID: self.BelongsToSimulatorID,
+		SimulationID: self.SimulationID,
+		SimulatorID: self.SimulatorID,
 		//StartParams: self.StartParameters,
 		//InputMapping
 		//OutputMapping

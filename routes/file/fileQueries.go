@@ -2,46 +2,76 @@ package file
 
 import (
 	"fmt"
+	"github.com/gin-gonic/gin"
+	_ "github.com/gin-gonic/gin"
 	"io"
 	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
-	"strconv"
-
-	"github.com/gin-gonic/gin"
-	_ "github.com/gin-gonic/gin"
 
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
 )
 
-func FindAllFiles() ([]common.File, int, error) {
+//func FindAllFiles() ([]common.File, int, error) {
+//	db := common.GetDB()
+//	var files []common.File
+//	err := db.Find(&files).Error
+//	if err != nil {
+//		// print error message to screen
+//		fmt.Println(fmt.Errorf("DB Error in FindAllFiles(): %q", err).Error())
+//	}
+//	return files, len(files), err
+//}
+//
+//func FindUserFiles(user *common.User) ([]common.File, int, error) {
+//	db := common.GetDB()
+//	var files []common.File
+//	err := db.Model(user).Related(&files, "Files").Error
+//	return files, len(files), err
+//}
+//
+//func FindFile(userID int, fileID string) ( common.File, error) {
+//	var file common.File
+//	db := common.GetDB()
+//	fileID_i, _ := strconv.Atoi(fileID)
+//
+//	err := db.First(&file, fileID_i).Error
+//
+//	return file, err
+//
+//}
+
+func FindFiles(c *gin.Context, widgetID int, modelID int, simulationID int) ([]common.File, int, error){
 	db := common.GetDB()
 	var files []common.File
-	err := db.Find(&files).Error
-	if err != nil {
-		// print error message to screen
-		fmt.Println(fmt.Errorf("DB Error in FindAllFiles(): %q", err).Error())
+	var err error
+
+	if widgetID != -1 {
+		var w common.Widget
+		err = db.First(&w, widgetID).Error
+		if err != nil {
+			return files, 0, err
+		}
+		err = db.Model(&w).Related(&files, "Files").Error
+		if err != nil {
+			return files, 0, err
+		}
+
+	} else if modelID != -1 {
+		var m common.Model
+		err = db.First(&m, modelID).Error
+		if err != nil {
+			return files, 0, err
+		}
+		err = db.Model(&m).Related(&files, "Files").Error
+		if err != nil {
+			return files, 0, err
+		}
+
 	}
+
 	return files, len(files), err
-}
-
-func FindUserFiles(user *common.User) ([]common.File, int, error) {
-	db := common.GetDB()
-	var files []common.File
-	err := db.Model(user).Related(&files, "Files").Error
-	return files, len(files), err
-}
-
-func FindFile(userID int, fileID string) ( common.File, error) {
-	var file common.File
-	db := common.GetDB()
-	fileID_i, _ := strconv.Atoi(fileID)
-
-	err := db.First(&file, fileID_i).Error
-
-	return file, err
-
 }
 
 func FindFileByPath(path string) (common.File, error) {
@@ -157,6 +187,9 @@ func ReadFile(c *gin.Context, widgetID int, modelID int, simulationID int){
 		"message": "OK.",
 	})
 }
+
+
+
 
 func DeleteFile(c *gin.Context, widgetID int, nmodelID int, simulationID int){
 	// TODO

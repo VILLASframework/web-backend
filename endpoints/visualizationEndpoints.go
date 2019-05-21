@@ -1,21 +1,14 @@
-package visualization
+package endpoints
 
 import (
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/visualization"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
-func VisualizationsRegister(r *gin.RouterGroup) {
-	r.GET("/", visualizationsReadEp)
-	r.POST("/", visualizationRegistrationEp)
-	r.PUT("/:VisualizationID", visualizationUpdateEp)
-	r.GET("/:VisualizationID", visualizationReadEp)
-	r.DELETE("/:VisualizationID", visualizationDeleteEp)
-}
-
-func visualizationsReadEp(c *gin.Context) {
-	allVisualizations, _, _ := FindAllVisualizations()
-	serializer := VisualizationsSerializer{c, allVisualizations}
+func visualizationReadAllEp(c *gin.Context) {
+	allVisualizations, _, _ := visualization.FindAllVisualizations()
+	serializer := visualization.VisualizationsSerializer{c, allVisualizations}
 	c.JSON(http.StatusOK, gin.H{
 		"visualizations": serializer.Response(),
 	})

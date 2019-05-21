@@ -1,22 +1,14 @@
-package simulator
+package endpoints
 
 import (
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulator"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
-func SimulatorsRegister(r *gin.RouterGroup) {
-	r.GET("/", simulatorsReadEp)
-	r.POST("/", simulatorRegistrationEp)
-	r.PUT("/:SimulatorID", simulatorUpdateEp)
-	r.GET("/:SimulatorID", simulatorReadEp)
-	r.DELETE("/:SimulatorID", simulatorDeleteEp)
-	r.POST("/:SimulatorID", simulatorSendActionEp)
-}
-
-func simulatorsReadEp(c *gin.Context) {
-	allSimulators, _, _ := FindAllSimulators()
-	serializer := SimulatorsSerializer{c, allSimulators}
+func simulatorReadAllEp(c *gin.Context) {
+	allSimulators, _, _ := simulator.FindAllSimulators()
+	serializer := simulator.SimulatorsSerializer{c, allSimulators}
 	c.JSON(http.StatusOK, gin.H{
 		"simulators": serializer.Response(),
 	})
@@ -34,7 +26,19 @@ func simulatorUpdateEp(c *gin.Context) {
 	})
 }
 
+func simulatorUpdateModelEp(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"message": "NOT implemented",
+	})
+}
+
 func simulatorReadEp(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"message": "NOT implemented",
+	})
+}
+
+func simulatorReadModelEp(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "NOT implemented",
 	})
@@ -51,3 +55,5 @@ func simulatorSendActionEp(c *gin.Context) {
 		"message": "NOT implemented",
 	})
 }
+
+

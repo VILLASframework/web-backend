@@ -1,22 +1,24 @@
-package user
+package endpoints
 
 import (
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/user"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
-func UsersRegister(r *gin.RouterGroup) {
-	r.GET("/", usersReadEp)
-	r.POST("/", userRegistrationEp)
-	r.PUT("/:UserID", userUpdateEp)
-	r.GET("/:UserID", userReadEp)
-	r.DELETE("/:UserID", userDeleteEp)
-	//r.GET("/me", userSelfEp) // TODO: this conflicts with GET /:userID
+
+
+func userReadAllEp(c *gin.Context) {
+	allUsers, _, _ := user.FindAllUsers()
+	serializer := user.UsersSerializer{c, allUsers}
+	c.JSON(http.StatusOK, gin.H{
+		"users": serializer.Response(),
+	})
 }
 
-func usersReadEp(c *gin.Context) {
-	allUsers, _, _ := FindAllUsers()
-	serializer := UsersSerializer{c, allUsers}
+func userReadAllSimEp(c *gin.Context) {
+	allUsers, _, _ := user.FindAllUsers()
+	serializer := user.UsersSerializer{c, allUsers}
 	c.JSON(http.StatusOK, gin.H{
 		"users": serializer.Response(),
 	})
@@ -34,6 +36,12 @@ func userUpdateEp(c *gin.Context) {
 	})
 }
 
+func userUpdateSimEp(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"message": "NOT implemented",
+	})
+}
+
 func userReadEp(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "NOT implemented",
@@ -41,6 +49,12 @@ func userReadEp(c *gin.Context) {
 }
 
 func userDeleteEp(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"message": "NOT implemented",
+	})
+}
+
+func userDeleteSimEp(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "NOT implemented",
 	})

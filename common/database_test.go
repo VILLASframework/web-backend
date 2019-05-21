@@ -30,9 +30,9 @@ func TestDummyDBAssociations(t *testing.T) {
 	var simr Simulator
 	var mo Model
 	var file File
-	var proj Project
 	var simn Simulation
 	var usr User
+	var usrs []User
 	var vis Visualization
 	var widg Widget
 
@@ -40,34 +40,21 @@ func TestDummyDBAssociations(t *testing.T) {
 	var mos []Model
 	var files []File
 	var files_sm []File
-	var projs []Project
 	var simns []Simulation
 	var viss []Visualization
 	var widgs []Widget
 
-	// Model
+	// User
 
-	a.NoError(db.Find(&mo, 1).Error, fM("Model"))
-	a.EqualValues("SimModel_A", mo.Name)
+	a.NoError(db.Find(&usr, 1).Error, fM("User"))
+	a.EqualValues("User_A", usr.Username)
 
-	// Model Associations
+	// User Associations
 
-	a.NoError(db.Model(&mo).Association("BelongsToSimulation").Find(&simn).Error)
-	a.EqualValues("Simulation_A", simn.Name, "Expected Simulation_A")
-
-	a.NoError(db.Model(&mo).Association("BelongsToSimulator").Find(&simr).Error)
-	a.EqualValues("Host_A", simr.Host, "Expected Host_A")
-
-	a.NoError(db.Model(&mo).Related(&smps, "OutputMapping").Error)
-	if len(smps) != 4 {
-		a.Fail("Model Associations",
-			"Expected to have %v Output AND Input Samples. Has %v.", 4, len(smps))
-	}
-
-	a.NoError(db.Model(&mo).Related(&files_sm, "Files").Error)
-	if len(files_sm) != 2 {
-		a.Fail("Model Associations",
-			"Expected to have %v Files. Has %v.", 2, len(files_sm))
+	a.NoError(db.Model(&usr).Related(&simns, "Simulations").Error)
+	if len(simns) != 2 {
+		a.Fail("User Associations",
+			"Expected to have %v Simulations. Has %v.", 2, len(simns))
 	}
 
 	// Simulation
@@ -77,8 +64,11 @@ func TestDummyDBAssociations(t *testing.T) {
 
 	// Simulation Associations
 
-	a.NoError(db.Model(&simn).Association("User").Find(&usr).Error)
-	a.EqualValues("User_A", usr.Username)
+	a.NoError(db.Model(&simn).Association("Users").Find(&usrs).Error)
+	if len(usrs) != 2 {
+		a.Fail("Simulations Associations",
+			"Expected to have %v Users. Has %v.", 2, len(usrs))
+	}
 
 	a.NoError(db.Model(&simn).Related(&mos, "Models").Error)
 	if len(mos) != 2 {
@@ -86,50 +76,34 @@ func TestDummyDBAssociations(t *testing.T) {
 			"Expected to have %v Models. Has %v.", 2, len(mos))
 	}
 
-	a.NoError(db.Model(&simn).Related(&projs, "Projects").Error)
-	if len(projs) != 2 {
-		a.Fail("Simulation Associations",
-			"Expected to have %v Projects. Has %v.", 2, len(projs))
-	}
-
-	// Project
-
-	a.NoError(db.Find(&proj, 1).Error, fM("Project"))
-	a.EqualValues("Project_A", proj.Name)
-
-	// Project Associations
-
-	a.NoError(db.Model(&proj).Association("Simulation").Find(&simn).Error)
-	a.EqualValues("Simulation_A", simn.Name)
-
-	a.NoError(db.Model(&proj).Association("User").Find(&usr).Error)
-	a.EqualValues("User_A", usr.Username)
-
-	a.NoError(db.Model(&proj).Related(&viss, "Visualizations").Error)
+	a.NoError(db.Model(&simn).Related(&viss, "Visualizations").Error)
 	if len(viss) != 2 {
-		a.Fail("Project Associations",
+		a.Fail("Simulation Associations",
 			"Expected to have %v Visualizations. Has %v.", 2, len(viss))
 	}
 
-	// User
 
-	a.NoError(db.Find(&usr, 1).Error, fM("User"))
-	a.EqualValues("User_A", usr.Username)
+	// Model
 
-	// User Associations
+	a.NoError(db.Find(&mo, 1).Error, fM("Model"))
+	a.EqualValues("Model_A", mo.Name)
 
-	a.NoError(db.Model(&usr).Related(&projs, "Projects").Error)
-	if len(projs) != 2 {
-		a.Fail("User Associations",
-			"Expected to have %v Projects. Has %v.", 2, len(projs))
+	// Model Associations
+
+	a.NoError(db.Model(&mo).Association("Simulator").Find(&simr).Error)
+	a.EqualValues("Host_A", simr.Host, "Expected Host_A")
+
+	a.NoError(db.Model(&mo).Where("Direction = ?", "out").Related(&smps, "OutputMapping").Error)
+	if len(smps) != 2 {
+		a.Fail("Model Associations",
+			"Expected to have %v Output AND Input Samples. Has %v.", 2, len(smps))
 	}
 
-	a.NoError(db.Model(&usr).Related(&simns, "Simulations").Error)
-	if len(simns) != 2 {
-		a.Fail("User Associations",
-			"Expected to have %v Simulations. Has %v.", 2, len(simns))
+	a.NoError(db.Model(&mo).Related(&files_sm, "Files").Error)
+	if len(files_sm) != 2 {
+		a.Fail("Model Associations",
+			"Expected to have %v Files. Has %v.", 2, len(files_sm))
 	}
-
 
 
 	// Visualization
@@ -138,12 +112,6 @@ func TestDummyDBAssociations(t *testing.T) {
 	a.EqualValues("Visualization_A", vis.Name)
 
 	// Visualization Associations
-
-	a.NoError(db.Model(&vis).Association("Project").Find(&proj).Error)
-	a.EqualValues("Project_A", proj.Name)
-
-	a.NoError(db.Model(&vis).Association("User").Find(&usr).Error)
-	a.EqualValues("User_A", usr.Username)
 
 	a.NoError(db.Model(&vis).Related(&widgs, "Widgets").Error)
 	if len(widgs) != 2 {
@@ -169,9 +137,5 @@ func TestDummyDBAssociations(t *testing.T) {
 	a.NoError(db.Find(&file, 1).Error, fM("File"))
 	a.EqualValues("File_A", file.Name)
 
-	// File Associations
-
-	//a.NoError(db.Model(&file).Association("User").Find(&usr).Error)
-	//a.EqualValues("User_A", usr.Username)
 
 }
