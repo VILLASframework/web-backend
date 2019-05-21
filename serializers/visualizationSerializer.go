@@ -1,10 +1,10 @@
-package visualization
+package serializers
 
 import (
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/queries"
 	"github.com/gin-gonic/gin"
 
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/widget"
 )
 
 type VisualizationsSerializer struct {
@@ -30,13 +30,13 @@ type VisualizationResponse struct {
 	Name    string `json:"Name"`
 	Grid 		int   `json:"Grid"`
 	SimulationID uint  `json:"SimulationID"`
-	Widgets	   []widget.WidgetResponse
+	Widgets	   []WidgetResponse
 }
 
 func (self *VisualizationSerializer) Response() VisualizationResponse {
 
-	w, _, _:= widget.FindVisualizationWidgets(&self.Visualization)
-	widgetsSerializer := widget.WidgetsSerializer{self.Ctx, w}
+	w, _, _:= queries.FindVisualizationWidgets(&self.Visualization)
+	widgetsSerializer := WidgetsSerializer{self.Ctx, w}
 
 	response := VisualizationResponse{
 		Name:    	self.Name,

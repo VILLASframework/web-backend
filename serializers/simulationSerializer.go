@@ -1,4 +1,4 @@
-package simulation
+package serializers
 
 import (
 	"github.com/gin-gonic/gin"

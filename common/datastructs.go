@@ -23,7 +23,7 @@ type Simulation struct {
 	ID              uint           `gorm:"primary_key;auto_increment"`
 	Name            string         `gorm:"not null"`
 	Running         bool           `gorm:"default:false"`
-	StartParameters postgres.Jsonb // TODO default value
+	StartParameters postgres.Jsonb `gorm:"default:{}"`
 
 	Users   		[]User 			`gorm:"not null;many2many:user_simulations"`
 	Models   		[]Model 		`gorm:"foreignkey:SimulationID"`
@@ -36,11 +36,11 @@ type Model struct {
 	Name            string         `gorm:"not null"`
 	OutputLength    int            `gorm:"default:1"`
 	InputLength     int            `gorm:"default:1"`
-	StartParameters postgres.Jsonb // TODO: default value?
+	StartParameters postgres.Jsonb `gorm:"default:{}"`
 
-	SimulationID 	uint       		`gorm:"not null"`
-	Simulator  		Simulator   	`gorm:"not null"`
-	SimulatorID 	uint 			`gorm:"not null"`
+	SimulationID 	uint
+	Simulator  		Simulator
+	SimulatorID 	uint
 
 	// NOTE: order of samples is important
 	OutputMapping 	[]Sample 		`gorm:"foreignkey:ModelID"`
@@ -71,8 +71,8 @@ type Simulator struct {
 	Uptime        int    `gorm:"default:0"`
 	State         string `gorm:"default:''"`
 	StateUpdateAt time.Time
-	Properties    postgres.Jsonb // TODO: default value?
-	RawProperties postgres.Jsonb // TODO: default value?
+	Properties    postgres.Jsonb `gorm:"default:{}"`
+	RawProperties postgres.Jsonb `gorm:"default:{}"`
 }
 
 type Visualization struct {
@@ -99,7 +99,7 @@ type Widget struct {
 	Y                int            `gorm:"not null"`
 	Z                int            `gorm:"not null"`
 	IsLocked         bool           `gorm:"default:false"`
-	CustomProperties postgres.Jsonb // TODO: default value?
+	CustomProperties postgres.Jsonb `gorm:"default:{}"`
 	VisualizationID  uint			`gorm:"not null"`
 	//new in villasweb 2.0
 	Files 			 []File			`gorm:"foreignkey:WidgetID"`

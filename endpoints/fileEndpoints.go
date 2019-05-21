@@ -2,7 +2,8 @@ package endpoints
 
 import (
 	"fmt"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/file"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/queries"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/serializers"
 	"strconv"
 
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
@@ -20,10 +21,10 @@ func fileMReadAllEp(c *gin.Context) {
 	}
 
 	// Find files' properties in DB and return in HTTP response, no change to DB
-	allFiles, _, err := file.FindFiles(c, -1, modelID, simulationID)
+	allFiles, _, err := queries.FindFiles(c, -1, modelID, simulationID)
 
 	if common.ProvideErrorResponse(c, err) == false {
-		serializer := file.FilesSerializerNoAssoc{c, allFiles}
+		serializer := serializers.FilesSerializerNoAssoc{c, allFiles}
 		c.JSON(http.StatusOK, gin.H{
 			"files": serializer.Response(),
 		})
@@ -39,7 +40,15 @@ func fileMRegistrationEp(c *gin.Context) {
 	}
 
 	// Save file locally and register file in DB, HTTP response is set by this method
-	file.RegisterFile(c,-1, modelID, simulationID)
+	queries.RegisterFile(c,-1, modelID, simulationID)
+
+}
+
+func fileMCloneEp(c *gin.Context) {
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "NOT implemented",
+	})
 
 }
 
@@ -51,7 +60,7 @@ func fileMReadEp(c *gin.Context) {
 	}
 
 	// Read file from disk and return in HTTP response, no change to DB
-	file.ReadFile(c, -1, modelID, simulationID)
+	queries.ReadFile(c, -1, modelID, simulationID)
 }
 
 func fileMUpdateEp(c *gin.Context) {
@@ -62,7 +71,7 @@ func fileMUpdateEp(c *gin.Context) {
 	}
 
 	// Update file locally and update file entry in DB, HTTP response is set by this method
-	file.UpdateFile(c,-1, modelID, simulationID)
+	queries.UpdateFile(c,-1, modelID, simulationID)
 }
 
 func fileMDeleteEp(c *gin.Context) {
@@ -73,7 +82,7 @@ func fileMDeleteEp(c *gin.Context) {
 	}
 
 	// Delete file from disk and remove entry from DB, HTTP response is set by this method
-	file.DeleteFile(c, -1, modelID, simulationID)
+	queries.DeleteFile(c, -1, modelID, simulationID)
 
 
 }
@@ -86,10 +95,10 @@ func fileWReadAllEp(c *gin.Context) {
 	}
 
 	// Find files' properties in DB and return in HTTP response, no change to DB
-	allFiles, _, err := file.FindFiles(c, widgetID, -1, simulationID)
+	allFiles, _, err := queries.FindFiles(c, widgetID, -1, simulationID)
 
 	if common.ProvideErrorResponse(c, err) == false {
-		serializer := file.FilesSerializerNoAssoc{c, allFiles}
+		serializer := serializers.FilesSerializerNoAssoc{c, allFiles}
 		c.JSON(http.StatusOK, gin.H{
 			"files": serializer.Response(),
 		})
@@ -105,7 +114,15 @@ func fileWRegistrationEp(c *gin.Context) {
 	}
 
 	// Save file locally and register file in DB, HTTP response is set by this method
-	file.RegisterFile(c,widgetID, -1, simulationID)
+	queries.RegisterFile(c,widgetID, -1, simulationID)
+
+}
+
+func fileWCloneEp(c *gin.Context) {
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "NOT implemented",
+	})
 
 }
 
@@ -117,7 +134,7 @@ func fileWReadEp(c *gin.Context) {
 	}
 
 	// Read file from disk and return in HTTP response, no change to DB
-	file.ReadFile(c, widgetID, -1, simulationID)
+	queries.ReadFile(c, widgetID, -1, simulationID)
 }
 
 func fileWUpdateEp(c *gin.Context) {
@@ -128,7 +145,7 @@ func fileWUpdateEp(c *gin.Context) {
 	}
 
 	// Update file locally and update file entry in DB, HTTP response is set by this method
-	file.UpdateFile(c,widgetID, -1, simulationID)
+	queries.UpdateFile(c,widgetID, -1, simulationID)
 }
 
 func fileWDeleteEp(c *gin.Context) {
@@ -139,7 +156,7 @@ func fileWDeleteEp(c *gin.Context) {
 	}
 
 	// Delete file from disk and remove entry from DB, HTTP response is set by this method
-	file.DeleteFile(c, widgetID, -1, simulationID)
+	queries.DeleteFile(c, widgetID, -1, simulationID)
 
 
 }

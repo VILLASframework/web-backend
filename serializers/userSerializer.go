@@ -1,10 +1,10 @@
-package user
+package serializers
 
 import (
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/queries"
 	"github.com/gin-gonic/gin"
 
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulation"
 )
 
 type UsersSerializer struct {
@@ -31,14 +31,14 @@ type UserResponse struct {
 	Password    string `json:"Password"` // XXX: ???
 	Role        string `json:"Role"`
 	Mail        string `json:"Mail"`
-	Simulations []simulation.SimulationResponseNoAssoc
+	Simulations []SimulationResponseNoAssoc
 }
 
 func (self *UserSerializer) Response() UserResponse {
 	// TODO: maybe all those should be made in one transaction
 
-	simulations, _, _ := simulation.FindUserSimulations(&self.User)
-	simulationsSerializer := simulation.SimulationsSerializerNoAssoc{self.Ctx, simulations}
+	simulations, _, _ := queries.FindUserSimulations(&self.User)
+	simulationsSerializer := SimulationsSerializerNoAssoc{self.Ctx, simulations}
 
 
 	response := UserResponse{

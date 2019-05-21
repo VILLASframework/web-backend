@@ -1,7 +1,8 @@
 package endpoints
 
 import (
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/user"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/queries"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/serializers"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -9,16 +10,16 @@ import (
 
 
 func userReadAllEp(c *gin.Context) {
-	allUsers, _, _ := user.FindAllUsers()
-	serializer := user.UsersSerializer{c, allUsers}
+	allUsers, _, _ := queries.FindAllUsers()
+	serializer := serializers.UsersSerializer{c, allUsers}
 	c.JSON(http.StatusOK, gin.H{
 		"users": serializer.Response(),
 	})
 }
 
 func userReadAllSimEp(c *gin.Context) {
-	allUsers, _, _ := user.FindAllUsers()
-	serializer := user.UsersSerializer{c, allUsers}
+	allUsers, _, _ := queries.FindAllUsers()
+	serializer := serializers.UsersSerializer{c, allUsers}
 	c.JSON(http.StatusOK, gin.H{
 		"users": serializer.Response(),
 	})

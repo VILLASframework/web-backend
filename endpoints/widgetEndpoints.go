@@ -20,6 +20,12 @@ func widgetRegistrationEp(c *gin.Context) {
 	})
 }
 
+func widgetCloneEp(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"message": "NOT implemented",
+	})
+}
+
 func widgetUpdateEp(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "NOT implemented",

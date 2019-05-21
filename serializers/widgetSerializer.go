@@ -1,4 +1,4 @@
-package widget
+package serializers
 
 import (
 	"github.com/gin-gonic/gin"

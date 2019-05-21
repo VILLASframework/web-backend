@@ -1,4 +1,4 @@
-package simulator
+package serializers
 
 import (
 	"time"

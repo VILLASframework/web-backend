@@ -1,14 +1,15 @@
 package endpoints
 
 import (
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulator"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/queries"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/serializers"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
 func simulatorReadAllEp(c *gin.Context) {
-	allSimulators, _, _ := simulator.FindAllSimulators()
-	serializer := simulator.SimulatorsSerializer{c, allSimulators}
+	allSimulators, _, _ := queries.FindAllSimulators()
+	serializer := serializers.SimulatorsSerializer{c, allSimulators}
 	c.JSON(http.StatusOK, gin.H{
 		"simulators": serializer.Response(),
 	})

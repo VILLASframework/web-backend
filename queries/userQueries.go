@@ -1,4 +1,4 @@
-package user
+package queries
 
 import (
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
