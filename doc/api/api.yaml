@@ -17,7 +17,7 @@ tags:
 - name: simulators
   description: Manage Simulators
 - name: projects
-  description: Manage Projects
+  description: (REMOVED) Manage Projects
 - name: simulations
   description: Manage Simulations
 - name: models
@@ -233,8 +233,8 @@ paths:
     get:
       tags:
         - files
-      summary: Get files of user
-      operationId: getFilesOfUser
+      summary: (REMOVED) Get files of user
+      operationId: (REMOVED) getFilesOfUser
       responses:
         200:
           description: OK.
@@ -255,8 +255,8 @@ paths:
     post:
       tags:
         - files
-      summary: Add a new file to the database (NEW, was /uploads before))
-      operationId: addFile
+      summary: (REMOVED) Add a new file to the database
+      operationId: (REMOVED) addFile
       requestBody:
         description: "File object to be added"
         required: true
@@ -281,8 +281,8 @@ paths:
     get:
       tags:
         - files
-      summary: Get properties of file with ID FileID
-      operationId: getFileProperties
+      summary: (REMOVED) Get properties of file with ID FileID
+      operationId: (REMOVED) getFileProperties
       parameters:
       - in: path 
         name: FileID
@@ -318,8 +318,8 @@ paths:
     put:
       tags:
         - files
-      summary: Update properties of file with ID FileID (NEW)
-      operationId: updateFileProperties
+      summary: (REMOVED) Update properties of file with ID FileID
+      operationId: (REMOVED) updateFileProperties
       requestBody:
         description: "File object to be updated"
         required: true
@@ -350,8 +350,8 @@ paths:
     delete:
       tags:
         - files
-      summary: Delete file with ID FileID
-      operationId: deleteFile
+      summary: (REMOVED) Delete file with ID FileID
+      operationId: (REMOVED) deleteFile
       parameters:
       - in: path 
         name: FileID
@@ -374,8 +374,8 @@ paths:
     get:
       tags:
         - projects
-      summary: Get projects of user
-      operationId: getProjects
+      summary: (REMOVED) Get projects of user
+      operationId: (REMOVED) getProjects
       responses:
         200:
           description: OK.
@@ -396,8 +396,8 @@ paths:
     post:
       tags:
         - projects
-      summary: Add a new project to the database
-      operationId: addProject
+      summary: (REMOVED) Add a new project to the database
+      operationId: (REMOVED) addProject
       requestBody:
         description: "Project object to add to DB"
         required: true
@@ -420,8 +420,8 @@ paths:
     put:
       tags:
         - projects
-      summary: Update properties of project with ID ProjectID
-      operationId: updateProjectProperties
+      summary: (REMOVED) Update properties of project with ID ProjectID
+      operationId: (REMOVED) updateProjectProperties
       parameters:
       - in: path 
         name: ProjectID
@@ -452,8 +452,8 @@ paths:
     get:
       tags:
         - projects
-      summary: Get properties of project with ID ProjectID
-      operationId: getProjectProperties
+      summary: (REMOVED) Get properties of project with ID ProjectID
+      operationId: (REMOVED) getProjectProperties
       parameters:
       - in: path 
         name: ProjectID
@@ -479,8 +479,8 @@ paths:
     delete:
       tags:
         - projects
-      summary: Delete project with ID ProjectID
-      operationId: deleteProject
+      summary: (REMOVED) Delete project with ID ProjectID
+      operationId: (REMOVED) deleteProject
       parameters:
       - in: path 
         name: ProjectID
@@ -503,8 +503,8 @@ paths:
     get:
       tags:
         - models
-      summary: Get simulation models of user
-      operationId: getModels
+      summary: (REMOVED) Get simulation models of user
+      operationId: (REMOVED) getModels
       responses:
         200:
           description: OK.
@@ -525,8 +525,8 @@ paths:
     post:
       tags:
         - models
-      summary: Add a new Model to the database
-      operationId: addModel
+      summary: (REMOVED) Add a new Model to the database
+      operationId: (REMOVED) addModel
       requestBody:
         description: "Model object to add to DB"
         required: true
@@ -549,8 +549,8 @@ paths:
     put:
       tags:
         - models
-      summary: Update properties of Model with ID ModelID
-      operationId: updateModelProperties
+      summary: (REMOVED) Update properties of Model with ID ModelID
+      operationId: (REMOVED) updateModelProperties
       parameters:
       - in: path 
         name: ModelID
@@ -581,8 +581,8 @@ paths:
     get:
       tags:
         - models
-      summary: Get properties of Model with ID ModelID
-      operationId: getModelProperties
+      summary: (REMOVED) Get properties of Model with ID ModelID
+      operationId: (REMOVED) getModelProperties
       parameters:
       - in: path 
         name: ModelID
@@ -608,8 +608,8 @@ paths:
     delete:
       tags:
         - models
-      summary: Delete Model with ID ModelID
-      operationId: deleteModel
+      summary: (REMOVED) Delete Model with ID ModelID
+      operationId: (REMOVED) deleteModel
       parameters:
       - in: path 
         name: ModelID
@@ -628,11 +628,11 @@ paths:
           description: Not found. Simulation or simulation model not found.
         500:
           description: Internal server error. Unable to save changed simulation or to remove simulation model.
-  /models/{ModelID}/file:
+  simulations/{SimulationID}/models/{ModelID}/file:
     get:
       tags:
-        - models
-      summary: Get file from Model with ID ModelID (NEW)
+        - simulations
+      summary: (NEW) Get file from Model with ID ModelID
       operationId: getFileFromModel
       parameters:
       - in: path
@@ -680,8 +680,8 @@ paths:
           description: Internal server error.
     put:
       tags:
-        - models
-      summary: Update (Overwrite) file of Model with ID ModelID, File object has to be in database (NEW)
+        - simulations
+      summary: (NEW) Update (Overwrite) file of Model with ID ModelID, File object has to be in database
       operationId: updateFileForModel
       parameters:
       - in: path
@@ -1024,9 +1024,9 @@ paths:
     get:
       tags:
         - visualizations
-      summary: Get all available visualizations
-      description: Return a JSON representation of all visualizations
-      operationId: getVisualizations
+      summary: (REMOVED) Get all available visualizations
+      description: (REMOVED) Return a JSON representation of all visualizations
+      operationId: (REMOVED) getVisualizations
       responses:
         200:
           description: OK.
@@ -1047,8 +1047,8 @@ paths:
     post:
       tags:
         - visualizations
-      summary: Add a new visualization to the database
-      operationId: addVisualization
+      summary: (REMOVED) Add a new visualization to the database
+      operationId: (REMOVED) addVisualization
       requestBody:
         description: "Visualization object to add to DB"
         required: true
@@ -1073,8 +1073,8 @@ paths:
     put:
       tags:
         - visualizations
-      summary: Update properties of Visualization with ID VisualizationID
-      operationId: updateVisualizationrProperties
+      summary: (REMOVED) Update properties of Visualization with ID VisualizationID
+      operationId: (REMOVED) updateVisualizationrProperties
       parameters:
       - in: path 
         name: VisualizationID
@@ -1105,8 +1105,8 @@ paths:
     get:
       tags:
         - visualizations
-      summary: Get properties of Visualization with ID VisualizationID
-      operationId: getVisualizationProperties
+      summary: (REMOVED) Get properties of Visualization with ID VisualizationID
+      operationId: (REMOVED) getVisualizationProperties
       parameters:
       - in: path 
         name: VisualizationID
@@ -1132,8 +1132,8 @@ paths:
     delete:
       tags:
         - visualizations
-      summary: Delete Visualization with ID VisualizationID
-      operationId: deleteVisualization
+      summary: (REMOVED) Delete Visualization with ID VisualizationID
+      operationId: (REMOVED) deleteVisualization
       parameters:
       - in: path 
         name: VisualizationID
@@ -1156,8 +1156,8 @@ paths:
     post:
       tags:
         - uploads
-      summary: Upload a new file to the database (REMOVED)
-      operationId: uploadFile
+      summary: (REMOVED) Upload a new file to the database
+      operationId: (REMOVED) uploadFile
       requestBody:
         description: "File object to upload TODO CHANGE TO FORM"
         required: true
