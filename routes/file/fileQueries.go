@@ -52,7 +52,7 @@ func FindFileByPath(path string) (common.File, error) {
 	return file, err
 }
 
-func RegisterFile(c *gin.Context, widgetID int, simulationmodelID int, simulationID int){
+func RegisterFile(c *gin.Context, widgetID int, modelID int, simulationID int){
 
 	// Extract file from PUT request form
 	file_header, err := c.FormFile("file")
@@ -67,7 +67,7 @@ func RegisterFile(c *gin.Context, widgetID int, simulationmodelID int, simulatio
 	// Obtain properties of file
 	filetype := file_header.Header.Get("Content-Type") // TODO make sure this is properly set in file header
 	filename := filepath.Base(file_header.Filename)
-	foldername := getFolderName(simulationID, simulationmodelID, widgetID)
+	foldername := getFolderName(simulationID, modelID, widgetID)
 	size := file_header.Size
 
 	// Save file to local disc (NOT DB!)
@@ -81,11 +81,11 @@ func RegisterFile(c *gin.Context, widgetID int, simulationmodelID int, simulatio
 	}
 
 	// Add File object with parameters to DB
-	saveFileInDB(c, filename, foldername, filetype, uint(size), widgetID, simulationmodelID, true)
+	saveFileInDB(c, filename, foldername, filetype, uint(size), widgetID, modelID, true)
 
 }
 
-func UpdateFile(c *gin.Context, widgetID int, simulationmodelID int, simulationID int){
+func UpdateFile(c *gin.Context, widgetID int, modelID int, simulationID int){
 
 	// Extract file from PUT request form
 	file_header, err := c.FormFile("file")
@@ -100,7 +100,7 @@ func UpdateFile(c *gin.Context, widgetID int, simulationmodelID int, simulationI
 	filename := filepath.Base(file_header.Filename)
 	filetype := file_header.Header.Get("Content-Type") // TODO make sure this is properly set in file header
 	size := file_header.Size
-	foldername := getFolderName(simulationID, simulationmodelID, widgetID)
+	foldername := getFolderName(simulationID, modelID, widgetID)
 
 	err = modifyFileOnDisc(file_header, filename, foldername, uint(size), false)
 	if err != nil {
@@ -111,10 +111,10 @@ func UpdateFile(c *gin.Context, widgetID int, simulationmodelID int, simulationI
 		return
 	}
 
-	saveFileInDB(c, filename, foldername, filetype, uint(size), widgetID, simulationmodelID, false)
+	saveFileInDB(c, filename, foldername, filetype, uint(size), widgetID, modelID, false)
 }
 
-func ReadFile(c *gin.Context, widgetID int, simulationmodelID int, simulationID int){
+func ReadFile(c *gin.Context, widgetID int, modelID int, simulationID int){
 
 	contentType := c.GetHeader("Content-Type")
 
@@ -123,7 +123,7 @@ func ReadFile(c *gin.Context, widgetID int, simulationmodelID int, simulationID 
 	if widgetID != -1 {
 		// get associated Widget
 		var wdgt common.Widget
-		err := db.First(&wdgt, simulationmodelID).Error
+		err := db.First(&wdgt, modelID).Error
 		if common.ProvideErrorResponse(c, err) {
 			return
 		}
@@ -132,11 +132,11 @@ func ReadFile(c *gin.Context, widgetID int, simulationmodelID int, simulationID 
 			return
 		}
 
-	} else if simulationmodelID != -1 {
+	} else if modelID != -1 {
 
 		// get associated Simulation Model
-		var model common.SimulationModel
-		err := db.First(&model, simulationmodelID).Error
+		var model common.Model
+		err := db.First(&model, modelID).Error
 		if common.ProvideErrorResponse(c, err) {
 			return
 		}
@@ -158,12 +158,12 @@ func ReadFile(c *gin.Context, widgetID int, simulationmodelID int, simulationID 
 	})
 }
 
-func DeleteFile(c *gin.Context, widgetID int, simulationmodelID int, simulationID int){
+func DeleteFile(c *gin.Context, widgetID int, nmodelID int, simulationID int){
 	// TODO
 }
 
 
-func saveFileInDB(c *gin.Context, filename string, foldername string, filetype string, size uint, widgetID int, simulationmodelID int, createObj bool) {
+func saveFileInDB(c *gin.Context, filename string, foldername string, filetype string, size uint, widgetID int, modelID int, createObj bool) {
 
 	filesavepath := filepath.Join(foldername, filename)
 
@@ -220,13 +220,13 @@ func saveFileInDB(c *gin.Context, filename string, foldername string, filetype s
 		}
 
 	}
-	if simulationmodelID != -1 {
+	if modelID != -1 {
 
 		if createObj {
 			// associate to Simulation Model
 			db := common.GetDB()
-			var model common.SimulationModel
-			err := db.First(&model, simulationmodelID).Error
+			var model common.Model
+			err := db.First(&model, modelID).Error
 			if common.ProvideErrorResponse(c, err) {
 				return
 			}
@@ -310,16 +310,16 @@ func modifyFileOnDisc(file_header *multipart.FileHeader, filename string, folder
 }
 
 
-func getFolderName(simulationID int, simulationmodelID int, widgetID int) string {
+func getFolderName(simulationID int, modelID int, widgetID int) string {
 	base_foldername := "files/"
 	elementname := ""
 	elementid := 0
-	if simulationmodelID == -1{
+	if modelID == -1{
 		elementname = "/widget_"
 		elementid = widgetID
 	} else {
-		elementname = "/simulationmodel_"
-		elementid = simulationmodelID
+		elementname = "/model_"
+		elementid = modelID
 	}
 
 

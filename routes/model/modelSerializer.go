@@ -1,4 +1,4 @@
-package simulationmodel
+package model
 
 import (
 	"github.com/gin-gonic/gin"
@@ -6,26 +6,26 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
 )
 
-type SimulationModelsSerializerNoAssoc struct {
+type ModelsSerializerNoAssoc struct {
 	Ctx         *gin.Context
-	SimulationModels []common.SimulationModel
+	Models []common.Model
 }
 
-func (self *SimulationModelsSerializerNoAssoc) Response() []SimulationModelResponseNoAssoc {
-	response := []SimulationModelResponseNoAssoc{}
-	for _, simulationmodel := range self.SimulationModels {
-		serializer := SimulationModelSerializerNoAssoc{self.Ctx, simulationmodel}
+func (self *ModelsSerializerNoAssoc) Response() []ModelResponseNoAssoc {
+	response := []ModelResponseNoAssoc{}
+	for _, model := range self.Models {
+		serializer := ModelSerializerNoAssoc{self.Ctx, model}
 		response = append(response, serializer.Response())
 	}
 	return response
 }
 
-type SimulationModelSerializerNoAssoc struct {
+type ModelSerializerNoAssoc struct {
 	Ctx *gin.Context
-	common.SimulationModel
+	common.Model
 }
 
-type SimulationModelResponseNoAssoc struct {
+type ModelResponseNoAssoc struct {
 	Name    		string `json:"Name"`
 	OutputLength    int   `json:"OutputLength"`
 	InputLength 	int   `json:"InputLength"`
@@ -36,8 +36,8 @@ type SimulationModelResponseNoAssoc struct {
 	//Input Mapping
 }
 
-func (self *SimulationModelSerializerNoAssoc) Response() SimulationModelResponseNoAssoc {
-	response := SimulationModelResponseNoAssoc{
+func (self *ModelSerializerNoAssoc) Response() ModelResponseNoAssoc {
+	response := ModelResponseNoAssoc{
 		Name:    		self.Name,
 		OutputLength:   self.OutputLength,
 		InputLength: 	self.InputLength,

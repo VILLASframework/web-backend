@@ -1,16 +1,12 @@
 package main
 
 import (
+	"github.com/gin-gonic/gin"
+
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/file"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/project"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulation"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulationmodel"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulator"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/user"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/visualization"
-
-	"github.com/gin-gonic/gin"
 )
 
 func main() {
@@ -23,12 +19,12 @@ func main() {
 
 	api := r.Group("/api")
 	user.UsersRegister(api.Group("/users"))
-	file.FilesRegister(api.Group("/files"))
-	project.ProjectsRegister(api.Group("/projects"))
+	//file.FilesRegister(api.Group("/files"))
+	//project.ProjectsRegister(api.Group("/projects"))
 	simulation.SimulationsRegister(api.Group("/simulations"))
-	simulationmodel.SimulationModelsRegister(api.Group("/models"))
+	//model.ModelsRegister(api.Group("/models"))
 	simulator.SimulatorsRegister(api.Group("/simulators"))
-	visualization.VisualizationsRegister(api.Group("/visualizations"))
+	//visualization.VisualizationsRegister(api.Group("/visualizations"))
 
 
 

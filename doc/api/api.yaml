@@ -20,8 +20,8 @@ tags:
   description: Manage Projects
 - name: simulations
   description: Manage Simulations
-- name: simulationmodels
-  description: Manage SimulationModels
+- name: models
+  description: Manage Models
 - name: visualizations
   description: Manage Visualizations
 - name: uploads
@@ -502,9 +502,9 @@ paths:
   /models:
     get:
       tags:
-        - simulationmodels
+        - models
       summary: Get simulation models of user
-      operationId: getSimulationModels
+      operationId: getModels
       responses:
         200:
           description: OK.
@@ -513,7 +513,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/SimulationModel'
+                  $ref: '#/components/schemas/Model'
         401:
           description: Unauthorized access.
         403:
@@ -524,16 +524,16 @@ paths:
           description: Internal server error.
     post:
       tags:
-        - simulationmodels
-      summary: Add a new SimulationModel to the database
-      operationId: addSimulationModel
+        - models
+      summary: Add a new Model to the database
+      operationId: addModel
       requestBody:
-        description: "SimulationModel object to add to DB"
+        description: "Model object to add to DB"
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SimulationModel'
+              $ref: '#/components/schemas/Model'
       responses:
         200:
           description: OK.
@@ -545,26 +545,26 @@ paths:
           description: Access forbidden.
         500:
           description: Internal server error. Unable to save simulation or simulation model.
-  /models/{SimulationModelID}:
+  /models/{ModelID}:
     put:
       tags:
-        - simulationmodels
-      summary: Update properties of SimulationModel with ID SimulationModelID
-      operationId: updateSimulationModelProperties
+        - models
+      summary: Update properties of Model with ID ModelID
+      operationId: updateModelProperties
       parameters:
       - in: path 
-        name: SimulationModelID
-        description: ID of a SimulationModel
+        name: ModelID
+        description: ID of a Model
         required: true
         schema:
           type: integer
       requestBody:
-        description: "SimulationModel object with new properties"
+        description: "Model object with new properties"
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SimulationModel'
+              $ref: '#/components/schemas/Model'
       responses:
         200:
           description: OK.
@@ -580,13 +580,13 @@ paths:
           description: Internal server error. Unable to save simulation model.
     get:
       tags:
-        - simulationmodels
-      summary: Get properties of SimulationModel with ID SimulationModelID
-      operationId: getSimulationModelProperties
+        - models
+      summary: Get properties of Model with ID ModelID
+      operationId: getModelProperties
       parameters:
       - in: path 
-        name: SimulationModelID
-        description: ID of a SimulationModel
+        name: ModelID
+        description: ID of a Model
         required: true
         schema:
           type: integer
@@ -596,7 +596,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SimulationModel'
+                $ref: '#/components/schemas/Model'
         401:
           description: Unauthorized access.
         403:
@@ -607,13 +607,13 @@ paths:
           description: Internal server error.
     delete:
       tags:
-        - simulationmodels
-      summary: Delete SimulationModel with ID SimulationModelID
-      operationId: deleteSimulationModel
+        - models
+      summary: Delete Model with ID ModelID
+      operationId: deleteModel
       parameters:
       - in: path 
-        name: SimulationModelID
-        description: ID of a SimulationModel
+        name: ModelID
+        description: ID of a Model
         required: true
         schema:
           type: integer
@@ -628,16 +628,16 @@ paths:
           description: Not found. Simulation or simulation model not found.
         500:
           description: Internal server error. Unable to save changed simulation or to remove simulation model.
-  /models/{SimulationModelID}/file:
+  /models/{ModelID}/file:
     get:
       tags:
-        - simulationmodels
-      summary: Get file from SimulationModel with ID SimulationModelID (NEW)
-      operationId: getFileFromSimulationModel
+        - models
+      summary: Get file from Model with ID ModelID (NEW)
+      operationId: getFileFromModel
       parameters:
       - in: path
-        name: SimulationModelID
-        description: ID of a SimulationModel
+        name: ModelID
+        description: ID of a Model
         required: true
         schema:
           type: integer
@@ -680,13 +680,13 @@ paths:
           description: Internal server error.
     put:
       tags:
-        - simulationmodels
-      summary: Update (Overwrite) file of SimulationModel with ID SimulationModelID, File object has to be in database (NEW)
-      operationId: updateFileForSimulationModel
+        - models
+      summary: Update (Overwrite) file of Model with ID ModelID, File object has to be in database (NEW)
+      operationId: updateFileForModel
       parameters:
       - in: path
-        name: SimulationModelID
-        description: ID of a SimulationModel
+        name: ModelID
+        description: ID of a Model
         required: true
         schema:
           type: integer
@@ -1269,7 +1269,7 @@ components:
           type: integer
         UserID:
           type: integer
-        SimulationModelID:
+        ModelID:
           type: integer
         Date:
           type: string
@@ -1298,7 +1298,7 @@ components:
         RawProperties:
           type: object
           properties: {}
-    SimulationModel:
+    Model:
       required:
       - Name
       - OutputLength
@@ -1323,23 +1323,23 @@ components:
         OutputMapping:
           type: array
           items:
-            $ref: '#/components/schemas/Signal'
+            $ref: '#/components/schemas/Sample'
         InputMapping:
           type: array
           items:
-            $ref: '#/components/schemas/Signal'
-    Signal:
+            $ref: '#/components/schemas/Sample'
+    Sample:
       required:
       - Name
       - Unit
-      - SimulationModelID
+      - ModelID
       type: object
       properties:
         Name:
           type: string
         Unit:
           type: string
-        SimulationModelID:
+        ModelID:
           type: integer
     Widget:
       required:

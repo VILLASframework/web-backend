@@ -28,7 +28,7 @@ func TestDummyDBAssociations(t *testing.T) {
 
 	// Variables for tests
 	var simr Simulator
-	var smo SimulationModel
+	var mo Model
 	var file File
 	var proj Project
 	var simn Simulation
@@ -36,8 +36,8 @@ func TestDummyDBAssociations(t *testing.T) {
 	var vis Visualization
 	var widg Widget
 
-	var sigs []Signal
-	var smos []SimulationModel
+	var smps []Sample
+	var mos []Model
 	var files []File
 	var files_sm []File
 	var projs []Project
@@ -45,28 +45,28 @@ func TestDummyDBAssociations(t *testing.T) {
 	var viss []Visualization
 	var widgs []Widget
 
-	// Simulation Model
+	// Model
 
-	a.NoError(db.Find(&smo, 1).Error, fM("SimulationModel"))
-	a.EqualValues("SimModel_A", smo.Name)
+	a.NoError(db.Find(&mo, 1).Error, fM("Model"))
+	a.EqualValues("SimModel_A", mo.Name)
 
-	// Simulation Model Associations
+	// Model Associations
 
-	a.NoError(db.Model(&smo).Association("BelongsToSimulation").Find(&simn).Error)
+	a.NoError(db.Model(&mo).Association("BelongsToSimulation").Find(&simn).Error)
 	a.EqualValues("Simulation_A", simn.Name, "Expected Simulation_A")
 
-	a.NoError(db.Model(&smo).Association("BelongsToSimulator").Find(&simr).Error)
+	a.NoError(db.Model(&mo).Association("BelongsToSimulator").Find(&simr).Error)
 	a.EqualValues("Host_A", simr.Host, "Expected Host_A")
 
-	a.NoError(db.Model(&smo).Related(&sigs, "OutputMapping").Error)
-	if len(sigs) != 4 {
-		a.Fail("Simulation Model Associations",
-			"Expected to have %v Output AND Input Signals. Has %v.", 4, len(sigs))
+	a.NoError(db.Model(&mo).Related(&smps, "OutputMapping").Error)
+	if len(smps) != 4 {
+		a.Fail("Model Associations",
+			"Expected to have %v Output AND Input Samples. Has %v.", 4, len(smps))
 	}
 
-	a.NoError(db.Model(&smo).Related(&files_sm, "Files").Error)
+	a.NoError(db.Model(&mo).Related(&files_sm, "Files").Error)
 	if len(files_sm) != 2 {
-		a.Fail("Simulation Model Associations",
+		a.Fail("Model Associations",
 			"Expected to have %v Files. Has %v.", 2, len(files_sm))
 	}
 
@@ -80,10 +80,10 @@ func TestDummyDBAssociations(t *testing.T) {
 	a.NoError(db.Model(&simn).Association("User").Find(&usr).Error)
 	a.EqualValues("User_A", usr.Username)
 
-	a.NoError(db.Model(&simn).Related(&smos, "Models").Error)
-	if len(smos) != 2 {
+	a.NoError(db.Model(&simn).Related(&mos, "Models").Error)
+	if len(mos) != 2 {
 		a.Fail("Simulation Associations",
-			"Expected to have %v Simulation Models. Has %v.", 2, len(smos))
+			"Expected to have %v Models. Has %v.", 2, len(mos))
 	}
 
 	a.NoError(db.Model(&simn).Related(&projs, "Projects").Error)

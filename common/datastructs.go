@@ -1,9 +1,10 @@
 package common
 
 import (
-	//"github.com/jinzhu/gorm"
-	"github.com/jinzhu/gorm/dialects/postgres"
 	"time"
+
+	// "github.com/jinzhu/gorm"
+	"github.com/jinzhu/gorm/dialects/postgres"
 )
 
 type Simulator struct {
@@ -35,7 +36,7 @@ type File struct {
 	//UserID uint `gorm:"not null"`
 
 	//new in villasweb 2.0
-	SimulationModelID uint `gorm:""`
+	ModelID uint `gorm:""`
 	WidgetID uint `gorm:""`
 }
 
@@ -63,11 +64,11 @@ type Simulation struct {
 	User   User `gorm:"not null;association_autoupdate:false"`
 	UserID uint `gorm:"not null"`
 
-	Models   []SimulationModel `gorm:"foreignkey:BelongsToSimulationID;association_autoupdate:false"`
+	Models   []Model `gorm:"foreignkey:BelongsToSimulationID;association_autoupdate:false"`
 	Projects []Project         `gorm:"association_autoupdate:false"`
 }
 
-type SimulationModel struct {
+type Model struct {
 	//gorm.Model
 	ID              uint           `gorm:"primary_key;auto_increment"`
 	Name            string         `gorm:"not null"`
@@ -80,9 +81,9 @@ type SimulationModel struct {
 
 	BelongsToSimulator   Simulator `gorm:"not null;association_autoupdate:false"`
 	BelongsToSimulatorID uint      `gorm:"not null"`
-	// NOTE: order of signals is important
-	OutputMapping []Signal `gorm:""`
-	InputMapping  []Signal `gorm:""`
+	// NOTE: order of samples is important
+	OutputMapping []Sample `gorm:""`
+	InputMapping  []Sample `gorm:""`
 
 	//new in villasweb 2.0 (for CIM file of simulation model and other model file formats)
 	Files 			[]File 			`gorm:""`
@@ -119,12 +120,14 @@ type Visualization struct {
 	Widgets []Widget `gorm:""`
 }
 
-type Signal struct {
+type Sample struct {
 	//gorm.Model
 	ID                uint   `gorm:"primary_key;auto_increment"`
 	Name              string `gorm:"not null"`
 	Unit              string `gorm:"not null"`
-	SimulationModelID uint
+	Index			  uint 	 `gorm:"not null"`
+	Direction		  string `gorm:"not null"`
+	ModelID uint
 	//IsRecorded			bool 			`gorm:"default:false"`
 }
 
