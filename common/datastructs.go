@@ -42,16 +42,16 @@ type Model struct {
 	Simulator  		Simulator
 	SimulatorID 	uint
 
-	// NOTE: order of samples is important
-	OutputMapping 	[]Sample 		`gorm:"foreignkey:ModelID"`
-	InputMapping  	[]Sample 		`gorm:"foreignkey:ModelID"`
+	// NOTE: order of signals is important
+	OutputMapping 	[]Signal 		`gorm:"foreignkey:ModelID"`
+	InputMapping  	[]Signal 		`gorm:"foreignkey:ModelID"`
 
 	//new in villasweb 2.0 (for CIM file of simulation model and other model file formats)
 	Files 		  	[]File 			`gorm:"foreignkey:ModelID"`
 
 }
 
-type Sample struct {
+type Signal struct {
 	//gorm.Model
 	ID                uint   `gorm:"primary_key;auto_increment"`
 	Name              string `gorm:"not null"`

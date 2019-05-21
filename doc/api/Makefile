@@ -9,7 +9,7 @@ RSYNC_OPTS ?= --recursive --ignore-missing-args --copy-links --chown $(DEPLOY_US
 all: index.html
 
 index.html: api.yaml
-	redoc-cli bundle --cdn --title "$(TITLE)" --output $@ api.yaml
+	redoc-cli bundle --cdn --title $(TITLE) --output $@ api.yaml
 
 deploy: index.html
 	rsync $(RSYNC_OPTS) index.html api.yaml $(DEPLOY_USER)@$(DEPLOY_HOST):$(DEPLOY_PATH)

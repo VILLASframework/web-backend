@@ -5,25 +5,25 @@ import (
 	"net/http"
 )
 
-func sampleRegistrationEp(c *gin.Context) {
+func signalRegistrationEp(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "NOT implemented",
 	})
 }
 
-func sampleReadAllEp(c *gin.Context) {
+func signalReadAllEp(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "NOT implemented",
 	})
 }
 
-func sampleUpdateEp(c *gin.Context) {
+func signalUpdateEp(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "NOT implemented",
 	})
 }
 
-func sampleDeleteEp(c *gin.Context) {
+func signalDeleteEp(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "NOT implemented",
 	})

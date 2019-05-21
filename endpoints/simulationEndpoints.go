@@ -2,6 +2,7 @@ package endpoints
 
 import (
 	"fmt"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/queries"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/serializers"
 	"github.com/gin-gonic/gin"
@@ -11,8 +12,11 @@ import (
 
 
 func simulationReadAllEp(c *gin.Context) {
+
+	//TODO Identify user who is issuing the request and return only those simulations that are known to the user
+
 	allSimulations, _, _ := queries.FindAllSimulations()
-	serializer := serializers.SimulationsSerializerNoAssoc{c, allSimulations}
+	serializer := serializers.SimulationsSerializer{c, allSimulations}
 	c.JSON(http.StatusOK, gin.H{
 		"simulations": serializer.Response(),
 	})
@@ -37,8 +41,20 @@ func simulationUpdateEp(c *gin.Context) {
 }
 
 func simulationReadEp(c *gin.Context) {
+
+	simID, err := GetSimulationID(c)
+	if err != nil {
+		return
+	}
+
+	sim, err := queries.FindSimulation(simID)
+	if common.ProvideErrorResponse(c, err) {
+		return
+	}
+
+	serializer := serializers.SimulationSerializer{c, sim}
 	c.JSON(http.StatusOK, gin.H{
-		"message": "NOT implemented",
+		"simulation": serializer.Response(),
 	})
 }
 

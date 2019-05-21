@@ -53,7 +53,7 @@ func VerifyConnection(db *gorm.DB) error {
 // to the Dummy*() where it is called
 func DropTables(db *gorm.DB) {
 	db.DropTableIfExists(&Simulator{})
-	db.DropTableIfExists(&Sample{})
+	db.DropTableIfExists(&Signal{})
 	db.DropTableIfExists(&Model{})
 	db.DropTableIfExists(&File{})
 	db.DropTableIfExists(&Simulation{})
@@ -65,7 +65,7 @@ func DropTables(db *gorm.DB) {
 // AutoMigrate the models
 func MigrateModels(db *gorm.DB) {
 	db.AutoMigrate(&Simulator{})
-	db.AutoMigrate(&Sample{})
+	db.AutoMigrate(&Signal{})
 	db.AutoMigrate(&Model{})
 	db.AutoMigrate(&File{})
 	db.AutoMigrate(&Simulation{})
@@ -100,14 +100,14 @@ func DummyPopulateDB(test_db *gorm.DB) {
 	checkErr(test_db.Create(&simr_A).Error)
 	checkErr(test_db.Create(&simr_B).Error)
 
-	outSmp_A := Sample{Name: "outSample_A", Direction: "out"}
-	outSmp_B := Sample{Name: "outSample_B", Direction: "out"}
-	inSmp_A := Sample{Name: "inSample_A", Direction: "in"}
-	inSmp_B := Sample{Name: "inSample_B", Direction: "in"}
-	checkErr(test_db.Create(&outSmp_A).Error)
-	checkErr(test_db.Create(&outSmp_B).Error)
-	checkErr(test_db.Create(&inSmp_A).Error)
-	checkErr(test_db.Create(&inSmp_B).Error)
+	outSig_A := Signal{Name: "outSignal_A", Direction: "out"}
+	outSig_B := Signal{Name: "outSignal_B", Direction: "out"}
+	inSig_A := Signal{Name: "inSignal_A", Direction: "in"}
+	inSig_B := Signal{Name: "inSignal_B", Direction: "in"}
+	checkErr(test_db.Create(&outSig_A).Error)
+	checkErr(test_db.Create(&outSig_B).Error)
+	checkErr(test_db.Create(&inSig_A).Error)
+	checkErr(test_db.Create(&inSig_B).Error)
 
 	mo_A := Model{Name: "Model_A"}
 	mo_B := Model{Name: "Model_B"}
@@ -161,11 +161,11 @@ func DummyPopulateDB(test_db *gorm.DB) {
 	checkErr(test_db.Model(&vis_A).Association("Widgets").Append(&widg_A).Error)
 	checkErr(test_db.Model(&vis_A).Association("Widgets").Append(&widg_B).Error)
 
-	// Model HM Samples
-	checkErr(test_db.Model(&mo_A).Association("InputMapping").Append(&inSmp_A).Error)
-	checkErr(test_db.Model(&mo_A).Association("InputMapping").Append(&inSmp_B).Error)
-	checkErr(test_db.Model(&mo_A).Association("OutputMapping").Append(&outSmp_A).Error)
-	checkErr(test_db.Model(&mo_A).Association("OutputMapping").Append(&outSmp_B).Error)
+	// Model HM Signal
+	checkErr(test_db.Model(&mo_A).Association("InputMapping").Append(&inSig_A).Error)
+	checkErr(test_db.Model(&mo_A).Association("InputMapping").Append(&inSig_B).Error)
+	checkErr(test_db.Model(&mo_A).Association("OutputMapping").Append(&outSig_A).Error)
+	checkErr(test_db.Model(&mo_A).Association("OutputMapping").Append(&outSig_B).Error)
 
 	// Model HM Files
 	checkErr(test_db.Model(&mo_A).Association("Files").Append(&file_A).Error)

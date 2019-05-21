@@ -41,12 +41,12 @@ func CloneModel(targetSim int, modelID int) error {
 	// Check if target sim exists
 	// Check if model exists
 
-	// Get all Samples of Model
+	// Get all Signals of Model
 	// Get Simulator of Model
 	// Get Files of model
 
 	// Add new model object to DB and associate with target sim
-	// Add new sample objects to DB and associate with new model object (careful with directions)
+	// Add new signal objects to DB and associate with new model object (careful with directions)
 	// Associate Simulator with new Model object
 	var err error
 	return err
@@ -83,7 +83,7 @@ func DeleteModel(simID int , modelID int ) error {
 	}
 
 	// TODO remove File Associations and files on disk
-	// TODO remove Sample Associations and Samples in DB
+	// TODO remove Signal Associations and Signals in DB
 	// TODO how to treat simulator association?
 
 	//remove model itself from DB

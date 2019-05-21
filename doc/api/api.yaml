@@ -1323,12 +1323,12 @@ components:
         OutputMapping:
           type: array
           items:
-            $ref: '#/components/schemas/Sample'
+            $ref: '#/components/schemas/Signal'
         InputMapping:
           type: array
           items:
-            $ref: '#/components/schemas/Sample'
-    Sample:
+            $ref: '#/components/schemas/Signal'
+    Signal:
       required:
       - Name
       - Unit

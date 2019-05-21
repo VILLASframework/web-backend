@@ -30,11 +30,11 @@ func SimulationsRegister(r *gin.RouterGroup) {
 	r.PUT("/:SimulationID/models/:ModelID/simulator", simulatorUpdateModelEp) // NEW in API
 	r.GET("/:SimulationID/models/:ModelID/simulator", simulatorReadModelEp) // NEW in API
 
-	// Input and Output Samples
-	r.POST("/:SimulationID/models/:ModelID/Samples/:Direction", sampleRegistrationEp) // NEW in API
-	r.GET("/:SimulationID/models/:ModelID/Samples/:Direction", sampleReadAllEp) // NEW in API
-	r.PUT("/:SimulationID/models/:ModelID/Samples/:Direction", sampleUpdateEp) // NEW in API
-	r.DELETE("/:SimulationID/models/:ModelID/Samples/:Direction", sampleDeleteEp) // NEW in API
+	// Input and Output Signals
+	r.POST("/:SimulationID/models/:ModelID/signals/:Direction", signalRegistrationEp) // NEW in API
+	r.GET("/:SimulationID/models/:ModelID/signals/:Direction", signalReadAllEp) // NEW in API
+	r.PUT("/:SimulationID/models/:ModelID/signals/:Direction", signalUpdateEp) // NEW in API
+	r.DELETE("/:SimulationID/models/:ModelID/signals/:Direction", signalDeleteEp) // NEW in API
 
 	// Visualizations
 	r.GET("/:SimulationID/visualizations", visualizationReadAllEp)
