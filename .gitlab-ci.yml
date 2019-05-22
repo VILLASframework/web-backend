@@ -82,7 +82,6 @@ test:backend:endpoints:
     - go test -v -args -dbhost=/var/run/postgresql
   dependencies:
     - build:backend
-    - test:backend:database
 
 # Stage: deploy
 ##############################################################################
