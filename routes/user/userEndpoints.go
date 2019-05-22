@@ -40,7 +40,7 @@ func authenticationEp(c *gin.Context) {
 	}
 
 	// Find the username in the database
-	user, err := FindUserByUsername(loginRequest.Username)
+	user, err := findUserByUsername(loginRequest.Username)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
@@ -99,7 +99,7 @@ func userRegistrationEp(c *gin.Context) {
 	// and in case of error raise 422
 
 	// Check that the username is NOT taken
-	_, err := FindUserByUsername(newUser.Username)
+	_, err := findUserByUsername(newUser.Username)
 	if err == nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{
 			"message": "Username is already taken",
@@ -108,7 +108,7 @@ func userRegistrationEp(c *gin.Context) {
 	}
 
 	// Hash the password before saving it to the DB
-	err = newUser.SetPassword(newUser.Password)
+	err = newUser.setPassword(newUser.Password)
 	if err != nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{
 			"message": "Unable to encrypt the password",

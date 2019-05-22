@@ -23,7 +23,7 @@ type User struct {
 	common.User // check golang embedding types
 }
 
-func FindUserByUsername(username string) (User, error) {
+func findUserByUsername(username string) (User, error) {
 	db := common.GetDB()
 	var user User
 	err := db.Find(&user, "Username = ?", username).Error
@@ -36,7 +36,7 @@ func (u *User) save() error {
 	return err
 }
 
-func (u *User) SetPassword(password string) error {
+func (u *User) setPassword(password string) error {
 	if len(password) == 0 {
 		return fmt.Errorf("Password cannot be empty")
 	}
