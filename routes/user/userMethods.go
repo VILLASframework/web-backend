@@ -30,6 +30,12 @@ func FindUserByUsername(username string) (User, error) {
 	return user, err
 }
 
+func (u *User) save() error {
+	db := common.GetDB()
+	err := db.Create(u).Error
+	return err
+}
+
 func (u *User) SetPassword(password string) error {
 	if len(password) == 0 {
 		return fmt.Errorf("Password cannot be empty")
@@ -49,7 +55,8 @@ func (u *User) validatePassword(password string) error {
 	return bcrypt.CompareHashAndPassword(hashedPassword, loginPassword)
 }
 
-func (u *User) update(data interface{}) error {
-	// TODO: Not implemented
-	return nil
+func (u *User) update(modifiedUser User) error {
+	db := common.GetDB()
+	err := db.Model(u).Update(modifiedUser).Error
+	return err
 }

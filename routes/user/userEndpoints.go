@@ -2,6 +2,7 @@ package user
 
 import (
 	//"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -12,9 +13,9 @@ func VisitorAuthenticate(r *gin.RouterGroup) {
 }
 
 func UsersRegister(r *gin.RouterGroup) {
-	r.POST("/users", userRegistrationEp)
+	r.POST("", userRegistrationEp)
 	r.PUT("/:UserID", userUpdateEp)
-	r.GET("/", usersReadEp)
+	r.GET("", usersReadEp)
 	r.GET("/:UserID", userReadEp)
 	//r.GET("/me", userSelfEp) // TODO: this conflicts with GET /:userID
 	r.DELETE("/:UserID", userDeleteEp)
@@ -84,8 +85,48 @@ func usersReadEp(c *gin.Context) {
 
 func userRegistrationEp(c *gin.Context) {
 
+	// Bind the response (context) with the User struct
+	var newUser User
+	if err := c.BindJSON(&newUser); err != nil {
+		// TODO: do something other than panic ...
+		panic(err)
+	}
+
+	// TODO: validate the User for:
+	//       - username
+	//       - email
+	//       - role
+	// and in case of error raise 422
+
+	// Check that the username is NOT taken
+	_, err := FindUserByUsername(newUser.Username)
+	if err == nil {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"message": "Username is already taken",
+		})
+		return
+	}
+
+	// Hash the password before saving it to the DB
+	err = newUser.SetPassword(newUser.Password)
+	if err != nil {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"message": "Unable to encrypt the password",
+		})
+		return
+	}
+
+	// Save the user in the DB
+	err = newUser.save()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Unable to create new user",
+		})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"message": "NOT implemented",
+		"user": fmt.Sprintf(newUser.Username),
 	})
 }
 
