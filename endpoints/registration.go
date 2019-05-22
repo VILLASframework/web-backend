@@ -34,23 +34,24 @@ func SimulationsRegister(r *gin.RouterGroup) {
 	r.POST("/:SimulationID/models/:ModelID/signals/:direction", signalRegistrationEp)
 	r.GET("/:SimulationID/models/:ModelID/signals/:direction", signalReadAllEp)
 
-	//TODO I was here
 	// Visualizations
 	r.GET("/:SimulationID/visualizations", visualizationReadAllEp)
 	r.POST("/:SimulationID/visualization", visualizationRegistrationEp)
-	r.POST("/:SimulationID/visualization/:visualizationID", visualizationCloneEp)
+	//r.POST("/:SimulationID/visualization/:visualizationID", visualizationCloneEp)
 	r.PUT("/:SimulationID/visualization/:visualizationID", visualizationUpdateEp)
 	r.GET("/:SimulationID/visualization/:visualizationID", visualizationReadEp)
-	r.DELETE("/:SimulationID/visualization/:visualizationID", visualizationDeleteEp)
+	//r.DELETE("/:SimulationID/visualization/:visualizationID", visualizationDeleteEp)
 
 	// Widgets
 	r.GET("/:SimulationID/visualization/:visualizationID/widgets", widgetReadAllEp)
 	r.POST("/:SimulationID/visualization/:visualizationID/widget", widgetRegistrationEp)
-	r.POST("/:SimulationID/visualization/:visualizationID/widget:widgetID", widgetCloneEp)
+	//r.POST("/:SimulationID/visualization/:visualizationID/widget:widgetID", widgetCloneEp)
 	r.PUT("/:SimulationID/visualization/:visualizationID/widget/:widgetID", widgetUpdateEp)
 	r.GET("/:SimulationID/visualization/:visualizationID/widget/:widgetID", widgetReadEp)
-	r.DELETE("/:SimulationID/visualization/:visualizationID/widget/:widgetID", widgetDeleteEp)
+	//r.DELETE("/:SimulationID/visualization/:visualizationID/widget/:widgetID", widgetDeleteEp)
 
+
+	// TODO I was here
 	// Files
 	// Files of Models
 	r.GET("/:SimulationID/models/:ModelID/files", fileMReadAllEp) // NEW in API
