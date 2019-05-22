@@ -43,23 +43,19 @@ type Model struct {
 	SimulatorID 	uint
 
 	// NOTE: order of signals is important
-	OutputMapping 	[]Signal 		`gorm:"foreignkey:ModelID"`
-	InputMapping  	[]Signal 		`gorm:"foreignkey:ModelID"`
+	OutputMapping 	[]Signal
+	InputMapping  	[]Signal
 
 	//new in villasweb 2.0 (for CIM file of simulation model and other model file formats)
 	Files 		  	[]File 			`gorm:"foreignkey:ModelID"`
 
 }
 
-type Signal struct {
-	//gorm.Model
-	ID                uint   `gorm:"primary_key;auto_increment"`
-	Name              string `gorm:"not null"`
-	Unit              string `gorm:"not null"`
-	Index			  uint 	 `gorm:"not null"`
-	Direction		  string `gorm:"not null"`
-	ModelID uint
-	//IsRecorded			bool 			`gorm:"default:false"`
+type Signal struct { // NOT A DB TABLE
+	Name              string
+	Unit              string
+	Index			  uint
+	Direction		  string
 }
 
 type Simulator struct {
