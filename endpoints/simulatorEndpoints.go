@@ -1,10 +1,13 @@
 package endpoints
 
 import (
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/queries"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/serializers"
 	"github.com/gin-gonic/gin"
+	"fmt"
 	"net/http"
+	"strconv"
 )
 
 func simulatorReadAllEp(c *gin.Context) {
@@ -28,9 +31,39 @@ func simulatorUpdateEp(c *gin.Context) {
 }
 
 func simulatorUpdateModelEp(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message": "NOT implemented",
-	})
+
+	// simulator ID as parameter of Query, e.g. simulations/:SimulationID/models/:ModelID/simulator?simulatorID=42
+	simulatorID, err := strconv.Atoi(c.Query("simulatorID"))
+	if err != nil {
+		errormsg := fmt.Sprintf("Bad request. No or incorrect simulator ID")
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": errormsg,
+		})
+		return
+	}
+
+	modelID, err := GetModelID(c)
+	if err != nil {
+		return
+	}
+
+	simulator, err := queries.FindSimulator(simulatorID)
+	if common.ProvideErrorResponse(c, err) {
+		return
+	}
+
+	model, err := queries.FindModel(modelID)
+	if common.ProvideErrorResponse(c, err) {
+		return
+	}
+
+	err = queries.UpdateSimulatorOfModel(&model, &simulator)
+	if common.ProvideErrorResponse(c, err) == false {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "OK",
+		})
+	}
+
 }
 
 func simulatorReadEp(c *gin.Context) {
@@ -40,8 +73,25 @@ func simulatorReadEp(c *gin.Context) {
 }
 
 func simulatorReadModelEp(c *gin.Context) {
+
+	modelID, err := GetModelID(c)
+	if err != nil {
+		return
+	}
+
+	model, err := queries.FindModel(modelID)
+	if common.ProvideErrorResponse(c, err) {
+		return
+	}
+
+	simulator, err := queries.FindSimulator(int(model.SimulatorID))
+	if common.ProvideErrorResponse(c, err) {
+		return
+	}
+
+	serializer := serializers.SimulatorSerializer{c, simulator}
 	c.JSON(http.StatusOK, gin.H{
-		"message": "NOT implemented",
+		"simulator": serializer.Response(),
 	})
 }
 

@@ -81,11 +81,6 @@ func modelCloneEp(c *gin.Context) {
 
 func modelUpdateEp(c *gin.Context) {
 
-	//simID, err := GetSimulationID(c)
-	//if err != nil {
-	//	return
-	//}
-
 	modelID, err := GetModelID(c)
 	if err != nil {
 		return

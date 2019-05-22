@@ -11,3 +11,10 @@ func FindAllSimulators() ([]common.Simulator, int, error) {
 	return simulators, len(simulators), err
 }
 
+func FindSimulator(simulatorID int) (common.Simulator, error) {
+	db := common.GetDB()
+	var simulator common.Simulator
+	err := db.First(&simulator, simulatorID).Error
+	return simulator, err
+}
+

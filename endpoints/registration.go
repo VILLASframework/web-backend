@@ -7,11 +7,11 @@ import (
 func SimulationsRegister(r *gin.RouterGroup) {
 
 	r.GET("/", simulationReadAllEp)
-	r.POST("/", simulationRegistrationEp)
-	r.POST("/:SimulationID", simulationCloneEp)
-	r.PUT("/:SimulationID", simulationUpdateEp)
+	//r.POST("/", simulationRegistrationEp)
+	//r.POST("/:SimulationID", simulationCloneEp)
+	//r.PUT("/:SimulationID", simulationUpdateEp)
 	r.GET("/:SimulationID", simulationReadEp)
-	r.DELETE("/:SimulationID", simulationDeleteEp)
+	//r.DELETE("/:SimulationID", simulationDeleteEp)
 
 	// Users
 	r.GET("/:SimulationID/users", userReadAllSimEp)
@@ -21,21 +21,20 @@ func SimulationsRegister(r *gin.RouterGroup) {
 	// Models
 	r.GET("/:SimulationID/models/", modelReadAllEp)
 	r.POST("/:SimulationID/models/", modelRegistrationEp)
-	r.POST("/:SimulationID/models/:ModelID", modelCloneEp)
+	//r.POST("/:SimulationID/models/:ModelID", modelCloneEp)
 	r.PUT("/:SimulationID/models/:ModelID", modelUpdateEp)
 	r.GET("/:SimulationID/models/:ModelID", modelReadEp)
-	r.DELETE("/:SimulationID/models/:ModelID", modelDeleteEp)
+	//r.DELETE("/:SimulationID/models/:ModelID", modelDeleteEp)
 
 	// Simulators
-	r.PUT("/:SimulationID/models/:ModelID/simulator", simulatorUpdateModelEp) // NEW in API
-	r.GET("/:SimulationID/models/:ModelID/simulator", simulatorReadModelEp) // NEW in API
+	r.PUT("/:SimulationID/models/:ModelID/simulator", simulatorUpdateModelEp)
+	r.GET("/:SimulationID/models/:ModelID/simulator", simulatorReadModelEp)
 
 	// Input and Output Signals
-	r.POST("/:SimulationID/models/:ModelID/signals/:Direction", signalRegistrationEp) // NEW in API
-	r.GET("/:SimulationID/models/:ModelID/signals/:Direction", signalReadAllEp) // NEW in API
-	r.PUT("/:SimulationID/models/:ModelID/signals/:Direction", signalUpdateEp) // NEW in API
-	r.DELETE("/:SimulationID/models/:ModelID/signals/:Direction", signalDeleteEp) // NEW in API
+	r.POST("/:SimulationID/models/:ModelID/signals/:direction", signalRegistrationEp)
+	r.GET("/:SimulationID/models/:ModelID/signals/:direction", signalReadAllEp)
 
+	//TODO I was here
 	// Visualizations
 	r.GET("/:SimulationID/visualizations", visualizationReadAllEp)
 	r.POST("/:SimulationID/visualization", visualizationRegistrationEp)
@@ -76,6 +75,7 @@ func UsersRegister(r *gin.RouterGroup) {
 	r.POST("/", userRegistrationEp)
 	r.PUT("/:UserID", userUpdateEp)
 	r.GET("/:UserID", userReadEp)
+	r.GET("/:UserID/simulations", userReadSimEp)
 	r.DELETE("/:UserID", userDeleteEp)
 	//r.GET("/me", userSelfEp) // TODO redirect to users/:UserID
 }

@@ -91,3 +91,9 @@ func DeleteModel(simID int , modelID int ) error {
 	err = db.Delete(&m).Error
 	return err
 }
+
+func UpdateSimulatorOfModel(model *common.Model, simulator *common.Simulator) error {
+	db := common.GetDB()
+	err := db.Model(model).Association("Simulator").Replace(simulator).Error
+	return err
+}
