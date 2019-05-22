@@ -57,7 +57,7 @@ build:backend:
 # Stage: test
 ##############################################################################
 
-test:backend:
+test:backend:database:
   stage: test
   tags:
     - docker
@@ -69,6 +69,20 @@ test:backend:
     - go test -v -args -dbhost=/var/run/postgresql
   dependencies:
     - build:backend
+
+test:backend:endpoints:
+  stage: test
+  tags:
+    - docker
+  image: villaswebbackendgo:ubuntu
+  script:
+    - /etc/init.d/postgresql start
+    - go mod tidy
+    - cd endpoints
+    - go test -v -args -dbhost=/var/run/postgresql
+  dependencies:
+    - build:backend
+    - test:backend:database
 
 # Stage: deploy
 ##############################################################################
