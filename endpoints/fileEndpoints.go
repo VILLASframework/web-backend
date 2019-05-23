@@ -2,17 +2,30 @@ package endpoints
 
 import (
 	"fmt"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/queries"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/serializers"
 	"strconv"
 
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
-	"github.com/gin-gonic/gin"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/queries"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/serializers"
+
 	"net/http"
+
+	"github.com/gin-gonic/gin"
+
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
 )
 
-// Endpoint functions
-
+// fileMReadAllEp godoc
+// @Summary Get all parameters of files of model
+// @ID GetAllModelFileParams
+// @Tags file
+// @Success 200 {array} common.File "File parameters requested by user"
+// @Failure 401 "Unauthorized Access"
+// @Failure 403 "Access forbidden."
+// @Failure 404 "Not found"
+// @Failure 500 "Internal server error"
+// @Param simulationID path int true "Simulation ID"
+// @Param modelID path int true "Model ID"
+// @Router simulations/{simulationID}/models/{modelID}/files [get]
 func fileMReadAllEp(c *gin.Context) {
 
 	simulationID, modelID, err := getRequestParams(c)
@@ -32,6 +45,18 @@ func fileMReadAllEp(c *gin.Context) {
 
 }
 
+// fileMRegistrationEp godoc
+// @Summary Get all parameters of files of model
+// @ID PostFileToModel
+// @Tags file
+// @Success 200 "OK."
+// @Failure 401 "Unauthorized Access"
+// @Failure 403 "Access forbidden."
+// @Failure 404 "Not found"
+// @Failure 500 "Internal server error"
+// @Param simulationID path int true "Simulation ID"
+// @Param modelID path int true "Model ID"
+// @Router simulations/{simulationID}/models/{modelID}/file [post]
 func fileMRegistrationEp(c *gin.Context) {
 
 	simulationID, modelID, err := getRequestParams(c)

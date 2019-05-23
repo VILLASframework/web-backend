@@ -1,11 +1,13 @@
 package endpoints
 
 import (
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/queries"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/serializers"
-	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 
@@ -18,6 +20,18 @@ func userReadAllEp(c *gin.Context) {
 	})
 }
 
+// userReadAllSimEp godoc
+// @Summary Get users of simulation
+// @ID GetAllUsersOfSimulation
+// @Produce  json
+// @Tags user
+// @Success 200 {array} common.User "Array of users that have access to the simulation"
+// @Failure 401 "Unauthorized Access"
+// @Failure 403 "Access forbidden."
+// @Failure 404 "Not found"
+// @Failure 500 "Internal server error"
+// @Param simulationID path int true "Simulation ID"
+// @Router /simulations/{simulationID}/users [get]
 func userReadAllSimEp(c *gin.Context) {
 
 	simID, err := GetSimulationID(c)
@@ -54,6 +68,18 @@ func userUpdateEp(c *gin.Context) {
 	})
 }
 
+// userUpdateSimEp godoc
+// @Summary Add user to simulation
+// @ID AddUserToSimulation
+// @Tags user
+// @Success 200 "OK."
+// @Failure 401 "Unauthorized Access"
+// @Failure 403 "Access forbidden."
+// @Failure 404 "Not found"
+// @Failure 500 "Internal server error"
+// @Param simulationID path int true "Simulation ID"
+// @Param username path int true "Username of user to be added"
+// @Router /simulations/{simulationID}/users/{username} [put]
 func userUpdateSimEp(c *gin.Context) {
 
 
@@ -102,6 +128,18 @@ func userDeleteEp(c *gin.Context) {
 	})
 }
 
+// userDeleteSimEp godoc
+// @Summary Delete user from simulation
+// @ID DeleteUserFromSimulation
+// @Tags user
+// @Success 200 "OK."
+// @Failure 401 "Unauthorized Access"
+// @Failure 403 "Access forbidden."
+// @Failure 404 "Not found"
+// @Failure 500 "Internal server error"
+// @Param simulationID path int true "Simulation ID"
+// @Param username path int true "Username of user"
+// @Router /simulations/{simulationID}/users/{username} [delete]
 func userDeleteSimEp(c *gin.Context) {
 
 	simID, err := GetSimulationID(c)

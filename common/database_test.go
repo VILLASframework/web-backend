@@ -2,8 +2,9 @@ package common
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 // Verify that you can connect to the database

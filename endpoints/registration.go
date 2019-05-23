@@ -6,11 +6,11 @@ import (
 
 func SimulationsRegister(r *gin.RouterGroup) {
 
-	r.GET("/", simulationReadAllEp)
+	r.GET("/", getSimulationsEp)
 	//r.POST("/", simulationRegistrationEp)
 	//r.POST("/:SimulationID", simulationCloneEp)
 	//r.PUT("/:SimulationID", simulationUpdateEp)
-	r.GET("/:SimulationID", simulationReadEp)
+	r.GET("/:SimulationID", getSimulationEp)
 	//r.DELETE("/:SimulationID", simulationDeleteEp)
 
 	// Users
@@ -50,11 +50,7 @@ func SimulationsRegister(r *gin.RouterGroup) {
 	r.GET("/:SimulationID/visualization/:visualizationID/widget/:widgetID", widgetReadEp)
 	//r.DELETE("/:SimulationID/visualization/:visualizationID/widget/:widgetID", widgetDeleteEp)
 
-
-	// TODO I was here
-	// Files
-	// Files of Models
-	r.GET("/:SimulationID/models/:ModelID/files", fileMReadAllEp) // NEW in API
+	r.GET("/:SimulationID/models/:ModelID/files", fileMReadAllEp)
 	r.POST ("/:SimulationID/models/:ModelID/file", fileMRegistrationEp) // NEW in API
 	//r.POST ("/:SimulationID/models/:ModelID/file", fileMCloneEp) // NEW in API
 	r.GET("/:SimulationID/models/:ModelID/file", fileMReadEp) // NEW in API

@@ -2,15 +2,27 @@ package endpoints
 
 import (
 	"fmt"
+	"net/http"
+	"strconv"
+
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/queries"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/serializers"
-	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
+// modelReadAllEp godoc
+// @Summary Get all models of simulation
+// @ID GetAllModelsOfSimulation
+// @Produce  json
+// @Tags model
+// @Success 200 {array} common.Model "Array of models to which belong to simulation"
+// @Failure 401 "Unauthorized Access"
+// @Failure 403 "Access forbidden."
+// @Failure 404 "Not found"
+// @Failure 500 "Internal server error"
+// @Router /simulations/{simulationID}/models [get]
 func modelReadAllEp(c *gin.Context) {
 
 	simID, err := GetSimulationID(c)
@@ -29,6 +41,17 @@ func modelReadAllEp(c *gin.Context) {
 	})
 }
 
+// modelRegistrationEp godoc
+// @Summary Add a model to a simulation
+// @ID AddModelToSimulation
+// @Tags model
+// @Param inputModel body common.Model true "Model to be added"
+// @Success 200 "OK."
+// @Failure 401 "Unauthorized Access"
+// @Failure 403 "Access forbidden."
+// @Failure 404 "Not found"
+// @Failure 500 "Internal server error"
+// @Router /simulations/{simulationID}/models [post]
 func modelRegistrationEp(c *gin.Context) {
 
 	simID, err := GetSimulationID(c)

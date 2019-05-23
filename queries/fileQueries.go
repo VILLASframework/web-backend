@@ -2,14 +2,15 @@ package queries
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
-	_ "github.com/gin-gonic/gin"
 	"io"
 	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
+	_ "github.com/gin-gonic/gin"
 
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
 )

@@ -21,7 +21,7 @@ func FindAllUsersSim(sim *common.Simulation) ([]common.User, int, error) {
 func FindUserByName(username string) (common.User, error){
 	db := common.GetDB()
 	var user common.User
-	err := db.Where("Username = ?", username).Find(user).Error
+	err := db.Where("Username = ?", username).Find(&user).Error
 	return user, err
 }
 

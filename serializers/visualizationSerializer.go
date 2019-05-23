@@ -1,9 +1,9 @@
 package serializers
 
 import (
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/queries"
 	"github.com/gin-gonic/gin"
 
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/queries"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
 )
 

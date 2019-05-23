@@ -1,8 +1,9 @@
 package endpoints
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/queries"

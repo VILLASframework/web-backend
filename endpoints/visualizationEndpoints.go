@@ -1,13 +1,15 @@
 package endpoints
 
 import (
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/queries"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/serializers"
-	"github.com/gin-gonic/gin"
 	"fmt"
 	"net/http"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
+
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/queries"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/serializers"
 )
 
 func visualizationReadAllEp(c *gin.Context) {

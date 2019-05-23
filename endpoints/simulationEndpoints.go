@@ -2,16 +2,28 @@ package endpoints
 
 import (
 	"fmt"
+	"net/http"
+	"strconv"
+
+	"github.com/gin-gonic/gin"
+
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/queries"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/serializers"
-	"github.com/gin-gonic/gin"
-	"net/http"
-	"strconv"
 )
 
-
-func simulationReadAllEp(c *gin.Context) {
+// getSimulationsEp godoc
+// @Summary Get all simulations
+// @ID GetAllSimulations
+// @Produce  json
+// @Tags simulation
+// @Success 200 {array} common.Simulation "Array of simulations to which user has access"
+// @Failure 401 "Unauthorized Access"
+// @Failure 403 "Access forbidden."
+// @Failure 404 "Not found"
+// @Failure 500 "Internal server error"
+// @Router /simulations [get]
+func getSimulationsEp(c *gin.Context) {
 
 	//TODO Identify user who is issuing the request and return only those simulations that are known to the user
 
@@ -40,7 +52,19 @@ func simulationUpdateEp(c *gin.Context) {
 	})
 }
 
-func simulationReadEp(c *gin.Context) {
+// getSimulationEp godoc
+// @Summary Get simulation
+// @ID GetSimulation
+// @Produce  json
+// @Tags simulation
+// @Success 200 {object} common.Simulation "Simulation requested by user"
+// @Failure 401 "Unauthorized Access"
+// @Failure 403 "Access forbidden."
+// @Failure 404 "Not found"
+// @Failure 500 "Internal server error"
+// @Param simulationID path int true "Simulation ID"
+// @Router /simulations/{simulationID} [get]
+func getSimulationEp(c *gin.Context) {
 
 	simID, err := GetSimulationID(c)
 	if err != nil {
