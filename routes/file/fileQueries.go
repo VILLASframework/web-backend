@@ -1,4 +1,4 @@
-package queries
+package file
 
 import (
 	"fmt"
@@ -13,6 +13,9 @@ import (
 	_ "github.com/gin-gonic/gin"
 
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/model"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulation"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/widget"
 )
 
 //func FindAllFiles() ([]common.File, int, error) {
@@ -103,18 +106,18 @@ func RegisterFile(c *gin.Context, widgetID int, modelID int, simulationID int){
 	size := file_header.Size
 
 	// Check if simulation and widget or model exist in DB
-	_, err = FindSimulation(simulationID)
+	_, err = simulation.FindSimulation(simulationID)
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
 
 	if modelID != -1 {
-		_, err = FindModel(modelID)
+		_, err = model.FindModel(modelID)
 		if common.ProvideErrorResponse(c, err) {
 			return
 		}
 	} else if widgetID != -1 {
-		_, err = FindWidget(widgetID)
+		_, err = widget.FindWidget(widgetID)
 		if common.ProvideErrorResponse(c, err) {
 			return
 		}

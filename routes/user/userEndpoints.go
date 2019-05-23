@@ -1,4 +1,4 @@
-package endpoints
+package user
 
 import (
 	"net/http"
@@ -6,71 +6,86 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/queries"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/serializers"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulation"
 )
 
 
+func RegisterUserEndpoints(r *gin.RouterGroup){
+	r.GET("/", GetUsers)
+	r.POST("/", AddUser)
+	r.PUT("/:userID", UpdateUser)
+	r.GET("/:userID", GetUser)
+	r.GET("/:userID/simulations", GetSimulationsOfUser)
+	r.DELETE("/:userID", DeleteUser)
+	//r.GET("/me", userSelfEp) // TODO redirect to users/:userID
+}
 
-func userReadAllEp(c *gin.Context) {
-	allUsers, _, _ := queries.FindAllUsers()
-	serializer := serializers.UsersSerializer{c, allUsers}
+func RegisterUserEndpointsForSimulation(r *gin.RouterGroup){
+	r.GET("/:simulationID/users", GetUsersOfSimulation)
+	r.PUT("/:simulationID/user/:username", UpdateUserOfSimulation)
+	r.DELETE("/:simulationID/user/:username", DeleteUserOfSimulation)
+
+}
+
+func GetUsers(c *gin.Context) {
+	allUsers, _, _ := FindAllUsers()
+	serializer := common.UsersSerializer{c, allUsers}
 	c.JSON(http.StatusOK, gin.H{
 		"users": serializer.Response(),
 	})
 }
 
-// userReadAllSimEp godoc
+// GetUsersOfSimulation godoc
 // @Summary Get users of simulation
-// @ID GetAllUsersOfSimulation
+// @ID GetUsersOfSimulation
 // @Produce  json
 // @Tags user
-// @Success 200 {array} common.User "Array of users that have access to the simulation"
+// @Success 200 {array} common.UserResponse "Array of users that have access to the simulation"
 // @Failure 401 "Unauthorized Access"
 // @Failure 403 "Access forbidden."
 // @Failure 404 "Not found"
 // @Failure 500 "Internal server error"
 // @Param simulationID path int true "Simulation ID"
 // @Router /simulations/{simulationID}/users [get]
-func userReadAllSimEp(c *gin.Context) {
+func GetUsersOfSimulation(c *gin.Context) {
 
-	simID, err := GetSimulationID(c)
+	simID, err := common.GetSimulationID(c)
 	if err != nil {
 		return
 	}
 
-	sim, err := queries.FindSimulation(simID)
+	sim, err := simulation.FindSimulation(simID)
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
 
 	// Find all users of simulation
-	allUsers, _, err := queries.FindAllUsersSim(&sim)
+	allUsers, _, err := FindAllUsersSim(&sim)
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
 
-	serializer := serializers.UsersSerializer{c, allUsers}
+	serializer := common.UsersSerializer{c, allUsers}
 	c.JSON(http.StatusOK, gin.H{
 		"users": serializer.Response(),
 	})
 }
 
-func userRegistrationEp(c *gin.Context) {
+func AddUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "NOT implemented",
 	})
 }
 
-func userUpdateEp(c *gin.Context) {
+func UpdateUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "NOT implemented",
 	})
 }
 
-// userUpdateSimEp godoc
+// UpdateUserOfSimulation godoc
 // @Summary Add user to simulation
-// @ID AddUserToSimulation
+// @ID UpdateUserOfSimulation
 // @Tags user
 // @Success 200 "OK."
 // @Failure 401 "Unauthorized Access"
@@ -80,27 +95,27 @@ func userUpdateEp(c *gin.Context) {
 // @Param simulationID path int true "Simulation ID"
 // @Param username path int true "Username of user to be added"
 // @Router /simulations/{simulationID}/users/{username} [put]
-func userUpdateSimEp(c *gin.Context) {
+func UpdateUserOfSimulation(c *gin.Context) {
 
 
-	simID, err := GetSimulationID(c)
+	simID, err := common.GetSimulationID(c)
 	if err != nil {
 		return
 	}
 
-	sim, err := queries.FindSimulation(simID)
+	sim, err := simulation.FindSimulation(simID)
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
 
 	username := c.Param("username")
 
-	user, err := queries.FindUserByName(username)
+	user, err := FindUserByName(username)
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
 
-	err = queries.AddUserToSim(&sim, &user)
+	err = AddUserToSim(&sim, &user)
 	if common.ProvideErrorResponse(c, err){
 		return
 	}
@@ -110,27 +125,27 @@ func userUpdateSimEp(c *gin.Context) {
 	})
 }
 
-func userReadEp(c *gin.Context) {
+func GetUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "NOT implemented",
 	})
 }
 
-func userReadSimEp(c *gin.Context) {
+func GetSimulationsOfUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "NOT implemented",
 	})
 }
 
-func userDeleteEp(c *gin.Context) {
+func DeleteUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "NOT implemented",
 	})
 }
 
-// userDeleteSimEp godoc
+// DeleteUserOfSimulation godoc
 // @Summary Delete user from simulation
-// @ID DeleteUserFromSimulation
+// @ID DeleteUserOfSimulation
 // @Tags user
 // @Success 200 "OK."
 // @Failure 401 "Unauthorized Access"
@@ -140,32 +155,26 @@ func userDeleteEp(c *gin.Context) {
 // @Param simulationID path int true "Simulation ID"
 // @Param username path int true "Username of user"
 // @Router /simulations/{simulationID}/users/{username} [delete]
-func userDeleteSimEp(c *gin.Context) {
+func DeleteUserOfSimulation(c *gin.Context) {
 
-	simID, err := GetSimulationID(c)
+	simID, err := common.GetSimulationID(c)
 	if err != nil {
 		return
 	}
 
-	sim, err := queries.FindSimulation(simID)
+	sim, err := simulation.FindSimulation(simID)
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
 
 	username := c.Param("username")
 
-	err = queries.RemoveUserFromSim(&sim, username)
+	err = RemoveUserFromSim(&sim, username)
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "OK.",
-	})
-}
-
-func userSelfEp(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message": "NOT implemented",
 	})
 }

@@ -2,9 +2,6 @@ package common
 
 import (
 	"time"
-
-	// "github.com/jinzhu/gorm"
-	"github.com/jinzhu/gorm/dialects/postgres"
 )
 
 // User data model
@@ -32,8 +29,8 @@ type Simulation struct {
 	Name            string         `gorm:"not null"`
 	// Running state of simulation
 	Running         bool           `gorm:"default:false"`
-	// Start parameters of simulation
-	StartParameters postgres.Jsonb
+	// Start parameters of simulation as JSON string
+	StartParameters string
 	// Users that have access to the simulation
 	Users   		[]User 			`gorm:"not null;many2many:user_simulations"`
 	// Models that belong to the simulation
@@ -52,8 +49,8 @@ type Model struct {
 	OutputLength    int            `gorm:"default:1"`
 	// Number of input signals
 	InputLength     int            `gorm:"default:1"`
-	// Start parameters of model
-	StartParameters postgres.Jsonb
+	// Start parameters of model as JSON string
+	StartParameters string
 	// ID of simulation to which model belongs
 	SimulationID 	uint
 	// Simulator associated with model
@@ -96,10 +93,10 @@ type Simulator struct {
 	State         string `gorm:"default:''"`
 	// Time of last state update
 	StateUpdateAt time.Time
-	// Properties of simulator
-	Properties    postgres.Jsonb
-	// Raw properties of simulator
-	RawProperties postgres.Jsonb
+	// Properties of simulator as JSON string
+	Properties    string
+	// Raw properties of simulator as JSON string
+	RawProperties string
 }
 
 // Visualization data model
@@ -141,8 +138,8 @@ type Widget struct {
 	Z                int            `gorm:"not null"`
 	// Locked state of widget
 	IsLocked         bool           `gorm:"default:false"`
-	// Custom properties of widget
-	CustomProperties postgres.Jsonb
+	// Custom properties of widget as JSON string
+	CustomProperties string
 	// ID of visualization to which widget belongs
 	VisualizationID  uint			`gorm:"not null"`
 	// Files that belong to widget (for example images)

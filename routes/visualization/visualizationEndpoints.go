@@ -1,44 +1,52 @@
-package endpoints
+package visualization
 
 import (
-	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/queries"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/serializers"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulation"
 )
 
-func visualizationReadAllEp(c *gin.Context) {
+func RegisterVisualizationEndpoints(r *gin.RouterGroup){
 
-	simID, err := GetSimulationID(c)
+	r.GET("/:simulationID/visualizations", GetVisualizations)
+	r.POST("/:simulationID/visualization", AddVisualization)
+	r.POST("/:simulationID/visualization/:visualizationID", CloneVisualization)
+	r.PUT("/:simulationID/visualization/:visualizationID", UpdateVisualization)
+	r.GET("/:simulationID/visualization/:visualizationID", GetVisualization)
+	r.DELETE("/:simulationID/visualization/:visualizationID", DeleteVisualization)
+
+}
+
+func GetVisualizations(c *gin.Context) {
+
+	simID, err := common.GetSimulationID(c)
 	if err != nil {
 		return
 	}
 
-	sim, err := queries.FindSimulation(simID)
+	sim, err := simulation.FindSimulation(simID)
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
 
-	allVisualizations, _, _ := queries.FindAllVisualizationsOfSim(&sim)
-	serializer := serializers.VisualizationsSerializer{c, allVisualizations}
+	allVisualizations, _, _ := FindAllVisualizationsOfSim(&sim)
+	serializer := common.VisualizationsSerializer{c, allVisualizations}
 	c.JSON(http.StatusOK, gin.H{
 		"visualizations": serializer.Response(),
 	})
 }
 
-func visualizationRegistrationEp(c *gin.Context) {
+func AddVisualization(c *gin.Context) {
 
-	simID, err := GetSimulationID(c)
+	simID, err := common.GetSimulationID(c)
 	if err != nil {
 		return
 	}
 
-	sim, err := queries.FindSimulation(simID)
+	sim, err := simulation.FindSimulation(simID)
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
@@ -54,7 +62,7 @@ func visualizationRegistrationEp(c *gin.Context) {
 	}
 
 	// add visualization to DB and add association to simulation
-	err = queries.AddVisualizationToSim(&sim, &vis)
+	err = AddVisualizationToSim(&sim, &vis)
 	if common.ProvideErrorResponse(c, err) == false {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "OK",
@@ -62,25 +70,25 @@ func visualizationRegistrationEp(c *gin.Context) {
 	}
 }
 
-func visualizationCloneEp(c *gin.Context) {
+func CloneVisualization(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "NOT implemented",
 	})
 }
 
-func visualizationUpdateEp(c *gin.Context) {
+func UpdateVisualization(c *gin.Context) {
 
-	simID, err := GetSimulationID(c)
+	simID, err := common.GetSimulationID(c)
 	if err != nil {
 		return
 	}
 
-	sim, err := queries.FindSimulation(simID)
+	sim, err := simulation.FindSimulation(simID)
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
 
-	visID, err := GetVisualizationID(c)
+	visID, err := common.GetVisualizationID(c)
 	if err != nil {
 		return
 	}
@@ -95,7 +103,7 @@ func visualizationUpdateEp(c *gin.Context) {
 		return
 	}
 
-	err = queries.UpdateVisualizationOfSim(&sim, vis, visID)
+	err = UpdateVisualizationOfSim(&sim, vis, visID)
 	if common.ProvideErrorResponse(c, err) == false {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "OK",
@@ -103,53 +111,38 @@ func visualizationUpdateEp(c *gin.Context) {
 	}
 }
 
-func visualizationReadEp(c *gin.Context) {
+func GetVisualization(c *gin.Context) {
 
-	simID, err := GetSimulationID(c)
+	simID, err := common.GetSimulationID(c)
 	if err != nil {
 		return
 	}
 
-	sim, err := queries.FindSimulation(simID)
+	sim, err := simulation.FindSimulation(simID)
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
 
-	visID, err := GetVisualizationID(c)
+	visID, err := common.GetVisualizationID(c)
 	if err != nil {
 		return
 	}
 
-	visualization, err := queries.FindVisualizationOfSim(&sim, visID)
+	visualization, err := FindVisualizationOfSim(&sim, visID)
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
 
-	serializer := serializers.VisualizationSerializer{c, visualization}
+	serializer := common.VisualizationSerializer{c, visualization}
 	c.JSON(http.StatusOK, gin.H{
 		"visualization": serializer.Response(),
 	})
 }
 
-func visualizationDeleteEp(c *gin.Context) {
+func DeleteVisualization(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "NOT implemented",
 	})
 }
 
 
-func GetVisualizationID(c *gin.Context) (int, error) {
-
-	simID, err := strconv.Atoi(c.Param("visualizationID"))
-
-	if err != nil {
-		errormsg := fmt.Sprintf("Bad request. No or incorrect format of visualization ID")
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
-		})
-		return -1, err
-	} else {
-		return simID, err
-
-	}
-}

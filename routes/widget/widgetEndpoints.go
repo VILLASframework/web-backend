@@ -1,69 +1,75 @@
-package endpoints
+package widget
 
 import (
-	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/queries"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/serializers"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulation"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/visualization"
 )
 
+func RegisterWidgetEndpoints(r *gin.RouterGroup){
+	r.GET("/:simulationID/visualization/:visualizationID/widgets", GetWidgets)
+	r.POST("/:simulationID/visualization/:visualizationID/widget", AddWidget)
+	r.POST("/:simulationID/visualization/:visualizationID/widget:widgetID", CloneWidget)
+	r.PUT("/:simulationID/visualization/:visualizationID/widget/:widgetID", UpdateWidget)
+	r.GET("/:simulationID/visualization/:visualizationID/widget/:widgetID", GetWidget)
+	r.DELETE("/:simulationID/visualization/:visualizationID/widget/:widgetID", DeleteWidget)
+}
 
-func widgetReadAllEp(c *gin.Context) {
+func GetWidgets(c *gin.Context) {
 
-	simID, err := GetSimulationID(c)
+	simID, err := common.GetSimulationID(c)
 	if err != nil {
 		return
 	}
 
-	sim, err := queries.FindSimulation(simID)
+	sim, err := simulation.FindSimulation(simID)
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
 
-	visID, err := GetVisualizationID(c)
+	visID, err := common.GetVisualizationID(c)
 	if err != nil {
 		return
 	}
 
-	vis, err := queries.FindVisualizationOfSim(&sim, visID)
+	vis, err := visualization.FindVisualizationOfSim(&sim, visID)
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
 
-	widgets,_, err := queries.FindWidgetsOfVisualization(&vis)
+	widgets,_, err := FindWidgetsOfVisualization(&vis)
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
 
-	serializer := serializers.WidgetsSerializer{c, widgets}
+	serializer := common.WidgetsSerializer{c, widgets}
 	c.JSON(http.StatusOK, gin.H{
 		"widgets": serializer.Response(),
 	})
 }
 
-func widgetRegistrationEp(c *gin.Context) {
+func AddWidget(c *gin.Context) {
 
-	simID, err := GetSimulationID(c)
+	simID, err := common.GetSimulationID(c)
 	if err != nil {
 		return
 	}
 
-	sim, err := queries.FindSimulation(simID)
+	sim, err := simulation.FindSimulation(simID)
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
 
-	visID, err := GetVisualizationID(c)
+	visID, err := common.GetVisualizationID(c)
 	if err != nil {
 		return
 	}
 
-	vis, err := queries.FindVisualizationOfSim(&sim, visID)
+	vis, err := visualization.FindVisualizationOfSim(&sim, visID)
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
@@ -78,7 +84,7 @@ func widgetRegistrationEp(c *gin.Context) {
 		return
 	}
 
-	err = queries.AddWidgetToVisualization(&vis, &widget_input)
+	err = AddWidgetToVisualization(&vis, &widget_input)
 	if common.ProvideErrorResponse(c, err) == false {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "OK.",
@@ -88,34 +94,34 @@ func widgetRegistrationEp(c *gin.Context) {
 
 }
 
-func widgetCloneEp(c *gin.Context) {
+func CloneWidget(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "NOT implemented",
 	})
 }
 
-func widgetUpdateEp(c *gin.Context) {
-	simID, err := GetSimulationID(c)
+func UpdateWidget(c *gin.Context) {
+	simID, err := common.GetSimulationID(c)
 	if err != nil {
 		return
 	}
 
-	sim, err := queries.FindSimulation(simID)
+	sim, err := simulation.FindSimulation(simID)
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
 
-	visID, err := GetVisualizationID(c)
+	visID, err := common.GetVisualizationID(c)
 	if err != nil {
 		return
 	}
 
-	vis, err := queries.FindVisualizationOfSim(&sim, visID)
+	vis, err := visualization.FindVisualizationOfSim(&sim, visID)
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
 
-	widgetID, err := GetWidgetID(c)
+	widgetID, err := common.GetWidgetID(c)
 	if err != nil {
 		return
 	}
@@ -130,7 +136,7 @@ func widgetUpdateEp(c *gin.Context) {
 		return
 	}
 
-	err = queries.UpdateWidgetOfVisualization(&vis, widget_input, widgetID)
+	err = UpdateWidgetOfVisualization(&vis, widget_input, widgetID)
 	if common.ProvideErrorResponse(c, err) == false {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "OK",
@@ -138,41 +144,41 @@ func widgetUpdateEp(c *gin.Context) {
 	}
 }
 
-func widgetReadEp(c *gin.Context) {
+func GetWidget(c *gin.Context) {
 
-	simID, err := GetSimulationID(c)
+	simID, err := common.GetSimulationID(c)
 	if err != nil {
 		return
 	}
 
-	sim, err := queries.FindSimulation(simID)
+	sim, err := simulation.FindSimulation(simID)
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
 
-	visID, err := GetVisualizationID(c)
+	visID, err := common.GetVisualizationID(c)
 	if err != nil {
 		return
 	}
 
-	visualization, err := queries.FindVisualizationOfSim(&sim, visID)
+	vis, err := visualization.FindVisualizationOfSim(&sim, visID)
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
 
-	widgetID, err := GetWidgetID(c)
+	widgetID, err := common.GetWidgetID(c)
 	if err != nil {
 		return
 	}
 
-	widget, err := queries.FindWidgetOfVisualization(&visualization, widgetID)
-	serializer := serializers.WidgetSerializer{c, widget}
+	widget, err := FindWidgetOfVisualization(&vis, widgetID)
+	serializer := common.WidgetSerializer{c, widget}
 	c.JSON(http.StatusOK, gin.H{
 		"widget": serializer.Response(),
 	})
 }
 
-func widgetDeleteEp(c *gin.Context) {
+func DeleteWidget(c *gin.Context) {
 
 	// simID, err := GetSimulationID(c)
 	// if err != nil {
@@ -215,18 +221,3 @@ func widgetDeleteEp(c *gin.Context) {
 }
 
 
-func GetWidgetID(c *gin.Context) (int, error) {
-
-	widgetID, err := strconv.Atoi(c.Param("WidgetID"))
-
-	if err != nil {
-		errormsg := fmt.Sprintf("Bad request. No or incorrect format of widget ID")
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
-		})
-		return -1, err
-	} else {
-		return widgetID, err
-
-	}
-}

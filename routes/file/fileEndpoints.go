@@ -1,22 +1,34 @@
-package endpoints
+package file
 
 import (
 	"fmt"
-	"strconv"
-
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/queries"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/serializers"
-
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
 )
 
-// fileMReadAllEp godoc
+func RegisterFileEndpoints(r *gin.RouterGroup){
+	r.GET("/:simulationID/models/:modelID/files", GetFilesOfModel)
+	r.POST ("/:simulationID/models/:modelID/file", AddFileToModel)
+	//r.POST ("/:simulationID/models/:modelID/file", CloneFileOfModel)
+	r.GET("/:simulationID/models/:modelID/file", GetFileOfModel)
+	r.PUT("/:simulationID/models/:modelID/file", UpdateFileOfModel)
+	r.DELETE("/:simulationID/models/:modelID/file", DeleteFileOfModel)
+
+	r.GET("/:simulationID/visualizations/:visualizationID/widgets/:widgetID/files", GetFilesOfWidget)
+	r.POST ("/:simulationID/visualizations/:visualizationID/widgets/:widgetID/file", AddFileToWidget)
+	//r.POST ("/:simulationID/visualizations/:visualizationID/widgets/:widgetID/file", CloneFileOfWidget)
+	r.GET("/:simulationID/visualizations/:visualizationID/widgets/:widgetID/file", GetFileOfWidget)
+	r.PUT("/:simulationID/visualizations/:visualizationID/widgets/:widgetID/file", UpdateFileOfWidget)
+	r.DELETE("/:simulationID/visualizations/:visualizationID/widgets/:widgetID/file", DeleteFileOfWidget)
+}
+
+// GetFilesOfModel godoc
 // @Summary Get all parameters of files of model
-// @ID GetAllModelFileParams
+// @ID GetFilesOfModel
 // @Tags file
 // @Success 200 {array} common.File "File parameters requested by user"
 // @Failure 401 "Unauthorized Access"
@@ -26,7 +38,7 @@ import (
 // @Param simulationID path int true "Simulation ID"
 // @Param modelID path int true "Model ID"
 // @Router simulations/{simulationID}/models/{modelID}/files [get]
-func fileMReadAllEp(c *gin.Context) {
+func GetFilesOfModel(c *gin.Context) {
 
 	simulationID, modelID, err := getRequestParams(c)
 	if err != nil{
@@ -34,10 +46,10 @@ func fileMReadAllEp(c *gin.Context) {
 	}
 
 	// Find files' properties in DB and return in HTTP response, no change to DB
-	allFiles, _, err := queries.FindFiles(c, -1, modelID, simulationID)
+	allFiles, _, err := FindFiles(c, -1, modelID, simulationID)
 
 	if common.ProvideErrorResponse(c, err) == false {
-		serializer := serializers.FilesSerializerNoAssoc{c, allFiles}
+		serializer := common.FilesSerializerNoAssoc{c, allFiles}
 		c.JSON(http.StatusOK, gin.H{
 			"files": serializer.Response(),
 		})
@@ -45,9 +57,9 @@ func fileMReadAllEp(c *gin.Context) {
 
 }
 
-// fileMRegistrationEp godoc
+// AddFileToModel godoc
 // @Summary Get all parameters of files of model
-// @ID PostFileToModel
+// @ID AddFileToModel
 // @Tags file
 // @Success 200 "OK."
 // @Failure 401 "Unauthorized Access"
@@ -57,7 +69,7 @@ func fileMReadAllEp(c *gin.Context) {
 // @Param simulationID path int true "Simulation ID"
 // @Param modelID path int true "Model ID"
 // @Router simulations/{simulationID}/models/{modelID}/file [post]
-func fileMRegistrationEp(c *gin.Context) {
+func AddFileToModel(c *gin.Context) {
 
 	simulationID, modelID, err := getRequestParams(c)
 	if err != nil{
@@ -65,11 +77,11 @@ func fileMRegistrationEp(c *gin.Context) {
 	}
 
 	// Save file locally and register file in DB, HTTP response is set by this method
-	queries.RegisterFile(c,-1, modelID, simulationID)
+	RegisterFile(c,-1, modelID, simulationID)
 
 }
 
-func fileMCloneEp(c *gin.Context) {
+func CloneFileOfModel(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "NOT implemented",
@@ -77,7 +89,7 @@ func fileMCloneEp(c *gin.Context) {
 
 }
 
-func fileMReadEp(c *gin.Context) {
+func GetFileOfModel(c *gin.Context) {
 
 	simulationID, modelID, err := getRequestParams(c)
 	if err != nil{
@@ -85,10 +97,10 @@ func fileMReadEp(c *gin.Context) {
 	}
 
 	// Read file from disk and return in HTTP response, no change to DB
-	queries.ReadFile(c, -1, modelID, simulationID)
+	ReadFile(c, -1, modelID, simulationID)
 }
 
-func fileMUpdateEp(c *gin.Context) {
+func UpdateFileOfModel(c *gin.Context) {
 
 	simulationID, modelID, err := getRequestParams(c)
 	if err != nil{
@@ -96,10 +108,10 @@ func fileMUpdateEp(c *gin.Context) {
 	}
 
 	// Update file locally and update file entry in DB, HTTP response is set by this method
-	queries.UpdateFile(c,-1, modelID, simulationID)
+	UpdateFile(c,-1, modelID, simulationID)
 }
 
-func fileMDeleteEp(c *gin.Context) {
+func DeleteFileOfModel(c *gin.Context) {
 
 	simulationID, modelID, err := getRequestParams(c)
 	if err != nil{
@@ -107,12 +119,12 @@ func fileMDeleteEp(c *gin.Context) {
 	}
 
 	// Delete file from disk and remove entry from DB, HTTP response is set by this method
-	queries.DeleteFile(c, -1, modelID, simulationID)
+	DeleteFile(c, -1, modelID, simulationID)
 
 
 }
 
-func fileWReadAllEp(c *gin.Context) {
+func GetFilesOfWidget(c *gin.Context) {
 
 	simulationID, widgetID, err := getRequestParams(c)
 	if err != nil{
@@ -120,10 +132,10 @@ func fileWReadAllEp(c *gin.Context) {
 	}
 
 	// Find files' properties in DB and return in HTTP response, no change to DB
-	allFiles, _, err := queries.FindFiles(c, widgetID, -1, simulationID)
+	allFiles, _, err := FindFiles(c, widgetID, -1, simulationID)
 
 	if common.ProvideErrorResponse(c, err) == false {
-		serializer := serializers.FilesSerializerNoAssoc{c, allFiles}
+		serializer := common.FilesSerializerNoAssoc{c, allFiles}
 		c.JSON(http.StatusOK, gin.H{
 			"files": serializer.Response(),
 		})
@@ -131,7 +143,7 @@ func fileWReadAllEp(c *gin.Context) {
 
 }
 
-func fileWRegistrationEp(c *gin.Context) {
+func AddFileToWidget(c *gin.Context) {
 
 	simulationID, widgetID, err := getRequestParams(c)
 	if err != nil{
@@ -139,11 +151,11 @@ func fileWRegistrationEp(c *gin.Context) {
 	}
 
 	// Save file locally and register file in DB, HTTP response is set by this method
-	queries.RegisterFile(c,widgetID, -1, simulationID)
+	RegisterFile(c,widgetID, -1, simulationID)
 
 }
 
-func fileWCloneEp(c *gin.Context) {
+func CloneFileOfWidget(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "NOT implemented",
@@ -151,7 +163,7 @@ func fileWCloneEp(c *gin.Context) {
 
 }
 
-func fileWReadEp(c *gin.Context) {
+func GetFileOfWidget(c *gin.Context) {
 
 	simulationID, widgetID, err := getRequestParams(c)
 	if err != nil{
@@ -159,10 +171,10 @@ func fileWReadEp(c *gin.Context) {
 	}
 
 	// Read file from disk and return in HTTP response, no change to DB
-	queries.ReadFile(c, widgetID, -1, simulationID)
+	ReadFile(c, widgetID, -1, simulationID)
 }
 
-func fileWUpdateEp(c *gin.Context) {
+func UpdateFileOfWidget(c *gin.Context) {
 
 	simulationID, widgetID, err := getRequestParams(c)
 	if err != nil{
@@ -170,10 +182,10 @@ func fileWUpdateEp(c *gin.Context) {
 	}
 
 	// Update file locally and update file entry in DB, HTTP response is set by this method
-	queries.UpdateFile(c,widgetID, -1, simulationID)
+	UpdateFile(c,widgetID, -1, simulationID)
 }
 
-func fileWDeleteEp(c *gin.Context) {
+func DeleteFileOfWidget(c *gin.Context) {
 
 	simulationID, widgetID, err := getRequestParams(c)
 	if err != nil{
@@ -181,7 +193,7 @@ func fileWDeleteEp(c *gin.Context) {
 	}
 
 	// Delete file from disk and remove entry from DB, HTTP response is set by this method
-	queries.DeleteFile(c, widgetID, -1, simulationID)
+	DeleteFile(c, widgetID, -1, simulationID)
 
 
 }
@@ -254,9 +266,9 @@ func getRequestParams(c *gin.Context) (int, int, error){
 	}
 
 	var subID int
-	subID, err = GetModelID(c)
+	subID, err = common.GetModelID(c)
 	if err != nil{
-		subID, err = GetWidgetID(c)
+		subID, err = common.GetWidgetID(c)
 		if err != nil {
 			return -1, -1, err
 		}
