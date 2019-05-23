@@ -51,6 +51,8 @@ build:backend:
   image: villaswebbackendgo:ubuntu
   script:
     - go mod tidy
+    - go get -u github.com/swaggo/swag/cmd/swag
+    - swag init -p pascalcase -g "start.go" -o "./doc/autoapi/"
     - go build
 
 
@@ -65,6 +67,8 @@ test:backend:database:
   script:
     - /etc/init.d/postgresql start
     - go mod tidy
+    - go get -u github.com/swaggo/swag/cmd/swag
+    - swag init -p pascalcase -g "start.go" -o "./doc/autoapi/"
     - cd common
     - go test -v -args -dbhost=/var/run/postgresql
   dependencies:
@@ -78,6 +82,8 @@ test:backend:endpoints:
   script:
     - /etc/init.d/postgresql start
     - go mod tidy
+    - go get -u github.com/swaggo/swag/cmd/swag
+    - swag init -p pascalcase -g "start.go" -o "./doc/autoapi/"
     - cd endpoints
     - go test -v -args -dbhost=/var/run/postgresql
   dependencies:
