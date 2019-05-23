@@ -52,7 +52,7 @@ build:backend:
   script:
     - go mod tidy
     - go get -u github.com/swaggo/swag/cmd/swag
-    - swag init -p pascalcase -g "start.go" -o "./doc/autoapi/"
+    - ~/go/bin/swag init -p pascalcase -g "start.go" -o "./doc/autoapi/"
     - go build
 
 
@@ -68,7 +68,7 @@ test:backend:database:
     - /etc/init.d/postgresql start
     - go mod tidy
     - go get -u github.com/swaggo/swag/cmd/swag
-    - swag init -p pascalcase -g "start.go" -o "./doc/autoapi/"
+    - ~/go/bin/swag init -p pascalcase -g "start.go" -o "./doc/autoapi/"
     - cd common
     - go test -v -args -dbhost=/var/run/postgresql
   dependencies:
@@ -83,7 +83,7 @@ test:backend:endpoints:
     - /etc/init.d/postgresql start
     - go mod tidy
     - go get -u github.com/swaggo/swag/cmd/swag
-    - swag init -p pascalcase -g "start.go" -o "./doc/autoapi/"
+    - ~/go/bin/swag init -p pascalcase -g "start.go" -o "./doc/autoapi/"
     - cd endpoints
     - go test -v -args -dbhost=/var/run/postgresql
   dependencies:
