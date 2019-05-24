@@ -7,7 +7,7 @@ import (
 func FindVisualizationWidgets(visualization *common.Visualization) ([]common.Widget, int, error) {
 	db := common.GetDB()
 	var widgets []common.Widget
-	err := db.Model(visualization).Related(&widgets, "Widgets").Error
+	err := db.Order("ID asc").Model(visualization).Related(&widgets, "Widgets").Error
 	return widgets, len(widgets), err
 }
 
@@ -23,7 +23,7 @@ func FindWidget(widgetID int) (common.Widget, error){
 func FindWidgetsOfVisualization(vis * common.Visualization) ([]common.Widget, int, error) {
 	db := common.GetDB()
 	var widgets []common.Widget
-	err := db.Model(vis).Related(&vis, "Widgets").Error
+	err := db.Order("ID asc").Model(vis).Related(&vis, "Widgets").Error
 	return widgets, len(widgets), err
 }
 

@@ -7,14 +7,14 @@ import (
 func FindAllUsers() ([]common.User, int, error) {
 	db := common.GetDB()
 	var users []common.User
-	err := db.Find(&users).Error
+	err := db.Order("ID asc").Find(&users).Error
 	return users, len(users), err
 }
 
 func FindAllUsersSim(sim *common.Simulation) ([]common.User, int, error) {
 	db := common.GetDB()
 	var users []common.User
-	err := db.Model(sim).Related(&users, "Users").Error
+	err := db.Order("ID asc").Model(sim).Related(&users, "Users").Error
 	return users, len(users), err
 }
 

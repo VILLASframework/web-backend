@@ -17,7 +17,7 @@ func FindAllModels(simID int) ([]common.Model, int, error) {
 		return models, 0, err
 	}
 
-	err = db.Model(sim).Related(&models, "Models").Error
+	err = db.Order("ID asc").Model(sim).Related(&models, "Models").Error
 
 	return models, len(models), err
 }

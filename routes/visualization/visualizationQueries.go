@@ -7,7 +7,7 @@ import (
 func FindAllVisualizationsOfSim(sim *common.Simulation) ([]common.Visualization, int, error) {
 	db := common.GetDB()
 	var visualizations []common.Visualization
-	err := db.Model(sim).Related(&visualizations, "Visualizations").Error
+	err := db.Order("ID asc").Model(sim).Related(&visualizations, "Visualizations").Error
 	return visualizations, len(visualizations), err
 }
 

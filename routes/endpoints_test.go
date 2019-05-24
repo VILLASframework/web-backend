@@ -39,8 +39,8 @@ var user_B = common.UserResponse{
 }
 
 var myUsers = []common.UserResponse{
-	user_B,
 	user_A,
+	user_B,
 }
 
 var msgUsers = common.ResponseMsgUsers{

@@ -4,17 +4,21 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
 )
 
+type Simulation struct{
+	common.Simulation
+}
+
 func FindAllSimulations() ([]common.Simulation, int, error) {
 	db := common.GetDB()
 	var simulations []common.Simulation
-	err := db.Find(&simulations).Error
+	err := db.Order("ID asc").Find(&simulations).Error
 	return simulations, len(simulations), err
 }
 
 func FindUserSimulations(user *common.User) ([]common.Simulation, int, error) {
 	db := common.GetDB()
 	var simulations []common.Simulation
-	err := db.Model(user).Related(&simulations, "Simulations").Error
+	err := db.Order("ID asc").Model(user).Related(&simulations, "Simulations").Error
 	return simulations, len(simulations), err
 }
 

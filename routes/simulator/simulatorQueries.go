@@ -7,7 +7,7 @@ import (
 func FindAllSimulators() ([]common.Simulator, int, error) {
 	db := common.GetDB()
 	var simulators []common.Simulator
-	err := db.Find(&simulators).Error
+	err := db.Order("ID asc").Find(&simulators).Error
 	return simulators, len(simulators), err
 }
 
