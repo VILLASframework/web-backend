@@ -31,7 +31,7 @@ import (
 // @license.name GNU GPL 3.0
 // @license.url http://www.gnu.de/documents/gpl-3.0.en.html
 
-// @host aaa.bbb.ccc.ddd:pppp
+// @host localhost:8080
 // @BasePath /api/v2
 func main() {
 	// Testing

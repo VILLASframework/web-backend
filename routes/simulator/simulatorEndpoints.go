@@ -17,6 +17,19 @@ func RegisterSimulatorEndpoints(r *gin.RouterGroup){
 	r.POST("/:simulatorID", SendActionToSimulator)
 }
 
+// GetSimulators godoc
+// @Summary Get all simulators
+// @ID GetSimulators
+// @Tags simulators
+// @Produce json
+// @Success 200 {array} common.SimulatorResponse "Simulator parameters requested by user"
+// @Failure 401 "Unauthorized Access"
+// @Failure 403 "Access forbidden."
+// @Failure 404 "Not found"
+// @Failure 500 "Internal server error"
+// @Param simulationID path int true "Simulation ID"
+// @Param modelID path int true "Model ID"
+// @Router /simulators [get]
 func GetSimulators(c *gin.Context) {
 	allSimulators, _, _ := FindAllSimulators()
 	serializer := common.SimulatorsSerializer{c, allSimulators}
