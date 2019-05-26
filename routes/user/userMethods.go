@@ -36,6 +36,15 @@ func (u *User) save() error {
 	return err
 }
 
+func (u *User) byID(id uint) error {
+	db := common.GetDB()
+	err := db.Find(u, id).Error
+	if err != nil {
+		return fmt.Errorf("User with id=%v does not exist", id)
+	}
+	return nil
+}
+
 func (u *User) setPassword(password string) error {
 	if len(password) == 0 {
 		return fmt.Errorf("Password cannot be empty")

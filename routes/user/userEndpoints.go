@@ -6,6 +6,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -110,7 +111,7 @@ func usersReadEp(c *gin.Context) {
 	allUsers, _, _ := FindAllUsers()
 	serializer := UsersSerializer{c, allUsers}
 	c.JSON(http.StatusOK, gin.H{
-		"users": serializer.Response(),
+		"users": serializer.Response(true),
 	})
 }
 
@@ -168,8 +169,19 @@ func userUpdateEp(c *gin.Context) {
 }
 
 func userReadEp(c *gin.Context) {
+
+	var user User
+	id, _ := strconv.ParseInt(c.Param("UserID"), 10, 64)
+
+	err := user.byID(uint(id))
+	if err != nil {
+		c.JSON(http.StatusNotFound, fmt.Sprintf("%v", err))
+		return
+	}
+
+	serializer := UserSerializer{c, user.User}
 	c.JSON(http.StatusOK, gin.H{
-		"message": "NOT implemented",
+		"user": serializer.Response(false),
 	})
 }
 
