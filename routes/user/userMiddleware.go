@@ -70,7 +70,10 @@ func Authentication(unauthorized bool) gin.HandlerFunc {
 		// If the authentication extraction fails return HTTP CODE 401
 		if err != nil {
 			if unauthorized {
-				ctx.AbortWithError(http.StatusUnauthorized, err)
+				ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+					"succes":  false,
+					"message": "Authentication failed",
+				})
 			}
 			return
 		}
