@@ -23,17 +23,19 @@ type User struct {
 	common.User // check golang embedding types
 }
 
-func findUserByUsername(username string) (User, error) {
-	db := common.GetDB()
-	var user User
-	err := db.Find(&user, "Username = ?", username).Error
-	return user, err
-}
-
 func (u *User) save() error {
 	db := common.GetDB()
 	err := db.Create(u).Error
 	return err
+}
+
+func (u *User) byUsername(username string) error {
+	db := common.GetDB()
+	err := db.Find(u, "Username = ?", username).Error
+	if err != nil {
+		return fmt.Errorf("User with username=%v does not exist", username)
+	}
+	return nil
 }
 
 func (u *User) byID(id uint) error {

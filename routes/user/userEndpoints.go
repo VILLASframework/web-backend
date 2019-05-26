@@ -52,7 +52,8 @@ func authenticationEp(c *gin.Context) {
 	}
 
 	// Find the username in the database
-	user, err := findUserByUsername(loginRequest.Username)
+	var user User
+	err := user.byUsername(loginRequest.Username)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
@@ -62,7 +63,8 @@ func authenticationEp(c *gin.Context) {
 	}
 
 	// Validate the password
-	if user.validatePassword(loginRequest.Password) != nil {
+	err = user.validatePassword(loginRequest.Password)
+	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"success": false,
 			"message": "Invalid password",
@@ -131,7 +133,7 @@ func userRegistrationEp(c *gin.Context) {
 	// and in case of error raise 422
 
 	// Check that the username is NOT taken
-	_, err := findUserByUsername(newUser.Username)
+	err := newUser.byUsername(newUser.Username)
 	if err == nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{
 			"message": "Username is already taken",
