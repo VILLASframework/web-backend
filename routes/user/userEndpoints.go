@@ -29,7 +29,6 @@ func UsersRegister(r *gin.RouterGroup) {
 	r.PUT("/:UserID", userUpdateEp)
 	r.GET("", usersReadEp)
 	r.GET("/:UserID", userReadEp)
-	//r.GET("/me", userSelfEp) // TODO: this conflicts with GET /:userID
 	r.DELETE("/:UserID", userDeleteEp)
 }
 
@@ -175,12 +174,6 @@ func userReadEp(c *gin.Context) {
 }
 
 func userDeleteEp(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message": "NOT implemented",
-	})
-}
-
-func userSelfEp(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "NOT implemented",
 	})
