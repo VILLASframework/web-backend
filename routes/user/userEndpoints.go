@@ -3,9 +3,21 @@ package user
 import (
 	//"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
 	"fmt"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"time"
 )
+
+// TODO: the signing secret must be environmental variable
+const jwtSigningSecret = "This should NOT be here!!@33$8&"
+const weekHours = time.Hour * 24 * 7
+
+type tokenClaims struct {
+	UserID string `json:"id"`
+	Role   string `json:"role"`
+	jwt.StandardClaims
+}
 
 // `/authenticate` endpoint does not require Authentication
 func VisitorAuthenticate(r *gin.RouterGroup) {
@@ -58,12 +70,32 @@ func authenticationEp(c *gin.Context) {
 		return
 	}
 
-	// TODO: generate jwt
+	// create authentication token
+	claims := tokenClaims{
+		string(user.ID),
+		user.Role,
+		jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(weekHours).Unix(),
+			IssuedAt:  time.Now().Unix(),
+			Issuer:    "http://web.villas.fein-aachen.org/",
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	tokenString, err := token.SignedString([]byte(jwtSigningSecret))
+	if err != nil {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
+		})
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"success":          true,
 		"message":          "Authenticated",
-		"token":            "NOT yet implemented",
+		"token":            tokenString,
 		"Original request": loginRequest, // TODO: remove that
 	})
 }

@@ -7,10 +7,9 @@ import (
 	"github.com/dgrijalva/jwt-go/request"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strconv"
 	"strings"
 )
-
-const signatureSecret = "_A_strong_password_as_enviromental_variable_"
 
 func UserToContext(ctx *gin.Context, user_id uint) {
 	var user common.User
@@ -64,7 +63,7 @@ func Authentication(unauthorized bool) gin.HandlerFunc {
 						token.Header["alg"])
 				}
 				// return secret in byte format
-				secret := ([]byte(signatureSecret))
+				secret := ([]byte(jwtSigningSecret))
 				return secret, nil
 			})
 
@@ -78,8 +77,8 @@ func Authentication(unauthorized bool) gin.HandlerFunc {
 
 		// If the token is ok, pass user_id to context
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-			user_id := uint(claims["id"].(float64))
-			UserToContext(ctx, user_id)
+			user_id, _ := strconv.ParseInt(claims["id"].(string), 10, 64)
+			UserToContext(ctx, uint(user_id))
 		}
 	}
 }
