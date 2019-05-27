@@ -43,13 +43,11 @@ func main() {
 
 	api := r.Group("/api")
 
-	// use ginSwagger middleware to
 	simulation.RegisterSimulationEndpoints(api.Group("/simulations"))
 	model.RegisterModelEndpoints(api.Group("/models"))
 	visualization.RegisterVisualizationEndpoints(api.Group("/visualizations"))
 	widget.RegisterWidgetEndpoints(api.Group("/widgets"))
 	file.RegisterFileEndpoints(api.Group("/files"))
-
 	user.RegisterUserEndpoints(api.Group("/users"))
 	simulator.RegisterSimulatorEndpoints(api.Group("/simulators"))
 
