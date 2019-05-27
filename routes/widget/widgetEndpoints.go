@@ -11,14 +11,26 @@ import (
 )
 
 func RegisterWidgetEndpoints(r *gin.RouterGroup){
-	r.GET("/:simulationID/visualization/:visualizationID/widgets", GetWidgets)
-	r.POST("/:simulationID/visualization/:visualizationID/widget", AddWidget)
-	r.POST("/:simulationID/visualization/:visualizationID/widget:widgetID", CloneWidget)
-	r.PUT("/:simulationID/visualization/:visualizationID/widget/:widgetID", UpdateWidget)
-	r.GET("/:simulationID/visualization/:visualizationID/widget/:widgetID", GetWidget)
-	r.DELETE("/:simulationID/visualization/:visualizationID/widget/:widgetID", DeleteWidget)
+	r.GET("/", GetWidgets)
+	r.POST("/", AddWidget)
+	//r.POST("/:widgetID", CloneWidget)
+	r.PUT("/:widgetID", UpdateWidget)
+	r.GET("/:widgetID", GetWidget)
+	r.DELETE("/:widgetID", DeleteWidget)
 }
 
+// GetWidgets godoc
+// @Summary Get all widgets of visualization
+// @ID GetWidgets
+// @Produce  json
+// @Tags widgets
+// @Success 200 {array} common.WidgetResponse "Array of widgets to which belong to visualization"
+// @Failure 401 "Unauthorized Access"
+// @Failure 403 "Access forbidden."
+// @Failure 404 "Not found"
+// @Failure 500 "Internal server error"
+// @Param visualizationID query int true "Visualization ID"
+// @Router /widgets [get]
 func GetWidgets(c *gin.Context) {
 
 	simID, err := common.GetSimulationID(c)
@@ -52,6 +64,19 @@ func GetWidgets(c *gin.Context) {
 	})
 }
 
+// AddWidget godoc
+// @Summary Add a widget to a visualization
+// @ID AddWidget
+// @Accept json
+// @Produce json
+// @Tags widgets
+// @Param inputWidget body common.WidgetResponse true "Widget to be added incl. ID of visualization"
+// @Success 200 "OK."
+// @Failure 401 "Unauthorized Access"
+// @Failure 403 "Access forbidden."
+// @Failure 404 "Not found"
+// @Failure 500 "Internal server error"
+// @Router /widgets [post]
 func AddWidget(c *gin.Context) {
 
 	simID, err := common.GetSimulationID(c)
@@ -100,6 +125,20 @@ func CloneWidget(c *gin.Context) {
 	})
 }
 
+// UpdateWidget godoc
+// @Summary Update a widget
+// @ID UpdateWidget
+// @Tags widgets
+// @Accept json
+// @Produce json
+// @Param inputWidget body common.WidgetResponse true "Widget to be updated"
+// @Success 200 "OK."
+// @Failure 401 "Unauthorized Access"
+// @Failure 403 "Access forbidden."
+// @Failure 404 "Not found"
+// @Failure 500 "Internal server error"
+// @Param widgetID path int true "Widget ID"
+// @Router /widgets/{widgetID} [put]
 func UpdateWidget(c *gin.Context) {
 	simID, err := common.GetSimulationID(c)
 	if err != nil {
@@ -144,6 +183,18 @@ func UpdateWidget(c *gin.Context) {
 	}
 }
 
+// GetWidget godoc
+// @Summary Get a widget
+// @ID GetWidget
+// @Tags widgets
+// @Produce json
+// @Success 200 {object} common.WidgetResponse "Requested widget."
+// @Failure 401 "Unauthorized Access"
+// @Failure 403 "Access forbidden."
+// @Failure 404 "Not found"
+// @Failure 500 "Internal server error"
+// @Param widgetID path int true "Widget ID"
+// @Router /widgets/{widgetID} [get]
 func GetWidget(c *gin.Context) {
 
 	simID, err := common.GetSimulationID(c)
@@ -178,6 +229,19 @@ func GetWidget(c *gin.Context) {
 	})
 }
 
+
+// DeleteWidget godoc
+// @Summary Delete a widget
+// @ID DeleteWidget
+// @Tags widgets
+// @Produce json
+// @Success 200 "OK."
+// @Failure 401 "Unauthorized Access"
+// @Failure 403 "Access forbidden."
+// @Failure 404 "Not found"
+// @Failure 500 "Internal server error"
+// @Param widgetID path int true "Widget ID"
+// @Router /widgets/{widgetID} [delete]
 func DeleteWidget(c *gin.Context) {
 
 	// simID, err := GetSimulationID(c)

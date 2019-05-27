@@ -138,43 +138,7 @@ func RegisterFile(c *gin.Context, widgetID int, modelID int, simulationID int){
 
 }
 
-func UpdateFile(c *gin.Context, widgetID int, modelID int, simulationID int){
 
-	// Extract file from PUT request form
-	err := c.Request.ParseForm()
-	if err != nil {
-		errormsg := fmt.Sprintf("Bad request. Get form error: %s", err.Error())
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
-		})
-		return;
-	}
-
-	file_header, err := c.FormFile("file")
-	if err != nil {
-		errormsg := fmt.Sprintf("Bad request. Get form error: %s", err.Error())
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
-		})
-		return;
-	}
-
-	filename := filepath.Base(file_header.Filename)
-	filetype := file_header.Header.Get("Content-Type") // TODO make sure this is properly set in file header
-	size := file_header.Size
-	foldername := getFolderName(simulationID, modelID, widgetID)
-
-	err = modifyFileOnDisc(file_header, filename, foldername, uint(size), false)
-	if err != nil {
-		errormsg := fmt.Sprintf("Internal Server Error. Error saving file: %s", err.Error())
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": errormsg,
-		})
-		return
-	}
-
-	saveFileInDB(c, filename, foldername, filetype, uint(size), widgetID, modelID, false)
-}
 
 func ReadFile(c *gin.Context, widgetID int, modelID int, simulationID int){
 
@@ -220,13 +184,6 @@ func ReadFile(c *gin.Context, widgetID int, modelID int, simulationID int){
 	c.JSON(http.StatusOK, gin.H{
 		"message": "OK.",
 	})
-}
-
-
-
-
-func DeleteFile(c *gin.Context, widgetID int, nmodelID int, simulationID int){
-	// TODO
 }
 
 

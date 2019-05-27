@@ -12,29 +12,30 @@ import (
 )
 
 func RegisterModelEndpoints(r *gin.RouterGroup){
-	r.GET("/:simulationID/models/", GetModels)
-	r.POST("/:simulationID/models/", AddModel)
-	r.POST("/:simulationID/models/:modelID", CloneModel)
-	r.PUT("/:simulationID/models/:modelID", UpdateModel)
-	r.GET("/:simulationID/models/:modelID", GetModel)
-	r.DELETE("/:simulationID/models/:modelID", DeleteModel)
-	r.PUT("/:simulationID/models/:modelID/simulator", UpdateSimulator)
-	r.GET("/:simulationID/models/:modelID/simulator", GetSimulator)
-	r.POST("/:simulationID/models/:modelID/signals/:direction", UpdateSignals)
-	r.GET("/:simulationID/models/:modelID/signals/:direction", GetSignals)
+	r.GET("/", GetModels)
+	r.POST("/", AddModel)
+	//r.POST("/:modelID", CloneModel)
+	r.PUT("/:modelID", UpdateModel)
+	r.GET("/:modelID", GetModel)
+	r.DELETE("/:modelID", DeleteModel)
+	//r.PUT("/:modelID/simulator", UpdateSimulator)
+	//r.GET("/:modelID/simulator", GetSimulator)
+	//r.POST("/:modelID/signals/:direction", UpdateSignals)
+	//r.GET("/:modelID/signals/:direction", GetSignals)
 }
 
 // GetModels godoc
 // @Summary Get all models of simulation
 // @ID GetModels
 // @Produce  json
-// @Tags model
+// @Tags models
 // @Success 200 {array} common.ModelResponse "Array of models to which belong to simulation"
 // @Failure 401 "Unauthorized Access"
 // @Failure 403 "Access forbidden."
 // @Failure 404 "Not found"
 // @Failure 500 "Internal server error"
-// @Router /simulations/{simulationID}/models [get]
+// @Param simulationID query int true "Simulation ID"
+// @Router /models [get]
 func GetModels(c *gin.Context) {
 
 	simID, err := common.GetSimulationID(c)
@@ -56,14 +57,16 @@ func GetModels(c *gin.Context) {
 // AddModel godoc
 // @Summary Add a model to a simulation
 // @ID AddModel
-// @Tags model
-// @Param inputModel body common.ModelResponse true "Model to be added"
+// @Accept json
+// @Produce json
+// @Tags models
+// @Param inputModel body common.ModelResponse true "Model to be added incl. IDs of simulation and simulator"
 // @Success 200 "OK."
 // @Failure 401 "Unauthorized Access"
 // @Failure 403 "Access forbidden."
 // @Failure 404 "Not found"
 // @Failure 500 "Internal server error"
-// @Router /simulations/{simulationID}/models [post]
+// @Router /models [post]
 func AddModel(c *gin.Context) {
 
 	simID, err := common.GetSimulationID(c)
@@ -125,6 +128,20 @@ func CloneModel(c *gin.Context) {
 
 }
 
+// UpdateModel godoc
+// @Summary Update a model
+// @ID UpdateModel
+// @Tags models
+// @Accept json
+// @Produce json
+// @Param inputModel body common.ModelResponse true "Model to be updated"
+// @Success 200 "OK."
+// @Failure 401 "Unauthorized Access"
+// @Failure 403 "Access forbidden."
+// @Failure 404 "Not found"
+// @Failure 500 "Internal server error"
+// @Param modelID path int true "Model ID"
+// @Router /models/{modelID} [put]
 func UpdateModel(c *gin.Context) {
 
 	modelID, err := common.GetModelID(c)
@@ -151,6 +168,18 @@ func UpdateModel(c *gin.Context) {
 
 }
 
+// GetModel godoc
+// @Summary Get a model
+// @ID GetModel
+// @Tags models
+// @Produce json
+// @Success 200 {object} common.ModelResponse "Requested model."
+// @Failure 401 "Unauthorized Access"
+// @Failure 403 "Access forbidden."
+// @Failure 404 "Not found"
+// @Failure 500 "Internal server error"
+// @Param modelID path int true "Model ID"
+// @Router /models/{modelID} [get]
 func GetModel(c *gin.Context) {
 
 	modelID, err := common.GetModelID(c)
@@ -169,6 +198,18 @@ func GetModel(c *gin.Context) {
 	})
 }
 
+// DeleteModel godoc
+// @Summary Delete a model
+// @ID DeleteModel
+// @Tags models
+// @Produce json
+// @Success 200 "OK."
+// @Failure 401 "Unauthorized Access"
+// @Failure 403 "Access forbidden."
+// @Failure 404 "Not found"
+// @Failure 500 "Internal server error"
+// @Param modelID path int true "Model ID"
+// @Router /models/{modelID} [delete]
 func DeleteModel(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{

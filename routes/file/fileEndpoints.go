@@ -3,6 +3,7 @@ package file
 import (
 	"fmt"
 	"net/http"
+	"path/filepath"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -11,21 +12,23 @@ import (
 )
 
 func RegisterFileEndpoints(r *gin.RouterGroup){
-	r.GET("/:simulationID/models/:modelID/files", GetFilesOfModel)
-	r.POST ("/:simulationID/models/:modelID/file", AddFileToModel)
-	r.GET("/:simulationID/models/:modelID/file", GetFileOfModel)
-	r.PUT("/:simulationID/models/:modelID/file", UpdateFileOfModel)
-	r.DELETE("/:simulationID/models/:modelID/file", DeleteFileOfModel)
-	r.GET("/:simulationID/visualizations/:visualizationID/widgets/:widgetID/files", GetFilesOfWidget)
-	r.POST ("/:simulationID/visualizations/:visualizationID/widgets/:widgetID/file", AddFileToWidget)
-	r.GET("/:simulationID/visualizations/:visualizationID/widgets/:widgetID/file", GetFileOfWidget)
-	r.PUT("/:simulationID/visualizations/:visualizationID/widgets/:widgetID/file", UpdateFileOfWidget)
-	r.DELETE("/:simulationID/visualizations/:visualizationID/widgets/:widgetID/file", DeleteFileOfWidget)
+	r.GET("/", GetFiles)
+	r.POST ("/", AddFile)
+	r.GET("/:fileID", GetFile)
+	r.PUT("/:fileID", UpdateFile)
+	r.DELETE("/:fileID", DeleteFile)
+	//r.GET("/:simulationID/visualizations/:visualizationID/widgets/:widgetID/files", GetFilesOfWidget)
+	//r.POST ("/:simulationID/visualizations/:visualizationID/widgets/:widgetID/file", AddFileToWidget)
+	//r.GET("/:simulationID/visualizations/:visualizationID/widgets/:widgetID/file", GetFileOfWidget)
+	//r.PUT("/:simulationID/visualizations/:visualizationID/widgets/:widgetID/file", UpdateFileOfWidget)
+	//r.DELETE("/:simulationID/visualizations/:visualizationID/widgets/:widgetID/file", DeleteFileOfWidget)
 }
 
-// GetFilesOfModel godoc
-// @Summary Get all parameters of files of model
-// @ID GetFilesOfModel
+
+
+// GetFiles godoc
+// @Summary Get all files of a specific model or widget
+// @ID GetFiles
 // @Tags files
 // @Produce json
 // @Success 200 {array} common.FileResponse "File parameters requested by user"
@@ -33,9 +36,140 @@ func RegisterFileEndpoints(r *gin.RouterGroup){
 // @Failure 403 "Access forbidden."
 // @Failure 404 "Not found"
 // @Failure 500 "Internal server error"
-// @Param simulationID path int true "Simulation ID"
-// @Param modelID path int true "Model ID"
-// @Router /simulations/{simulationID}/models/{modelID}/files [get]
+// @Param originType query string true "Set to model for files of model, set to widget for files of widget"
+// @Param originID query int true "ID of either model or widget of which files are requested"
+// @Router /files [get]
+func GetFiles(c *gin.Context) {
+
+	// TODO if originType == "model" --> GetFilesOfModel, if originType == "vis" --> GetFilesOfWidget
+
+}
+
+// AddFile godoc
+// @Summary Add a file to a specific model or widget
+// @ID AddFile
+// @Tags files
+// @Produce json
+// @Accept text/plain
+// @Accept png
+// @Accept jpeg
+// @Accept gif
+// @Accept model/x-cim
+// @Accept model/x-cim.zip
+// @Success 200 "OK"
+// @Failure 401 "Unauthorized Access"
+// @Failure 403 "Access forbidden."
+// @Failure 404 "Not found"
+// @Failure 500 "Internal server error"
+// @Param inputFile formData file true "File to be uploaded"
+// @Param originType query string true "Set to model for files of model, set to widget for files of widget"
+// @Param originID query int true "ID of either model or widget of which files are requested"
+// @Router /files [post]
+func AddFile(c *gin.Context){
+	// TODO if originType == "model" --> AddFileToModel, if originType == "vis" --> AddFileToWidget
+}
+
+// GetFile godoc
+// @Summary Download a file
+// @ID GetFile
+// @Tags files
+// @Produce text/plain
+// @Produce png
+// @Produce jpeg
+// @Produce gif
+// @Produce model/x-cim
+// @Produce model/x-cim.zip
+// @Success 200 "OK"
+// @Failure 401 "Unauthorized Access"
+// @Failure 403 "Access forbidden."
+// @Failure 404 "Not found"
+// @Failure 500 "Internal server error"
+// @Param fileID path int true "ID of the file to download"
+// @Router /files/{fileID} [get]
+func GetFile(c *gin.Context){
+	// TODO
+}
+
+// UpdateFile godoc
+// @Summary Update a file
+// @ID UpdateFile
+// @Tags files
+// @Produce json
+// @Accept text/plain
+// @Accept png
+// @Accept jpeg
+// @Accept gif
+// @Accept model/x-cim
+// @Accept model/x-cim.zip
+// @Success 200 "OK"
+// @Failure 401 "Unauthorized Access"
+// @Failure 403 "Access forbidden."
+// @Failure 404 "Not found"
+// @Failure 500 "Internal server error"
+// @Param fileID path int true "ID of the file to update"
+// @Router /files/{fileID} [put]
+func UpdateFile(c *gin.Context){
+
+	//TODO parse this info based on fileID parameter
+	simulationID := 1
+	modelID := 1
+	widgetID := 1
+
+
+	// Extract file from PUT request form
+	err := c.Request.ParseForm()
+	if err != nil {
+		errormsg := fmt.Sprintf("Bad request. Get form error: %s", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": errormsg,
+		})
+		return;
+	}
+
+	file_header, err := c.FormFile("file")
+	if err != nil {
+		errormsg := fmt.Sprintf("Bad request. Get form error: %s", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": errormsg,
+		})
+		return;
+	}
+
+	filename := filepath.Base(file_header.Filename)
+	filetype := file_header.Header.Get("Content-Type") // TODO make sure this is properly set in file header
+	size := file_header.Size
+	foldername := getFolderName(simulationID, modelID, widgetID)
+
+	err = modifyFileOnDisc(file_header, filename, foldername, uint(size), false)
+	if err != nil {
+		errormsg := fmt.Sprintf("Internal Server Error. Error saving file: %s", err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": errormsg,
+		})
+		return
+	}
+
+	saveFileInDB(c, filename, foldername, filetype, uint(size), widgetID, modelID, false)
+}
+
+
+// DeleteFile godoc
+// @Summary Delete a file
+// @ID DeleteFile
+// @Tags files
+// @Produce json
+// @Success 200 "OK"
+// @Failure 401 "Unauthorized Access"
+// @Failure 403 "Access forbidden."
+// @Failure 404 "Not found"
+// @Failure 500 "Internal server error"
+// @Param fileID path int true "ID of the file to update"
+// @Router /files/{fileID} [delete]
+func DeleteFile(c *gin.Context){
+	// TODO
+}
+
+
 func GetFilesOfModel(c *gin.Context) {
 
 	simulationID, modelID, err := getRequestParams(c)
@@ -55,20 +189,7 @@ func GetFilesOfModel(c *gin.Context) {
 
 }
 
-// AddFileToModel godoc
-// @Summary Get all parameters of files of model
-// @ID AddFileToModel
-// @Tags files
-// @Accept text/plain
-// @Produce json
-// @Success 200 "OK."
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
-// @Param simulationID path int true "Simulation ID"
-// @Param modelID path int true "Model ID"
-// @Router /simulations/{simulationID}/models/{modelID}/file [post]
+
 func AddFileToModel(c *gin.Context) {
 
 	simulationID, modelID, err := getRequestParams(c)
@@ -89,19 +210,7 @@ func CloneFileOfModel(c *gin.Context) {
 
 }
 
-// GetFileOfModel godoc
-// @Summary Download a file that belongs to a model
-// @ID GetFileOfModel
-// @Tags files
-// @Produce text/plain
-// @Success 200 "OK, File included in response."
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
-// @Param simulationID path int true "Simulation ID"
-// @Param modelID path int true "Model ID"
-// @Router /simulations/{simulationID}/models/{modelID}/file [get]
+
 func GetFileOfModel(c *gin.Context) {
 
 	simulationID, modelID, err := getRequestParams(c)
@@ -113,71 +222,31 @@ func GetFileOfModel(c *gin.Context) {
 	ReadFile(c, -1, modelID, simulationID)
 }
 
-// UpdateFileOfModel godoc
-// @Summary Update (overwrite) a file that belongs to a model
-// @ID UpdateFileOfModel
-// @Tags files
-// @Accept text/plain
-// @Produce json
-// @Success 200 "OK."
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
-// @Param simulationID path int true "Simulation ID"
-// @Param modelID path int true "Model ID"
-// @Router /simulations/{simulationID}/models/{modelID}/file [put]
+
 func UpdateFileOfModel(c *gin.Context) {
 
-	simulationID, modelID, err := getRequestParams(c)
-	if err != nil{
-		return
-	}
+	//simulationID, modelID, err := getRequestParams(c)
+	//if err != nil{
+	//	return
+	//}
 
 	// Update file locally and update file entry in DB, HTTP response is set by this method
-	UpdateFile(c,-1, modelID, simulationID)
+	//UpdateFile(c,-1, modelID, simulationID)
 }
 
-// DeleteFileOfModel godoc
-// @Summary Delete a file that belongs to a model
-// @ID DeleteFileOfModel
-// @Tags files
-// @Produce json
-// @Success 200 "OK."
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
-// @Param simulationID path int true "Simulation ID"
-// @Param modelID path int true "Model ID"
-// @Router /simulations/{simulationID}/models/{modelID}/file [delete]
 func DeleteFileOfModel(c *gin.Context) {
 
-	simulationID, modelID, err := getRequestParams(c)
-	if err != nil{
-		return
-	}
+	//simulationID, modelID, err := getRequestParams(c)
+	//if err != nil{
+	//	return
+	//}
 
 	// Delete file from disk and remove entry from DB, HTTP response is set by this method
-	DeleteFile(c, -1, modelID, simulationID)
+	//DeleteFile(c, -1, modelID, simulationID)
 
 
 }
 
-// GetFilesOfWidget godoc
-// @Summary Get all parameters of files of widget
-// @ID GetFilesOfWidget
-// @Tags files
-// @Produce json
-// @Success 200 {array} common.WidgetResponse "File parameters requested by user"
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
-// @Param simulationID path int true "Simulation ID"
-// @Param visualizationID path int true "Visualization ID"
-// @Param widgetID path int true "Widget ID"
-// @Router /simulations/{simulationID}/visualizations/{visualizationID}/widgets/{widgetID}/files [get]
 func GetFilesOfWidget(c *gin.Context) {
 
 	simulationID, widgetID, err := getRequestParams(c)
@@ -197,21 +266,7 @@ func GetFilesOfWidget(c *gin.Context) {
 
 }
 
-// AddFileToWidget godoc
-// @Summary Get all parameters of files of widget
-// @ID AddFileToWidget
-// @Tags files
-// @Accept text/plain
-// @Produce json
-// @Success 200 "OK."
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
-// @Param simulationID path int true "Simulation ID"
-// @Param visualizationID path int true "Visualization ID"
-// @Param widgetID path int true "Widget ID"
-// @Router /simulations/{simulationID}/visualizations/{visualizationID}/widgets/{widgetID}/file [post]
+
 func AddFileToWidget(c *gin.Context) {
 
 	simulationID, widgetID, err := getRequestParams(c)
@@ -232,20 +287,7 @@ func CloneFileOfWidget(c *gin.Context) {
 
 }
 
-// GetFileOfWidget godoc
-// @Summary Download a file that belongs to a widget
-// @ID GetFileOfWidget
-// @Tags files
-// @Produce text/plain
-// @Success 200 "OK, File included in response."
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
-// @Param simulationID path int true "Simulation ID"
-// @Param visualizationID path int true "Visualization ID"
-// @Param widgetID path int true "Widget ID"
-// @Router /simulations/{simulationID}/visualizations/{visualizationID}/widgets/{widgetID}/file [get]
+
 func GetFileOfWidget(c *gin.Context) {
 
 	simulationID, widgetID, err := getRequestParams(c)
@@ -257,55 +299,28 @@ func GetFileOfWidget(c *gin.Context) {
 	ReadFile(c, widgetID, -1, simulationID)
 }
 
-// UpdateFileOfWidget godoc
-// @Summary Update (overwrite) a file that belongs to a widget
-// @ID UpdateFileOfWidget
-// @Tags files
-// @Accept text/plain
-// @Produce json
-// @Success 200 "OK."
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
-// @Param simulationID path int true "Simulation ID"
-// @Param visualizationID path int true "Visualization ID"
-// @Param widgetID path int true "Widget ID"
-// @Router /simulations/{simulationID}/visualizations/{visualizationID}/widgets/{widgetID}/file [put]
+
 func UpdateFileOfWidget(c *gin.Context) {
 
-	simulationID, widgetID, err := getRequestParams(c)
-	if err != nil{
-		return
-	}
-
-	// Update file locally and update file entry in DB, HTTP response is set by this method
-	UpdateFile(c,widgetID, -1, simulationID)
+	//simulationID, widgetID, err := getRequestParams(c)
+	//if err != nil{
+	//	return
+	//}
+	//
+	//// Update file locally and update file entry in DB, HTTP response is set by this method
+	//UpdateFile(c,widgetID, -1, simulationID)
 }
 
-// DeleteFileOfWidget godoc
-// @Summary Delete a file that belongs to a widget
-// @ID DeleteFileOfWidget
-// @Tags files
-// @Produce json
-// @Success 200 "OK."
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
-// @Param simulationID path int true "Simulation ID"
-// @Param visualizationID path int true "Visualization ID"
-// @Param widgetID path int true "Widget ID"
-// @Router /simulations/{simulationID}/visualizations/{visualizationID}/widgets/{widgetID}/file [delete]
+
 func DeleteFileOfWidget(c *gin.Context) {
 
-	simulationID, widgetID, err := getRequestParams(c)
-	if err != nil{
-		return
-	}
-
-	// Delete file from disk and remove entry from DB, HTTP response is set by this method
-	DeleteFile(c, widgetID, -1, simulationID)
+	//simulationID, widgetID, err := getRequestParams(c)
+	//if err != nil{
+	//	return
+	//}
+	//
+	//// Delete file from disk and remove entry from DB, HTTP response is set by this method
+	//DeleteFile(c, widgetID, -1, simulationID)
 
 
 }

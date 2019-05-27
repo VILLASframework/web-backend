@@ -36,6 +36,11 @@ func (m *Model) addToSimulation(simID int) error {
 		return err
 	}
 
+	err = db.Create(m).Error
+	if err != nil {
+		return err
+	}
+
 	err = db.Model(&sim).Association("Models").Append(m).Error
 	return err
 }
