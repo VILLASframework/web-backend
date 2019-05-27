@@ -95,10 +95,9 @@ func authenticationEp(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"success":          true,
-		"message":          "Authenticated",
-		"token":            tokenString,
-		"Original request": loginRequest, // TODO: remove that
+		"success": true,
+		"message": "Authenticated",
+		"token":   tokenString,
 	})
 }
 
