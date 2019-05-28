@@ -18,8 +18,8 @@ func RegisterSimulationEndpoints(r *gin.RouterGroup){
 	r.DELETE("/:simulationID", DeleteSimulation)
 
 	r.GET("/:simulationID/users", GetUsersOfSimulation)
-	r.PUT("/:simulationID/user/", AddUserToSimulation)
-	r.DELETE("/:simulationID/user/", DeleteUserFromSimulation)
+	r.PUT("/:simulationID/user", AddUserToSimulation)
+	r.DELETE("/:simulationID/user", DeleteUserFromSimulation)
 }
 
 // GetSimulations godoc
@@ -188,10 +188,6 @@ func GetUsersOfSimulation(c *gin.Context) {
 // @Param username query string true "User name"
 // @Router /simulations/{simulationID}/user [put]
 func AddUserToSimulation(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message": "NOT implemented",
-	})
-
 	simID, err := common.GetSimulationID(c)
 	if err != nil {
 		return

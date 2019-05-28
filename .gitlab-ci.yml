@@ -84,7 +84,7 @@ test:backend:endpoints:
     - go mod tidy
     - go get -u github.com/swaggo/swag/cmd/swag
     - ~/go/bin/swag init -p pascalcase -g "start.go" -o "./doc/autoapi/"
-    - cd routes
+    - cd routes/simulation
     - go test -v -args -dbhost=/var/run/postgresql
   dependencies:
     - build:backend

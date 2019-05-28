@@ -1,4 +1,4 @@
-package routes
+package simulation
 
 import (
 	"encoding/json"
@@ -11,13 +11,6 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/file"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/model"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulation"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulator"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/user"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/visualization"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/widget"
 )
 
 
@@ -83,13 +76,7 @@ func TestSimulationEndpoints(t *testing.T) {
 
 	router := gin.Default()
 	api := router.Group("/api")
-	simulation.RegisterSimulationEndpoints(api.Group("/simulations"))
-	model.RegisterModelEndpoints(api.Group("/models"))
-	visualization.RegisterVisualizationEndpoints(api.Group("/visualizations"))
-	widget.RegisterWidgetEndpoints(api.Group("/widgets"))
-	file.RegisterFileEndpoints(api.Group("/files"))
-	user.RegisterUserEndpoints(api.Group("/users"))
-	simulator.RegisterSimulatorEndpoints(api.Group("/simulators"))
+	RegisterSimulationEndpoints(api.Group("/simulations"))
 
 	msgOKjson, err := json.Marshal(msgOK)
 	if err !=nil {
@@ -120,15 +107,13 @@ func TestSimulationEndpoints(t *testing.T) {
 	// test GET simulations/:SimulationID/users
 	testEndpoint(t, router, "/api/simulations/1/users", "GET", "", 200, string(msgUsersjson))
 
-	// test DELETE simulations/:SimulationID/user/:username
-	testEndpoint(t, router, "/api/simulations/1/user/?username=User_A", "DELETE", "", 200, string(msgOKjson))
+	// test DELETE simulations/:SimulationID/user
+	testEndpoint(t, router, "/api/simulations/1/user?username=User_A", "DELETE", "", 200, string(msgOKjson))
 
-	// test PUT simulations/:SimulationID/user/:username
-	testEndpoint(t, router, "/api/simulations/1/user/?username=User_A", "PUT", "", 200, string(msgOKjson))
-
+	// test PUT simulations/:SimulationID/user
+	testEndpoint(t, router, "/api/simulations/1/user?username=User_A", "PUT", "", 200, string(msgOKjson))
 
 	// TODO add more tests
-
 }
 
 
