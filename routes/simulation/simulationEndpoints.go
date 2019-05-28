@@ -18,8 +18,8 @@ func RegisterSimulationEndpoints(r *gin.RouterGroup){
 	r.DELETE("/:simulationID", DeleteSimulation)
 
 	r.GET("/:simulationID/users", GetUsersOfSimulation)
-	r.PUT("/:simulationID/users/:userID", AddUserToSimulation)
-	r.DELETE("/:simulationID/users/:userID", DeleteUserFromSimulation)
+	r.PUT("/:simulationID/users/:username", AddUserToSimulation)
+	r.DELETE("/:simulationID/users/:username", DeleteUserFromSimulation)
 }
 
 // GetSimulations godoc
@@ -175,7 +175,7 @@ func GetUsersOfSimulation(c *gin.Context) {
 
 
 // AddUserToSimulation godoc
-// @Summary Add a user to a asimulation
+// @Summary Add a user to a a simulation
 // @ID AddUserToSimulation
 // @Tags simulations
 // @Produce json
@@ -185,8 +185,8 @@ func GetUsersOfSimulation(c *gin.Context) {
 // @Failure 404 "Not found"
 // @Failure 500 "Internal server error"
 // @Param simulationID path int true "Simulation ID"
-// @Param userID path int true "User ID"
-// @Router /simulations/{simulationID}/users/{userID} [put]
+// @Param username path int true "User name"
+// @Router /simulations/{simulationID}/users/{username} [put]
 func AddUserToSimulation(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "NOT implemented",
@@ -230,8 +230,8 @@ func AddUserToSimulation(c *gin.Context) {
 // @Failure 404 "Not found"
 // @Failure 500 "Internal server error"
 // @Param simulationID path int true "Simulation ID"
-// @Param userID path int true "User ID"
-// @Router /simulations/{simulationID}/users/{userID} [delete]
+// @Param username path int true "User ID"
+// @Router /simulations/{simulationID}/users/{username} [delete]
 func DeleteUserFromSimulation(c *gin.Context) {
 	simID, err := common.GetSimulationID(c)
 	if err != nil {
