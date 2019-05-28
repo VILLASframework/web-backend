@@ -22,10 +22,10 @@ type tokenClaims struct {
 	jwt.StandardClaims
 }
 
-type AuthResponse struct{
-	Success bool `json:"success"`
+type AuthResponse struct {
+	Success bool   `json:"success"`
 	Message string `json:"message"`
-	Token string `json:"token"`
+	Token   string `json:"token"`
 }
 
 // `/authenticate` endpoint does not require Authentication
