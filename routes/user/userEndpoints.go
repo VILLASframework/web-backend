@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
 )
 
 // TODO: the signing secret must be environmental variable
@@ -20,19 +22,37 @@ type tokenClaims struct {
 	jwt.StandardClaims
 }
 
+type AuthResponse struct{
+	Success bool `json:"success"`
+	Message string `json:"message"`
+	Token string `json:"token"`
+}
+
 // `/authenticate` endpoint does not require Authentication
 func VisitorAuthenticate(r *gin.RouterGroup) {
 	r.POST("", authenticationEp)
 }
 
-func UsersRegister(r *gin.RouterGroup) {
-	r.POST("", userRegistrationEp)
-	r.PUT("/:UserID", userUpdateEp)
-	r.GET("", usersReadEp)
-	r.GET("/:UserID", userReadEp)
-	r.DELETE("/:UserID", userDeleteEp)
+func RegisterUserEndpoints(r *gin.RouterGroup) {
+	r.POST("", addUser)
+	r.PUT("/:UserID", updateUser)
+	r.GET("", getUsers)
+	r.GET("/:UserID", getUser)
+	r.DELETE("/:UserID", deleteUser)
 }
 
+// authenticationEp godoc
+// @Summary Authentication for user
+// @ID authenticationEp
+// @Accept json
+// @Produce json
+// @Tags users
+// @Param inputUser body user.Credentials true "Credentials of user"
+// @Success 200 {object} user.AuthResponse "JSON web token and message"
+// @Failure 401 "Unauthorized Access"
+// @Failure 404 "Not found"
+// @Failure 422 "Unprocessable entity."
+// @Router /authenticate [post]
 func authenticationEp(c *gin.Context) {
 
 	// Bind the response (context) with the Credentials struct
@@ -101,7 +121,18 @@ func authenticationEp(c *gin.Context) {
 	})
 }
 
-func usersReadEp(c *gin.Context) {
+// GetUsers godoc
+// @Summary Get all users
+// @ID GetUsers
+// @Produce  json
+// @Tags users
+// @Success 200 {array} common.UserResponse "Array of users"
+// @Failure 401 "Unauthorized Access"
+// @Failure 403 "Access forbidden."
+// @Failure 404 "Not found"
+// @Failure 500 "Internal server error"
+// @Router /users [get]
+func getUsers(c *gin.Context) {
 	//// dummy TODO: check in the middleware if the user is authorized
 	//authorized := false
 	//// TODO: move this redirect in the authentication middleware
@@ -110,13 +141,26 @@ func usersReadEp(c *gin.Context) {
 	//return
 	//}
 	allUsers, _, _ := FindAllUsers()
-	serializer := UsersSerializer{c, allUsers}
+	serializer := common.UsersSerializer{c, allUsers}
 	c.JSON(http.StatusOK, gin.H{
 		"users": serializer.Response(true),
 	})
 }
 
-func userRegistrationEp(c *gin.Context) {
+// AddUser godoc
+// @Summary Add a user
+// @ID AddUser
+// @Accept json
+// @Produce json
+// @Tags users
+// @Param inputUser body common.UserResponse true "User to be added"
+// @Success 200 "OK."
+// @Failure 401 "Unauthorized Access"
+// @Failure 403 "Access forbidden."
+// @Failure 404 "Not found"
+// @Failure 500 "Internal server error"
+// @Router /users [post]
+func addUser(c *gin.Context) {
 
 	// Bind the response (context) with the User struct
 	var newUser User
@@ -163,13 +207,39 @@ func userRegistrationEp(c *gin.Context) {
 	})
 }
 
-func userUpdateEp(c *gin.Context) {
+// UpdateUser godoc
+// @Summary Update a user
+// @ID UpdateUser
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param inputUser body common.UserResponse true "User to be updated"
+// @Success 200 "OK."
+// @Failure 401 "Unauthorized Access"
+// @Failure 403 "Access forbidden."
+// @Failure 404 "Not found"
+// @Failure 500 "Internal server error"
+// @Param userID path int true "User ID"
+// @Router /users/{userID} [put]
+func updateUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "NOT implemented",
 	})
 }
 
-func userReadEp(c *gin.Context) {
+// GetUser godoc
+// @Summary Get user
+// @ID GetUser
+// @Produce  json
+// @Tags users
+// @Success 200 {object} common.UserResponse "User requested by user"
+// @Failure 401 "Unauthorized Access"
+// @Failure 403 "Access forbidden."
+// @Failure 404 "Not found"
+// @Failure 500 "Internal server error"
+// @Param userID path int true "User ID"
+// @Router /users/{userID} [get]
+func getUser(c *gin.Context) {
 
 	var user User
 	id, _ := strconv.ParseInt(c.Param("UserID"), 10, 64)
@@ -180,13 +250,25 @@ func userReadEp(c *gin.Context) {
 		return
 	}
 
-	serializer := UserSerializer{c, user.User}
+	serializer := common.UserSerializer{c, user.User}
 	c.JSON(http.StatusOK, gin.H{
 		"user": serializer.Response(false),
 	})
 }
 
-func userDeleteEp(c *gin.Context) {
+// DeleteUser godoc
+// @Summary Delete a user
+// @ID DeleteUser
+// @Tags users
+// @Produce json
+// @Success 200 "OK."
+// @Failure 401 "Unauthorized Access"
+// @Failure 403 "Access forbidden."
+// @Failure 404 "Not found"
+// @Failure 500 "Internal server error"
+// @Param userID path int true "User ID"
+// @Router /users/{userID} [delete]
+func deleteUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "NOT implemented",
 	})

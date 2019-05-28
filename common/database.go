@@ -54,10 +54,9 @@ func VerifyConnection(db *gorm.DB) error {
 // to the Dummy*() where it is called
 func DropTables(db *gorm.DB) {
 	db.DropTableIfExists(&Simulator{})
-	db.DropTableIfExists(&Signal{})
-	db.DropTableIfExists(&SimulationModel{})
+	//db.DropTableIfExists(&Signal{})
+	db.DropTableIfExists(&Model{})
 	db.DropTableIfExists(&File{})
-	db.DropTableIfExists(&Project{})
 	db.DropTableIfExists(&Simulation{})
 	db.DropTableIfExists(&User{})
 	db.DropTableIfExists(&Visualization{})
@@ -67,10 +66,9 @@ func DropTables(db *gorm.DB) {
 // AutoMigrate the models
 func MigrateModels(db *gorm.DB) {
 	db.AutoMigrate(&Simulator{})
-	db.AutoMigrate(&Signal{})
-	db.AutoMigrate(&SimulationModel{})
+	//db.AutoMigrate(&Signal{})
+	db.AutoMigrate(&Model{})
 	db.AutoMigrate(&File{})
-	db.AutoMigrate(&Project{})
 	db.AutoMigrate(&Simulation{})
 	db.AutoMigrate(&User{})
 	db.AutoMigrate(&Visualization{})
@@ -103,29 +101,24 @@ func DummyPopulateDB(test_db *gorm.DB) {
 	checkErr(test_db.Create(&simr_A).Error)
 	checkErr(test_db.Create(&simr_B).Error)
 
-	outSig_A := Signal{Name: "outSignal_A"}
-	outSig_B := Signal{Name: "outSignal_B"}
-	inSig_A := Signal{Name: "inSignal_A"}
-	inSig_B := Signal{Name: "inSignal_B"}
-	checkErr(test_db.Create(&outSig_A).Error)
-	checkErr(test_db.Create(&outSig_B).Error)
-	checkErr(test_db.Create(&inSig_A).Error)
-	checkErr(test_db.Create(&inSig_B).Error)
+	//outSig_A := Signal{Name: "outSignal_A", Direction: "out"}
+	//outSig_B := Signal{Name: "outSignal_B", Direction: "out"}
+	//inSig_A := Signal{Name: "inSignal_A", Direction: "in"}
+	//inSig_B := Signal{Name: "inSignal_B", Direction: "in"}
+	//checkErr(test_db.Create(&outSig_A).Error)
+	//checkErr(test_db.Create(&outSig_B).Error)
+	//checkErr(test_db.Create(&inSig_A).Error)
+	//checkErr(test_db.Create(&inSig_B).Error)
 
-	smo_A := SimulationModel{Name: "SimModel_A"}
-	smo_B := SimulationModel{Name: "SimModel_B"}
-	checkErr(test_db.Create(&smo_A).Error)
-	checkErr(test_db.Create(&smo_B).Error)
+	mo_A := Model{Name: "Model_A"}
+	mo_B := Model{Name: "Model_B"}
+	checkErr(test_db.Create(&mo_A).Error)
+	checkErr(test_db.Create(&mo_B).Error)
 
 	file_A := File{Name: "File_A"}
 	file_B := File{Name: "File_B"}
 	checkErr(test_db.Create(&file_A).Error)
 	checkErr(test_db.Create(&file_B).Error)
-
-	proj_A := Project{Name: "Project_A"}
-	proj_B := Project{Name: "Project_B"}
-	checkErr(test_db.Create(&proj_A).Error)
-	checkErr(test_db.Create(&proj_B).Error)
 
 	simn_A := Simulation{Name: "Simulation_A"}
 	simn_B := Simulation{Name: "Simulation_B"}
@@ -162,49 +155,40 @@ func DummyPopulateDB(test_db *gorm.DB) {
 	// For `belongs to` use the model with id=1
 	// For `has many` use the models with id=1 and id=2
 
-	// Project HM Visualization, Visualization BT Project
-	checkErr(test_db.Model(&vis_A).Association("Project").Append(&proj_A).Error)
-	checkErr(test_db.Model(&vis_B).Association("Project").Append(&proj_A).Error)
+	// User HM Simulations, Simulation HM Users (Many-to-Many)
+	checkErr(test_db.Model(&simn_A).Association("Users").Append(&usr_A).Error)
+	checkErr(test_db.Model(&simn_A).Association("Users").Append(&usr_B).Error)
+	checkErr(test_db.Model(&simn_B).Association("Users").Append(&usr_A).Error)
+	checkErr(test_db.Model(&simn_B).Association("Users").Append(&usr_B).Error)
 
-	// User HM Project, Project BT User
-	checkErr(test_db.Model(&proj_A).Association("User").Append(&usr_A).Error)
-	checkErr(test_db.Model(&proj_B).Association("User").Append(&usr_A).Error)
+	// Simulation HM Model
+	checkErr(test_db.Model(&simn_A).Association("Models").Append(&mo_A).Error)
+	checkErr(test_db.Model(&simn_A).Association("Models").Append(&mo_B).Error)
 
-	// Simulation HM Project, Project BT Simulation
-	checkErr(test_db.Model(&proj_A).Association("Simulation").Append(&simn_A).Error)
-	checkErr(test_db.Model(&proj_B).Association("Simulation").Append(&simn_A).Error)
-
-	// User HM Files
-	checkErr(test_db.Model(&usr_A).Association("Files").Append(&file_A).Error)
-	checkErr(test_db.Model(&usr_A).Association("Files").Append(&file_B).Error)
-
-	// Simulation HM SimModel, SimModel BT Simulation
-	checkErr(test_db.Model(&smo_A).Association("BelongsToSimulation").Append(&simn_A).Error)
-	checkErr(test_db.Model(&smo_B).Association("BelongsToSimulation").Append(&simn_A).Error)
-
-	// User HM Simulation, Simulation BT User
-	checkErr(test_db.Model(&simn_A).Association("User").Append(&usr_A).Error)
-	checkErr(test_db.Model(&simn_B).Association("User").Append(&usr_A).Error)
+	// Simulation HM Visualizations
+	checkErr(test_db.Model(&simn_A).Association("Visualizations").Append(&vis_A).Error)
+	checkErr(test_db.Model(&simn_A).Association("Visualizations").Append(&vis_B).Error)
 
 	// Visualization HM Widget
 	checkErr(test_db.Model(&vis_A).Association("Widgets").Append(&widg_A).Error)
 	checkErr(test_db.Model(&vis_A).Association("Widgets").Append(&widg_B).Error)
 
-	// SimModel HM Signal
-	checkErr(test_db.Model(&smo_A).Association("InputMapping").Append(&inSig_A).Error)
-	checkErr(test_db.Model(&smo_A).Association("InputMapping").Append(&inSig_B).Error)
-	checkErr(test_db.Model(&smo_A).Association("OutputMapping").Append(&outSig_A).Error)
-	checkErr(test_db.Model(&smo_A).Association("OutputMapping").Append(&outSig_B).Error)
+	// Model HM Signal
+	//checkErr(test_db.Model(&mo_A).Association("InputMapping").Append(&inSig_A).Error)
+	//checkErr(test_db.Model(&mo_A).Association("InputMapping").Append(&inSig_B).Error)
+	//checkErr(test_db.Model(&mo_A).Association("OutputMapping").Append(&outSig_A).Error)
+	//checkErr(test_db.Model(&mo_A).Association("OutputMapping").Append(&outSig_B).Error)
 
-	//SimulationModel HM Files
-	checkErr(test_db.Model(&smo_A).Association("Files").Append(&file_A).Error)
-	checkErr(test_db.Model(&smo_A).Association("Files").Append(&file_B).Error)
+	// Model HM Files
+	checkErr(test_db.Model(&mo_A).Association("Files").Append(&file_A).Error)
+	checkErr(test_db.Model(&mo_A).Association("Files").Append(&file_B).Error)
 
-	// Visualization BT User
-	checkErr(test_db.Model(&vis_A).Association("User").Append(&usr_A).Error)
+	// Simulator BT Model
+	checkErr(test_db.Model(&mo_A).Association("Simulator").Append(&simr_A).Error)
 
-	// Simulator BT SimModel
-	checkErr(test_db.Model(&smo_A).Association("BelongsToSimulator").Append(&simr_A).Error)
+	// Widget HM Files
+	checkErr(test_db.Model(&widg_A).Association("Files").Append(&file_A).Error)
+	checkErr(test_db.Model(&widg_A).Association("Files").Append(&file_B).Error)
 
 }
 

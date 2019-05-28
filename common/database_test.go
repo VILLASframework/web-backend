@@ -2,8 +2,9 @@ package common
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 // Verify that you can connect to the database
@@ -28,45 +29,33 @@ func TestDummyDBAssociations(t *testing.T) {
 
 	// Variables for tests
 	var simr Simulator
-	var smo SimulationModel
+	var mo Model
 	var file File
-	var proj Project
 	var simn Simulation
 	var usr User
+	var usrs []User
 	var vis Visualization
+	var widg Widget
 
-	var sigs []Signal
-	var smos []SimulationModel
+	//var sigs []Signal
+	var mos []Model
 	var files []File
 	var files_sm []File
-	var projs []Project
 	var simns []Simulation
 	var viss []Visualization
 	var widgs []Widget
 
-	// Simulation Model
+	// User
 
-	a.NoError(db.Find(&smo, 1).Error, fM("SimulationModel"))
-	a.EqualValues("SimModel_A", smo.Name)
+	a.NoError(db.Find(&usr, 1).Error, fM("User"))
+	a.EqualValues("User_A", usr.Username)
 
-	// Simulation Model Associations
+	// User Associations
 
-	a.NoError(db.Model(&smo).Association("BelongsToSimulation").Find(&simn).Error)
-	a.EqualValues("Simulation_A", simn.Name, "Expected Simulation_A")
-
-	a.NoError(db.Model(&smo).Association("BelongsToSimulator").Find(&simr).Error)
-	a.EqualValues("Host_A", simr.Host, "Expected Host_A")
-
-	a.NoError(db.Model(&smo).Related(&sigs, "OutputMapping").Error)
-	if len(sigs) != 4 {
-		a.Fail("Simulation Model Associations",
-			"Expected to have %v Output AND Input Signals. Has %v.", 4, len(sigs))
-	}
-
-	a.NoError(db.Model(&smo).Related(&files_sm, "Files").Error)
-	if len(files_sm) != 2 {
-		a.Fail("Simulation Model Associations",
-			"Expected to have %v Files. Has %v.", 2, len(files_sm))
+	a.NoError(db.Model(&usr).Related(&simns, "Simulations").Error)
+	if len(simns) != 2 {
+		a.Fail("User Associations",
+			"Expected to have %v Simulations. Has %v.", 2, len(simns))
 	}
 
 	// Simulation
@@ -76,64 +65,47 @@ func TestDummyDBAssociations(t *testing.T) {
 
 	// Simulation Associations
 
-	a.NoError(db.Model(&simn).Association("User").Find(&usr).Error)
-	a.EqualValues("User_A", usr.Username)
-
-	a.NoError(db.Model(&simn).Related(&smos, "Models").Error)
-	if len(smos) != 2 {
-		a.Fail("Simulation Associations",
-			"Expected to have %v Simulation Models. Has %v.", 2, len(smos))
+	a.NoError(db.Model(&simn).Association("Users").Find(&usrs).Error)
+	if len(usrs) != 2 {
+		a.Fail("Simulations Associations",
+			"Expected to have %v Users. Has %v.", 2, len(usrs))
 	}
 
-	a.NoError(db.Model(&simn).Related(&projs, "Projects").Error)
-	if len(projs) != 2 {
+	a.NoError(db.Model(&simn).Related(&mos, "Models").Error)
+	if len(mos) != 2 {
 		a.Fail("Simulation Associations",
-			"Expected to have %v Projects. Has %v.", 2, len(projs))
+			"Expected to have %v Models. Has %v.", 2, len(mos))
 	}
 
-	// Project
-
-	a.NoError(db.Find(&proj, 1).Error, fM("Project"))
-	a.EqualValues("Project_A", proj.Name)
-
-	// Project Associations
-
-	a.NoError(db.Model(&proj).Association("Simulation").Find(&simn).Error)
-	a.EqualValues("Simulation_A", simn.Name)
-
-	a.NoError(db.Model(&proj).Association("User").Find(&usr).Error)
-	a.EqualValues("User_A", usr.Username)
-
-	a.NoError(db.Model(&proj).Related(&viss, "Visualizations").Error)
+	a.NoError(db.Model(&simn).Related(&viss, "Visualizations").Error)
 	if len(viss) != 2 {
-		a.Fail("Project Associations",
+		a.Fail("Simulation Associations",
 			"Expected to have %v Visualizations. Has %v.", 2, len(viss))
 	}
 
-	// User
 
-	a.NoError(db.Find(&usr, 1).Error, fM("User"))
-	a.EqualValues("User_A", usr.Username)
+	// Model
 
-	// User Associations
+	a.NoError(db.Find(&mo, 1).Error, fM("Model"))
+	a.EqualValues("Model_A", mo.Name)
 
-	a.NoError(db.Model(&usr).Related(&projs, "Projects").Error)
-	if len(projs) != 2 {
-		a.Fail("User Associations",
-			"Expected to have %v Projects. Has %v.", 2, len(projs))
+	// Model Associations
+
+	a.NoError(db.Model(&mo).Association("Simulator").Find(&simr).Error)
+	a.EqualValues("Host_A", simr.Host, "Expected Host_A")
+
+	//a.NoError(db.Model(&mo).Where("Direction = ?", "out").Related(&sigs, "OutputMapping").Error)
+	//if len(sigs) != 2 {
+	//	a.Fail("Model Associations",
+	//		"Expected to have %v Output AND Input Signals. Has %v.", 2, len(sigs))
+	//}
+
+	a.NoError(db.Model(&mo).Related(&files_sm, "Files").Error)
+	if len(files_sm) != 2 {
+		a.Fail("Model Associations",
+			"Expected to have %v Files. Has %v.", 2, len(files_sm))
 	}
 
-	a.NoError(db.Model(&usr).Related(&simns, "Simulations").Error)
-	if len(simns) != 2 {
-		a.Fail("User Associations",
-			"Expected to have %v Simulations. Has %v.", 2, len(simns))
-	}
-
-	a.NoError(db.Model(&usr).Related(&files, "Files").Error)
-	if len(files) != 2 {
-		a.Fail("User Associations",
-			"Expected to have %v Files. Has %v.", 2, len(files))
-	}
 
 	// Visualization
 
@@ -142,16 +114,23 @@ func TestDummyDBAssociations(t *testing.T) {
 
 	// Visualization Associations
 
-	a.NoError(db.Model(&vis).Association("Project").Find(&proj).Error)
-	a.EqualValues("Project_A", proj.Name)
-
-	a.NoError(db.Model(&vis).Association("User").Find(&usr).Error)
-	a.EqualValues("User_A", usr.Username)
-
 	a.NoError(db.Model(&vis).Related(&widgs, "Widgets").Error)
 	if len(widgs) != 2 {
 		a.Fail("Widget Associations",
 			"Expected to have %v Widget. Has %v.", 2, len(widgs))
+	}
+
+
+	// Widget
+	a.NoError(db.Find(&widg, 1).Error, fM("Widget"))
+	a.EqualValues("Widget_A", widg.Name)
+
+
+	// Widget Association
+	a.NoError(db.Model(&widg).Related(&files, "Files").Error)
+	if len(files) != 2 {
+		a.Fail("Widget Associations",
+			"Expected to have %v Files. Has %v.", 2, len(files))
 	}
 
 	// File
@@ -159,9 +138,5 @@ func TestDummyDBAssociations(t *testing.T) {
 	a.NoError(db.Find(&file, 1).Error, fM("File"))
 	a.EqualValues("File_A", file.Name)
 
-	// File Associations
-
-	//a.NoError(db.Model(&file).Association("User").Find(&usr).Error)
-	//a.EqualValues("User_A", usr.Username)
 
 }
