@@ -121,10 +121,10 @@ func TestSimulationEndpoints(t *testing.T) {
 	testEndpoint(t, router, "/api/simulations/1/users", "GET", "", 200, string(msgUsersjson))
 
 	// test DELETE simulations/:SimulationID/user/:username
-	testEndpoint(t, router, "/api/simulations/1/user/User_A", "DELETE", "", 200, string(msgOKjson))
+	testEndpoint(t, router, "/api/simulations/1/user/?username=User_A", "DELETE", "", 200, string(msgOKjson))
 
 	// test PUT simulations/:SimulationID/user/:username
-	testEndpoint(t, router, "/api/simulations/1/user/User_A", "PUT", "", 200, string(msgOKjson))
+	testEndpoint(t, router, "/api/simulations/1/user/?username=User_A", "PUT", "", 200, string(msgOKjson))
 
 
 	// TODO add more tests

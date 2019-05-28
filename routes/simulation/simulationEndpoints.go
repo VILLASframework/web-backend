@@ -18,8 +18,8 @@ func RegisterSimulationEndpoints(r *gin.RouterGroup){
 	r.DELETE("/:simulationID", DeleteSimulation)
 
 	r.GET("/:simulationID/users", GetUsersOfSimulation)
-	r.PUT("/:simulationID/users/:username", AddUserToSimulation)
-	r.DELETE("/:simulationID/users/:username", DeleteUserFromSimulation)
+	r.PUT("/:simulationID/user/", AddUserToSimulation)
+	r.DELETE("/:simulationID/user/", DeleteUserFromSimulation)
 }
 
 // GetSimulations godoc
@@ -185,8 +185,8 @@ func GetUsersOfSimulation(c *gin.Context) {
 // @Failure 404 "Not found"
 // @Failure 500 "Internal server error"
 // @Param simulationID path int true "Simulation ID"
-// @Param username path int true "User name"
-// @Router /simulations/{simulationID}/users/{username} [put]
+// @Param username query string true "User name"
+// @Router /simulations/{simulationID}/user [put]
 func AddUserToSimulation(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "NOT implemented",
@@ -202,7 +202,9 @@ func AddUserToSimulation(c *gin.Context) {
 		return
 	}
 
-	username := c.Param("username")
+	querydata := c.Request.URL.Query()
+
+	username := querydata.Get("username")
 
 	u, err := user.FindUserByName(username)
 	if common.ProvideErrorResponse(c, err) {
@@ -220,7 +222,7 @@ func AddUserToSimulation(c *gin.Context) {
 }
 
 // DeleteUserFromSimulation godoc
-// @Summary Delete a user from asimulation
+// @Summary Delete a user from a simulation
 // @ID DeleteUserFromSimulation
 // @Tags simulations
 // @Produce json
@@ -230,8 +232,8 @@ func AddUserToSimulation(c *gin.Context) {
 // @Failure 404 "Not found"
 // @Failure 500 "Internal server error"
 // @Param simulationID path int true "Simulation ID"
-// @Param username path int true "User ID"
-// @Router /simulations/{simulationID}/users/{username} [delete]
+// @Param username query string true "User name"
+// @Router /simulations/{simulationID}/user [delete]
 func DeleteUserFromSimulation(c *gin.Context) {
 	simID, err := common.GetSimulationID(c)
 	if err != nil {
@@ -243,7 +245,9 @@ func DeleteUserFromSimulation(c *gin.Context) {
 		return
 	}
 
-	username := c.Param("username")
+	querydata := c.Request.URL.Query()
+
+	username := querydata.Get("username")
 
 	err = user.RemoveUserFromSim(&sim, username)
 	if common.ProvideErrorResponse(c, err) {
