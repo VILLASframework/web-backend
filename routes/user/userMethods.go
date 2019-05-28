@@ -29,7 +29,7 @@ func (u *User) save() error {
 	return err
 }
 
-func (u *User) byUsername(username string) error {
+func (u *User) ByUsername(username string) error {
 	db := common.GetDB()
 	err := db.Find(u, "Username = ?", username).Error
 	if err != nil {

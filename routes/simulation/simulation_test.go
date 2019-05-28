@@ -13,22 +13,20 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
 )
 
-
 var msgOK = common.ResponseMsg{
 	Message: "OK.",
 }
 
-
 var user_A = common.UserResponse{
 	Username: "User_A",
-	Role: "user",
-	Mail: "",
+	Role:     "user",
+	Mail:     "",
 }
 
 var user_B = common.UserResponse{
 	Username: "User_B",
-	Role: "user",
-	Mail: "",
+	Role:     "user",
+	Mail:     "",
 }
 
 var myUsers = []common.UserResponse{
@@ -40,16 +38,15 @@ var msgUsers = common.ResponseMsgUsers{
 	Users: myUsers,
 }
 
-
 var simulationA = common.SimulationResponse{
-	Name: "Simulation_A",
-	ID: 1,
+	Name:    "Simulation_A",
+	ID:      1,
 	Running: false,
 }
 
 var simulationB = common.SimulationResponse{
-	Name: "Simulation_B",
-	ID: 2,
+	Name:    "Simulation_B",
+	ID:      2,
 	Running: false,
 }
 
@@ -73,30 +70,31 @@ func TestSimulationEndpoints(t *testing.T) {
 	defer db.Close()
 	common.DummyPopulateDB(db)
 
-
 	router := gin.Default()
 	api := router.Group("/api")
 	RegisterSimulationEndpoints(api.Group("/simulations"))
 
 	msgOKjson, err := json.Marshal(msgOK)
-	if err !=nil {
+	if err != nil {
 		panic(err)
 	}
 
 	msgUsersjson, err := json.Marshal(msgUsers)
-	if err !=nil {
+	if err != nil {
 		panic(err)
 	}
 
 	msgSimulationsjson, err := json.Marshal(msgSimulations)
-	if err !=nil {
+	if err != nil {
 		panic(err)
 	}
 
 	msgSimulationjson, err := json.Marshal(msgSimulation)
-	if err !=nil {
+	if err != nil {
 		panic(err)
 	}
+
+	// TODO add authentication for User_A
 
 	// test GET simulations/
 	testEndpoint(t, router, "/api/simulations/", "GET", "", 200, string(msgSimulationsjson))
@@ -116,8 +114,7 @@ func TestSimulationEndpoints(t *testing.T) {
 	// TODO add more tests
 }
 
-
-func testEndpoint(t *testing.T, router *gin.Engine, url string, method string, body string, expected_code int, expected_response string ) {
+func testEndpoint(t *testing.T, router *gin.Engine, url string, method string, body string, expected_code int, expected_response string) {
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest(method, url, nil)
 	router.ServeHTTP(w, req)

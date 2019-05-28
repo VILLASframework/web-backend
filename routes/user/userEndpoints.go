@@ -73,7 +73,7 @@ func authenticationEp(c *gin.Context) {
 
 	// Find the username in the database
 	var user User
-	err := user.byUsername(loginRequest.Username)
+	err := user.ByUsername(loginRequest.Username)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
@@ -140,8 +140,14 @@ func getUsers(c *gin.Context) {
 	//c.Redirect(http.StatusSeeOther, "/authenticate")
 	//return
 	//}
-	allUsers, _, _ := FindAllUsers()
-	serializer := common.UsersSerializer{c, allUsers}
+
+	db := common.GetDB()
+	var users []common.User
+	err := db.Order("ID asc").Find(&users).Error
+	if common.ProvideErrorResponse(c, err) {
+		return
+	}
+	serializer := common.UsersSerializer{c, users}
 	c.JSON(http.StatusOK, gin.H{
 		"users": serializer.Response(true),
 	})
@@ -176,7 +182,7 @@ func addUser(c *gin.Context) {
 	// and in case of error raise 422
 
 	// Check that the username is NOT taken
-	err := newUser.byUsername(newUser.Username)
+	err := newUser.ByUsername(newUser.Username)
 	if err == nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{
 			"message": "Username is already taken",

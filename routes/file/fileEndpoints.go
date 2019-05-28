@@ -3,7 +3,6 @@ package file
 import (
 	"fmt"
 	"net/http"
-	"path/filepath"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -11,24 +10,17 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
 )
 
-func RegisterFileEndpoints(r *gin.RouterGroup){
-	r.GET("/", GetFiles)
-	r.POST ("/", AddFile)
-	r.GET("/:fileID", GetFile)
-	r.PUT("/:fileID", UpdateFile)
-	r.DELETE("/:fileID", DeleteFile)
-	//r.GET("/:simulationID/visualizations/:visualizationID/widgets/:widgetID/files", GetFilesOfWidget)
-	//r.POST ("/:simulationID/visualizations/:visualizationID/widgets/:widgetID/file", AddFileToWidget)
-	//r.GET("/:simulationID/visualizations/:visualizationID/widgets/:widgetID/file", GetFileOfWidget)
-	//r.PUT("/:simulationID/visualizations/:visualizationID/widgets/:widgetID/file", UpdateFileOfWidget)
-	//r.DELETE("/:simulationID/visualizations/:visualizationID/widgets/:widgetID/file", DeleteFileOfWidget)
+func RegisterFileEndpoints(r *gin.RouterGroup) {
+	r.GET("/", getFiles)
+	r.POST("/", addFile)
+	r.GET("/:fileID", getFile)
+	r.PUT("/:fileID", updateFile)
+	r.DELETE("/:fileID", deleteFile)
 }
 
-
-
-// GetFiles godoc
+// getFiles godoc
 // @Summary Get all files of a specific model or widget
-// @ID GetFiles
+// @ID getFiles
 // @Tags files
 // @Produce json
 // @Success 200 {array} common.FileResponse "File parameters requested by user"
@@ -39,15 +31,50 @@ func RegisterFileEndpoints(r *gin.RouterGroup){
 // @Param originType query string true "Set to model for files of model, set to widget for files of widget"
 // @Param originID query int true "ID of either model or widget of which files are requested"
 // @Router /files [get]
-func GetFiles(c *gin.Context) {
+func getFiles(c *gin.Context) {
 
-	// TODO if originType == "model" --> GetFilesOfModel, if originType == "vis" --> GetFilesOfWidget
+	objectType := c.Request.URL.Query().Get("objectType")
+	if objectType != "model" && objectType != "widget" {
+		errormsg := fmt.Sprintf("Bad request. Object type not supported for files: %s", objectType)
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": errormsg,
+		})
+		return
+	}
+	objectID_s := c.Request.URL.Query().Get("objectID")
+	objectID, err := strconv.Atoi(objectID_s)
+	if err != nil {
+		errormsg := fmt.Sprintf("Bad request. Error on ID conversion: %s", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": errormsg,
+		})
+		return
+	}
+
+	db := common.GetDB()
+	var files []common.File
+	if objectType == "model" {
+		err = db.Where("ModelID", objectID).Find(&files).Error
+		if common.ProvideErrorResponse(c, err) {
+			return
+		}
+	} else {
+		err = db.Where("WidgetID", objectID).Find(&files).Error
+		if common.ProvideErrorResponse(c, err) {
+			return
+		}
+	}
+
+	serializer := common.FilesSerializerNoAssoc{c, files}
+	c.JSON(http.StatusOK, gin.H{
+		"files": serializer.Response(),
+	})
 
 }
 
-// AddFile godoc
+// addFile godoc
 // @Summary Add a file to a specific model or widget
-// @ID AddFile
+// @ID addFile
 // @Tags files
 // @Produce json
 // @Accept text/plain
@@ -62,16 +89,50 @@ func GetFiles(c *gin.Context) {
 // @Failure 404 "Not found"
 // @Failure 500 "Internal server error"
 // @Param inputFile formData file true "File to be uploaded"
-// @Param originType query string true "Set to model for files of model, set to widget for files of widget"
-// @Param originID query int true "ID of either model or widget of which files are requested"
+// @Param objectType query string true "Set to model for files of model, set to widget for files of widget"
+// @Param objectID query int true "ID of either model or widget of which files are requested"
 // @Router /files [post]
-func AddFile(c *gin.Context){
-	// TODO if originType == "model" --> AddFileToModel, if originType == "vis" --> AddFileToWidget
+func addFile(c *gin.Context) {
+	// Extract file from PUT request form
+	file_header, err := c.FormFile("file")
+	if err != nil {
+		errormsg := fmt.Sprintf("Bad request. Get form error: %s", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": errormsg,
+		})
+		return
+	}
+
+	objectType := c.Request.URL.Query().Get("objectType")
+	if objectType != "model" && objectType != "widget" {
+		errormsg := fmt.Sprintf("Bad request. Object type not supported for files: %s", objectType)
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": errormsg,
+		})
+		return
+	}
+	objectID_s := c.Request.URL.Query().Get("objectID")
+	objectID, err := strconv.Atoi(objectID_s)
+	if err != nil {
+		errormsg := fmt.Sprintf("Bad request. Error on ID conversion: %s", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": errormsg,
+		})
+		return
+	}
+
+	var newFile File
+	err = newFile.register(file_header, objectType, uint(objectID))
+	if common.ProvideErrorResponse(c, err) == false {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "OK.",
+		})
+	}
 }
 
-// GetFile godoc
+// getFile godoc
 // @Summary Download a file
-// @ID GetFile
+// @ID getFile
 // @Tags files
 // @Produce text/plain
 // @Produce png
@@ -86,13 +147,29 @@ func AddFile(c *gin.Context){
 // @Failure 500 "Internal server error"
 // @Param fileID path int true "ID of the file to download"
 // @Router /files/{fileID} [get]
-func GetFile(c *gin.Context){
-	// TODO
+func getFile(c *gin.Context) {
+
+	fileID, err := common.GetFileID(c)
+	if err != nil {
+		return
+	}
+
+	var f File
+	err = f.byID(uint(fileID))
+	if common.ProvideErrorResponse(c, err) {
+		return
+	}
+
+	f.download(c)
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "OK.",
+	})
 }
 
-// UpdateFile godoc
+// updateFile godoc
 // @Summary Update a file
-// @ID UpdateFile
+// @ID updateFile
 // @Tags files
 // @Produce json
 // @Accept text/plain
@@ -106,15 +183,10 @@ func GetFile(c *gin.Context){
 // @Failure 403 "Access forbidden."
 // @Failure 404 "Not found"
 // @Failure 500 "Internal server error"
+// @Param inputFile formData file true "File to be uploaded"
 // @Param fileID path int true "ID of the file to update"
 // @Router /files/{fileID} [put]
-func UpdateFile(c *gin.Context){
-
-	//TODO parse this info based on fileID parameter
-	simulationID := 1
-	modelID := 1
-	widgetID := 1
-
+func updateFile(c *gin.Context) {
 
 	// Extract file from PUT request form
 	err := c.Request.ParseForm()
@@ -123,7 +195,7 @@ func UpdateFile(c *gin.Context){
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": errormsg,
 		})
-		return;
+		return
 	}
 
 	file_header, err := c.FormFile("file")
@@ -132,30 +204,31 @@ func UpdateFile(c *gin.Context){
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": errormsg,
 		})
-		return;
-	}
-
-	filename := filepath.Base(file_header.Filename)
-	filetype := file_header.Header.Get("Content-Type") // TODO make sure this is properly set in file header
-	size := file_header.Size
-	foldername := getFolderName(simulationID, modelID, widgetID)
-
-	err = modifyFileOnDisc(file_header, filename, foldername, uint(size), false)
-	if err != nil {
-		errormsg := fmt.Sprintf("Internal Server Error. Error saving file: %s", err.Error())
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": errormsg,
-		})
 		return
 	}
 
-	saveFileInDB(c, filename, foldername, filetype, uint(size), widgetID, modelID, false)
+	fileID, err := common.GetFileID(c)
+	if err != nil {
+		return
+	}
+
+	var f File
+	err = f.byID(uint(fileID))
+	if common.ProvideErrorResponse(c, err) {
+		return
+	}
+
+	err = f.update(file_header)
+	if common.ProvideErrorResponse(c, err) == false {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "OK.",
+		})
+	}
 }
 
-
-// DeleteFile godoc
+// deleteFile godoc
 // @Summary Delete a file
-// @ID DeleteFile
+// @ID deleteFile
 // @Tags files
 // @Produce json
 // @Success 200 "OK"
@@ -165,241 +238,8 @@ func UpdateFile(c *gin.Context){
 // @Failure 500 "Internal server error"
 // @Param fileID path int true "ID of the file to update"
 // @Router /files/{fileID} [delete]
-func DeleteFile(c *gin.Context){
-	// TODO
-}
-
-
-func GetFilesOfModel(c *gin.Context) {
-
-	simulationID, modelID, err := getRequestParams(c)
-	if err != nil{
-		return
-	}
-
-	// Find files' properties in DB and return in HTTP response, no change to DB
-	allFiles, _, err := FindFiles(c, -1, modelID, simulationID)
-
-	if common.ProvideErrorResponse(c, err) == false {
-		serializer := common.FilesSerializerNoAssoc{c, allFiles}
-		c.JSON(http.StatusOK, gin.H{
-			"files": serializer.Response(),
-		})
-	}
-
-}
-
-
-func AddFileToModel(c *gin.Context) {
-
-	simulationID, modelID, err := getRequestParams(c)
-	if err != nil{
-		return
-	}
-
-	// Save file locally and register file in DB, HTTP response is set by this method
-	RegisterFile(c,-1, modelID, simulationID)
-
-}
-
-func CloneFileOfModel(c *gin.Context) {
-
+func deleteFile(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
-		"message": "NOT implemented",
+		"message": "Not implemented.",
 	})
-
-}
-
-
-func GetFileOfModel(c *gin.Context) {
-
-	simulationID, modelID, err := getRequestParams(c)
-	if err != nil{
-		return
-	}
-
-	// Read file from disk and return in HTTP response, no change to DB
-	ReadFile(c, -1, modelID, simulationID)
-}
-
-
-func UpdateFileOfModel(c *gin.Context) {
-
-	//simulationID, modelID, err := getRequestParams(c)
-	//if err != nil{
-	//	return
-	//}
-
-	// Update file locally and update file entry in DB, HTTP response is set by this method
-	//UpdateFile(c,-1, modelID, simulationID)
-}
-
-func DeleteFileOfModel(c *gin.Context) {
-
-	//simulationID, modelID, err := getRequestParams(c)
-	//if err != nil{
-	//	return
-	//}
-
-	// Delete file from disk and remove entry from DB, HTTP response is set by this method
-	//DeleteFile(c, -1, modelID, simulationID)
-
-
-}
-
-func GetFilesOfWidget(c *gin.Context) {
-
-	simulationID, widgetID, err := getRequestParams(c)
-	if err != nil{
-		return
-	}
-
-	// Find files' properties in DB and return in HTTP response, no change to DB
-	allFiles, _, err := FindFiles(c, widgetID, -1, simulationID)
-
-	if common.ProvideErrorResponse(c, err) == false {
-		serializer := common.FilesSerializerNoAssoc{c, allFiles}
-		c.JSON(http.StatusOK, gin.H{
-			"files": serializer.Response(),
-		})
-	}
-
-}
-
-
-func AddFileToWidget(c *gin.Context) {
-
-	simulationID, widgetID, err := getRequestParams(c)
-	if err != nil{
-		return
-	}
-
-	// Save file locally and register file in DB, HTTP response is set by this method
-	RegisterFile(c,widgetID, -1, simulationID)
-
-}
-
-func CloneFileOfWidget(c *gin.Context) {
-
-	c.JSON(http.StatusOK, gin.H{
-		"message": "NOT implemented",
-	})
-
-}
-
-
-func GetFileOfWidget(c *gin.Context) {
-
-	simulationID, widgetID, err := getRequestParams(c)
-	if err != nil{
-		return
-	}
-
-	// Read file from disk and return in HTTP response, no change to DB
-	ReadFile(c, widgetID, -1, simulationID)
-}
-
-
-func UpdateFileOfWidget(c *gin.Context) {
-
-	//simulationID, widgetID, err := getRequestParams(c)
-	//if err != nil{
-	//	return
-	//}
-	//
-	//// Update file locally and update file entry in DB, HTTP response is set by this method
-	//UpdateFile(c,widgetID, -1, simulationID)
-}
-
-
-func DeleteFileOfWidget(c *gin.Context) {
-
-	//simulationID, widgetID, err := getRequestParams(c)
-	//if err != nil{
-	//	return
-	//}
-	//
-	//// Delete file from disk and remove entry from DB, HTTP response is set by this method
-	//DeleteFile(c, widgetID, -1, simulationID)
-
-
-}
-
-
-// local functions
-
-//func filesReadEp(c *gin.Context)  {
-//	// Database query
-//	allFiles, _, err := FindAllFiles()
-//
-//	if common.ProvideErrorResponse(c, err) == false {
-//		serializer := FilesSerializerNoAssoc{c, allFiles}
-//		c.JSON(http.StatusOK, gin.H{
-//			"files": serializer.Response(),
-//		})
-//	}
-//
-//}
-//
-//
-//
-//func fileUpdateEp(c *gin.Context) {
-//	c.JSON(http.StatusOK, gin.H{
-//		"message": "NOT implemented",
-//	})
-//}
-//
-//func fileReadEp(c *gin.Context) {
-//	var err error
-//	var file common.File
-//	fileID := c.Param("FileID")
-//	desc := c.GetHeader("X-Request-FileDesc")
-//	desc_b, _ := strconv.ParseBool(desc)
-//
-//	userID := 1 // TODO obtain ID of user making the request
-//
-//	//check if description of file or file itself shall be returned
-//	if desc_b {
-//		file, err = FindFile(userID, fileID)
-//		if common.ProvideErrorResponse(c, err) == false {
-//			serializer := FileSerializerNoAssoc{c, file}
-//			c.JSON(http.StatusOK, gin.H{
-//				"file": serializer.Response(),
-//			})
-//		}
-//
-//
-//	} else {
-//		//TODO: return file itself
-//	}
-//}
-//
-//func fileDeleteEp(c *gin.Context) {
-//	c.JSON(http.StatusOK, gin.H{
-//		"message": "NOT implemented",
-//	})
-//}
-
-
-func getRequestParams(c *gin.Context) (int, int, error){
-	simulationID, err := strconv.Atoi(c.Param("SimulationID"))
-
-	if err != nil {
-		errormsg := fmt.Sprintf("Bad request. No or incorrect format of simulation ID")
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
-		})
-		return -1, -1, err
-	}
-
-	var subID int
-	subID, err = common.GetModelID(c)
-	if err != nil{
-		subID, err = common.GetWidgetID(c)
-		if err != nil {
-			return -1, -1, err
-		}
-	}
-
-	return simulationID, subID, err
 }

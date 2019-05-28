@@ -6,22 +6,21 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulation"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/visualization"
 )
 
-func RegisterWidgetEndpoints(r *gin.RouterGroup){
-	r.GET("/", GetWidgets)
-	r.POST("/", AddWidget)
-	//r.POST("/:widgetID", CloneWidget)
-	r.PUT("/:widgetID", UpdateWidget)
-	r.GET("/:widgetID", GetWidget)
-	r.DELETE("/:widgetID", DeleteWidget)
+func RegisterWidgetEndpoints(r *gin.RouterGroup) {
+	r.GET("/", getWidgets)
+	r.POST("/", addWidget)
+	//r.POST("/:widgetID", cloneWidget)
+	r.PUT("/:widgetID", updateWidget)
+	r.GET("/:widgetID", getWidget)
+	r.DELETE("/:widgetID", deleteWidget)
 }
 
-// GetWidgets godoc
+// getWidgets godoc
 // @Summary Get all widgets of visualization
-// @ID GetWidgets
+// @ID getWidgets
 // @Produce  json
 // @Tags widgets
 // @Success 200 {array} common.WidgetResponse "Array of widgets to which belong to visualization"
@@ -31,29 +30,22 @@ func RegisterWidgetEndpoints(r *gin.RouterGroup){
 // @Failure 500 "Internal server error"
 // @Param visualizationID query int true "Visualization ID"
 // @Router /widgets [get]
-func GetWidgets(c *gin.Context) {
-
-	simID, err := common.GetSimulationID(c)
-	if err != nil {
-		return
-	}
-
-	sim, err := simulation.FindSimulation(simID)
-	if common.ProvideErrorResponse(c, err) {
-		return
-	}
+func getWidgets(c *gin.Context) {
 
 	visID, err := common.GetVisualizationID(c)
 	if err != nil {
 		return
 	}
 
-	vis, err := visualization.FindVisualizationOfSim(&sim, visID)
+	var vis visualization.Visualization
+	err = vis.ByID(uint(visID))
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
 
-	widgets,_, err := FindWidgetsOfVisualization(&vis)
+	db := common.GetDB()
+	var widgets []common.Widget
+	err = db.Order("ID asc").Model(vis).Related(&widgets, "Widgets").Error
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
@@ -64,9 +56,9 @@ func GetWidgets(c *gin.Context) {
 	})
 }
 
-// AddWidget godoc
+// addWidget godoc
 // @Summary Add a widget to a visualization
-// @ID AddWidget
+// @ID addWidget
 // @Accept json
 // @Produce json
 // @Tags widgets
@@ -77,30 +69,10 @@ func GetWidgets(c *gin.Context) {
 // @Failure 404 "Not found"
 // @Failure 500 "Internal server error"
 // @Router /widgets [post]
-func AddWidget(c *gin.Context) {
+func addWidget(c *gin.Context) {
 
-	simID, err := common.GetSimulationID(c)
-	if err != nil {
-		return
-	}
-
-	sim, err := simulation.FindSimulation(simID)
-	if common.ProvideErrorResponse(c, err) {
-		return
-	}
-
-	visID, err := common.GetVisualizationID(c)
-	if err != nil {
-		return
-	}
-
-	vis, err := visualization.FindVisualizationOfSim(&sim, visID)
-	if common.ProvideErrorResponse(c, err) {
-		return
-	}
-
-	var widget_input common.Widget
-	err = c.BindJSON(&widget_input)
+	var newWidget Widget
+	err := c.BindJSON(&newWidget)
 	if err != nil {
 		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -109,25 +81,24 @@ func AddWidget(c *gin.Context) {
 		return
 	}
 
-	err = AddWidgetToVisualization(&vis, &widget_input)
+	err = newWidget.addToVisualization(newWidget.VisualizationID)
+
 	if common.ProvideErrorResponse(c, err) == false {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "OK.",
 		})
 	}
-
-
 }
 
-func CloneWidget(c *gin.Context) {
+func cloneWidget(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "NOT implemented",
 	})
 }
 
-// UpdateWidget godoc
+// updateWidget godoc
 // @Summary Update a widget
-// @ID UpdateWidget
+// @ID updateWidget
 // @Tags widgets
 // @Accept json
 // @Produce json
@@ -139,34 +110,15 @@ func CloneWidget(c *gin.Context) {
 // @Failure 500 "Internal server error"
 // @Param widgetID path int true "Widget ID"
 // @Router /widgets/{widgetID} [put]
-func UpdateWidget(c *gin.Context) {
-	simID, err := common.GetSimulationID(c)
-	if err != nil {
-		return
-	}
-
-	sim, err := simulation.FindSimulation(simID)
-	if common.ProvideErrorResponse(c, err) {
-		return
-	}
-
-	visID, err := common.GetVisualizationID(c)
-	if err != nil {
-		return
-	}
-
-	vis, err := visualization.FindVisualizationOfSim(&sim, visID)
-	if common.ProvideErrorResponse(c, err) {
-		return
-	}
+func updateWidget(c *gin.Context) {
 
 	widgetID, err := common.GetWidgetID(c)
 	if err != nil {
 		return
 	}
 
-	var widget_input common.Widget
-	err = c.BindJSON(&widget_input)
+	var modifiedWidget Widget
+	err = c.BindJSON(&modifiedWidget)
 	if err != nil {
 		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -175,7 +127,13 @@ func UpdateWidget(c *gin.Context) {
 		return
 	}
 
-	err = UpdateWidgetOfVisualization(&vis, widget_input, widgetID)
+	var w Widget
+	err = w.ByID(uint(widgetID))
+	if common.ProvideErrorResponse(c, err) {
+		return
+	}
+
+	err = w.update(modifiedWidget)
 	if common.ProvideErrorResponse(c, err) == false {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "OK",
@@ -183,9 +141,9 @@ func UpdateWidget(c *gin.Context) {
 	}
 }
 
-// GetWidget godoc
+// getWidget godoc
 // @Summary Get a widget
-// @ID GetWidget
+// @ID getWidget
 // @Tags widgets
 // @Produce json
 // @Success 200 {object} common.WidgetResponse "Requested widget."
@@ -195,44 +153,28 @@ func UpdateWidget(c *gin.Context) {
 // @Failure 500 "Internal server error"
 // @Param widgetID path int true "Widget ID"
 // @Router /widgets/{widgetID} [get]
-func GetWidget(c *gin.Context) {
-
-	simID, err := common.GetSimulationID(c)
-	if err != nil {
-		return
-	}
-
-	sim, err := simulation.FindSimulation(simID)
-	if common.ProvideErrorResponse(c, err) {
-		return
-	}
-
-	visID, err := common.GetVisualizationID(c)
-	if err != nil {
-		return
-	}
-
-	vis, err := visualization.FindVisualizationOfSim(&sim, visID)
-	if common.ProvideErrorResponse(c, err) {
-		return
-	}
+func getWidget(c *gin.Context) {
 
 	widgetID, err := common.GetWidgetID(c)
 	if err != nil {
 		return
 	}
 
-	widget, err := FindWidgetOfVisualization(&vis, widgetID)
-	serializer := common.WidgetSerializer{c, widget}
+	var w Widget
+	err = w.ByID(uint(widgetID))
+	if common.ProvideErrorResponse(c, err) {
+		return
+	}
+
+	serializer := common.WidgetSerializer{c, w.Widget}
 	c.JSON(http.StatusOK, gin.H{
 		"widget": serializer.Response(),
 	})
 }
 
-
-// DeleteWidget godoc
+// deleteWidget godoc
 // @Summary Delete a widget
-// @ID DeleteWidget
+// @ID deleteWidget
 // @Tags widgets
 // @Produce json
 // @Success 200 "OK."
@@ -242,28 +184,8 @@ func GetWidget(c *gin.Context) {
 // @Failure 500 "Internal server error"
 // @Param widgetID path int true "Widget ID"
 // @Router /widgets/{widgetID} [delete]
-func DeleteWidget(c *gin.Context) {
+func deleteWidget(c *gin.Context) {
 
-	// simID, err := GetSimulationID(c)
-	// if err != nil {
-	// 	return
-	// }
-	//
-	// sim, err := queries.FindSimulation(simID)
-	// if common.ProvideErrorResponse(c, err) {
-	// 	return
-	// }
-	//
-	// visID, err := GetVisualizationID(c)
-	// if err != nil {
-	// 	return
-	// }
-	//
-	// visualization, err := queries.FindVisualizationOfSim(&sim, visID)
-	// if common.ProvideErrorResponse(c, err) {
-	// 	return
-	// }
-	//
 	// widgetID, err := GetWidgetID(c)
 	// if err != nil {
 	// 	return
@@ -276,12 +198,9 @@ func DeleteWidget(c *gin.Context) {
 
 	// TODO delete files of widget in DB and on disk
 
-
 	// TODO Delete widget itself + association with visualization
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "NOT implemented",
 	})
 }
-
-

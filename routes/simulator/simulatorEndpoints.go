@@ -8,7 +8,7 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
 )
 
-func RegisterSimulatorEndpoints(r *gin.RouterGroup){
+func RegisterSimulatorEndpoints(r *gin.RouterGroup) {
 	r.GET("/", GetSimulators)
 	r.POST("/", AddSimulator)
 	r.PUT("/:simulatorID", UpdateSimulator)
@@ -29,8 +29,13 @@ func RegisterSimulatorEndpoints(r *gin.RouterGroup){
 // @Failure 500 "Internal server error"
 // @Router /simulators [get]
 func GetSimulators(c *gin.Context) {
-	allSimulators, _, _ := FindAllSimulators()
-	serializer := common.SimulatorsSerializer{c, allSimulators}
+	db := common.GetDB()
+	var simulators []common.Simulator
+	err := db.Order("ID asc").Find(&simulators).Error
+	if common.ProvideErrorResponse(c, err) {
+		return
+	}
+	serializer := common.SimulatorsSerializer{c, simulators}
 	c.JSON(http.StatusOK, gin.H{
 		"simulators": serializer.Response(),
 	})
@@ -54,7 +59,6 @@ func AddSimulator(c *gin.Context) {
 		"message": "NOT implemented",
 	})
 }
-
 
 // UpdateSimulator godoc
 // @Summary Update a simulator
@@ -130,5 +134,3 @@ func SendActionToSimulator(c *gin.Context) {
 		"message": "NOT implemented",
 	})
 }
-
-

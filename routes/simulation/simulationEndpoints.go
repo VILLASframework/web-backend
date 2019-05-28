@@ -1,7 +1,7 @@
 package simulation
 
 import (
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/user"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -9,7 +9,7 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
 )
 
-func RegisterSimulationEndpoints(r *gin.RouterGroup){
+func RegisterSimulationEndpoints(r *gin.RouterGroup) {
 	r.GET("/", GetSimulations)
 	r.POST("/", AddSimulation)
 	//r.POST("/:simulationID", CloneSimulation)
@@ -36,9 +36,18 @@ func RegisterSimulationEndpoints(r *gin.RouterGroup){
 func GetSimulations(c *gin.Context) {
 
 	//TODO Identify user who is issuing the request and return only those simulations that are known to the user
+	userID, _ := c.Get("user_id")
 
-	allSimulations, _, _ := FindAllSimulations()
-	serializer := common.SimulationsSerializer{c, allSimulations}
+	fmt.Println(userID)
+
+	db := common.GetDB()
+	var simulations []common.Simulation
+	err := db.Order("ID asc").Find(&simulations).Error
+	if common.ProvideErrorResponse(c, err) {
+		return
+	}
+
+	serializer := common.SimulationsSerializer{c, simulations}
 	c.JSON(http.StatusOK, gin.H{
 		"simulations": serializer.Response(),
 	})
@@ -58,7 +67,6 @@ func GetSimulations(c *gin.Context) {
 // @Failure 500 "Internal server error"
 // @Router /simulations [post]
 func AddSimulation(c *gin.Context) {
-
 
 }
 
@@ -107,12 +115,13 @@ func GetSimulation(c *gin.Context) {
 		return
 	}
 
-	sim, err := FindSimulation(simID)
+	var sim Simulation
+	err = sim.ByID(uint(simID))
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
 
-	serializer := common.SimulationSerializer{c, sim}
+	serializer := common.SimulationSerializer{c, sim.Simulation}
 	c.JSON(http.StatusOK, gin.H{
 		"simulation": serializer.Response(),
 	})
@@ -136,7 +145,6 @@ func DeleteSimulation(c *gin.Context) {
 	})
 }
 
-
 // GetUsersOfSimulation godoc
 // @Summary Get users of simulation
 // @ID GetUsersOfSimulation
@@ -156,13 +164,14 @@ func GetUsersOfSimulation(c *gin.Context) {
 		return
 	}
 
-	sim, err := FindSimulation(simID)
+	var sim Simulation
+	err = sim.ByID(uint(simID))
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
 
 	// Find all users of simulation
-	allUsers, _, err := user.FindAllUsersSim(&sim)
+	allUsers, _, err := sim.getUsers()
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
@@ -172,7 +181,6 @@ func GetUsersOfSimulation(c *gin.Context) {
 		"users": serializer.Response(false),
 	})
 }
-
 
 // AddUserToSimulation godoc
 // @Summary Add a user to a a simulation
@@ -193,22 +201,16 @@ func AddUserToSimulation(c *gin.Context) {
 		return
 	}
 
-	sim, err := FindSimulation(simID)
+	var sim Simulation
+	err = sim.ByID(uint(simID))
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
 
-	querydata := c.Request.URL.Query()
+	username := c.Request.URL.Query().Get("username")
 
-	username := querydata.Get("username")
-
-	u, err := user.FindUserByName(username)
+	err = sim.addUser(username)
 	if common.ProvideErrorResponse(c, err) {
-		return
-	}
-
-	err = user.AddUserToSim(&sim, &u)
-	if common.ProvideErrorResponse(c, err){
 		return
 	}
 
@@ -236,16 +238,15 @@ func DeleteUserFromSimulation(c *gin.Context) {
 		return
 	}
 
-	sim, err := FindSimulation(simID)
+	var sim Simulation
+	err = sim.ByID(uint(simID))
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
 
-	querydata := c.Request.URL.Query()
+	username := c.Request.URL.Query().Get("username")
 
-	username := querydata.Get("username")
-
-	err = user.RemoveUserFromSim(&sim, username)
+	err = sim.deleteUser(username)
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
@@ -254,5 +255,3 @@ func DeleteUserFromSimulation(c *gin.Context) {
 		"message": "OK.",
 	})
 }
-
-

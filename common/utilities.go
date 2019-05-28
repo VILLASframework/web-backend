@@ -27,6 +27,7 @@ func ProvideErrorResponse(c *gin.Context, err error) bool {
 	return false // No error
 }
 
+// Parsing of parameters
 
 func GetSimulationID(c *gin.Context) (int, error) {
 
@@ -88,6 +89,22 @@ func GetWidgetID(c *gin.Context) (int, error) {
 		return -1, err
 	} else {
 		return widgetID, err
+
+	}
+}
+
+func GetFileID(c *gin.Context) (int, error) {
+
+	fileID, err := strconv.Atoi(c.Param("fileID"))
+
+	if err != nil {
+		errormsg := fmt.Sprintf("Bad request. No or incorrect format of file ID")
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": errormsg,
+		})
+		return -1, err
+	} else {
+		return fileID, err
 
 	}
 }

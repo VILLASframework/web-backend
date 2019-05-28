@@ -1,32 +1,29 @@
 package model
 
 import (
-	"fmt"
 	"net/http"
-	"strconv"
-
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulator"
 
 	"github.com/gin-gonic/gin"
+
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulation"
 )
 
-func RegisterModelEndpoints(r *gin.RouterGroup){
-	r.GET("/", GetModels)
-	r.POST("/", AddModel)
-	//r.POST("/:modelID", CloneModel)
-	r.PUT("/:modelID", UpdateModel)
-	r.GET("/:modelID", GetModel)
-	r.DELETE("/:modelID", DeleteModel)
-	//r.PUT("/:modelID/simulator", UpdateSimulator)
-	//r.GET("/:modelID/simulator", GetSimulator)
-	//r.POST("/:modelID/signals/:direction", UpdateSignals)
-	//r.GET("/:modelID/signals/:direction", GetSignals)
+func RegisterModelEndpoints(r *gin.RouterGroup) {
+	r.GET("/", getModels)
+	r.POST("/", addModel)
+	//r.POST("/:modelID", cloneModel)
+	r.PUT("/:modelID", updateModel)
+	r.GET("/:modelID", getModel)
+	r.DELETE("/:modelID", deleteModel)
+	r.GET("/:modelID/signals", getSignals)
+	r.POST("/:modelID/signals", addSignal)
+	r.DELETE("/:modelID/signals", deleteSignals)
 }
 
-// GetModels godoc
+// getModels godoc
 // @Summary Get all models of simulation
-// @ID GetModels
+// @ID getModels
 // @Produce  json
 // @Tags models
 // @Success 200 {array} common.ModelResponse "Array of models to which belong to simulation"
@@ -36,27 +33,36 @@ func RegisterModelEndpoints(r *gin.RouterGroup){
 // @Failure 500 "Internal server error"
 // @Param simulationID query int true "Simulation ID"
 // @Router /models [get]
-func GetModels(c *gin.Context) {
+func getModels(c *gin.Context) {
 
 	simID, err := common.GetSimulationID(c)
 	if err != nil {
 		return
 	}
 
-	allModels, _, err := FindAllModels(simID)
+	db := common.GetDB()
+	var models []common.Model
+
+	var sim simulation.Simulation
+	err = sim.ByID(uint(simID))
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
 
-	serializer := common.ModelsSerializer{c, allModels}
+	err = db.Order("ID asc").Model(sim).Related(&models, "Models").Error
+	if common.ProvideErrorResponse(c, err) {
+		return
+	}
+
+	serializer := common.ModelsSerializer{c, models}
 	c.JSON(http.StatusOK, gin.H{
 		"models": serializer.Response(),
 	})
 }
 
-// AddModel godoc
+// addModel godoc
 // @Summary Add a model to a simulation
-// @ID AddModel
+// @ID addModel
 // @Accept json
 // @Produce json
 // @Tags models
@@ -67,7 +73,7 @@ func GetModels(c *gin.Context) {
 // @Failure 404 "Not found"
 // @Failure 500 "Internal server error"
 // @Router /models [post]
-func AddModel(c *gin.Context) {
+func addModel(c *gin.Context) {
 
 	simID, err := common.GetSimulationID(c)
 	if err != nil {
@@ -92,7 +98,7 @@ func AddModel(c *gin.Context) {
 	}
 }
 
-func CloneModel(c *gin.Context) {
+func cloneModel(c *gin.Context) {
 
 	// modelID, err := routes.GetModelID(c)
 	// if err != nil {
@@ -120,17 +126,15 @@ func CloneModel(c *gin.Context) {
 	// Add new signal objects to DB and associate with new model object (careful with directions)
 	// Associate Simulator with new Model object
 
-
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Not implemented.",
 	})
 
-
 }
 
-// UpdateModel godoc
+// updateModel godoc
 // @Summary Update a model
-// @ID UpdateModel
+// @ID updateModel
 // @Tags models
 // @Accept json
 // @Produce json
@@ -142,15 +146,15 @@ func CloneModel(c *gin.Context) {
 // @Failure 500 "Internal server error"
 // @Param modelID path int true "Model ID"
 // @Router /models/{modelID} [put]
-func UpdateModel(c *gin.Context) {
+func updateModel(c *gin.Context) {
 
 	modelID, err := common.GetModelID(c)
 	if err != nil {
 		return
 	}
 
-	var m Model
-	err = c.BindJSON(&m)
+	var modifiedModel Model
+	err = c.BindJSON(&modifiedModel)
 	if err != nil {
 		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -159,7 +163,13 @@ func UpdateModel(c *gin.Context) {
 		return
 	}
 
-	err = m.UpdateModel(modelID)
+	var m Model
+	err = m.ByID(uint(modelID))
+	if common.ProvideErrorResponse(c, err) {
+		return
+	}
+
+	err = m.update(modifiedModel)
 	if common.ProvideErrorResponse(c, err) == false {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "OK.",
@@ -168,9 +178,9 @@ func UpdateModel(c *gin.Context) {
 
 }
 
-// GetModel godoc
+// getModel godoc
 // @Summary Get a model
-// @ID GetModel
+// @ID getModel
 // @Tags models
 // @Produce json
 // @Success 200 {object} common.ModelResponse "Requested model."
@@ -180,27 +190,28 @@ func UpdateModel(c *gin.Context) {
 // @Failure 500 "Internal server error"
 // @Param modelID path int true "Model ID"
 // @Router /models/{modelID} [get]
-func GetModel(c *gin.Context) {
+func getModel(c *gin.Context) {
 
 	modelID, err := common.GetModelID(c)
 	if err != nil {
 		return
 	}
 
-	m, err := FindModel(modelID)
+	var m Model
+	err = m.ByID(uint(modelID))
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
 
-	serializer := common.ModelSerializer{c, m}
+	serializer := common.ModelSerializer{c, m.Model}
 	c.JSON(http.StatusOK, gin.H{
 		"model": serializer.Response(),
 	})
 }
 
-// DeleteModel godoc
+// deleteModel godoc
 // @Summary Delete a model
-// @ID DeleteModel
+// @ID deleteModel
 // @Tags models
 // @Produce json
 // @Success 200 "OK."
@@ -210,89 +221,41 @@ func GetModel(c *gin.Context) {
 // @Failure 500 "Internal server error"
 // @Param modelID path int true "Model ID"
 // @Router /models/{modelID} [delete]
-func DeleteModel(c *gin.Context) {
+func deleteModel(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Not implemented.",
 	})
 }
 
-
-func GetSimulator(c *gin.Context) {
-
-	modelID, err := common.GetModelID(c)
-	if err != nil {
-		return
-	}
-
-	m, err := FindModel(modelID)
-	if common.ProvideErrorResponse(c, err) {
-		return
-	}
-
-	smtr, err := simulator.FindSimulator(int(m.SimulatorID))
-	if common.ProvideErrorResponse(c, err) {
-		return
-	}
-
-	serializer := common.SimulatorSerializer{c, smtr}
-	c.JSON(http.StatusOK, gin.H{
-		"simulator": serializer.Response(),
-	})
-}
-
-
-func UpdateSimulator(c *gin.Context) {
-
-	// simulator ID as parameter of Query, e.g. simulations/:SimulationID/models/:ModelID/simulator?simulatorID=42
-	simulatorID, err := strconv.Atoi(c.Query("simulatorID"))
-	if err != nil {
-		errormsg := fmt.Sprintf("Bad request. No or incorrect simulator ID")
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
-		})
-		return
-	}
+// AddSignal godoc
+// @Summary Add a signal to a signal mapping of a model
+// @ID AddSignal
+// @Accept json
+// @Produce json
+// @Tags models
+// @Param inputSignal body common.Signal true "A signal to be added to the model"
+// @Param direction query string true "Direction of signal (in or out)"
+// @Success 200 "OK."
+// @Failure 401 "Unauthorized Access"
+// @Failure 403 "Access forbidden."
+// @Failure 404 "Not found"
+// @Failure 500 "Internal server error"
+// @Router /models/{modelID}/signals [post]
+func addSignal(c *gin.Context) {
 
 	modelID, err := common.GetModelID(c)
 	if err != nil {
 		return
 	}
 
-	smtr, err := simulator.FindSimulator(simulatorID)
+	var m Model
+	err = m.ByID(uint(modelID))
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
 
-	_m, err := FindModel(modelID)
-	if common.ProvideErrorResponse(c, err) {
-		return
-	}
-
-	var m = Model{_m}
-	err = m.UpdateSimulator(&smtr)
-	if common.ProvideErrorResponse(c, err) == false {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "OK",
-		})
-	}
-
-}
-
-
-func UpdateSignals(c *gin.Context) {
-
-	modelID, err := common.GetModelID(c)
-	if err != nil {
-		return
-	}
-
-	_m, err := FindModel(modelID)
-	if common.ProvideErrorResponse(c, err) {
-		return
-	}
-
-	direction := c.Param("direction")
+	direction := c.Request.URL.Query().Get("direction")
 	if !(direction == "out") && !(direction == "in") {
 		errormsg := "Bad request. Direction has to be in or out"
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -301,8 +264,8 @@ func UpdateSignals(c *gin.Context) {
 		return
 	}
 
-	var sigs []common.Signal
-	err = c.BindJSON(&sigs)
+	var sig common.Signal
+	err = c.BindJSON(&sig)
 	if err != nil {
 		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -311,9 +274,8 @@ func UpdateSignals(c *gin.Context) {
 		return
 	}
 
-	// Add signals to model and remove all existing Signals of the requested direction (if any)
-	var m = Model{_m}
-	err = m.UpdateSignals(sigs, direction)
+	// Add signal to model
+	err = m.addSignal(sig, direction)
 	if common.ProvideErrorResponse(c, err) == false {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "OK.",
@@ -321,14 +283,27 @@ func UpdateSignals(c *gin.Context) {
 	}
 }
 
-func GetSignals(c *gin.Context) {
+// getSignals godoc
+// @Summary Get all signals of one direction
+// @ID getSignals
+// @Produce json
+// @Tags models
+// @Param direction query string true "Direction of signal (in or out)"
+// @Success 200 {array} common.Signal "Requested signals."
+// @Failure 401 "Unauthorized Access"
+// @Failure 403 "Access forbidden."
+// @Failure 404 "Not found"
+// @Failure 500 "Internal server error"
+// @Router /models/{modelID}/signals [get]
+func getSignals(c *gin.Context) {
 
 	modelID, err := common.GetModelID(c)
 	if err != nil {
 		return
 	}
 
-	m, err := FindModel(modelID)
+	var m Model
+	err = m.ByID(uint(modelID))
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
@@ -352,4 +327,47 @@ func GetSignals(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"signals": signals,
 	})
+}
+
+// deleteSignals godoc
+// @Summary Delete all signals of a direction
+// @ID deleteSignals
+// @Tags models
+// @Produce json
+// @Success 200 "OK."
+// @Failure 401 "Unauthorized Access"
+// @Failure 403 "Access forbidden."
+// @Failure 404 "Not found"
+// @Failure 500 "Internal server error"
+// @Param modelID path int true "Model ID"
+// @Param direction query string true "Direction of signals to delete (in or out)"
+// @Router /models/{modelID}/signals [delete]
+func deleteSignals(c *gin.Context) {
+	modelID, err := common.GetModelID(c)
+	if err != nil {
+		return
+	}
+
+	var m Model
+	err = m.ByID(uint(modelID))
+	if common.ProvideErrorResponse(c, err) {
+		return
+	}
+
+	direction := c.Param("direction")
+	if !(direction == "out") && !(direction == "in") {
+		errormsg := "Bad request. Direction has to be in or out"
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": errormsg,
+		})
+		return
+	}
+
+	err = m.deleteSignals(direction)
+	if common.ProvideErrorResponse(c, err) == false {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "OK.",
+		})
+	}
+
 }

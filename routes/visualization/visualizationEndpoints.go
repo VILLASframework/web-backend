@@ -9,20 +9,20 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulation"
 )
 
-func RegisterVisualizationEndpoints(r *gin.RouterGroup){
+func RegisterVisualizationEndpoints(r *gin.RouterGroup) {
 
-	r.GET("/", GetVisualizations)
-	r.POST("/", AddVisualization)
-	//r.POST("/:visualizationID", CloneVisualization)
-	r.PUT("/:visualizationID", UpdateVisualization)
-	r.GET("/:visualizationID", GetVisualization)
-	r.DELETE("/:visualizationID", DeleteVisualization)
+	r.GET("/", getVisualizations)
+	r.POST("/", addVisualization)
+	//r.POST("/:visualizationID", cloneVisualization)
+	r.PUT("/:visualizationID", updateVisualization)
+	r.GET("/:visualizationID", getVisualization)
+	r.DELETE("/:visualizationID", deleteVisualization)
 
 }
 
-// GetVisualizations godoc
+// getVisualizations godoc
 // @Summary Get all visualizations of simulation
-// @ID GetVisualizations
+// @ID getVisualizations
 // @Produce  json
 // @Tags visualizations
 // @Success 200 {array} common.VisualizationResponse "Array of visualizations to which belong to simulation"
@@ -32,28 +32,32 @@ func RegisterVisualizationEndpoints(r *gin.RouterGroup){
 // @Failure 500 "Internal server error"
 // @Param simulationID query int true "Simulation ID"
 // @Router /visualizations [get]
-func GetVisualizations(c *gin.Context) {
+func getVisualizations(c *gin.Context) {
 
 	simID, err := common.GetSimulationID(c)
 	if err != nil {
 		return
 	}
 
-	sim, err := simulation.FindSimulation(simID)
+	var sim simulation.Simulation
+	err = sim.ByID(uint(simID))
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
 
-	allVisualizations, _, _ := FindAllVisualizationsOfSim(&sim)
-	serializer := common.VisualizationsSerializer{c, allVisualizations}
+	db := common.GetDB()
+	var visualizations []common.Visualization
+	err = db.Order("ID asc").Model(sim).Related(&visualizations, "Visualizations").Error
+
+	serializer := common.VisualizationsSerializer{c, visualizations}
 	c.JSON(http.StatusOK, gin.H{
 		"visualizations": serializer.Response(),
 	})
 }
 
-// AddVisualization godoc
+// addVisualization godoc
 // @Summary Add a visualization to a simulation
-// @ID AddVisualization
+// @ID addVisualization
 // @Accept json
 // @Produce json
 // @Tags visualizations
@@ -64,19 +68,14 @@ func GetVisualizations(c *gin.Context) {
 // @Failure 404 "Not found"
 // @Failure 500 "Internal server error"
 // @Router /visualizations [post]
-func AddVisualization(c *gin.Context) {
+func addVisualization(c *gin.Context) {
 
 	simID, err := common.GetSimulationID(c)
 	if err != nil {
 		return
 	}
 
-	sim, err := simulation.FindSimulation(simID)
-	if common.ProvideErrorResponse(c, err) {
-		return
-	}
-
-	var vis common.Visualization
+	var vis Visualization
 	err = c.BindJSON(&vis)
 	if err != nil {
 		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
@@ -87,7 +86,7 @@ func AddVisualization(c *gin.Context) {
 	}
 
 	// add visualization to DB and add association to simulation
-	err = AddVisualizationToSim(&sim, &vis)
+	err = vis.addToSimulation(simID)
 	if common.ProvideErrorResponse(c, err) == false {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "OK",
@@ -95,15 +94,15 @@ func AddVisualization(c *gin.Context) {
 	}
 }
 
-func CloneVisualization(c *gin.Context) {
+func cloneVisualization(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "NOT implemented",
 	})
 }
 
-// UpdateVisualization godoc
+// updateVisualization godoc
 // @Summary Update a visualization
-// @ID UpdateVisualization
+// @ID updateVisualization
 // @Tags visualizations
 // @Accept json
 // @Produce json
@@ -115,14 +114,15 @@ func CloneVisualization(c *gin.Context) {
 // @Failure 500 "Internal server error"
 // @Param visualizationID path int true "Visualization ID"
 // @Router /visualizations/{visualizationID} [put]
-func UpdateVisualization(c *gin.Context) {
+func updateVisualization(c *gin.Context) {
 
 	simID, err := common.GetSimulationID(c)
 	if err != nil {
 		return
 	}
 
-	sim, err := simulation.FindSimulation(simID)
+	var sim simulation.Simulation
+	err = sim.ByID(uint(simID))
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
@@ -132,8 +132,8 @@ func UpdateVisualization(c *gin.Context) {
 		return
 	}
 
-	var vis common.Visualization
-	err = c.BindJSON(&vis)
+	var modifiedVis Visualization
+	err = c.BindJSON(&modifiedVis)
 	if err != nil {
 		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -142,7 +142,13 @@ func UpdateVisualization(c *gin.Context) {
 		return
 	}
 
-	err = UpdateVisualizationOfSim(&sim, vis, visID)
+	var vis Visualization
+	err = vis.ByID(uint(visID))
+	if common.ProvideErrorResponse(c, err) {
+		return
+	}
+
+	err = vis.update(modifiedVis)
 	if common.ProvideErrorResponse(c, err) == false {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "OK",
@@ -150,9 +156,9 @@ func UpdateVisualization(c *gin.Context) {
 	}
 }
 
-// GetVisualization godoc
+// getVisualization godoc
 // @Summary Get a visualization
-// @ID GetVisualization
+// @ID getVisualization
 // @Tags visualizations
 // @Produce json
 // @Success 200 {object} common.VisualizationResponse "Requested visualization."
@@ -162,14 +168,15 @@ func UpdateVisualization(c *gin.Context) {
 // @Failure 500 "Internal server error"
 // @Param visualizationID path int true "Visualization ID"
 // @Router /visualizations/{visualizationID} [get]
-func GetVisualization(c *gin.Context) {
+func getVisualization(c *gin.Context) {
 
 	simID, err := common.GetSimulationID(c)
 	if err != nil {
 		return
 	}
 
-	sim, err := simulation.FindSimulation(simID)
+	var sim simulation.Simulation
+	err = sim.ByID(uint(simID))
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
@@ -179,20 +186,21 @@ func GetVisualization(c *gin.Context) {
 		return
 	}
 
-	visualization, err := FindVisualizationOfSim(&sim, visID)
+	var vis Visualization
+	err = vis.ByID(uint(visID))
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
 
-	serializer := common.VisualizationSerializer{c, visualization}
+	serializer := common.VisualizationSerializer{c, vis.Visualization}
 	c.JSON(http.StatusOK, gin.H{
 		"visualization": serializer.Response(),
 	})
 }
 
-// DeleteVisualization godoc
+// deleteVisualization godoc
 // @Summary Delete a visualization
-// @ID DeleteVisualization
+// @ID deleteVisualization
 // @Tags visualizations
 // @Produce json
 // @Success 200 "OK."
@@ -202,10 +210,8 @@ func GetVisualization(c *gin.Context) {
 // @Failure 500 "Internal server error"
 // @Param visualizationID path int true "Visualization ID"
 // @Router /visualizations/{visualizationID} [delete]
-func DeleteVisualization(c *gin.Context) {
+func deleteVisualization(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "NOT implemented",
 	})
 }
-
-
