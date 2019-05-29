@@ -128,6 +128,10 @@ func DummyPopulateDB(test_db *gorm.DB) {
 	// Hash passwords with bcrypt algorithm
 	var bcryptCost = 10
 
+	pw_0, err :=
+		bcrypt.GenerateFromPassword([]byte("xyz789"), bcryptCost)
+	checkErr(err)
+
 	pw_A, err :=
 		bcrypt.GenerateFromPassword([]byte("abc123"), bcryptCost)
 	checkErr(err)
@@ -136,8 +140,10 @@ func DummyPopulateDB(test_db *gorm.DB) {
 		bcrypt.GenerateFromPassword([]byte("bcd234"), bcryptCost)
 	checkErr(err)
 
-	usr_A := User{Username: "User_A", Password: string(pw_A)}
-	usr_B := User{Username: "User_B", Password: string(pw_B)}
+	usr_0 := User{Username: "User_0", Password: string(pw_0), Role: "Admin"}
+	usr_A := User{Username: "User_A", Password: string(pw_A), Role: "User"}
+	usr_B := User{Username: "User_B", Password: string(pw_B), Role: "User"}
+	checkErr(test_db.Create(&usr_0).Error)
 	checkErr(test_db.Create(&usr_A).Error)
 	checkErr(test_db.Create(&usr_B).Error)
 
