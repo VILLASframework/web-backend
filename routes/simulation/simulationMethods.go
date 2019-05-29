@@ -15,7 +15,7 @@ func (s *Simulation) ByID(id uint) error {
 	db := common.GetDB()
 	err := db.Find(s, id).Error
 	if err != nil {
-		return fmt.Errorf("Simulation with id=%v does not exist", id)
+		return fmt.Errorf("simulation with id=%v does not exist", id)
 	}
 	return nil
 }
@@ -25,6 +25,12 @@ func (s *Simulation) getUsers() ([]common.User, int, error) {
 	var users []common.User
 	err := db.Order("ID asc").Model(s).Related(&users, "Users").Error
 	return users, len(users), err
+}
+
+func (s *Simulation) save() error {
+	db := common.GetDB()
+	err := db.Create(s).Error
+	return err
 }
 
 func (s *Simulation) update(modifiedSimulation Simulation) error {
@@ -55,14 +61,63 @@ func (s *Simulation) deleteUser(username string) error {
 		return err
 	}
 
-	// remove user from simulation
-	err = db.Model(s).Association("Users").Delete(&deletedUser).Error
-	if err != nil {
-		return err
+	no_users := db.Model(s).Association("Users").Count()
+
+	if no_users > 1 {
+		// remove user from simulation
+		err = db.Model(s).Association("Users").Delete(&deletedUser).Error
+		if err != nil {
+			return err
+		}
+		// remove simulation from user
+		err = db.Model(&deletedUser).Association("Simulations").Delete(s).Error
+		if err != nil {
+			return err
+		}
+	} else {
+		return fmt.Errorf("cannot delete last user from simulation without deleting simulation itself, doing nothing")
 	}
 
-	// remove simulation from user
-	err = db.Model(&deletedUser).Association("Simulations").Delete(s).Error
+	return nil
+}
 
-	return err
+func (s *Simulation) delete() error {
+	db := common.GetDB()
+	no_models := db.Model(s).Association("Models").Count()
+	no_visualizations := db.Model(s).Association("Visualizations").Count()
+
+	if no_models > 0 || no_visualizations > 0 {
+		return fmt.Errorf("cannot delete simulation that contains models and/ or visualizations, doing nothing")
+	} else {
+		// delete simulation from all users and vice versa
+
+		users, no_users, err := s.getUsers()
+		if err != nil {
+			return err
+		}
+
+		if no_users > 0 {
+			for u, _ := range users {
+				// remove user from simulation
+				err = db.Model(s).Association("Users").Delete(&u).Error
+				if err != nil {
+					return err
+				}
+				// remove simulation from user
+				err = db.Model(&u).Association("Simulations").Delete(s).Error
+				if err != nil {
+					return err
+				}
+			}
+		}
+
+		// Delete simulation
+		err = db.Delete(s).Error
+		if err != nil {
+			return err
+		}
+
+	}
+
+	return nil
 }

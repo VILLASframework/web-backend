@@ -7,24 +7,23 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/user"
 )
 
 func RegisterSimulationEndpoints(r *gin.RouterGroup) {
-	r.GET("/", GetSimulations)
-	r.POST("/", AddSimulation)
-	//r.POST("/:simulationID", CloneSimulation)
-	r.PUT("/:simulationID", UpdateSimulation)
-	r.GET("/:simulationID", GetSimulation)
-	r.DELETE("/:simulationID", DeleteSimulation)
-
-	r.GET("/:simulationID/users", GetUsersOfSimulation)
-	r.PUT("/:simulationID/user", AddUserToSimulation)
-	r.DELETE("/:simulationID/user", DeleteUserFromSimulation)
+	r.GET("/", getSimulations)
+	r.POST("/", addSimulation)
+	r.PUT("/:simulationID", updateSimulation)
+	r.GET("/:simulationID", getSimulation)
+	r.DELETE("/:simulationID", deleteSimulation)
+	r.GET("/:simulationID/users", getUsersOfSimulation)
+	r.PUT("/:simulationID/user", addUserToSimulation)
+	r.DELETE("/:simulationID/user", deleteUserFromSimulation)
 }
 
-// GetSimulations godoc
+// getSimulations godoc
 // @Summary Get all simulations
-// @ID GetSimulations
+// @ID getSimulations
 // @Produce  json
 // @Tags simulations
 // @Success 200 {array} common.SimulationResponse "Array of simulations to which user has access"
@@ -33,16 +32,22 @@ func RegisterSimulationEndpoints(r *gin.RouterGroup) {
 // @Failure 404 "Not found"
 // @Failure 500 "Internal server error"
 // @Router /simulations [get]
-func GetSimulations(c *gin.Context) {
+func getSimulations(c *gin.Context) {
 
-	//TODO Identify user who is issuing the request and return only those simulations that are known to the user
-	userID, _ := c.Get("user_id")
-
+	userID := c.GetInt("user_id")
 	fmt.Println(userID)
 
+	var u user.User
+	err := u.ByID(uint(userID))
+	if common.ProvideErrorResponse(c, err) {
+		return
+	}
+
+	// get all simulations for the user who issues the request
+	// TODO consider role of user, if admin return all simulations
 	db := common.GetDB()
 	var simulations []common.Simulation
-	err := db.Order("ID asc").Find(&simulations).Error
+	err = db.Order("ID asc").Model(&u).Related(&simulations, "Simulations").Error
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
@@ -53,9 +58,9 @@ func GetSimulations(c *gin.Context) {
 	})
 }
 
-// AddSimulation godoc
+// addSimulation godoc
 // @Summary Add a simulation
-// @ID AddSimulation
+// @ID addSimulation
 // @Accept json
 // @Produce json
 // @Tags simulations
@@ -66,19 +71,44 @@ func GetSimulations(c *gin.Context) {
 // @Failure 404 "Not found"
 // @Failure 500 "Internal server error"
 // @Router /simulations [post]
-func AddSimulation(c *gin.Context) {
+func addSimulation(c *gin.Context) {
 
+	user_id := c.GetInt("user_id")
+
+	var u user.User
+	err := u.ByID(uint(user_id))
+	if common.ProvideErrorResponse(c, err) {
+		return
+	}
+
+	var sim Simulation
+	err = c.BindJSON(&sim)
+	if err != nil {
+		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": errormsg,
+		})
+		return
+	}
+
+	// save new simulation to DB
+	err = sim.save()
+	if common.ProvideErrorResponse(c, err) {
+		return
+	}
+
+	// add user to new simulation
+	err = sim.addUser(u.Username)
+	if common.ProvideErrorResponse(c, err) == false {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "OK.",
+		})
+	}
 }
 
-func CloneSimulation(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message": "NOT implemented",
-	})
-}
-
-// UpdateSimulation godoc
+// updateSimulation godoc
 // @Summary Update a simulation
-// @ID UpdateSimulation
+// @ID updateSimulation
 // @Tags simulations
 // @Accept json
 // @Produce json
@@ -90,15 +120,42 @@ func CloneSimulation(c *gin.Context) {
 // @Failure 500 "Internal server error"
 // @Param simulationID path int true "Simulation ID"
 // @Router /simulations/{simulationID} [put]
-func UpdateSimulation(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message": "NOT implemented",
-	})
+func updateSimulation(c *gin.Context) {
+
+	// TODO check if user has access to this simulation
+
+	simID, err := common.GetSimulationID(c)
+	if err != nil {
+		return
+	}
+
+	var modifiedSim Simulation
+	err = c.BindJSON(&modifiedSim)
+	if err != nil {
+		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": errormsg,
+		})
+		return
+	}
+
+	var sim Simulation
+	err = sim.ByID(uint(simID))
+	if common.ProvideErrorResponse(c, err) {
+		return
+	}
+
+	err = sim.update(modifiedSim)
+	if common.ProvideErrorResponse(c, err) == false {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "OK.",
+		})
+	}
 }
 
-// GetSimulation godoc
+// getSimulation godoc
 // @Summary Get simulation
-// @ID GetSimulation
+// @ID getSimulation
 // @Produce  json
 // @Tags simulations
 // @Success 200 {object} common.SimulationResponse "Simulation requested by user"
@@ -108,7 +165,9 @@ func UpdateSimulation(c *gin.Context) {
 // @Failure 500 "Internal server error"
 // @Param simulationID path int true "Simulation ID"
 // @Router /simulations/{simulationID} [get]
-func GetSimulation(c *gin.Context) {
+func getSimulation(c *gin.Context) {
+
+	// TODO check if user has access to this simulation
 
 	simID, err := common.GetSimulationID(c)
 	if err != nil {
@@ -127,9 +186,9 @@ func GetSimulation(c *gin.Context) {
 	})
 }
 
-// DeleteSimulation godoc
+// deleteSimulation godoc
 // @Summary Delete a simulation
-// @ID DeleteSimulation
+// @ID deleteSimulation
 // @Tags simulations
 // @Produce json
 // @Success 200 "OK."
@@ -139,15 +198,32 @@ func GetSimulation(c *gin.Context) {
 // @Failure 500 "Internal server error"
 // @Param simulationID path int true "Simulation ID"
 // @Router /simulations/{simulationID} [delete]
-func DeleteSimulation(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message": "NOT implemented",
-	})
+func deleteSimulation(c *gin.Context) {
+
+	// TODO check if user has access to this simulation
+
+	simID, err := common.GetSimulationID(c)
+	if err != nil {
+		return
+	}
+
+	var sim Simulation
+	err = sim.ByID(uint(simID))
+	if common.ProvideErrorResponse(c, err) {
+		return
+	}
+
+	err = sim.delete()
+	if common.ProvideErrorResponse(c, err) == false {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "OK",
+		})
+	}
 }
 
-// GetUsersOfSimulation godoc
+// getUsersOfSimulation godoc
 // @Summary Get users of simulation
-// @ID GetUsersOfSimulation
+// @ID getUsersOfSimulation
 // @Produce  json
 // @Tags simulations
 // @Success 200 {array} common.UserResponse "Array of users that have access to the simulation"
@@ -157,7 +233,9 @@ func DeleteSimulation(c *gin.Context) {
 // @Failure 500 "Internal server error"
 // @Param simulationID path int true "Simulation ID"
 // @Router /simulations/{simulationID}/users/ [get]
-func GetUsersOfSimulation(c *gin.Context) {
+func getUsersOfSimulation(c *gin.Context) {
+
+	// TODO check if user has access to this simulation
 
 	simID, err := common.GetSimulationID(c)
 	if err != nil {
@@ -182,9 +260,9 @@ func GetUsersOfSimulation(c *gin.Context) {
 	})
 }
 
-// AddUserToSimulation godoc
+// addUserToSimulation godoc
 // @Summary Add a user to a a simulation
-// @ID AddUserToSimulation
+// @ID addUserToSimulation
 // @Tags simulations
 // @Produce json
 // @Success 200 "OK."
@@ -195,7 +273,10 @@ func GetUsersOfSimulation(c *gin.Context) {
 // @Param simulationID path int true "Simulation ID"
 // @Param username query string true "User name"
 // @Router /simulations/{simulationID}/user [put]
-func AddUserToSimulation(c *gin.Context) {
+func addUserToSimulation(c *gin.Context) {
+
+	// TODO check if user has access to this simulation
+
 	simID, err := common.GetSimulationID(c)
 	if err != nil {
 		return
@@ -219,9 +300,9 @@ func AddUserToSimulation(c *gin.Context) {
 	})
 }
 
-// DeleteUserFromSimulation godoc
+// deleteUserFromSimulation godoc
 // @Summary Delete a user from a simulation
-// @ID DeleteUserFromSimulation
+// @ID deleteUserFromSimulation
 // @Tags simulations
 // @Produce json
 // @Success 200 "OK."
@@ -232,7 +313,10 @@ func AddUserToSimulation(c *gin.Context) {
 // @Param simulationID path int true "Simulation ID"
 // @Param username query string true "User name"
 // @Router /simulations/{simulationID}/user [delete]
-func DeleteUserFromSimulation(c *gin.Context) {
+func deleteUserFromSimulation(c *gin.Context) {
+
+	// TODO check if user has access to this simulation
+
 	simID, err := common.GetSimulationID(c)
 	if err != nil {
 		return

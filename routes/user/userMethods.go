@@ -38,7 +38,7 @@ func (u *User) ByUsername(username string) error {
 	return nil
 }
 
-func (u *User) byID(id uint) error {
+func (u *User) ByID(id uint) error {
 	db := common.GetDB()
 	err := db.Find(u, id).Error
 	if err != nil {

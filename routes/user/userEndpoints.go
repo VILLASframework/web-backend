@@ -250,7 +250,7 @@ func getUser(c *gin.Context) {
 	var user User
 	id, _ := strconv.ParseInt(c.Param("UserID"), 10, 64)
 
-	err := user.byID(uint(id))
+	err := user.ByID(uint(id))
 	if err != nil {
 		c.JSON(http.StatusNotFound, fmt.Sprintf("%v", err))
 		return
