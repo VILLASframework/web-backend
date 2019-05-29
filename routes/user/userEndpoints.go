@@ -269,7 +269,23 @@ func getUser(c *gin.Context) {
 // @Param userID path int true "User ID"
 // @Router /users/{userID} [delete]
 func deleteUser(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message": "NOT implemented",
-	})
+
+	var user User
+	id, _ := strconv.ParseInt(c.Param("UserID"), 10, 64)
+
+	// Check that the user exist
+	err := user.byID(uint(id))
+	if err != nil {
+		c.JSON(http.StatusNotFound, fmt.Sprintf("%v", err))
+		return
+	}
+
+	// Try to remove user
+	err = user.remove()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, fmt.Sprintf("%v", err))
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{})
 }
