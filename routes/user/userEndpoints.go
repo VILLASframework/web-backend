@@ -166,9 +166,12 @@ func addUser(c *gin.Context) {
 
 	// Bind the response (context) with the User struct
 	var newUser User
-	if err := c.BindJSON(&newUser); err != nil {
-		// TODO: do something other than panic ...
-		panic(err)
+	if err := c.ShouldBindJSON(&newUser); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
+		})
+		return
 	}
 
 	// TODO: validate the User for:
