@@ -28,9 +28,8 @@ type AuthResponse struct {
 	Token   string `json:"token"`
 }
 
-// `/authenticate` endpoint does not require Authentication
 func VisitorAuthenticate(r *gin.RouterGroup) {
-	r.POST("", authenticationEp)
+	r.POST("", authenticate)
 }
 
 func RegisterUserEndpoints(r *gin.RouterGroup) {
@@ -41,9 +40,9 @@ func RegisterUserEndpoints(r *gin.RouterGroup) {
 	r.DELETE("/:UserID", deleteUser)
 }
 
-// authenticationEp godoc
+// authenticate godoc
 // @Summary Authentication for user
-// @ID authenticationEp
+// @ID authenticate
 // @Accept json
 // @Produce json
 // @Tags users
@@ -53,13 +52,16 @@ func RegisterUserEndpoints(r *gin.RouterGroup) {
 // @Failure 404 "Not found"
 // @Failure 422 "Unprocessable entity."
 // @Router /authenticate [post]
-func authenticationEp(c *gin.Context) {
+func authenticate(c *gin.Context) {
 
 	// Bind the response (context) with the Credentials struct
 	var loginRequest Credentials
-	if err := c.BindJSON(&loginRequest); err != nil {
-		// TODO: do something other than panic ...
-		panic(err)
+	if err := c.ShouldBindJSON(&loginRequest); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
+		})
+		return
 	}
 
 	// Check if the Username or Password are empty
