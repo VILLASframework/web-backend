@@ -8,7 +8,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
-	"strings"
 )
 
 func UserToContext(ctx *gin.Context, user_id uint) {
@@ -21,47 +20,25 @@ func UserToContext(ctx *gin.Context, user_id uint) {
 	ctx.Set("user", user)
 }
 
-// func stripBearerPrefixFromTokenString()
-// Originally is supposed to remove the 'BEARER' token from the Auth
-// header "Authorization: Bearer <token>". Currently use curl's header
-// like "$ curl -H 'Authorization: TOKEN <token> ..."
-func removeTokenPrefix(tok string) (string, error) {
-	// if the prefix exists remove it from token
-	if len(tok) > 5 && strings.ToUpper(tok[0:6]) == "TOKEN " {
-		return tok[6:], nil
-	}
-	// otherwise return token
-	return tok, nil
-}
-
-// Extractor of Authorization Header
-// var AuthorizationHeaderExtractor
-var GetAuthorizationHeader = &request.PostExtractionFilter{
-	request.HeaderExtractor{"Authorization"},
-	removeTokenPrefix,
-}
-
-// Extractor of OAuth2 tokens. Finds the 'access_token'
-// var OAuth2Extractor
-var GetAuth2 = &request.MultiExtractor{
-	GetAuthorizationHeader,
-	request.ArgumentExtractor{"access_token"},
-}
-
 func Authentication(unauthorized bool) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		// Initialize user_id and model in the context
 		UserToContext(ctx, 0)
 
 		// Authentication's access token extraction
-		token, err := request.ParseFromRequest(ctx.Request, GetAuth2,
+		// XXX: if we have a multi-header for Authorization (e.g. in
+		// case of OAuth2 use the request.OAuth2Extractor and make sure
+		// that the argument is 'access-token' or provide a custom one
+		token, err := request.ParseFromRequest(ctx.Request,
+			request.AuthorizationHeaderExtractor,
 			func(token *jwt.Token) (interface{}, error) {
+
 				// validate alg for signing the jwt
-				// XXX: whis is the default signing method?
 				if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 					return nil, fmt.Errorf("Unexpected signing alg: %v",
 						token.Header["alg"])
 				}
+
 				// return secret in byte format
 				secret := ([]byte(jwtSigningSecret))
 				return secret, nil
