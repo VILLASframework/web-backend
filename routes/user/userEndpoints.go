@@ -1,7 +1,6 @@
 package user
 
 import (
-	//"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
@@ -17,7 +16,7 @@ const jwtSigningSecret = "This should NOT be here!!@33$8&"
 const weekHours = time.Hour * 24 * 7
 
 type tokenClaims struct {
-	UserID string `json:"id"`
+	UserID uint   `json:"id"`
 	Role   string `json:"role"`
 	jwt.StandardClaims
 }
@@ -96,7 +95,7 @@ func authenticate(c *gin.Context) {
 
 	// create authentication token
 	claims := tokenClaims{
-		string(user.ID),
+		user.ID,
 		user.Role,
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(weekHours).Unix(),
