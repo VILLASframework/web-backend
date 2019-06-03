@@ -2,66 +2,47 @@ package user
 
 import (
 	"fmt"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/dgrijalva/jwt-go/request"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"strconv"
-	"strings"
 )
 
-func UserToContext(ctx *gin.Context, user_id uint) {
-	var user common.User
-	if user_id != 0 {
-		db := common.GetDB()
-		db.First(&user, user_id)
+func userToContext(ctx *gin.Context, user_id uint) {
+
+	var user User
+
+	err := user.ByID(user_id)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+			"succes":  false,
+			"message": "Authentication failed (user not found)",
+		})
+		return
 	}
+
+	ctx.Set("user_role", user.Role)
 	ctx.Set("user_id", user_id)
-	ctx.Set("user", user)
-}
-
-// func stripBearerPrefixFromTokenString()
-// Originally is supposed to remove the 'BEARER' token from the Auth
-// header "Authorization: Bearer <token>". Currently use curl's header
-// like "$ curl -H 'Authorization: TOKEN <token> ..."
-func removeTokenPrefix(tok string) (string, error) {
-	// if the prefix exists remove it from token
-	if len(tok) > 5 && strings.ToUpper(tok[0:6]) == "TOKEN " {
-		return tok[6:], nil
-	}
-	// otherwise return token
-	return tok, nil
-}
-
-// Extractor of Authorization Header
-// var AuthorizationHeaderExtractor
-var GetAuthorizationHeader = &request.PostExtractionFilter{
-	request.HeaderExtractor{"Authorization"},
-	removeTokenPrefix,
-}
-
-// Extractor of OAuth2 tokens. Finds the 'access_token'
-// var OAuth2Extractor
-var GetAuth2 = &request.MultiExtractor{
-	GetAuthorizationHeader,
-	request.ArgumentExtractor{"access_token"},
 }
 
 func Authentication(unauthorized bool) gin.HandlerFunc {
+
 	return func(ctx *gin.Context) {
-		// Initialize user_id and model in the context
-		UserToContext(ctx, 0)
 
 		// Authentication's access token extraction
-		token, err := request.ParseFromRequest(ctx.Request, GetAuth2,
+		// XXX: if we have a multi-header for Authorization (e.g. in
+		// case of OAuth2 use the request.OAuth2Extractor and make sure
+		// that the argument is 'access-token' or provide a custom one
+		token, err := request.ParseFromRequest(ctx.Request,
+			request.AuthorizationHeaderExtractor,
 			func(token *jwt.Token) (interface{}, error) {
+
 				// validate alg for signing the jwt
-				// XXX: whis is the default signing method?
 				if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 					return nil, fmt.Errorf("Unexpected signing alg: %v",
 						token.Header["alg"])
 				}
+
 				// return secret in byte format
 				secret := ([]byte(jwtSigningSecret))
 				return secret, nil
@@ -72,7 +53,7 @@ func Authentication(unauthorized bool) gin.HandlerFunc {
 			if unauthorized {
 				ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 					"succes":  false,
-					"message": "Authentication failed",
+					"message": "Authentication failed (claims extraction)",
 				})
 			}
 			return
@@ -80,8 +61,19 @@ func Authentication(unauthorized bool) gin.HandlerFunc {
 
 		// If the token is ok, pass user_id to context
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-			user_id, _ := strconv.ParseInt(claims["id"].(string), 10, 64)
-			UserToContext(ctx, uint(user_id))
+
+			user_id, ok := claims["id"].(float64)
+
+			if !ok {
+				ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+					"succes":  false,
+					"message": "Authentication failed (claims casting)",
+				})
+				return
+			}
+
+			userToContext(ctx, uint(user_id))
 		}
+
 	}
 }

@@ -29,6 +29,12 @@ func (u *User) save() error {
 	return err
 }
 
+func (u *User) remove() error {
+	db := common.GetDB()
+	err := db.Delete(u).Error
+	return err
+}
+
 func (u *User) ByUsername(username string) error {
 	db := common.GetDB()
 	err := db.Find(u, "Username = ?", username).Error

@@ -1,7 +1,6 @@
 package user
 
 import (
-	//"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
@@ -17,7 +16,7 @@ const jwtSigningSecret = "This should NOT be here!!@33$8&"
 const weekHours = time.Hour * 24 * 7
 
 type tokenClaims struct {
-	UserID string `json:"id"`
+	UserID uint   `json:"id"`
 	Role   string `json:"role"`
 	jwt.StandardClaims
 }
@@ -28,9 +27,8 @@ type AuthResponse struct {
 	Token   string `json:"token"`
 }
 
-// `/authenticate` endpoint does not require Authentication
 func VisitorAuthenticate(r *gin.RouterGroup) {
-	r.POST("", authenticationEp)
+	r.POST("", authenticate)
 }
 
 func RegisterUserEndpoints(r *gin.RouterGroup) {
@@ -41,9 +39,9 @@ func RegisterUserEndpoints(r *gin.RouterGroup) {
 	r.DELETE("/:UserID", deleteUser)
 }
 
-// authenticationEp godoc
+// authenticate godoc
 // @Summary Authentication for user
-// @ID authenticationEp
+// @ID authenticate
 // @Accept json
 // @Produce json
 // @Tags users
@@ -53,13 +51,16 @@ func RegisterUserEndpoints(r *gin.RouterGroup) {
 // @Failure 404 "Not found"
 // @Failure 422 "Unprocessable entity."
 // @Router /authenticate [post]
-func authenticationEp(c *gin.Context) {
+func authenticate(c *gin.Context) {
 
 	// Bind the response (context) with the Credentials struct
 	var loginRequest Credentials
-	if err := c.BindJSON(&loginRequest); err != nil {
-		// TODO: do something other than panic ...
-		panic(err)
+	if err := c.ShouldBindJSON(&loginRequest); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
+		})
+		return
 	}
 
 	// Check if the Username or Password are empty
@@ -94,7 +95,7 @@ func authenticationEp(c *gin.Context) {
 
 	// create authentication token
 	claims := tokenClaims{
-		string(user.ID),
+		user.ID,
 		user.Role,
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(weekHours).Unix(),
@@ -170,9 +171,12 @@ func addUser(c *gin.Context) {
 
 	// Bind the response (context) with the User struct
 	var newUser User
-	if err := c.BindJSON(&newUser); err != nil {
-		// TODO: do something other than panic ...
-		panic(err)
+	if err := c.ShouldBindJSON(&newUser); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
+		})
+		return
 	}
 
 	// TODO: validate the User for:
@@ -275,7 +279,23 @@ func getUser(c *gin.Context) {
 // @Param userID path int true "User ID"
 // @Router /users/{userID} [delete]
 func deleteUser(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message": "NOT implemented",
-	})
+
+	var user User
+	id, _ := strconv.ParseInt(c.Param("UserID"), 10, 64)
+
+	// Check that the user exist
+	err := user.ByID(uint(id))
+	if err != nil {
+		c.JSON(http.StatusNotFound, fmt.Sprintf("%v", err))
+		return
+	}
+
+	// Try to remove user
+	err = user.remove()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, fmt.Sprintf("%v", err))
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{})
 }
