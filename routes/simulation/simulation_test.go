@@ -48,8 +48,16 @@ var myUsers = []common.UserResponse{
 	user_B,
 }
 
+var myUserB = []common.UserResponse{
+	user_B,
+}
+
 var msgUsers = common.ResponseMsgUsers{
 	Users: myUsers,
+}
+
+var msgUserB = common.ResponseMsgUsers{
+	Users: myUserB,
 }
 
 var simulationA = common.SimulationResponse{
@@ -64,6 +72,19 @@ var simulationB = common.SimulationResponse{
 	Running: false,
 }
 
+var simulationC = common.Simulation{
+	Name:            "Simulation_C",
+	Running:         false,
+	StartParameters: "test",
+}
+
+var simulationC_response = common.SimulationResponse{
+	ID:          3,
+	Name:        simulationC.Name,
+	Running:     simulationC.Running,
+	StartParams: simulationC.StartParameters,
+}
+
 var mySimulations = []common.SimulationResponse{
 	simulationA,
 	simulationB,
@@ -74,7 +95,7 @@ var msgSimulations = common.ResponseMsgSimulations{
 }
 
 var msgSimulation = common.ResponseMsgSimulation{
-	Simulation: simulationA,
+	Simulation: simulationC_response,
 }
 
 // Test /simulation endpoints
@@ -107,6 +128,11 @@ func TestSimulationEndpoints(t *testing.T) {
 		panic(err)
 	}
 
+	msgUserBjson, err := json.Marshal(msgUserB)
+	if err != nil {
+		panic(err)
+	}
+
 	msgSimulationsjson, err := json.Marshal(msgSimulations)
 	if err != nil {
 		panic(err)
@@ -117,24 +143,38 @@ func TestSimulationEndpoints(t *testing.T) {
 		panic(err)
 	}
 
+	simulationCjson, err := json.Marshal(simulationC)
+	if err != nil {
+		panic(err)
+	}
+
 	authenticate(t, router, "/api/authenticate", "POST", credjson, 200)
 
 	// test GET simulations/
 	testEndpoint(t, router, "/api/simulations/", "GET", nil, 200, string(msgSimulationsjson))
 
+	// test POST simulations/
+	testEndpoint(t, router, "/api/simulations/", "POST", simulationCjson, 200, string(msgOKjson))
+
 	// test GET simulations/:SimulationID
-	testEndpoint(t, router, "/api/simulations/1", "GET", nil, 200, string(msgSimulationjson))
+	testEndpoint(t, router, "/api/simulations/3", "GET", nil, 200, string(msgSimulationjson))
+
+	// test DELETE simulations/:SimulationID
+	testEndpoint(t, router, "/api/simulations/3", "DELETE", nil, 200, string(msgOKjson))
+	testEndpoint(t, router, "/api/simulations/", "GET", nil, 200, string(msgSimulationsjson))
 
 	// test GET simulations/:SimulationID/users
 	testEndpoint(t, router, "/api/simulations/1/users", "GET", nil, 200, string(msgUsersjson))
 
 	// test DELETE simulations/:SimulationID/user
 	testEndpoint(t, router, "/api/simulations/1/user?username=User_A", "DELETE", nil, 200, string(msgOKjson))
+	testEndpoint(t, router, "/api/simulations/1/users", "GET", nil, 200, string(msgUserBjson))
 
 	// test PUT simulations/:SimulationID/user
 	testEndpoint(t, router, "/api/simulations/1/user?username=User_A", "PUT", nil, 200, string(msgOKjson))
+	testEndpoint(t, router, "/api/simulations/1/users", "GET", nil, 200, string(msgUsersjson))
 
-	// TODO add more tests
+	// TODO add tests for other return codes
 }
 
 func testEndpoint(t *testing.T, router *gin.Engine, url string, method string, body []byte, expected_code int, expected_response string) {

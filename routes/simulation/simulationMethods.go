@@ -39,16 +39,10 @@ func (s *Simulation) update(modifiedSimulation Simulation) error {
 	return err
 }
 
-func (s *Simulation) addUser(username string) error {
-
-	var newUser user.User
-	err := newUser.ByUsername(username)
-	if err != nil {
-		return err
-	}
+func (s *Simulation) addUser(u *common.User) error {
 
 	db := common.GetDB()
-	err = db.Model(s).Association("Users").Append(&newUser).Error
+	err := db.Model(s).Association("Users").Append(u).Error
 	return err
 }
 
@@ -65,12 +59,12 @@ func (s *Simulation) deleteUser(username string) error {
 
 	if no_users > 1 {
 		// remove user from simulation
-		err = db.Model(s).Association("Users").Delete(&deletedUser).Error
+		err = db.Model(s).Association("Users").Delete(&deletedUser.User).Error
 		if err != nil {
 			return err
 		}
 		// remove simulation from user
-		err = db.Model(&deletedUser).Association("Simulations").Delete(s).Error
+		err = db.Model(&deletedUser.User).Association("Simulations").Delete(s).Error
 		if err != nil {
 			return err
 		}
@@ -97,7 +91,8 @@ func (s *Simulation) delete() error {
 		}
 
 		if no_users > 0 {
-			for u, _ := range users {
+			for _, u := range users {
+				fmt.Println("User in delete: ", u)
 				// remove user from simulation
 				err = db.Model(s).Association("Users").Delete(&u).Error
 				if err != nil {

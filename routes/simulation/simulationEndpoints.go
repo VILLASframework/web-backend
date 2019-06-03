@@ -71,10 +71,10 @@ func getSimulations(c *gin.Context) {
 // @Router /simulations [post]
 func addSimulation(c *gin.Context) {
 
-	user_id := c.GetInt("user_id")
+	userID, _ := c.Get("user_id")
 
 	var u user.User
-	err := u.ByID(uint(user_id))
+	err := u.ByID(userID.(uint))
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
@@ -96,7 +96,7 @@ func addSimulation(c *gin.Context) {
 	}
 
 	// add user to new simulation
-	err = sim.addUser(u.Username)
+	err = sim.addUser(&(u.User))
 	if common.ProvideErrorResponse(c, err) == false {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "OK.",
@@ -214,7 +214,7 @@ func deleteSimulation(c *gin.Context) {
 	err = sim.delete()
 	if common.ProvideErrorResponse(c, err) == false {
 		c.JSON(http.StatusOK, gin.H{
-			"message": "OK",
+			"message": "OK.",
 		})
 	}
 }
@@ -288,7 +288,13 @@ func addUserToSimulation(c *gin.Context) {
 
 	username := c.Request.URL.Query().Get("username")
 
-	err = sim.addUser(username)
+	var u user.User
+	err = u.ByUsername(username)
+	if common.ProvideErrorResponse(c, err) {
+		return
+	}
+
+	err = sim.addUser(&(u.User))
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
