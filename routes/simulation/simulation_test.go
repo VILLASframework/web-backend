@@ -15,10 +15,9 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
 )
 
-
 var token string
 
-type credentials struct{
+type credentials struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
@@ -34,13 +33,13 @@ var msgOK = common.ResponseMsg{
 
 var user_A = common.UserResponse{
 	Username: "User_A",
-	Role:     "user",
+	Role:     "User",
 	Mail:     "",
 }
 
 var user_B = common.UserResponse{
 	Username: "User_B",
-	Role:     "user",
+	Role:     "User",
 	Mail:     "",
 }
 
@@ -118,7 +117,6 @@ func TestSimulationEndpoints(t *testing.T) {
 		panic(err)
 	}
 
-	// TODO add authentication for User_A
 	authenticate(t, router, "/api/authenticate", "POST", credjson, 200)
 
 	// test GET simulations/
@@ -142,15 +140,14 @@ func TestSimulationEndpoints(t *testing.T) {
 func testEndpoint(t *testing.T, router *gin.Engine, url string, method string, body []byte, expected_code int, expected_response string) {
 	w := httptest.NewRecorder()
 
-
-	if body != nil{
+	if body != nil {
 		req, _ := http.NewRequest(method, url, bytes.NewBuffer(body))
 		req.Header.Set("Content-Type", "application/json")
-		req.Header.Add("Authorization", "TOKEN " + token)
+		req.Header.Add("Authorization", "Bearer "+token)
 		router.ServeHTTP(w, req)
 	} else {
 		req, _ := http.NewRequest(method, url, nil)
-		req.Header.Add("Authorization", "TOKEN " + token)
+		req.Header.Add("Authorization", "Bearer "+token)
 		router.ServeHTTP(w, req)
 	}
 
@@ -171,13 +168,12 @@ func authenticate(t *testing.T, router *gin.Engine, url string, method string, b
 	var body_data map[string]interface{}
 
 	err := json.Unmarshal([]byte(w.Body.String()), &body_data)
-	if err != nil{
+	if err != nil {
 		panic(err)
 	}
 
-
 	success := body_data["success"].(bool)
-	if !success{
+	if !success {
 		panic(-1)
 	}
 	// save token to global variable

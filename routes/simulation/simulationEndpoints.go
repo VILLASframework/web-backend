@@ -1,7 +1,6 @@
 package simulation
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -34,11 +33,10 @@ func RegisterSimulationEndpoints(r *gin.RouterGroup) {
 // @Router /simulations [get]
 func getSimulations(c *gin.Context) {
 
-	userID := c.GetInt("user_id")
-	fmt.Println(userID)
+	userID, _ := c.Get("user_id")
 
 	var u user.User
-	err := u.ByID(uint(userID))
+	err := u.ByID(userID.(uint))
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
