@@ -47,7 +47,7 @@ func TestDummyDBAssociations(t *testing.T) {
 
 	// User
 
-	a.NoError(db.Find(&usr, 1).Error, fM("User"))
+	a.NoError(db.Find(&usr, 2).Error, fM("User"))
 	a.EqualValues("User_A", usr.Username)
 
 	// User Associations
@@ -83,7 +83,6 @@ func TestDummyDBAssociations(t *testing.T) {
 			"Expected to have %v Visualizations. Has %v.", 2, len(viss))
 	}
 
-
 	// Model
 
 	a.NoError(db.Find(&mo, 1).Error, fM("Model"))
@@ -106,7 +105,6 @@ func TestDummyDBAssociations(t *testing.T) {
 			"Expected to have %v Files. Has %v.", 2, len(files_sm))
 	}
 
-
 	// Visualization
 
 	a.NoError(db.Find(&vis, 1).Error, fM("Visualization"))
@@ -120,11 +118,9 @@ func TestDummyDBAssociations(t *testing.T) {
 			"Expected to have %v Widget. Has %v.", 2, len(widgs))
 	}
 
-
 	// Widget
 	a.NoError(db.Find(&widg, 1).Error, fM("Widget"))
 	a.EqualValues("Widget_A", widg.Name)
-
 
 	// Widget Association
 	a.NoError(db.Model(&widg).Related(&files, "Files").Error)
@@ -137,6 +133,5 @@ func TestDummyDBAssociations(t *testing.T) {
 
 	a.NoError(db.Find(&file, 1).Error, fM("File"))
 	a.EqualValues("File_A", file.Name)
-
 
 }
