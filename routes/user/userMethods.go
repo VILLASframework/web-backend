@@ -72,8 +72,15 @@ func (u *User) validatePassword(password string) error {
 	return bcrypt.CompareHashAndPassword(hashedPassword, loginPassword)
 }
 
-func (u *User) update(modifiedUser User) error {
+func (u *User) update(updatedUser User) error {
+
+	// TODO: if the field is empty string member shouldn't be updated
+	u.Username = updatedUser.Username
+	u.Password = updatedUser.Password
+	u.Mail = updatedUser.Mail
+	u.Role = updatedUser.Role
+
 	db := common.GetDB()
-	err := db.Model(u).Update(modifiedUser).Error
+	err := db.Model(u).Update(updatedUser).Error
 	return err
 }
