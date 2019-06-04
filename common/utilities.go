@@ -27,7 +27,6 @@ func ProvideErrorResponse(c *gin.Context, err error) bool {
 	return false // No error
 }
 
-
 func GetSimulationID(c *gin.Context) (int, error) {
 
 	simID, err := strconv.Atoi(c.Param("simulationID"))
@@ -90,4 +89,20 @@ func GetWidgetID(c *gin.Context) (int, error) {
 		return widgetID, err
 
 	}
+}
+
+func IsActionAllowed(c *gin.Context, model string, action string) error {
+
+	// Get user's role from context
+	role, exists := c.Get("user_role")
+	if !exists {
+		return fmt.Errorf("Request does not contain user's role")
+	}
+
+	// Check if the role can execute the action on the model
+	if !Roles[role.(string)][model][action] {
+		return fmt.Errorf("Action not allowed for role %v", role)
+	}
+
+	return nil
 }
