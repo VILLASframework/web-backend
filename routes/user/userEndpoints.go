@@ -163,6 +163,12 @@ func getUsers(c *gin.Context) {
 // @Router /users [post]
 func addUser(c *gin.Context) {
 
+	err := common.IsActionAllowed(c, common.ModelUser, common.Create)
+	if err != nil {
+		c.JSON(http.StatusUnprocessableEntity, fmt.Sprintf("%v", err))
+		return
+	}
+
 	// Bind the response (context) with the User struct
 	var newUser User
 	if err := c.ShouldBindJSON(&newUser); err != nil {
@@ -244,6 +250,12 @@ func updateUser(c *gin.Context) {
 // @Param userID path int true "User ID"
 // @Router /users/{userID} [get]
 func getUser(c *gin.Context) {
+
+	err := common.IsActionAllowed(c, common.ModelUser, common.Read)
+	if err != nil {
+		c.JSON(http.StatusUnprocessableEntity, fmt.Sprintf("%v", err))
+		return
+	}
 
 	var user User
 	id, _ := strconv.ParseInt(c.Param("UserID"), 10, 64)
