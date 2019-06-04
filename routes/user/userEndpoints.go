@@ -274,7 +274,7 @@ func getUser(c *gin.Context) {
 // @Router /users/{userID} [delete]
 func deleteUser(c *gin.Context) {
 
-	err := common.IsActionAllowed(c, "user", "delete")
+	err := common.IsActionAllowed(c, common.ModelUser, common.Delete)
 	if err != nil {
 		c.JSON(http.StatusUnprocessableEntity, fmt.Sprintf("%v", err))
 		return

@@ -91,7 +91,7 @@ func GetWidgetID(c *gin.Context) (int, error) {
 	}
 }
 
-func IsActionAllowed(c *gin.Context, model string, action string) error {
+func IsActionAllowed(c *gin.Context, model ModelName, action CRUD) error {
 
 	// Get user's role from context
 	role, exists := c.Get("user_role")
