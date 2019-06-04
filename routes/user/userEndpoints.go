@@ -163,7 +163,7 @@ func getUsers(c *gin.Context) {
 // @Router /users [post]
 func addUser(c *gin.Context) {
 
-	err := common.IsActionAllowed(c, common.ModelUser, common.Create)
+	err := common.ValidateRole(c, common.ModelUser, common.Create)
 	if err != nil {
 		c.JSON(http.StatusUnprocessableEntity, fmt.Sprintf("%v", err))
 		return
@@ -251,7 +251,7 @@ func updateUser(c *gin.Context) {
 // @Router /users/{userID} [get]
 func getUser(c *gin.Context) {
 
-	err := common.IsActionAllowed(c, common.ModelUser, common.Read)
+	err := common.ValidateRole(c, common.ModelUser, common.Read)
 	if err != nil {
 		c.JSON(http.StatusUnprocessableEntity, fmt.Sprintf("%v", err))
 		return
@@ -286,7 +286,7 @@ func getUser(c *gin.Context) {
 // @Router /users/{userID} [delete]
 func deleteUser(c *gin.Context) {
 
-	err := common.IsActionAllowed(c, common.ModelUser, common.Delete)
+	err := common.ValidateRole(c, common.ModelUser, common.Delete)
 	if err != nil {
 		c.JSON(http.StatusUnprocessableEntity, fmt.Sprintf("%v", err))
 		return

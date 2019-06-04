@@ -91,7 +91,10 @@ func GetWidgetID(c *gin.Context) (int, error) {
 	}
 }
 
-func IsActionAllowed(c *gin.Context, model ModelName, action CRUD) error {
+func ValidateRole(c *gin.Context, model ModelName, action CRUD) error {
+	// Extracts and validates the role which is saved in the context for
+	// executing a specific CRUD operation on a specific model. In case
+	// of invalid role return an error.
 
 	// Get user's role from context
 	role, exists := c.Get("user_role")
