@@ -1,6 +1,7 @@
 package simulation
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -33,22 +34,36 @@ func RegisterSimulationEndpoints(r *gin.RouterGroup) {
 // @Router /simulations [get]
 func getSimulations(c *gin.Context) {
 
-	// ATTENTION: do not use c.GetInt ("user_id") since user_id is of type uint and not int
-	userID, _ := c.Get("user_id")
+	err := common.ValidateRole(c, common.ModelSimulation, common.Read)
+	if err != nil {
+		c.JSON(http.StatusUnprocessableEntity, fmt.Sprintf("%v", err))
+		return
+	}
+
+	// ATTENTION: do not use c.GetInt (common.UserIDCtx) since user_id is of type uint and not int
+	userID, _ := c.Get(common.UserIDCtx)
+	userRole, _ := c.Get(common.UserRoleCtx)
 
 	var u user.User
-	err := u.ByID(userID.(uint))
+	err = u.ByID(userID.(uint))
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
 
 	// get all simulations for the user who issues the request
-	// TODO consider role of user, if admin return all simulations
 	db := common.GetDB()
 	var simulations []common.Simulation
-	err = db.Order("ID asc").Model(&u).Related(&simulations, "Simulations").Error
-	if common.ProvideErrorResponse(c, err) {
-		return
+	if userRole == "Admin" { // Admin can see all simulations
+		err = db.Order("ID asc").Find(&simulations).Error
+		if common.ProvideErrorResponse(c, err) {
+			return
+		}
+
+	} else { // User or Guest roles see only their simulations
+		err = db.Order("ID asc").Model(&u).Related(&simulations, "Simulations").Error
+		if common.ProvideErrorResponse(c, err) {
+			return
+		}
 	}
 
 	serializer := common.SimulationsSerializer{c, simulations}
