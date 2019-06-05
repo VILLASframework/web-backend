@@ -9,6 +9,9 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
+const UserIDCtx = "user_id"
+const UserRoleCtx = "user_role"
+
 func ProvideErrorResponse(c *gin.Context, err error) bool {
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {

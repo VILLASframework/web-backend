@@ -251,8 +251,8 @@ func updateUser(c *gin.Context) {
 	// If the logged in user has NOT the same id as the user that is
 	// going to be updated AND the role is NOT admin (is already saved
 	// in the context from the Authentication middleware)
-	userID, _ := c.Get("user_id")
-	userRole, _ := c.Get("user_role")
+	userID, _ := c.Get(common.UserIDCtx)
+	userRole, _ := c.Get(common.UserRoleCtx)
 	if toBeUpdatedID != userID && userRole != "Admin" {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
