@@ -9,6 +9,9 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
+const UserIDCtx = "user_id"
+const UserRoleCtx = "user_role"
+
 func ProvideErrorResponse(c *gin.Context, err error) bool {
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -26,8 +29,6 @@ func ProvideErrorResponse(c *gin.Context, err error) bool {
 	}
 	return false // No error
 }
-
-// Parsing of parameters
 
 func GetSimulationID(c *gin.Context) (int, error) {
 
@@ -89,7 +90,6 @@ func GetWidgetID(c *gin.Context) (int, error) {
 		return -1, err
 	} else {
 		return widgetID, err
-
 	}
 }
 
@@ -105,6 +105,5 @@ func GetFileID(c *gin.Context) (int, error) {
 		return -1, err
 	} else {
 		return fileID, err
-
 	}
 }

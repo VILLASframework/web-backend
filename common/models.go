@@ -39,6 +39,7 @@ type Simulation struct {
 }
 
 // Model data model
+// TODO: rename to SimulationModel
 type Model struct {
 	// ID of model
 	ID uint `gorm:"primary_key;auto_increment"`

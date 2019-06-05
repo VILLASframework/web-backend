@@ -169,6 +169,12 @@ func getUsers(c *gin.Context) {
 // @Router /users [post]
 func addUser(c *gin.Context) {
 
+	err := common.ValidateRole(c, common.ModelUser, common.Create)
+	if err != nil {
+		c.JSON(http.StatusUnprocessableEntity, fmt.Sprintf("%v", err))
+		return
+	}
+
 	// Bind the response (context) with the User struct
 	var newUser User
 	if err := c.ShouldBindJSON(&newUser); err != nil {
@@ -186,7 +192,7 @@ func addUser(c *gin.Context) {
 	// and in case of error raise 422
 
 	// Check that the username is NOT taken
-	err := newUser.ByUsername(newUser.Username)
+	err = newUser.ByUsername(newUser.Username)
 	if err == nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{
 			"message": "Username is already taken",
@@ -232,8 +238,80 @@ func addUser(c *gin.Context) {
 // @Param userID path int true "User ID"
 // @Router /users/{userID} [put]
 func updateUser(c *gin.Context) {
+
+	err := common.ValidateRole(c, common.ModelUser, common.Read)
+	if err != nil {
+		c.JSON(http.StatusUnprocessableEntity, fmt.Sprintf("%v", err))
+		return
+	}
+
+	// Find the user
+	var user User
+	toBeUpdatedID, _ := strconv.ParseInt(c.Param("UserID"), 10, 64)
+	err = user.ByID(uint(toBeUpdatedID))
+	if err != nil {
+		c.JSON(http.StatusNotFound, fmt.Sprintf("%v", err))
+		return
+	}
+
+	// If the logged in user has NOT the same id as the user that is
+	// going to be updated AND the role is NOT admin (is already saved
+	// in the context from the Authentication middleware)
+	userID, _ := c.Get(common.UserIDCtx)
+	userRole, _ := c.Get(common.UserRoleCtx)
+	if toBeUpdatedID != userID && userRole != "Admin" {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"message": "Invalid authorization",
+		})
+	}
+
+	// Bind the (context) with the User struct
+	var updatedUser User
+	if err := c.ShouldBindJSON(&updatedUser); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
+		})
+		return
+	}
+
+	// TODO: validate the User for:
+	//       - username
+	// 		 - password
+	//       - email
+	//       - role
+	// and in case of error raise 422
+
+	// Check that the username is NOT taken
+	err = updatedUser.ByUsername(updatedUser.Username)
+	if err == nil {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"message": "Username is already taken",
+		})
+		return
+	}
+
+	// Hash the password before updating it to the DB
+	err = updatedUser.setPassword(updatedUser.Password)
+	if err != nil {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"message": "Unable to encrypt new password",
+		})
+		return
+	}
+
+	// Finaly update the user
+	err = user.update(updatedUser)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Unable to update user",
+		})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"message": "NOT implemented",
+		"user": fmt.Sprintf(updatedUser.Username),
 	})
 }
 
@@ -251,10 +329,16 @@ func updateUser(c *gin.Context) {
 // @Router /users/{userID} [get]
 func getUser(c *gin.Context) {
 
+	err := common.ValidateRole(c, common.ModelUser, common.Read)
+	if err != nil {
+		c.JSON(http.StatusUnprocessableEntity, fmt.Sprintf("%v", err))
+		return
+	}
+
 	var user User
 	id, _ := strconv.ParseInt(c.Param("UserID"), 10, 64)
 
-	err := user.ByID(uint(id))
+	err = user.ByID(uint(id))
 	if err != nil {
 		c.JSON(http.StatusNotFound, fmt.Sprintf("%v", err))
 		return
@@ -280,11 +364,17 @@ func getUser(c *gin.Context) {
 // @Router /users/{userID} [delete]
 func deleteUser(c *gin.Context) {
 
+	err := common.ValidateRole(c, common.ModelUser, common.Delete)
+	if err != nil {
+		c.JSON(http.StatusUnprocessableEntity, fmt.Sprintf("%v", err))
+		return
+	}
+
 	var user User
 	id, _ := strconv.ParseInt(c.Param("UserID"), 10, 64)
 
 	// Check that the user exist
-	err := user.ByID(uint(id))
+	err = user.ByID(uint(id))
 	if err != nil {
 		c.JSON(http.StatusNotFound, fmt.Sprintf("%v", err))
 		return

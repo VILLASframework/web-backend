@@ -2,6 +2,7 @@ package user
 
 import (
 	"fmt"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/dgrijalva/jwt-go/request"
 	"github.com/gin-gonic/gin"
@@ -21,8 +22,8 @@ func userToContext(ctx *gin.Context, user_id uint) {
 		return
 	}
 
-	ctx.Set("user_role", user.Role)
-	ctx.Set("user_id", user_id)
+	ctx.Set(common.UserRoleCtx, user.Role)
+	ctx.Set(common.UserIDCtx, user_id)
 }
 
 func Authentication(unauthorized bool) gin.HandlerFunc {
