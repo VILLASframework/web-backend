@@ -1,4 +1,4 @@
-package model
+package simulationmodel
 
 import (
 	"fmt"
@@ -8,26 +8,26 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulator"
 )
 
-type Model struct {
-	common.Model
+type SimulationModel struct {
+	common.SimulationModel
 }
 
-func (m *Model) save() error {
+func (m *SimulationModel) save() error {
 	db := common.GetDB()
 	err := db.Create(m).Error
 	return err
 }
 
-func (m *Model) ByID(id uint) error {
+func (m *SimulationModel) ByID(id uint) error {
 	db := common.GetDB()
 	err := db.Find(m, id).Error
 	if err != nil {
-		return fmt.Errorf("Model with id=%v does not exist", id)
+		return fmt.Errorf("Simulation Model with id=%v does not exist", id)
 	}
 	return nil
 }
 
-func (m *Model) addToSimulation(simID int) error {
+func (m *SimulationModel) addToSimulation(simID int) error {
 	db := common.GetDB()
 	var sim simulation.Simulation
 	err := sim.ByID(uint(simID))
@@ -35,34 +35,34 @@ func (m *Model) addToSimulation(simID int) error {
 		return err
 	}
 
-	// save model to DB
+	// save simulation model to DB
 	err = m.save()
 	if err != nil {
 		return err
 	}
 
-	// associate simulator with model
+	// associate simulator with simulation model
 	var simltr simulator.Simulator
 	err = simltr.ByID(m.SimulatorID)
 	err = db.Model(m).Association("Simulator").Append(&simltr).Error
 
-	// associate model with simulation
-	err = db.Model(&sim).Association("Models").Append(m).Error
+	// associate simulation model with simulation
+	err = db.Model(&sim).Association("SimulationModels").Append(m).Error
 
 	return err
 }
 
-func (m *Model) update(modifiedModel Model) error {
+func (m *SimulationModel) update(modifiedSimulationModel SimulationModel) error {
 	db := common.GetDB()
-	err := db.Model(m).Update(modifiedModel).Error
+	err := db.Model(m).Update(modifiedSimulationModel).Error
 	if err != nil {
 		return err
 	}
 
-	if m.SimulatorID != modifiedModel.SimulatorID {
+	if m.SimulatorID != modifiedSimulationModel.SimulatorID {
 		// update simulator
 		var s simulator.Simulator
-		err = s.ByID(modifiedModel.SimulatorID)
+		err = s.ByID(modifiedSimulationModel.SimulatorID)
 
 		err = db.Model(m).Association("Simulator").Replace(s).Error
 
@@ -71,7 +71,7 @@ func (m *Model) update(modifiedModel Model) error {
 	return err
 }
 
-func (m *Model) updateSignals(signals []common.Signal, direction string) error {
+func (m *SimulationModel) updateSignals(signals []common.Signal, direction string) error {
 
 	db := common.GetDB()
 	var err error
@@ -85,7 +85,7 @@ func (m *Model) updateSignals(signals []common.Signal, direction string) error {
 	return err
 }
 
-func (m *Model) addSignal(signal common.Signal, direction string) error {
+func (m *SimulationModel) addSignal(signal common.Signal, direction string) error {
 
 	db := common.GetDB()
 	var err error
@@ -109,7 +109,7 @@ func (m *Model) addSignal(signal common.Signal, direction string) error {
 	return err
 }
 
-func (m *Model) deleteSignals(direction string) error {
+func (m *SimulationModel) deleteSignals(direction string) error {
 
 	db := common.GetDB()
 	var err error

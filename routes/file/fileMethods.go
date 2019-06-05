@@ -11,7 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/model"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulationmodel"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/widget"
 )
 
@@ -62,7 +62,7 @@ func (f *File) register(fileHeader *multipart.FileHeader, objectType string, obj
 	f.Path = filepath.Join(getFolderName(objectType, objectID), f.Name)
 	f.Size = uint(fileHeader.Size)
 
-	var m model.Model
+	var m simulationmodel.SimulationModel
 	var w widget.Widget
 	var err error
 	if objectType == "model" {
@@ -188,7 +188,7 @@ func (f *File) download(c *gin.Context) {
 	c.File(f.Path)
 }
 
-func (f *File) addToModel(model model.Model) error {
+func (f *File) addToModel(model simulationmodel.SimulationModel) error {
 	db := common.GetDB()
 	err := db.Model(&model).Association("Files").Append(f).Error
 	return err

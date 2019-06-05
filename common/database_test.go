@@ -29,7 +29,7 @@ func TestDummyDBAssociations(t *testing.T) {
 
 	// Variables for tests
 	var simr Simulator
-	var mo Model
+	var mo SimulationModel
 	var file File
 	var simn Simulation
 	var usr User
@@ -38,7 +38,7 @@ func TestDummyDBAssociations(t *testing.T) {
 	var widg Widget
 
 	//var sigs []Signal
-	var mos []Model
+	var mos []SimulationModel
 	var files []File
 	var files_sm []File
 	var simns []Simulation
@@ -71,10 +71,10 @@ func TestDummyDBAssociations(t *testing.T) {
 			"Expected to have %v Users. Has %v.", 2, len(usrs))
 	}
 
-	a.NoError(db.Model(&simn).Related(&mos, "Models").Error)
+	a.NoError(db.Model(&simn).Related(&mos, "SimulationModels").Error)
 	if len(mos) != 2 {
 		a.Fail("Simulation Associations",
-			"Expected to have %v Models. Has %v.", 2, len(mos))
+			"Expected to have %v simulation models. Has %v.", 2, len(mos))
 	}
 
 	a.NoError(db.Model(&simn).Related(&viss, "Visualizations").Error)
@@ -83,12 +83,12 @@ func TestDummyDBAssociations(t *testing.T) {
 			"Expected to have %v Visualizations. Has %v.", 2, len(viss))
 	}
 
-	// Model
+	// SimulationModel
 
-	a.NoError(db.Find(&mo, 1).Error, fM("Model"))
-	a.EqualValues("Model_A", mo.Name)
+	a.NoError(db.Find(&mo, 1).Error, fM("SimulationModel"))
+	a.EqualValues("SimulationModel_A", mo.Name)
 
-	// Model Associations
+	// SimulationModel Associations
 
 	a.NoError(db.Model(&mo).Association("Simulator").Find(&simr).Error)
 	a.EqualValues("Host_A", simr.Host, "Expected Host_A")
@@ -101,7 +101,7 @@ func TestDummyDBAssociations(t *testing.T) {
 
 	a.NoError(db.Model(&mo).Related(&files_sm, "Files").Error)
 	if len(files_sm) != 2 {
-		a.Fail("Model Associations",
+		a.Fail("SimulationModel Associations",
 			"Expected to have %v Files. Has %v.", 2, len(files_sm))
 	}
 

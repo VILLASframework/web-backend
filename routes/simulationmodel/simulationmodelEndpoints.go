@@ -1,4 +1,4 @@
-package model
+package simulationmodel
 
 import (
 	"net/http"
@@ -10,30 +10,30 @@ import (
 )
 
 func RegisterModelEndpoints(r *gin.RouterGroup) {
-	r.GET("/", getModels)
-	r.POST("/", addModel)
-	//r.POST("/:modelID", cloneModel)
-	r.PUT("/:modelID", updateModel)
-	r.GET("/:modelID", getModel)
-	r.DELETE("/:modelID", deleteModel)
+	r.GET("/", getSimulationModels)
+	r.POST("/", addSimulationModel)
+	//r.POST("/:modelID", cloneSimulationModel)
+	r.PUT("/:modelID", updateSimulationModel)
+	r.GET("/:modelID", getSimulationModel)
+	r.DELETE("/:modelID", deleteSimulationModel)
 	r.GET("/:modelID/signals", getSignals)
 	r.POST("/:modelID/signals", addSignal)
 	r.DELETE("/:modelID/signals", deleteSignals)
 }
 
-// getModels godoc
-// @Summary Get all models of simulation
-// @ID getModels
+// getSimulationModels godoc
+// @Summary Get all simulation models of simulation
+// @ID getSimulationModels
 // @Produce  json
 // @Tags models
-// @Success 200 {array} common.ModelResponse "Array of models to which belong to simulation"
+// @Success 200 {array} common.SimulationModelResponse "Array of models to which belong to simulation"
 // @Failure 401 "Unauthorized Access"
 // @Failure 403 "Access forbidden."
 // @Failure 404 "Not found"
 // @Failure 500 "Internal server error"
 // @Param simulationID query int true "Simulation ID"
 // @Router /models [get]
-func getModels(c *gin.Context) {
+func getSimulationModels(c *gin.Context) {
 
 	simID, err := common.GetSimulationID(c)
 	if err != nil {
@@ -41,7 +41,7 @@ func getModels(c *gin.Context) {
 	}
 
 	db := common.GetDB()
-	var models []common.Model
+	var models []common.SimulationModel
 
 	var sim simulation.Simulation
 	err = sim.ByID(uint(simID))
@@ -54,33 +54,33 @@ func getModels(c *gin.Context) {
 		return
 	}
 
-	serializer := common.ModelsSerializer{c, models}
+	serializer := common.SimulationModelsSerializer{c, models}
 	c.JSON(http.StatusOK, gin.H{
 		"models": serializer.Response(),
 	})
 }
 
-// addModel godoc
-// @Summary Add a model to a simulation
-// @ID addModel
+// addSimulationModel godoc
+// @Summary Add a simulation model to a simulation
+// @ID addSimulationModel
 // @Accept json
 // @Produce json
 // @Tags models
-// @Param inputModel body common.ModelResponse true "Model to be added incl. IDs of simulation and simulator"
+// @Param inputSimulationModel body common.SimulationModelResponse true "Simulation model to be added incl. IDs of simulation and simulator"
 // @Success 200 "OK."
 // @Failure 401 "Unauthorized Access"
 // @Failure 403 "Access forbidden."
 // @Failure 404 "Not found"
 // @Failure 500 "Internal server error"
 // @Router /models [post]
-func addModel(c *gin.Context) {
+func addSimulationModel(c *gin.Context) {
 
 	simID, err := common.GetSimulationID(c)
 	if err != nil {
 		return
 	}
 
-	var m Model
+	var m SimulationModel
 	err = c.BindJSON(&m)
 	if err != nil {
 		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
@@ -98,7 +98,7 @@ func addModel(c *gin.Context) {
 	}
 }
 
-func cloneModel(c *gin.Context) {
+func cloneSimulationModel(c *gin.Context) {
 
 	// modelID, err := routes.GetModelID(c)
 	// if err != nil {
@@ -132,13 +132,13 @@ func cloneModel(c *gin.Context) {
 
 }
 
-// updateModel godoc
-// @Summary Update a model
-// @ID updateModel
+// updateSimulationModel godoc
+// @Summary Update a simulation model
+// @ID updateSimulationModel
 // @Tags models
 // @Accept json
 // @Produce json
-// @Param inputModel body common.ModelResponse true "Model to be updated"
+// @Param inputSimulationModel body common.SimulationModelResponse true "Simulation model to be updated"
 // @Success 200 "OK."
 // @Failure 401 "Unauthorized Access"
 // @Failure 403 "Access forbidden."
@@ -146,14 +146,14 @@ func cloneModel(c *gin.Context) {
 // @Failure 500 "Internal server error"
 // @Param modelID path int true "Model ID"
 // @Router /models/{modelID} [put]
-func updateModel(c *gin.Context) {
+func updateSimulationModel(c *gin.Context) {
 
 	modelID, err := common.GetModelID(c)
 	if err != nil {
 		return
 	}
 
-	var modifiedModel Model
+	var modifiedModel SimulationModel
 	err = c.BindJSON(&modifiedModel)
 	if err != nil {
 		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
@@ -163,7 +163,7 @@ func updateModel(c *gin.Context) {
 		return
 	}
 
-	var m Model
+	var m SimulationModel
 	err = m.ByID(uint(modelID))
 	if common.ProvideErrorResponse(c, err) {
 		return
@@ -178,40 +178,40 @@ func updateModel(c *gin.Context) {
 
 }
 
-// getModel godoc
-// @Summary Get a model
-// @ID getModel
+// getSimulationModel godoc
+// @Summary Get a simulation model
+// @ID getSimulationModel
 // @Tags models
 // @Produce json
-// @Success 200 {object} common.ModelResponse "Requested model."
+// @Success 200 {object} common.SimulationModelResponse "Requested simulation model."
 // @Failure 401 "Unauthorized Access"
 // @Failure 403 "Access forbidden."
 // @Failure 404 "Not found"
 // @Failure 500 "Internal server error"
 // @Param modelID path int true "Model ID"
 // @Router /models/{modelID} [get]
-func getModel(c *gin.Context) {
+func getSimulationModel(c *gin.Context) {
 
 	modelID, err := common.GetModelID(c)
 	if err != nil {
 		return
 	}
 
-	var m Model
+	var m SimulationModel
 	err = m.ByID(uint(modelID))
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
 
-	serializer := common.ModelSerializer{c, m.Model}
+	serializer := common.SimulationModelSerializer{c, m.SimulationModel}
 	c.JSON(http.StatusOK, gin.H{
 		"model": serializer.Response(),
 	})
 }
 
-// deleteModel godoc
-// @Summary Delete a model
-// @ID deleteModel
+// deleteSimulationModel godoc
+// @Summary Delete a simulation model
+// @ID deleteSimulationModel
 // @Tags models
 // @Produce json
 // @Success 200 "OK."
@@ -221,7 +221,7 @@ func getModel(c *gin.Context) {
 // @Failure 500 "Internal server error"
 // @Param modelID path int true "Model ID"
 // @Router /models/{modelID} [delete]
-func deleteModel(c *gin.Context) {
+func deleteSimulationModel(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Not implemented.",
@@ -249,7 +249,7 @@ func addSignal(c *gin.Context) {
 		return
 	}
 
-	var m Model
+	var m SimulationModel
 	err = m.ByID(uint(modelID))
 	if common.ProvideErrorResponse(c, err) {
 		return
@@ -302,7 +302,7 @@ func getSignals(c *gin.Context) {
 		return
 	}
 
-	var m Model
+	var m SimulationModel
 	err = m.ByID(uint(modelID))
 	if common.ProvideErrorResponse(c, err) {
 		return
@@ -348,7 +348,7 @@ func deleteSignals(c *gin.Context) {
 		return
 	}
 
-	var m Model
+	var m SimulationModel
 	err = m.ByID(uint(modelID))
 	if common.ProvideErrorResponse(c, err) {
 		return

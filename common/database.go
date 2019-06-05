@@ -55,7 +55,7 @@ func VerifyConnection(db *gorm.DB) error {
 func DropTables(db *gorm.DB) {
 	db.DropTableIfExists(&Simulator{})
 	//db.DropTableIfExists(&Signal{})
-	db.DropTableIfExists(&Model{})
+	db.DropTableIfExists(&SimulationModel{})
 	db.DropTableIfExists(&File{})
 	db.DropTableIfExists(&Simulation{})
 	db.DropTableIfExists(&User{})
@@ -67,7 +67,7 @@ func DropTables(db *gorm.DB) {
 func MigrateModels(db *gorm.DB) {
 	db.AutoMigrate(&Simulator{})
 	//db.AutoMigrate(&Signal{})
-	db.AutoMigrate(&Model{})
+	db.AutoMigrate(&SimulationModel{})
 	db.AutoMigrate(&File{})
 	db.AutoMigrate(&Simulation{})
 	db.AutoMigrate(&User{})
@@ -110,8 +110,8 @@ func DummyPopulateDB(test_db *gorm.DB) {
 	//checkErr(test_db.Create(&inSig_A).Error)
 	//checkErr(test_db.Create(&inSig_B).Error)
 
-	mo_A := Model{Name: "Model_A"}
-	mo_B := Model{Name: "Model_B"}
+	mo_A := SimulationModel{Name: "SimulationModel_A"}
+	mo_B := SimulationModel{Name: "SimulationModel_B"}
 	checkErr(test_db.Create(&mo_A).Error)
 	checkErr(test_db.Create(&mo_B).Error)
 
@@ -157,7 +157,7 @@ func DummyPopulateDB(test_db *gorm.DB) {
 	checkErr(test_db.Create(&widg_A).Error)
 	checkErr(test_db.Create(&widg_B).Error)
 
-	// Associations betweend models
+	// Associations between models
 	// For `belongs to` use the model with id=1
 	// For `has many` use the models with id=1 and id=2
 
@@ -167,9 +167,9 @@ func DummyPopulateDB(test_db *gorm.DB) {
 	checkErr(test_db.Model(&simn_B).Association("Users").Append(&usr_A).Error)
 	checkErr(test_db.Model(&simn_B).Association("Users").Append(&usr_B).Error)
 
-	// Simulation HM Model
-	checkErr(test_db.Model(&simn_A).Association("Models").Append(&mo_A).Error)
-	checkErr(test_db.Model(&simn_A).Association("Models").Append(&mo_B).Error)
+	// Simulation HM SimulationModels
+	checkErr(test_db.Model(&simn_A).Association("SimulationModels").Append(&mo_A).Error)
+	checkErr(test_db.Model(&simn_A).Association("SimulationModels").Append(&mo_B).Error)
 
 	// Simulation HM Visualizations
 	checkErr(test_db.Model(&simn_A).Association("Visualizations").Append(&vis_A).Error)
@@ -179,17 +179,17 @@ func DummyPopulateDB(test_db *gorm.DB) {
 	checkErr(test_db.Model(&vis_A).Association("Widgets").Append(&widg_A).Error)
 	checkErr(test_db.Model(&vis_A).Association("Widgets").Append(&widg_B).Error)
 
-	// Model HM Signal
+	// SimulationModel HM Signal
 	//checkErr(test_db.Model(&mo_A).Association("InputMapping").Append(&inSig_A).Error)
 	//checkErr(test_db.Model(&mo_A).Association("InputMapping").Append(&inSig_B).Error)
 	//checkErr(test_db.Model(&mo_A).Association("OutputMapping").Append(&outSig_A).Error)
 	//checkErr(test_db.Model(&mo_A).Association("OutputMapping").Append(&outSig_B).Error)
 
-	// Model HM Files
+	// SimulationModel HM Files
 	checkErr(test_db.Model(&mo_A).Association("Files").Append(&file_A).Error)
 	checkErr(test_db.Model(&mo_A).Association("Files").Append(&file_B).Error)
 
-	// Simulator BT Model
+	// Simulator BT SimulationModel
 	checkErr(test_db.Model(&mo_A).Association("Simulator").Append(&simr_A).Error)
 
 	// Widget HM Files

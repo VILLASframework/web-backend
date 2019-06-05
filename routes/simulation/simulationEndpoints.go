@@ -78,7 +78,7 @@ func getSimulations(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Tags simulations
-// @Param inputModel body common.ModelResponse true "Simulation to be added"
+// @Param inputSimulation body common.SimulationResponse true "Simulation to be added"
 // @Success 200 "OK."
 // @Failure 401 "Unauthorized Access"
 // @Failure 403 "Access forbidden."

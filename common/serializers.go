@@ -25,7 +25,6 @@ type UserSerializer struct {
 	User
 }
 
-
 func (self *UserSerializer) Response(assoc bool) UserResponse {
 
 	response := UserResponse{
@@ -72,47 +71,45 @@ type SimulationSerializer struct {
 	Simulation
 }
 
-
 func (self *SimulationSerializer) Response() SimulationResponse {
 	response := SimulationResponse{
-		Name:    self.Name,
-		ID:      self.ID,
-		Running: self.Running,
+		Name:        self.Name,
+		ID:          self.ID,
+		Running:     self.Running,
 		StartParams: self.StartParameters,
 	}
 	return response
 }
 
-
 // Model/s Serializers
 
-type ModelsSerializer struct {
-	Ctx         *gin.Context
-	Models []Model
+type SimulationModelsSerializer struct {
+	Ctx              *gin.Context
+	SimulationModels []SimulationModel
 }
 
-func (self *ModelsSerializer) Response() []ModelResponse {
-	response := []ModelResponse{}
-	for _, model := range self.Models {
-		serializer := ModelSerializer{self.Ctx, model}
+func (self *SimulationModelsSerializer) Response() []SimulationModelResponse {
+	response := []SimulationModelResponse{}
+	for _, simulationmodel := range self.SimulationModels {
+		serializer := SimulationModelSerializer{self.Ctx, simulationmodel}
 		response = append(response, serializer.Response())
 	}
 	return response
 }
 
-type ModelSerializer struct {
+type SimulationModelSerializer struct {
 	Ctx *gin.Context
-	Model
+	SimulationModel
 }
 
-func (self *ModelSerializer) Response() ModelResponse {
-	response := ModelResponse{
-		Name:    		self.Name,
-		OutputLength:   self.OutputLength,
-		InputLength: 	self.InputLength,
+func (self *SimulationModelSerializer) Response() SimulationModelResponse {
+	response := SimulationModelResponse{
+		Name:         self.Name,
+		OutputLength: self.OutputLength,
+		InputLength:  self.InputLength,
 		SimulationID: self.SimulationID,
-		SimulatorID: self.SimulatorID,
-		StartParams: self.StartParameters,
+		SimulatorID:  self.SimulatorID,
+		StartParams:  self.StartParameters,
 		//InputMapping
 		//OutputMapping
 	}
@@ -122,7 +119,7 @@ func (self *ModelSerializer) Response() ModelResponse {
 // Simulator/s Serializers
 
 type SimulatorsSerializer struct {
-	Ctx   *gin.Context
+	Ctx        *gin.Context
 	Simulators []Simulator
 }
 
@@ -143,12 +140,12 @@ type SimulatorSerializer struct {
 func (self *SimulatorSerializer) Response() SimulatorResponse {
 
 	response := SimulatorResponse{
-		UUID:    		self.UUID,
-		Host:    		self.Host,
-		ModelType:      self.Modeltype,
-		Uptime:        	self.Uptime,
-		State:    		self.State,
-		StateUpdateAt: 	self.StateUpdateAt,
+		UUID:          self.UUID,
+		Host:          self.Host,
+		ModelType:     self.Modeltype,
+		Uptime:        self.Uptime,
+		State:         self.State,
+		StateUpdateAt: self.StateUpdateAt,
 	}
 	return response
 }
@@ -156,7 +153,7 @@ func (self *SimulatorSerializer) Response() SimulatorResponse {
 // Visualization/s Serializers
 
 type VisualizationsSerializer struct {
-	Ctx         *gin.Context
+	Ctx            *gin.Context
 	Visualizations []Visualization
 }
 
@@ -174,12 +171,11 @@ type VisualizationSerializer struct {
 	Visualization
 }
 
-
 func (self *VisualizationSerializer) Response() VisualizationResponse {
 
 	response := VisualizationResponse{
-		Name:    	self.Name,
-		Grid:	 	self.Grid,
+		Name:         self.Name,
+		Grid:         self.Grid,
 		SimulationID: self.SimulationID,
 	}
 	return response
@@ -188,7 +184,7 @@ func (self *VisualizationSerializer) Response() VisualizationResponse {
 // Widget/s Serializers
 
 type WidgetsSerializer struct {
-	Ctx         *gin.Context
+	Ctx     *gin.Context
 	Widgets []Widget
 }
 
@@ -209,17 +205,17 @@ type WidgetSerializer struct {
 func (self *WidgetSerializer) Response() WidgetResponse {
 
 	response := WidgetResponse{
-		Name:    			self.Name,
-		Type:	 			self.Type,
-		Width: 				self.Width,
-		Height: 			self.Height,
-		MinWidth:			self.MinWidth,
-		MinHeight:			self.MinHeight,
-		X: 					self.X,
-		Y: 					self.Y,
-		Z: 					self.Z,
-		VisualizationID:  	self.VisualizationID,
-		IsLocked: 			self.IsLocked,
+		Name:            self.Name,
+		Type:            self.Type,
+		Width:           self.Width,
+		Height:          self.Height,
+		MinWidth:        self.MinWidth,
+		MinHeight:       self.MinHeight,
+		X:               self.X,
+		Y:               self.Y,
+		Z:               self.Z,
+		VisualizationID: self.VisualizationID,
+		IsLocked:        self.IsLocked,
 		//CustomProperties
 	}
 	return response
@@ -245,7 +241,6 @@ type FileSerializerNoAssoc struct {
 	Ctx *gin.Context
 	File
 }
-
 
 func (self *FileSerializerNoAssoc) Response() FileResponse {
 	response := FileResponse{

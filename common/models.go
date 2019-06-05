@@ -32,36 +32,35 @@ type Simulation struct {
 	StartParameters string
 	// Users that have access to the simulation
 	Users []*User `gorm:"not null;many2many:user_simulations"`
-	// Models that belong to the simulation
-	Models []Model `gorm:"foreignkey:SimulationID"`
+	// SimulationModels that belong to the simulation
+	SimulationModels []SimulationModel `gorm:"foreignkey:SimulationID"`
 	// Visualizations that belong to the simulation
 	Visualizations []Visualization `gorm:"foreignkey:SimulationID"`
 }
 
-// Model data model
-// TODO: rename to SimulationModel
-type Model struct {
-	// ID of model
+// SimulationModel data model
+type SimulationModel struct {
+	// ID of simulation model
 	ID uint `gorm:"primary_key;auto_increment"`
-	// Name of model
+	// Name of simulation model
 	Name string `gorm:"not null"`
 	// Number of output signals
 	OutputLength int `gorm:"default:1"`
 	// Number of input signals
 	InputLength int `gorm:"default:1"`
-	// Start parameters of model as JSON string
+	// Start parameters of simulation model as JSON string
 	StartParameters string
-	// ID of simulation to which model belongs
+	// ID of simulation to which simulation model belongs
 	SimulationID uint
-	// Simulator associated with model
+	// Simulator associated with simulation model
 	Simulator Simulator
-	// ID of simulator associated with model
+	// ID of simulator associated with simulation model
 	SimulatorID uint
-	// Mapping of output signals of the model, order of signals is important
+	// Mapping of output signals of the simulation model, order of signals is important
 	OutputMapping []Signal
-	// Mapping of input signals of the model, order of signals is important
+	// Mapping of input signals of the simulation model, order of signals is important
 	InputMapping []Signal
-	// Files of model (can be CIM and other model file formats)
+	// Files of simulation model (can be CIM and other simulation model file formats)
 	Files []File `gorm:"foreignkey:ModelID"`
 }
 
