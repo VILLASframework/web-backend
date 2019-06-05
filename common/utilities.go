@@ -87,25 +87,5 @@ func GetWidgetID(c *gin.Context) (int, error) {
 		return -1, err
 	} else {
 		return widgetID, err
-
 	}
-}
-
-func ValidateRole(c *gin.Context, model ModelName, action CRUD) error {
-	// Extracts and validates the role which is saved in the context for
-	// executing a specific CRUD operation on a specific model. In case
-	// of invalid role return an error.
-
-	// Get user's role from context
-	role, exists := c.Get("user_role")
-	if !exists {
-		return fmt.Errorf("Request does not contain user's role")
-	}
-
-	// Check if the role can execute the action on the model
-	if !Roles[role.(string)][model][action] {
-		return fmt.Errorf("Action not allowed for role %v", role)
-	}
-
-	return nil
 }
