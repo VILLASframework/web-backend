@@ -323,7 +323,7 @@ func checkPermissions(c *gin.Context, operation common.CRUD) (bool, Simulation) 
 
 	err := common.ValidateRole(c, common.ModelSimulation, operation)
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, fmt.Sprintf("%v", err))
+		c.JSON(http.StatusUnprocessableEntity, "Access denied (role validation failed).")
 		return false, sim
 	}
 
@@ -352,7 +352,7 @@ func checkPermissions(c *gin.Context, operation common.CRUD) (bool, Simulation) 
 		}
 
 		if sim.checkAccess(userID.(uint), userRole.(string)) == false {
-			c.JSON(http.StatusUnprocessableEntity, fmt.Sprintf("%v", err))
+			c.JSON(http.StatusUnprocessableEntity, "Access denied (entity ID).")
 			return false, sim
 		}
 

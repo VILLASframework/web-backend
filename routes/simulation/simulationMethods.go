@@ -92,7 +92,6 @@ func (s *Simulation) delete() error {
 
 		if no_users > 0 {
 			for _, u := range users {
-				fmt.Println("User in delete: ", u)
 				// remove user from simulation
 				err = db.Model(s).Association("Users").Delete(&u).Error
 				if err != nil {

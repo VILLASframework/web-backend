@@ -174,6 +174,10 @@ func TestSimulationEndpoints(t *testing.T) {
 	testEndpoint(t, router, "/api/simulations/1/user?username=User_B", "PUT", nil, 200, string(msgOKjson))
 	testEndpoint(t, router, "/api/simulations/1/users", "GET", nil, 200, string(msgUsersjson))
 
+	// test DELETE simulations/:SimulationID/user for logged in user User_A
+	testEndpoint(t, router, "/api/simulations/1/user?username=User_A", "DELETE", nil, 200, string(msgOKjson))
+	testEndpoint(t, router, "/api/simulations/1/users", "GET", nil, 422, "\"Access denied (entity ID).\"")
+
 	// TODO add tests for other return codes
 }
 
