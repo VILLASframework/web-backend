@@ -30,22 +30,6 @@ func ProvideErrorResponse(c *gin.Context, err error) bool {
 	return false // No error
 }
 
-func GetSimulationID(c *gin.Context) (int, error) {
-
-	simID, err := strconv.Atoi(c.Param("simulationID"))
-
-	if err != nil {
-		errormsg := fmt.Sprintf("Bad request. No or incorrect format of simulation ID")
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
-		})
-		return -1, err
-	} else {
-		return simID, err
-
-	}
-}
-
 func GetModelID(c *gin.Context) (int, error) {
 
 	modelID, err := strconv.Atoi(c.Param("modelID"))

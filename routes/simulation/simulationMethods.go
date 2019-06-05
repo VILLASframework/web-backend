@@ -116,3 +116,25 @@ func (s *Simulation) delete() error {
 
 	return nil
 }
+
+func (s *Simulation) checkAccess(userID uint, userRole string) bool {
+
+	if userRole == "Admin" {
+		return true
+	} else {
+		db := common.GetDB()
+		u := common.User{}
+		u.Username = ""
+		err := db.Order("ID asc").Model(s).Where("ID = ?", userID).Related(&u, "Users").Error
+		if err != nil {
+			return false
+		} else {
+			if u.Username != "" {
+				return true
+			} else {
+				return false
+			}
+		}
+	}
+
+}

@@ -1,7 +1,9 @@
 package simulationmodel
 
 import (
+	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 
@@ -35,8 +37,12 @@ func RegisterModelEndpoints(r *gin.RouterGroup) {
 // @Router /models [get]
 func getSimulationModels(c *gin.Context) {
 
-	simID, err := common.GetSimulationID(c)
+	simID, err := strconv.Atoi(c.Request.URL.Query().Get("simulationID"))
 	if err != nil {
+		errormsg := fmt.Sprintf("Bad request. No or incorrect format of simulationID query parameter")
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": errormsg,
+		})
 		return
 	}
 
@@ -75,13 +81,8 @@ func getSimulationModels(c *gin.Context) {
 // @Router /models [post]
 func addSimulationModel(c *gin.Context) {
 
-	simID, err := common.GetSimulationID(c)
-	if err != nil {
-		return
-	}
-
 	var m SimulationModel
-	err = c.BindJSON(&m)
+	err := c.BindJSON(&m)
 	if err != nil {
 		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -90,7 +91,7 @@ func addSimulationModel(c *gin.Context) {
 		return
 	}
 
-	err = m.addToSimulation(simID)
+	err = m.addToSimulation(m.SimulationID)
 	if common.ProvideErrorResponse(c, err) == false {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "OK.",

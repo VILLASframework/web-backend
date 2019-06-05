@@ -1,7 +1,9 @@
 package visualization
 
 import (
+	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 
@@ -34,8 +36,12 @@ func RegisterVisualizationEndpoints(r *gin.RouterGroup) {
 // @Router /visualizations [get]
 func getVisualizations(c *gin.Context) {
 
-	simID, err := common.GetSimulationID(c)
+	simID, err := strconv.Atoi(c.Request.URL.Query().Get("simulationID"))
 	if err != nil {
+		errormsg := fmt.Sprintf("Bad request. No or incorrect format of simulationID query parameter")
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": errormsg,
+		})
 		return
 	}
 
@@ -70,13 +76,8 @@ func getVisualizations(c *gin.Context) {
 // @Router /visualizations [post]
 func addVisualization(c *gin.Context) {
 
-	simID, err := common.GetSimulationID(c)
-	if err != nil {
-		return
-	}
-
 	var vis Visualization
-	err = c.BindJSON(&vis)
+	err := c.BindJSON(&vis)
 	if err != nil {
 		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -86,7 +87,7 @@ func addVisualization(c *gin.Context) {
 	}
 
 	// add visualization to DB and add association to simulation
-	err = vis.addToSimulation(simID)
+	err = vis.addToSimulation(vis.SimulationID)
 	if common.ProvideErrorResponse(c, err) == false {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "OK",
@@ -115,17 +116,6 @@ func cloneVisualization(c *gin.Context) {
 // @Param visualizationID path int true "Visualization ID"
 // @Router /visualizations/{visualizationID} [put]
 func updateVisualization(c *gin.Context) {
-
-	simID, err := common.GetSimulationID(c)
-	if err != nil {
-		return
-	}
-
-	var sim simulation.Simulation
-	err = sim.ByID(uint(simID))
-	if common.ProvideErrorResponse(c, err) {
-		return
-	}
 
 	visID, err := common.GetVisualizationID(c)
 	if err != nil {
@@ -169,17 +159,6 @@ func updateVisualization(c *gin.Context) {
 // @Param visualizationID path int true "Visualization ID"
 // @Router /visualizations/{visualizationID} [get]
 func getVisualization(c *gin.Context) {
-
-	simID, err := common.GetSimulationID(c)
-	if err != nil {
-		return
-	}
-
-	var sim simulation.Simulation
-	err = sim.ByID(uint(simID))
-	if common.ProvideErrorResponse(c, err) {
-		return
-	}
 
 	visID, err := common.GetVisualizationID(c)
 	if err != nil {

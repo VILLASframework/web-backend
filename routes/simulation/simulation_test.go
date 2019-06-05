@@ -48,16 +48,16 @@ var myUsers = []common.UserResponse{
 	user_B,
 }
 
-var myUserB = []common.UserResponse{
-	user_B,
+var myUserA = []common.UserResponse{
+	user_A,
 }
 
 var msgUsers = common.ResponseMsgUsers{
 	Users: myUsers,
 }
 
-var msgUserB = common.ResponseMsgUsers{
-	Users: myUserB,
+var msgUserA = common.ResponseMsgUsers{
+	Users: myUserA,
 }
 
 var simulationA = common.SimulationResponse{
@@ -128,7 +128,7 @@ func TestSimulationEndpoints(t *testing.T) {
 		panic(err)
 	}
 
-	msgUserBjson, err := json.Marshal(msgUserB)
+	msgUserAjson, err := json.Marshal(msgUserA)
 	if err != nil {
 		panic(err)
 	}
@@ -167,11 +167,11 @@ func TestSimulationEndpoints(t *testing.T) {
 	testEndpoint(t, router, "/api/simulations/1/users", "GET", nil, 200, string(msgUsersjson))
 
 	// test DELETE simulations/:SimulationID/user
-	testEndpoint(t, router, "/api/simulations/1/user?username=User_A", "DELETE", nil, 200, string(msgOKjson))
-	testEndpoint(t, router, "/api/simulations/1/users", "GET", nil, 200, string(msgUserBjson))
+	testEndpoint(t, router, "/api/simulations/1/user?username=User_B", "DELETE", nil, 200, string(msgOKjson))
+	testEndpoint(t, router, "/api/simulations/1/users", "GET", nil, 200, string(msgUserAjson))
 
 	// test PUT simulations/:SimulationID/user
-	testEndpoint(t, router, "/api/simulations/1/user?username=User_A", "PUT", nil, 200, string(msgOKjson))
+	testEndpoint(t, router, "/api/simulations/1/user?username=User_B", "PUT", nil, 200, string(msgOKjson))
 	testEndpoint(t, router, "/api/simulations/1/users", "GET", nil, 200, string(msgUsersjson))
 
 	// TODO add tests for other return codes

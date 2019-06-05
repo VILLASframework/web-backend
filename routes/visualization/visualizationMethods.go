@@ -26,10 +26,10 @@ func (v *Visualization) ByID(id uint) error {
 	return nil
 }
 
-func (v *Visualization) addToSimulation(simID int) error {
+func (v *Visualization) addToSimulation(simID uint) error {
 	db := common.GetDB()
 	var sim simulation.Simulation
-	err := sim.ByID(uint(simID))
+	err := sim.ByID(simID)
 	if err != nil {
 		return err
 	}
