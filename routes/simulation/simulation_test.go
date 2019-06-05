@@ -1,16 +1,12 @@
 package simulation
 
 import (
-	"bytes"
 	"encoding/json"
-	"fmt"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/user"
-	"net/http"
-	"net/http/httptest"
 	"testing"
 
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/user"
+
 	"github.com/gin-gonic/gin"
-	"github.com/stretchr/testify/assert"
 
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
 )
@@ -148,80 +144,35 @@ func TestSimulationEndpoints(t *testing.T) {
 		panic(err)
 	}
 
-	authenticate(t, router, "/api/authenticate", "POST", credjson, 200)
+	token = common.AuthenticateForTest(t, router, "/api/authenticate", "POST", credjson, 200)
 
 	// test GET simulations/
-	testEndpoint(t, router, "/api/simulations/", "GET", nil, 200, string(msgSimulationsjson))
+	common.TestEndpoint(t, router, token, "/api/simulations/", "GET", nil, 200, string(msgSimulationsjson))
 
 	// test POST simulations/
-	testEndpoint(t, router, "/api/simulations/", "POST", simulationCjson, 200, string(msgOKjson))
+	common.TestEndpoint(t, router, token, "/api/simulations/", "POST", simulationCjson, 200, string(msgOKjson))
 
 	// test GET simulations/:SimulationID
-	testEndpoint(t, router, "/api/simulations/3", "GET", nil, 200, string(msgSimulationjson))
+	common.TestEndpoint(t, router, token, "/api/simulations/3", "GET", nil, 200, string(msgSimulationjson))
 
 	// test DELETE simulations/:SimulationID
-	testEndpoint(t, router, "/api/simulations/3", "DELETE", nil, 200, string(msgOKjson))
-	testEndpoint(t, router, "/api/simulations/", "GET", nil, 200, string(msgSimulationsjson))
+	common.TestEndpoint(t, router, token, "/api/simulations/3", "DELETE", nil, 200, string(msgOKjson))
+	common.TestEndpoint(t, router, token, "/api/simulations/", "GET", nil, 200, string(msgSimulationsjson))
 
 	// test GET simulations/:SimulationID/users
-	testEndpoint(t, router, "/api/simulations/1/users", "GET", nil, 200, string(msgUsersjson))
+	common.TestEndpoint(t, router, token, "/api/simulations/1/users", "GET", nil, 200, string(msgUsersjson))
 
 	// test DELETE simulations/:SimulationID/user
-	testEndpoint(t, router, "/api/simulations/1/user?username=User_B", "DELETE", nil, 200, string(msgOKjson))
-	testEndpoint(t, router, "/api/simulations/1/users", "GET", nil, 200, string(msgUserAjson))
+	common.TestEndpoint(t, router, token, "/api/simulations/1/user?username=User_B", "DELETE", nil, 200, string(msgOKjson))
+	common.TestEndpoint(t, router, token, "/api/simulations/1/users", "GET", nil, 200, string(msgUserAjson))
 
 	// test PUT simulations/:SimulationID/user
-	testEndpoint(t, router, "/api/simulations/1/user?username=User_B", "PUT", nil, 200, string(msgOKjson))
-	testEndpoint(t, router, "/api/simulations/1/users", "GET", nil, 200, string(msgUsersjson))
+	common.TestEndpoint(t, router, token, "/api/simulations/1/user?username=User_B", "PUT", nil, 200, string(msgOKjson))
+	common.TestEndpoint(t, router, token, "/api/simulations/1/users", "GET", nil, 200, string(msgUsersjson))
 
 	// test DELETE simulations/:SimulationID/user for logged in user User_A
-	testEndpoint(t, router, "/api/simulations/1/user?username=User_A", "DELETE", nil, 200, string(msgOKjson))
-	testEndpoint(t, router, "/api/simulations/1/users", "GET", nil, 422, "\"Access denied (for simulation ID).\"")
+	common.TestEndpoint(t, router, token, "/api/simulations/1/user?username=User_A", "DELETE", nil, 200, string(msgOKjson))
+	common.TestEndpoint(t, router, token, "/api/simulations/1/users", "GET", nil, 422, "\"Access denied (for simulation ID).\"")
 
 	// TODO add tests for other return codes
-}
-
-func testEndpoint(t *testing.T, router *gin.Engine, url string, method string, body []byte, expected_code int, expected_response string) {
-	w := httptest.NewRecorder()
-
-	if body != nil {
-		req, _ := http.NewRequest(method, url, bytes.NewBuffer(body))
-		req.Header.Set("Content-Type", "application/json")
-		req.Header.Add("Authorization", "Bearer "+token)
-		router.ServeHTTP(w, req)
-	} else {
-		req, _ := http.NewRequest(method, url, nil)
-		req.Header.Add("Authorization", "Bearer "+token)
-		router.ServeHTTP(w, req)
-	}
-
-	assert.Equal(t, expected_code, w.Code)
-	fmt.Println(w.Body.String())
-	assert.Equal(t, expected_response, w.Body.String())
-}
-
-func authenticate(t *testing.T, router *gin.Engine, url string, method string, body []byte, expected_code int) {
-	w := httptest.NewRecorder()
-
-	req, _ := http.NewRequest(method, url, bytes.NewBuffer(body))
-	req.Header.Set("Content-Type", "application/json")
-	router.ServeHTTP(w, req)
-
-	assert.Equal(t, expected_code, w.Code)
-
-	var body_data map[string]interface{}
-
-	err := json.Unmarshal([]byte(w.Body.String()), &body_data)
-	if err != nil {
-		panic(err)
-	}
-
-	success := body_data["success"].(bool)
-	if !success {
-		panic(-1)
-	}
-	// save token to global variable
-	token = body_data["token"].(string)
-
-	fmt.Println(w.Body.String())
 }
