@@ -77,7 +77,7 @@ func (s *Simulation) deleteUser(username string) error {
 
 func (s *Simulation) delete() error {
 	db := common.GetDB()
-	no_models := db.Model(s).Association("Models").Count()
+	no_models := db.Model(s).Association("SimulationModels").Count()
 	no_visualizations := db.Model(s).Association("Visualizations").Count()
 
 	if no_models > 0 || no_visualizations > 0 {
