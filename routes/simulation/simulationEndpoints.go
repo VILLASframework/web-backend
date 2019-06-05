@@ -1,9 +1,7 @@
 package simulation
 
 import (
-	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 
@@ -35,7 +33,7 @@ func RegisterSimulationEndpoints(r *gin.RouterGroup) {
 // @Router /simulations [get]
 func getSimulations(c *gin.Context) {
 
-	ok, _ := checkPermissions(c, common.Read)
+	ok, _ := CheckPermissions(c, common.ModelSimulation, common.Read, "none")
 	if !ok {
 		return
 	}
@@ -87,7 +85,7 @@ func getSimulations(c *gin.Context) {
 // @Router /simulations [post]
 func addSimulation(c *gin.Context) {
 
-	ok, _ := checkPermissions(c, common.Create)
+	ok, _ := CheckPermissions(c, common.ModelSimulation, common.Create, "none")
 	if !ok {
 		return
 	}
@@ -141,7 +139,7 @@ func addSimulation(c *gin.Context) {
 // @Router /simulations/{simulationID} [put]
 func updateSimulation(c *gin.Context) {
 
-	ok, sim := checkPermissions(c, common.Update)
+	ok, sim := CheckPermissions(c, common.ModelSimulation, common.Update, "path")
 	if !ok {
 		return
 	}
@@ -178,7 +176,7 @@ func updateSimulation(c *gin.Context) {
 // @Router /simulations/{simulationID} [get]
 func getSimulation(c *gin.Context) {
 
-	ok, sim := checkPermissions(c, common.Read)
+	ok, sim := CheckPermissions(c, common.ModelSimulation, common.Read, "path")
 	if !ok {
 		return
 	}
@@ -203,7 +201,7 @@ func getSimulation(c *gin.Context) {
 // @Router /simulations/{simulationID} [delete]
 func deleteSimulation(c *gin.Context) {
 
-	ok, sim := checkPermissions(c, common.Delete)
+	ok, sim := CheckPermissions(c, common.ModelSimulation, common.Delete, "path")
 	if !ok {
 		return
 	}
@@ -230,7 +228,7 @@ func deleteSimulation(c *gin.Context) {
 // @Router /simulations/{simulationID}/users/ [get]
 func getUsersOfSimulation(c *gin.Context) {
 
-	ok, sim := checkPermissions(c, common.Read)
+	ok, sim := CheckPermissions(c, common.ModelSimulation, common.Read, "path")
 	if !ok {
 		return
 	}
@@ -262,7 +260,7 @@ func getUsersOfSimulation(c *gin.Context) {
 // @Router /simulations/{simulationID}/user [put]
 func addUserToSimulation(c *gin.Context) {
 
-	ok, sim := checkPermissions(c, common.Update)
+	ok, sim := CheckPermissions(c, common.ModelSimulation, common.Update, "path")
 	if !ok {
 		return
 	}
@@ -300,7 +298,7 @@ func addUserToSimulation(c *gin.Context) {
 // @Router /simulations/{simulationID}/user [delete]
 func deleteUserFromSimulation(c *gin.Context) {
 
-	ok, sim := checkPermissions(c, common.Update)
+	ok, sim := CheckPermissions(c, common.ModelSimulation, common.Update, "path")
 	if !ok {
 		return
 	}
@@ -315,48 +313,4 @@ func deleteUserFromSimulation(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "OK.",
 	})
-}
-
-func checkPermissions(c *gin.Context, operation common.CRUD) (bool, Simulation) {
-
-	var sim Simulation
-
-	err := common.ValidateRole(c, common.ModelSimulation, operation)
-	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, "Access denied (role validation failed).")
-		return false, sim
-	}
-
-	if operation == common.Create {
-		return true, sim
-	} else {
-		simID, err := strconv.Atoi(c.Param("simulationID"))
-
-		if err != nil && operation == common.Read {
-			return true, sim // for GET all simulations endpoint no simulation ID is provided
-		} else if err != nil {
-
-			errormsg := fmt.Sprintf("Bad request. No or incorrect format of simulation ID")
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": errormsg,
-			})
-			return false, sim
-		}
-
-		userID, _ := c.Get(common.UserIDCtx)
-		userRole, _ := c.Get(common.UserRoleCtx)
-
-		err = sim.ByID(uint(simID))
-		if common.ProvideErrorResponse(c, err) {
-			return false, sim
-		}
-
-		if sim.checkAccess(userID.(uint), userRole.(string)) == false {
-			c.JSON(http.StatusUnprocessableEntity, "Access denied (entity ID).")
-			return false, sim
-		}
-
-	}
-
-	return true, sim
 }
