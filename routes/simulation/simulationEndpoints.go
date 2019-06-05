@@ -33,6 +33,7 @@ func RegisterSimulationEndpoints(r *gin.RouterGroup) {
 // @Router /simulations [get]
 func getSimulations(c *gin.Context) {
 
+	// ATTENTION: do not use c.GetInt ("user_id") since user_id is of type uint and not int
 	userID, _ := c.Get("user_id")
 
 	var u user.User
