@@ -1,9 +1,7 @@
 package simulationmodel
 
 import (
-	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 
@@ -37,25 +35,14 @@ func RegisterModelEndpoints(r *gin.RouterGroup) {
 // @Router /models [get]
 func getSimulationModels(c *gin.Context) {
 
-	simID, err := strconv.Atoi(c.Request.URL.Query().Get("simulationID"))
-	if err != nil {
-		errormsg := fmt.Sprintf("Bad request. No or incorrect format of simulationID query parameter")
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
-		})
+	ok, sim := simulation.CheckPermissions(c, common.ModelSimulationModel, common.Read, "query", -1)
+	if !ok {
 		return
 	}
 
 	db := common.GetDB()
 	var models []common.SimulationModel
-
-	var sim simulation.Simulation
-	err = sim.ByID(uint(simID))
-	if common.ProvideErrorResponse(c, err) {
-		return
-	}
-
-	err = db.Order("ID asc").Model(sim).Related(&models, "Models").Error
+	err := db.Order("ID asc").Model(sim).Related(&models, "Models").Error
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
@@ -81,8 +68,8 @@ func getSimulationModels(c *gin.Context) {
 // @Router /models [post]
 func addSimulationModel(c *gin.Context) {
 
-	var m SimulationModel
-	err := c.BindJSON(&m)
+	var newModel SimulationModel
+	err := c.BindJSON(&newModel)
 	if err != nil {
 		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -91,7 +78,12 @@ func addSimulationModel(c *gin.Context) {
 		return
 	}
 
-	err = m.addToSimulation(m.SimulationID)
+	ok, _ := simulation.CheckPermissions(c, common.ModelSimulationModel, common.Create, "body", int(newModel.SimulationID))
+	if !ok {
+		return
+	}
+
+	err = newModel.addToSimulation(newModel.SimulationID)
 	if common.ProvideErrorResponse(c, err) == false {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "OK.",
@@ -149,24 +141,18 @@ func cloneSimulationModel(c *gin.Context) {
 // @Router /models/{modelID} [put]
 func updateSimulationModel(c *gin.Context) {
 
-	modelID, err := common.GetModelID(c)
-	if err != nil {
+	ok, m := checkPermissions(c, common.Update)
+	if !ok {
 		return
 	}
 
 	var modifiedModel SimulationModel
-	err = c.BindJSON(&modifiedModel)
+	err := c.BindJSON(&modifiedModel)
 	if err != nil {
 		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": errormsg,
 		})
-		return
-	}
-
-	var m SimulationModel
-	err = m.ByID(uint(modelID))
-	if common.ProvideErrorResponse(c, err) {
 		return
 	}
 
@@ -176,7 +162,6 @@ func updateSimulationModel(c *gin.Context) {
 			"message": "OK.",
 		})
 	}
-
 }
 
 // getSimulationModel godoc
@@ -193,14 +178,8 @@ func updateSimulationModel(c *gin.Context) {
 // @Router /models/{modelID} [get]
 func getSimulationModel(c *gin.Context) {
 
-	modelID, err := common.GetModelID(c)
-	if err != nil {
-		return
-	}
-
-	var m SimulationModel
-	err = m.ByID(uint(modelID))
-	if common.ProvideErrorResponse(c, err) {
+	ok, m := checkPermissions(c, common.Read)
+	if !ok {
 		return
 	}
 
@@ -224,6 +203,11 @@ func getSimulationModel(c *gin.Context) {
 // @Router /models/{modelID} [delete]
 func deleteSimulationModel(c *gin.Context) {
 
+	//ok, m := checkPermissions(c, common.Delete)
+	//if !ok {
+	//	return
+	//}
+
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Not implemented.",
 	})
@@ -245,14 +229,8 @@ func deleteSimulationModel(c *gin.Context) {
 // @Router /models/{modelID}/signals [post]
 func addSignal(c *gin.Context) {
 
-	modelID, err := common.GetModelID(c)
-	if err != nil {
-		return
-	}
-
-	var m SimulationModel
-	err = m.ByID(uint(modelID))
-	if common.ProvideErrorResponse(c, err) {
+	ok, m := checkPermissions(c, common.Update)
+	if !ok {
 		return
 	}
 
@@ -266,7 +244,7 @@ func addSignal(c *gin.Context) {
 	}
 
 	var sig common.Signal
-	err = c.BindJSON(&sig)
+	err := c.BindJSON(&sig)
 	if err != nil {
 		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -298,14 +276,8 @@ func addSignal(c *gin.Context) {
 // @Router /models/{modelID}/signals [get]
 func getSignals(c *gin.Context) {
 
-	modelID, err := common.GetModelID(c)
-	if err != nil {
-		return
-	}
-
-	var m SimulationModel
-	err = m.ByID(uint(modelID))
-	if common.ProvideErrorResponse(c, err) {
+	ok, m := checkPermissions(c, common.Read)
+	if !ok {
 		return
 	}
 
@@ -344,14 +316,9 @@ func getSignals(c *gin.Context) {
 // @Param direction query string true "Direction of signals to delete (in or out)"
 // @Router /models/{modelID}/signals [delete]
 func deleteSignals(c *gin.Context) {
-	modelID, err := common.GetModelID(c)
-	if err != nil {
-		return
-	}
 
-	var m SimulationModel
-	err = m.ByID(uint(modelID))
-	if common.ProvideErrorResponse(c, err) {
+	ok, m := checkPermissions(c, common.Update)
+	if !ok {
 		return
 	}
 
@@ -364,7 +331,7 @@ func deleteSignals(c *gin.Context) {
 		return
 	}
 
-	err = m.deleteSignals(direction)
+	err := m.deleteSignals(direction)
 	if common.ProvideErrorResponse(c, err) == false {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "OK.",

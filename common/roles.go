@@ -18,6 +18,7 @@ const ModelUser = ModelName("user")
 const ModelSimulation = ModelName("simulation")
 const ModelSimulator = ModelName("simulator")
 const ModelVisualization = ModelName("visualization")
+const ModelSimulationModel = ModelName("simulationmodel")
 
 type CRUD string
 
@@ -44,14 +45,16 @@ var _r__ = Permission{Create: false, Read: true, Update: false, Delete: false}
 // allowed to do a certain action on a given model based on his role
 var Roles = RoleActions{
 	"Admin": {
-		ModelUser:       crud,
-		ModelSimulation: crud,
-		ModelSimulator:  crud,
+		ModelUser:            crud,
+		ModelSimulation:      crud,
+		ModelSimulationModel: crud,
+		ModelSimulator:       crud,
 	},
 	"User": {
-		ModelUser:       _ru_,
-		ModelSimulation: crud,
-		ModelSimulator:  _r__,
+		ModelUser:            _ru_,
+		ModelSimulation:      crud,
+		ModelSimulationModel: crud,
+		ModelSimulator:       _r__,
 	},
 	"Guest": {
 		ModelVisualization: _r__,

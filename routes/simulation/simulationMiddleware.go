@@ -10,7 +10,7 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
 )
 
-func CheckPermissions(c *gin.Context, modelname common.ModelName, operation common.CRUD, simIDSource string) (bool, Simulation) {
+func CheckPermissions(c *gin.Context, modelname common.ModelName, operation common.CRUD, simIDSource string, simIDBody int) (bool, Simulation) {
 
 	var sim Simulation
 
@@ -43,6 +43,9 @@ func CheckPermissions(c *gin.Context, modelname common.ModelName, operation comm
 			})
 			return false, sim
 		}
+	} else if simIDSource == "body" {
+		simID = simIDBody
+
 	} else {
 		errormsg := fmt.Sprintf("Bad request. The following source of your simulation ID is not valid: %s", simIDSource)
 		c.JSON(http.StatusBadRequest, gin.H{

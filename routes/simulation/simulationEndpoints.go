@@ -33,7 +33,7 @@ func RegisterSimulationEndpoints(r *gin.RouterGroup) {
 // @Router /simulations [get]
 func getSimulations(c *gin.Context) {
 
-	ok, _ := CheckPermissions(c, common.ModelSimulation, common.Read, "none")
+	ok, _ := CheckPermissions(c, common.ModelSimulation, common.Read, "none", -1)
 	if !ok {
 		return
 	}
@@ -85,7 +85,7 @@ func getSimulations(c *gin.Context) {
 // @Router /simulations [post]
 func addSimulation(c *gin.Context) {
 
-	ok, _ := CheckPermissions(c, common.ModelSimulation, common.Create, "none")
+	ok, _ := CheckPermissions(c, common.ModelSimulation, common.Create, "none", -1)
 	if !ok {
 		return
 	}
@@ -139,7 +139,7 @@ func addSimulation(c *gin.Context) {
 // @Router /simulations/{simulationID} [put]
 func updateSimulation(c *gin.Context) {
 
-	ok, sim := CheckPermissions(c, common.ModelSimulation, common.Update, "path")
+	ok, sim := CheckPermissions(c, common.ModelSimulation, common.Update, "path", -1)
 	if !ok {
 		return
 	}
@@ -176,7 +176,7 @@ func updateSimulation(c *gin.Context) {
 // @Router /simulations/{simulationID} [get]
 func getSimulation(c *gin.Context) {
 
-	ok, sim := CheckPermissions(c, common.ModelSimulation, common.Read, "path")
+	ok, sim := CheckPermissions(c, common.ModelSimulation, common.Read, "path", -1)
 	if !ok {
 		return
 	}
@@ -201,7 +201,7 @@ func getSimulation(c *gin.Context) {
 // @Router /simulations/{simulationID} [delete]
 func deleteSimulation(c *gin.Context) {
 
-	ok, sim := CheckPermissions(c, common.ModelSimulation, common.Delete, "path")
+	ok, sim := CheckPermissions(c, common.ModelSimulation, common.Delete, "path", -1)
 	if !ok {
 		return
 	}
@@ -228,7 +228,7 @@ func deleteSimulation(c *gin.Context) {
 // @Router /simulations/{simulationID}/users/ [get]
 func getUsersOfSimulation(c *gin.Context) {
 
-	ok, sim := CheckPermissions(c, common.ModelSimulation, common.Read, "path")
+	ok, sim := CheckPermissions(c, common.ModelSimulation, common.Read, "path", -1)
 	if !ok {
 		return
 	}
@@ -260,7 +260,7 @@ func getUsersOfSimulation(c *gin.Context) {
 // @Router /simulations/{simulationID}/user [put]
 func addUserToSimulation(c *gin.Context) {
 
-	ok, sim := CheckPermissions(c, common.ModelSimulation, common.Update, "path")
+	ok, sim := CheckPermissions(c, common.ModelSimulation, common.Update, "path", -1)
 	if !ok {
 		return
 	}
@@ -298,7 +298,7 @@ func addUserToSimulation(c *gin.Context) {
 // @Router /simulations/{simulationID}/user [delete]
 func deleteUserFromSimulation(c *gin.Context) {
 
-	ok, sim := CheckPermissions(c, common.ModelSimulation, common.Update, "path")
+	ok, sim := CheckPermissions(c, common.ModelSimulation, common.Update, "path", -1)
 	if !ok {
 		return
 	}
