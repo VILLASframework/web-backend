@@ -62,6 +62,7 @@ test:api:bundle:
   artifacts:
     paths:
       - doc/api/index.html
+      - doc/api/swagger.json
 
 test:backend:database:
   stage: test
