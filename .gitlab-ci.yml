@@ -32,20 +32,6 @@ prepare:ubuntu:
 # Stage: build
 ##############################################################################
 
-build:doc:api:
-  stage: build
-  tags:
-    - docker
-  image: redoc
-  script:
-    - go get -u github.com/swaggo/swag/cmd/swag
-    - ~/go/bin/swag init -p pascalcase -g "start.go" -o "./doc/api/"
-    - cd doc/api
-    - redoc-cli bundle --cdn --title "VILLASweb Backend API Documentation" --output index.html swagger.json
-  artifacts:
-    paths:
-      - doc/api/index.html
-
 build:backend:
   stage: build
   tags:
@@ -56,10 +42,26 @@ build:backend:
     - go get -u github.com/swaggo/swag/cmd/swag
     - ~/go/bin/swag init -p pascalcase -g "start.go" -o "./doc/api/"
     - go build
-
+  artifacts:
+    paths:
+      - doc/api/swagger.json
 
 # Stage: test
 ##############################################################################
+
+test:api:bundle:
+  stage: test
+  tags:
+    - docker
+  image: redoc
+  script:
+    - cd doc/api
+    - redoc-cli bundle --cdn --title "VILLASweb Backend API Documentation" --output index.html swagger.json
+  dependencies:
+    - build:backend
+  artifacts:
+    paths:
+      - doc/api/index.html
 
 test:backend:database:
   stage: test
@@ -91,6 +93,8 @@ test:backend:endpoints:
   dependencies:
     - build:backend
 
+
+
 # Stage: deploy
 ##############################################################################
 
@@ -100,7 +104,7 @@ deploy:upload:
     - cd doc/api
     - rsync --copy-links --chown ${DEPLOY_USER}:${DEPLOY_USER} index.html swagger.json ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}
   dependencies:
-    - build:doc:api
+    - test:api:bundle
   only:
     - master
   tags:
