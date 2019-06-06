@@ -38,8 +38,10 @@ build:doc:api:
     - docker
   image: redoc
   script:
+    - go get -u github.com/swaggo/swag/cmd/swag
+    - ~/go/bin/swag init -p pascalcase -g "start.go" -o "./doc/api/"
     - cd doc/api
-    - redoc-cli bundle --cdn --title "VILLASweb Backend API Documentation" --output index.html api.yaml
+    - redoc-cli bundle --cdn --title "VILLASweb Backend API Documentation" --output index.html swagger.json
   artifacts:
     paths:
       - doc/api/index.html
@@ -52,7 +54,7 @@ build:backend:
   script:
     - go mod tidy
     - go get -u github.com/swaggo/swag/cmd/swag
-    - ~/go/bin/swag init -p pascalcase -g "start.go" -o "./doc/autoapi/"
+    - ~/go/bin/swag init -p pascalcase -g "start.go" -o "./doc/api/"
     - go build
 
 
@@ -68,7 +70,7 @@ test:backend:database:
     - /etc/init.d/postgresql start
     - go mod tidy
     - go get -u github.com/swaggo/swag/cmd/swag
-    - ~/go/bin/swag init -p pascalcase -g "start.go" -o "./doc/autoapi/"
+    - ~/go/bin/swag init -p pascalcase -g "start.go" -o "./doc/api/"
     - cd common
     - go test -v -args -dbhost=/var/run/postgresql
   dependencies:
@@ -83,7 +85,7 @@ test:backend:endpoints:
     - /etc/init.d/postgresql start
     - go mod tidy
     - go get -u github.com/swaggo/swag/cmd/swag
-    - ~/go/bin/swag init -p pascalcase -g "start.go" -o "./doc/autoapi/"
+    - ~/go/bin/swag init -p pascalcase -g "start.go" -o "./doc/api/"
     - cd routes/simulation
     - go test -v -args -dbhost=/var/run/postgresql
   dependencies:
@@ -96,7 +98,7 @@ deploy:upload:
   stage: deploy
   script:
     - cd doc/api
-    - rsync --copy-links --chown ${DEPLOY_USER}:${DEPLOY_USER} index.html api.yaml ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}
+    - rsync --copy-links --chown ${DEPLOY_USER}:${DEPLOY_USER} index.html swagger.json ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}
   dependencies:
     - build:doc:api
   only:

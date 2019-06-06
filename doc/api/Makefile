@@ -8,11 +8,11 @@ RSYNC_OPTS ?= --recursive --ignore-missing-args --copy-links --chown $(DEPLOY_US
 
 all: index.html
 
-index.html: api.yaml
-	redoc-cli bundle --cdn --title $(TITLE) --output $@ api.yaml
+index.html: swagger.json
+	redoc-cli bundle --cdn --title $(TITLE) --output $@ swagger.json
 
 deploy: index.html
-	rsync $(RSYNC_OPTS) index.html api.yaml $(DEPLOY_USER)@$(DEPLOY_HOST):$(DEPLOY_PATH)
+	rsync $(RSYNC_OPTS) index.html swagger.json $(DEPLOY_USER)@$(DEPLOY_HOST):$(DEPLOY_PATH)
 
 clean:
 	rm -rf index.html
