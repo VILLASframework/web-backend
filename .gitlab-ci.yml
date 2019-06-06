@@ -91,6 +91,8 @@ test:backend:endpoints:
     - ~/go/bin/swag init -p pascalcase -g "start.go" -o "./doc/api/"
     - cd routes/simulation
     - go test -v -args -dbhost=/var/run/postgresql
+    - cd ../simulationmodel
+    - go test -v -args -dbhost=/var/run/postgresql
   dependencies:
     - build:backend
 

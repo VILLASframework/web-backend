@@ -9,8 +9,8 @@ import (
 )
 
 func RegisterSimulatorEndpoints(r *gin.RouterGroup) {
-	r.GET("/", GetSimulators)
-	r.POST("/", AddSimulator)
+	r.GET("", GetSimulators)
+	r.POST("", AddSimulator)
 	r.PUT("/:simulatorID", UpdateSimulator)
 	r.GET("/:simulatorID", GetSimulator)
 	r.DELETE("/:simulatorID", DeleteSimulator)

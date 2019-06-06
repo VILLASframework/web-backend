@@ -54,7 +54,7 @@ func VerifyConnection(db *gorm.DB) error {
 // to the Dummy*() where it is called
 func DropTables(db *gorm.DB) {
 	db.DropTableIfExists(&Simulator{})
-	//db.DropTableIfExists(&Signal{})
+	db.DropTableIfExists(&Signal{})
 	db.DropTableIfExists(&SimulationModel{})
 	db.DropTableIfExists(&File{})
 	db.DropTableIfExists(&Simulation{})
@@ -66,7 +66,7 @@ func DropTables(db *gorm.DB) {
 // AutoMigrate the models
 func MigrateModels(db *gorm.DB) {
 	db.AutoMigrate(&Simulator{})
-	//db.AutoMigrate(&Signal{})
+	db.AutoMigrate(&Signal{})
 	db.AutoMigrate(&SimulationModel{})
 	db.AutoMigrate(&File{})
 	db.AutoMigrate(&Simulation{})
@@ -101,14 +101,14 @@ func DummyPopulateDB(test_db *gorm.DB) {
 	checkErr(test_db.Create(&simr_A).Error)
 	checkErr(test_db.Create(&simr_B).Error)
 
-	//outSig_A := Signal{Name: "outSignal_A", Direction: "out"}
-	//outSig_B := Signal{Name: "outSignal_B", Direction: "out"}
-	//inSig_A := Signal{Name: "inSignal_A", Direction: "in"}
-	//inSig_B := Signal{Name: "inSignal_B", Direction: "in"}
-	//checkErr(test_db.Create(&outSig_A).Error)
-	//checkErr(test_db.Create(&outSig_B).Error)
-	//checkErr(test_db.Create(&inSig_A).Error)
-	//checkErr(test_db.Create(&inSig_B).Error)
+	outSig_A := Signal{Name: "outSignal_A", Direction: "out", Index: 0, Unit: "V"}
+	outSig_B := Signal{Name: "outSignal_B", Direction: "out", Index: 1, Unit: "V"}
+	inSig_A := Signal{Name: "inSignal_A", Direction: "in", Index: 0, Unit: "A"}
+	inSig_B := Signal{Name: "inSignal_B", Direction: "in", Index: 1, Unit: "A"}
+	checkErr(test_db.Create(&outSig_A).Error)
+	checkErr(test_db.Create(&outSig_B).Error)
+	checkErr(test_db.Create(&inSig_A).Error)
+	checkErr(test_db.Create(&inSig_B).Error)
 
 	mo_A := SimulationModel{Name: "SimulationModel_A"}
 	mo_B := SimulationModel{Name: "SimulationModel_B"}
@@ -179,11 +179,11 @@ func DummyPopulateDB(test_db *gorm.DB) {
 	checkErr(test_db.Model(&vis_A).Association("Widgets").Append(&widg_A).Error)
 	checkErr(test_db.Model(&vis_A).Association("Widgets").Append(&widg_B).Error)
 
-	// SimulationModel HM Signal
-	//checkErr(test_db.Model(&mo_A).Association("InputMapping").Append(&inSig_A).Error)
-	//checkErr(test_db.Model(&mo_A).Association("InputMapping").Append(&inSig_B).Error)
-	//checkErr(test_db.Model(&mo_A).Association("OutputMapping").Append(&outSig_A).Error)
-	//checkErr(test_db.Model(&mo_A).Association("OutputMapping").Append(&outSig_B).Error)
+	// SimulationModel HM Signals
+	checkErr(test_db.Model(&mo_A).Association("InputMapping").Append(&inSig_A).Error)
+	checkErr(test_db.Model(&mo_A).Association("InputMapping").Append(&inSig_B).Error)
+	checkErr(test_db.Model(&mo_A).Association("OutputMapping").Append(&outSig_A).Error)
+	checkErr(test_db.Model(&mo_A).Association("OutputMapping").Append(&outSig_B).Error)
 
 	// SimulationModel HM Files
 	checkErr(test_db.Model(&mo_A).Association("Files").Append(&file_A).Error)
@@ -191,6 +191,7 @@ func DummyPopulateDB(test_db *gorm.DB) {
 
 	// Simulator BT SimulationModel
 	checkErr(test_db.Model(&mo_A).Association("Simulator").Append(&simr_A).Error)
+	checkErr(test_db.Model(&mo_B).Association("Simulator").Append(&simr_A).Error)
 
 	// Widget HM Files
 	checkErr(test_db.Model(&widg_A).Association("Files").Append(&file_A).Error)

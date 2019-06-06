@@ -13,8 +13,8 @@ import (
 
 func RegisterVisualizationEndpoints(r *gin.RouterGroup) {
 
-	r.GET("/", getVisualizations)
-	r.POST("/", addVisualization)
+	r.GET("", getVisualizations)
+	r.POST("", addVisualization)
 	//r.POST("/:visualizationID", cloneVisualization)
 	r.PUT("/:visualizationID", updateVisualization)
 	r.GET("/:visualizationID", getVisualization)

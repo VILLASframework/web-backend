@@ -147,17 +147,17 @@ func TestSimulationEndpoints(t *testing.T) {
 	token = common.AuthenticateForTest(t, router, "/api/authenticate", "POST", credjson, 200)
 
 	// test GET simulations/
-	common.TestEndpoint(t, router, token, "/api/simulations/", "GET", nil, 200, string(msgSimulationsjson))
+	common.TestEndpoint(t, router, token, "/api/simulations", "GET", nil, 200, string(msgSimulationsjson))
 
 	// test POST simulations/
-	common.TestEndpoint(t, router, token, "/api/simulations/", "POST", simulationCjson, 200, string(msgOKjson))
+	common.TestEndpoint(t, router, token, "/api/simulations", "POST", simulationCjson, 200, string(msgOKjson))
 
 	// test GET simulations/:SimulationID
 	common.TestEndpoint(t, router, token, "/api/simulations/3", "GET", nil, 200, string(msgSimulationjson))
 
 	// test DELETE simulations/:SimulationID
 	common.TestEndpoint(t, router, token, "/api/simulations/3", "DELETE", nil, 200, string(msgOKjson))
-	common.TestEndpoint(t, router, token, "/api/simulations/", "GET", nil, 200, string(msgSimulationsjson))
+	common.TestEndpoint(t, router, token, "/api/simulations", "GET", nil, 200, string(msgSimulationsjson))
 
 	// test GET simulations/:SimulationID/users
 	common.TestEndpoint(t, router, token, "/api/simulations/1/users", "GET", nil, 200, string(msgUsersjson))

@@ -57,14 +57,17 @@ type SimulationModel struct {
 	// ID of simulator associated with simulation model
 	SimulatorID uint
 	// Mapping of output signals of the simulation model, order of signals is important
-	OutputMapping []Signal
+	OutputMapping []Signal `gorm:"foreignkey:SimulationModelID"`
 	// Mapping of input signals of the simulation model, order of signals is important
-	InputMapping []Signal
+	InputMapping []Signal `gorm:"foreignkey:SimulationModelID"`
 	// Files of simulation model (can be CIM and other simulation model file formats)
-	Files []File `gorm:"foreignkey:ModelID"`
+	Files []File `gorm:"foreignkey:SimulationModelID"`
 }
 
+// Signal data model
 type Signal struct {
+	// ID of simulation model
+	ID uint `gorm:"primary_key;auto_increment"`
 	// Name of Signal
 	Name string
 	// Unit of Signal
@@ -73,6 +76,8 @@ type Signal struct {
 	Index uint
 	// Direction of the signal (in or out)
 	Direction string
+	// ID of simulation model
+	SimulationModelID uint
 }
 
 // Simulator data model
@@ -162,7 +167,7 @@ type File struct {
 	// Last modification time of file
 	Date time.Time
 	// ID of model to which file belongs
-	ModelID uint `gorm:""`
+	SimulationModelID uint `gorm:""`
 	// ID of widget to which file belongs
 	WidgetID uint `gorm:""`
 }

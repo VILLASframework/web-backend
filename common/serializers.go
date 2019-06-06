@@ -104,14 +104,13 @@ type SimulationModelSerializer struct {
 
 func (self *SimulationModelSerializer) Response() SimulationModelResponse {
 	response := SimulationModelResponse{
+		ID:           self.ID,
 		Name:         self.Name,
 		OutputLength: self.OutputLength,
 		InputLength:  self.InputLength,
 		SimulationID: self.SimulationID,
 		SimulatorID:  self.SimulatorID,
 		StartParams:  self.StartParameters,
-		//InputMapping
-		//OutputMapping
 	}
 	return response
 }
@@ -252,6 +251,38 @@ func (self *FileSerializerNoAssoc) Response() FileResponse {
 		H:    self.ImageHeight,
 		W:    self.ImageWidth,
 		// Date
+	}
+	return response
+}
+
+// Signal/s Serializers
+type SignalsSerializer struct {
+	Ctx     *gin.Context
+	Signals []Signal
+}
+
+func (self *SignalsSerializer) Response() []SignalResponse {
+	response := []SignalResponse{}
+	for _, s := range self.Signals {
+		serializer := SignalSerializer{self.Ctx, s}
+		response = append(response, serializer.Response())
+	}
+	return response
+
+}
+
+type SignalSerializer struct {
+	Ctx *gin.Context
+	Signal
+}
+
+func (self *SignalSerializer) Response() SignalResponse {
+	response := SignalResponse{
+		Name:              self.Name,
+		Unit:              self.Unit,
+		Direction:         self.Direction,
+		SimulationModelID: self.SimulationModelID,
+		Index:             self.Index,
 	}
 	return response
 }

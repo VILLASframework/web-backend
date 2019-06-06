@@ -37,7 +37,7 @@ func TestDummyDBAssociations(t *testing.T) {
 	var vis Visualization
 	var widg Widget
 
-	//var sigs []Signal
+	var sigs []Signal
 	var mos []SimulationModel
 	var files []File
 	var files_sm []File
@@ -93,11 +93,11 @@ func TestDummyDBAssociations(t *testing.T) {
 	a.NoError(db.Model(&mo).Association("Simulator").Find(&simr).Error)
 	a.EqualValues("Host_A", simr.Host, "Expected Host_A")
 
-	//a.NoError(db.Model(&mo).Where("Direction = ?", "out").Related(&sigs, "OutputMapping").Error)
-	//if len(sigs) != 2 {
-	//	a.Fail("Model Associations",
-	//		"Expected to have %v Output AND Input Signals. Has %v.", 2, len(sigs))
-	//}
+	a.NoError(db.Model(&mo).Where("Direction = ?", "out").Related(&sigs, "OutputMapping").Error)
+	if len(sigs) != 2 {
+		a.Fail("SimulationModel Associations",
+			"Expected to have %v Output Signals. Has %v.", 2, len(sigs))
+	}
 
 	a.NoError(db.Model(&mo).Related(&files_sm, "Files").Error)
 	if len(files_sm) != 2 {

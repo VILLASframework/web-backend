@@ -18,14 +18,13 @@ type SimulationResponse struct {
 }
 
 type SimulationModelResponse struct {
-	Name          string   `json:"Name"`
-	OutputLength  int      `json:"OutputLength"`
-	InputLength   int      `json:"InputLength"`
-	SimulationID  uint     `json:"SimulationID"`
-	SimulatorID   uint     `json:"SimulatorID"`
-	StartParams   string   `json:"StartParams"`
-	InputMapping  []Signal `json:"InputMapping"`
-	OutputMapping []Signal `json:"OutputMapping"`
+	ID           uint   `json:"ID"`
+	Name         string `json:"Name"`
+	OutputLength int    `json:"OutputLength"`
+	InputLength  int    `json:"InputLength"`
+	SimulationID uint   `json:"SimulationID"`
+	SimulatorID  uint   `json:"SimulatorID"`
+	StartParams  string `json:"StartParams"`
 }
 
 type SimulatorResponse struct {
@@ -71,6 +70,14 @@ type FileResponse struct {
 	Date time.Time `json:"Date"`
 }
 
+type SignalResponse struct {
+	Name              string `json:"Name"`
+	Unit              string `json:"Unit"`
+	Index             uint   `json:"Index"`
+	Direction         string `json:"Direction"`
+	SimulationModelID uint   `json:"SimulationModelID"`
+}
+
 // Response messages
 
 type ResponseMsg struct {
@@ -91,4 +98,16 @@ type ResponseMsgSimulations struct {
 
 type ResponseMsgSimulation struct {
 	Simulation SimulationResponse `json:"simulation"`
+}
+
+type ResponseMsgSimulationModels struct {
+	SimulationModels []SimulationModelResponse `json:"models"`
+}
+
+type ResponseMsgSimulationModel struct {
+	SimulationModel SimulationModelResponse `json:"model"`
+}
+
+type ResponseMsgSignals struct {
+	Signals []SignalResponse `json:"signals"`
 }

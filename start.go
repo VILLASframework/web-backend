@@ -51,7 +51,7 @@ func main() {
 	api.Use(user.Authentication(true))
 
 	simulation.RegisterSimulationEndpoints(api.Group("/simulations"))
-	simulationmodel.RegisterModelEndpoints(api.Group("/models"))
+	simulationmodel.RegisterSimulationModelEndpoints(api.Group("/models"))
 	visualization.RegisterVisualizationEndpoints(api.Group("/visualizations"))
 	widget.RegisterWidgetEndpoints(api.Group("/widgets"))
 	file.RegisterFileEndpoints(api.Group("/files"))

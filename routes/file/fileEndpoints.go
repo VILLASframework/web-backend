@@ -11,8 +11,8 @@ import (
 )
 
 func RegisterFileEndpoints(r *gin.RouterGroup) {
-	r.GET("/", getFiles)
-	r.POST("/", addFile)
+	r.GET("", getFiles)
+	r.POST("", addFile)
 	r.GET("/:fileID", getFile)
 	r.PUT("/:fileID", updateFile)
 	r.DELETE("/:fileID", deleteFile)

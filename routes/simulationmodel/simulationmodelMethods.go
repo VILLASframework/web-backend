@@ -27,10 +27,10 @@ func (m *SimulationModel) ByID(id uint) error {
 	return nil
 }
 
-func (m *SimulationModel) addToSimulation(simID uint) error {
+func (m *SimulationModel) addToSimulation() error {
 	db := common.GetDB()
 	var sim simulation.Simulation
-	err := sim.ByID(simID)
+	err := sim.ByID(m.SimulationID)
 	if err != nil {
 		return err
 	}
@@ -54,55 +54,70 @@ func (m *SimulationModel) addToSimulation(simID uint) error {
 
 func (m *SimulationModel) update(modifiedSimulationModel SimulationModel) error {
 	db := common.GetDB()
-	err := db.Model(m).Update(modifiedSimulationModel).Error
-	if err != nil {
-		return err
-	}
 
 	if m.SimulatorID != modifiedSimulationModel.SimulatorID {
 		// update simulator
 		var s simulator.Simulator
-		err = s.ByID(modifiedSimulationModel.SimulatorID)
-
+		err := s.ByID(modifiedSimulationModel.SimulatorID)
+		if err != nil {
+			return err
+		}
 		err = db.Model(m).Association("Simulator").Replace(s).Error
 
 	}
 
-	return err
-}
-
-func (m *SimulationModel) updateSignals(signals []common.Signal, direction string) error {
-
-	db := common.GetDB()
-	var err error
-
-	if direction == "in" {
-		err = db.Model(m).Select("InputMapping").Update("InputMapping", signals).Error
-	} else {
-		err = db.Model(m).Select("OutputMapping").Update("OutputMapping", signals).Error
+	err := db.Model(m).Updates(map[string]interface{}{"Name": modifiedSimulationModel.Name,
+		"OutputLength":    modifiedSimulationModel.OutputLength,
+		"InputLength":     modifiedSimulationModel.InputLength,
+		"StartParameters": modifiedSimulationModel.StartParameters,
+		"SimulatorID":     modifiedSimulationModel.SimulatorID,
+	}).Error
+	if err != nil {
+		return err
 	}
 
 	return err
 }
 
-func (m *SimulationModel) addSignal(signal common.Signal, direction string) error {
+func (m *SimulationModel) delete() error {
+
+	db := common.GetDB()
+	var sim simulation.Simulation
+	err := sim.ByID(m.SimulationID)
+	if err != nil {
+		return err
+	}
+
+	// remove association between SimulationModel and Simulation
+	// SimulationModel itself is not deleted from DB, it remains as "dangling"
+	err = db.Model(&sim).Association("SimulationModels").Delete(m).Error
+
+	return err
+}
+
+func (m *SimulationModel) addSignal(signal common.Signal) error {
 
 	db := common.GetDB()
 	var err error
 
-	if direction == "in" {
+	if signal.Direction == "in" {
 		err = db.Model(m).Association("InputMapping").Append(signal).Error
 		if err != nil {
 			return err
 		}
 		// adapt length of mapping
-		m.InputLength = db.Model(m).Association("InputMapping").Count()
+		m.InputLength = db.Model(m).Where("Direction = ?", "in").Association("InputMapping").Count()
+		err = m.update(*m)
 
 	} else {
 		err = db.Model(m).Association("OutputMapping").Append(signal).Error
+		if err != nil {
+			return err
+		}
 
 		// adapt length of mapping
-		m.OutputLength = db.Model(m).Association("OutputMapping").Count()
+		m.OutputLength = db.Model(m).Where("Direction = ?", "out").Association("OutputMapping").Count()
+		err = m.update(*m)
 
 	}
 
@@ -124,7 +139,7 @@ func (m *SimulationModel) deleteSignals(direction string) error {
 	}
 
 	var signals []common.Signal
-	err = db.Order("ID asc").Model(m).Related(&signals, columnName).Error
+	err = db.Order("ID asc").Model(m).Where("Direction = ?", direction).Related(&signals, columnName).Error
 	if err != nil {
 		return err
 	}
@@ -147,6 +162,7 @@ func (m *SimulationModel) deleteSignals(direction string) error {
 	} else {
 		m.OutputLength = 0
 	}
+	err = m.update(*m)
 
 	return err
 }

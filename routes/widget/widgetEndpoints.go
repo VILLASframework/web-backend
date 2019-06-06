@@ -10,8 +10,8 @@ import (
 )
 
 func RegisterWidgetEndpoints(r *gin.RouterGroup) {
-	r.GET("/", getWidgets)
-	r.POST("/", addWidget)
+	r.GET("", getWidgets)
+	r.POST("", addWidget)
 	//r.POST("/:widgetID", cloneWidget)
 	r.PUT("/:widgetID", updateWidget)
 	r.GET("/:widgetID", getWidget)

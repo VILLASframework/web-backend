@@ -9,15 +9,15 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulation"
 )
 
-func RegisterModelEndpoints(r *gin.RouterGroup) {
-	r.GET("/", getSimulationModels)
-	r.POST("/", addSimulationModel)
+func RegisterSimulationModelEndpoints(r *gin.RouterGroup) {
+	r.GET("", getSimulationModels)
+	r.POST("", addSimulationModel)
 	//r.POST("/:modelID", cloneSimulationModel)
 	r.PUT("/:modelID", updateSimulationModel)
 	r.GET("/:modelID", getSimulationModel)
 	r.DELETE("/:modelID", deleteSimulationModel)
 	r.GET("/:modelID/signals", getSignals)
-	r.POST("/:modelID/signals", addSignal)
+	r.PUT("/:modelID/signals", addSignal)
 	r.DELETE("/:modelID/signals", deleteSignals)
 }
 
@@ -83,7 +83,7 @@ func addSimulationModel(c *gin.Context) {
 		return
 	}
 
-	err = newModel.addToSimulation(newModel.SimulationID)
+	err = newModel.addToSimulation()
 	if common.ProvideErrorResponse(c, err) == false {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "OK.",
@@ -203,63 +203,19 @@ func getSimulationModel(c *gin.Context) {
 // @Router /models/{modelID} [delete]
 func deleteSimulationModel(c *gin.Context) {
 
-	//ok, m := checkPermissions(c, common.Delete)
-	//if !ok {
-	//	return
-	//}
-
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Not implemented.",
-	})
-}
-
-// AddSignal godoc
-// @Summary Add a signal to a signal mapping of a model
-// @ID AddSignal
-// @Accept json
-// @Produce json
-// @Tags models
-// @Param inputSignal body common.Signal true "A signal to be added to the model"
-// @Param direction query string true "Direction of signal (in or out)"
-// @Success 200 "OK."
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
-// @Router /models/{modelID}/signals [post]
-func addSignal(c *gin.Context) {
-
-	ok, m := checkPermissions(c, common.Update)
+	ok, m := checkPermissions(c, common.Delete)
 	if !ok {
 		return
 	}
 
-	direction := c.Request.URL.Query().Get("direction")
-	if !(direction == "out") && !(direction == "in") {
-		errormsg := "Bad request. Direction has to be in or out"
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
-		})
+	err := m.delete()
+	if common.ProvideErrorResponse(c, err) {
 		return
 	}
 
-	var sig common.Signal
-	err := c.BindJSON(&sig)
-	if err != nil {
-		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
-		})
-		return
-	}
-
-	// Add signal to model
-	err = m.addSignal(sig, direction)
-	if common.ProvideErrorResponse(c, err) == false {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "OK.",
-		})
-	}
+	c.JSON(http.StatusOK, gin.H{
+		"message": "OK.",
+	})
 }
 
 // getSignals godoc
@@ -281,8 +237,13 @@ func getSignals(c *gin.Context) {
 		return
 	}
 
-	direction := c.Param("direction")
-	if !(direction == "out") && !(direction == "in") {
+	var mapping string
+	direction := c.Request.URL.Query().Get("direction")
+	if direction == "in" {
+		mapping = "InputMapping"
+	} else if direction == "out" {
+		mapping = "OutputMapping"
+	} else {
 		errormsg := "Bad request. Direction has to be in or out"
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": errormsg,
@@ -290,16 +251,56 @@ func getSignals(c *gin.Context) {
 		return
 	}
 
-	var signals []common.Signal
-	if direction == "in" {
-		signals = m.InputMapping
-	} else {
-		signals = m.OutputMapping
+	db := common.GetDB()
+	var sigs []common.Signal
+	err := db.Order("ID asc").Model(m).Where("Direction = ?", direction).Related(&sigs, mapping).Error
+	if common.ProvideErrorResponse(c, err) {
+		return
 	}
 
+	serializer := common.SignalsSerializer{c, sigs}
 	c.JSON(http.StatusOK, gin.H{
-		"signals": signals,
+		"signals": serializer.Response(),
 	})
+}
+
+// AddSignal godoc
+// @Summary Add a signal to a signal mapping of a model
+// @ID AddSignal
+// @Accept json
+// @Produce json
+// @Tags models
+// @Param inputSignal body common.Signal true "A signal to be added to the model incl. direction"
+// @Success 200 "OK."
+// @Failure 401 "Unauthorized Access"
+// @Failure 403 "Access forbidden."
+// @Failure 404 "Not found"
+// @Failure 500 "Internal server error"
+// @Router /models/{modelID}/signals [put]
+func addSignal(c *gin.Context) {
+
+	ok, m := checkPermissions(c, common.Update)
+	if !ok {
+		return
+	}
+
+	var sig common.Signal
+	err := c.BindJSON(&sig)
+	if err != nil {
+		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": errormsg,
+		})
+		return
+	}
+
+	// Add signal to model
+	err = m.addSignal(sig)
+	if common.ProvideErrorResponse(c, err) == false {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "OK.",
+		})
+	}
 }
 
 // deleteSignals godoc
@@ -322,7 +323,7 @@ func deleteSignals(c *gin.Context) {
 		return
 	}
 
-	direction := c.Param("direction")
+	direction := c.Request.URL.Query().Get("direction")
 	if !(direction == "out") && !(direction == "in") {
 		errormsg := "Bad request. Direction has to be in or out"
 		c.JSON(http.StatusBadRequest, gin.H{

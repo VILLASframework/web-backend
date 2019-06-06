@@ -77,41 +77,37 @@ func (s *Simulation) deleteUser(username string) error {
 
 func (s *Simulation) delete() error {
 	db := common.GetDB()
-	no_models := db.Model(s).Association("SimulationModels").Count()
-	no_visualizations := db.Model(s).Association("Visualizations").Count()
 
-	if no_models > 0 || no_visualizations > 0 {
-		return fmt.Errorf("cannot delete simulation that contains models and/ or visualizations, doing nothing")
-	} else {
-		// delete simulation from all users and vice versa
+	// delete simulation from all users and vice versa
 
-		users, no_users, err := s.getUsers()
-		if err != nil {
-			return err
-		}
+	users, no_users, err := s.getUsers()
+	if err != nil {
+		return err
+	}
 
-		if no_users > 0 {
-			for _, u := range users {
-				// remove user from simulation
-				err = db.Model(s).Association("Users").Delete(&u).Error
-				if err != nil {
-					return err
-				}
-				// remove simulation from user
-				err = db.Model(&u).Association("Simulations").Delete(s).Error
-				if err != nil {
-					return err
-				}
+	if no_users > 0 {
+		for _, u := range users {
+			// remove user from simulation
+			err = db.Model(s).Association("Users").Delete(&u).Error
+			if err != nil {
+				return err
+			}
+			// remove simulation from user
+			err = db.Model(&u).Association("Simulations").Delete(s).Error
+			if err != nil {
+				return err
 			}
 		}
-
-		// Delete simulation
-		err = db.Delete(s).Error
-		if err != nil {
-			return err
-		}
-
 	}
+
+	// Simulation is not deleted from DB, only associations with users are removed
+	// Simulation remains "dangling" in DB
+
+	// Delete simulation
+	//err = db.Delete(s).Error
+	//if err != nil {
+	//	return err
+	//}
 
 	return nil
 }
