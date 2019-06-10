@@ -134,17 +134,16 @@ func authenticate(c *gin.Context) {
 // @Failure 500 "Internal server error"
 // @Router /users [get]
 func getUsers(c *gin.Context) {
-	//// dummy TODO: check in the middleware if the user is authorized
-	//authorized := false
-	//// TODO: move this redirect in the authentication middleware
-	//if !authorized {
-	//c.Redirect(http.StatusSeeOther, "/authenticate")
-	//return
-	//}
+
+	err := common.ValidateRole(c, common.ModelUser, common.Read)
+	if err != nil {
+		c.JSON(http.StatusUnprocessableEntity, fmt.Sprintf("%v", err))
+		return
+	}
 
 	db := common.GetDB()
 	var users []common.User
-	err := db.Order("ID asc").Find(&users).Error
+	err = db.Order("ID asc").Find(&users).Error
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
