@@ -125,3 +125,12 @@ func AuthenticateForTest(t *testing.T, router *gin.Engine, url string, method st
 
 	return body_data["token"].(string)
 }
+
+// Read the parameter with name paramName from the gin Context and
+// return it as uint variable
+func UintParamFromCtx(c *gin.Context, paramName string) (uint, error) {
+
+	param, err := strconv.Atoi(c.Param(paramName))
+
+	return uint(param), err
+}

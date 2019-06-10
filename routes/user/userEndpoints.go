@@ -5,7 +5,6 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"strconv"
 	"time"
 
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
@@ -238,7 +237,7 @@ func addUser(c *gin.Context) {
 // @Router /users/{userID} [put]
 func updateUser(c *gin.Context) {
 
-	err := common.ValidateRole(c, common.ModelUser, common.Read)
+	err := common.ValidateRole(c, common.ModelUser, common.Update)
 	if err != nil {
 		c.JSON(http.StatusUnprocessableEntity, fmt.Sprintf("%v", err))
 		return
@@ -246,8 +245,8 @@ func updateUser(c *gin.Context) {
 
 	// Find the user
 	var user User
-	toBeUpdatedID, _ := strconv.ParseInt(c.Param("UserID"), 10, 64)
-	err = user.ByID(uint(toBeUpdatedID))
+	toBeUpdatedID, _ := common.UintParamFromCtx(c, "UserID")
+	err = user.ByID(toBeUpdatedID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, fmt.Sprintf("%v", err))
 		return
@@ -258,11 +257,13 @@ func updateUser(c *gin.Context) {
 	// in the context from the Authentication middleware)
 	userID, _ := c.Get(common.UserIDCtx)
 	userRole, _ := c.Get(common.UserRoleCtx)
+
 	if toBeUpdatedID != userID && userRole != "Admin" {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
 			"message": "Invalid authorization",
 		})
+		return
 	}
 
 	// Bind the (context) with the User struct
@@ -335,9 +336,9 @@ func getUser(c *gin.Context) {
 	}
 
 	var user User
-	id, _ := strconv.ParseInt(c.Param("UserID"), 10, 64)
+	id, _ := common.UintParamFromCtx(c, "UserID")
 
-	err = user.ByID(uint(id))
+	err = user.ByID(id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, fmt.Sprintf("%v", err))
 		return
@@ -370,7 +371,7 @@ func deleteUser(c *gin.Context) {
 	}
 
 	var user User
-	id, _ := strconv.ParseInt(c.Param("UserID"), 10, 64)
+	id, _ := common.UintParamFromCtx(c, "UserID")
 
 	// Check that the user exist
 	err = user.ByID(uint(id))
