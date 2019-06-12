@@ -4,15 +4,23 @@ import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"gopkg.in/go-playground/validator.v9"
 	"net/http"
 	"time"
 
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
 )
 
+var validate *validator.Validate
+
 // TODO: the signing secret must be environmental variable
 const jwtSigningSecret = "This should NOT be here!!@33$8&"
 const weekHours = time.Hour * 24 * 7
+
+type loginRequest struct {
+	Username string `form:"Username" validate:"required"`
+	Password string `form:"Password" validate:"required,min=8"`
+}
 
 type tokenClaims struct {
 	UserID uint   `json:"id"`
@@ -44,7 +52,7 @@ func RegisterUserEndpoints(r *gin.RouterGroup) {
 // @Accept json
 // @Produce json
 // @Tags users
-// @Param inputUser body user.Credentials true "Credentials of user"
+// @Param inputUser body user.loginRequest true "loginRequest of user"
 // @Success 200 {object} user.AuthResponse "JSON web token and message"
 // @Failure 401 "Unauthorized Access"
 // @Failure 404 "Not found"
@@ -52,9 +60,9 @@ func RegisterUserEndpoints(r *gin.RouterGroup) {
 // @Router /authenticate [post]
 func authenticate(c *gin.Context) {
 
-	// Bind the response (context) with the Credentials struct
-	var loginRequest Credentials
-	if err := c.ShouldBindJSON(&loginRequest); err != nil {
+	// Bind the response (context) with the loginRequest struct
+	var credentials loginRequest
+	if err := c.ShouldBindJSON(&credentials); err != nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{
 			"success": false,
 			"message": fmt.Sprintf("%v", err),
@@ -62,8 +70,18 @@ func authenticate(c *gin.Context) {
 		return
 	}
 
+	validate = validator.New()
+	errs := validate.Struct(credentials)
+	if errs != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Invalid credentials",
+		})
+		return
+	}
+
 	// Check if the Username or Password are empty
-	if loginRequest.Username == "" || loginRequest.Password == "" {
+	if credentials.Username == "" || credentials.Password == "" {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"success": false,
 			"message": "Invalid credentials",
@@ -73,7 +91,7 @@ func authenticate(c *gin.Context) {
 
 	// Find the username in the database
 	var user User
-	err := user.ByUsername(loginRequest.Username)
+	err := user.ByUsername(credentials.Username)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
@@ -83,7 +101,7 @@ func authenticate(c *gin.Context) {
 	}
 
 	// Validate the password
-	err = user.validatePassword(loginRequest.Password)
+	err = user.validatePassword(credentials.Password)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"success": false,
