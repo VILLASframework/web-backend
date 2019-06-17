@@ -18,6 +18,7 @@ const ModelUser = ModelName("user")
 const ModelSimulation = ModelName("simulation")
 const ModelSimulator = ModelName("simulator")
 const ModelVisualization = ModelName("visualization")
+const ModelWidget = ModelName("widget")
 const ModelSimulationModel = ModelName("simulationmodel")
 
 type CRUD string
@@ -49,15 +50,24 @@ var Roles = RoleActions{
 		ModelSimulation:      crud,
 		ModelSimulationModel: crud,
 		ModelSimulator:       crud,
+		ModelWidget:          crud,
+		ModelVisualization:   crud,
 	},
 	"User": {
 		ModelUser:            _ru_,
 		ModelSimulation:      crud,
 		ModelSimulationModel: crud,
 		ModelSimulator:       _r__,
+		ModelWidget:          crud,
+		ModelVisualization:   crud,
 	},
 	"Guest": {
-		ModelVisualization: _r__,
+		ModelSimulation:      _r__,
+		ModelSimulationModel: _r__,
+		ModelVisualization:   _r__,
+		ModelWidget:          _r__,
+		ModelSimulator:       _r__,
+		ModelUser:            _ru_,
 	},
 }
 

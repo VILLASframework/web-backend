@@ -35,7 +35,7 @@ func RegisterSimulationModelEndpoints(r *gin.RouterGroup) {
 // @Router /models [get]
 func getSimulationModels(c *gin.Context) {
 
-	ok, sim := simulation.CheckPermissions(c, common.ModelSimulationModel, common.Read, "query", -1)
+	ok, sim := simulation.CheckPermissions(c, common.Read, "query", -1)
 	if !ok {
 		return
 	}
@@ -78,7 +78,7 @@ func addSimulationModel(c *gin.Context) {
 		return
 	}
 
-	ok, _ := simulation.CheckPermissions(c, common.ModelSimulationModel, common.Create, "body", int(newModel.SimulationID))
+	ok, _ := simulation.CheckPermissions(c, common.Create, "body", int(newModel.SimulationID))
 	if !ok {
 		return
 	}

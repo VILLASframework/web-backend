@@ -1,9 +1,7 @@
 package visualization
 
 import (
-	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 
@@ -19,7 +17,6 @@ func RegisterVisualizationEndpoints(r *gin.RouterGroup) {
 	r.PUT("/:visualizationID", updateVisualization)
 	r.GET("/:visualizationID", getVisualization)
 	r.DELETE("/:visualizationID", deleteVisualization)
-
 }
 
 // getVisualizations godoc
@@ -36,26 +33,19 @@ func RegisterVisualizationEndpoints(r *gin.RouterGroup) {
 // @Router /visualizations [get]
 func getVisualizations(c *gin.Context) {
 
-	simID, err := strconv.Atoi(c.Request.URL.Query().Get("simulationID"))
-	if err != nil {
-		errormsg := fmt.Sprintf("Bad request. No or incorrect format of simulationID query parameter")
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
-		})
-		return
-	}
-
-	var sim simulation.Simulation
-	err = sim.ByID(uint(simID))
-	if common.ProvideErrorResponse(c, err) {
+	ok, sim := simulation.CheckPermissions(c, common.Read, "query", -1)
+	if !ok {
 		return
 	}
 
 	db := common.GetDB()
-	var visualizations []common.Visualization
-	err = db.Order("ID asc").Model(sim).Related(&visualizations, "Visualizations").Error
+	var vis []common.Visualization
+	err := db.Order("ID asc").Model(sim).Related(&vis, "Visualizations").Error
+	if common.ProvideErrorResponse(c, err) {
+		return
+	}
 
-	serializer := common.VisualizationsSerializer{c, visualizations}
+	serializer := common.VisualizationsSerializer{c, vis}
 	c.JSON(http.StatusOK, gin.H{
 		"visualizations": serializer.Response(),
 	})
@@ -76,8 +66,8 @@ func getVisualizations(c *gin.Context) {
 // @Router /visualizations [post]
 func addVisualization(c *gin.Context) {
 
-	var vis Visualization
-	err := c.BindJSON(&vis)
+	var newVis Visualization
+	err := c.BindJSON(&newVis)
 	if err != nil {
 		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -86,13 +76,19 @@ func addVisualization(c *gin.Context) {
 		return
 	}
 
+	ok, _ := simulation.CheckPermissions(c, common.Create, "body", int(newVis.SimulationID))
+	if !ok {
+		return
+	}
+
 	// add visualization to DB and add association to simulation
-	err = vis.addToSimulation(vis.SimulationID)
+	err = newVis.addToSimulation()
 	if common.ProvideErrorResponse(c, err) == false {
 		c.JSON(http.StatusOK, gin.H{
-			"message": "OK",
+			"message": "OK.",
 		})
 	}
+
 }
 
 func cloneVisualization(c *gin.Context) {
@@ -117,13 +113,13 @@ func cloneVisualization(c *gin.Context) {
 // @Router /visualizations/{visualizationID} [put]
 func updateVisualization(c *gin.Context) {
 
-	visID, err := common.GetVisualizationID(c)
-	if err != nil {
+	ok, v := CheckPermissions(c, common.Update, "path", -1)
+	if !ok {
 		return
 	}
 
 	var modifiedVis Visualization
-	err = c.BindJSON(&modifiedVis)
+	err := c.BindJSON(&modifiedVis)
 	if err != nil {
 		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -132,16 +128,10 @@ func updateVisualization(c *gin.Context) {
 		return
 	}
 
-	var vis Visualization
-	err = vis.ByID(uint(visID))
-	if common.ProvideErrorResponse(c, err) {
-		return
-	}
-
-	err = vis.update(modifiedVis)
+	err = v.update(modifiedVis)
 	if common.ProvideErrorResponse(c, err) == false {
 		c.JSON(http.StatusOK, gin.H{
-			"message": "OK",
+			"message": "OK.",
 		})
 	}
 }
@@ -160,14 +150,8 @@ func updateVisualization(c *gin.Context) {
 // @Router /visualizations/{visualizationID} [get]
 func getVisualization(c *gin.Context) {
 
-	visID, err := common.GetVisualizationID(c)
-	if err != nil {
-		return
-	}
-
-	var vis Visualization
-	err = vis.ByID(uint(visID))
-	if common.ProvideErrorResponse(c, err) {
+	ok, vis := CheckPermissions(c, common.Read, "path", -1)
+	if !ok {
 		return
 	}
 
@@ -190,7 +174,17 @@ func getVisualization(c *gin.Context) {
 // @Param visualizationID path int true "Visualization ID"
 // @Router /visualizations/{visualizationID} [delete]
 func deleteVisualization(c *gin.Context) {
+	ok, vis := CheckPermissions(c, common.Delete, "path", -1)
+	if !ok {
+		return
+	}
+
+	err := vis.delete()
+	if common.ProvideErrorResponse(c, err) {
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"message": "NOT implemented",
+		"message": "OK.",
 	})
 }

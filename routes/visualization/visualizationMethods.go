@@ -26,10 +26,10 @@ func (v *Visualization) ByID(id uint) error {
 	return nil
 }
 
-func (v *Visualization) addToSimulation(simID uint) error {
+func (v *Visualization) addToSimulation() error {
 	db := common.GetDB()
 	var sim simulation.Simulation
-	err := sim.ByID(simID)
+	err := sim.ByID(v.SimulationID)
 	if err != nil {
 		return err
 	}
@@ -47,11 +47,29 @@ func (v *Visualization) addToSimulation(simID uint) error {
 }
 
 func (v *Visualization) update(modifiedVis Visualization) error {
+
 	db := common.GetDB()
-	err := db.Model(v).Update(modifiedVis).Error
+
+	err := db.Model(v).Updates(map[string]interface{}{
+		"Name": modifiedVis.Name,
+		"Grid": modifiedVis.Grid,
+	}).Error
+
+	return err
+}
+
+func (v *Visualization) delete() error {
+
+	db := common.GetDB()
+	var sim simulation.Simulation
+	err := sim.ByID(v.SimulationID)
 	if err != nil {
 		return err
 	}
+
+	// remove association between Visualization and Simulation
+	// Visualization itself is not deleted from DB, it remains as "dangling"
+	err = db.Model(&sim).Association("Visualizations").Delete(v).Error
 
 	return err
 }

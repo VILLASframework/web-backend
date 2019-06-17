@@ -10,11 +10,11 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
 )
 
-func CheckPermissions(c *gin.Context, modelname common.ModelName, operation common.CRUD, simIDSource string, simIDBody int) (bool, Simulation) {
+func CheckPermissions(c *gin.Context, operation common.CRUD, simIDSource string, simIDBody int) (bool, Simulation) {
 
 	var sim Simulation
 
-	err := common.ValidateRole(c, modelname, operation)
+	err := common.ValidateRole(c, common.ModelSimulation, operation)
 	if err != nil {
 		c.JSON(http.StatusUnprocessableEntity, "Access denied (role validation failed).")
 		return false, sim

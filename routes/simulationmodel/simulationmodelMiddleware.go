@@ -15,6 +15,12 @@ func checkPermissions(c *gin.Context, operation common.CRUD) (bool, SimulationMo
 
 	var m SimulationModel
 
+	err := common.ValidateRole(c, common.ModelSimulationModel, operation)
+	if err != nil {
+		c.JSON(http.StatusUnprocessableEntity, "Access denied (role validation failed).")
+		return false, m
+	}
+
 	modelID, err := strconv.Atoi(c.Param("modelID"))
 
 	if err != nil {
@@ -30,7 +36,7 @@ func checkPermissions(c *gin.Context, operation common.CRUD) (bool, SimulationMo
 		return false, m
 	}
 
-	ok, _ := simulation.CheckPermissions(c, common.ModelSimulationModel, operation, "body", int(m.SimulationID))
+	ok, _ := simulation.CheckPermissions(c, operation, "body", int(m.SimulationID))
 	if !ok {
 		return false, m
 	}

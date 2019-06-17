@@ -12,7 +12,6 @@ import (
 func RegisterWidgetEndpoints(r *gin.RouterGroup) {
 	r.GET("", getWidgets)
 	r.POST("", addWidget)
-	//r.POST("/:widgetID", cloneWidget)
 	r.PUT("/:widgetID", updateWidget)
 	r.GET("/:widgetID", getWidget)
 	r.DELETE("/:widgetID", deleteWidget)
@@ -32,20 +31,14 @@ func RegisterWidgetEndpoints(r *gin.RouterGroup) {
 // @Router /widgets [get]
 func getWidgets(c *gin.Context) {
 
-	visID, err := common.GetVisualizationID(c)
-	if err != nil {
-		return
-	}
-
-	var vis visualization.Visualization
-	err = vis.ByID(uint(visID))
-	if common.ProvideErrorResponse(c, err) {
+	ok, vis := visualization.CheckPermissions(c, common.Read, "query", -1)
+	if !ok {
 		return
 	}
 
 	db := common.GetDB()
 	var widgets []common.Widget
-	err = db.Order("ID asc").Model(vis).Related(&widgets, "Widgets").Error
+	err := db.Order("ID asc").Model(vis).Related(&widgets, "Widgets").Error
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
@@ -81,19 +74,18 @@ func addWidget(c *gin.Context) {
 		return
 	}
 
-	err = newWidget.addToVisualization(newWidget.VisualizationID)
+	ok, _ := visualization.CheckPermissions(c, common.Create, "body", int(newWidget.VisualizationID))
+	if !ok {
+		return
+	}
+
+	err = newWidget.addToVisualization()
 
 	if common.ProvideErrorResponse(c, err) == false {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "OK.",
 		})
 	}
-}
-
-func cloneWidget(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message": "NOT implemented",
-	})
 }
 
 // updateWidget godoc
@@ -112,24 +104,18 @@ func cloneWidget(c *gin.Context) {
 // @Router /widgets/{widgetID} [put]
 func updateWidget(c *gin.Context) {
 
-	widgetID, err := common.GetWidgetID(c)
-	if err != nil {
+	ok, w := CheckPermissions(c, common.Update)
+	if !ok {
 		return
 	}
 
 	var modifiedWidget Widget
-	err = c.BindJSON(&modifiedWidget)
+	err := c.BindJSON(&modifiedWidget)
 	if err != nil {
 		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": errormsg,
 		})
-		return
-	}
-
-	var w Widget
-	err = w.ByID(uint(widgetID))
-	if common.ProvideErrorResponse(c, err) {
 		return
 	}
 
@@ -155,14 +141,8 @@ func updateWidget(c *gin.Context) {
 // @Router /widgets/{widgetID} [get]
 func getWidget(c *gin.Context) {
 
-	widgetID, err := common.GetWidgetID(c)
-	if err != nil {
-		return
-	}
-
-	var w Widget
-	err = w.ByID(uint(widgetID))
-	if common.ProvideErrorResponse(c, err) {
+	ok, w := CheckPermissions(c, common.Read)
+	if !ok {
 		return
 	}
 
@@ -186,21 +166,17 @@ func getWidget(c *gin.Context) {
 // @Router /widgets/{widgetID} [delete]
 func deleteWidget(c *gin.Context) {
 
-	// widgetID, err := GetWidgetID(c)
-	// if err != nil {
-	// 	return
-	// }
-	//
-	// widget, err := queries.FindWidgetOfVisualization(&visualization, widgetID)
-	// if common.ProvideErrorResponse(c, err) {
-	// 	return
-	// }
+	ok, w := CheckPermissions(c, common.Delete)
+	if !ok {
+		return
+	}
 
-	// TODO delete files of widget in DB and on disk
-
-	// TODO Delete widget itself + association with visualization
+	err := w.delete()
+	if common.ProvideErrorResponse(c, err) {
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "NOT implemented",
+		"message": "OK.",
 	})
 }
