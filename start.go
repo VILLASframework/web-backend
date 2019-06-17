@@ -2,6 +2,8 @@ package main
 
 import (
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/file"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/signal"
+
 	"github.com/gin-gonic/gin"
 	"github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
@@ -52,6 +54,7 @@ func main() {
 
 	simulation.RegisterSimulationEndpoints(api.Group("/simulations"))
 	simulationmodel.RegisterSimulationModelEndpoints(api.Group("/models"))
+	signal.RegisterSignalEndpoints(api.Group("/signals"))
 	visualization.RegisterVisualizationEndpoints(api.Group("/visualizations"))
 	widget.RegisterWidgetEndpoints(api.Group("/widgets"))
 	file.RegisterFileEndpoints(api.Group("/files"))

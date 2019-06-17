@@ -20,6 +20,7 @@ const ModelSimulator = ModelName("simulator")
 const ModelVisualization = ModelName("visualization")
 const ModelWidget = ModelName("widget")
 const ModelSimulationModel = ModelName("simulationmodel")
+const ModelSignal = ModelName("signal")
 
 type CRUD string
 
@@ -52,6 +53,7 @@ var Roles = RoleActions{
 		ModelSimulator:       crud,
 		ModelWidget:          crud,
 		ModelVisualization:   crud,
+		ModelSignal:          crud,
 	},
 	"User": {
 		ModelUser:            _ru_,
@@ -60,6 +62,7 @@ var Roles = RoleActions{
 		ModelSimulator:       _r__,
 		ModelWidget:          crud,
 		ModelVisualization:   crud,
+		ModelSignal:          crud,
 	},
 	"Guest": {
 		ModelSimulation:      _r__,
@@ -68,6 +71,7 @@ var Roles = RoleActions{
 		ModelWidget:          _r__,
 		ModelSimulator:       _r__,
 		ModelUser:            _ru_,
+		ModelSignal:          _r__,
 	},
 }
 

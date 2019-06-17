@@ -52,7 +52,7 @@ func (m *SimulationModel) addToSimulation() error {
 	return err
 }
 
-func (m *SimulationModel) update(modifiedSimulationModel SimulationModel) error {
+func (m *SimulationModel) Update(modifiedSimulationModel SimulationModel) error {
 	db := common.GetDB()
 
 	if m.SimulatorID != modifiedSimulationModel.SimulatorID {
@@ -66,15 +66,13 @@ func (m *SimulationModel) update(modifiedSimulationModel SimulationModel) error 
 
 	}
 
-	err := db.Model(m).Updates(map[string]interface{}{"Name": modifiedSimulationModel.Name,
+	err := db.Model(m).Updates(map[string]interface{}{
+		"Name":            modifiedSimulationModel.Name,
 		"OutputLength":    modifiedSimulationModel.OutputLength,
 		"InputLength":     modifiedSimulationModel.InputLength,
 		"StartParameters": modifiedSimulationModel.StartParameters,
 		"SimulatorID":     modifiedSimulationModel.SimulatorID,
 	}).Error
-	if err != nil {
-		return err
-	}
 
 	return err
 }
@@ -91,78 +89,6 @@ func (m *SimulationModel) delete() error {
 	// remove association between SimulationModel and Simulation
 	// SimulationModel itself is not deleted from DB, it remains as "dangling"
 	err = db.Model(&sim).Association("SimulationModels").Delete(m).Error
-
-	return err
-}
-
-func (m *SimulationModel) addSignal(signal common.Signal) error {
-
-	db := common.GetDB()
-	var err error
-
-	if signal.Direction == "in" {
-		err = db.Model(m).Association("InputMapping").Append(signal).Error
-		if err != nil {
-			return err
-		}
-		// adapt length of mapping
-		m.InputLength = db.Model(m).Where("Direction = ?", "in").Association("InputMapping").Count()
-		err = m.update(*m)
-
-	} else {
-		err = db.Model(m).Association("OutputMapping").Append(signal).Error
-		if err != nil {
-			return err
-		}
-
-		// adapt length of mapping
-		m.OutputLength = db.Model(m).Where("Direction = ?", "out").Association("OutputMapping").Count()
-		err = m.update(*m)
-
-	}
-
-	return err
-}
-
-func (m *SimulationModel) deleteSignals(direction string) error {
-
-	db := common.GetDB()
-	var err error
-
-	var columnName string
-
-	if direction == "in" {
-		columnName = "InputMapping"
-
-	} else {
-		columnName = "OutputMapping"
-	}
-
-	var signals []common.Signal
-	err = db.Order("ID asc").Model(m).Where("Direction = ?", direction).Related(&signals, columnName).Error
-	if err != nil {
-		return err
-	}
-
-	// remove association to each signal and delete each signal from db
-	for _, sig := range signals {
-		err = db.Model(m).Association(columnName).Delete(sig).Error
-		if err != nil {
-			return err
-		}
-		err = db.Delete(sig).Error
-		if err != nil {
-			return err
-		}
-	}
-
-	// set length of mapping to 0
-	if columnName == "InputMapping" {
-		m.InputLength = 0
-	} else {
-		m.OutputLength = 0
-	}
-	err = m.update(*m)
 
 	return err
 }

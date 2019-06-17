@@ -15,9 +15,6 @@ func RegisterSimulationModelEndpoints(r *gin.RouterGroup) {
 	r.PUT("/:modelID", updateSimulationModel)
 	r.GET("/:modelID", getSimulationModel)
 	r.DELETE("/:modelID", deleteSimulationModel)
-	r.GET("/:modelID/signals", getSignals)
-	r.PUT("/:modelID/signals", addSignal)
-	r.DELETE("/:modelID/signals", deleteSignals)
 }
 
 // getSimulationModels godoc
@@ -106,7 +103,7 @@ func addSimulationModel(c *gin.Context) {
 // @Router /models/{modelID} [put]
 func updateSimulationModel(c *gin.Context) {
 
-	ok, m := checkPermissions(c, common.Update)
+	ok, m := CheckPermissions(c, common.Update, "path", -1)
 	if !ok {
 		return
 	}
@@ -121,7 +118,7 @@ func updateSimulationModel(c *gin.Context) {
 		return
 	}
 
-	err = m.update(modifiedModel)
+	err = m.Update(modifiedModel)
 	if common.ProvideErrorResponse(c, err) == false {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "OK.",
@@ -143,7 +140,7 @@ func updateSimulationModel(c *gin.Context) {
 // @Router /models/{modelID} [get]
 func getSimulationModel(c *gin.Context) {
 
-	ok, m := checkPermissions(c, common.Read)
+	ok, m := CheckPermissions(c, common.Read, "path", -1)
 	if !ok {
 		return
 	}
@@ -168,7 +165,7 @@ func getSimulationModel(c *gin.Context) {
 // @Router /models/{modelID} [delete]
 func deleteSimulationModel(c *gin.Context) {
 
-	ok, m := checkPermissions(c, common.Delete)
+	ok, m := CheckPermissions(c, common.Delete, "path", -1)
 	if !ok {
 		return
 	}
@@ -181,127 +178,4 @@ func deleteSimulationModel(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "OK.",
 	})
-}
-
-// getSignals godoc
-// @Summary Get all signals of one direction
-// @ID getSignals
-// @Produce json
-// @Tags models
-// @Param direction query string true "Direction of signal (in or out)"
-// @Success 200 {array} common.Signal "Requested signals."
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
-// @Router /models/{modelID}/signals [get]
-func getSignals(c *gin.Context) {
-
-	ok, m := checkPermissions(c, common.Read)
-	if !ok {
-		return
-	}
-
-	var mapping string
-	direction := c.Request.URL.Query().Get("direction")
-	if direction == "in" {
-		mapping = "InputMapping"
-	} else if direction == "out" {
-		mapping = "OutputMapping"
-	} else {
-		errormsg := "Bad request. Direction has to be in or out"
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
-		})
-		return
-	}
-
-	db := common.GetDB()
-	var sigs []common.Signal
-	err := db.Order("ID asc").Model(m).Where("Direction = ?", direction).Related(&sigs, mapping).Error
-	if common.ProvideErrorResponse(c, err) {
-		return
-	}
-
-	serializer := common.SignalsSerializer{c, sigs}
-	c.JSON(http.StatusOK, gin.H{
-		"signals": serializer.Response(),
-	})
-}
-
-// AddSignal godoc
-// @Summary Add a signal to a signal mapping of a model
-// @ID AddSignal
-// @Accept json
-// @Produce json
-// @Tags models
-// @Param inputSignal body common.Signal true "A signal to be added to the model incl. direction"
-// @Success 200 "OK."
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
-// @Router /models/{modelID}/signals [put]
-func addSignal(c *gin.Context) {
-
-	ok, m := checkPermissions(c, common.Update)
-	if !ok {
-		return
-	}
-
-	var sig common.Signal
-	err := c.BindJSON(&sig)
-	if err != nil {
-		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
-		})
-		return
-	}
-
-	// Add signal to model
-	err = m.addSignal(sig)
-	if common.ProvideErrorResponse(c, err) == false {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "OK.",
-		})
-	}
-}
-
-// deleteSignals godoc
-// @Summary Delete all signals of a direction
-// @ID deleteSignals
-// @Tags models
-// @Produce json
-// @Success 200 "OK."
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
-// @Param modelID path int true "Model ID"
-// @Param direction query string true "Direction of signals to delete (in or out)"
-// @Router /models/{modelID}/signals [delete]
-func deleteSignals(c *gin.Context) {
-
-	ok, m := checkPermissions(c, common.Update)
-	if !ok {
-		return
-	}
-
-	direction := c.Request.URL.Query().Get("direction")
-	if !(direction == "out") && !(direction == "in") {
-		errormsg := "Bad request. Direction has to be in or out"
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
-		})
-		return
-	}
-
-	err := m.deleteSignals(direction)
-	if common.ProvideErrorResponse(c, err) == false {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "OK.",
-		})
-	}
-
 }
