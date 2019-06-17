@@ -111,7 +111,7 @@ type Visualization struct {
 	// Grid of visualization
 	Grid int `gorm:"default:15"`
 	// ID of simulation to which visualization belongs
-	SimulationID uint `gorm:"not null"`
+	SimulationID uint
 	// Widgets that belong to visualization
 	Widgets []Widget `gorm:"foreignkey:VisualizationID"`
 }

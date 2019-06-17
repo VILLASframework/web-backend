@@ -93,6 +93,8 @@ test:backend:endpoints:
     - go test -v -args -dbhost=/var/run/postgresql
     - cd ../simulationmodel
     - go test -v -args -dbhost=/var/run/postgresql
+    - cd ../visualization
+    - go test -v -args -dbhost=/var/run/postgresql
   dependencies:
     - build:backend
 

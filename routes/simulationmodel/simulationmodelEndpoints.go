@@ -12,7 +12,6 @@ import (
 func RegisterSimulationModelEndpoints(r *gin.RouterGroup) {
 	r.GET("", getSimulationModels)
 	r.POST("", addSimulationModel)
-	//r.POST("/:modelID", cloneSimulationModel)
 	r.PUT("/:modelID", updateSimulationModel)
 	r.GET("/:modelID", getSimulationModel)
 	r.DELETE("/:modelID", deleteSimulationModel)
@@ -89,40 +88,6 @@ func addSimulationModel(c *gin.Context) {
 			"message": "OK.",
 		})
 	}
-}
-
-func cloneSimulationModel(c *gin.Context) {
-
-	// modelID, err := routes.GetModelID(c)
-	// if err != nil {
-	// 	return
-	// }
-	//
-	// targetSimID, err := strconv.Atoi(c.PostForm("TargetSim"))
-	// if err != nil {
-	// 	errormsg := fmt.Sprintf("Bad request. No or incorrect format of target sim ID")
-	// 	c.JSON(http.StatusBadRequest, gin.H{
-	// 		"error": errormsg,
-	// 	})
-	// 	return
-	// }
-
-	// TODO TO BE IMPLEMENTED
-	// Check if target sim exists
-	// Check if model exists
-
-	// Get all Signals of Model
-	// Get Simulator of Model
-	// Get Files of model
-
-	// Add new model object to DB and associate with target sim
-	// Add new signal objects to DB and associate with new model object (careful with directions)
-	// Associate Simulator with new Model object
-
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Not implemented.",
-	})
-
 }
 
 // updateSimulationModel godoc

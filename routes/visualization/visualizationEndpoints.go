@@ -13,7 +13,6 @@ func RegisterVisualizationEndpoints(r *gin.RouterGroup) {
 
 	r.GET("", getVisualizations)
 	r.POST("", addVisualization)
-	//r.POST("/:visualizationID", cloneVisualization)
 	r.PUT("/:visualizationID", updateVisualization)
 	r.GET("/:visualizationID", getVisualization)
 	r.DELETE("/:visualizationID", deleteVisualization)
@@ -89,12 +88,6 @@ func addVisualization(c *gin.Context) {
 		})
 	}
 
-}
-
-func cloneVisualization(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message": "NOT implemented",
-	})
 }
 
 // updateVisualization godoc

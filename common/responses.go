@@ -39,12 +39,14 @@ type SimulatorResponse struct {
 }
 
 type VisualizationResponse struct {
+	ID           uint   `json:"ID"`
 	Name         string `json:"Name"`
 	Grid         int    `json:"Grid"`
 	SimulationID uint   `json:"SimulationID"`
 }
 
 type WidgetResponse struct {
+	ID               uint   `json:"ID"`
 	Name             string `json:"Name"`
 	Type             string `json:"Type"`
 	Width            uint   `json:"Width"`
@@ -61,7 +63,7 @@ type WidgetResponse struct {
 
 type FileResponse struct {
 	Name string    `json:"Name"`
-	ID   uint      `json:"FileID"`
+	ID   uint      `json:"ID"`
 	Path string    `json:"Path"`
 	Type string    `json:"Type"`
 	Size uint      `json:"Size"`
@@ -110,4 +112,12 @@ type ResponseMsgSimulationModel struct {
 
 type ResponseMsgSignals struct {
 	Signals []SignalResponse `json:"signals"`
+}
+
+type ResponseMsgVisualizations struct {
+	Visualizations []VisualizationResponse `json:"visualizations"`
+}
+
+type ResponseMsgVisualization struct {
+	Visualization VisualizationResponse `json:"visualization"`
 }

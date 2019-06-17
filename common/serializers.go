@@ -176,6 +176,7 @@ func (self *VisualizationSerializer) Response() VisualizationResponse {
 		Name:         self.Name,
 		Grid:         self.Grid,
 		SimulationID: self.SimulationID,
+		ID:           self.ID,
 	}
 	return response
 }
@@ -204,6 +205,7 @@ type WidgetSerializer struct {
 func (self *WidgetSerializer) Response() WidgetResponse {
 
 	response := WidgetResponse{
+		ID:              self.ID,
 		Name:            self.Name,
 		Type:            self.Type,
 		Width:           self.Width,
