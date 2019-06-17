@@ -114,6 +114,10 @@ type ResponseMsgSignals struct {
 	Signals []SignalResponse `json:"signals"`
 }
 
+type ResponseMsgSignal struct {
+	Signal SignalResponse `json:"signal"`
+}
+
 type ResponseMsgVisualizations struct {
 	Visualizations []VisualizationResponse `json:"visualizations"`
 }

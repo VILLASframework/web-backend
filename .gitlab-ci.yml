@@ -100,6 +100,11 @@ test:simulationmodel:
   variables:
     TEST_FOLDER: routes/simulationmodel
 
+test:signal:
+  extends: test:simulation
+  variables:
+    TEST_FOLDER: routes/signal
+
 test:visualization:
   extends: test:simulation
   variables:
