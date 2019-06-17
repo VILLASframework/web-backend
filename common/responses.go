@@ -121,3 +121,11 @@ type ResponseMsgVisualizations struct {
 type ResponseMsgVisualization struct {
 	Visualization VisualizationResponse `json:"visualization"`
 }
+
+type ResponseMsgWidgets struct {
+	Widgets []WidgetResponse `json:"widgets"`
+}
+
+type ResponseMsgWidget struct {
+	Widget WidgetResponse `json:"widget"`
+}

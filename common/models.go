@@ -143,7 +143,7 @@ type Widget struct {
 	// Custom properties of widget as JSON string
 	CustomProperties string
 	// ID of visualization to which widget belongs
-	VisualizationID uint `gorm:"not null"`
+	VisualizationID uint
 	// Files that belong to widget (for example images)
 	Files []File `gorm:"foreignkey:WidgetID"`
 }

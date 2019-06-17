@@ -21,11 +21,6 @@ func CheckPermissions(c *gin.Context, operation common.CRUD) (bool, Widget) {
 		return false, w
 	}
 
-	ok, _ := visualization.CheckPermissions(c, operation, "query", -1)
-	if !ok {
-		return false, w
-	}
-
 	widgetID, err := strconv.Atoi(c.Param("widgetID"))
 	if err != nil {
 		errormsg := fmt.Sprintf("Bad request. No or incorrect format of widgetID path parameter")
@@ -37,6 +32,11 @@ func CheckPermissions(c *gin.Context, operation common.CRUD) (bool, Widget) {
 
 	err = w.ByID(uint(widgetID))
 	if common.ProvideErrorResponse(c, err) {
+		return false, w
+	}
+
+	ok, _ := visualization.CheckPermissions(c, operation, "body", int(w.VisualizationID))
+	if !ok {
 		return false, w
 	}
 

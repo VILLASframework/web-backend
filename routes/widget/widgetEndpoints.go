@@ -122,7 +122,7 @@ func updateWidget(c *gin.Context) {
 	err = w.update(modifiedWidget)
 	if common.ProvideErrorResponse(c, err) == false {
 		c.JSON(http.StatusOK, gin.H{
-			"message": "OK",
+			"message": "OK.",
 		})
 	}
 }
