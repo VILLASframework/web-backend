@@ -23,7 +23,7 @@ func RegisterSignalEndpoints(r *gin.RouterGroup) {
 // @Produce json
 // @Tags signals
 // @Param direction query string true "Direction of signal (in or out)"
-// @Param direction modelID string true "Model ID of signals to be obtained"
+// @Param modelID query string true "Model ID of signals to be obtained"
 // @Success 200 {array} common.Signal "Requested signals."
 // @Failure 401 "Unauthorized Access"
 // @Failure 403 "Access forbidden."
