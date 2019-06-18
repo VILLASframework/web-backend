@@ -52,8 +52,6 @@ type SimulationModel struct {
 	StartParameters string
 	// ID of simulation to which simulation model belongs
 	SimulationID uint
-	// Simulator associated with simulation model
-	Simulator Simulator
 	// ID of simulator associated with simulation model
 	SimulatorID uint
 	// Mapping of output signals of the simulation model, order of signals is important
@@ -101,7 +99,7 @@ type Simulator struct {
 	// Raw properties of simulator as JSON string
 	RawProperties string
 	// SimulationModels in which the simulator is used
-	SimulationModels []SimulationModel
+	SimulationModels []SimulationModel `gorm:"foreignkey:SimulatorID"`
 }
 
 // Visualization data model

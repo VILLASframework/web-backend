@@ -44,10 +44,6 @@ func (m *SimulationModel) addToSimulation() error {
 	// associate simulator with simulation model
 	var simltr simulator.Simulator
 	err = simltr.ByID(m.SimulatorID)
-	err = db.Model(m).Association("Simulator").Append(&simltr).Error
-	if err != nil {
-		return err
-	}
 	err = db.Model(&simltr).Association("SimulationModels").Append(m).Error
 	if err != nil {
 		return err
@@ -74,10 +70,6 @@ func (m *SimulationModel) Update(modifiedSimulationModel SimulationModel) error 
 		if err != nil {
 			return err
 		}
-		err = db.Model(m).Association("Simulator").Replace(s).Error
-		if err != nil {
-			return err
-		}
 		// remove simulation model from old simulator
 		err = db.Model(&s_old).Association("SimulationModels").Delete(m).Error
 		if err != nil {
@@ -93,7 +85,6 @@ func (m *SimulationModel) Update(modifiedSimulationModel SimulationModel) error 
 		"OutputLength":    modifiedSimulationModel.OutputLength,
 		"InputLength":     modifiedSimulationModel.InputLength,
 		"StartParameters": modifiedSimulationModel.StartParameters,
-		"SimulatorID":     modifiedSimulationModel.SimulatorID,
 	}).Error
 
 	return err

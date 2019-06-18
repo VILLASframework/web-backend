@@ -189,9 +189,9 @@ func DummyPopulateDB(test_db *gorm.DB) {
 	checkErr(test_db.Model(&mo_A).Association("Files").Append(&file_A).Error)
 	checkErr(test_db.Model(&mo_A).Association("Files").Append(&file_B).Error)
 
-	// Simulator BT SimulationModel
-	checkErr(test_db.Model(&mo_A).Association("Simulator").Append(&simr_A).Error)
-	checkErr(test_db.Model(&mo_B).Association("Simulator").Append(&simr_A).Error)
+	// Simulator HM SimulationModels
+	checkErr(test_db.Model(&simr_A).Association("SimulationModels").Append(&mo_A).Error)
+	checkErr(test_db.Model(&simr_A).Association("SimulationModels").Append(&mo_B).Error)
 
 	// Widget HM Files
 	checkErr(test_db.Model(&widg_A).Association("Files").Append(&file_A).Error)
