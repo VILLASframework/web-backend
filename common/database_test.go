@@ -83,15 +83,23 @@ func TestDummyDBAssociations(t *testing.T) {
 			"Expected to have %v Visualizations. Has %v.", 2, len(viss))
 	}
 
+	// Simulator
+	a.NoError(db.Find(&simr, 1).Error, fM("Simulator"))
+	a.EqualValues("Host_A", simr.Host)
+
+	// Simulator Associations
+	a.NoError(db.Model(&simr).Association("SimulationModels").Find(&mos).Error)
+	if len(mos) != 2 {
+		a.Fail("Simulator Associations",
+			"Expected to have %v SimulationModels. Has %v.", 2, len(mos))
+	}
+
 	// SimulationModel
 
 	a.NoError(db.Find(&mo, 1).Error, fM("SimulationModel"))
 	a.EqualValues("SimulationModel_A", mo.Name)
 
 	// SimulationModel Associations
-
-	a.NoError(db.Model(&mo).Association("Simulator").Find(&simr).Error)
-	a.EqualValues("Host_A", simr.Host, "Expected Host_A")
 
 	a.NoError(db.Model(&mo).Where("Direction = ?", "out").Related(&sigs, "OutputMapping").Error)
 	if len(sigs) != 2 {
