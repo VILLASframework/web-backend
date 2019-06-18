@@ -100,6 +100,8 @@ type Simulator struct {
 	Properties string
 	// Raw properties of simulator as JSON string
 	RawProperties string
+	// SimulationModels in which the simulator is used
+	SimulationModels []SimulationModel
 }
 
 // Visualization data model

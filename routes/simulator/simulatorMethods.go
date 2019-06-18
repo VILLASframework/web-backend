@@ -24,3 +24,43 @@ func (s *Simulator) ByID(id uint) error {
 	}
 	return nil
 }
+
+func (s *Simulator) update(modifiedSimulator Simulator) error {
+
+	db := common.GetDB()
+
+	err := db.Model(s).Updates(map[string]interface{}{
+		"UUID":          modifiedSimulator.UUID,
+		"Host":          modifiedSimulator.Host,
+		"Modeltype":     modifiedSimulator.Modeltype,
+		"Uptime":        modifiedSimulator.Uptime,
+		"State":         modifiedSimulator.State,
+		"StateUpdateAt": modifiedSimulator.StateUpdateAt,
+		"Properties":    modifiedSimulator.Properties,
+		"RawProperties": modifiedSimulator.RawProperties,
+	}).Error
+
+	return err
+
+}
+
+func (s *Simulator) delete() error {
+	db := common.GetDB()
+
+	no_simulationmodels := db.Model(s).Association("SimulationModel").Count()
+
+	if no_simulationmodels > 0 {
+		return fmt.Errorf("Simulator cannot be deleted as it is still used in SimulationModels (active or dangling)")
+	}
+
+	// delete Simulator from DB (does NOT remain as dangling)
+	err := db.Delete(s).Error
+	return err
+}
+
+func (s *Simulator) getModels() ([]common.SimulationModel, int, error) {
+	db := common.GetDB()
+	var models []common.SimulationModel
+	err := db.Order("ID asc").Model(s).Related(&models, "SimulationModels").Error
+	return models, len(models), err
+}

@@ -140,7 +140,7 @@ var msgWdgupdated = common.ResponseMsgWidget{
 }
 
 // Test /models endpoints
-func TestSimulationModelEndpoints(t *testing.T) {
+func TestWidgetEndpoints(t *testing.T) {
 
 	db := common.DummyInitDB()
 	defer db.Close()

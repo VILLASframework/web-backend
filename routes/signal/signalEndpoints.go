@@ -137,7 +137,6 @@ func updateSignal(c *gin.Context) {
 			"message": "OK.",
 		})
 	}
-
 }
 
 // getSignal godoc

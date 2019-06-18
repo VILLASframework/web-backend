@@ -109,7 +109,7 @@ var msgInSignalC = common.ResponseMsgSignal{
 }
 
 // Test /models endpoints
-func TestSimulationModelEndpoints(t *testing.T) {
+func TestSignalEndpoints(t *testing.T) {
 
 	db := common.DummyInitDB()
 	defer db.Close()

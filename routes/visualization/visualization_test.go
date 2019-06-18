@@ -86,7 +86,7 @@ var msgVisupdated = common.ResponseMsgVisualization{
 }
 
 // Test /models endpoints
-func TestSimulationModelEndpoints(t *testing.T) {
+func TestVisualizationEndpoints(t *testing.T) {
 
 	db := common.DummyInitDB()
 	defer db.Close()
