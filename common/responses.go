@@ -28,14 +28,15 @@ type SimulationModelResponse struct {
 }
 
 type SimulatorResponse struct {
-	UUID          string    `json:"UUID"`
-	Host          string    `json:"Host"`
-	ModelType     string    `json:"ModelType"`
-	Uptime        int       `json:"Uptime"`
-	State         string    `json:"State"`
-	StateUpdateAt time.Time `json:"StateUpdateAt"`
-	Properties    string    `json:"Properties"`
-	RawProperties string    `json:"RawProperties"`
+	ID            uint   `json:"ID"`
+	UUID          string `json:"UUID"`
+	Host          string `json:"Host"`
+	ModelType     string `json:"ModelType"`
+	Uptime        int    `json:"Uptime"`
+	State         string `json:"State"`
+	StateUpdateAt string `json:"StateUpdateAt"`
+	Properties    string `json:"Properties"`
+	RawProperties string `json:"RawProperties"`
 }
 
 type VisualizationResponse struct {
@@ -132,4 +133,12 @@ type ResponseMsgWidgets struct {
 
 type ResponseMsgWidget struct {
 	Widget WidgetResponse `json:"widget"`
+}
+
+type ResponseMsgSimulators struct {
+	Simulators []SimulatorResponse `json:"simulators"`
+}
+
+type ResponseMsgSimulator struct {
+	Simulator SimulatorResponse `json:"simulator"`
 }

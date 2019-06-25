@@ -139,6 +139,7 @@ type SimulatorSerializer struct {
 func (self *SimulatorSerializer) Response() SimulatorResponse {
 
 	response := SimulatorResponse{
+		ID:            self.ID,
 		UUID:          self.UUID,
 		Host:          self.Host,
 		ModelType:     self.Modeltype,

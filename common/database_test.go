@@ -113,6 +113,9 @@ func TestDummyDBAssociations(t *testing.T) {
 			"Expected to have %v Files. Has %v.", 2, len(files_sm))
 	}
 
+	simulatorID, _ := db.Model(&mo).Get("SimulatorID")
+	fmt.Println("SimulatorID: ", simulatorID.(uint))
+
 	// Visualization
 
 	a.NoError(db.Find(&vis, 1).Error, fM("Visualization"))

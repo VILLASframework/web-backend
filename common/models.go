@@ -93,11 +93,11 @@ type Simulator struct {
 	// State of the simulator
 	State string `gorm:"default:''"`
 	// Time of last state update
-	StateUpdateAt time.Time
+	StateUpdateAt string `gorm:"default:''"`
 	// Properties of simulator as JSON string
-	Properties string
+	Properties string `gorm:"default:''"`
 	// Raw properties of simulator as JSON string
-	RawProperties string
+	RawProperties string `gorm:"default:''"`
 	// SimulationModels in which the simulator is used
 	SimulationModels []SimulationModel `gorm:"foreignkey:SimulatorID"`
 }

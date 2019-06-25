@@ -77,7 +77,9 @@ func (m *SimulationModel) Update(modifiedSimulationModel SimulationModel) error 
 		}
 		// add simulation model to new simulator
 		err = db.Model(&s).Association("SimulationModels").Append(m).Error
-
+		if err != nil {
+			return err
+		}
 	}
 
 	err := db.Model(m).Updates(map[string]interface{}{

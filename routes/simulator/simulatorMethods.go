@@ -47,7 +47,7 @@ func (s *Simulator) update(modifiedSimulator Simulator) error {
 func (s *Simulator) delete() error {
 	db := common.GetDB()
 
-	no_simulationmodels := db.Model(s).Association("SimulationModel").Count()
+	no_simulationmodels := db.Model(s).Association("SimulationModels").Count()
 
 	if no_simulationmodels > 0 {
 		return fmt.Errorf("Simulator cannot be deleted as it is still used in SimulationModels (active or dangling)")
