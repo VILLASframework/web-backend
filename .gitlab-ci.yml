@@ -114,6 +114,13 @@ test:widget:
   extends: test:simulation
   variables:
     TEST_FOLDER: routes/widget
+
+test:simulator:
+  extends: test:simulation
+  variables:
+    TEST_FOLDER: routes/simulator
+
+
 # Stage: deploy
 ##############################################################################
 
