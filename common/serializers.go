@@ -248,12 +248,14 @@ func (self *FileSerializerNoAssoc) Response() FileResponse {
 	response := FileResponse{
 		Name: self.Name,
 		ID:   self.ID,
-		Path: self.Path,
-		Type: self.Type,
-		Size: self.Size,
-		H:    self.ImageHeight,
-		W:    self.ImageWidth,
-		// Date
+		//Path: self.Path,
+		Type:              self.Type,
+		Size:              self.Size,
+		H:                 self.ImageHeight,
+		W:                 self.ImageWidth,
+		Date:              self.Date,
+		WidgetID:          self.WidgetID,
+		SimulationModelID: self.SimulationModelID,
 	}
 	return response
 }

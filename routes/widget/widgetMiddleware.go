@@ -11,7 +11,7 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/visualization"
 )
 
-func CheckPermissions(c *gin.Context, operation common.CRUD) (bool, Widget) {
+func CheckPermissions(c *gin.Context, operation common.CRUD, widgetIDBody int) (bool, Widget) {
 
 	var w Widget
 
@@ -21,13 +21,18 @@ func CheckPermissions(c *gin.Context, operation common.CRUD) (bool, Widget) {
 		return false, w
 	}
 
-	widgetID, err := strconv.Atoi(c.Param("widgetID"))
-	if err != nil {
-		errormsg := fmt.Sprintf("Bad request. No or incorrect format of widgetID path parameter")
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
-		})
-		return false, w
+	var widgetID int
+	if widgetIDBody < 0 {
+		widgetID, err = strconv.Atoi(c.Param("widgetID"))
+		if err != nil {
+			errormsg := fmt.Sprintf("Bad request. No or incorrect format of widgetID path parameter")
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": errormsg,
+			})
+			return false, w
+		}
+	} else {
+		widgetID = widgetIDBody
 	}
 
 	err = w.ByID(uint(widgetID))

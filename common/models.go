@@ -1,9 +1,5 @@
 package common
 
-import (
-	"time"
-)
-
 // User data model
 type User struct {
 	// ID of user
@@ -155,7 +151,7 @@ type File struct {
 	// Name of file
 	Name string `gorm:"not null"`
 	// Path at which file is saved at server side
-	Path string `gorm:"not null"`
+	//Path string `gorm:"not null"`
 	// Type of file (MIME type)
 	Type string `gorm:"not null"`
 	// Size of file (in byte)
@@ -165,9 +161,11 @@ type File struct {
 	// Width of image (only needed in case of image)
 	ImageWidth uint
 	// Last modification time of file
-	Date time.Time
+	Date string
 	// ID of model to which file belongs
-	SimulationModelID uint `gorm:""`
+	SimulationModelID uint
 	// ID of widget to which file belongs
-	WidgetID uint `gorm:""`
+	WidgetID uint
+	// TODO Add file itself here??
+	FileData []byte `gorm:"column:FileData"`
 }

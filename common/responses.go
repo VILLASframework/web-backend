@@ -1,9 +1,5 @@
 package common
 
-import (
-	"time"
-)
-
 type UserResponse struct {
 	Username string `json:"Username"`
 	Role     string `json:"Role"`
@@ -63,14 +59,15 @@ type WidgetResponse struct {
 }
 
 type FileResponse struct {
-	Name string    `json:"Name"`
-	ID   uint      `json:"ID"`
-	Path string    `json:"Path"`
-	Type string    `json:"Type"`
-	Size uint      `json:"Size"`
-	H    uint      `json:"ImageHeight"`
-	W    uint      `json:"ImageWidth"`
-	Date time.Time `json:"Date"`
+	Name              string `json:"Name"`
+	ID                uint   `json:"ID"`
+	Type              string `json:"Type"`
+	Size              uint   `json:"Size"`
+	H                 uint   `json:"ImageHeight"`
+	W                 uint   `json:"ImageWidth"`
+	Date              string `json:"Date"`
+	WidgetID          uint   `json:"WidgetID"`
+	SimulationModelID uint   `json:"SimulationModelID"`
 }
 
 type SignalResponse struct {
@@ -141,4 +138,12 @@ type ResponseMsgSimulators struct {
 
 type ResponseMsgSimulator struct {
 	Simulator SimulatorResponse `json:"simulator"`
+}
+
+type ResponseMsgFiles struct {
+	Files []FileResponse `json:"files"`
+}
+
+type ResponseMsgFile struct {
+	File FileResponse `json:"file"`
 }

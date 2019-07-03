@@ -104,7 +104,7 @@ func addWidget(c *gin.Context) {
 // @Router /widgets/{widgetID} [put]
 func updateWidget(c *gin.Context) {
 
-	ok, w := CheckPermissions(c, common.Update)
+	ok, w := CheckPermissions(c, common.Update, -1)
 	if !ok {
 		return
 	}
@@ -141,7 +141,7 @@ func updateWidget(c *gin.Context) {
 // @Router /widgets/{widgetID} [get]
 func getWidget(c *gin.Context) {
 
-	ok, w := CheckPermissions(c, common.Read)
+	ok, w := CheckPermissions(c, common.Read, -1)
 	if !ok {
 		return
 	}
@@ -166,7 +166,7 @@ func getWidget(c *gin.Context) {
 // @Router /widgets/{widgetID} [delete]
 func deleteWidget(c *gin.Context) {
 
-	ok, w := CheckPermissions(c, common.Delete)
+	ok, w := CheckPermissions(c, common.Delete, -1)
 	if !ok {
 		return
 	}

@@ -117,8 +117,12 @@ func DummyPopulateDB(test_db *gorm.DB) {
 
 	file_A := File{Name: "File_A"}
 	file_B := File{Name: "File_B"}
+	file_C := File{Name: "File_C"}
+	file_D := File{Name: "File_D"}
 	checkErr(test_db.Create(&file_A).Error)
 	checkErr(test_db.Create(&file_B).Error)
+	checkErr(test_db.Create(&file_C).Error)
+	checkErr(test_db.Create(&file_D).Error)
 
 	simn_A := Simulation{Name: "Simulation_A"}
 	simn_B := Simulation{Name: "Simulation_B"}
@@ -186,8 +190,8 @@ func DummyPopulateDB(test_db *gorm.DB) {
 	checkErr(test_db.Model(&mo_A).Association("OutputMapping").Append(&outSig_B).Error)
 
 	// SimulationModel HM Files
-	checkErr(test_db.Model(&mo_A).Association("Files").Append(&file_A).Error)
-	checkErr(test_db.Model(&mo_A).Association("Files").Append(&file_B).Error)
+	checkErr(test_db.Model(&mo_A).Association("Files").Append(&file_C).Error)
+	checkErr(test_db.Model(&mo_A).Association("Files").Append(&file_D).Error)
 
 	// Simulator HM SimulationModels
 	checkErr(test_db.Model(&simr_A).Association("SimulationModels").Append(&mo_A).Error)
