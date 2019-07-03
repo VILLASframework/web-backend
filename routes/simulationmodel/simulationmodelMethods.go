@@ -87,6 +87,7 @@ func (m *SimulationModel) Update(modifiedSimulationModel SimulationModel) error 
 		"OutputLength":    modifiedSimulationModel.OutputLength,
 		"InputLength":     modifiedSimulationModel.InputLength,
 		"StartParameters": modifiedSimulationModel.StartParameters,
+		"SimulatorID":     modifiedSimulationModel.SimulatorID,
 	}).Error
 
 	return err
