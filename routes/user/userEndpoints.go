@@ -22,6 +22,20 @@ type loginRequest struct {
 	Password string `form:"Password" validate:"required,min=8"`
 }
 
+type updateUserRequest struct {
+	Username string `form:"Username" validate:"omitempty"`
+	Password string `form:"Password" validate:"min=6"`
+	Role     string `form:"Role" validate:"omitempty,oneof=Admin User Guest"`
+	Mail     string `form:"Mail" validate:"omitempty,email"`
+}
+
+type createUserRequest struct {
+	Username string `form:"Username" validate:"required"`
+	Password string `form:"Password" validate:"required,min=6"`
+	Role     string `form:"Role" validate:"required,oneof=Admin User Guest"`
+	Mail     string `form:"Mail" validate:"required,email"`
+}
+
 type tokenClaims struct {
 	UserID uint   `json:"id"`
 	Role   string `json:"role"`
@@ -75,7 +89,7 @@ func authenticate(c *gin.Context) {
 	if errs != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
-			"message": "Invalid credentials",
+			"message": fmt.Sprintf("%v", errs),
 		})
 		return
 	}
