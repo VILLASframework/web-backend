@@ -8,14 +8,6 @@ import (
 
 const bcryptCost = 10
 
-// TODO: use validator
-type Credentials struct {
-	Username string `form:"Username"`
-	Password string `form:"Password"`
-	//Role     string `form:"Role"`
-	//Mail     string `form:"Mail"`
-}
-
 // This is ugly but no other way to keep each model on the corresponding
 // package since we have circular dependencies. Methods of a type must
 // live in the same package.

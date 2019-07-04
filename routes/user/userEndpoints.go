@@ -4,16 +4,23 @@ import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"gopkg.in/go-playground/validator.v9"
 	"net/http"
-	"strconv"
 	"time"
 
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
 )
 
+var validate *validator.Validate
+
 // TODO: the signing secret must be environmental variable
 const jwtSigningSecret = "This should NOT be here!!@33$8&"
 const weekHours = time.Hour * 24 * 7
+
+type loginRequest struct {
+	Username string `form:"Username" validate:"required"`
+	Password string `form:"Password" validate:"required,min=6"`
+}
 
 type tokenClaims struct {
 	UserID uint   `json:"id"`
@@ -45,7 +52,7 @@ func RegisterUserEndpoints(r *gin.RouterGroup) {
 // @Accept json
 // @Produce json
 // @Tags users
-// @Param inputUser body user.Credentials true "Credentials of user"
+// @Param inputUser body user.loginRequest true "loginRequest of user"
 // @Success 200 {object} user.AuthResponse "JSON web token and message"
 // @Failure 401 "Unauthorized Access"
 // @Failure 404 "Not found"
@@ -53,9 +60,9 @@ func RegisterUserEndpoints(r *gin.RouterGroup) {
 // @Router /authenticate [post]
 func authenticate(c *gin.Context) {
 
-	// Bind the response (context) with the Credentials struct
-	var loginRequest Credentials
-	if err := c.ShouldBindJSON(&loginRequest); err != nil {
+	// Bind the response (context) with the loginRequest struct
+	var credentials loginRequest
+	if err := c.ShouldBindJSON(&credentials); err != nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{
 			"success": false,
 			"message": fmt.Sprintf("%v", err),
@@ -63,8 +70,18 @@ func authenticate(c *gin.Context) {
 		return
 	}
 
+	validate = validator.New()
+	errs := validate.Struct(credentials)
+	if errs != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Invalid credentials",
+		})
+		return
+	}
+
 	// Check if the Username or Password are empty
-	if loginRequest.Username == "" || loginRequest.Password == "" {
+	if credentials.Username == "" || credentials.Password == "" {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"success": false,
 			"message": "Invalid credentials",
@@ -74,7 +91,7 @@ func authenticate(c *gin.Context) {
 
 	// Find the username in the database
 	var user User
-	err := user.ByUsername(loginRequest.Username)
+	err := user.ByUsername(credentials.Username)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
@@ -84,7 +101,7 @@ func authenticate(c *gin.Context) {
 	}
 
 	// Validate the password
-	err = user.validatePassword(loginRequest.Password)
+	err = user.validatePassword(credentials.Password)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"success": false,
@@ -134,17 +151,16 @@ func authenticate(c *gin.Context) {
 // @Failure 500 "Internal server error"
 // @Router /users [get]
 func getUsers(c *gin.Context) {
-	//// dummy TODO: check in the middleware if the user is authorized
-	//authorized := false
-	//// TODO: move this redirect in the authentication middleware
-	//if !authorized {
-	//c.Redirect(http.StatusSeeOther, "/authenticate")
-	//return
-	//}
+
+	err := common.ValidateRole(c, common.ModelUser, common.Read)
+	if err != nil {
+		c.JSON(http.StatusUnprocessableEntity, fmt.Sprintf("%v", err))
+		return
+	}
 
 	db := common.GetDB()
 	var users []common.User
-	err := db.Order("ID asc").Find(&users).Error
+	err = db.Order("ID asc").Find(&users).Error
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
@@ -239,7 +255,7 @@ func addUser(c *gin.Context) {
 // @Router /users/{userID} [put]
 func updateUser(c *gin.Context) {
 
-	err := common.ValidateRole(c, common.ModelUser, common.Read)
+	err := common.ValidateRole(c, common.ModelUser, common.Update)
 	if err != nil {
 		c.JSON(http.StatusUnprocessableEntity, fmt.Sprintf("%v", err))
 		return
@@ -247,8 +263,8 @@ func updateUser(c *gin.Context) {
 
 	// Find the user
 	var user User
-	toBeUpdatedID, _ := strconv.ParseInt(c.Param("userID"), 10, 64)
-	err = user.ByID(uint(toBeUpdatedID))
+	toBeUpdatedID, _ := common.UintParamFromCtx(c, "userID")
+	err = user.ByID(toBeUpdatedID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, fmt.Sprintf("%v", err))
 		return
@@ -259,11 +275,13 @@ func updateUser(c *gin.Context) {
 	// in the context from the Authentication middleware)
 	userID, _ := c.Get(common.UserIDCtx)
 	userRole, _ := c.Get(common.UserRoleCtx)
+
 	if toBeUpdatedID != userID && userRole != "Admin" {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
 			"message": "Invalid authorization",
 		})
+		return
 	}
 
 	// Bind the (context) with the User struct
@@ -345,9 +363,9 @@ func getUser(c *gin.Context) {
 	}
 
 	var user User
-	id, _ := strconv.ParseInt(c.Param("userID"), 10, 64)
+	id, _ := common.UintParamFromCtx(c, "userID")
 
-	err = user.ByID(uint(id))
+	err = user.ByID(id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, fmt.Sprintf("%v", err))
 		return
@@ -380,7 +398,7 @@ func deleteUser(c *gin.Context) {
 	}
 
 	var user User
-	id, _ := strconv.ParseInt(c.Param("userID"), 10, 64)
+	id, _ := common.UintParamFromCtx(c, "userID")
 
 	// Check that the user exist
 	err = user.ByID(uint(id))
