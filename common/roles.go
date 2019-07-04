@@ -42,6 +42,7 @@ type RoleActions map[string]ModelActions
 // Predefined CRUD operations permissions to be used in Roles
 var crud = Permission{Create: true, Read: true, Update: true, Delete: true}
 var _ru_ = Permission{Create: false, Read: true, Update: true, Delete: false}
+var __u_ = Permission{Create: false, Read: false, Update: true, Delete: false}
 var _r__ = Permission{Create: false, Read: true, Update: false, Delete: false}
 
 // Roles is used as a look up variable to determine if a certain user is
@@ -58,7 +59,7 @@ var Roles = RoleActions{
 		ModelFile:            crud,
 	},
 	"User": {
-		ModelUser:            _ru_,
+		ModelUser:            __u_,
 		ModelSimulation:      crud,
 		ModelSimulationModel: crud,
 		ModelSimulator:       _r__,

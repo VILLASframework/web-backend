@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -77,4 +78,13 @@ func AuthenticateForTest(t *testing.T, router *gin.Engine, url string, method st
 	fmt.Println(w.Body.String())
 
 	return body_data["token"].(string)
+}
+
+// Read the parameter with name paramName from the gin Context and
+// return it as uint variable
+func UintParamFromCtx(c *gin.Context, paramName string) (uint, error) {
+
+	param, err := strconv.Atoi(c.Param(paramName))
+
+	return uint(param), err
 }
