@@ -150,8 +150,6 @@ type File struct {
 	ID uint `gorm:"primary_key;auto_increment"`
 	// Name of file
 	Name string `gorm:"not null"`
-	// Path at which file is saved at server side
-	//Path string `gorm:"not null"`
 	// Type of file (MIME type)
 	Type string `gorm:"not null"`
 	// Size of file (in byte)
