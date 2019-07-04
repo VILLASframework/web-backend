@@ -31,12 +31,14 @@ var user_A = common.UserResponse{
 	Username: "User_A",
 	Role:     "User",
 	Mail:     "",
+	ID:       2,
 }
 
 var user_B = common.UserResponse{
 	Username: "User_B",
 	Role:     "User",
 	Mail:     "",
+	ID:       3,
 }
 
 var myUsers = []common.UserResponse{
