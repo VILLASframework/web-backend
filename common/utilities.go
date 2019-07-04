@@ -72,6 +72,7 @@ func AuthenticateForTest(t *testing.T, router *gin.Engine, url string, method st
 
 	success := body_data["success"].(bool)
 	if !success {
+		fmt.Println("Authentication not successful: ", body_data["message"])
 		panic(-1)
 	}
 

@@ -19,7 +19,7 @@ const weekHours = time.Hour * 24 * 7
 
 type loginRequest struct {
 	Username string `form:"Username" validate:"required"`
-	Password string `form:"Password" validate:"required,min=8"`
+	Password string `form:"Password" validate:"required,min=6"`
 }
 
 type tokenClaims struct {
