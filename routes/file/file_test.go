@@ -198,8 +198,8 @@ func TestSignalEndpoints(t *testing.T) {
 	common.TestEndpoint(t, router, token, "/api/files/5", "GET", nil, 200, filecontent_update)
 
 	// test DELETE files/:fileID
-	//common.TestEndpoint(t, router, token, "/api/files/3", "DELETE", nil, 200, string(msgOKjson))
-	//common.TestEndpoint(t, router, token, "/api/files?originID=1&originType=widget", "GET", nil, 200, string(msgFilesjson))
+	common.TestEndpoint(t, router, token, "/api/files/5", "DELETE", nil, 200, string(msgOKjson))
+	common.TestEndpoint(t, router, token, "/api/files?objectID=1&objectType=widget", "GET", nil, 200, string(msgFilesjson))
 
 	// TODO add testing for other return codes
 

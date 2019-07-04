@@ -104,12 +104,6 @@ func (f *File) register(fileHeader *multipart.FileHeader, objectType string, obj
 	f.FileData, err = ioutil.ReadAll(fileContent)
 	defer fileContent.Close()
 
-	// Save file to local disc (NOT DB!)
-	//err = f.modifyFileOnDisc(fileHeader, true)
-	//if err != nil {
-	//	return fmt.Errorf("File could not be saved/ modified on disk: ", err.Error())
-	//}
-
 	// Add File object with parameters to DB
 	err = f.save()
 	if err != nil {
@@ -146,11 +140,6 @@ func (f *File) update(fileHeader *multipart.FileHeader) error {
 	fmt.Println("File content: ", string(fileData))
 	defer fileContent.Close()
 
-	//err := f.modifyFileOnDisc(fileHeader, false)
-	//if err != nil {
-	//	return err
-	//}
-
 	db := common.GetDB()
 	err = db.Model(f).Updates(map[string]interface{}{"Size": fileHeader.Size,
 		"FileData": fileData,
@@ -159,70 +148,35 @@ func (f *File) update(fileHeader *multipart.FileHeader) error {
 }
 
 func (f *File) delete() error {
-	return nil
+
+	db := common.GetDB()
+
+	if f.WidgetID > 0 {
+		// remove association between file and widget
+		var w widget.Widget
+		err := w.ByID(f.WidgetID)
+		if err != nil {
+			return err
+		}
+		err = db.Model(&w).Association("Files").Delete(f).Error
+		if err != nil {
+			return err
+		}
+	} else {
+		// remove association between file and simulation model
+		var m simulationmodel.SimulationModel
+		err := m.ByID(f.SimulationModelID)
+		if err != nil {
+			return err
+		}
+		err = db.Model(&m).Association("Files").Delete(f).Error
+		if err != nil {
+			return err
+		}
+	}
+
+	// delete file from DB
+	err := db.Delete(f).Error
+
+	return err
 }
-
-//func (f *File) modifyFileOnDisc(fileHeader *multipart.FileHeader, createFile bool) error {
-//
-//	//filesavepath := filepath.Join(foldername, filename)
-//	var err error
-//
-//	if createFile {
-//		// Ensure folder with name foldername exists
-//		err = os.MkdirAll(f.Path, os.ModePerm)
-//	} else {
-//		// test if file exists
-//		_, err = os.Stat(f.Path)
-//	}
-//	if err != nil {
-//		return err
-//	}
-//
-//	var open_options int
-//	if createFile {
-//		// create file it not exists, file MUST not exist
-//		open_options = os.O_RDWR | os.O_CREATE | os.O_EXCL
-//	} else {
-//		open_options = os.O_RDWR
-//	}
-//
-//	fileTarget, err := os.OpenFile(f.Path, open_options, 0666)
-//	if err != nil {
-//		return err
-//	}
-//	defer fileTarget.Close()
-//
-//	// Save file to target path
-//	uploadedFile, err := fileHeader.Open()
-//	if err != nil {
-//		return err
-//	}
-//	defer uploadedFile.Close()
-//
-//	var uploadContent = make([]byte, f.Size)
-//	for {
-//
-//		n, err := uploadedFile.Read(uploadContent)
-//		if err != nil && err != io.EOF {
-//			return err
-//		}
-//
-//		if n == 0 {
-//			break
-//		}
-//
-//		_, err = fileTarget.Write(uploadContent[:n])
-//		if err != nil {
-//			return err
-//		}
-//
-//	}
-//	return err
-//}
-
-//func getFolderName(objectType string, objectID uint) string {
-//	base_foldername := "files/"
-//
-//	foldername := base_foldername + objectType + "_" + strconv.Itoa(int(objectID)) + "/"
-//	return foldername
-//}
