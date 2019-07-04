@@ -229,7 +229,7 @@ func addUser(c *gin.Context) {
 // @Tags users
 // @Accept json
 // @Produce json
-// @Param inputUser body common.UserResponse true "User to be updated"
+// @Param inputUser body common.User true "User to be updated (anything except for ID can be changed, role can only be change by admin)"
 // @Success 200 "OK."
 // @Failure 401 "Unauthorized Access"
 // @Failure 403 "Access forbidden."
@@ -247,7 +247,7 @@ func updateUser(c *gin.Context) {
 
 	// Find the user
 	var user User
-	toBeUpdatedID, _ := strconv.ParseInt(c.Param("UserID"), 10, 64)
+	toBeUpdatedID, _ := strconv.ParseInt(c.Param("userID"), 10, 64)
 	err = user.ByID(uint(toBeUpdatedID))
 	if err != nil {
 		c.JSON(http.StatusNotFound, fmt.Sprintf("%v", err))
@@ -301,6 +301,15 @@ func updateUser(c *gin.Context) {
 		return
 	}
 
+	// To change the role of a user admin role is required
+	if (updatedUser.Role != user.Role) && (userRole != "Admin") {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"message": "Invalid authorization. User role can only be changed by Admin",
+		})
+		return
+	}
+
 	// Finaly update the user
 	err = user.update(updatedUser)
 	if err != nil {
@@ -336,7 +345,7 @@ func getUser(c *gin.Context) {
 	}
 
 	var user User
-	id, _ := strconv.ParseInt(c.Param("UserID"), 10, 64)
+	id, _ := strconv.ParseInt(c.Param("userID"), 10, 64)
 
 	err = user.ByID(uint(id))
 	if err != nil {
@@ -371,7 +380,7 @@ func deleteUser(c *gin.Context) {
 	}
 
 	var user User
-	id, _ := strconv.ParseInt(c.Param("UserID"), 10, 64)
+	id, _ := strconv.ParseInt(c.Param("userID"), 10, 64)
 
 	// Check that the user exist
 	err = user.ByID(uint(id))

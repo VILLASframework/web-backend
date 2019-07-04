@@ -31,6 +31,7 @@ func (self *UserSerializer) Response(assoc bool) UserResponse {
 		Username: self.Username,
 		Role:     self.Role,
 		Mail:     self.Mail,
+		ID:       self.ID,
 	}
 
 	// Associated models MUST NOT called with assoc=true otherwise we

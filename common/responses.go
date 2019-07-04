@@ -4,11 +4,12 @@ type UserResponse struct {
 	Username string `json:"Username"`
 	Role     string `json:"Role"`
 	Mail     string `json:"Mail"`
+	ID       uint   `json:"ID"`
 }
 
 type SimulationResponse struct {
 	Name        string `json:"Name"`
-	ID          uint   `json:"SimulationID"`
+	ID          uint   `json:"ID"`
 	Running     bool   `json:"Running"`
 	StartParams string `json:"Starting Parameters"`
 }
