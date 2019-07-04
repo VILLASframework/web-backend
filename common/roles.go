@@ -17,6 +17,7 @@ type ModelName string
 const ModelUser = ModelName("user")
 const ModelSimulation = ModelName("simulation")
 const ModelSimulator = ModelName("simulator")
+const ModelSimulatorAction = ModelName("simulatoraction")
 const ModelVisualization = ModelName("visualization")
 const ModelWidget = ModelName("widget")
 const ModelSimulationModel = ModelName("simulationmodel")
@@ -52,6 +53,7 @@ var Roles = RoleActions{
 		ModelSimulation:      crud,
 		ModelSimulationModel: crud,
 		ModelSimulator:       crud,
+		ModelSimulatorAction: crud,
 		ModelWidget:          crud,
 		ModelVisualization:   crud,
 		ModelSignal:          crud,
@@ -62,6 +64,7 @@ var Roles = RoleActions{
 		ModelSimulation:      crud,
 		ModelSimulationModel: crud,
 		ModelSimulator:       _r__,
+		ModelSimulatorAction: _ru_,
 		ModelWidget:          crud,
 		ModelVisualization:   crud,
 		ModelSignal:          crud,
@@ -73,6 +76,7 @@ var Roles = RoleActions{
 		ModelVisualization:   _r__,
 		ModelWidget:          _r__,
 		ModelSimulator:       _r__,
+		ModelSimulatorAction: _r__,
 		ModelUser:            _ru_,
 		ModelSignal:          _r__,
 		ModelFile:            _r__,

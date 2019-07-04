@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/file"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/signal"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/swaggo/gin-swagger"
@@ -62,6 +64,27 @@ func main() {
 	simulator.RegisterSimulatorEndpoints(api.Group("/simulators"))
 
 	r.GET("swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	err := common.ConnectAMQP("amqp://localhost")
+	if err != nil {
+		panic(err)
+	}
+
+	// Periodically call the Ping function to check which simulators are still there
+	ticker := time.NewTicker(10 * time.Second)
+	go func() {
+
+		for {
+			select {
+			case <-ticker.C:
+				err = common.PingAMQP()
+				if err != nil {
+					fmt.Println("AMQP Error: ", err.Error())
+				}
+			}
+		}
+
+	}()
 
 	// server at port 4000 to match frontend's redirect path
 	r.Run(":4000")

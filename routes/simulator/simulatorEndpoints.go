@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -292,7 +293,56 @@ func getModelsOfSimulator(c *gin.Context) {
 // @Param simulatorID path int true "Simulator ID"
 // @Router /simulators/{simulatorID}/action [post]
 func sendActionToSimulator(c *gin.Context) {
+
+	err := common.ValidateRole(c, common.ModelSimulatorAction, common.Update)
+	if err != nil {
+		c.JSON(http.StatusUnprocessableEntity, "Access denied (role validation failed).")
+		return
+	}
+
+	simulatorID, err := strconv.Atoi(c.Param("simulatorID"))
+	if err != nil {
+		errormsg := fmt.Sprintf("Bad request. No or incorrect format of simulatorID path parameter")
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": errormsg,
+		})
+		return
+	}
+
+	var actions []common.Action
+	err = c.BindJSON(&actions)
+	if err != nil {
+		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": errormsg,
+		})
+		return
+	}
+
+	var s Simulator
+	err = s.ByID(uint(simulatorID))
+	if common.ProvideErrorResponse(c, err) {
+		return
+	}
+
+	now := time.Now()
+
+	for _, action := range actions {
+		if action.When == 0 {
+			action.When = float32(now.Unix())
+		}
+
+		err = common.SendActionAMQP(action, s.UUID)
+		if err != nil {
+			errormsg := "Internal Server Error. Unable to send actions to simulator: " + err.Error()
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": errormsg,
+			})
+			return
+		}
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"message": "NOT implemented",
+		"message": "OK.",
 	})
 }
