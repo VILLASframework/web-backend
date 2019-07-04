@@ -120,6 +120,11 @@ test:simulator:
   variables:
     TEST_FOLDER: routes/simulator
 
+test:file:
+  extends: test:simulation
+  variables:
+    TEST_FOLDER: routes/file
+
 
 # Stage: deploy
 ##############################################################################
