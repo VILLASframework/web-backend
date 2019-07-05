@@ -18,10 +18,11 @@ type AMQPclient struct {
 }
 
 type Action struct {
-	Act  string  `json:"action"`
-	When float32 `json:"when"`
-
-	// TODO add more fields here
+	Act        string   `json:"action"`
+	When       float32  `json:"when"`
+	Parameters struct{} `json:"parameters"`
+	Model      struct{} `json:"model"`
+	Results    struct{} `json:"results"`
 }
 
 var client AMQPclient
