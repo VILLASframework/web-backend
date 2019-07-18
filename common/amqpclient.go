@@ -85,13 +85,14 @@ func ConnectAMQP(uri string) error {
 	// consuming queue
 	go func() {
 		for message := range client.replies {
-			err = message.Ack(false)
-			if err != nil {
-				fmt.Println("AMQP: Unable to ack message:", err)
-			}
+			//err = message.Ack(false)
+			//if err != nil {
+			//	fmt.Println("AMQP: Unable to ack message:", err)
+			//}
 
 			content := string(message.Body)
 
+			// any action message sent by the VILLAScontroller should be ignored by the web backend
 			if strings.Contains(content, "action") {
 				continue
 			}

@@ -13,6 +13,7 @@ var DB_HOST string
 var DB_NAME string
 var DB_DUMMY string
 var DB_SSLMODE string
+var WITH_AMQP bool
 
 var DBpool *gorm.DB
 
@@ -22,11 +23,13 @@ func init() {
 	flag.StringVar(&DB_NAME, "dbname", "villasdb", "Name of the database to use (default is villasdb)")
 	flag.StringVar(&DB_DUMMY, "dbdummy", "testvillasdb", "Name of the test database to use (default is testvillasdb)")
 	flag.StringVar(&DB_SSLMODE, "dbsslmode", "disable", "SSL mode of DB (default is disable)") // TODO: change default for production
+	flag.BoolVar(&WITH_AMQP, "amqp", false, "If AMQP client for simulators shall be enabled, set this option to true (default is false)")
 	flag.Parse()
 	fmt.Println("DB_HOST has value ", DB_HOST)
 	fmt.Println("DB_NAME has value ", DB_NAME)
 	fmt.Println("DB_DUMMY has value ", DB_DUMMY)
 	fmt.Println("DB_SSLMODE has value ", DB_SSLMODE)
+	fmt.Println("WITH_AMQP has value ", WITH_AMQP)
 }
 
 // Initialize connection to the database

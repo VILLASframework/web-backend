@@ -65,27 +65,29 @@ func main() {
 
 	r.GET("swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	err := common.ConnectAMQP("amqp://localhost")
-	if err != nil {
-		panic(err)
-	}
-
-	// Periodically call the Ping function to check which simulators are still there
-	ticker := time.NewTicker(10 * time.Second)
-	go func() {
-
-		for {
-			select {
-			case <-ticker.C:
-				err = common.PingAMQP()
-				if err != nil {
-					fmt.Println("AMQP Error: ", err.Error())
-				}
-			}
+	if common.WITH_AMQP == true {
+		fmt.Println("Starting AMQP client")
+		err := common.ConnectAMQP("amqp://localhost")
+		if err != nil {
+			panic(err)
 		}
 
-	}()
+		// Periodically call the Ping function to check which simulators are still there
+		ticker := time.NewTicker(10 * time.Second)
+		go func() {
 
+			for {
+				select {
+				case <-ticker.C:
+					err = common.PingAMQP()
+					if err != nil {
+						fmt.Println("AMQP Error: ", err.Error())
+					}
+				}
+			}
+
+		}()
+	}
 	// server at port 4000 to match frontend's redirect path
 	r.Run(":4000")
 }

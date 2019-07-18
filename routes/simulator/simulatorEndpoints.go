@@ -18,7 +18,10 @@ func RegisterSimulatorEndpoints(r *gin.RouterGroup) {
 	r.GET("/:simulatorID", getSimulator)
 	r.DELETE("/:simulatorID", deleteSimulator)
 	r.GET("/:simulatorID/models", getModelsOfSimulator)
-	r.POST("/:simulatorID/action", sendActionToSimulator)
+	// register action endpoint only if AMQP client is used
+	if common.WITH_AMQP == true {
+		r.POST("/:simulatorID/action", sendActionToSimulator)
+	}
 }
 
 // getSimulators godoc
@@ -280,7 +283,7 @@ func getModelsOfSimulator(c *gin.Context) {
 }
 
 // sendActionToSimulator godoc
-// @Summary Send an action to simulator
+// @Summary Send an action to simulator (only available if backend server is started with -amqp parameter)
 // @ID sendActionToSimulator
 // @Tags simulators
 // @Produce json
