@@ -29,9 +29,10 @@ type tokenClaims struct {
 }
 
 type AuthResponse struct {
-	Success bool   `json:"success"`
-	Message string `json:"message"`
-	Token   string `json:"token"`
+	Success bool                `json:"success"`
+	Message string              `json:"message"`
+	Token   string              `json:"token"`
+	User    common.UserResponse `json:"user"`
 }
 
 func VisitorAuthenticate(r *gin.RouterGroup) {
@@ -132,10 +133,13 @@ func authenticate(c *gin.Context) {
 		return
 	}
 
+	serializer := common.UserSerializer{c, user.User}
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "Authenticated",
 		"token":   tokenString,
+		"user":    serializer.Response(false),
 	})
 }
 
