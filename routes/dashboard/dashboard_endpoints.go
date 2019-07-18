@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulation"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/scenario"
 )
 
 func RegisterDashboardEndpoints(r *gin.RouterGroup) {
@@ -19,20 +19,20 @@ func RegisterDashboardEndpoints(r *gin.RouterGroup) {
 }
 
 // getDashboards godoc
-// @Summary Get all dashboards of simulation
+// @Summary Get all dashboards of scenario
 // @ID getDashboards
 // @Produce  json
 // @Tags dashboards
-// @Success 200 {array} common.DashboardResponse "Array of dashboards to which belong to simulation"
+// @Success 200 {array} common.DashboardResponse "Array of dashboards to which belong to scenario"
 // @Failure 401 "Unauthorized Access"
 // @Failure 403 "Access forbidden."
 // @Failure 404 "Not found"
 // @Failure 500 "Internal server error"
-// @Param simulationID query int true "Simulation ID"
+// @Param scenarioID query int true "Scenario ID"
 // @Router /dashboards [get]
 func getDashboards(c *gin.Context) {
 
-	ok, sim := simulation.CheckPermissions(c, common.Read, "query", -1)
+	ok, sim := scenario.CheckPermissions(c, common.Read, "query", -1)
 	if !ok {
 		return
 	}
@@ -51,12 +51,12 @@ func getDashboards(c *gin.Context) {
 }
 
 // addDashboard godoc
-// @Summary Add a dashboard to a simulation
+// @Summary Add a dashboard to a scenario
 // @ID addDashboard
 // @Accept json
 // @Produce json
 // @Tags dashboards
-// @Param inputDab body common.DashboardResponse true "Dashboard to be added incl. ID of simulation"
+// @Param inputDab body common.DashboardResponse true "Dashboard to be added incl. ID of Scenario"
 // @Success 200 "OK."
 // @Failure 401 "Unauthorized Access"
 // @Failure 403 "Access forbidden."
@@ -75,13 +75,13 @@ func addDashboard(c *gin.Context) {
 		return
 	}
 
-	ok, _ := simulation.CheckPermissions(c, common.Create, "body", int(newDab.SimulationID))
+	ok, _ := scenario.CheckPermissions(c, common.Create, "body", int(newDab.ScenarioID))
 	if !ok {
 		return
 	}
 
-	// add dashboard to DB and add association to simulation
-	err = newDab.addToSimulation()
+	// add dashboard to DB and add association to scenario
+	err = newDab.addToScenario()
 	if common.ProvideErrorResponse(c, err) == false {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "OK.",

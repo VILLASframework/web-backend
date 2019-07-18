@@ -60,7 +60,7 @@ func DropTables(db *gorm.DB) {
 	db.DropTableIfExists(&Signal{})
 	db.DropTableIfExists(&SimulationModel{})
 	db.DropTableIfExists(&File{})
-	db.DropTableIfExists(&Simulation{})
+	db.DropTableIfExists(&Scenario{})
 	db.DropTableIfExists(&User{})
 	db.DropTableIfExists(&Dashboard{})
 	db.DropTableIfExists(&Widget{})
@@ -72,7 +72,7 @@ func MigrateModels(db *gorm.DB) {
 	db.AutoMigrate(&Signal{})
 	db.AutoMigrate(&SimulationModel{})
 	db.AutoMigrate(&File{})
-	db.AutoMigrate(&Simulation{})
+	db.AutoMigrate(&Scenario{})
 	db.AutoMigrate(&User{})
 	db.AutoMigrate(&Dashboard{})
 	db.AutoMigrate(&Widget{})
@@ -127,10 +127,10 @@ func DummyPopulateDB(test_db *gorm.DB) {
 	checkErr(test_db.Create(&file_C).Error)
 	checkErr(test_db.Create(&file_D).Error)
 
-	simn_A := Simulation{Name: "Simulation_A"}
-	simn_B := Simulation{Name: "Simulation_B"}
-	checkErr(test_db.Create(&simn_A).Error)
-	checkErr(test_db.Create(&simn_B).Error)
+	so_A := Scenario{Name: "Scenario_A"}
+	so_B := Scenario{Name: "Scenario_B"}
+	checkErr(test_db.Create(&so_A).Error)
+	checkErr(test_db.Create(&so_B).Error)
 
 	// Hash passwords with bcrypt algorithm
 	var bcryptCost = 10
@@ -168,19 +168,19 @@ func DummyPopulateDB(test_db *gorm.DB) {
 	// For `belongs to` use the model with id=1
 	// For `has many` use the models with id=1 and id=2
 
-	// User HM Simulations, Simulation HM Users (Many-to-Many)
-	checkErr(test_db.Model(&simn_A).Association("Users").Append(&usr_A).Error)
-	checkErr(test_db.Model(&simn_A).Association("Users").Append(&usr_B).Error)
-	checkErr(test_db.Model(&simn_B).Association("Users").Append(&usr_A).Error)
-	checkErr(test_db.Model(&simn_B).Association("Users").Append(&usr_B).Error)
+	// User HM Scenarios, Scenario HM Users (Many-to-Many)
+	checkErr(test_db.Model(&so_A).Association("Users").Append(&usr_A).Error)
+	checkErr(test_db.Model(&so_A).Association("Users").Append(&usr_B).Error)
+	checkErr(test_db.Model(&so_B).Association("Users").Append(&usr_A).Error)
+	checkErr(test_db.Model(&so_B).Association("Users").Append(&usr_B).Error)
 
-	// Simulation HM SimulationModels
-	checkErr(test_db.Model(&simn_A).Association("SimulationModels").Append(&mo_A).Error)
-	checkErr(test_db.Model(&simn_A).Association("SimulationModels").Append(&mo_B).Error)
+	// Scenario HM SimulationModels
+	checkErr(test_db.Model(&so_A).Association("SimulationModels").Append(&mo_A).Error)
+	checkErr(test_db.Model(&so_A).Association("SimulationModels").Append(&mo_B).Error)
 
-	// Simulation HM Dashboards
-	checkErr(test_db.Model(&simn_A).Association("Dashboards").Append(&dab_A).Error)
-	checkErr(test_db.Model(&simn_A).Association("Dashboards").Append(&dab_B).Error)
+	// Scenario HM Dashboards
+	checkErr(test_db.Model(&so_A).Association("Dashboards").Append(&dab_A).Error)
+	checkErr(test_db.Model(&so_A).Association("Dashboards").Append(&dab_B).Error)
 
 	// Dashboard HM Widget
 	checkErr(test_db.Model(&dab_A).Association("Widgets").Append(&widg_A).Error)

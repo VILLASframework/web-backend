@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/file"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/signal"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -13,7 +11,9 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
 	_ "git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/doc/api" // doc/api folder is used by Swag CLI, you have to import it
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/dashboard"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulation"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/file"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/scenario"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/signal"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulationmodel"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulator"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/user"
@@ -54,7 +54,7 @@ func main() {
 
 	api.Use(user.Authentication(true))
 
-	simulation.RegisterSimulationEndpoints(api.Group("/simulations"))
+	scenario.RegisterScenarioEndpoints(api.Group("/scenarios"))
 	simulationmodel.RegisterSimulationModelEndpoints(api.Group("/models"))
 	signal.RegisterSignalEndpoints(api.Group("/signals"))
 	dashboard.RegisterDashboardEndpoints(api.Group("/dashboards"))

@@ -31,7 +31,7 @@ func TestDummyDBAssociations(t *testing.T) {
 	var simr Simulator
 	var mo SimulationModel
 	var file File
-	var simn Simulation
+	var so Scenario
 	var usr User
 	var usrs []User
 	var dab Dashboard
@@ -41,7 +41,7 @@ func TestDummyDBAssociations(t *testing.T) {
 	var mos []SimulationModel
 	var files []File
 	var files_sm []File
-	var simns []Simulation
+	var sos []Scenario
 	var dabs []Dashboard
 	var widgs []Widget
 
@@ -52,34 +52,34 @@ func TestDummyDBAssociations(t *testing.T) {
 
 	// User Associations
 
-	a.NoError(db.Model(&usr).Related(&simns, "Simulations").Error)
-	if len(simns) != 2 {
+	a.NoError(db.Model(&usr).Related(&sos, "Scenarios").Error)
+	if len(sos) != 2 {
 		a.Fail("User Associations",
-			"Expected to have %v Simulations. Has %v.", 2, len(simns))
+			"Expected to have %v Scenarios. Has %v.", 2, len(sos))
 	}
 
-	// Simulation
+	// Scenario
 
-	a.NoError(db.Find(&simn, 1).Error, fM("Simulation"))
-	a.EqualValues("Simulation_A", simn.Name)
+	a.NoError(db.Find(&so, 1).Error, fM("Scenario"))
+	a.EqualValues("Scenario_A", so.Name)
 
-	// Simulation Associations
+	// Scenario Associations
 
-	a.NoError(db.Model(&simn).Association("Users").Find(&usrs).Error)
+	a.NoError(db.Model(&so).Association("Users").Find(&usrs).Error)
 	if len(usrs) != 2 {
-		a.Fail("Simulations Associations",
+		a.Fail("Scenario Associations",
 			"Expected to have %v Users. Has %v.", 2, len(usrs))
 	}
 
-	a.NoError(db.Model(&simn).Related(&mos, "SimulationModels").Error)
+	a.NoError(db.Model(&so).Related(&mos, "SimulationModels").Error)
 	if len(mos) != 2 {
-		a.Fail("Simulation Associations",
+		a.Fail("Scenario Associations",
 			"Expected to have %v simulation models. Has %v.", 2, len(mos))
 	}
 
-	a.NoError(db.Model(&simn).Related(&dabs, "Dashboards").Error)
+	a.NoError(db.Model(&so).Related(&dabs, "Dashboards").Error)
 	if len(dabs) != 2 {
-		a.Fail("Simulation Associations",
+		a.Fail("Scenario Associations",
 			"Expected to have %v Dashboards. Has %v.", 2, len(dabs))
 	}
 

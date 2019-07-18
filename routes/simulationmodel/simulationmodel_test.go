@@ -31,7 +31,7 @@ var modelA = common.SimulationModelResponse{
 	Name:         "SimulationModel_A",
 	OutputLength: 1,
 	InputLength:  1,
-	SimulationID: 1,
+	ScenarioID:   1,
 	SimulatorID:  1,
 	StartParams:  "",
 }
@@ -41,7 +41,7 @@ var modelB = common.SimulationModelResponse{
 	Name:         "SimulationModel_B",
 	OutputLength: 1,
 	InputLength:  1,
-	SimulationID: 1,
+	ScenarioID:   1,
 	SimulatorID:  1,
 	StartParams:  "",
 }
@@ -51,7 +51,7 @@ var modelC = common.SimulationModel{
 	Name:            "SimulationModel_C",
 	OutputLength:    1,
 	InputLength:     1,
-	SimulationID:    1,
+	ScenarioID:      1,
 	SimulatorID:     1,
 	StartParameters: "test",
 	InputMapping:    nil,
@@ -63,7 +63,7 @@ var modelCupdated = common.SimulationModel{
 	Name:            "SimulationModel_CUpdated",
 	OutputLength:    modelC.OutputLength,
 	InputLength:     modelC.InputLength,
-	SimulationID:    modelC.SimulationID,
+	ScenarioID:      modelC.ScenarioID,
 	SimulatorID:     2,
 	StartParameters: modelC.StartParameters,
 	InputMapping:    modelC.InputMapping,
@@ -75,7 +75,7 @@ var modelC_response = common.SimulationModelResponse{
 	Name:         modelC.Name,
 	InputLength:  modelC.InputLength,
 	OutputLength: modelC.OutputLength,
-	SimulationID: modelC.SimulationID,
+	ScenarioID:   modelC.ScenarioID,
 	SimulatorID:  modelC.SimulatorID,
 	StartParams:  modelC.StartParameters,
 }
@@ -85,7 +85,7 @@ var modelC_responseUpdated = common.SimulationModelResponse{
 	Name:         modelCupdated.Name,
 	InputLength:  modelC.InputLength,
 	OutputLength: modelC.OutputLength,
-	SimulationID: modelC.SimulationID,
+	ScenarioID:   modelC.ScenarioID,
 	SimulatorID:  modelCupdated.SimulatorID,
 	StartParams:  modelC.StartParameters,
 }
@@ -163,7 +163,7 @@ func TestSimulationModelEndpoints(t *testing.T) {
 	token = common.AuthenticateForTest(t, router, "/api/authenticate", "POST", credjson, 200)
 
 	// test GET models
-	common.TestEndpoint(t, router, token, "/api/models?simulationID=1", "GET", nil, 200, string(msgModelsjson))
+	common.TestEndpoint(t, router, token, "/api/models?scenarioID=1", "GET", nil, 200, string(msgModelsjson))
 
 	// test POST models
 	common.TestEndpoint(t, router, token, "/api/models", "POST", modelCjson, 200, string(msgOKjson))
@@ -177,7 +177,7 @@ func TestSimulationModelEndpoints(t *testing.T) {
 
 	// test DELETE models/:ModelID
 	common.TestEndpoint(t, router, token, "/api/models/3", "DELETE", nil, 200, string(msgOKjson))
-	common.TestEndpoint(t, router, token, "/api/models?simulationID=1", "GET", nil, 200, string(msgModelsjson))
+	common.TestEndpoint(t, router, token, "/api/models?scenarioID=1", "GET", nil, 200, string(msgModelsjson))
 
 	// TODO add testing for other return codes
 

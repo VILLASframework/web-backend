@@ -7,7 +7,7 @@ type UserResponse struct {
 	ID       uint   `json:"ID"`
 }
 
-type SimulationResponse struct {
+type ScenarioResponse struct {
 	Name        string `json:"Name"`
 	ID          uint   `json:"ID"`
 	Running     bool   `json:"Running"`
@@ -19,7 +19,7 @@ type SimulationModelResponse struct {
 	Name         string `json:"Name"`
 	OutputLength int    `json:"OutputLength"`
 	InputLength  int    `json:"InputLength"`
-	SimulationID uint   `json:"SimulationID"`
+	ScenarioID   uint   `json:"ScenarioID"`
 	SimulatorID  uint   `json:"SimulatorID"`
 	StartParams  string `json:"StartParams"`
 }
@@ -37,10 +37,10 @@ type SimulatorResponse struct {
 }
 
 type DashboardResponse struct {
-	ID           uint   `json:"ID"`
-	Name         string `json:"Name"`
-	Grid         int    `json:"Grid"`
-	SimulationID uint   `json:"SimulationID"`
+	ID         uint   `json:"ID"`
+	Name       string `json:"Name"`
+	Grid       int    `json:"Grid"`
+	ScenarioID uint   `json:"ScenarioID"`
 }
 
 type WidgetResponse struct {
@@ -93,12 +93,12 @@ type ResponseMsgUser struct {
 	User UserResponse `json:"user"`
 }
 
-type ResponseMsgSimulations struct {
-	Simulations []SimulationResponse `json:"simulations"`
+type ResponseMsgScenarios struct {
+	Scenarios []ScenarioResponse `json:"scenarios"`
 }
 
-type ResponseMsgSimulation struct {
-	Simulation SimulationResponse `json:"simulation"`
+type ResponseMsgScenario struct {
+	Scenario ScenarioResponse `json:"scenario"`
 }
 
 type ResponseMsgSimulationModels struct {

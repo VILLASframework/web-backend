@@ -1,4 +1,4 @@
-package simulation
+package scenario
 
 import (
 	"fmt"
@@ -7,46 +7,46 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/user"
 )
 
-type Simulation struct {
-	common.Simulation
+type Scenario struct {
+	common.Scenario
 }
 
-func (s *Simulation) ByID(id uint) error {
+func (s *Scenario) ByID(id uint) error {
 	db := common.GetDB()
 	err := db.Find(s, id).Error
 	if err != nil {
-		return fmt.Errorf("simulation with id=%v does not exist", id)
+		return fmt.Errorf("scenario with id=%v does not exist", id)
 	}
 	return nil
 }
 
-func (s *Simulation) getUsers() ([]common.User, int, error) {
+func (s *Scenario) getUsers() ([]common.User, int, error) {
 	db := common.GetDB()
 	var users []common.User
 	err := db.Order("ID asc").Model(s).Related(&users, "Users").Error
 	return users, len(users), err
 }
 
-func (s *Simulation) save() error {
+func (s *Scenario) save() error {
 	db := common.GetDB()
 	err := db.Create(s).Error
 	return err
 }
 
-func (s *Simulation) update(modifiedSimulation Simulation) error {
+func (s *Scenario) update(modifiedScenario Scenario) error {
 	db := common.GetDB()
-	err := db.Model(s).Update(modifiedSimulation).Error
+	err := db.Model(s).Update(modifiedScenario).Error
 	return err
 }
 
-func (s *Simulation) addUser(u *common.User) error {
+func (s *Scenario) addUser(u *common.User) error {
 
 	db := common.GetDB()
 	err := db.Model(s).Association("Users").Append(u).Error
 	return err
 }
 
-func (s *Simulation) deleteUser(username string) error {
+func (s *Scenario) deleteUser(username string) error {
 	db := common.GetDB()
 
 	var deletedUser user.User
@@ -58,27 +58,27 @@ func (s *Simulation) deleteUser(username string) error {
 	no_users := db.Model(s).Association("Users").Count()
 
 	if no_users > 1 {
-		// remove user from simulation
+		// remove user from scenario
 		err = db.Model(s).Association("Users").Delete(&deletedUser.User).Error
 		if err != nil {
 			return err
 		}
-		// remove simulation from user
-		err = db.Model(&deletedUser.User).Association("Simulations").Delete(s).Error
+		// remove scenario from user
+		err = db.Model(&deletedUser.User).Association("Scenarios").Delete(s).Error
 		if err != nil {
 			return err
 		}
 	} else {
-		return fmt.Errorf("cannot delete last user from simulation without deleting simulation itself, doing nothing")
+		return fmt.Errorf("cannot delete last user from scenario without deleting scenario itself, doing nothing")
 	}
 
 	return nil
 }
 
-func (s *Simulation) delete() error {
+func (s *Scenario) delete() error {
 	db := common.GetDB()
 
-	// delete simulation from all users and vice versa
+	// delete scenario from all users and vice versa
 
 	users, no_users, err := s.getUsers()
 	if err != nil {
@@ -87,23 +87,23 @@ func (s *Simulation) delete() error {
 
 	if no_users > 0 {
 		for _, u := range users {
-			// remove user from simulation
+			// remove user from scenario
 			err = db.Model(s).Association("Users").Delete(&u).Error
 			if err != nil {
 				return err
 			}
-			// remove simulation from user
-			err = db.Model(&u).Association("Simulations").Delete(s).Error
+			// remove scenario from user
+			err = db.Model(&u).Association("Scenarios").Delete(s).Error
 			if err != nil {
 				return err
 			}
 		}
 	}
 
-	// Simulation is not deleted from DB, only associations with users are removed
-	// Simulation remains "dangling" in DB
+	// Scenario is not deleted from DB, only associations with users are removed
+	// Scenario remains "dangling" in DB
 
-	// Delete simulation
+	// Delete scenario
 	//err = db.Delete(s).Error
 	//if err != nil {
 	//	return err
@@ -112,7 +112,7 @@ func (s *Simulation) delete() error {
 	return nil
 }
 
-func (s *Simulation) checkAccess(userID uint, userRole string) bool {
+func (s *Scenario) checkAccess(userID uint, userRole string) bool {
 
 	if userRole == "Admin" {
 		return true

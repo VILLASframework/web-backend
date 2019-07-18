@@ -15,7 +15,7 @@ import (
 type ModelName string
 
 const ModelUser = ModelName("user")
-const ModelSimulation = ModelName("simulation")
+const ModelScenario = ModelName("scenario")
 const ModelSimulator = ModelName("simulator")
 const ModelSimulatorAction = ModelName("simulatoraction")
 const ModelDashboard = ModelName("dashboard")
@@ -51,7 +51,7 @@ var _r__ = Permission{Create: false, Read: true, Update: false, Delete: false}
 var Roles = RoleActions{
 	"Admin": {
 		ModelUser:            crud,
-		ModelSimulation:      crud,
+		ModelScenario:        crud,
 		ModelSimulationModel: crud,
 		ModelSimulator:       crud,
 		ModelSimulatorAction: crud,
@@ -62,7 +62,7 @@ var Roles = RoleActions{
 	},
 	"User": {
 		ModelUser:            __u_,
-		ModelSimulation:      crud,
+		ModelScenario:        crud,
 		ModelSimulationModel: crud,
 		ModelSimulator:       _r__,
 		ModelSimulatorAction: _ru_,
@@ -72,7 +72,7 @@ var Roles = RoleActions{
 		ModelFile:            crud,
 	},
 	"Guest": {
-		ModelSimulation:      _r__,
+		ModelScenario:        _r__,
 		ModelSimulationModel: _r__,
 		ModelDashboard:       _r__,
 		ModelWidget:          _r__,

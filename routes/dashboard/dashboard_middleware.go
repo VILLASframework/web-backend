@@ -2,13 +2,13 @@ package dashboard
 
 import (
 	"fmt"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/scenario"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulation"
 )
 
 func CheckPermissions(c *gin.Context, operation common.CRUD, dabIDSource string, dabIDBody int) (bool, Dashboard) {
@@ -49,7 +49,7 @@ func CheckPermissions(c *gin.Context, operation common.CRUD, dabIDSource string,
 		return false, dab
 	}
 
-	ok, _ := simulation.CheckPermissions(c, operation, "body", int(dab.SimulationID))
+	ok, _ := scenario.CheckPermissions(c, operation, "body", int(dab.ScenarioID))
 	if !ok {
 		return false, dab
 	}

@@ -40,40 +40,40 @@ func (self *UserSerializer) Response(assoc bool) UserResponse {
 
 		// TODO: maybe all those should be made in one transaction
 
-		//simulations, _, _ := simulation.FindUserSimulations(&self.User)
-		//simulationsSerializer :=
-		//	SimulationsSerializer{self.Ctx, simulations}
+		//scenarios, _, _ := scenario.FindUserScenarios(&self.User)
+		//scenariosSerializer :=
+		//	ScenariosSerializer{self.Ctx, scenarios}
 
 		// Add the associated models to the response
-		//response.Simulations = simulationsSerializer.Response()
+		//response.Scenarios = scenariosSerializer.Response()
 	}
 
 	return response
 }
 
-// Simulation/s Serializers
+// Scenario/s Serializers
 
-type SimulationsSerializer struct {
-	Ctx         *gin.Context
-	Simulations []Simulation
+type ScenariosSerializer struct {
+	Ctx       *gin.Context
+	Scenarios []Scenario
 }
 
-func (self *SimulationsSerializer) Response() []SimulationResponse {
-	response := []SimulationResponse{}
-	for _, simulation := range self.Simulations {
-		serializer := SimulationSerializer{self.Ctx, simulation}
+func (self *ScenariosSerializer) Response() []ScenarioResponse {
+	response := []ScenarioResponse{}
+	for _, so := range self.Scenarios {
+		serializer := ScenarioSerializer{self.Ctx, so}
 		response = append(response, serializer.Response())
 	}
 	return response
 }
 
-type SimulationSerializer struct {
+type ScenarioSerializer struct {
 	Ctx *gin.Context
-	Simulation
+	Scenario
 }
 
-func (self *SimulationSerializer) Response() SimulationResponse {
-	response := SimulationResponse{
+func (self *ScenarioSerializer) Response() ScenarioResponse {
+	response := ScenarioResponse{
 		Name:        self.Name,
 		ID:          self.ID,
 		Running:     self.Running,
@@ -109,7 +109,7 @@ func (self *SimulationModelSerializer) Response() SimulationModelResponse {
 		Name:         self.Name,
 		OutputLength: self.OutputLength,
 		InputLength:  self.InputLength,
-		SimulationID: self.SimulationID,
+		ScenarioID:   self.ScenarioID,
 		SimulatorID:  self.SimulatorID,
 		StartParams:  self.StartParameters,
 	}
@@ -175,10 +175,10 @@ type DashboardSerializer struct {
 func (self *DashboardSerializer) Response() DashboardResponse {
 
 	response := DashboardResponse{
-		Name:         self.Name,
-		Grid:         self.Grid,
-		SimulationID: self.SimulationID,
-		ID:           self.ID,
+		Name:       self.Name,
+		Grid:       self.Grid,
+		ScenarioID: self.ScenarioID,
+		ID:         self.ID,
 	}
 	return response
 }

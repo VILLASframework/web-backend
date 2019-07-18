@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulation"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/scenario"
 )
 
 func CheckPermissions(c *gin.Context, operation common.CRUD, modelIDSource string, modelIDBody int) (bool, SimulationModel) {
@@ -49,7 +49,7 @@ func CheckPermissions(c *gin.Context, operation common.CRUD, modelIDSource strin
 		return false, m
 	}
 
-	ok, _ := simulation.CheckPermissions(c, operation, "body", int(m.SimulationID))
+	ok, _ := scenario.CheckPermissions(c, operation, "body", int(m.ScenarioID))
 	if !ok {
 		return false, m
 	}

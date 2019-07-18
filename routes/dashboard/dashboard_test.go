@@ -27,45 +27,45 @@ var msgOK = common.ResponseMsg{
 }
 
 var dabA = common.DashboardResponse{
-	ID:           1,
-	Name:         "Dashboard_A",
-	Grid:         15,
-	SimulationID: 1,
+	ID:         1,
+	Name:       "Dashboard_A",
+	Grid:       15,
+	ScenarioID: 1,
 }
 
 var dabB = common.DashboardResponse{
-	ID:           2,
-	Name:         "Dashboard_B",
-	Grid:         15,
-	SimulationID: 1,
+	ID:         2,
+	Name:       "Dashboard_B",
+	Grid:       15,
+	ScenarioID: 1,
 }
 
 var dabC = common.Dashboard{
-	ID:           3,
-	Name:         "Dashboard_C",
-	Grid:         99,
-	SimulationID: 1,
+	ID:         3,
+	Name:       "Dashboard_C",
+	Grid:       99,
+	ScenarioID: 1,
 }
 
 var dabCupdated = common.Dashboard{
-	ID:           dabC.ID,
-	Name:         "Dashboard_CUpdated",
-	SimulationID: dabC.SimulationID,
-	Grid:         dabC.Grid,
+	ID:         dabC.ID,
+	Name:       "Dashboard_CUpdated",
+	ScenarioID: dabC.ScenarioID,
+	Grid:       dabC.Grid,
 }
 
 var dabC_response = common.DashboardResponse{
-	ID:           dabC.ID,
-	Name:         dabC.Name,
-	Grid:         dabC.Grid,
-	SimulationID: dabC.SimulationID,
+	ID:         dabC.ID,
+	Name:       dabC.Name,
+	Grid:       dabC.Grid,
+	ScenarioID: dabC.ScenarioID,
 }
 
 var dabC_responseUpdated = common.DashboardResponse{
-	ID:           dabCupdated.ID,
-	Name:         dabCupdated.Name,
-	Grid:         dabCupdated.Grid,
-	SimulationID: dabCupdated.SimulationID,
+	ID:         dabCupdated.ID,
+	Name:       dabCupdated.Name,
+	Grid:       dabCupdated.Grid,
+	ScenarioID: dabCupdated.ScenarioID,
 }
 
 var myDashboards = []common.DashboardResponse{
@@ -140,22 +140,22 @@ func TestEndpoints(t *testing.T) {
 
 	token = common.AuthenticateForTest(t, router, "/api/authenticate", "POST", credjson, 200)
 
-	// test GET models
-	common.TestEndpoint(t, router, token, "/api/dashboards?simulationID=1", "GET", nil, 200, string(msgDashboardsjson))
+	// test GET dashboards
+	common.TestEndpoint(t, router, token, "/api/dashboards?scenarioID=1", "GET", nil, 200, string(msgDashboardsjson))
 
-	// test POST models
+	// test POST dashboards
 	common.TestEndpoint(t, router, token, "/api/dashboards", "POST", dabCjson, 200, string(msgOKjson))
 
-	// test GET models/:ModelID to check if previous POST worked correctly
+	// test GET dashboards/:dashboardID to check if previous POST worked correctly
 	common.TestEndpoint(t, router, token, "/api/dashboards/3", "GET", nil, 200, string(msgDabjson))
 
-	// test PUT models/:ModelID
+	// test PUT dashboards/:dashboardID
 	common.TestEndpoint(t, router, token, "/api/dashboards/3", "PUT", dabCupdatedjson, 200, string(msgOKjson))
 	common.TestEndpoint(t, router, token, "/api/dashboards/3", "GET", nil, 200, string(msgDabupdatedjson))
 
-	// test DELETE models/:ModelID
+	// test DELETE dashboards/:dashboardID
 	common.TestEndpoint(t, router, token, "/api/dashboards/3", "DELETE", nil, 200, string(msgOKjson))
-	common.TestEndpoint(t, router, token, "/api/dashboards?simulationID=1", "GET", nil, 200, string(msgDashboardsjson))
+	common.TestEndpoint(t, router, token, "/api/dashboards?scenarioID=1", "GET", nil, 200, string(msgDashboardsjson))
 
 	// TODO add testing for other return codes
 

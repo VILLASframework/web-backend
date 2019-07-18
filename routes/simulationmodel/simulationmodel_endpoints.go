@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulation"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/scenario"
 )
 
 func RegisterSimulationModelEndpoints(r *gin.RouterGroup) {
@@ -18,27 +18,27 @@ func RegisterSimulationModelEndpoints(r *gin.RouterGroup) {
 }
 
 // getSimulationModels godoc
-// @Summary Get all simulation models of simulation
+// @Summary Get all simulation models of scenario
 // @ID getSimulationModels
 // @Produce  json
 // @Tags models
-// @Success 200 {array} common.SimulationModelResponse "Array of models to which belong to simulation"
+// @Success 200 {array} common.SimulationModelResponse "Array of models to which belong to scenario"
 // @Failure 401 "Unauthorized Access"
 // @Failure 403 "Access forbidden."
 // @Failure 404 "Not found"
 // @Failure 500 "Internal server error"
-// @Param simulationID query int true "Simulation ID"
+// @Param scenarioID query int true "Scenario ID"
 // @Router /models [get]
 func getSimulationModels(c *gin.Context) {
 
-	ok, sim := simulation.CheckPermissions(c, common.Read, "query", -1)
+	ok, so := scenario.CheckPermissions(c, common.Read, "query", -1)
 	if !ok {
 		return
 	}
 
 	db := common.GetDB()
 	var models []common.SimulationModel
-	err := db.Order("ID asc").Model(sim).Related(&models, "Models").Error
+	err := db.Order("ID asc").Model(so).Related(&models, "Models").Error
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
@@ -50,12 +50,12 @@ func getSimulationModels(c *gin.Context) {
 }
 
 // addSimulationModel godoc
-// @Summary Add a simulation model to a simulation
+// @Summary Add a simulation model to a scenario
 // @ID addSimulationModel
 // @Accept json
 // @Produce json
 // @Tags models
-// @Param inputSimulationModel body common.SimulationModelResponse true "Simulation model to be added incl. IDs of simulation and simulator"
+// @Param inputSimulationModel body common.SimulationModelResponse true "Simulation model to be added incl. IDs of scenario and simulator"
 // @Success 200 "OK."
 // @Failure 401 "Unauthorized Access"
 // @Failure 403 "Access forbidden."
@@ -74,12 +74,12 @@ func addSimulationModel(c *gin.Context) {
 		return
 	}
 
-	ok, _ := simulation.CheckPermissions(c, common.Create, "body", int(newModel.SimulationID))
+	ok, _ := scenario.CheckPermissions(c, common.Create, "body", int(newModel.ScenarioID))
 	if !ok {
 		return
 	}
 
-	err = newModel.addToSimulation()
+	err = newModel.addToScenario()
 	if common.ProvideErrorResponse(c, err) == false {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "OK.",

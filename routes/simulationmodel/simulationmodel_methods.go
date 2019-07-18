@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulation"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/scenario"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulator"
 )
 
@@ -27,10 +27,10 @@ func (m *SimulationModel) ByID(id uint) error {
 	return nil
 }
 
-func (m *SimulationModel) addToSimulation() error {
+func (m *SimulationModel) addToScenario() error {
 	db := common.GetDB()
-	var sim simulation.Simulation
-	err := sim.ByID(m.SimulationID)
+	var so scenario.Scenario
+	err := so.ByID(m.ScenarioID)
 	if err != nil {
 		return err
 	}
@@ -49,8 +49,8 @@ func (m *SimulationModel) addToSimulation() error {
 		return err
 	}
 
-	// associate simulation model with simulation
-	err = db.Model(&sim).Association("SimulationModels").Append(m).Error
+	// associate simulation model with scenario
+	err = db.Model(&so).Association("SimulationModels").Append(m).Error
 
 	return err
 }
@@ -96,15 +96,15 @@ func (m *SimulationModel) Update(modifiedSimulationModel SimulationModel) error 
 func (m *SimulationModel) delete() error {
 
 	db := common.GetDB()
-	var sim simulation.Simulation
-	err := sim.ByID(m.SimulationID)
+	var so scenario.Scenario
+	err := so.ByID(m.ScenarioID)
 	if err != nil {
 		return err
 	}
 
-	// remove association between SimulationModel and Simulation
+	// remove association between SimulationModel and Scenario
 	// SimulationModel itself is not deleted from DB, it remains as "dangling"
-	err = db.Model(&sim).Association("SimulationModels").Delete(m).Error
+	err = db.Model(&so).Association("SimulationModels").Delete(m).Error
 
 	return err
 }

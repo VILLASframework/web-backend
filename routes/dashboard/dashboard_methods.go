@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulation"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/scenario"
 )
 
 type Dashboard struct {
@@ -26,10 +26,10 @@ func (d *Dashboard) ByID(id uint) error {
 	return nil
 }
 
-func (d *Dashboard) addToSimulation() error {
+func (d *Dashboard) addToScenario() error {
 	db := common.GetDB()
-	var sim simulation.Simulation
-	err := sim.ByID(d.SimulationID)
+	var sim scenario.Scenario
+	err := sim.ByID(d.ScenarioID)
 	if err != nil {
 		return err
 	}
@@ -40,7 +40,7 @@ func (d *Dashboard) addToSimulation() error {
 		return err
 	}
 
-	// associate dashboard with simulation
+	// associate dashboard with scenario
 	err = db.Model(&sim).Association("Dashboards").Append(d).Error
 
 	return err
@@ -61,13 +61,13 @@ func (d *Dashboard) update(modifiedDab Dashboard) error {
 func (d *Dashboard) delete() error {
 
 	db := common.GetDB()
-	var sim simulation.Simulation
-	err := sim.ByID(d.SimulationID)
+	var sim scenario.Scenario
+	err := sim.ByID(d.ScenarioID)
 	if err != nil {
 		return err
 	}
 
-	// remove association between Dashboard and Simulation
+	// remove association between Dashboard and Scenario
 	// Dashboard itself is not deleted from DB, it remains as "dangling"
 	err = db.Model(&sim).Association("Dashboards").Delete(d).Error
 

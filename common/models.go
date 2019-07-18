@@ -12,26 +12,26 @@ type User struct {
 	Mail string `gorm:"default:''"`
 	// Role of user
 	Role string `gorm:"default:'user'"`
-	// Simulations to which user has access
-	Simulations []*Simulation `gorm:"many2many:user_simulations"`
+	// Scenarios to which user has access
+	Scenarios []*Scenario `gorm:"many2many:user_scenarios"`
 }
 
-// Simulation data model
-type Simulation struct {
-	// ID of simulation
+// Scenario data model
+type Scenario struct {
+	// ID of scenario
 	ID uint `gorm:"primary_key;auto_increment"`
-	// Name of simulation
+	// Name of scenario
 	Name string `gorm:"not null"`
-	// Running state of simulation
+	// Running state of scenario
 	Running bool `gorm:"default:false"`
-	// Start parameters of simulation as JSON string
+	// Start parameters of scenario as JSON string
 	StartParameters string
-	// Users that have access to the simulation
-	Users []*User `gorm:"not null;many2many:user_simulations"`
-	// SimulationModels that belong to the simulation
-	SimulationModels []SimulationModel `gorm:"foreignkey:SimulationID"`
-	// Dashboards that belong to the simulation
-	Dashboards []Dashboard `gorm:"foreignkey:SimulationID"`
+	// Users that have access to the scenario
+	Users []*User `gorm:"not null;many2many:user_scenarios"`
+	// SimulationModels that belong to the scenario
+	SimulationModels []SimulationModel `gorm:"foreignkey:ScenarioID"`
+	// Dashboards that belong to the Scenario
+	Dashboards []Dashboard `gorm:"foreignkey:ScenarioID"`
 }
 
 // SimulationModel data model
@@ -46,8 +46,8 @@ type SimulationModel struct {
 	InputLength int `gorm:"default:1"`
 	// Start parameters of simulation model as JSON string
 	StartParameters string
-	// ID of simulation to which simulation model belongs
-	SimulationID uint
+	// ID of Scenario to which simulation model belongs
+	ScenarioID uint
 	// ID of simulator associated with simulation model
 	SimulatorID uint
 	// Mapping of output signals of the simulation model, order of signals is important
@@ -106,8 +106,8 @@ type Dashboard struct {
 	Name string `gorm:"not null"`
 	// Grid of dashboard
 	Grid int `gorm:"default:15"`
-	// ID of simulation to which dashboard belongs
-	SimulationID uint
+	// ID of scenario to which dashboard belongs
+	ScenarioID uint
 	// Widgets that belong to dashboard
 	Widgets []Widget `gorm:"foreignkey:DashboardID"`
 }
