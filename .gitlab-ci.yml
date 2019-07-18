@@ -105,10 +105,10 @@ test:signal:
   variables:
     TEST_FOLDER: routes/signal
 
-test:visualization:
+test:dashboard:
   extends: test:simulation
   variables:
-    TEST_FOLDER: routes/visualization
+    TEST_FOLDER: routes/dashboard
 
 test:widget:
   extends: test:simulation

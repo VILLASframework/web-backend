@@ -18,7 +18,7 @@ const ModelUser = ModelName("user")
 const ModelSimulation = ModelName("simulation")
 const ModelSimulator = ModelName("simulator")
 const ModelSimulatorAction = ModelName("simulatoraction")
-const ModelVisualization = ModelName("visualization")
+const ModelDashboard = ModelName("dashboard")
 const ModelWidget = ModelName("widget")
 const ModelSimulationModel = ModelName("simulationmodel")
 const ModelSignal = ModelName("signal")
@@ -56,7 +56,7 @@ var Roles = RoleActions{
 		ModelSimulator:       crud,
 		ModelSimulatorAction: crud,
 		ModelWidget:          crud,
-		ModelVisualization:   crud,
+		ModelDashboard:       crud,
 		ModelSignal:          crud,
 		ModelFile:            crud,
 	},
@@ -67,14 +67,14 @@ var Roles = RoleActions{
 		ModelSimulator:       _r__,
 		ModelSimulatorAction: _ru_,
 		ModelWidget:          crud,
-		ModelVisualization:   crud,
+		ModelDashboard:       crud,
 		ModelSignal:          crud,
 		ModelFile:            crud,
 	},
 	"Guest": {
 		ModelSimulation:      _r__,
 		ModelSimulationModel: _r__,
-		ModelVisualization:   _r__,
+		ModelDashboard:       _r__,
 		ModelWidget:          _r__,
 		ModelSimulator:       _r__,
 		ModelSimulatorAction: _r__,

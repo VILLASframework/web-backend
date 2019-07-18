@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/visualization"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/dashboard"
 )
 
 func RegisterWidgetEndpoints(r *gin.RouterGroup) {
@@ -18,27 +18,27 @@ func RegisterWidgetEndpoints(r *gin.RouterGroup) {
 }
 
 // getWidgets godoc
-// @Summary Get all widgets of visualization
+// @Summary Get all widgets of dashboard
 // @ID getWidgets
 // @Produce  json
 // @Tags widgets
-// @Success 200 {array} common.WidgetResponse "Array of widgets to which belong to visualization"
+// @Success 200 {array} common.WidgetResponse "Array of widgets to which belong to dashboard"
 // @Failure 401 "Unauthorized Access"
 // @Failure 403 "Access forbidden."
 // @Failure 404 "Not found"
 // @Failure 500 "Internal server error"
-// @Param visualizationID query int true "Visualization ID"
+// @Param dashboardID query int true "Dashboard ID"
 // @Router /widgets [get]
 func getWidgets(c *gin.Context) {
 
-	ok, vis := visualization.CheckPermissions(c, common.Read, "query", -1)
+	ok, dab := dashboard.CheckPermissions(c, common.Read, "query", -1)
 	if !ok {
 		return
 	}
 
 	db := common.GetDB()
 	var widgets []common.Widget
-	err := db.Order("ID asc").Model(vis).Related(&widgets, "Widgets").Error
+	err := db.Order("ID asc").Model(dab).Related(&widgets, "Widgets").Error
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
@@ -50,12 +50,12 @@ func getWidgets(c *gin.Context) {
 }
 
 // addWidget godoc
-// @Summary Add a widget to a visualization
+// @Summary Add a widget to a dashboard
 // @ID addWidget
 // @Accept json
 // @Produce json
 // @Tags widgets
-// @Param inputWidget body common.WidgetResponse true "Widget to be added incl. ID of visualization"
+// @Param inputWidget body common.WidgetResponse true "Widget to be added incl. ID of dashboard"
 // @Success 200 "OK."
 // @Failure 401 "Unauthorized Access"
 // @Failure 403 "Access forbidden."
@@ -74,12 +74,12 @@ func addWidget(c *gin.Context) {
 		return
 	}
 
-	ok, _ := visualization.CheckPermissions(c, common.Create, "body", int(newWidget.VisualizationID))
+	ok, _ := dashboard.CheckPermissions(c, common.Create, "body", int(newWidget.DashboardID))
 	if !ok {
 		return
 	}
 
-	err = newWidget.addToVisualization()
+	err = newWidget.addToDashboard()
 
 	if common.ProvideErrorResponse(c, err) == false {
 		c.JSON(http.StatusOK, gin.H{

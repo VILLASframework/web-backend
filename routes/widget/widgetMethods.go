@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/visualization"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/dashboard"
 )
 
 type Widget struct {
@@ -26,22 +26,22 @@ func (w *Widget) ByID(id uint) error {
 	return nil
 }
 
-func (w *Widget) addToVisualization() error {
+func (w *Widget) addToDashboard() error {
 	db := common.GetDB()
-	var vis visualization.Visualization
-	err := vis.ByID(uint(w.VisualizationID))
+	var dab dashboard.Dashboard
+	err := dab.ByID(uint(w.DashboardID))
 	if err != nil {
 		return err
 	}
 
-	// save visualization to DB
+	// save widget to DB
 	err = w.save()
 	if err != nil {
 		return err
 	}
 
-	// associate visualization with simulation
-	err = db.Model(&vis).Association("Widgets").Append(w).Error
+	// associate dashboard with simulation
+	err = db.Model(&dab).Association("Widgets").Append(w).Error
 
 	return err
 }
@@ -69,15 +69,15 @@ func (w *Widget) update(modifiedWidget Widget) error {
 func (w *Widget) delete() error {
 
 	db := common.GetDB()
-	var vis visualization.Visualization
-	err := vis.ByID(w.VisualizationID)
+	var dab dashboard.Dashboard
+	err := dab.ByID(w.DashboardID)
 	if err != nil {
 		return err
 	}
 
-	// remove association between Visualization and Widget
+	// remove association between Dashboard and Widget
 	// Widget itself is not deleted from DB, it remains as "dangling"
-	err = db.Model(&vis).Association("Widgets").Delete(w).Error
+	err = db.Model(&dab).Association("Widgets").Delete(w).Error
 
 	// TODO: What about files that belong to a widget? Keep them or remove them here?
 

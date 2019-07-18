@@ -36,7 +36,7 @@ type SimulatorResponse struct {
 	RawProperties string `json:"RawProperties"`
 }
 
-type VisualizationResponse struct {
+type DashboardResponse struct {
 	ID           uint   `json:"ID"`
 	Name         string `json:"Name"`
 	Grid         int    `json:"Grid"`
@@ -54,7 +54,7 @@ type WidgetResponse struct {
 	X                int    `json:"X"`
 	Y                int    `json:"Y"`
 	Z                int    `json:"Z"`
-	VisualizationID  uint   `json:"VisualizationID"`
+	DashboardID      uint   `json:"DashboardID"`
 	IsLocked         bool   `json:"IsLocked"`
 	CustomProperties string `json:"CustomProperties"`
 }
@@ -117,12 +117,12 @@ type ResponseMsgSignal struct {
 	Signal SignalResponse `json:"signal"`
 }
 
-type ResponseMsgVisualizations struct {
-	Visualizations []VisualizationResponse `json:"visualizations"`
+type ResponseMsgDashboards struct {
+	Dashboards []DashboardResponse `json:"dashboards"`
 }
 
-type ResponseMsgVisualization struct {
-	Visualization VisualizationResponse `json:"visualization"`
+type ResponseMsgDashboard struct {
+	Dashboard DashboardResponse `json:"dashboard"`
 }
 
 type ResponseMsgWidgets struct {

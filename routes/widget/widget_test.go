@@ -39,7 +39,7 @@ var wdgA = common.WidgetResponse{
 	Z:                0,
 	IsLocked:         false,
 	CustomProperties: "",
-	VisualizationID:  1,
+	DashboardID:      1,
 }
 
 var wdgB = common.WidgetResponse{
@@ -55,7 +55,7 @@ var wdgB = common.WidgetResponse{
 	Z:                0,
 	IsLocked:         false,
 	CustomProperties: "",
-	VisualizationID:  1,
+	DashboardID:      1,
 }
 
 var wdgC = common.Widget{
@@ -71,7 +71,7 @@ var wdgC = common.Widget{
 	Z:                13,
 	IsLocked:         false,
 	CustomProperties: "",
-	VisualizationID:  1,
+	DashboardID:      1,
 }
 
 var wdgCupdated = common.Widget{
@@ -87,7 +87,7 @@ var wdgCupdated = common.Widget{
 	Z:                wdgC.Z,
 	IsLocked:         wdgC.IsLocked,
 	CustomProperties: wdgC.CustomProperties,
-	VisualizationID:  wdgC.VisualizationID,
+	DashboardID:      wdgC.DashboardID,
 }
 
 var wdgC_response = common.WidgetResponse{
@@ -103,7 +103,7 @@ var wdgC_response = common.WidgetResponse{
 	Z:                wdgC.Z,
 	IsLocked:         wdgC.IsLocked,
 	CustomProperties: wdgC.CustomProperties,
-	VisualizationID:  wdgC.VisualizationID,
+	DashboardID:      wdgC.DashboardID,
 }
 
 var wdgC_responseUpdated = common.WidgetResponse{
@@ -119,7 +119,7 @@ var wdgC_responseUpdated = common.WidgetResponse{
 	Z:                wdgC.Z,
 	IsLocked:         wdgC.IsLocked,
 	CustomProperties: wdgC.CustomProperties,
-	VisualizationID:  wdgC.VisualizationID,
+	DashboardID:      wdgC.DashboardID,
 }
 
 var myWidgets = []common.WidgetResponse{
@@ -139,7 +139,7 @@ var msgWdgupdated = common.ResponseMsgWidget{
 	Widget: wdgC_responseUpdated,
 }
 
-// Test /models endpoints
+// Test /widgets endpoints
 func TestWidgetEndpoints(t *testing.T) {
 
 	db := common.DummyInitDB()
@@ -194,22 +194,22 @@ func TestWidgetEndpoints(t *testing.T) {
 
 	token = common.AuthenticateForTest(t, router, "/api/authenticate", "POST", credjson, 200)
 
-	// test GET models
-	common.TestEndpoint(t, router, token, "/api/widgets?visualizationID=1", "GET", nil, 200, string(msgWidgetsjson))
+	// test GET widgets
+	common.TestEndpoint(t, router, token, "/api/widgets?dashboardID=1", "GET", nil, 200, string(msgWidgetsjson))
 
-	// test POST models
+	// test POST widgets
 	common.TestEndpoint(t, router, token, "/api/widgets", "POST", wdgCjson, 200, string(msgOKjson))
 
-	// test GET models/:ModelID to check if previous POST worked correctly
+	// test GET widgets/:widgetID to check if previous POST worked correctly
 	common.TestEndpoint(t, router, token, "/api/widgets/3", "GET", nil, 200, string(msgWdgjson))
 
-	// test PUT models/:ModelID
+	// test PUT widgets/:widgetID
 	common.TestEndpoint(t, router, token, "/api/widgets/3", "PUT", wdgCupdatedjson, 200, string(msgOKjson))
 	common.TestEndpoint(t, router, token, "/api/widgets/3", "GET", nil, 200, string(msgWdgupdatedjson))
 
-	// test DELETE models/:ModelID
+	// test DELETE widgets/:widgetID
 	common.TestEndpoint(t, router, token, "/api/widgets/3", "DELETE", nil, 200, string(msgOKjson))
-	common.TestEndpoint(t, router, token, "/api/widgets?visualizationID=1", "GET", nil, 200, string(msgWidgetsjson))
+	common.TestEndpoint(t, router, token, "/api/widgets?dashboardID=1", "GET", nil, 200, string(msgWidgetsjson))
 
 	// TODO add testing for other return codes
 

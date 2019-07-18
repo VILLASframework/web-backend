@@ -12,11 +12,11 @@ import (
 
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
 	_ "git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/doc/api" // doc/api folder is used by Swag CLI, you have to import it
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/dashboard"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulation"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulationmodel"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulator"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/user"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/visualization"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/widget"
 )
 
@@ -57,7 +57,7 @@ func main() {
 	simulation.RegisterSimulationEndpoints(api.Group("/simulations"))
 	simulationmodel.RegisterSimulationModelEndpoints(api.Group("/models"))
 	signal.RegisterSignalEndpoints(api.Group("/signals"))
-	visualization.RegisterVisualizationEndpoints(api.Group("/visualizations"))
+	dashboard.RegisterDashboardEndpoints(api.Group("/dashboards"))
 	widget.RegisterWidgetEndpoints(api.Group("/widgets"))
 	file.RegisterFileEndpoints(api.Group("/files"))
 	user.RegisterUserEndpoints(api.Group("/users"))

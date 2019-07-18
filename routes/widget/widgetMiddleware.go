@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/visualization"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/dashboard"
 )
 
 func CheckPermissions(c *gin.Context, operation common.CRUD, widgetIDBody int) (bool, Widget) {
@@ -40,7 +40,7 @@ func CheckPermissions(c *gin.Context, operation common.CRUD, widgetIDBody int) (
 		return false, w
 	}
 
-	ok, _ := visualization.CheckPermissions(c, operation, "body", int(w.VisualizationID))
+	ok, _ := dashboard.CheckPermissions(c, operation, "body", int(w.DashboardID))
 	if !ok {
 		return false, w
 	}

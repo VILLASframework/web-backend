@@ -30,8 +30,8 @@ type Simulation struct {
 	Users []*User `gorm:"not null;many2many:user_simulations"`
 	// SimulationModels that belong to the simulation
 	SimulationModels []SimulationModel `gorm:"foreignkey:SimulationID"`
-	// Visualizations that belong to the simulation
-	Visualizations []Visualization `gorm:"foreignkey:SimulationID"`
+	// Dashboards that belong to the simulation
+	Dashboards []Dashboard `gorm:"foreignkey:SimulationID"`
 }
 
 // SimulationModel data model
@@ -98,18 +98,18 @@ type Simulator struct {
 	SimulationModels []SimulationModel `gorm:"foreignkey:SimulatorID"`
 }
 
-// Visualization data model
-type Visualization struct {
-	// ID of visualization
+// Dashboard data model
+type Dashboard struct {
+	// ID of dashboard
 	ID uint `gorm:"primary_key;auto_increment"`
-	// Name of visualization
+	// Name of dashboard
 	Name string `gorm:"not null"`
-	// Grid of visualization
+	// Grid of dashboard
 	Grid int `gorm:"default:15"`
-	// ID of simulation to which visualization belongs
+	// ID of simulation to which dashboard belongs
 	SimulationID uint
-	// Widgets that belong to visualization
-	Widgets []Widget `gorm:"foreignkey:VisualizationID"`
+	// Widgets that belong to dashboard
+	Widgets []Widget `gorm:"foreignkey:DashboardID"`
 }
 
 // Widget data model
@@ -138,8 +138,8 @@ type Widget struct {
 	IsLocked bool `gorm:"default:false"`
 	// Custom properties of widget as JSON string
 	CustomProperties string
-	// ID of visualization to which widget belongs
-	VisualizationID uint
+	// ID of dashboard to which widget belongs
+	DashboardID uint
 	// Files that belong to widget (for example images)
 	Files []File `gorm:"foreignkey:WidgetID"`
 }

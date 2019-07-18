@@ -151,30 +151,30 @@ func (self *SimulatorSerializer) Response() SimulatorResponse {
 	return response
 }
 
-// Visualization/s Serializers
+// Dashboard/s Serializers
 
-type VisualizationsSerializer struct {
-	Ctx            *gin.Context
-	Visualizations []Visualization
+type DashboardsSerializer struct {
+	Ctx        *gin.Context
+	Dashboards []Dashboard
 }
 
-func (self *VisualizationsSerializer) Response() []VisualizationResponse {
-	response := []VisualizationResponse{}
-	for _, visualization := range self.Visualizations {
-		serializer := VisualizationSerializer{self.Ctx, visualization}
+func (self *DashboardsSerializer) Response() []DashboardResponse {
+	response := []DashboardResponse{}
+	for _, dashboard := range self.Dashboards {
+		serializer := DashboardSerializer{self.Ctx, dashboard}
 		response = append(response, serializer.Response())
 	}
 	return response
 }
 
-type VisualizationSerializer struct {
+type DashboardSerializer struct {
 	Ctx *gin.Context
-	Visualization
+	Dashboard
 }
 
-func (self *VisualizationSerializer) Response() VisualizationResponse {
+func (self *DashboardSerializer) Response() DashboardResponse {
 
-	response := VisualizationResponse{
+	response := DashboardResponse{
 		Name:         self.Name,
 		Grid:         self.Grid,
 		SimulationID: self.SimulationID,
@@ -207,18 +207,18 @@ type WidgetSerializer struct {
 func (self *WidgetSerializer) Response() WidgetResponse {
 
 	response := WidgetResponse{
-		ID:              self.ID,
-		Name:            self.Name,
-		Type:            self.Type,
-		Width:           self.Width,
-		Height:          self.Height,
-		MinWidth:        self.MinWidth,
-		MinHeight:       self.MinHeight,
-		X:               self.X,
-		Y:               self.Y,
-		Z:               self.Z,
-		VisualizationID: self.VisualizationID,
-		IsLocked:        self.IsLocked,
+		ID:          self.ID,
+		Name:        self.Name,
+		Type:        self.Type,
+		Width:       self.Width,
+		Height:      self.Height,
+		MinWidth:    self.MinWidth,
+		MinHeight:   self.MinHeight,
+		X:           self.X,
+		Y:           self.Y,
+		Z:           self.Z,
+		DashboardID: self.DashboardID,
+		IsLocked:    self.IsLocked,
 		//CustomProperties
 	}
 	return response

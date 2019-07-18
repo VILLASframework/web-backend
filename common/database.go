@@ -62,7 +62,7 @@ func DropTables(db *gorm.DB) {
 	db.DropTableIfExists(&File{})
 	db.DropTableIfExists(&Simulation{})
 	db.DropTableIfExists(&User{})
-	db.DropTableIfExists(&Visualization{})
+	db.DropTableIfExists(&Dashboard{})
 	db.DropTableIfExists(&Widget{})
 }
 
@@ -74,7 +74,7 @@ func MigrateModels(db *gorm.DB) {
 	db.AutoMigrate(&File{})
 	db.AutoMigrate(&Simulation{})
 	db.AutoMigrate(&User{})
-	db.AutoMigrate(&Visualization{})
+	db.AutoMigrate(&Dashboard{})
 	db.AutoMigrate(&Widget{})
 }
 
@@ -154,10 +154,10 @@ func DummyPopulateDB(test_db *gorm.DB) {
 	checkErr(test_db.Create(&usr_A).Error)
 	checkErr(test_db.Create(&usr_B).Error)
 
-	vis_A := Visualization{Name: "Visualization_A"}
-	vis_B := Visualization{Name: "Visualization_B"}
-	checkErr(test_db.Create(&vis_A).Error)
-	checkErr(test_db.Create(&vis_B).Error)
+	dab_A := Dashboard{Name: "Dashboard_A"}
+	dab_B := Dashboard{Name: "Dashboard_B"}
+	checkErr(test_db.Create(&dab_A).Error)
+	checkErr(test_db.Create(&dab_B).Error)
 
 	widg_A := Widget{Name: "Widget_A"}
 	widg_B := Widget{Name: "Widget_B"}
@@ -178,13 +178,13 @@ func DummyPopulateDB(test_db *gorm.DB) {
 	checkErr(test_db.Model(&simn_A).Association("SimulationModels").Append(&mo_A).Error)
 	checkErr(test_db.Model(&simn_A).Association("SimulationModels").Append(&mo_B).Error)
 
-	// Simulation HM Visualizations
-	checkErr(test_db.Model(&simn_A).Association("Visualizations").Append(&vis_A).Error)
-	checkErr(test_db.Model(&simn_A).Association("Visualizations").Append(&vis_B).Error)
+	// Simulation HM Dashboards
+	checkErr(test_db.Model(&simn_A).Association("Dashboards").Append(&dab_A).Error)
+	checkErr(test_db.Model(&simn_A).Association("Dashboards").Append(&dab_B).Error)
 
-	// Visualization HM Widget
-	checkErr(test_db.Model(&vis_A).Association("Widgets").Append(&widg_A).Error)
-	checkErr(test_db.Model(&vis_A).Association("Widgets").Append(&widg_B).Error)
+	// Dashboard HM Widget
+	checkErr(test_db.Model(&dab_A).Association("Widgets").Append(&widg_A).Error)
+	checkErr(test_db.Model(&dab_A).Association("Widgets").Append(&widg_B).Error)
 
 	// SimulationModel HM Signals
 	checkErr(test_db.Model(&mo_A).Association("InputMapping").Append(&inSig_A).Error)
