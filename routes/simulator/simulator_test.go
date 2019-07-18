@@ -31,7 +31,7 @@ var model_A = common.SimulationModelResponse{
 	Name:         "SimulationModel_A",
 	OutputLength: 1,
 	InputLength:  1,
-	SimulationID: 1,
+	ScenarioID:   1,
 	SimulatorID:  1,
 	StartParams:  "",
 }
@@ -41,7 +41,7 @@ var model_B = common.SimulationModelResponse{
 	Name:         "SimulationModel_B",
 	OutputLength: 1,
 	InputLength:  1,
-	SimulationID: 1,
+	ScenarioID:   1,
 	SimulatorID:  1,
 	StartParams:  "",
 }
@@ -144,7 +144,7 @@ var msgSimulatorUpdated = common.ResponseMsgSimulator{
 	Simulator: simulatorCupdated_response,
 }
 
-// Test /simulation endpoints
+// Test /simulator endpoints
 func TestSimulatorEndpoints(t *testing.T) {
 
 	db := common.DummyInitDB()
