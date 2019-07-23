@@ -41,10 +41,10 @@ func VisitorAuthenticate(r *gin.RouterGroup) {
 
 func RegisterUserEndpoints(r *gin.RouterGroup) {
 	r.POST("", addUser)
-	r.PUT("/:UserID", updateUser)
+	r.PUT("/:userID", updateUser)
 	r.GET("", getUsers)
-	r.GET("/:UserID", getUser)
-	r.DELETE("/:UserID", deleteUser)
+	r.GET("/:userID", getUser)
+	r.DELETE("/:userID", deleteUser)
 }
 
 // authenticate godoc
