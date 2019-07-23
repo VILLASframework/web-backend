@@ -1,10 +1,12 @@
 package common
 
+import "github.com/jinzhu/gorm/dialects/postgres"
+
 type UserResponse struct {
-	Username string `json:"Username"`
-	Role     string `json:"Role"`
-	Mail     string `json:"Mail"`
-	ID       uint   `json:"ID"`
+	Username string `json:"username"`
+	Role     string `json:"role"`
+	Mail     string `json:"mail"`
+	ID       uint   `json:"id"`
 }
 
 type ScenarioResponse struct {
@@ -25,15 +27,15 @@ type SimulationModelResponse struct {
 }
 
 type SimulatorResponse struct {
-	ID            uint   `json:"ID"`
-	UUID          string `json:"UUID"`
-	Host          string `json:"Host"`
-	ModelType     string `json:"ModelType"`
-	Uptime        int    `json:"Uptime"`
-	State         string `json:"State"`
-	StateUpdateAt string `json:"StateUpdateAt"`
-	Properties    string `json:"Properties"`
-	RawProperties string `json:"RawProperties"`
+	ID            uint           `json:"id"`
+	UUID          string         `json:"uuid"`
+	Host          string         `json:"host"`
+	ModelType     string         `json:"modelType"`
+	Uptime        int            `json:"uptime"`
+	State         string         `json:"state"`
+	StateUpdateAt string         `json:"stateUpdateAt"`
+	Properties    postgres.Jsonb `json:"properties"`
+	RawProperties postgres.Jsonb `json:"rawProperties"`
 }
 
 type DashboardResponse struct {

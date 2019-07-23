@@ -147,6 +147,8 @@ func (self *SimulatorSerializer) Response() SimulatorResponse {
 		Uptime:        self.Uptime,
 		State:         self.State,
 		StateUpdateAt: self.StateUpdateAt,
+		Properties:    self.Properties,
+		RawProperties: self.RawProperties,
 	}
 	return response
 }

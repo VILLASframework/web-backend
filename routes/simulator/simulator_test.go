@@ -2,6 +2,7 @@ package simulator
 
 import (
 	"encoding/json"
+	"github.com/jinzhu/gorm/dialects/postgres"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -61,10 +62,10 @@ var simulatorA = common.SimulatorResponse{
 	Host:          "Host_A",
 	ModelType:     "",
 	Uptime:        0,
-	State:         "",
+	State:         "running",
 	StateUpdateAt: "",
-	Properties:    "",
-	RawProperties: "",
+	Properties:    postgres.Jsonb{json.RawMessage(`{"name" : "TestNameA"}`)},
+	RawProperties: postgres.Jsonb{json.RawMessage(`{}`)},
 }
 
 var simulatorB = common.SimulatorResponse{
@@ -73,10 +74,10 @@ var simulatorB = common.SimulatorResponse{
 	Host:          "Host_B",
 	ModelType:     "",
 	Uptime:        0,
-	State:         "",
+	State:         "idle",
 	StateUpdateAt: "",
-	Properties:    "",
-	RawProperties: "",
+	Properties:    postgres.Jsonb{json.RawMessage(`{"name" : "TestNameB"}`)},
+	RawProperties: postgres.Jsonb{json.RawMessage(`{}`)},
 }
 
 var simulatorC = common.Simulator{
@@ -85,10 +86,10 @@ var simulatorC = common.Simulator{
 	Host:          "Host_C",
 	Modeltype:     "",
 	Uptime:        0,
-	State:         "",
+	State:         "idle",
 	StateUpdateAt: "",
-	Properties:    "",
-	RawProperties: "",
+	Properties:    postgres.Jsonb{json.RawMessage(`{"name" : "TestNameC"}`)},
+	RawProperties: postgres.Jsonb{json.RawMessage(`{}`)},
 }
 
 var simulatorCupdated = common.Simulator{
@@ -99,8 +100,8 @@ var simulatorCupdated = common.Simulator{
 	Uptime:        0,
 	State:         "running",
 	StateUpdateAt: "",
-	Properties:    "",
-	RawProperties: "",
+	Properties:    postgres.Jsonb{json.RawMessage(`{"name" : "TestNameCupdate"}`)},
+	RawProperties: postgres.Jsonb{json.RawMessage(`{}`)},
 }
 
 var simulatorC_response = common.SimulatorResponse{

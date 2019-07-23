@@ -1,9 +1,11 @@
 package common
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"github.com/jinzhu/gorm"
+	"github.com/jinzhu/gorm/dialects/postgres"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"golang.org/x/crypto/bcrypt"
 	"log"
@@ -99,8 +101,10 @@ func DummyPopulateDB(test_db *gorm.DB) {
 
 	// Create two entries of each model
 
-	simr_A := Simulator{UUID: "1", Host: "Host_A"}
-	simr_B := Simulator{UUID: "2", Host: "Host_B"}
+	propertiesA := json.RawMessage(`{"name" : "TestNameA"}`)
+	propertiesB := json.RawMessage(`{"name" : "TestNameB"}`)
+	simr_A := Simulator{UUID: "1", Host: "Host_A", State: "running", Properties: postgres.Jsonb{propertiesA}, RawProperties: postgres.Jsonb{json.RawMessage(`{}`)}}
+	simr_B := Simulator{UUID: "2", Host: "Host_B", State: "idle", Properties: postgres.Jsonb{propertiesB}, RawProperties: postgres.Jsonb{json.RawMessage(`{}`)}}
 	checkErr(test_db.Create(&simr_A).Error)
 	checkErr(test_db.Create(&simr_B).Error)
 

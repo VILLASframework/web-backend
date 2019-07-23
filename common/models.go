@@ -1,5 +1,7 @@
 package common
 
+import "github.com/jinzhu/gorm/dialects/postgres"
+
 // User data model
 type User struct {
 	// ID of user
@@ -91,9 +93,9 @@ type Simulator struct {
 	// Time of last state update
 	StateUpdateAt string `gorm:"default:''"`
 	// Properties of simulator as JSON string
-	Properties string `gorm:"default:''"`
+	Properties postgres.Jsonb
 	// Raw properties of simulator as JSON string
-	RawProperties string `gorm:"default:''"`
+	RawProperties postgres.Jsonb
 	// SimulationModels in which the simulator is used
 	SimulationModels []SimulationModel `gorm:"foreignkey:SimulatorID"`
 }
