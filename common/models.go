@@ -81,7 +81,7 @@ type Simulator struct {
 	// ID of the simulator
 	ID uint `gorm:"primary_key;auto_increment"`
 	// UUID of the simulator
-	UUID string `gorm:"unique;not null"`
+	UUID string `gorm:"not null"`
 	// Host if the simulator
 	Host string `gorm:"default:''"`
 	// Model type supported by the simulator
