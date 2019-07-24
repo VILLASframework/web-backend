@@ -58,50 +58,50 @@ var msgModels = common.ResponseMsgSimulationModels{
 
 var simulatorA = common.SimulatorResponse{
 	ID:            1,
-	UUID:          "1",
+	UUID:          "4854af30-325f-44a5-ad59-b67b2597de68",
 	Host:          "Host_A",
-	ModelType:     "",
+	ModelType:     "ModelTypeA",
 	Uptime:        0,
 	State:         "running",
-	StateUpdateAt: "",
+	StateUpdateAt: "placeholder",
 	Properties:    postgres.Jsonb{json.RawMessage(`{"name" : "TestNameA"}`)},
-	RawProperties: postgres.Jsonb{json.RawMessage(`{}`)},
+	RawProperties: postgres.Jsonb{json.RawMessage(`{"name" : "TestNameA"}`)},
 }
 
 var simulatorB = common.SimulatorResponse{
 	ID:            2,
-	UUID:          "2",
+	UUID:          "7be0322d-354e-431e-84bd-ae4c9633138b",
 	Host:          "Host_B",
-	ModelType:     "",
+	ModelType:     "ModelTypeB",
 	Uptime:        0,
 	State:         "idle",
-	StateUpdateAt: "",
+	StateUpdateAt: "placeholder",
 	Properties:    postgres.Jsonb{json.RawMessage(`{"name" : "TestNameB"}`)},
-	RawProperties: postgres.Jsonb{json.RawMessage(`{}`)},
+	RawProperties: postgres.Jsonb{json.RawMessage(`{"name" : "TestNameB"}`)},
 }
 
 var simulatorC = common.Simulator{
 	ID:            3,
-	UUID:          "3",
+	UUID:          "6d9776bf-b693-45e8-97b6-4c13d151043f",
 	Host:          "Host_C",
-	Modeltype:     "",
+	Modeltype:     "ModelTypeC",
 	Uptime:        0,
 	State:         "idle",
-	StateUpdateAt: "",
+	StateUpdateAt: "placeholder",
 	Properties:    postgres.Jsonb{json.RawMessage(`{"name" : "TestNameC"}`)},
-	RawProperties: postgres.Jsonb{json.RawMessage(`{}`)},
+	RawProperties: postgres.Jsonb{json.RawMessage(`{"name" : "TestNameC"}`)},
 }
 
 var simulatorCupdated = common.Simulator{
 	ID:            3,
-	UUID:          "3",
+	UUID:          "6d9776bf-b693-45e8-97b6-4c13d151043f",
 	Host:          "Host_Cupdated",
-	Modeltype:     "",
+	Modeltype:     "ModelTypeCUpdated",
 	Uptime:        0,
 	State:         "running",
-	StateUpdateAt: "",
+	StateUpdateAt: "placeholder",
 	Properties:    postgres.Jsonb{json.RawMessage(`{"name" : "TestNameCupdate"}`)},
-	RawProperties: postgres.Jsonb{json.RawMessage(`{}`)},
+	RawProperties: postgres.Jsonb{json.RawMessage(`{"name" : "TestNameCupdate"}`)},
 }
 
 var simulatorC_response = common.SimulatorResponse{
