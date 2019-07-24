@@ -51,10 +51,11 @@ func TestEndpoint(t *testing.T, router *gin.Engine, token string, url string, me
 	}
 
 	assert.Equal(t, expected_code, w.Code)
-	fmt.Println(w.Body.String())
+	//fmt.Println("Actual:", w.Body.String())
+	//fmt.Println("Expected: ", string(expected_response))
 	opts := jsondiff.DefaultConsoleOptions()
 	diff, _ := jsondiff.Compare(w.Body.Bytes(), expected_response, &opts)
-	assert.Equal(t, diff.String(), "FullMatch")
+	assert.Equal(t, "FullMatch", diff.String())
 
 }
 

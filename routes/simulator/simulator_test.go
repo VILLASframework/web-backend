@@ -60,7 +60,7 @@ var simulatorA = common.SimulatorResponse{
 	ID:            1,
 	UUID:          "4854af30-325f-44a5-ad59-b67b2597de68",
 	Host:          "Host_A",
-	ModelType:     "ModelTypeA",
+	Modeltype:     "ModelTypeA",
 	Uptime:        0,
 	State:         "running",
 	StateUpdateAt: "placeholder",
@@ -72,7 +72,7 @@ var simulatorB = common.SimulatorResponse{
 	ID:            2,
 	UUID:          "7be0322d-354e-431e-84bd-ae4c9633138b",
 	Host:          "Host_B",
-	ModelType:     "ModelTypeB",
+	Modeltype:     "ModelTypeB",
 	Uptime:        0,
 	State:         "idle",
 	StateUpdateAt: "placeholder",
@@ -105,10 +105,10 @@ var simulatorCupdated = common.Simulator{
 }
 
 var simulatorC_response = common.SimulatorResponse{
-	ID:            3,
+	ID:            simulatorC.ID,
 	UUID:          simulatorC.UUID,
 	Host:          simulatorC.Host,
-	ModelType:     simulatorC.Modeltype,
+	Modeltype:     simulatorC.Modeltype,
 	Uptime:        simulatorC.Uptime,
 	State:         simulatorC.State,
 	StateUpdateAt: simulatorC.StateUpdateAt,
@@ -116,16 +116,24 @@ var simulatorC_response = common.SimulatorResponse{
 	RawProperties: simulatorC.RawProperties,
 }
 
+var simulatorC_msg = common.ResponseMsgSimulator{
+	Simulator: simulatorC_response,
+}
+
 var simulatorCupdated_response = common.SimulatorResponse{
 	ID:            simulatorCupdated.ID,
 	UUID:          simulatorCupdated.UUID,
 	Host:          simulatorCupdated.Host,
-	ModelType:     simulatorCupdated.Modeltype,
+	Modeltype:     simulatorCupdated.Modeltype,
 	Uptime:        simulatorCupdated.Uptime,
 	State:         simulatorCupdated.State,
 	StateUpdateAt: simulatorCupdated.StateUpdateAt,
 	Properties:    simulatorCupdated.Properties,
 	RawProperties: simulatorCupdated.RawProperties,
+}
+
+var simulatorCupdated_msg = common.ResponseMsgSimulator{
+	Simulator: simulatorCupdated_response,
 }
 
 var mySimulators = []common.SimulatorResponse{
@@ -139,10 +147,6 @@ var msgSimulators = common.ResponseMsgSimulators{
 
 var msgSimulator = common.ResponseMsgSimulator{
 	Simulator: simulatorC_response,
-}
-
-var msgSimulatorUpdated = common.ResponseMsgSimulator{
-	Simulator: simulatorCupdated_response,
 }
 
 // Test /simulator endpoints
@@ -185,17 +189,12 @@ func TestSimulatorEndpoints(t *testing.T) {
 		panic(err)
 	}
 
-	msgSimulatorUpdatedjson, err := json.Marshal(msgSimulatorUpdated)
+	simulatorCjson, err := json.Marshal(simulatorC_msg)
 	if err != nil {
 		panic(err)
 	}
 
-	simulatorCjson, err := json.Marshal(simulatorC)
-	if err != nil {
-		panic(err)
-	}
-
-	simulatorCupdatedjson, err := json.Marshal(simulatorCupdated)
+	simulatorCupdatedjson, err := json.Marshal(simulatorCupdated_msg)
 	if err != nil {
 		panic(err)
 	}
@@ -213,7 +212,7 @@ func TestSimulatorEndpoints(t *testing.T) {
 
 	// test PUT simulators/:SimulatorID
 	common.TestEndpoint(t, router, token, "/api/simulators/3", "PUT", simulatorCupdatedjson, 200, msgOKjson)
-	common.TestEndpoint(t, router, token, "/api/simulators/3", "GET", nil, 200, msgSimulatorUpdatedjson)
+	common.TestEndpoint(t, router, token, "/api/simulators/3", "GET", nil, 200, simulatorCupdatedjson)
 
 	// test DELETE simulators/:SimulatorID
 	common.TestEndpoint(t, router, token, "/api/simulators/3", "DELETE", nil, 200, msgOKjson)

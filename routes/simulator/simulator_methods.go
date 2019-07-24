@@ -25,20 +25,10 @@ func (s *Simulator) ByID(id uint) error {
 	return nil
 }
 
-func (s *Simulator) update(modifiedSimulator Simulator) error {
+func (s *Simulator) update(modifiedSimulator common.SimulatorResponse) error {
 
 	db := common.GetDB()
-
-	err := db.Model(s).Updates(map[string]interface{}{
-		"UUID":          modifiedSimulator.UUID,
-		"Host":          modifiedSimulator.Host,
-		"Modeltype":     modifiedSimulator.Modeltype,
-		"Uptime":        modifiedSimulator.Uptime,
-		"State":         modifiedSimulator.State,
-		"StateUpdateAt": modifiedSimulator.StateUpdateAt,
-		"Properties":    modifiedSimulator.Properties,
-		"RawProperties": modifiedSimulator.RawProperties,
-	}).Error
+	err := db.Model(s).Updates(modifiedSimulator).Error
 
 	return err
 

@@ -76,8 +76,8 @@ func addSimulator(c *gin.Context) {
 		return
 	}
 
-	var newSimulator Simulator
-	err = c.BindJSON(&newSimulator)
+	var newSimulatorData common.ResponseMsgSimulator
+	err = c.BindJSON(&newSimulatorData)
 	if err != nil {
 		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -85,6 +85,17 @@ func addSimulator(c *gin.Context) {
 		})
 		return
 	}
+
+	var newSimulator Simulator
+	newSimulator.ID = newSimulatorData.Simulator.ID
+	newSimulator.State = newSimulatorData.Simulator.State
+	newSimulator.StateUpdateAt = newSimulatorData.Simulator.StateUpdateAt
+	newSimulator.Modeltype = newSimulatorData.Simulator.Modeltype
+	newSimulator.UUID = newSimulatorData.Simulator.UUID
+	newSimulator.Uptime = newSimulatorData.Simulator.Uptime
+	newSimulator.Host = newSimulatorData.Simulator.Host
+	newSimulator.RawProperties = newSimulatorData.Simulator.RawProperties
+	newSimulator.Properties = newSimulatorData.Simulator.Properties
 
 	err = newSimulator.save()
 	if common.ProvideErrorResponse(c, err) == false {
@@ -115,10 +126,11 @@ func updateSimulator(c *gin.Context) {
 		return
 	}
 
-	var modifiedSimulator Simulator
+	var modifiedSimulator common.ResponseMsgSimulator
+
 	err = c.BindJSON(&modifiedSimulator)
 	if err != nil {
-		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
+		errormsg := "Bad request. Error unmarshalling data to JSON: " + err.Error()
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": errormsg,
 		})
@@ -140,7 +152,7 @@ func updateSimulator(c *gin.Context) {
 		return
 	}
 
-	err = s.update(modifiedSimulator)
+	err = s.update(modifiedSimulator.Simulator)
 	if common.ProvideErrorResponse(c, err) == false {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "OK.",

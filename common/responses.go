@@ -30,7 +30,7 @@ type SimulatorResponse struct {
 	ID            uint           `json:"id"`
 	UUID          string         `json:"uuid"`
 	Host          string         `json:"host"`
-	ModelType     string         `json:"modelType"`
+	Modeltype     string         `json:"modelType"`
 	Uptime        int            `json:"uptime"`
 	State         string         `json:"state"`
 	StateUpdateAt string         `json:"stateUpdateAt"`

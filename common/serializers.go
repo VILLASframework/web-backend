@@ -143,7 +143,7 @@ func (self *SimulatorSerializer) Response() SimulatorResponse {
 		ID:            self.ID,
 		UUID:          self.UUID,
 		Host:          self.Host,
-		ModelType:     self.Modeltype,
+		Modeltype:     self.Modeltype,
 		Uptime:        self.Uptime,
 		State:         self.State,
 		StateUpdateAt: self.StateUpdateAt,
