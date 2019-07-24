@@ -79,23 +79,23 @@ type Signal struct {
 // Simulator data model
 type Simulator struct {
 	// ID of the simulator
-	ID uint `gorm:"primary_key;auto_increment"`
+	ID uint `gorm:"primary_key;auto_increment",json:"id"`
 	// UUID of the simulator
-	UUID string `gorm:"not null"`
+	UUID string `gorm:"not null",json:"uuid"`
 	// Host if the simulator
-	Host string `gorm:"default:''"`
+	Host string `gorm:"default:''",json:"host"`
 	// Model type supported by the simulator
-	Modeltype string `gorm:"default:''"`
+	Modeltype string `gorm:"default:''",json:"modelType"`
 	// Uptime of the simulator
-	Uptime int `gorm:"default:0"`
+	Uptime int `gorm:"default:0",json:"uptime"`
 	// State of the simulator
-	State string `gorm:"default:''"`
+	State string `gorm:"default:''",json:"state"`
 	// Time of last state update
-	StateUpdateAt string `gorm:"default:''"`
+	StateUpdateAt string `gorm:"default:''",json:"stateUpdateAt"`
 	// Properties of simulator as JSON string
-	Properties postgres.Jsonb
+	Properties postgres.Jsonb `json:"properties"`
 	// Raw properties of simulator as JSON string
-	RawProperties postgres.Jsonb
+	RawProperties postgres.Jsonb `json:"rawProperties"`
 	// SimulationModels in which the simulator is used
 	SimulationModels []SimulationModel `gorm:"foreignkey:SimulatorID"`
 }

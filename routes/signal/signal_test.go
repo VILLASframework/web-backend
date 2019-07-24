@@ -163,23 +163,23 @@ func TestSignalEndpoints(t *testing.T) {
 	token = common.AuthenticateForTest(t, router, "/api/authenticate", "POST", credjson, 200)
 
 	// test GET signals
-	common.TestEndpoint(t, router, token, "/api/signals?modelID=1&direction=in", "GET", nil, 200, string(msgInSignalsjson))
-	common.TestEndpoint(t, router, token, "/api/signals?modelID=1&direction=out", "GET", nil, 200, string(msgOutSignalsjson))
+	common.TestEndpoint(t, router, token, "/api/signals?modelID=1&direction=in", "GET", nil, 200, msgInSignalsjson)
+	common.TestEndpoint(t, router, token, "/api/signals?modelID=1&direction=out", "GET", nil, 200, msgOutSignalsjson)
 
 	// test POST signals
-	common.TestEndpoint(t, router, token, "/api/signals", "POST", inSignalCjson, 200, string(msgOKjson))
+	common.TestEndpoint(t, router, token, "/api/signals", "POST", inSignalCjson, 200, msgOKjson)
 
 	// test GET signals/:signalID
-	common.TestEndpoint(t, router, token, "/api/signals/5", "GET", nil, 200, string(msgInSignalCjson))
+	common.TestEndpoint(t, router, token, "/api/signals/5", "GET", nil, 200, msgInSignalCjson)
 
 	// test PUT signals/:signalID
-	common.TestEndpoint(t, router, token, "/api/signals/5", "PUT", inSignalCupdatedjson, 200, string(msgOKjson))
-	common.TestEndpoint(t, router, token, "/api/signals/5", "GET", nil, 200, string(msgInSignalCupdatedjson))
+	common.TestEndpoint(t, router, token, "/api/signals/5", "PUT", inSignalCupdatedjson, 200, msgOKjson)
+	common.TestEndpoint(t, router, token, "/api/signals/5", "GET", nil, 200, msgInSignalCupdatedjson)
 
 	// test DELETE signals/:signalID
-	common.TestEndpoint(t, router, token, "/api/signals/5", "DELETE", nil, 200, string(msgOKjson))
-	common.TestEndpoint(t, router, token, "/api/signals?modelID=1&direction=in", "GET", nil, 200, string(msgInSignalsjson))
-	common.TestEndpoint(t, router, token, "/api/signals?modelID=1&direction=out", "GET", nil, 200, string(msgOutSignalsjson))
+	common.TestEndpoint(t, router, token, "/api/signals/5", "DELETE", nil, 200, msgOKjson)
+	common.TestEndpoint(t, router, token, "/api/signals?modelID=1&direction=in", "GET", nil, 200, msgInSignalsjson)
+	common.TestEndpoint(t, router, token, "/api/signals?modelID=1&direction=out", "GET", nil, 200, msgOutSignalsjson)
 
 	// TODO test GET models/:ModelID to check if POST and DELETE adapt InputLength correctly??
 	//common.TestEndpoint(t, router, token, "/api/models/1", "GET", nil, 200, string(msgModelAUpdated2json))

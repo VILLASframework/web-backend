@@ -141,21 +141,21 @@ func TestEndpoints(t *testing.T) {
 	token = common.AuthenticateForTest(t, router, "/api/authenticate", "POST", credjson, 200)
 
 	// test GET dashboards
-	common.TestEndpoint(t, router, token, "/api/dashboards?scenarioID=1", "GET", nil, 200, string(msgDashboardsjson))
+	common.TestEndpoint(t, router, token, "/api/dashboards?scenarioID=1", "GET", nil, 200, msgDashboardsjson)
 
 	// test POST dashboards
-	common.TestEndpoint(t, router, token, "/api/dashboards", "POST", dabCjson, 200, string(msgOKjson))
+	common.TestEndpoint(t, router, token, "/api/dashboards", "POST", dabCjson, 200, msgOKjson)
 
 	// test GET dashboards/:dashboardID to check if previous POST worked correctly
-	common.TestEndpoint(t, router, token, "/api/dashboards/3", "GET", nil, 200, string(msgDabjson))
+	common.TestEndpoint(t, router, token, "/api/dashboards/3", "GET", nil, 200, msgDabjson)
 
 	// test PUT dashboards/:dashboardID
-	common.TestEndpoint(t, router, token, "/api/dashboards/3", "PUT", dabCupdatedjson, 200, string(msgOKjson))
-	common.TestEndpoint(t, router, token, "/api/dashboards/3", "GET", nil, 200, string(msgDabupdatedjson))
+	common.TestEndpoint(t, router, token, "/api/dashboards/3", "PUT", dabCupdatedjson, 200, msgOKjson)
+	common.TestEndpoint(t, router, token, "/api/dashboards/3", "GET", nil, 200, msgDabupdatedjson)
 
 	// test DELETE dashboards/:dashboardID
-	common.TestEndpoint(t, router, token, "/api/dashboards/3", "DELETE", nil, 200, string(msgOKjson))
-	common.TestEndpoint(t, router, token, "/api/dashboards?scenarioID=1", "GET", nil, 200, string(msgDashboardsjson))
+	common.TestEndpoint(t, router, token, "/api/dashboards/3", "DELETE", nil, 200, msgOKjson)
+	common.TestEndpoint(t, router, token, "/api/dashboards?scenarioID=1", "GET", nil, 200, msgDashboardsjson)
 
 	// TODO add testing for other return codes
 

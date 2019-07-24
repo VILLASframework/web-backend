@@ -101,8 +101,8 @@ func DummyPopulateDB(test_db *gorm.DB) {
 
 	// Create two entries of each model
 
-	propertiesA := json.RawMessage(`{"name" : "TestNameA"}`)
-	propertiesB := json.RawMessage(`{"name" : "TestNameB"}`)
+	propertiesA := json.RawMessage(`{"name" : "TestNameA", "category" : "CategoryA", "location" : "anywhere on earth", "type": "dummy"}`)
+	propertiesB := json.RawMessage(`{"name" : "TestNameB", "category" : "CategoryB", "location" : "where ever you want", "type": "generic"}`)
 	simr_A := Simulator{UUID: "4854af30-325f-44a5-ad59-b67b2597de68", Host: "Host_A", State: "running", Modeltype: "ModelTypeA", StateUpdateAt: "placeholder", Properties: postgres.Jsonb{propertiesA}, RawProperties: postgres.Jsonb{propertiesA}}
 	simr_B := Simulator{UUID: "7be0322d-354e-431e-84bd-ae4c9633138b", Host: "Host_B", State: "idle", Modeltype: "ModelTypeB", StateUpdateAt: "placeholder", Properties: postgres.Jsonb{propertiesB}, RawProperties: postgres.Jsonb{propertiesB}}
 	checkErr(test_db.Create(&simr_A).Error)

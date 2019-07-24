@@ -2,6 +2,10 @@ package scenario
 
 import (
 	"encoding/json"
+	"fmt"
+	"github.com/stretchr/testify/assert"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/user"
@@ -149,32 +153,41 @@ func TestScenarioEndpoints(t *testing.T) {
 	token = common.AuthenticateForTest(t, router, "/api/authenticate", "POST", credjson, 200)
 
 	// test GET scenarios/
-	common.TestEndpoint(t, router, token, "/api/scenarios", "GET", nil, 200, string(msgScenariosjson))
+	common.TestEndpoint(t, router, token, "/api/scenarios", "GET", nil, 200, msgScenariosjson)
 
 	// test POST scenarios/
-	common.TestEndpoint(t, router, token, "/api/scenarios", "POST", scenarioCjson, 200, string(msgOKjson))
+	common.TestEndpoint(t, router, token, "/api/scenarios", "POST", scenarioCjson, 200, msgOKjson)
 
 	// test GET scenarios/:ScenarioID
-	common.TestEndpoint(t, router, token, "/api/scenarios/3", "GET", nil, 200, string(msgScenariojson))
+	common.TestEndpoint(t, router, token, "/api/scenarios/3", "GET", nil, 200, msgScenariojson)
 
 	// test DELETE scenarios/:ScenarioID
-	common.TestEndpoint(t, router, token, "/api/scenarios/3", "DELETE", nil, 200, string(msgOKjson))
-	common.TestEndpoint(t, router, token, "/api/scenarios", "GET", nil, 200, string(msgScenariosjson))
+	common.TestEndpoint(t, router, token, "/api/scenarios/3", "DELETE", nil, 200, msgOKjson)
+	common.TestEndpoint(t, router, token, "/api/scenarios", "GET", nil, 200, msgScenariosjson)
 
 	// test GET scenarios/:ScenarioID/users
-	common.TestEndpoint(t, router, token, "/api/scenarios/1/users", "GET", nil, 200, string(msgUsersjson))
+	common.TestEndpoint(t, router, token, "/api/scenarios/1/users", "GET", nil, 200, msgUsersjson)
 
 	// test DELETE scenarios/:ScenarioID/user
-	common.TestEndpoint(t, router, token, "/api/scenarios/1/user?username=User_B", "DELETE", nil, 200, string(msgOKjson))
-	common.TestEndpoint(t, router, token, "/api/scenarios/1/users", "GET", nil, 200, string(msgUserAjson))
+	common.TestEndpoint(t, router, token, "/api/scenarios/1/user?username=User_B", "DELETE", nil, 200, msgOKjson)
+	common.TestEndpoint(t, router, token, "/api/scenarios/1/users", "GET", nil, 200, msgUserAjson)
 
 	// test PUT scenarios/:ScenarioID/user
-	common.TestEndpoint(t, router, token, "/api/scenarios/1/user?username=User_B", "PUT", nil, 200, string(msgOKjson))
-	common.TestEndpoint(t, router, token, "/api/scenarios/1/users", "GET", nil, 200, string(msgUsersjson))
+	common.TestEndpoint(t, router, token, "/api/scenarios/1/user?username=User_B", "PUT", nil, 200, msgOKjson)
+	common.TestEndpoint(t, router, token, "/api/scenarios/1/users", "GET", nil, 200, msgUsersjson)
 
 	// test DELETE scenarios/:ScenarioID/user for logged in user User_A
-	common.TestEndpoint(t, router, token, "/api/scenarios/1/user?username=User_A", "DELETE", nil, 200, string(msgOKjson))
-	common.TestEndpoint(t, router, token, "/api/scenarios/1/users", "GET", nil, 422, "\"Access denied (for scenario ID).\"")
+	common.TestEndpoint(t, router, token, "/api/scenarios/1/user?username=User_A", "DELETE", nil, 200, msgOKjson)
+
+	// test if deletion of user from scenario has worked
+	w2 := httptest.NewRecorder()
+	req2, _ := http.NewRequest("GET", "/api/scenarios/1/users", nil)
+	req2.Header.Add("Authorization", "Bearer "+token)
+	router.ServeHTTP(w2, req2)
+
+	assert.Equal(t, 422, w2.Code)
+	fmt.Println(w2.Body.String())
+	assert.Equal(t, "\"Access denied (for scenario ID).\"", w2.Body.String())
 
 	// TODO add tests for other return codes
 }

@@ -11,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
+	"github.com/nsf/jsondiff"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -35,7 +36,7 @@ func ProvideErrorResponse(c *gin.Context, err error) bool {
 	return false // No error
 }
 
-func TestEndpoint(t *testing.T, router *gin.Engine, token string, url string, method string, body []byte, expected_code int, expected_response string) {
+func TestEndpoint(t *testing.T, router *gin.Engine, token string, url string, method string, body []byte, expected_code int, expected_response []byte) {
 	w := httptest.NewRecorder()
 
 	if body != nil {
@@ -51,7 +52,10 @@ func TestEndpoint(t *testing.T, router *gin.Engine, token string, url string, me
 
 	assert.Equal(t, expected_code, w.Code)
 	fmt.Println(w.Body.String())
-	assert.Equal(t, expected_response, w.Body.String())
+	opts := jsondiff.DefaultConsoleOptions()
+	diff, _ := jsondiff.Compare(w.Body.Bytes(), expected_response, &opts)
+	assert.Equal(t, diff.String(), "FullMatch")
+
 }
 
 func AuthenticateForTest(t *testing.T, router *gin.Engine, url string, method string, body []byte, expected_code int) string {

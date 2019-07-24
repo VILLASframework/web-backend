@@ -64,8 +64,8 @@ var simulatorA = common.SimulatorResponse{
 	Uptime:        0,
 	State:         "running",
 	StateUpdateAt: "placeholder",
-	Properties:    postgres.Jsonb{json.RawMessage(`{"name" : "TestNameA"}`)},
-	RawProperties: postgres.Jsonb{json.RawMessage(`{"name" : "TestNameA"}`)},
+	Properties:    postgres.Jsonb{json.RawMessage(`{"name" : "TestNameA", "category" : "CategoryA", "location" : "anywhere on earth", "type": "dummy"}`)},
+	RawProperties: postgres.Jsonb{json.RawMessage(`{"name" : "TestNameA", "category" : "CategoryA", "location" : "anywhere on earth", "type": "dummy"}`)},
 }
 
 var simulatorB = common.SimulatorResponse{
@@ -76,8 +76,8 @@ var simulatorB = common.SimulatorResponse{
 	Uptime:        0,
 	State:         "idle",
 	StateUpdateAt: "placeholder",
-	Properties:    postgres.Jsonb{json.RawMessage(`{"name" : "TestNameB"}`)},
-	RawProperties: postgres.Jsonb{json.RawMessage(`{"name" : "TestNameB"}`)},
+	Properties:    postgres.Jsonb{json.RawMessage(`{"name" : "TestNameB", "category" : "CategoryB", "location" : "where ever you want", "type": "generic"}`)},
+	RawProperties: postgres.Jsonb{json.RawMessage(`{"name" : "TestNameB", "category" : "CategoryB", "location" : "where ever you want", "type": "generic"}`)},
 }
 
 var simulatorC = common.Simulator{
@@ -88,8 +88,8 @@ var simulatorC = common.Simulator{
 	Uptime:        0,
 	State:         "idle",
 	StateUpdateAt: "placeholder",
-	Properties:    postgres.Jsonb{json.RawMessage(`{"name" : "TestNameC"}`)},
-	RawProperties: postgres.Jsonb{json.RawMessage(`{"name" : "TestNameC"}`)},
+	Properties:    postgres.Jsonb{json.RawMessage(`{"name" : "TestNameC", "category" : "CategoryC", "location" : "my desk", "type": "blubb"}`)},
+	RawProperties: postgres.Jsonb{json.RawMessage(`{"name" : "TestNameC", "category" : "CategoryC", "location" : "my desk", "type": "blubb"}`)},
 }
 
 var simulatorCupdated = common.Simulator{
@@ -100,8 +100,8 @@ var simulatorCupdated = common.Simulator{
 	Uptime:        0,
 	State:         "running",
 	StateUpdateAt: "placeholder",
-	Properties:    postgres.Jsonb{json.RawMessage(`{"name" : "TestNameCupdate"}`)},
-	RawProperties: postgres.Jsonb{json.RawMessage(`{"name" : "TestNameCupdate"}`)},
+	Properties:    postgres.Jsonb{json.RawMessage(`{"name" : "TestNameCUpdate", "category" : "CategoryC", "location" : "my desk", "type": "blubb"}`)},
+	RawProperties: postgres.Jsonb{json.RawMessage(`{"name" : "TestNameCUpdate", "category" : "CategoryC", "location" : "my desk", "type": "blubb"}`)},
 }
 
 var simulatorC_response = common.SimulatorResponse{
@@ -203,24 +203,24 @@ func TestSimulatorEndpoints(t *testing.T) {
 	token = common.AuthenticateForTest(t, router, "/api/authenticate", "POST", credjson, 200)
 
 	// test GET simulators/
-	common.TestEndpoint(t, router, token, "/api/simulators", "GET", nil, 200, string(msgSimulatorsjson))
+	common.TestEndpoint(t, router, token, "/api/simulators", "GET", nil, 200, msgSimulatorsjson)
 
 	// test POST simulators/
-	common.TestEndpoint(t, router, token, "/api/simulators", "POST", simulatorCjson, 200, string(msgOKjson))
+	common.TestEndpoint(t, router, token, "/api/simulators", "POST", simulatorCjson, 200, msgOKjson)
 
 	// test GET simulators/:SimulatorID
-	common.TestEndpoint(t, router, token, "/api/simulators/3", "GET", nil, 200, string(msgSimulatorjson))
+	common.TestEndpoint(t, router, token, "/api/simulators/3", "GET", nil, 200, msgSimulatorjson)
 
 	// test PUT simulators/:SimulatorID
-	common.TestEndpoint(t, router, token, "/api/simulators/3", "PUT", simulatorCupdatedjson, 200, string(msgOKjson))
-	common.TestEndpoint(t, router, token, "/api/simulators/3", "GET", nil, 200, string(msgSimulatorUpdatedjson))
+	common.TestEndpoint(t, router, token, "/api/simulators/3", "PUT", simulatorCupdatedjson, 200, msgOKjson)
+	common.TestEndpoint(t, router, token, "/api/simulators/3", "GET", nil, 200, msgSimulatorUpdatedjson)
 
 	// test DELETE simulators/:SimulatorID
-	common.TestEndpoint(t, router, token, "/api/simulators/3", "DELETE", nil, 200, string(msgOKjson))
-	common.TestEndpoint(t, router, token, "/api/simulators", "GET", nil, 200, string(msgSimulatorsjson))
+	common.TestEndpoint(t, router, token, "/api/simulators/3", "DELETE", nil, 200, msgOKjson)
+	common.TestEndpoint(t, router, token, "/api/simulators", "GET", nil, 200, msgSimulatorsjson)
 
 	// test GET simulators/:SimulatorID/models
-	common.TestEndpoint(t, router, token, "/api/simulators/1/models", "GET", nil, 200, string(msgModelsjson))
+	common.TestEndpoint(t, router, token, "/api/simulators/1/models", "GET", nil, 200, msgModelsjson)
 
 	// TODO add tests for other return codes
 }

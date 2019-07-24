@@ -106,7 +106,7 @@ func TestSignalEndpoints(t *testing.T) {
 	token = common.AuthenticateForTest(t, router, "/api/authenticate", "POST", credjson, 200)
 
 	// test GET files
-	common.TestEndpoint(t, router, token, "/api/files?objectID=1&objectType=widget", "GET", nil, 200, string(msgFilesjson))
+	common.TestEndpoint(t, router, token, "/api/files?objectID=1&objectType=widget", "GET", nil, 200, msgFilesjson)
 
 	// test POST files
 	bodyBuf := &bytes.Buffer{}
@@ -151,7 +151,15 @@ func TestSignalEndpoints(t *testing.T) {
 	assert.Equal(t, string(msgOKjson), w.Body.String())
 
 	// test GET files/:fileID
-	common.TestEndpoint(t, router, token, "/api/files/5", "GET", nil, 200, filecontent)
+	w2 := httptest.NewRecorder()
+	req2, _ := http.NewRequest("GET", "/api/files/5", nil)
+	req2.Header.Add("Authorization", "Bearer "+token)
+	router.ServeHTTP(w2, req2)
+
+	assert.Equal(t, 200, w2.Code)
+	fmt.Println(w2.Body.String())
+	assert.Equal(t, filecontent, w2.Body.String())
+
 	//common.TestEndpoint(t, router, token, "/api/files?objectID=1&objectType=widget", "GET", nil, 200, string(msgFilesjson))
 
 	// test PUT files/:fileID
@@ -195,11 +203,19 @@ func TestSignalEndpoints(t *testing.T) {
 	fmt.Println(w_update.Body.String())
 	assert.Equal(t, string(msgOKjson), w_update.Body.String())
 
-	common.TestEndpoint(t, router, token, "/api/files/5", "GET", nil, 200, filecontent_update)
+	// Test GET on updated file content
+	w3 := httptest.NewRecorder()
+	req3, _ := http.NewRequest("GET", "/api/files/5", nil)
+	req3.Header.Add("Authorization", "Bearer "+token)
+	router.ServeHTTP(w3, req3)
+
+	assert.Equal(t, 200, w3.Code)
+	fmt.Println(w3.Body.String())
+	assert.Equal(t, filecontent_update, w3.Body.String())
 
 	// test DELETE files/:fileID
-	common.TestEndpoint(t, router, token, "/api/files/5", "DELETE", nil, 200, string(msgOKjson))
-	common.TestEndpoint(t, router, token, "/api/files?objectID=1&objectType=widget", "GET", nil, 200, string(msgFilesjson))
+	common.TestEndpoint(t, router, token, "/api/files/5", "DELETE", nil, 200, msgOKjson)
+	common.TestEndpoint(t, router, token, "/api/files?objectID=1&objectType=widget", "GET", nil, 200, msgFilesjson)
 
 	// TODO add testing for other return codes
 

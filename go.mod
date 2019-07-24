@@ -11,6 +11,7 @@ require (
 	github.com/jinzhu/gorm v1.9.10
 	github.com/leodido/go-urn v1.1.0 // indirect
 	github.com/mailru/easyjson v0.0.0-20190626092158-b2ccc519800e // indirect
+	github.com/nsf/jsondiff v0.0.0-20190712045011-8443391ee9b6
 	github.com/streadway/amqp v0.0.0-20190404075320-75d898a42a94
 	github.com/stretchr/testify v1.3.0
 	github.com/swaggo/gin-swagger v1.2.0

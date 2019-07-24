@@ -163,21 +163,21 @@ func TestSimulationModelEndpoints(t *testing.T) {
 	token = common.AuthenticateForTest(t, router, "/api/authenticate", "POST", credjson, 200)
 
 	// test GET models
-	common.TestEndpoint(t, router, token, "/api/models?scenarioID=1", "GET", nil, 200, string(msgModelsjson))
+	common.TestEndpoint(t, router, token, "/api/models?scenarioID=1", "GET", nil, 200, msgModelsjson)
 
 	// test POST models
-	common.TestEndpoint(t, router, token, "/api/models", "POST", modelCjson, 200, string(msgOKjson))
+	common.TestEndpoint(t, router, token, "/api/models", "POST", modelCjson, 200, msgOKjson)
 
 	// test GET models/:ModelID to check if previous POST worked correctly
-	common.TestEndpoint(t, router, token, "/api/models/3", "GET", nil, 200, string(msgModeljson))
+	common.TestEndpoint(t, router, token, "/api/models/3", "GET", nil, 200, msgModeljson)
 
 	// test PUT models/:ModelID
-	common.TestEndpoint(t, router, token, "/api/models/3", "PUT", modelCupdatedjson, 200, string(msgOKjson))
-	common.TestEndpoint(t, router, token, "/api/models/3", "GET", nil, 200, string(msgModelupdatedjson))
+	common.TestEndpoint(t, router, token, "/api/models/3", "PUT", modelCupdatedjson, 200, msgOKjson)
+	common.TestEndpoint(t, router, token, "/api/models/3", "GET", nil, 200, msgModelupdatedjson)
 
 	// test DELETE models/:ModelID
-	common.TestEndpoint(t, router, token, "/api/models/3", "DELETE", nil, 200, string(msgOKjson))
-	common.TestEndpoint(t, router, token, "/api/models?scenarioID=1", "GET", nil, 200, string(msgModelsjson))
+	common.TestEndpoint(t, router, token, "/api/models/3", "DELETE", nil, 200, msgOKjson)
+	common.TestEndpoint(t, router, token, "/api/models?scenarioID=1", "GET", nil, 200, msgModelsjson)
 
 	// TODO add testing for other return codes
 

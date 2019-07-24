@@ -195,21 +195,21 @@ func TestWidgetEndpoints(t *testing.T) {
 	token = common.AuthenticateForTest(t, router, "/api/authenticate", "POST", credjson, 200)
 
 	// test GET widgets
-	common.TestEndpoint(t, router, token, "/api/widgets?dashboardID=1", "GET", nil, 200, string(msgWidgetsjson))
+	common.TestEndpoint(t, router, token, "/api/widgets?dashboardID=1", "GET", nil, 200, msgWidgetsjson)
 
 	// test POST widgets
-	common.TestEndpoint(t, router, token, "/api/widgets", "POST", wdgCjson, 200, string(msgOKjson))
+	common.TestEndpoint(t, router, token, "/api/widgets", "POST", wdgCjson, 200, msgOKjson)
 
 	// test GET widgets/:widgetID to check if previous POST worked correctly
-	common.TestEndpoint(t, router, token, "/api/widgets/3", "GET", nil, 200, string(msgWdgjson))
+	common.TestEndpoint(t, router, token, "/api/widgets/3", "GET", nil, 200, msgWdgjson)
 
 	// test PUT widgets/:widgetID
-	common.TestEndpoint(t, router, token, "/api/widgets/3", "PUT", wdgCupdatedjson, 200, string(msgOKjson))
-	common.TestEndpoint(t, router, token, "/api/widgets/3", "GET", nil, 200, string(msgWdgupdatedjson))
+	common.TestEndpoint(t, router, token, "/api/widgets/3", "PUT", wdgCupdatedjson, 200, msgOKjson)
+	common.TestEndpoint(t, router, token, "/api/widgets/3", "GET", nil, 200, msgWdgupdatedjson)
 
 	// test DELETE widgets/:widgetID
-	common.TestEndpoint(t, router, token, "/api/widgets/3", "DELETE", nil, 200, string(msgOKjson))
-	common.TestEndpoint(t, router, token, "/api/widgets?dashboardID=1", "GET", nil, 200, string(msgWidgetsjson))
+	common.TestEndpoint(t, router, token, "/api/widgets/3", "DELETE", nil, 200, msgOKjson)
+	common.TestEndpoint(t, router, token, "/api/widgets?dashboardID=1", "GET", nil, 200, msgWidgetsjson)
 
 	// TODO add testing for other return codes
 
