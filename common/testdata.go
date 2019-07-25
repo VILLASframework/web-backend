@@ -20,12 +20,12 @@ var bcryptCost = 10
 var pw0, _ = bcrypt.GenerateFromPassword([]byte("xyz789"), bcryptCost)
 var pwA, _ = bcrypt.GenerateFromPassword([]byte("abc123"), bcryptCost)
 var pwB, _ = bcrypt.GenerateFromPassword([]byte("bcd234"), bcryptCost)
-var User0 = User{ID: 1, Username: "User_0", Password: string(pw0), Role: "Admin", Mail: "User_0@example.com"}
-var User0_response = UserResponse{Username: User0.Username, Role: User0.Role, ID: User0.ID, Mail: User0.Mail}
-var UserA = User{ID: 2, Username: "User_A", Password: string(pwA), Role: "User", Mail: "User_A@example.com"}
-var UserA_response = UserResponse{Username: UserA.Username, Role: UserA.Role, ID: UserA.ID, Mail: UserA.Mail}
-var UserB = User{ID: 3, Username: "User_B", Password: string(pwB), Role: "User", Mail: "User_B@example.com"}
-var UserB_response = UserResponse{Username: UserB.Username, Role: UserB.Role, ID: UserB.ID, Mail: UserB.Mail}
+var User0 = User{Username: "User_0", Password: string(pw0), Role: "Admin", Mail: "User_0@example.com"}
+var User0_response = UserResponse{Username: User0.Username, Role: User0.Role, ID: 1, Mail: User0.Mail}
+var UserA = User{Username: "User_A", Password: string(pwA), Role: "User", Mail: "User_A@example.com"}
+var UserA_response = UserResponse{Username: UserA.Username, Role: UserA.Role, ID: 2, Mail: UserA.Mail}
+var UserB = User{Username: "User_B", Password: string(pwB), Role: "User", Mail: "User_B@example.com"}
+var UserB_response = UserResponse{Username: UserB.Username, Role: UserB.Role, ID: 3, Mail: UserB.Mail}
 
 // Credentials
 
@@ -47,7 +47,6 @@ var propertiesC = json.RawMessage(`{"name" : "TestNameC", "category" : "Category
 var propertiesCupdated = json.RawMessage(`{"name" : "TestNameCUpdate", "category" : "CategoryC", "location" : "my desk", "type": "blubb"}`)
 
 var SimulatorA = Simulator{
-	ID:            1,
 	UUID:          "4854af30-325f-44a5-ad59-b67b2597de68",
 	Host:          "Host_A",
 	Modeltype:     "ModelTypeA",
@@ -59,7 +58,7 @@ var SimulatorA = Simulator{
 }
 
 var SimulatorA_response = SimulatorResponse{
-	ID:            SimulatorA.ID,
+	ID:            1,
 	UUID:          SimulatorA.UUID,
 	Host:          SimulatorA.Host,
 	Modeltype:     SimulatorA.Modeltype,
@@ -71,7 +70,6 @@ var SimulatorA_response = SimulatorResponse{
 }
 
 var SimulatorB = Simulator{
-	ID:            2,
 	UUID:          "7be0322d-354e-431e-84bd-ae4c9633138b",
 	Host:          "Host_B",
 	Modeltype:     "ModelTypeB",
@@ -83,7 +81,7 @@ var SimulatorB = Simulator{
 }
 
 var SimulatorB_response = SimulatorResponse{
-	ID:            SimulatorB.ID,
+	ID:            2,
 	UUID:          SimulatorB.UUID,
 	Host:          SimulatorB.Host,
 	Modeltype:     SimulatorB.Modeltype,
@@ -95,7 +93,6 @@ var SimulatorB_response = SimulatorResponse{
 }
 
 var SimulatorC = Simulator{
-	ID:            3,
 	UUID:          "6d9776bf-b693-45e8-97b6-4c13d151043f",
 	Host:          "Host_C",
 	Modeltype:     "ModelTypeC",
@@ -107,7 +104,7 @@ var SimulatorC = Simulator{
 }
 
 var SimulatorC_response = SimulatorResponse{
-	ID:            SimulatorC.ID,
+	ID:            3,
 	UUID:          SimulatorC.UUID,
 	Host:          SimulatorC.Host,
 	Modeltype:     SimulatorC.Modeltype,
@@ -119,7 +116,6 @@ var SimulatorC_response = SimulatorResponse{
 }
 
 var SimulatorCUpdated = Simulator{
-	ID:            SimulatorC.ID,
 	UUID:          SimulatorC.UUID,
 	Host:          "Host_Cupdated",
 	Modeltype:     "ModelTypeCUpdated",
@@ -131,7 +127,7 @@ var SimulatorCUpdated = Simulator{
 }
 
 var SimulatorCUpdated_response = SimulatorResponse{
-	ID:            SimulatorCUpdated.ID,
+	ID:            3,
 	UUID:          SimulatorCUpdated.UUID,
 	Host:          SimulatorCUpdated.Host,
 	Modeltype:     SimulatorCUpdated.Modeltype,
@@ -148,19 +144,18 @@ var startParametersA = json.RawMessage(`{"parameter1" : "testValue1A", "paramete
 var startParametersB = json.RawMessage(`{"parameter1" : "testValue1B", "parameter2" : "testValue2B", "parameter3" : 43}`)
 var startParametersC = json.RawMessage(`{"parameter1" : "testValue1C", "parameter2" : "testValue2C", "parameter3" : 44}`)
 
-var ScenarioA = Scenario{ID: 1, Name: "Scenario_A", Running: true, StartParameters: postgres.Jsonb{startParametersA}}
-var ScenarioA_response = ScenarioResponse{ID: ScenarioA.ID, Name: ScenarioA.Name, Running: ScenarioA.Running, StartParameters: ScenarioA.StartParameters}
-var ScenarioB = Scenario{ID: 2, Name: "Scenario_B", Running: false, StartParameters: postgres.Jsonb{startParametersB}}
-var ScenarioB_response = ScenarioResponse{ID: ScenarioB.ID, Name: ScenarioB.Name, Running: ScenarioB.Running, StartParameters: ScenarioB.StartParameters}
-var ScenarioC = Scenario{ID: 3, Name: "Scenario_C", Running: false, StartParameters: postgres.Jsonb{startParametersC}}
-var ScenarioC_response = ScenarioResponse{ID: ScenarioC.ID, Name: ScenarioC.Name, Running: ScenarioC.Running, StartParameters: ScenarioC.StartParameters}
-var ScenarioCUpdated = Scenario{ID: ScenarioC.ID, Name: "Scenario_Cupdated", Running: true, StartParameters: postgres.Jsonb{startParametersC}}
-var ScenarioCUpdated_response = ScenarioResponse{ID: ScenarioCUpdated.ID, Name: ScenarioCUpdated.Name, Running: ScenarioCUpdated.Running, StartParameters: ScenarioCUpdated.StartParameters}
+var ScenarioA = Scenario{Name: "Scenario_A", Running: true, StartParameters: postgres.Jsonb{startParametersA}}
+var ScenarioA_response = ScenarioResponse{ID: 1, Name: ScenarioA.Name, Running: ScenarioA.Running, StartParameters: ScenarioA.StartParameters}
+var ScenarioB = Scenario{Name: "Scenario_B", Running: false, StartParameters: postgres.Jsonb{startParametersB}}
+var ScenarioB_response = ScenarioResponse{ID: 2, Name: ScenarioB.Name, Running: ScenarioB.Running, StartParameters: ScenarioB.StartParameters}
+var ScenarioC = Scenario{Name: "Scenario_C", Running: false, StartParameters: postgres.Jsonb{startParametersC}}
+var ScenarioC_response = ScenarioResponse{ID: 3, Name: ScenarioC.Name, Running: ScenarioC.Running, StartParameters: ScenarioC.StartParameters}
+var ScenarioCUpdated = Scenario{Name: "Scenario_Cupdated", Running: true, StartParameters: postgres.Jsonb{startParametersC}}
+var ScenarioCUpdated_response = ScenarioResponse{ID: 3, Name: ScenarioCUpdated.Name, Running: ScenarioCUpdated.Running, StartParameters: ScenarioCUpdated.StartParameters}
 
 // Simulation Models
 
 var SimulationModelA = SimulationModel{
-	ID:              1,
 	Name:            "SimulationModel_A",
 	OutputLength:    1,
 	InputLength:     1,
@@ -170,7 +165,7 @@ var SimulationModelA = SimulationModel{
 }
 
 var SimulationModelA_response = SimulationModelResponse{
-	ID:              SimulationModelA.ID,
+	ID:              1,
 	Name:            SimulationModelA.Name,
 	InputLength:     SimulationModelA.InputLength,
 	OutputLength:    SimulationModelA.OutputLength,
@@ -180,7 +175,6 @@ var SimulationModelA_response = SimulationModelResponse{
 }
 
 var SimulationModelB = SimulationModel{
-	ID:              2,
 	Name:            "SimulationModel_B",
 	OutputLength:    1,
 	InputLength:     1,
@@ -190,7 +184,7 @@ var SimulationModelB = SimulationModel{
 }
 
 var SimulationModelB_response = SimulationModelResponse{
-	ID:              SimulationModelB.ID,
+	ID:              2,
 	Name:            SimulationModelB.Name,
 	InputLength:     SimulationModelB.InputLength,
 	OutputLength:    SimulationModelB.OutputLength,
@@ -200,7 +194,6 @@ var SimulationModelB_response = SimulationModelResponse{
 }
 
 var SimulationModelC = SimulationModel{
-	ID:              3,
 	Name:            "SimulationModel_C",
 	OutputLength:    1,
 	InputLength:     1,
@@ -210,7 +203,7 @@ var SimulationModelC = SimulationModel{
 }
 
 var SimulationModelC_response = SimulationModelResponse{
-	ID:              SimulationModelC.ID,
+	ID:              3,
 	Name:            SimulationModelC.Name,
 	InputLength:     SimulationModelC.InputLength,
 	OutputLength:    SimulationModelC.OutputLength,
@@ -220,7 +213,6 @@ var SimulationModelC_response = SimulationModelResponse{
 }
 
 var SimulationModelCUpdated = SimulationModel{
-	ID:              SimulationModelC.ID,
 	Name:            "SimulationModel_CUpdated",
 	OutputLength:    SimulationModelC.OutputLength,
 	InputLength:     SimulationModelC.InputLength,
@@ -232,7 +224,7 @@ var SimulationModelCUpdated = SimulationModel{
 }
 
 var SimulationModelCUpdated_response = SimulationModelResponse{
-	ID:              SimulationModelCUpdated.ID,
+	ID:              3,
 	Name:            SimulationModelCUpdated.Name,
 	InputLength:     SimulationModelCUpdated.InputLength,
 	OutputLength:    SimulationModelCUpdated.OutputLength,
@@ -341,11 +333,80 @@ var InSignalCUpdated_response = SignalResponse{
 
 // Dashboards
 
-var DashboardA = Dashboard{ID: 1, Name: "Dashboard_A", Grid: 15, ScenarioID: 1}
-var DashboardA_response = DashboardResponse{ID: DashboardA.ID, Name: DashboardA.Name, Grid: DashboardA.Grid, ScenarioID: DashboardA.ScenarioID}
-var DashboardB = Dashboard{ID: 2, Name: "Dashboard_B", Grid: 10, ScenarioID: 1}
-var DashboardB_response = DashboardResponse{ID: DashboardB.ID, Name: DashboardB.Name, Grid: DashboardB.Grid, ScenarioID: DashboardB.ScenarioID}
-var DashboardC = Dashboard{ID: 3, Name: "Dashboard_C", Grid: 25, ScenarioID: 1}
-var DashboardC_response = DashboardResponse{ID: DashboardC.ID, Name: DashboardC.Name, Grid: DashboardC.Grid, ScenarioID: DashboardC.ScenarioID}
-var DashboardCUpdated = Dashboard{ID: DashboardC.ID, Name: "Dashboard_Cupdated", Grid: 24, ScenarioID: DashboardC.ScenarioID}
-var DashboardCUpdated_response = DashboardResponse{ID: DashboardCUpdated.ID, Name: DashboardCUpdated.Name, Grid: DashboardCUpdated.Grid, ScenarioID: DashboardCUpdated.ScenarioID}
+var DashboardA = Dashboard{Name: "Dashboard_A", Grid: 15, ScenarioID: 1}
+var DashboardA_response = DashboardResponse{ID: 1, Name: DashboardA.Name, Grid: DashboardA.Grid, ScenarioID: DashboardA.ScenarioID}
+var DashboardB = Dashboard{Name: "Dashboard_B", Grid: 10, ScenarioID: 1}
+var DashboardB_response = DashboardResponse{ID: 2, Name: DashboardB.Name, Grid: DashboardB.Grid, ScenarioID: DashboardB.ScenarioID}
+var DashboardC = Dashboard{Name: "Dashboard_C", Grid: 25, ScenarioID: 1}
+var DashboardC_response = DashboardResponse{ID: 3, Name: DashboardC.Name, Grid: DashboardC.Grid, ScenarioID: DashboardC.ScenarioID}
+var DashboardCUpdated = Dashboard{Name: "Dashboard_Cupdated", Grid: 24, ScenarioID: DashboardC.ScenarioID}
+var DashboardCUpdated_response = DashboardResponse{ID: 3, Name: DashboardCUpdated.Name, Grid: DashboardCUpdated.Grid, ScenarioID: DashboardCUpdated.ScenarioID}
+
+// Files
+
+var FileA = File{
+	Name:              "File_A",
+	Type:              "text/plain",
+	Size:              42,
+	ImageHeight:       333,
+	ImageWidth:        111,
+	Date:              time.Now().String(),
+	WidgetID:          1,
+	SimulationModelID: 0,
+}
+
+var FileA_response = FileResponse{
+	ID:                1,
+	Name:              FileA.Name,
+	Type:              FileA.Type,
+	Size:              FileA.Size,
+	ImageWidth:        FileA.ImageWidth,
+	ImageHeight:       FileA.ImageHeight,
+	Date:              FileA.Date,
+	WidgetID:          FileA.WidgetID,
+	SimulationModelID: FileA.SimulationModelID,
+}
+
+var FileB = File{
+	Name:              "File_B",
+	Type:              "text/plain",
+	Size:              1234,
+	ImageHeight:       55,
+	ImageWidth:        22,
+	Date:              time.Now().String(),
+	WidgetID:          1,
+	SimulationModelID: 0,
+}
+
+var FileB_response = FileResponse{
+	ID:                2,
+	Name:              FileB.Name,
+	Type:              FileB.Type,
+	Size:              FileB.Size,
+	ImageWidth:        FileB.ImageWidth,
+	ImageHeight:       FileB.ImageHeight,
+	Date:              FileB.Date,
+	WidgetID:          FileB.WidgetID,
+	SimulationModelID: FileB.SimulationModelID,
+}
+
+var FileC = File{
+	Name:              "File_C",
+	Type:              "text/plain",
+	Size:              32,
+	ImageHeight:       10,
+	ImageWidth:        10,
+	Date:              time.Now().String(),
+	WidgetID:          0,
+	SimulationModelID: 1,
+}
+var FileD = File{
+	Name:              "File_D",
+	Type:              "text/plain",
+	Size:              5000,
+	ImageHeight:       400,
+	ImageWidth:        800,
+	Date:              time.Now().String(),
+	WidgetID:          0,
+	SimulationModelID: 1,
+}

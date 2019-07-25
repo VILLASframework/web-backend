@@ -66,8 +66,8 @@ type FileResponse struct {
 	ID                uint   `json:"id"`
 	Type              string `json:"type"`
 	Size              uint   `json:"size"`
-	H                 uint   `json:"imageHeight"`
-	W                 uint   `json:"imageWidth"`
+	ImageWidth        uint   `json:"imageHeight"`
+	ImageHeight       uint   `json:"imageWidth"`
 	Date              string `json:"date"`
 	WidgetID          uint   `json:"widgetID"`
 	SimulationModelID uint   `json:"simulationModelID"`

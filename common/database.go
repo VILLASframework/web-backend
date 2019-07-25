@@ -125,14 +125,11 @@ func DummyPopulateDB(test_db *gorm.DB) {
 	checkErr(test_db.Create(&DashboardA).Error)
 	checkErr(test_db.Create(&DashboardB).Error)
 
-	file_A := File{Name: "File_A"}
-	file_B := File{Name: "File_B"}
-	file_C := File{Name: "File_C"}
-	file_D := File{Name: "File_D"}
-	checkErr(test_db.Create(&file_A).Error)
-	checkErr(test_db.Create(&file_B).Error)
-	checkErr(test_db.Create(&file_C).Error)
-	checkErr(test_db.Create(&file_D).Error)
+	// Files
+	checkErr(test_db.Create(&FileA).Error)
+	checkErr(test_db.Create(&FileB).Error)
+	checkErr(test_db.Create(&FileC).Error)
+	checkErr(test_db.Create(&FileD).Error)
 
 	widg_A := Widget{Name: "Widget_A"}
 	widg_B := Widget{Name: "Widget_B"}
@@ -168,16 +165,16 @@ func DummyPopulateDB(test_db *gorm.DB) {
 	checkErr(test_db.Model(&SimulationModelA).Association("OutputMapping").Append(&OutSignalB).Error)
 
 	// SimulationModel HM Files
-	checkErr(test_db.Model(&SimulationModelA).Association("Files").Append(&file_C).Error)
-	checkErr(test_db.Model(&SimulationModelA).Association("Files").Append(&file_D).Error)
+	checkErr(test_db.Model(&SimulationModelA).Association("Files").Append(&FileC).Error)
+	checkErr(test_db.Model(&SimulationModelA).Association("Files").Append(&FileD).Error)
 
 	// Simulator HM SimulationModels
 	checkErr(test_db.Model(&SimulatorA).Association("SimulationModels").Append(&SimulationModelA).Error)
 	checkErr(test_db.Model(&SimulatorA).Association("SimulationModels").Append(&SimulationModelB).Error)
 
 	// Widget HM Files
-	checkErr(test_db.Model(&widg_A).Association("Files").Append(&file_A).Error)
-	checkErr(test_db.Model(&widg_A).Association("Files").Append(&file_B).Error)
+	checkErr(test_db.Model(&widg_A).Association("Files").Append(&FileA).Error)
+	checkErr(test_db.Model(&widg_A).Association("Files").Append(&FileB).Error)
 }
 
 // Erase tables and glose the testdb

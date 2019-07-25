@@ -17,49 +17,17 @@ import (
 	"testing"
 )
 
-var token string
-var filecontent = "This is my testfile"
-var filecontent_update = "This is my updated testfile with a dot at the end."
-var filename = "testfile.txt"
-var filename_update = "testfileupdate.txt"
-
-type credentials struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
-
-var cred = credentials{
-	Username: "User_A",
-	Password: "abc123",
-}
-
-var msgOK = common.ResponseMsg{
-	Message: "OK.",
-}
-
-var FileA = common.FileResponse{
-	Name:     "File_A",
-	ID:       1,
-	WidgetID: 1,
-}
-
-var FileB = common.FileResponse{
-	Name:     "File_B",
-	ID:       2,
-	WidgetID: 1,
-}
-
-var myFiles = []common.FileResponse{
-	FileA,
-	FileB,
-}
-
-var msgFiles = common.ResponseMsgFiles{
-	Files: myFiles,
-}
-
-// Test /models endpoints
+// Test /files endpoints
 func TestSignalEndpoints(t *testing.T) {
+
+	var token string
+	var filecontent = "This is my testfile"
+	var filecontent_update = "This is my updated testfile with a dot at the end."
+	var filename = "testfile.txt"
+	var filename_update = "testfileupdate.txt"
+
+	var myFiles = []common.FileResponse{common.FileA_response, common.FileB_response}
+	var msgFiles = common.ResponseMsgFiles{Files: myFiles}
 
 	db := common.DummyInitDB()
 	defer db.Close()
@@ -88,12 +56,12 @@ func TestSignalEndpoints(t *testing.T) {
 
 	RegisterFileEndpoints(api.Group("/files"))
 
-	credjson, err := json.Marshal(cred)
+	credjson, err := json.Marshal(common.CredUser)
 	if err != nil {
 		panic(err)
 	}
 
-	msgOKjson, err := json.Marshal(msgOK)
+	msgOKjson, err := json.Marshal(common.MsgOK)
 	if err != nil {
 		panic(err)
 	}
