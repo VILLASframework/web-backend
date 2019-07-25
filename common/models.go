@@ -26,8 +26,8 @@ type Scenario struct {
 	Name string `gorm:"not null"`
 	// Running state of scenario
 	Running bool `gorm:"default:false"`
-	// Start parameters of scenario as JSON string
-	StartParameters string
+	// Start parameters of scenario as JSON
+	StartParameters postgres.Jsonb
 	// Users that have access to the scenario
 	Users []*User `gorm:"not null;many2many:user_scenarios"`
 	// SimulationModels that belong to the scenario
@@ -46,8 +46,8 @@ type SimulationModel struct {
 	OutputLength int `gorm:"default:1"`
 	// Number of input signals
 	InputLength int `gorm:"default:1"`
-	// Start parameters of simulation model as JSON string
-	StartParameters string
+	// Start parameters of simulation model as JSON
+	StartParameters postgres.Jsonb
 	// ID of Scenario to which simulation model belongs
 	ScenarioID uint
 	// ID of simulator associated with simulation model
@@ -168,4 +168,9 @@ type File struct {
 	WidgetID uint
 	// TODO Add file itself here??
 	FileData []byte `gorm:"column:FileData"`
+}
+
+type credentials struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
 }

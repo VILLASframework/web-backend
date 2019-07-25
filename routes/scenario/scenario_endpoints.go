@@ -76,7 +76,7 @@ func getScenarios(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Tags scenarios
-// @Param inputScenario body common.ScenarioResponse true "Scenario to be added"
+// @Param inputScenario body common.ResponseMsgScenario true "Scenario to be added"
 // @Success 200 "OK."
 // @Failure 401 "Unauthorized Access"
 // @Failure 403 "Access forbidden."
@@ -98,8 +98,8 @@ func addScenario(c *gin.Context) {
 		return
 	}
 
-	var so Scenario
-	err = c.BindJSON(&so)
+	var newScenarioData common.ResponseMsgScenario
+	err = c.BindJSON(&newScenarioData)
 	if err != nil {
 		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -108,14 +108,20 @@ func addScenario(c *gin.Context) {
 		return
 	}
 
+	var newScenario Scenario
+	newScenario.ID = newScenarioData.Scenario.ID
+	newScenario.StartParameters = newScenarioData.Scenario.StartParameters
+	newScenario.Running = newScenarioData.Scenario.Running
+	newScenario.Name = newScenarioData.Scenario.Name
+
 	// save new scenario to DB
-	err = so.save()
+	err = newScenario.save()
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
 
 	// add user to new scenario
-	err = so.addUser(&(u.User))
+	err = newScenario.addUser(&(u.User))
 	if common.ProvideErrorResponse(c, err) == false {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "OK.",
@@ -129,7 +135,7 @@ func addScenario(c *gin.Context) {
 // @Tags scenarios
 // @Accept json
 // @Produce json
-// @Param inputScenario body common.ScenarioResponse true "Scenario to be updated"
+// @Param inputScenario body common.ResponseMsgScenario true "Scenario to be updated"
 // @Success 200 "OK."
 // @Failure 401 "Unauthorized Access"
 // @Failure 403 "Access forbidden."
@@ -144,8 +150,8 @@ func updateScenario(c *gin.Context) {
 		return
 	}
 
-	var modifiedSo Scenario
-	err := c.BindJSON(&modifiedSo)
+	var modifiedScenarioData common.ResponseMsgScenario
+	err := c.BindJSON(&modifiedScenarioData)
 	if err != nil {
 		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -154,7 +160,7 @@ func updateScenario(c *gin.Context) {
 		return
 	}
 
-	err = so.update(modifiedSo)
+	err = so.update(modifiedScenarioData.Scenario)
 	if common.ProvideErrorResponse(c, err) == false {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "OK.",

@@ -10,20 +10,20 @@ type UserResponse struct {
 }
 
 type ScenarioResponse struct {
-	Name        string `json:"Name"`
-	ID          uint   `json:"ID"`
-	Running     bool   `json:"Running"`
-	StartParams string `json:"Starting Parameters"`
+	Name            string         `json:"name"`
+	ID              uint           `json:"id"`
+	Running         bool           `json:"running"`
+	StartParameters postgres.Jsonb `json:"startParameters"`
 }
 
 type SimulationModelResponse struct {
-	ID           uint   `json:"ID"`
-	Name         string `json:"Name"`
-	OutputLength int    `json:"OutputLength"`
-	InputLength  int    `json:"InputLength"`
-	ScenarioID   uint   `json:"ScenarioID"`
-	SimulatorID  uint   `json:"SimulatorID"`
-	StartParams  string `json:"StartParams"`
+	ID              uint           `json:"id"`
+	Name            string         `json:"name"`
+	OutputLength    int            `json:"outputLength"`
+	InputLength     int            `json:"inputLength"`
+	ScenarioID      uint           `json:"scenarioID"`
+	SimulatorID     uint           `json:"simulatorID"`
+	StartParameters postgres.Jsonb `json:"startParameters"`
 }
 
 type SimulatorResponse struct {
@@ -74,11 +74,11 @@ type FileResponse struct {
 }
 
 type SignalResponse struct {
-	Name              string `json:"Name"`
-	Unit              string `json:"Unit"`
-	Index             uint   `json:"Index"`
-	Direction         string `json:"Direction"`
-	SimulationModelID uint   `json:"SimulationModelID"`
+	Name              string `json:"name"`
+	Unit              string `json:"unit"`
+	Index             uint   `json:"index"`
+	Direction         string `json:"direction"`
+	SimulationModelID uint   `json:"simulationModelID"`
 }
 
 // Response messages

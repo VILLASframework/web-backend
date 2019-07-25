@@ -55,7 +55,7 @@ func (m *SimulationModel) addToScenario() error {
 	return err
 }
 
-func (m *SimulationModel) Update(modifiedSimulationModel SimulationModel) error {
+func (m *SimulationModel) Update(modifiedSimulationModel common.SimulationModelResponse) error {
 	db := common.GetDB()
 
 	if m.SimulatorID != modifiedSimulationModel.SimulatorID {

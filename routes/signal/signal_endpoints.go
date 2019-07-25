@@ -70,7 +70,7 @@ func getSignals(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Tags signals
-// @Param inputSignal body common.Signal true "A signal to be added to the model incl. direction and model ID to which signal shall be added"
+// @Param inputSignal body common.ResponseMsgSignal true "A signal to be added to the model incl. direction and model ID to which signal shall be added"
 // @Success 200 "OK."
 // @Failure 401 "Unauthorized Access"
 // @Failure 403 "Access forbidden."
@@ -79,8 +79,8 @@ func getSignals(c *gin.Context) {
 // @Router /signals [post]
 func addSignal(c *gin.Context) {
 
-	var newSignal Signal
-	err := c.BindJSON(&newSignal)
+	var newSignalData common.ResponseMsgSignal
+	err := c.BindJSON(&newSignalData)
 	if err != nil {
 		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -88,6 +88,13 @@ func addSignal(c *gin.Context) {
 		})
 		return
 	}
+
+	var newSignal Signal
+	newSignal.Index = newSignalData.Signal.Index
+	newSignal.SimulationModelID = newSignalData.Signal.SimulationModelID
+	newSignal.Direction = newSignalData.Signal.Direction
+	newSignal.Unit = newSignalData.Signal.Unit
+	newSignal.Name = newSignalData.Signal.Name
 
 	ok, _ := simulationmodel.CheckPermissions(c, common.Update, "body", int(newSignal.SimulationModelID))
 	if !ok {
@@ -121,7 +128,7 @@ func updateSignal(c *gin.Context) {
 		return
 	}
 
-	var modifiedSignal Signal
+	var modifiedSignal common.ResponseMsgSignal
 	err := c.BindJSON(&modifiedSignal)
 	if err != nil {
 		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
@@ -131,7 +138,7 @@ func updateSignal(c *gin.Context) {
 		return
 	}
 
-	err = sig.update(modifiedSignal)
+	err = sig.update(modifiedSignal.Signal)
 	if common.ProvideErrorResponse(c, err) == false {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "OK.",

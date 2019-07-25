@@ -33,7 +33,7 @@ func (s *Scenario) save() error {
 	return err
 }
 
-func (s *Scenario) update(modifiedScenario Scenario) error {
+func (s *Scenario) update(modifiedScenario common.ScenarioResponse) error {
 	db := common.GetDB()
 	err := db.Model(s).Update(modifiedScenario).Error
 	return err

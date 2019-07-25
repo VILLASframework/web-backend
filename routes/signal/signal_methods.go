@@ -63,7 +63,7 @@ func (s *Signal) addToSimulationModel() error {
 	return err
 }
 
-func (s *Signal) update(modifiedSignal Signal) error {
+func (s *Signal) update(modifiedSignal common.SignalResponse) error {
 	db := common.GetDB()
 
 	err := db.Model(s).Updates(map[string]interface{}{

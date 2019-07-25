@@ -3,105 +3,29 @@ package scenario
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/user"
-
-	"github.com/gin-gonic/gin"
-
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/user"
 )
-
-var token string
-
-type credentials struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
-
-var cred = credentials{
-	Username: "User_A",
-	Password: "abc123",
-}
-
-var msgOK = common.ResponseMsg{
-	Message: "OK.",
-}
-
-var user_A = common.UserResponse{
-	Username: "User_A",
-	Role:     "User",
-	Mail:     "",
-	ID:       2,
-}
-
-var user_B = common.UserResponse{
-	Username: "User_B",
-	Role:     "User",
-	Mail:     "",
-	ID:       3,
-}
-
-var myUsers = []common.UserResponse{
-	user_A,
-	user_B,
-}
-
-var myUserA = []common.UserResponse{
-	user_A,
-}
-
-var msgUsers = common.ResponseMsgUsers{
-	Users: myUsers,
-}
-
-var msgUserA = common.ResponseMsgUsers{
-	Users: myUserA,
-}
-
-var scenarioA = common.ScenarioResponse{
-	Name:    "Scenario_A",
-	ID:      1,
-	Running: false,
-}
-
-var scenarioB = common.ScenarioResponse{
-	Name:    "Scenario_B",
-	ID:      2,
-	Running: false,
-}
-
-var scenarioC = common.Scenario{
-	Name:            "Scenario_C",
-	Running:         false,
-	StartParameters: "test",
-}
-
-var scenarioC_response = common.ScenarioResponse{
-	ID:          3,
-	Name:        scenarioC.Name,
-	Running:     scenarioC.Running,
-	StartParams: scenarioC.StartParameters,
-}
-
-var myScenarios = []common.ScenarioResponse{
-	scenarioA,
-	scenarioB,
-}
-
-var msgScenarios = common.ResponseMsgScenarios{
-	Scenarios: myScenarios,
-}
-
-var msgScenario = common.ResponseMsgScenario{
-	Scenario: scenarioC_response,
-}
 
 // Test /scenarios endpoints
 func TestScenarioEndpoints(t *testing.T) {
+
+	var token string
+
+	var myUsers = []common.UserResponse{common.UserA_response, common.UserB_response}
+	var myUserA = []common.UserResponse{common.UserA_response}
+	var msgUsers = common.ResponseMsgUsers{Users: myUsers}
+	var msgUserA = common.ResponseMsgUsers{Users: myUserA}
+	var myScenarios = []common.ScenarioResponse{common.ScenarioA_response, common.ScenarioB_response}
+	var msgScenarios = common.ResponseMsgScenarios{Scenarios: myScenarios}
+	var msgScenario = common.ResponseMsgScenario{Scenario: common.ScenarioC_response}
+	var msgScenarioUpdated = common.ResponseMsgScenario{Scenario: common.ScenarioCUpdated_response}
 
 	db := common.DummyInitDB()
 	defer db.Close()
@@ -118,37 +42,14 @@ func TestScenarioEndpoints(t *testing.T) {
 
 	RegisterScenarioEndpoints(api.Group("/scenarios"))
 
-	credjson, err := json.Marshal(cred)
+	credjson, _ := json.Marshal(common.CredUser)
+	msgOKjson, _ := json.Marshal(common.MsgOK)
+	msgScenariosjson, _ := json.Marshal(msgScenarios)
+	msgScenariojson, _ := json.Marshal(msgScenario)
+	msgScenarioUpdatedjson, _ := json.Marshal(msgScenarioUpdated)
 
-	msgOKjson, err := json.Marshal(msgOK)
-	if err != nil {
-		panic(err)
-	}
-
-	msgUsersjson, err := json.Marshal(msgUsers)
-	if err != nil {
-		panic(err)
-	}
-
-	msgUserAjson, err := json.Marshal(msgUserA)
-	if err != nil {
-		panic(err)
-	}
-
-	msgScenariosjson, err := json.Marshal(msgScenarios)
-	if err != nil {
-		panic(err)
-	}
-
-	msgScenariojson, err := json.Marshal(msgScenario)
-	if err != nil {
-		panic(err)
-	}
-
-	scenarioCjson, err := json.Marshal(scenarioC)
-	if err != nil {
-		panic(err)
-	}
+	msgUsersjson, _ := json.Marshal(msgUsers)
+	msgUserAjson, _ := json.Marshal(msgUserA)
 
 	token = common.AuthenticateForTest(t, router, "/api/authenticate", "POST", credjson, 200)
 
@@ -156,10 +57,14 @@ func TestScenarioEndpoints(t *testing.T) {
 	common.TestEndpoint(t, router, token, "/api/scenarios", "GET", nil, 200, msgScenariosjson)
 
 	// test POST scenarios/
-	common.TestEndpoint(t, router, token, "/api/scenarios", "POST", scenarioCjson, 200, msgOKjson)
+	common.TestEndpoint(t, router, token, "/api/scenarios", "POST", msgScenariojson, 200, msgOKjson)
 
 	// test GET scenarios/:ScenarioID
 	common.TestEndpoint(t, router, token, "/api/scenarios/3", "GET", nil, 200, msgScenariojson)
+
+	// test PUT scenarios/:ScenarioID
+	common.TestEndpoint(t, router, token, "/api/scenarios/3", "PUT", msgScenarioUpdatedjson, 200, msgOKjson)
+	common.TestEndpoint(t, router, token, "/api/scenarios/3", "GET", nil, 200, msgScenarioUpdatedjson)
 
 	// test DELETE scenarios/:ScenarioID
 	common.TestEndpoint(t, router, token, "/api/scenarios/3", "DELETE", nil, 200, msgOKjson)

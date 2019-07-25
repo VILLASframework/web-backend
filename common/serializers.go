@@ -74,10 +74,10 @@ type ScenarioSerializer struct {
 
 func (self *ScenarioSerializer) Response() ScenarioResponse {
 	response := ScenarioResponse{
-		Name:        self.Name,
-		ID:          self.ID,
-		Running:     self.Running,
-		StartParams: self.StartParameters,
+		Name:            self.Name,
+		ID:              self.ID,
+		Running:         self.Running,
+		StartParameters: self.StartParameters,
 	}
 	return response
 }
@@ -105,13 +105,13 @@ type SimulationModelSerializer struct {
 
 func (self *SimulationModelSerializer) Response() SimulationModelResponse {
 	response := SimulationModelResponse{
-		ID:           self.ID,
-		Name:         self.Name,
-		OutputLength: self.OutputLength,
-		InputLength:  self.InputLength,
-		ScenarioID:   self.ScenarioID,
-		SimulatorID:  self.SimulatorID,
-		StartParams:  self.StartParameters,
+		ID:              self.ID,
+		Name:            self.Name,
+		OutputLength:    self.OutputLength,
+		InputLength:     self.InputLength,
+		ScenarioID:      self.ScenarioID,
+		SimulatorID:     self.SimulatorID,
+		StartParameters: self.StartParameters,
 	}
 	return response
 }

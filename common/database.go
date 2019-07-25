@@ -1,13 +1,10 @@
 package common
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
 	"github.com/jinzhu/gorm"
-	"github.com/jinzhu/gorm/dialects/postgres"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
-	"golang.org/x/crypto/bcrypt"
 	"log"
 )
 
@@ -99,28 +96,30 @@ func DummyPopulateDB(test_db *gorm.DB) {
 
 	MigrateModels(test_db)
 
-	// Create two entries of each model
+	// Create entries of each model (data defined in testdata.go)
 
-	propertiesA := json.RawMessage(`{"name" : "TestNameA", "category" : "CategoryA", "location" : "anywhere on earth", "type": "dummy"}`)
-	propertiesB := json.RawMessage(`{"name" : "TestNameB", "category" : "CategoryB", "location" : "where ever you want", "type": "generic"}`)
-	simr_A := Simulator{UUID: "4854af30-325f-44a5-ad59-b67b2597de68", Host: "Host_A", State: "running", Modeltype: "ModelTypeA", StateUpdateAt: "placeholder", Properties: postgres.Jsonb{propertiesA}, RawProperties: postgres.Jsonb{propertiesA}}
-	simr_B := Simulator{UUID: "7be0322d-354e-431e-84bd-ae4c9633138b", Host: "Host_B", State: "idle", Modeltype: "ModelTypeB", StateUpdateAt: "placeholder", Properties: postgres.Jsonb{propertiesB}, RawProperties: postgres.Jsonb{propertiesB}}
-	checkErr(test_db.Create(&simr_A).Error)
-	checkErr(test_db.Create(&simr_B).Error)
+	// Users
+	checkErr(test_db.Create(&User0).Error) // Admin
+	checkErr(test_db.Create(&UserA).Error) // Normal User
+	checkErr(test_db.Create(&UserB).Error) // Normal User
 
-	outSig_A := Signal{Name: "outSignal_A", Direction: "out", Index: 0, Unit: "V"}
-	outSig_B := Signal{Name: "outSignal_B", Direction: "out", Index: 1, Unit: "V"}
-	inSig_A := Signal{Name: "inSignal_A", Direction: "in", Index: 0, Unit: "A"}
-	inSig_B := Signal{Name: "inSignal_B", Direction: "in", Index: 1, Unit: "A"}
-	checkErr(test_db.Create(&outSig_A).Error)
-	checkErr(test_db.Create(&outSig_B).Error)
-	checkErr(test_db.Create(&inSig_A).Error)
-	checkErr(test_db.Create(&inSig_B).Error)
+	// Simulators
+	checkErr(test_db.Create(&SimulatorA).Error)
+	checkErr(test_db.Create(&SimulatorB).Error)
 
-	mo_A := SimulationModel{Name: "SimulationModel_A"}
-	mo_B := SimulationModel{Name: "SimulationModel_B"}
-	checkErr(test_db.Create(&mo_A).Error)
-	checkErr(test_db.Create(&mo_B).Error)
+	// Scenarios
+	checkErr(test_db.Create(&ScenarioA).Error)
+	checkErr(test_db.Create(&ScenarioB).Error)
+
+	// Signals
+	checkErr(test_db.Create(&OutSignalA).Error)
+	checkErr(test_db.Create(&OutSignalB).Error)
+	checkErr(test_db.Create(&InSignalA).Error)
+	checkErr(test_db.Create(&InSignalB).Error)
+
+	// Simulation Models
+	checkErr(test_db.Create(&SimulationModelA).Error)
+	checkErr(test_db.Create(&SimulationModelB).Error)
 
 	file_A := File{Name: "File_A"}
 	file_B := File{Name: "File_B"}
@@ -130,33 +129,6 @@ func DummyPopulateDB(test_db *gorm.DB) {
 	checkErr(test_db.Create(&file_B).Error)
 	checkErr(test_db.Create(&file_C).Error)
 	checkErr(test_db.Create(&file_D).Error)
-
-	so_A := Scenario{Name: "Scenario_A"}
-	so_B := Scenario{Name: "Scenario_B"}
-	checkErr(test_db.Create(&so_A).Error)
-	checkErr(test_db.Create(&so_B).Error)
-
-	// Hash passwords with bcrypt algorithm
-	var bcryptCost = 10
-
-	pw_0, err :=
-		bcrypt.GenerateFromPassword([]byte("xyz789"), bcryptCost)
-	checkErr(err)
-
-	pw_A, err :=
-		bcrypt.GenerateFromPassword([]byte("abc123"), bcryptCost)
-	checkErr(err)
-
-	pw_B, err :=
-		bcrypt.GenerateFromPassword([]byte("bcd234"), bcryptCost)
-	checkErr(err)
-
-	usr_0 := User{Username: "User_0", Password: string(pw_0), Role: "Admin"}
-	usr_A := User{Username: "User_A", Password: string(pw_A), Role: "User"}
-	usr_B := User{Username: "User_B", Password: string(pw_B), Role: "User"}
-	checkErr(test_db.Create(&usr_0).Error)
-	checkErr(test_db.Create(&usr_A).Error)
-	checkErr(test_db.Create(&usr_B).Error)
 
 	dab_A := Dashboard{Name: "Dashboard_A"}
 	dab_B := Dashboard{Name: "Dashboard_B"}
@@ -173,41 +145,40 @@ func DummyPopulateDB(test_db *gorm.DB) {
 	// For `has many` use the models with id=1 and id=2
 
 	// User HM Scenarios, Scenario HM Users (Many-to-Many)
-	checkErr(test_db.Model(&so_A).Association("Users").Append(&usr_A).Error)
-	checkErr(test_db.Model(&so_A).Association("Users").Append(&usr_B).Error)
-	checkErr(test_db.Model(&so_B).Association("Users").Append(&usr_A).Error)
-	checkErr(test_db.Model(&so_B).Association("Users").Append(&usr_B).Error)
+	checkErr(test_db.Model(&ScenarioA).Association("Users").Append(&UserA).Error)
+	checkErr(test_db.Model(&ScenarioA).Association("Users").Append(&UserB).Error)
+	checkErr(test_db.Model(&ScenarioB).Association("Users").Append(&UserA).Error)
+	checkErr(test_db.Model(&ScenarioB).Association("Users").Append(&UserB).Error)
 
 	// Scenario HM SimulationModels
-	checkErr(test_db.Model(&so_A).Association("SimulationModels").Append(&mo_A).Error)
-	checkErr(test_db.Model(&so_A).Association("SimulationModels").Append(&mo_B).Error)
+	checkErr(test_db.Model(&ScenarioA).Association("SimulationModels").Append(&SimulationModelA).Error)
+	checkErr(test_db.Model(&ScenarioA).Association("SimulationModels").Append(&SimulationModelB).Error)
 
 	// Scenario HM Dashboards
-	checkErr(test_db.Model(&so_A).Association("Dashboards").Append(&dab_A).Error)
-	checkErr(test_db.Model(&so_A).Association("Dashboards").Append(&dab_B).Error)
+	checkErr(test_db.Model(&ScenarioA).Association("Dashboards").Append(&dab_A).Error)
+	checkErr(test_db.Model(&ScenarioA).Association("Dashboards").Append(&dab_B).Error)
 
 	// Dashboard HM Widget
 	checkErr(test_db.Model(&dab_A).Association("Widgets").Append(&widg_A).Error)
 	checkErr(test_db.Model(&dab_A).Association("Widgets").Append(&widg_B).Error)
 
 	// SimulationModel HM Signals
-	checkErr(test_db.Model(&mo_A).Association("InputMapping").Append(&inSig_A).Error)
-	checkErr(test_db.Model(&mo_A).Association("InputMapping").Append(&inSig_B).Error)
-	checkErr(test_db.Model(&mo_A).Association("OutputMapping").Append(&outSig_A).Error)
-	checkErr(test_db.Model(&mo_A).Association("OutputMapping").Append(&outSig_B).Error)
+	checkErr(test_db.Model(&SimulationModelA).Association("InputMapping").Append(&InSignalA).Error)
+	checkErr(test_db.Model(&SimulationModelA).Association("InputMapping").Append(&InSignalB).Error)
+	checkErr(test_db.Model(&SimulationModelA).Association("OutputMapping").Append(&OutSignalA).Error)
+	checkErr(test_db.Model(&SimulationModelA).Association("OutputMapping").Append(&OutSignalB).Error)
 
 	// SimulationModel HM Files
-	checkErr(test_db.Model(&mo_A).Association("Files").Append(&file_C).Error)
-	checkErr(test_db.Model(&mo_A).Association("Files").Append(&file_D).Error)
+	checkErr(test_db.Model(&SimulationModelA).Association("Files").Append(&file_C).Error)
+	checkErr(test_db.Model(&SimulationModelA).Association("Files").Append(&file_D).Error)
 
 	// Simulator HM SimulationModels
-	checkErr(test_db.Model(&simr_A).Association("SimulationModels").Append(&mo_A).Error)
-	checkErr(test_db.Model(&simr_A).Association("SimulationModels").Append(&mo_B).Error)
+	checkErr(test_db.Model(&SimulatorA).Association("SimulationModels").Append(&SimulationModelA).Error)
+	checkErr(test_db.Model(&SimulatorA).Association("SimulationModels").Append(&SimulationModelB).Error)
 
 	// Widget HM Files
 	checkErr(test_db.Model(&widg_A).Association("Files").Append(&file_A).Error)
 	checkErr(test_db.Model(&widg_A).Association("Files").Append(&file_B).Error)
-
 }
 
 // Erase tables and glose the testdb

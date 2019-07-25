@@ -55,7 +55,7 @@ func getSimulationModels(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Tags models
-// @Param inputSimulationModel body common.SimulationModelResponse true "Simulation model to be added incl. IDs of scenario and simulator"
+// @Param inputSimulationModel body common.ResponseMsgSimulationModel true "Simulation model to be added incl. IDs of scenario and simulator"
 // @Success 200 "OK."
 // @Failure 401 "Unauthorized Access"
 // @Failure 403 "Access forbidden."
@@ -64,8 +64,8 @@ func getSimulationModels(c *gin.Context) {
 // @Router /models [post]
 func addSimulationModel(c *gin.Context) {
 
-	var newModel SimulationModel
-	err := c.BindJSON(&newModel)
+	var newModelData common.ResponseMsgSimulationModel
+	err := c.BindJSON(&newModelData)
 	if err != nil {
 		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -73,6 +73,15 @@ func addSimulationModel(c *gin.Context) {
 		})
 		return
 	}
+
+	var newModel SimulationModel
+	newModel.ID = newModelData.SimulationModel.ID
+	newModel.Name = newModelData.SimulationModel.Name
+	newModel.SimulatorID = newModelData.SimulationModel.SimulatorID
+	newModel.ScenarioID = newModelData.SimulationModel.ScenarioID
+	newModel.StartParameters = newModelData.SimulationModel.StartParameters
+	newModel.OutputLength = 0
+	newModel.InputLength = 0
 
 	ok, _ := scenario.CheckPermissions(c, common.Create, "body", int(newModel.ScenarioID))
 	if !ok {
@@ -93,7 +102,7 @@ func addSimulationModel(c *gin.Context) {
 // @Tags models
 // @Accept json
 // @Produce json
-// @Param inputSimulationModel body common.SimulationModelResponse true "Simulation model to be updated"
+// @Param inputSimulationModel body common.ResponseMsgSimulationModel true "Simulation model to be updated"
 // @Success 200 "OK."
 // @Failure 401 "Unauthorized Access"
 // @Failure 403 "Access forbidden."
@@ -108,7 +117,7 @@ func updateSimulationModel(c *gin.Context) {
 		return
 	}
 
-	var modifiedModel SimulationModel
+	var modifiedModel common.ResponseMsgSimulationModel
 	err := c.BindJSON(&modifiedModel)
 	if err != nil {
 		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
@@ -118,7 +127,7 @@ func updateSimulationModel(c *gin.Context) {
 		return
 	}
 
-	err = m.Update(modifiedModel)
+	err = m.Update(modifiedModel.SimulationModel)
 	if common.ProvideErrorResponse(c, err) == false {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "OK.",

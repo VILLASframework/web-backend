@@ -10,106 +10,17 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/user"
 )
 
-var token string
-
-type credentials struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
-
-var cred = credentials{
-	Username: "User_A",
-	Password: "abc123",
-}
-
-var msgOK = common.ResponseMsg{
-	Message: "OK.",
-}
-
-var inSignalA = common.SignalResponse{
-	Name:              "inSignal_A",
-	Direction:         "in",
-	Index:             0,
-	Unit:              "A",
-	SimulationModelID: 1,
-}
-
-var inSignalB = common.SignalResponse{
-	Name:              "inSignal_B",
-	Direction:         "in",
-	Index:             1,
-	Unit:              "A",
-	SimulationModelID: 1,
-}
-
-var inSignalC = common.SignalResponse{
-	Name:              "inSignal_C",
-	Direction:         "in",
-	Index:             2,
-	Unit:              "A",
-	SimulationModelID: 1,
-}
-
-var inSignalCupdated = common.Signal{
-	Name:              "inSignalupdated_C",
-	Direction:         "in",
-	Index:             2,
-	Unit:              "Ohm",
-	SimulationModelID: 1,
-}
-
-var inSignalCupdatedResp = common.SignalResponse{
-	Name:              inSignalCupdated.Name,
-	Direction:         inSignalCupdated.Direction,
-	Index:             inSignalCupdated.Index,
-	Unit:              inSignalCupdated.Unit,
-	SimulationModelID: inSignalCupdated.SimulationModelID,
-}
-
-var outSignalA = common.SignalResponse{
-	Name:              "outSignal_A",
-	Direction:         "out",
-	Index:             0,
-	Unit:              "V",
-	SimulationModelID: 1,
-}
-
-var outSignalB = common.SignalResponse{
-	Name:              "outSignal_B",
-	Direction:         "out",
-	Index:             1,
-	Unit:              "V",
-	SimulationModelID: 1,
-}
-
-var myInSignals = []common.SignalResponse{
-	inSignalA,
-	inSignalB,
-}
-
-var myOutSignals = []common.SignalResponse{
-	outSignalA,
-	outSignalB,
-}
-
-var msgInSignals = common.ResponseMsgSignals{
-	Signals: myInSignals,
-}
-
-var msgInSignalCupdated = common.ResponseMsgSignal{
-	Signal: inSignalCupdatedResp,
-}
-
-var msgOutSignals = common.ResponseMsgSignals{
-	Signals: myOutSignals,
-}
-
-var msgInSignalC = common.ResponseMsgSignal{
-	Signal: inSignalC,
-}
-
 // Test /models endpoints
 func TestSignalEndpoints(t *testing.T) {
+
+	var token string
+
+	var myInSignals = []common.SignalResponse{common.InSignalA_response, common.InSignalB_response}
+	var myOutSignals = []common.SignalResponse{common.OutSignalA_response, common.OutSignalB_response}
+	var msgInSignals = common.ResponseMsgSignals{Signals: myInSignals}
+	var msgInSignalC = common.ResponseMsgSignal{Signal: common.InSignalC_response}
+	var msgInSignalCupdated = common.ResponseMsgSignal{Signal: common.InSignalCUpdated_response}
+	var msgOutSignals = common.ResponseMsgSignals{Signals: myOutSignals}
 
 	db := common.DummyInitDB()
 	defer db.Close()
@@ -126,39 +37,12 @@ func TestSignalEndpoints(t *testing.T) {
 
 	RegisterSignalEndpoints(api.Group("/signals"))
 
-	credjson, err := json.Marshal(cred)
-	if err != nil {
-		panic(err)
-	}
-
-	msgOKjson, err := json.Marshal(msgOK)
-	if err != nil {
-		panic(err)
-	}
-
-	msgInSignalsjson, err := json.Marshal(msgInSignals)
-	if err != nil {
-		panic(err)
-	}
-
-	msgOutSignalsjson, err := json.Marshal(msgOutSignals)
-	if err != nil {
-		panic(err)
-	}
-
-	inSignalCjson, err := json.Marshal(inSignalC)
-	if err != nil {
-		panic(err)
-	}
-
-	msgInSignalCjson, err := json.Marshal(msgInSignalC)
-	if err != nil {
-		panic(err)
-	}
-
-	msgInSignalCupdatedjson, err := json.Marshal(msgInSignalCupdated)
-
-	inSignalCupdatedjson, err := json.Marshal(inSignalCupdated)
+	credjson, _ := json.Marshal(common.CredUser)
+	msgOKjson, _ := json.Marshal(common.MsgOK)
+	msgInSignalsjson, _ := json.Marshal(msgInSignals)
+	msgOutSignalsjson, _ := json.Marshal(msgOutSignals)
+	inSignalCjson, _ := json.Marshal(msgInSignalC)
+	inSignalCupdatedjson, _ := json.Marshal(msgInSignalCupdated)
 
 	token = common.AuthenticateForTest(t, router, "/api/authenticate", "POST", credjson, 200)
 
@@ -170,11 +54,11 @@ func TestSignalEndpoints(t *testing.T) {
 	common.TestEndpoint(t, router, token, "/api/signals", "POST", inSignalCjson, 200, msgOKjson)
 
 	// test GET signals/:signalID
-	common.TestEndpoint(t, router, token, "/api/signals/5", "GET", nil, 200, msgInSignalCjson)
+	common.TestEndpoint(t, router, token, "/api/signals/5", "GET", nil, 200, inSignalCjson)
 
 	// test PUT signals/:signalID
 	common.TestEndpoint(t, router, token, "/api/signals/5", "PUT", inSignalCupdatedjson, 200, msgOKjson)
-	common.TestEndpoint(t, router, token, "/api/signals/5", "GET", nil, 200, msgInSignalCupdatedjson)
+	common.TestEndpoint(t, router, token, "/api/signals/5", "GET", nil, 200, inSignalCupdatedjson)
 
 	// test DELETE signals/:signalID
 	common.TestEndpoint(t, router, token, "/api/signals/5", "DELETE", nil, 200, msgOKjson)
