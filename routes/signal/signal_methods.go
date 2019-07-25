@@ -48,8 +48,9 @@ func (s *Signal) addToSimulationModel() error {
 		}
 
 		// adapt length of mapping
-		m.InputLength = db.Model(m).Where("Direction = ?", "in").Association("InputMapping").Count()
-		err = m.Update(m)
+		var newInputLength = db.Model(m).Where("Direction = ?", "in").Association("InputMapping").Count()
+		err = db.Model(m).Update("InputLength", newInputLength).Error
+
 	} else {
 		err = db.Model(&m).Association("OutputMapping").Append(s).Error
 		if err != nil {
@@ -57,8 +58,8 @@ func (s *Signal) addToSimulationModel() error {
 		}
 
 		// adapt length of mapping
-		m.OutputLength = db.Model(m).Where("Direction = ?", "out").Association("OutputMapping").Count()
-		err = m.Update(m)
+		var newOutputLength = db.Model(m).Where("Direction = ?", "out").Association("OutputMapping").Count()
+		err = db.Model(m).Update("OutputLength", newOutputLength).Error
 	}
 	return err
 }
@@ -94,8 +95,8 @@ func (s *Signal) delete() error {
 		}
 
 		// Reduce length of mapping by 1
-		m.InputLength--
-		err = m.Update(m)
+		var newInputLength = m.InputLength - 1
+		err = db.Model(m).Update("InputLength", newInputLength).Error
 
 	} else {
 		err = db.Model(&m).Association("OutputMapping").Delete(s).Error
@@ -104,8 +105,8 @@ func (s *Signal) delete() error {
 		}
 
 		// Reduce length of mapping by 1
-		m.OutputLength--
-		err = m.Update(m)
+		var newOutputLength = m.OutputLength - 1
+		err = db.Model(m).Update("OutputLength", newOutputLength).Error
 	}
 
 	return err
