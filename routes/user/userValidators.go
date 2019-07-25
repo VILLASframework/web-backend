@@ -37,14 +37,16 @@ func (r *updateUserRequest) validate() error {
 	return errs
 }
 
-func (r *updateUserRequest) createUser() User {
+func (r *updateUserRequest) createUser(role interface{}) User {
 	var u User
 
 	u.Username = r.Username
 	u.Password = r.Password
 	u.Mail = r.Mail
-	u.Role = r.Role
-
+	// Only the Admin must be able to update user's role
+	if role == "Admin" {
+		u.Role = r.Role
+	}
 	return u
 }
 

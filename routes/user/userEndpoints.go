@@ -304,14 +304,7 @@ func updateUser(c *gin.Context) {
 		return
 	}
 
-	updatedUser := req.createUser()
-
-	// TODO: validate the User for:
-	//       - username
-	// 		 - password
-	//       - email
-	//       - role
-	// and in case of error raise 422
+	updatedUser := req.createUser(userRole)
 
 	// Check that the username is NOT taken
 	err = updatedUser.ByUsername(updatedUser.Username)
