@@ -29,7 +29,7 @@ func RegisterSimulatorEndpoints(r *gin.RouterGroup) {
 // @ID getSimulators
 // @Tags simulators
 // @Produce json
-// @Success 200 {array} common.SimulatorResponse "Simulator parameters requested by user"
+// @Success 200 {array} common.ResponseMsgSimulators "Simulator parameters requested by user"
 // @Failure 401 "Unauthorized Access"
 // @Failure 403 "Access forbidden."
 // @Failure 404 "Not found"
@@ -61,7 +61,7 @@ func getSimulators(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Tags simulators
-// @Param inputSimulator body common.SimulatorResponse true "Simulator to be added"
+// @Param inputSimulator body common.ResponseMsgSimulator true "Simulator to be added"
 // @Success 200 "OK."
 // @Failure 401 "Unauthorized Access"
 // @Failure 403 "Access forbidden."
@@ -111,7 +111,7 @@ func addSimulator(c *gin.Context) {
 // @Tags simulators
 // @Accept json
 // @Produce json
-// @Param inputSimulator body common.SimulatorResponse true "Simulator to be updated"
+// @Param inputSimulator body common.ResponseMsgSimulator true "Simulator to be updated"
 // @Success 200 "OK."
 // @Failure 401 "Unauthorized Access"
 // @Failure 403 "Access forbidden."
@@ -165,7 +165,7 @@ func updateSimulator(c *gin.Context) {
 // @ID getSimulator
 // @Produce  json
 // @Tags simulators
-// @Success 200 {object} common.SimulatorResponse "Simulator requested by user"
+// @Success 200 {object} common.ResponseMsgSimulator "Simulator requested by user"
 // @Failure 401 "Unauthorized Access"
 // @Failure 403 "Access forbidden."
 // @Failure 404 "Not found"
@@ -251,7 +251,7 @@ func deleteSimulator(c *gin.Context) {
 // @ID getModelsOfSimulator
 // @Tags simulators
 // @Produce json
-// @Success 200 "OK."
+// @Success 200 {object} common.ResponseMsgSimulationModels "Simulation models requested by user"
 // @Failure 401 "Unauthorized Access"
 // @Failure 403 "Access forbidden."
 // @Failure 404 "Not found"
