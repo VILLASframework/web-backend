@@ -131,10 +131,9 @@ func DummyPopulateDB(test_db *gorm.DB) {
 	checkErr(test_db.Create(&FileC).Error)
 	checkErr(test_db.Create(&FileD).Error)
 
-	widg_A := Widget{Name: "Widget_A"}
-	widg_B := Widget{Name: "Widget_B"}
-	checkErr(test_db.Create(&widg_A).Error)
-	checkErr(test_db.Create(&widg_B).Error)
+	// Widgets
+	checkErr(test_db.Create(&WidgetA).Error)
+	checkErr(test_db.Create(&WidgetB).Error)
 
 	// Associations between models
 	// For `belongs to` use the model with id=1
@@ -155,8 +154,8 @@ func DummyPopulateDB(test_db *gorm.DB) {
 	checkErr(test_db.Model(&ScenarioA).Association("Dashboards").Append(&DashboardB).Error)
 
 	// Dashboard HM Widget
-	checkErr(test_db.Model(&DashboardA).Association("Widgets").Append(&widg_A).Error)
-	checkErr(test_db.Model(&DashboardA).Association("Widgets").Append(&widg_B).Error)
+	checkErr(test_db.Model(&DashboardA).Association("Widgets").Append(&WidgetA).Error)
+	checkErr(test_db.Model(&DashboardA).Association("Widgets").Append(&WidgetB).Error)
 
 	// SimulationModel HM Signals
 	checkErr(test_db.Model(&SimulationModelA).Association("InputMapping").Append(&InSignalA).Error)
@@ -173,8 +172,8 @@ func DummyPopulateDB(test_db *gorm.DB) {
 	checkErr(test_db.Model(&SimulatorA).Association("SimulationModels").Append(&SimulationModelB).Error)
 
 	// Widget HM Files
-	checkErr(test_db.Model(&widg_A).Association("Files").Append(&FileA).Error)
-	checkErr(test_db.Model(&widg_A).Association("Files").Append(&FileB).Error)
+	checkErr(test_db.Model(&WidgetA).Association("Files").Append(&FileA).Error)
+	checkErr(test_db.Model(&WidgetA).Association("Files").Append(&FileB).Error)
 }
 
 // Erase tables and glose the testdb

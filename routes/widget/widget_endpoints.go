@@ -55,7 +55,7 @@ func getWidgets(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Tags widgets
-// @Param inputWidget body common.WidgetResponse true "Widget to be added incl. ID of dashboard"
+// @Param inputWidget body common.ResponseMsgWidget true "Widget to be added incl. ID of dashboard"
 // @Success 200 "OK."
 // @Failure 401 "Unauthorized Access"
 // @Failure 403 "Access forbidden."
@@ -64,8 +64,8 @@ func getWidgets(c *gin.Context) {
 // @Router /widgets [post]
 func addWidget(c *gin.Context) {
 
-	var newWidget Widget
-	err := c.BindJSON(&newWidget)
+	var newWidgetData common.ResponseMsgWidget
+	err := c.BindJSON(&newWidgetData)
 	if err != nil {
 		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -73,6 +73,20 @@ func addWidget(c *gin.Context) {
 		})
 		return
 	}
+
+	var newWidget Widget
+	newWidget.Name = newWidgetData.Widget.Name
+	newWidget.Type = newWidgetData.Widget.Type
+	newWidget.Height = newWidgetData.Widget.Height
+	newWidget.Width = newWidgetData.Widget.Width
+	newWidget.MinHeight = newWidgetData.Widget.MinHeight
+	newWidget.MinWidth = newWidgetData.Widget.MinWidth
+	newWidget.X = newWidgetData.Widget.X
+	newWidget.Y = newWidgetData.Widget.Y
+	newWidget.Z = newWidgetData.Widget.Z
+	newWidget.CustomProperties = newWidgetData.Widget.CustomProperties
+	newWidget.IsLocked = newWidgetData.Widget.IsLocked
+	newWidget.DashboardID = newWidgetData.Widget.DashboardID
 
 	ok, _ := dashboard.CheckPermissions(c, common.Create, "body", int(newWidget.DashboardID))
 	if !ok {
@@ -94,7 +108,7 @@ func addWidget(c *gin.Context) {
 // @Tags widgets
 // @Accept json
 // @Produce json
-// @Param inputWidget body common.WidgetResponse true "Widget to be updated"
+// @Param inputWidget body common.ResponseMsgWidget true "Widget to be updated"
 // @Success 200 "OK."
 // @Failure 401 "Unauthorized Access"
 // @Failure 403 "Access forbidden."
@@ -109,7 +123,7 @@ func updateWidget(c *gin.Context) {
 		return
 	}
 
-	var modifiedWidget Widget
+	var modifiedWidget common.ResponseMsgWidget
 	err := c.BindJSON(&modifiedWidget)
 	if err != nil {
 		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
@@ -119,7 +133,7 @@ func updateWidget(c *gin.Context) {
 		return
 	}
 
-	err = w.update(modifiedWidget)
+	err = w.update(modifiedWidget.Widget)
 	if common.ProvideErrorResponse(c, err) == false {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "OK.",

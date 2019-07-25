@@ -209,19 +209,19 @@ type WidgetSerializer struct {
 func (self *WidgetSerializer) Response() WidgetResponse {
 
 	response := WidgetResponse{
-		ID:          self.ID,
-		Name:        self.Name,
-		Type:        self.Type,
-		Width:       self.Width,
-		Height:      self.Height,
-		MinWidth:    self.MinWidth,
-		MinHeight:   self.MinHeight,
-		X:           self.X,
-		Y:           self.Y,
-		Z:           self.Z,
-		DashboardID: self.DashboardID,
-		IsLocked:    self.IsLocked,
-		//CustomProperties
+		ID:               self.ID,
+		Name:             self.Name,
+		Type:             self.Type,
+		Width:            self.Width,
+		Height:           self.Height,
+		MinWidth:         self.MinWidth,
+		MinHeight:        self.MinHeight,
+		X:                self.X,
+		Y:                self.Y,
+		Z:                self.Z,
+		DashboardID:      self.DashboardID,
+		IsLocked:         self.IsLocked,
+		CustomProperties: self.CustomProperties,
 	}
 	return response
 }

@@ -46,7 +46,7 @@ func (w *Widget) addToDashboard() error {
 	return err
 }
 
-func (w *Widget) update(modifiedWidget Widget) error {
+func (w *Widget) update(modifiedWidget common.WidgetResponse) error {
 
 	db := common.GetDB()
 	err := db.Model(w).Updates(map[string]interface{}{
