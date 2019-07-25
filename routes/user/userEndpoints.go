@@ -267,9 +267,13 @@ func updateUser(c *gin.Context) {
 		return
 	}
 
-	// If the logged in user has NOT the same id as the user that is
+	// Cases
+	// 1: If the logged in user has NOT the same id as the user that is
 	// going to be updated AND the role is NOT admin (is already saved
-	// in the context from the Authentication middleware)
+	// in the context from the Authentication middleware) the operation
+	// is elegal
+	// 2: If the udpate is done by the Admin every field can be updated
+	// 3: If the update is done by a User everything except Role
 	userID, _ := c.Get(common.UserIDCtx)
 	userRole, _ := c.Get(common.UserRoleCtx)
 
@@ -282,14 +286,25 @@ func updateUser(c *gin.Context) {
 	}
 
 	// Bind the (context) with the User struct
-	var updatedUser User
-	if err := c.ShouldBindJSON(&updatedUser); err != nil {
+	var req updateUserRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{
 			"success": false,
 			"message": fmt.Sprintf("%v", err),
 		})
 		return
 	}
+
+	// Validate the request (taking into acount the role)
+	if err = req.validate(); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
+		})
+		return
+	}
+
+	updatedUser := req.createUser()
 
 	// TODO: validate the User for:
 	//       - username

@@ -31,6 +31,23 @@ func (r *loginRequest) validate() error {
 	return errs
 }
 
+func (r *updateUserRequest) validate() error {
+	validate = validator.New()
+	errs := validate.Struct(r)
+	return errs
+}
+
+func (r *updateUserRequest) createUser() User {
+	var u User
+
+	u.Username = r.Username
+	u.Password = r.Password
+	u.Mail = r.Mail
+	u.Role = r.Role
+
+	return u
+}
+
 func (r *addUserRequest) validate() error {
 	validate = validator.New()
 	errs := validate.Struct(r)
