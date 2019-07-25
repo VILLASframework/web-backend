@@ -338,3 +338,14 @@ var InSignalCUpdated_response = SignalResponse{
 	Unit:              InSignalCUpdated.Unit,
 	SimulationModelID: InSignalCUpdated.SimulationModelID,
 }
+
+// Dashboards
+
+var DashboardA = Dashboard{ID: 1, Name: "Dashboard_A", Grid: 15, ScenarioID: 1}
+var DashboardA_response = DashboardResponse{ID: DashboardA.ID, Name: DashboardA.Name, Grid: DashboardA.Grid, ScenarioID: DashboardA.ScenarioID}
+var DashboardB = Dashboard{ID: 2, Name: "Dashboard_B", Grid: 10, ScenarioID: 1}
+var DashboardB_response = DashboardResponse{ID: DashboardB.ID, Name: DashboardB.Name, Grid: DashboardB.Grid, ScenarioID: DashboardB.ScenarioID}
+var DashboardC = Dashboard{ID: 3, Name: "Dashboard_C", Grid: 25, ScenarioID: 1}
+var DashboardC_response = DashboardResponse{ID: DashboardC.ID, Name: DashboardC.Name, Grid: DashboardC.Grid, ScenarioID: DashboardC.ScenarioID}
+var DashboardCUpdated = Dashboard{ID: DashboardC.ID, Name: "Dashboard_Cupdated", Grid: 24, ScenarioID: DashboardC.ScenarioID}
+var DashboardCUpdated_response = DashboardResponse{ID: DashboardCUpdated.ID, Name: DashboardCUpdated.Name, Grid: DashboardCUpdated.Grid, ScenarioID: DashboardCUpdated.ScenarioID}

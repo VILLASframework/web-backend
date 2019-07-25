@@ -46,7 +46,7 @@ func (d *Dashboard) addToScenario() error {
 	return err
 }
 
-func (d *Dashboard) update(modifiedDab Dashboard) error {
+func (d *Dashboard) update(modifiedDab common.DashboardResponse) error {
 
 	db := common.GetDB()
 

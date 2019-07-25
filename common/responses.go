@@ -39,38 +39,38 @@ type SimulatorResponse struct {
 }
 
 type DashboardResponse struct {
-	ID         uint   `json:"ID"`
-	Name       string `json:"Name"`
-	Grid       int    `json:"Grid"`
-	ScenarioID uint   `json:"ScenarioID"`
+	ID         uint   `json:"id"`
+	Name       string `json:"name"`
+	Grid       int    `json:"grid"`
+	ScenarioID uint   `json:"scenarioID"`
 }
 
 type WidgetResponse struct {
-	ID               uint   `json:"ID"`
-	Name             string `json:"Name"`
-	Type             string `json:"Type"`
-	Width            uint   `json:"Width"`
-	Height           uint   `json:"Height"`
-	MinWidth         uint   `json:"MinWidth"`
-	MinHeight        uint   `json:"MinHeight"`
-	X                int    `json:"X"`
-	Y                int    `json:"Y"`
-	Z                int    `json:"Z"`
-	DashboardID      uint   `json:"DashboardID"`
-	IsLocked         bool   `json:"IsLocked"`
-	CustomProperties string `json:"CustomProperties"`
+	ID               uint           `json:"id"`
+	Name             string         `json:"name"`
+	Type             string         `json:"type"`
+	Width            uint           `json:"width"`
+	Height           uint           `json:"height"`
+	MinWidth         uint           `json:"minWidth"`
+	MinHeight        uint           `json:"minHeight"`
+	X                int            `json:"x"`
+	Y                int            `json:"y"`
+	Z                int            `json:"z"`
+	DashboardID      uint           `json:"dashboardID"`
+	IsLocked         bool           `json:"isLocked"`
+	CustomProperties postgres.Jsonb `json:"customProperties"`
 }
 
 type FileResponse struct {
-	Name              string `json:"Name"`
-	ID                uint   `json:"ID"`
-	Type              string `json:"Type"`
-	Size              uint   `json:"Size"`
-	H                 uint   `json:"ImageHeight"`
-	W                 uint   `json:"ImageWidth"`
-	Date              string `json:"Date"`
-	WidgetID          uint   `json:"WidgetID"`
-	SimulationModelID uint   `json:"SimulationModelID"`
+	Name              string `json:"name"`
+	ID                uint   `json:"id"`
+	Type              string `json:"type"`
+	Size              uint   `json:"size"`
+	H                 uint   `json:"imageHeight"`
+	W                 uint   `json:"imageWidth"`
+	Date              string `json:"date"`
+	WidgetID          uint   `json:"widgetID"`
+	SimulationModelID uint   `json:"simulationModelID"`
 }
 
 type SignalResponse struct {

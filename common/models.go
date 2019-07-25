@@ -139,7 +139,7 @@ type Widget struct {
 	// Locked state of widget
 	IsLocked bool `gorm:"default:false"`
 	// Custom properties of widget as JSON string
-	CustomProperties string
+	CustomProperties postgres.Jsonb
 	// ID of dashboard to which widget belongs
 	DashboardID uint
 	// Files that belong to widget (for example images)
@@ -170,6 +170,7 @@ type File struct {
 	FileData []byte `gorm:"column:FileData"`
 }
 
+// Credentials type (not for DB)
 type credentials struct {
 	Username string `json:"username"`
 	Password string `json:"password"`

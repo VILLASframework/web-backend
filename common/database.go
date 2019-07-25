@@ -121,6 +121,10 @@ func DummyPopulateDB(test_db *gorm.DB) {
 	checkErr(test_db.Create(&SimulationModelA).Error)
 	checkErr(test_db.Create(&SimulationModelB).Error)
 
+	// Dashboards
+	checkErr(test_db.Create(&DashboardA).Error)
+	checkErr(test_db.Create(&DashboardB).Error)
+
 	file_A := File{Name: "File_A"}
 	file_B := File{Name: "File_B"}
 	file_C := File{Name: "File_C"}
@@ -129,11 +133,6 @@ func DummyPopulateDB(test_db *gorm.DB) {
 	checkErr(test_db.Create(&file_B).Error)
 	checkErr(test_db.Create(&file_C).Error)
 	checkErr(test_db.Create(&file_D).Error)
-
-	dab_A := Dashboard{Name: "Dashboard_A"}
-	dab_B := Dashboard{Name: "Dashboard_B"}
-	checkErr(test_db.Create(&dab_A).Error)
-	checkErr(test_db.Create(&dab_B).Error)
 
 	widg_A := Widget{Name: "Widget_A"}
 	widg_B := Widget{Name: "Widget_B"}
@@ -155,12 +154,12 @@ func DummyPopulateDB(test_db *gorm.DB) {
 	checkErr(test_db.Model(&ScenarioA).Association("SimulationModels").Append(&SimulationModelB).Error)
 
 	// Scenario HM Dashboards
-	checkErr(test_db.Model(&ScenarioA).Association("Dashboards").Append(&dab_A).Error)
-	checkErr(test_db.Model(&ScenarioA).Association("Dashboards").Append(&dab_B).Error)
+	checkErr(test_db.Model(&ScenarioA).Association("Dashboards").Append(&DashboardA).Error)
+	checkErr(test_db.Model(&ScenarioA).Association("Dashboards").Append(&DashboardB).Error)
 
 	// Dashboard HM Widget
-	checkErr(test_db.Model(&dab_A).Association("Widgets").Append(&widg_A).Error)
-	checkErr(test_db.Model(&dab_A).Association("Widgets").Append(&widg_B).Error)
+	checkErr(test_db.Model(&DashboardA).Association("Widgets").Append(&widg_A).Error)
+	checkErr(test_db.Model(&DashboardA).Association("Widgets").Append(&widg_B).Error)
 
 	// SimulationModel HM Signals
 	checkErr(test_db.Model(&SimulationModelA).Association("InputMapping").Append(&InSignalA).Error)

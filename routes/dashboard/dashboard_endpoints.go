@@ -56,7 +56,7 @@ func getDashboards(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Tags dashboards
-// @Param inputDab body common.DashboardResponse true "Dashboard to be added incl. ID of Scenario"
+// @Param inputDab body common.ResponseMsgDashboard true "Dashboard to be added incl. ID of Scenario"
 // @Success 200 "OK."
 // @Failure 401 "Unauthorized Access"
 // @Failure 403 "Access forbidden."
@@ -65,8 +65,8 @@ func getDashboards(c *gin.Context) {
 // @Router /dashboards [post]
 func addDashboard(c *gin.Context) {
 
-	var newDab Dashboard
-	err := c.BindJSON(&newDab)
+	var newDabData common.ResponseMsgDashboard
+	err := c.BindJSON(&newDabData)
 	if err != nil {
 		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -74,6 +74,12 @@ func addDashboard(c *gin.Context) {
 		})
 		return
 	}
+
+	var newDab Dashboard
+	newDab.ID = newDabData.Dashboard.ID
+	newDab.Grid = newDabData.Dashboard.Grid
+	newDab.ScenarioID = newDabData.Dashboard.ScenarioID
+	newDab.Name = newDabData.Dashboard.Name
 
 	ok, _ := scenario.CheckPermissions(c, common.Create, "body", int(newDab.ScenarioID))
 	if !ok {
@@ -96,7 +102,7 @@ func addDashboard(c *gin.Context) {
 // @Tags dashboards
 // @Accept json
 // @Produce json
-// @Param inputDab body common.DashboardResponse true "Dashboard to be updated"
+// @Param inputDab body common.ResponseMsgDashboard true "Dashboard to be updated"
 // @Success 200 "OK."
 // @Failure 401 "Unauthorized Access"
 // @Failure 403 "Access forbidden."
@@ -111,7 +117,7 @@ func updateDashboard(c *gin.Context) {
 		return
 	}
 
-	var modifiedDab Dashboard
+	var modifiedDab common.ResponseMsgDashboard
 	err := c.BindJSON(&modifiedDab)
 	if err != nil {
 		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
@@ -121,7 +127,7 @@ func updateDashboard(c *gin.Context) {
 		return
 	}
 
-	err = d.update(modifiedDab)
+	err = d.update(modifiedDab.Dashboard)
 	if common.ProvideErrorResponse(c, err) == false {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "OK.",
