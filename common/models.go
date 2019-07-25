@@ -1,11 +1,13 @@
 package common
 
-import "github.com/jinzhu/gorm/dialects/postgres"
+import (
+	"github.com/jinzhu/gorm"
+	"github.com/jinzhu/gorm/dialects/postgres"
+)
 
 // User data model
 type User struct {
-	// ID of user
-	ID uint `gorm:"primary_key;auto_increment"`
+	gorm.Model
 	// Username of user
 	Username string `gorm:"unique;not null"`
 	// Password of user
@@ -20,8 +22,7 @@ type User struct {
 
 // Scenario data model
 type Scenario struct {
-	// ID of scenario
-	ID uint `gorm:"primary_key;auto_increment"`
+	gorm.Model
 	// Name of scenario
 	Name string `gorm:"not null"`
 	// Running state of scenario
@@ -38,8 +39,7 @@ type Scenario struct {
 
 // SimulationModel data model
 type SimulationModel struct {
-	// ID of simulation model
-	ID uint `gorm:"primary_key;auto_increment"`
+	gorm.Model
 	// Name of simulation model
 	Name string `gorm:"not null"`
 	// Number of output signals
@@ -62,8 +62,7 @@ type SimulationModel struct {
 
 // Signal data model
 type Signal struct {
-	// ID of simulation model
-	ID uint `gorm:"primary_key;auto_increment"`
+	gorm.Model
 	// Name of Signal
 	Name string
 	// Unit of Signal
@@ -78,8 +77,7 @@ type Signal struct {
 
 // Simulator data model
 type Simulator struct {
-	// ID of the simulator
-	ID uint `gorm:"primary_key;auto_increment",json:"id"`
+	gorm.Model
 	// UUID of the simulator
 	UUID string `gorm:"not null",json:"uuid"`
 	// Host if the simulator
@@ -102,8 +100,7 @@ type Simulator struct {
 
 // Dashboard data model
 type Dashboard struct {
-	// ID of dashboard
-	ID uint `gorm:"primary_key;auto_increment"`
+	gorm.Model
 	// Name of dashboard
 	Name string `gorm:"not null"`
 	// Grid of dashboard
@@ -116,8 +113,7 @@ type Dashboard struct {
 
 // Widget data model
 type Widget struct {
-	// ID of widget
-	ID uint `gorm:"primary_key;auto_increment"`
+	gorm.Model
 	// Name of widget
 	Name string `gorm:"not null"`
 	// Type of widget
@@ -148,14 +144,13 @@ type Widget struct {
 
 // File data model
 type File struct {
-	// ID of file
-	ID uint `gorm:"primary_key;auto_increment"`
+	gorm.Model
 	// Name of file
 	Name string `gorm:"not null"`
 	// Type of file (MIME type)
-	Type string `gorm:"not null"`
+	Type string
 	// Size of file (in byte)
-	Size uint `gorm:"not null"`
+	Size uint
 	// Height of image (only needed in case of image)
 	ImageHeight uint
 	// Width of image (only needed in case of image)
@@ -166,7 +161,7 @@ type File struct {
 	SimulationModelID uint
 	// ID of widget to which file belongs
 	WidgetID uint
-	// TODO Add file itself here??
+	// File itself
 	FileData []byte `gorm:"column:FileData"`
 }
 
