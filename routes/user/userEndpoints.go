@@ -4,37 +4,15 @@ import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-	"gopkg.in/go-playground/validator.v9"
 	"net/http"
 	"time"
 
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
 )
 
-var validate *validator.Validate
-
 // TODO: the signing secret must be environmental variable
 const jwtSigningSecret = "This should NOT be here!!@33$8&"
 const weekHours = time.Hour * 24 * 7
-
-type loginRequest struct {
-	Username string `form:"Username" validate:"required"`
-	Password string `form:"Password" validate:"required,min=8"`
-}
-
-type updateUserRequest struct {
-	Username string `form:"Username" validate:"omitempty"`
-	Password string `form:"Password" validate:"min=6"`
-	Role     string `form:"Role" validate:"omitempty,oneof=Admin User Guest"`
-	Mail     string `form:"Mail" validate:"omitempty,email"`
-}
-
-type createUserRequest struct {
-	Username string `form:"Username" validate:"required"`
-	Password string `form:"Password" validate:"required,min=6"`
-	Role     string `form:"Role" validate:"required,oneof=Admin User Guest"`
-	Mail     string `form:"Mail" validate:"required,email"`
-}
 
 type tokenClaims struct {
 	UserID uint   `json:"id"`
@@ -84,9 +62,8 @@ func authenticate(c *gin.Context) {
 		return
 	}
 
-	validate = validator.New()
-	errs := validate.Struct(credentials)
-	if errs != nil {
+	// Validate the login request
+	if errs := credentials.validate(); errs != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
 			"message": fmt.Sprintf("%v", errs),
@@ -205,9 +182,9 @@ func addUser(c *gin.Context) {
 		return
 	}
 
-	// Bind the response (context) with the User struct
-	var newUser User
-	if err := c.ShouldBindJSON(&newUser); err != nil {
+	// Bind the request
+	var req addUserRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{
 			"success": false,
 			"message": fmt.Sprintf("%v", err),
@@ -215,11 +192,17 @@ func addUser(c *gin.Context) {
 		return
 	}
 
-	// TODO: validate the User for:
-	//       - username
-	//       - email
-	//       - role
-	// and in case of error raise 422
+	// Validate the request
+	if err = req.validate(); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
+		})
+		return
+	}
+
+	// Create the new user from the request
+	newUser := req.createUser()
 
 	// Check that the username is NOT taken
 	err = newUser.ByUsername(newUser.Username)
