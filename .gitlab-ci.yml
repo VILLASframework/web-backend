@@ -2,6 +2,7 @@ variables:
   DEPLOY_USER: deploy
   DEPLOY_HOST: acs-os-fein-website
   DEPLOY_PATH: /var/www/villas/api/web/
+  TEST_FOLDER: routes/scenario
 
 stages:
   - prepare
@@ -64,7 +65,7 @@ test:api:bundle:
       - doc/api/index.html
       - doc/api/swagger.json
 
-test:backend:database:
+test:database:
   stage: test
   tags:
     - docker
@@ -79,7 +80,7 @@ test:backend:database:
   dependencies:
     - build:backend
 
-test:backend:endpoints:
+test:scenario:
   stage: test
   tags:
     - docker
@@ -89,13 +90,40 @@ test:backend:endpoints:
     - go mod tidy
     - go get -u github.com/swaggo/swag/cmd/swag
     - ~/go/bin/swag init -p pascalcase -g "start.go" -o "./doc/api/"
-    - cd routes/simulation
-    - go test -v -args -dbhost=/var/run/postgresql
-    - cd ../simulationmodel
+    - cd ${TEST_FOLDER}
     - go test -v -args -dbhost=/var/run/postgresql
   dependencies:
     - build:backend
 
+test:simulationmodel:
+  extends: test:scenario
+  variables:
+    TEST_FOLDER: routes/simulationmodel
+
+test:signal:
+  extends: test:scenario
+  variables:
+    TEST_FOLDER: routes/signal
+
+test:dashboard:
+  extends: test:scenario
+  variables:
+    TEST_FOLDER: routes/dashboard
+
+test:widget:
+  extends: test:scenario
+  variables:
+    TEST_FOLDER: routes/widget
+
+test:simulator:
+  extends: test:scenario
+  variables:
+    TEST_FOLDER: routes/simulator
+
+test:file:
+  extends: test:scenario
+  variables:
+    TEST_FOLDER: routes/file
 
 
 # Stage: deploy

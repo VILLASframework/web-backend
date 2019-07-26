@@ -1,13 +1,13 @@
 package common
 
 import (
-	"time"
+	"github.com/jinzhu/gorm"
+	"github.com/jinzhu/gorm/dialects/postgres"
 )
 
 // User data model
 type User struct {
-	// ID of user
-	ID uint `gorm:"primary_key;auto_increment"`
+	gorm.Model
 	// Username of user
 	Username string `gorm:"unique;not null"`
 	// Password of user
@@ -16,44 +16,40 @@ type User struct {
 	Mail string `gorm:"default:''"`
 	// Role of user
 	Role string `gorm:"default:'user'"`
-	// Simulations to which user has access
-	Simulations []*Simulation `gorm:"many2many:user_simulations"`
+	// Scenarios to which user has access
+	Scenarios []*Scenario `gorm:"many2many:user_scenarios"`
 }
 
-// Simulation data model
-type Simulation struct {
-	// ID of simulation
-	ID uint `gorm:"primary_key;auto_increment"`
-	// Name of simulation
+// Scenario data model
+type Scenario struct {
+	gorm.Model
+	// Name of scenario
 	Name string `gorm:"not null"`
-	// Running state of simulation
+	// Running state of scenario
 	Running bool `gorm:"default:false"`
-	// Start parameters of simulation as JSON string
-	StartParameters string
-	// Users that have access to the simulation
-	Users []*User `gorm:"not null;many2many:user_simulations"`
-	// SimulationModels that belong to the simulation
-	SimulationModels []SimulationModel `gorm:"foreignkey:SimulationID"`
-	// Visualizations that belong to the simulation
-	Visualizations []Visualization `gorm:"foreignkey:SimulationID"`
+	// Start parameters of scenario as JSON
+	StartParameters postgres.Jsonb
+	// Users that have access to the scenario
+	Users []*User `gorm:"not null;many2many:user_scenarios"`
+	// SimulationModels that belong to the scenario
+	SimulationModels []SimulationModel `gorm:"foreignkey:ScenarioID"`
+	// Dashboards that belong to the Scenario
+	Dashboards []Dashboard `gorm:"foreignkey:ScenarioID"`
 }
 
 // SimulationModel data model
 type SimulationModel struct {
-	// ID of simulation model
-	ID uint `gorm:"primary_key;auto_increment"`
+	gorm.Model
 	// Name of simulation model
 	Name string `gorm:"not null"`
 	// Number of output signals
 	OutputLength int `gorm:"default:1"`
 	// Number of input signals
 	InputLength int `gorm:"default:1"`
-	// Start parameters of simulation model as JSON string
-	StartParameters string
-	// ID of simulation to which simulation model belongs
-	SimulationID uint
-	// Simulator associated with simulation model
-	Simulator Simulator
+	// Start parameters of simulation model as JSON
+	StartParameters postgres.Jsonb
+	// ID of Scenario to which simulation model belongs
+	ScenarioID uint
 	// ID of simulator associated with simulation model
 	SimulatorID uint
 	// Mapping of output signals of the simulation model, order of signals is important
@@ -66,8 +62,7 @@ type SimulationModel struct {
 
 // Signal data model
 type Signal struct {
-	// ID of simulation model
-	ID uint `gorm:"primary_key;auto_increment"`
+	gorm.Model
 	// Name of Signal
 	Name string
 	// Unit of Signal
@@ -82,44 +77,43 @@ type Signal struct {
 
 // Simulator data model
 type Simulator struct {
-	// ID of the simulator
-	ID uint `gorm:"primary_key;auto_increment"`
+	gorm.Model
 	// UUID of the simulator
-	UUID string `gorm:"unique;not null"`
+	UUID string `gorm:"not null",json:"uuid"`
 	// Host if the simulator
-	Host string `gorm:"default:''"`
+	Host string `gorm:"default:''",json:"host"`
 	// Model type supported by the simulator
-	Modeltype string `gorm:"default:''"`
+	Modeltype string `gorm:"default:''",json:"modelType"`
 	// Uptime of the simulator
-	Uptime int `gorm:"default:0"`
+	Uptime int `gorm:"default:0",json:"uptime"`
 	// State of the simulator
-	State string `gorm:"default:''"`
+	State string `gorm:"default:''",json:"state"`
 	// Time of last state update
-	StateUpdateAt time.Time
+	StateUpdateAt string `gorm:"default:''",json:"stateUpdateAt"`
 	// Properties of simulator as JSON string
-	Properties string
+	Properties postgres.Jsonb `json:"properties"`
 	// Raw properties of simulator as JSON string
-	RawProperties string
+	RawProperties postgres.Jsonb `json:"rawProperties"`
+	// SimulationModels in which the simulator is used
+	SimulationModels []SimulationModel `gorm:"foreignkey:SimulatorID"`
 }
 
-// Visualization data model
-type Visualization struct {
-	// ID of visualization
-	ID uint `gorm:"primary_key;auto_increment"`
-	// Name of visualization
+// Dashboard data model
+type Dashboard struct {
+	gorm.Model
+	// Name of dashboard
 	Name string `gorm:"not null"`
-	// Grid of visualization
+	// Grid of dashboard
 	Grid int `gorm:"default:15"`
-	// ID of simulation to which visualization belongs
-	SimulationID uint `gorm:"not null"`
-	// Widgets that belong to visualization
-	Widgets []Widget `gorm:"foreignkey:VisualizationID"`
+	// ID of scenario to which dashboard belongs
+	ScenarioID uint
+	// Widgets that belong to dashboard
+	Widgets []Widget `gorm:"foreignkey:DashboardID"`
 }
 
 // Widget data model
 type Widget struct {
-	// ID of widget
-	ID uint `gorm:"primary_key;auto_increment"`
+	gorm.Model
 	// Name of widget
 	Name string `gorm:"not null"`
 	// Type of widget
@@ -141,33 +135,38 @@ type Widget struct {
 	// Locked state of widget
 	IsLocked bool `gorm:"default:false"`
 	// Custom properties of widget as JSON string
-	CustomProperties string
-	// ID of visualization to which widget belongs
-	VisualizationID uint `gorm:"not null"`
+	CustomProperties postgres.Jsonb
+	// ID of dashboard to which widget belongs
+	DashboardID uint
 	// Files that belong to widget (for example images)
 	Files []File `gorm:"foreignkey:WidgetID"`
 }
 
 // File data model
 type File struct {
-	// ID of file
-	ID uint `gorm:"primary_key;auto_increment"`
+	gorm.Model
 	// Name of file
 	Name string `gorm:"not null"`
-	// Path at which file is saved at server side
-	Path string `gorm:"not null"`
 	// Type of file (MIME type)
-	Type string `gorm:"not null"`
+	Type string
 	// Size of file (in byte)
-	Size uint `gorm:"not null"`
+	Size uint
 	// Height of image (only needed in case of image)
 	ImageHeight uint
 	// Width of image (only needed in case of image)
 	ImageWidth uint
 	// Last modification time of file
-	Date time.Time
+	Date string
 	// ID of model to which file belongs
-	SimulationModelID uint `gorm:""`
+	SimulationModelID uint
 	// ID of widget to which file belongs
-	WidgetID uint `gorm:""`
+	WidgetID uint
+	// File itself
+	FileData []byte `gorm:"column:FileData"`
+}
+
+// Credentials type (not for DB)
+type credentials struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
 }

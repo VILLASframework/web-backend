@@ -8,6 +8,8 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulationmodel"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/widget"
 )
 
 func RegisterFileEndpoints(r *gin.RouterGroup) {
@@ -28,8 +30,8 @@ func RegisterFileEndpoints(r *gin.RouterGroup) {
 // @Failure 403 "Access forbidden."
 // @Failure 404 "Not found"
 // @Failure 500 "Internal server error"
-// @Param originType query string true "Set to model for files of model, set to widget for files of widget"
-// @Param originID query int true "ID of either model or widget of which files are requested"
+// @Param objectType query string true "Set to model for files of model, set to widget for files of widget"
+// @Param objectID query int true "ID of either model or widget of which files are requested"
 // @Router /files [get]
 func getFiles(c *gin.Context) {
 
@@ -51,15 +53,33 @@ func getFiles(c *gin.Context) {
 		return
 	}
 
+	//Check access
+	var ok bool
+	var m simulationmodel.SimulationModel
+	var w widget.Widget
+	if objectType == "model" {
+		ok, m = simulationmodel.CheckPermissions(c, common.Read, "body", objectID)
+		if !ok {
+			return
+		}
+	} else {
+		ok, w = widget.CheckPermissions(c, common.Read, objectID)
+		if !ok {
+			return
+		}
+	}
+
+	// get meta data of files
 	db := common.GetDB()
+
 	var files []common.File
 	if objectType == "model" {
-		err = db.Where("ModelID", objectID).Find(&files).Error
+		err = db.Order("ID asc").Model(&m).Related(&files, "Files").Error
 		if common.ProvideErrorResponse(c, err) {
 			return
 		}
 	} else {
-		err = db.Where("WidgetID", objectID).Find(&files).Error
+		err = db.Order("ID asc").Model(&w).Related(&files, "Files").Error
 		if common.ProvideErrorResponse(c, err) {
 			return
 		}
@@ -93,15 +113,6 @@ func getFiles(c *gin.Context) {
 // @Param objectID query int true "ID of either model or widget of which files are requested"
 // @Router /files [post]
 func addFile(c *gin.Context) {
-	// Extract file from PUT request form
-	file_header, err := c.FormFile("file")
-	if err != nil {
-		errormsg := fmt.Sprintf("Bad request. Get form error: %s", err.Error())
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
-		})
-		return
-	}
 
 	objectType := c.Request.URL.Query().Get("objectType")
 	if objectType != "model" && objectType != "widget" {
@@ -115,6 +126,30 @@ func addFile(c *gin.Context) {
 	objectID, err := strconv.Atoi(objectID_s)
 	if err != nil {
 		errormsg := fmt.Sprintf("Bad request. Error on ID conversion: %s", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": errormsg,
+		})
+		return
+	}
+
+	// Check access
+	var ok bool
+	if objectType == "model" {
+		ok, _ = simulationmodel.CheckPermissions(c, common.Create, "body", objectID)
+		if !ok {
+			return
+		}
+	} else {
+		ok, _ = widget.CheckPermissions(c, common.Create, objectID)
+		if !ok {
+			return
+		}
+	}
+
+	// Extract file from POST request form
+	file_header, err := c.FormFile("file")
+	if err != nil {
+		errormsg := fmt.Sprintf("Bad request. Get form error: %s", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": errormsg,
 		})
@@ -149,22 +184,16 @@ func addFile(c *gin.Context) {
 // @Router /files/{fileID} [get]
 func getFile(c *gin.Context) {
 
-	fileID, err := common.GetFileID(c)
-	if err != nil {
+	// check access
+	ok, f := checkPermissions(c, common.Read)
+	if !ok {
 		return
 	}
 
-	var f File
-	err = f.byID(uint(fileID))
+	err := f.download(c)
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
-
-	f.download(c)
-
-	c.JSON(http.StatusOK, gin.H{
-		"message": "OK.",
-	})
 }
 
 // updateFile godoc
@@ -188,6 +217,12 @@ func getFile(c *gin.Context) {
 // @Router /files/{fileID} [put]
 func updateFile(c *gin.Context) {
 
+	// check access
+	ok, f := checkPermissions(c, common.Update)
+	if !ok {
+		return
+	}
+
 	// Extract file from PUT request form
 	err := c.Request.ParseForm()
 	if err != nil {
@@ -204,17 +239,6 @@ func updateFile(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": errormsg,
 		})
-		return
-	}
-
-	fileID, err := common.GetFileID(c)
-	if err != nil {
-		return
-	}
-
-	var f File
-	err = f.byID(uint(fileID))
-	if common.ProvideErrorResponse(c, err) {
 		return
 	}
 
@@ -239,7 +263,17 @@ func updateFile(c *gin.Context) {
 // @Param fileID path int true "ID of the file to update"
 // @Router /files/{fileID} [delete]
 func deleteFile(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Not implemented.",
-	})
+
+	// check access
+	ok, f := checkPermissions(c, common.Delete)
+	if !ok {
+		return
+	}
+
+	err := f.delete()
+	if common.ProvideErrorResponse(c, err) == false {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "OK.",
+		})
+	}
 }

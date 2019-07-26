@@ -21,9 +21,10 @@ type tokenClaims struct {
 }
 
 type AuthResponse struct {
-	Success bool   `json:"success"`
-	Message string `json:"message"`
-	Token   string `json:"token"`
+	Success bool                `json:"success"`
+	Message string              `json:"message"`
+	Token   string              `json:"token"`
+	User    common.UserResponse `json:"user"`
 }
 
 func VisitorAuthenticate(r *gin.RouterGroup) {
@@ -32,10 +33,10 @@ func VisitorAuthenticate(r *gin.RouterGroup) {
 
 func RegisterUserEndpoints(r *gin.RouterGroup) {
 	r.POST("", addUser)
-	r.PUT("/:UserID", updateUser)
+	r.PUT("/:userID", updateUser)
 	r.GET("", getUsers)
-	r.GET("/:UserID", getUser)
-	r.DELETE("/:UserID", deleteUser)
+	r.GET("/:userID", getUser)
+	r.DELETE("/:userID", deleteUser)
 }
 
 // authenticate godoc
@@ -123,10 +124,13 @@ func authenticate(c *gin.Context) {
 		return
 	}
 
+	serializer := common.UserSerializer{c, user.User}
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "Authenticated",
 		"token":   tokenString,
+		"user":    serializer.Response(false),
 	})
 }
 
@@ -242,7 +246,7 @@ func addUser(c *gin.Context) {
 // @Tags users
 // @Accept json
 // @Produce json
-// @Param inputUser body common.UserResponse true "User to be updated"
+// @Param inputUser body common.User true "User to be updated (anything except for ID can be changed, role can only be change by admin)"
 // @Success 200 "OK."
 // @Failure 401 "Unauthorized Access"
 // @Failure 403 "Access forbidden."
@@ -260,7 +264,7 @@ func updateUser(c *gin.Context) {
 
 	// Find the user
 	var user User
-	toBeUpdatedID, _ := common.UintParamFromCtx(c, "UserID")
+	toBeUpdatedID, _ := common.UintParamFromCtx(c, "userID")
 	err = user.ByID(toBeUpdatedID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, fmt.Sprintf("%v", err))
@@ -324,6 +328,15 @@ func updateUser(c *gin.Context) {
 		return
 	}
 
+	// To change the role of a user admin role is required
+	if (updatedUser.Role != user.Role) && (userRole != "Admin") {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"message": "Invalid authorization. User role can only be changed by Admin",
+		})
+		return
+	}
+
 	// Finaly update the user
 	err = user.update(updatedUser)
 	if err != nil {
@@ -359,7 +372,7 @@ func getUser(c *gin.Context) {
 	}
 
 	var user User
-	id, _ := common.UintParamFromCtx(c, "UserID")
+	id, _ := common.UintParamFromCtx(c, "userID")
 
 	err = user.ByID(id)
 	if err != nil {
@@ -394,7 +407,7 @@ func deleteUser(c *gin.Context) {
 	}
 
 	var user User
-	id, _ := common.UintParamFromCtx(c, "UserID")
+	id, _ := common.UintParamFromCtx(c, "userID")
 
 	// Check that the user exist
 	err = user.ByID(uint(id))

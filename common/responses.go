@@ -1,81 +1,84 @@
 package common
 
-import (
-	"time"
-)
+import "github.com/jinzhu/gorm/dialects/postgres"
 
 type UserResponse struct {
-	Username string `json:"Username"`
-	Role     string `json:"Role"`
-	Mail     string `json:"Mail"`
+	Username string `json:"username"`
+	Role     string `json:"role"`
+	Mail     string `json:"mail"`
+	ID       uint   `json:"id"`
 }
 
-type SimulationResponse struct {
-	Name        string `json:"Name"`
-	ID          uint   `json:"SimulationID"`
-	Running     bool   `json:"Running"`
-	StartParams string `json:"Starting Parameters"`
+type ScenarioResponse struct {
+	Name            string         `json:"name"`
+	ID              uint           `json:"id"`
+	Running         bool           `json:"running"`
+	StartParameters postgres.Jsonb `json:"startParameters"`
 }
 
 type SimulationModelResponse struct {
-	ID           uint   `json:"ID"`
-	Name         string `json:"Name"`
-	OutputLength int    `json:"OutputLength"`
-	InputLength  int    `json:"InputLength"`
-	SimulationID uint   `json:"SimulationID"`
-	SimulatorID  uint   `json:"SimulatorID"`
-	StartParams  string `json:"StartParams"`
+	ID              uint           `json:"id"`
+	Name            string         `json:"name"`
+	OutputLength    int            `json:"outputLength"`
+	InputLength     int            `json:"inputLength"`
+	ScenarioID      uint           `json:"scenarioID"`
+	SimulatorID     uint           `json:"simulatorID"`
+	StartParameters postgres.Jsonb `json:"startParameters"`
 }
 
 type SimulatorResponse struct {
-	UUID          string    `json:"UUID"`
-	Host          string    `json:"Host"`
-	ModelType     string    `json:"ModelType"`
-	Uptime        int       `json:"Uptime"`
-	State         string    `json:"State"`
-	StateUpdateAt time.Time `json:"StateUpdateAt"`
-	Properties    string    `json:"Properties"`
-	RawProperties string    `json:"RawProperties"`
+	ID            uint           `json:"id"`
+	UUID          string         `json:"uuid"`
+	Host          string         `json:"host"`
+	Modeltype     string         `json:"modelType"`
+	Uptime        int            `json:"uptime"`
+	State         string         `json:"state"`
+	StateUpdateAt string         `json:"stateUpdateAt"`
+	Properties    postgres.Jsonb `json:"properties"`
+	RawProperties postgres.Jsonb `json:"rawProperties"`
 }
 
-type VisualizationResponse struct {
-	Name         string `json:"Name"`
-	Grid         int    `json:"Grid"`
-	SimulationID uint   `json:"SimulationID"`
+type DashboardResponse struct {
+	ID         uint   `json:"id"`
+	Name       string `json:"name"`
+	Grid       int    `json:"grid"`
+	ScenarioID uint   `json:"scenarioID"`
 }
 
 type WidgetResponse struct {
-	Name             string `json:"Name"`
-	Type             string `json:"Type"`
-	Width            uint   `json:"Width"`
-	Height           uint   `json:"Height"`
-	MinWidth         uint   `json:"MinWidth"`
-	MinHeight        uint   `json:"MinHeight"`
-	X                int    `json:"X"`
-	Y                int    `json:"Y"`
-	Z                int    `json:"Z"`
-	VisualizationID  uint   `json:"VisualizationID"`
-	IsLocked         bool   `json:"IsLocked"`
-	CustomProperties string `json:"CustomProperties"`
+	ID               uint           `json:"id"`
+	Name             string         `json:"name"`
+	Type             string         `json:"type"`
+	Width            uint           `json:"width"`
+	Height           uint           `json:"height"`
+	MinWidth         uint           `json:"minWidth"`
+	MinHeight        uint           `json:"minHeight"`
+	X                int            `json:"x"`
+	Y                int            `json:"y"`
+	Z                int            `json:"z"`
+	DashboardID      uint           `json:"dashboardID"`
+	IsLocked         bool           `json:"isLocked"`
+	CustomProperties postgres.Jsonb `json:"customProperties"`
 }
 
 type FileResponse struct {
-	Name string    `json:"Name"`
-	ID   uint      `json:"FileID"`
-	Path string    `json:"Path"`
-	Type string    `json:"Type"`
-	Size uint      `json:"Size"`
-	H    uint      `json:"ImageHeight"`
-	W    uint      `json:"ImageWidth"`
-	Date time.Time `json:"Date"`
+	Name              string `json:"name"`
+	ID                uint   `json:"id"`
+	Type              string `json:"type"`
+	Size              uint   `json:"size"`
+	ImageWidth        uint   `json:"imageHeight"`
+	ImageHeight       uint   `json:"imageWidth"`
+	Date              string `json:"date"`
+	WidgetID          uint   `json:"widgetID"`
+	SimulationModelID uint   `json:"simulationModelID"`
 }
 
 type SignalResponse struct {
-	Name              string `json:"Name"`
-	Unit              string `json:"Unit"`
-	Index             uint   `json:"Index"`
-	Direction         string `json:"Direction"`
-	SimulationModelID uint   `json:"SimulationModelID"`
+	Name              string `json:"name"`
+	Unit              string `json:"unit"`
+	Index             uint   `json:"index"`
+	Direction         string `json:"direction"`
+	SimulationModelID uint   `json:"simulationModelID"`
 }
 
 // Response messages
@@ -92,12 +95,12 @@ type ResponseMsgUser struct {
 	User UserResponse `json:"user"`
 }
 
-type ResponseMsgSimulations struct {
-	Simulations []SimulationResponse `json:"simulations"`
+type ResponseMsgScenarios struct {
+	Scenarios []ScenarioResponse `json:"scenarios"`
 }
 
-type ResponseMsgSimulation struct {
-	Simulation SimulationResponse `json:"simulation"`
+type ResponseMsgScenario struct {
+	Scenario ScenarioResponse `json:"scenario"`
 }
 
 type ResponseMsgSimulationModels struct {
@@ -110,4 +113,40 @@ type ResponseMsgSimulationModel struct {
 
 type ResponseMsgSignals struct {
 	Signals []SignalResponse `json:"signals"`
+}
+
+type ResponseMsgSignal struct {
+	Signal SignalResponse `json:"signal"`
+}
+
+type ResponseMsgDashboards struct {
+	Dashboards []DashboardResponse `json:"dashboards"`
+}
+
+type ResponseMsgDashboard struct {
+	Dashboard DashboardResponse `json:"dashboard"`
+}
+
+type ResponseMsgWidgets struct {
+	Widgets []WidgetResponse `json:"widgets"`
+}
+
+type ResponseMsgWidget struct {
+	Widget WidgetResponse `json:"widget"`
+}
+
+type ResponseMsgSimulators struct {
+	Simulators []SimulatorResponse `json:"simulators"`
+}
+
+type ResponseMsgSimulator struct {
+	Simulator SimulatorResponse `json:"simulator"`
+}
+
+type ResponseMsgFiles struct {
+	Files []FileResponse `json:"files"`
+}
+
+type ResponseMsgFile struct {
+	File FileResponse `json:"file"`
 }

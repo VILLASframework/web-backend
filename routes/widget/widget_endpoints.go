@@ -6,46 +6,39 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/visualization"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/dashboard"
 )
 
 func RegisterWidgetEndpoints(r *gin.RouterGroup) {
 	r.GET("", getWidgets)
 	r.POST("", addWidget)
-	//r.POST("/:widgetID", cloneWidget)
 	r.PUT("/:widgetID", updateWidget)
 	r.GET("/:widgetID", getWidget)
 	r.DELETE("/:widgetID", deleteWidget)
 }
 
 // getWidgets godoc
-// @Summary Get all widgets of visualization
+// @Summary Get all widgets of dashboard
 // @ID getWidgets
 // @Produce  json
 // @Tags widgets
-// @Success 200 {array} common.WidgetResponse "Array of widgets to which belong to visualization"
+// @Success 200 {array} common.WidgetResponse "Array of widgets to which belong to dashboard"
 // @Failure 401 "Unauthorized Access"
 // @Failure 403 "Access forbidden."
 // @Failure 404 "Not found"
 // @Failure 500 "Internal server error"
-// @Param visualizationID query int true "Visualization ID"
+// @Param dashboardID query int true "Dashboard ID"
 // @Router /widgets [get]
 func getWidgets(c *gin.Context) {
 
-	visID, err := common.GetVisualizationID(c)
-	if err != nil {
-		return
-	}
-
-	var vis visualization.Visualization
-	err = vis.ByID(uint(visID))
-	if common.ProvideErrorResponse(c, err) {
+	ok, dab := dashboard.CheckPermissions(c, common.Read, "query", -1)
+	if !ok {
 		return
 	}
 
 	db := common.GetDB()
 	var widgets []common.Widget
-	err = db.Order("ID asc").Model(vis).Related(&widgets, "Widgets").Error
+	err := db.Order("ID asc").Model(dab).Related(&widgets, "Widgets").Error
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
@@ -57,12 +50,12 @@ func getWidgets(c *gin.Context) {
 }
 
 // addWidget godoc
-// @Summary Add a widget to a visualization
+// @Summary Add a widget to a dashboard
 // @ID addWidget
 // @Accept json
 // @Produce json
 // @Tags widgets
-// @Param inputWidget body common.WidgetResponse true "Widget to be added incl. ID of visualization"
+// @Param inputWidget body common.ResponseMsgWidget true "Widget to be added incl. ID of dashboard"
 // @Success 200 "OK."
 // @Failure 401 "Unauthorized Access"
 // @Failure 403 "Access forbidden."
@@ -71,8 +64,8 @@ func getWidgets(c *gin.Context) {
 // @Router /widgets [post]
 func addWidget(c *gin.Context) {
 
-	var newWidget Widget
-	err := c.BindJSON(&newWidget)
+	var newWidgetData common.ResponseMsgWidget
+	err := c.BindJSON(&newWidgetData)
 	if err != nil {
 		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -81,7 +74,26 @@ func addWidget(c *gin.Context) {
 		return
 	}
 
-	err = newWidget.addToVisualization(newWidget.VisualizationID)
+	var newWidget Widget
+	newWidget.Name = newWidgetData.Widget.Name
+	newWidget.Type = newWidgetData.Widget.Type
+	newWidget.Height = newWidgetData.Widget.Height
+	newWidget.Width = newWidgetData.Widget.Width
+	newWidget.MinHeight = newWidgetData.Widget.MinHeight
+	newWidget.MinWidth = newWidgetData.Widget.MinWidth
+	newWidget.X = newWidgetData.Widget.X
+	newWidget.Y = newWidgetData.Widget.Y
+	newWidget.Z = newWidgetData.Widget.Z
+	newWidget.CustomProperties = newWidgetData.Widget.CustomProperties
+	newWidget.IsLocked = newWidgetData.Widget.IsLocked
+	newWidget.DashboardID = newWidgetData.Widget.DashboardID
+
+	ok, _ := dashboard.CheckPermissions(c, common.Create, "body", int(newWidget.DashboardID))
+	if !ok {
+		return
+	}
+
+	err = newWidget.addToDashboard()
 
 	if common.ProvideErrorResponse(c, err) == false {
 		c.JSON(http.StatusOK, gin.H{
@@ -90,19 +102,13 @@ func addWidget(c *gin.Context) {
 	}
 }
 
-func cloneWidget(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message": "NOT implemented",
-	})
-}
-
 // updateWidget godoc
 // @Summary Update a widget
 // @ID updateWidget
 // @Tags widgets
 // @Accept json
 // @Produce json
-// @Param inputWidget body common.WidgetResponse true "Widget to be updated"
+// @Param inputWidget body common.ResponseMsgWidget true "Widget to be updated"
 // @Success 200 "OK."
 // @Failure 401 "Unauthorized Access"
 // @Failure 403 "Access forbidden."
@@ -112,13 +118,13 @@ func cloneWidget(c *gin.Context) {
 // @Router /widgets/{widgetID} [put]
 func updateWidget(c *gin.Context) {
 
-	widgetID, err := common.GetWidgetID(c)
-	if err != nil {
+	ok, w := CheckPermissions(c, common.Update, -1)
+	if !ok {
 		return
 	}
 
-	var modifiedWidget Widget
-	err = c.BindJSON(&modifiedWidget)
+	var modifiedWidget common.ResponseMsgWidget
+	err := c.BindJSON(&modifiedWidget)
 	if err != nil {
 		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -127,16 +133,10 @@ func updateWidget(c *gin.Context) {
 		return
 	}
 
-	var w Widget
-	err = w.ByID(uint(widgetID))
-	if common.ProvideErrorResponse(c, err) {
-		return
-	}
-
-	err = w.update(modifiedWidget)
+	err = w.update(modifiedWidget.Widget)
 	if common.ProvideErrorResponse(c, err) == false {
 		c.JSON(http.StatusOK, gin.H{
-			"message": "OK",
+			"message": "OK.",
 		})
 	}
 }
@@ -155,14 +155,8 @@ func updateWidget(c *gin.Context) {
 // @Router /widgets/{widgetID} [get]
 func getWidget(c *gin.Context) {
 
-	widgetID, err := common.GetWidgetID(c)
-	if err != nil {
-		return
-	}
-
-	var w Widget
-	err = w.ByID(uint(widgetID))
-	if common.ProvideErrorResponse(c, err) {
+	ok, w := CheckPermissions(c, common.Read, -1)
+	if !ok {
 		return
 	}
 
@@ -186,21 +180,17 @@ func getWidget(c *gin.Context) {
 // @Router /widgets/{widgetID} [delete]
 func deleteWidget(c *gin.Context) {
 
-	// widgetID, err := GetWidgetID(c)
-	// if err != nil {
-	// 	return
-	// }
-	//
-	// widget, err := queries.FindWidgetOfVisualization(&visualization, widgetID)
-	// if common.ProvideErrorResponse(c, err) {
-	// 	return
-	// }
+	ok, w := CheckPermissions(c, common.Delete, -1)
+	if !ok {
+		return
+	}
 
-	// TODO delete files of widget in DB and on disk
-
-	// TODO Delete widget itself + association with visualization
+	err := w.delete()
+	if common.ProvideErrorResponse(c, err) {
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "NOT implemented",
+		"message": "OK.",
 	})
 }

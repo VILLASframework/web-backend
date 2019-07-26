@@ -11,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
+	"github.com/nsf/jsondiff"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -35,53 +36,7 @@ func ProvideErrorResponse(c *gin.Context, err error) bool {
 	return false // No error
 }
 
-func GetVisualizationID(c *gin.Context) (int, error) {
-
-	simID, err := strconv.Atoi(c.Param("visualizationID"))
-
-	if err != nil {
-		errormsg := fmt.Sprintf("Bad request. No or incorrect format of visualization ID")
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
-		})
-		return -1, err
-	} else {
-		return simID, err
-
-	}
-}
-
-func GetWidgetID(c *gin.Context) (int, error) {
-
-	widgetID, err := strconv.Atoi(c.Param("widgetID"))
-
-	if err != nil {
-		errormsg := fmt.Sprintf("Bad request. No or incorrect format of widget ID")
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
-		})
-		return -1, err
-	} else {
-		return widgetID, err
-	}
-}
-
-func GetFileID(c *gin.Context) (int, error) {
-
-	fileID, err := strconv.Atoi(c.Param("fileID"))
-
-	if err != nil {
-		errormsg := fmt.Sprintf("Bad request. No or incorrect format of file ID")
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
-		})
-		return -1, err
-	} else {
-		return fileID, err
-	}
-}
-
-func TestEndpoint(t *testing.T, router *gin.Engine, token string, url string, method string, body []byte, expected_code int, expected_response string) {
+func TestEndpoint(t *testing.T, router *gin.Engine, token string, url string, method string, body []byte, expected_code int, expected_response []byte) {
 	w := httptest.NewRecorder()
 
 	if body != nil {
@@ -96,8 +51,12 @@ func TestEndpoint(t *testing.T, router *gin.Engine, token string, url string, me
 	}
 
 	assert.Equal(t, expected_code, w.Code)
-	fmt.Println(w.Body.String())
-	assert.Equal(t, expected_response, w.Body.String())
+	//fmt.Println("Actual:", w.Body.String())
+	//fmt.Println("Expected: ", string(expected_response))
+	opts := jsondiff.DefaultConsoleOptions()
+	diff, _ := jsondiff.Compare(w.Body.Bytes(), expected_response, &opts)
+	assert.Equal(t, "FullMatch", diff.String())
+
 }
 
 func AuthenticateForTest(t *testing.T, router *gin.Engine, url string, method string, body []byte, expected_code int) string {
@@ -118,6 +77,7 @@ func AuthenticateForTest(t *testing.T, router *gin.Engine, url string, method st
 
 	success := body_data["success"].(bool)
 	if !success {
+		fmt.Println("Authentication not successful: ", body_data["message"])
 		panic(-1)
 	}
 

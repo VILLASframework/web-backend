@@ -1,18 +1,22 @@
 package main
 
 import (
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/file"
+	"fmt"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
 
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
 	_ "git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/doc/api" // doc/api folder is used by Swag CLI, you have to import it
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulation"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/dashboard"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/file"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/scenario"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/signal"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulationmodel"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulator"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/user"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/visualization"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/widget"
 )
 
@@ -50,9 +54,10 @@ func main() {
 
 	api.Use(user.Authentication(true))
 
-	simulation.RegisterSimulationEndpoints(api.Group("/simulations"))
+	scenario.RegisterScenarioEndpoints(api.Group("/scenarios"))
 	simulationmodel.RegisterSimulationModelEndpoints(api.Group("/models"))
-	visualization.RegisterVisualizationEndpoints(api.Group("/visualizations"))
+	signal.RegisterSignalEndpoints(api.Group("/signals"))
+	dashboard.RegisterDashboardEndpoints(api.Group("/dashboards"))
 	widget.RegisterWidgetEndpoints(api.Group("/widgets"))
 	file.RegisterFileEndpoints(api.Group("/files"))
 	user.RegisterUserEndpoints(api.Group("/users"))
@@ -60,6 +65,29 @@ func main() {
 
 	r.GET("swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
+	if common.WITH_AMQP == true {
+		fmt.Println("Starting AMQP client")
+		err := common.ConnectAMQP("amqp://localhost")
+		if err != nil {
+			panic(err)
+		}
+
+		// Periodically call the Ping function to check which simulators are still there
+		ticker := time.NewTicker(10 * time.Second)
+		go func() {
+
+			for {
+				select {
+				case <-ticker.C:
+					err = common.PingAMQP()
+					if err != nil {
+						fmt.Println("AMQP Error: ", err.Error())
+					}
+				}
+			}
+
+		}()
+	}
 	// server at port 4000 to match frontend's redirect path
 	r.Run(":4000")
 }

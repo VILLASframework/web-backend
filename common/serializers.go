@@ -31,6 +31,7 @@ func (self *UserSerializer) Response(assoc bool) UserResponse {
 		Username: self.Username,
 		Role:     self.Role,
 		Mail:     self.Mail,
+		ID:       self.ID,
 	}
 
 	// Associated models MUST NOT called with assoc=true otherwise we
@@ -39,44 +40,44 @@ func (self *UserSerializer) Response(assoc bool) UserResponse {
 
 		// TODO: maybe all those should be made in one transaction
 
-		//simulations, _, _ := simulation.FindUserSimulations(&self.User)
-		//simulationsSerializer :=
-		//	SimulationsSerializer{self.Ctx, simulations}
+		//scenarios, _, _ := scenario.FindUserScenarios(&self.User)
+		//scenariosSerializer :=
+		//	ScenariosSerializer{self.Ctx, scenarios}
 
 		// Add the associated models to the response
-		//response.Simulations = simulationsSerializer.Response()
+		//response.Scenarios = scenariosSerializer.Response()
 	}
 
 	return response
 }
 
-// Simulation/s Serializers
+// Scenario/s Serializers
 
-type SimulationsSerializer struct {
-	Ctx         *gin.Context
-	Simulations []Simulation
+type ScenariosSerializer struct {
+	Ctx       *gin.Context
+	Scenarios []Scenario
 }
 
-func (self *SimulationsSerializer) Response() []SimulationResponse {
-	response := []SimulationResponse{}
-	for _, simulation := range self.Simulations {
-		serializer := SimulationSerializer{self.Ctx, simulation}
+func (self *ScenariosSerializer) Response() []ScenarioResponse {
+	response := []ScenarioResponse{}
+	for _, so := range self.Scenarios {
+		serializer := ScenarioSerializer{self.Ctx, so}
 		response = append(response, serializer.Response())
 	}
 	return response
 }
 
-type SimulationSerializer struct {
+type ScenarioSerializer struct {
 	Ctx *gin.Context
-	Simulation
+	Scenario
 }
 
-func (self *SimulationSerializer) Response() SimulationResponse {
-	response := SimulationResponse{
-		Name:        self.Name,
-		ID:          self.ID,
-		Running:     self.Running,
-		StartParams: self.StartParameters,
+func (self *ScenarioSerializer) Response() ScenarioResponse {
+	response := ScenarioResponse{
+		Name:            self.Name,
+		ID:              self.ID,
+		Running:         self.Running,
+		StartParameters: self.StartParameters,
 	}
 	return response
 }
@@ -104,13 +105,13 @@ type SimulationModelSerializer struct {
 
 func (self *SimulationModelSerializer) Response() SimulationModelResponse {
 	response := SimulationModelResponse{
-		ID:           self.ID,
-		Name:         self.Name,
-		OutputLength: self.OutputLength,
-		InputLength:  self.InputLength,
-		SimulationID: self.SimulationID,
-		SimulatorID:  self.SimulatorID,
-		StartParams:  self.StartParameters,
+		ID:              self.ID,
+		Name:            self.Name,
+		OutputLength:    self.OutputLength,
+		InputLength:     self.InputLength,
+		ScenarioID:      self.ScenarioID,
+		SimulatorID:     self.SimulatorID,
+		StartParameters: self.StartParameters,
 	}
 	return response
 }
@@ -139,43 +140,47 @@ type SimulatorSerializer struct {
 func (self *SimulatorSerializer) Response() SimulatorResponse {
 
 	response := SimulatorResponse{
+		ID:            self.ID,
 		UUID:          self.UUID,
 		Host:          self.Host,
-		ModelType:     self.Modeltype,
+		Modeltype:     self.Modeltype,
 		Uptime:        self.Uptime,
 		State:         self.State,
 		StateUpdateAt: self.StateUpdateAt,
+		Properties:    self.Properties,
+		RawProperties: self.RawProperties,
 	}
 	return response
 }
 
-// Visualization/s Serializers
+// Dashboard/s Serializers
 
-type VisualizationsSerializer struct {
-	Ctx            *gin.Context
-	Visualizations []Visualization
+type DashboardsSerializer struct {
+	Ctx        *gin.Context
+	Dashboards []Dashboard
 }
 
-func (self *VisualizationsSerializer) Response() []VisualizationResponse {
-	response := []VisualizationResponse{}
-	for _, visualization := range self.Visualizations {
-		serializer := VisualizationSerializer{self.Ctx, visualization}
+func (self *DashboardsSerializer) Response() []DashboardResponse {
+	response := []DashboardResponse{}
+	for _, dashboard := range self.Dashboards {
+		serializer := DashboardSerializer{self.Ctx, dashboard}
 		response = append(response, serializer.Response())
 	}
 	return response
 }
 
-type VisualizationSerializer struct {
+type DashboardSerializer struct {
 	Ctx *gin.Context
-	Visualization
+	Dashboard
 }
 
-func (self *VisualizationSerializer) Response() VisualizationResponse {
+func (self *DashboardSerializer) Response() DashboardResponse {
 
-	response := VisualizationResponse{
-		Name:         self.Name,
-		Grid:         self.Grid,
-		SimulationID: self.SimulationID,
+	response := DashboardResponse{
+		Name:       self.Name,
+		Grid:       self.Grid,
+		ScenarioID: self.ScenarioID,
+		ID:         self.ID,
 	}
 	return response
 }
@@ -204,18 +209,19 @@ type WidgetSerializer struct {
 func (self *WidgetSerializer) Response() WidgetResponse {
 
 	response := WidgetResponse{
-		Name:            self.Name,
-		Type:            self.Type,
-		Width:           self.Width,
-		Height:          self.Height,
-		MinWidth:        self.MinWidth,
-		MinHeight:       self.MinHeight,
-		X:               self.X,
-		Y:               self.Y,
-		Z:               self.Z,
-		VisualizationID: self.VisualizationID,
-		IsLocked:        self.IsLocked,
-		//CustomProperties
+		ID:               self.ID,
+		Name:             self.Name,
+		Type:             self.Type,
+		Width:            self.Width,
+		Height:           self.Height,
+		MinWidth:         self.MinWidth,
+		MinHeight:        self.MinHeight,
+		X:                self.X,
+		Y:                self.Y,
+		Z:                self.Z,
+		DashboardID:      self.DashboardID,
+		IsLocked:         self.IsLocked,
+		CustomProperties: self.CustomProperties,
 	}
 	return response
 }
@@ -245,12 +251,14 @@ func (self *FileSerializerNoAssoc) Response() FileResponse {
 	response := FileResponse{
 		Name: self.Name,
 		ID:   self.ID,
-		Path: self.Path,
-		Type: self.Type,
-		Size: self.Size,
-		H:    self.ImageHeight,
-		W:    self.ImageWidth,
-		// Date
+		//Path: self.Path,
+		Type:              self.Type,
+		Size:              self.Size,
+		ImageHeight:       self.ImageHeight,
+		ImageWidth:        self.ImageWidth,
+		Date:              self.Date,
+		WidgetID:          self.WidgetID,
+		SimulationModelID: self.SimulationModelID,
 	}
 	return response
 }

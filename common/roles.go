@@ -15,10 +15,14 @@ import (
 type ModelName string
 
 const ModelUser = ModelName("user")
-const ModelSimulation = ModelName("simulation")
+const ModelScenario = ModelName("scenario")
 const ModelSimulator = ModelName("simulator")
-const ModelVisualization = ModelName("visualization")
+const ModelSimulatorAction = ModelName("simulatoraction")
+const ModelDashboard = ModelName("dashboard")
+const ModelWidget = ModelName("widget")
 const ModelSimulationModel = ModelName("simulationmodel")
+const ModelSignal = ModelName("signal")
+const ModelFile = ModelName("file")
 
 type CRUD string
 
@@ -47,18 +51,36 @@ var _r__ = Permission{Create: false, Read: true, Update: false, Delete: false}
 var Roles = RoleActions{
 	"Admin": {
 		ModelUser:            crud,
-		ModelSimulation:      crud,
+		ModelScenario:        crud,
 		ModelSimulationModel: crud,
 		ModelSimulator:       crud,
+		ModelSimulatorAction: crud,
+		ModelWidget:          crud,
+		ModelDashboard:       crud,
+		ModelSignal:          crud,
+		ModelFile:            crud,
 	},
 	"User": {
 		ModelUser:            __u_,
-		ModelSimulation:      crud,
+		ModelScenario:        crud,
 		ModelSimulationModel: crud,
 		ModelSimulator:       _r__,
+		ModelSimulatorAction: _ru_,
+		ModelWidget:          crud,
+		ModelDashboard:       crud,
+		ModelSignal:          crud,
+		ModelFile:            crud,
 	},
 	"Guest": {
-		ModelVisualization: _r__,
+		ModelScenario:        _r__,
+		ModelSimulationModel: _r__,
+		ModelDashboard:       _r__,
+		ModelWidget:          _r__,
+		ModelSimulator:       _r__,
+		ModelSimulatorAction: _r__,
+		ModelUser:            _ru_,
+		ModelSignal:          _r__,
+		ModelFile:            _r__,
 	},
 }
 
