@@ -11,10 +11,7 @@ import (
 
 func TestUserEndpoints(t *testing.T) {
 
-	myUsers := []common.UserResponse{
-		common.User0_response,
-		common.UserA_response,
-		common.UserB_response}
+	myUsers := []common.User{common.User0, common.UserA, common.UserB}
 	msgUsers := common.ResponseMsgUsers{Users: myUsers}
 
 	db := common.DummyInitDB()

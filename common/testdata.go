@@ -20,12 +20,25 @@ var bcryptCost = 10
 var pw0, _ = bcrypt.GenerateFromPassword([]byte("xyz789"), bcryptCost)
 var pwA, _ = bcrypt.GenerateFromPassword([]byte("abc123"), bcryptCost)
 var pwB, _ = bcrypt.GenerateFromPassword([]byte("bcd234"), bcryptCost)
-var User0 = User{Username: "User_0", Password: string(pw0), Role: "Admin", Mail: "User_0@example.com"}
-var User0_response = UserResponse{Username: User0.Username, Role: User0.Role, ID: 1, Mail: User0.Mail}
-var UserA = User{Username: "User_A", Password: string(pwA), Role: "User", Mail: "User_A@example.com"}
-var UserA_response = UserResponse{Username: UserA.Username, Role: UserA.Role, ID: 2, Mail: UserA.Mail}
-var UserB = User{Username: "User_B", Password: string(pwB), Role: "User", Mail: "User_B@example.com"}
-var UserB_response = UserResponse{Username: UserB.Username, Role: UserB.Role, ID: 3, Mail: UserB.Mail}
+
+// XXX: The IDs should NOT be hardcoded. In the future the expected
+// responses must be produced by the request send to the API. This will
+// also help to test the POST methods on the endpoints.
+
+var User0 = User{Username: "User_0", Password: string(pw0),
+	Role: "Admin", Mail: "User_0@example.com", Model: Model{ID: 1}}
+var User0_response = UserResponse{Username: User0.Username,
+	Role: User0.Role, Mail: User0.Mail, ID: User0.ID}
+
+var UserA = User{Username: "User_A", Password: string(pwA),
+	Role: "User", Mail: "User_A@example.com", Model: Model{ID: 2}}
+var UserA_response = UserResponse{Username: UserA.Username,
+	Role: UserA.Role, Mail: UserA.Mail, ID: UserA.ID}
+
+var UserB = User{Username: "User_B", Password: string(pwB),
+	Role: "User", Mail: "User_B@example.com", Model: Model{ID: 3}}
+var UserB_response = UserResponse{Username: UserB.Username,
+	Role: UserB.Role, Mail: UserB.Mail, ID: UserB.ID}
 
 // Credentials
 

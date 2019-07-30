@@ -88,7 +88,7 @@ type ResponseMsg struct {
 }
 
 type ResponseMsgUsers struct {
-	Users []UserResponse `json:"users"`
+	Users []User `json:"users"`
 }
 
 type ResponseMsgUser struct {
