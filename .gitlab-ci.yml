@@ -125,6 +125,11 @@ test:file:
   variables:
     TEST_FOLDER: routes/file
 
+test:user:
+  extends: test:scenario
+  variables:
+    TEST_FOLDER: routes/user
+
 
 # Stage: deploy
 ##############################################################################
