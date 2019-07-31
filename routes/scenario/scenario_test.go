@@ -16,12 +16,14 @@ import (
 // Test /scenarios endpoints
 func TestScenarioEndpoints(t *testing.T) {
 
-	var token string
+	myUsers := []common.User{common.UserA, common.UserB}
+	msgUsers := common.ResponseMsgUsers{myUsers}
 
-	var myUsers = []common.UserResponse{common.UserA_response, common.UserB_response}
-	var myUserA = []common.UserResponse{common.UserA_response}
-	var msgUsers = common.ResponseMsgUsers{Users: myUsers}
-	var msgUserA = common.ResponseMsgUsers{Users: myUserA}
+	// TODO: rename that variable since it is not a user but userS with
+	// only one entry.
+	myUserA := []common.User{common.UserA}
+	msgUserA := common.ResponseMsgUsers{myUserA}
+
 	var myScenarios = []common.ScenarioResponse{common.ScenarioA_response, common.ScenarioB_response}
 	var msgScenarios = common.ResponseMsgScenarios{Scenarios: myScenarios}
 	var msgScenario = common.ResponseMsgScenario{Scenario: common.ScenarioC_response}
@@ -51,7 +53,7 @@ func TestScenarioEndpoints(t *testing.T) {
 	msgUsersjson, _ := json.Marshal(msgUsers)
 	msgUserAjson, _ := json.Marshal(msgUserA)
 
-	token = common.AuthenticateForTest(t, router, "/api/authenticate", "POST", credjson, 200)
+	token := common.AuthenticateForTest(t, router, "/api/authenticate", "POST", credjson, 200)
 
 	// test GET scenarios/
 	err := common.NewTestEndpoint(router, token, "/api/scenarios", "GET", nil, 200, msgScenariosjson)
