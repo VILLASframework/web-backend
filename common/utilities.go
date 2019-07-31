@@ -36,6 +36,40 @@ func ProvideErrorResponse(c *gin.Context, err error) bool {
 	return false // No error
 }
 
+func NewTestEndpoint(router *gin.Engine, token string, url string,
+	method string, body []byte, expected_code int,
+	expected_response []byte) error {
+
+	w := httptest.NewRecorder()
+
+	if body != nil {
+		req, _ := http.NewRequest(method, url, bytes.NewBuffer(body))
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Add("Authorization", "Bearer "+token)
+		router.ServeHTTP(w, req)
+	} else {
+		req, _ := http.NewRequest(method, url, nil)
+		req.Header.Add("Authorization", "Bearer "+token)
+		router.ServeHTTP(w, req)
+	}
+
+	// Check the return HTTP Code
+	if w.Code != expected_code {
+		return fmt.Errorf("HTTP Code: Expected \"%v\". Got \"%v\".",
+			expected_code, w.Code)
+	}
+
+	// Check the response
+	opts := jsondiff.DefaultConsoleOptions()
+	diff, _ := jsondiff.Compare(w.Body.Bytes(), expected_response, &opts)
+	if diff.String() != "FullMatch" {
+		return fmt.Errorf("Response: Expected \"%v\". Got \"%v\".",
+			"FullMatch", diff.String())
+	}
+
+	return nil
+}
+
 func TestEndpoint(t *testing.T, router *gin.Engine, token string, url string, method string, body []byte, expected_code int, expected_response []byte) {
 	w := httptest.NewRecorder()
 

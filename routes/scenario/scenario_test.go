@@ -54,35 +54,48 @@ func TestScenarioEndpoints(t *testing.T) {
 	token = common.AuthenticateForTest(t, router, "/api/authenticate", "POST", credjson, 200)
 
 	// test GET scenarios/
-	common.TestEndpoint(t, router, token, "/api/scenarios", "GET", nil, 200, msgScenariosjson)
+	err := common.NewTestEndpoint(router, token, "/api/scenarios", "GET", nil, 200, msgScenariosjson)
+	assert.NoError(t, err)
 
 	// test POST scenarios/
-	common.TestEndpoint(t, router, token, "/api/scenarios", "POST", msgScenariojson, 200, msgOKjson)
+	err = common.NewTestEndpoint(router, token, "/api/scenarios", "POST", msgScenariojson, 200, msgOKjson)
+	assert.NoError(t, err)
 
 	// test GET scenarios/:ScenarioID
-	common.TestEndpoint(t, router, token, "/api/scenarios/3", "GET", nil, 200, msgScenariojson)
+	err = common.NewTestEndpoint(router, token, "/api/scenarios/3", "GET", nil, 200, msgScenariojson)
+	assert.NoError(t, err)
 
 	// test PUT scenarios/:ScenarioID
-	common.TestEndpoint(t, router, token, "/api/scenarios/3", "PUT", msgScenarioUpdatedjson, 200, msgOKjson)
-	common.TestEndpoint(t, router, token, "/api/scenarios/3", "GET", nil, 200, msgScenarioUpdatedjson)
+	err = common.NewTestEndpoint(router, token, "/api/scenarios/3", "PUT", msgScenarioUpdatedjson, 200, msgOKjson)
+	assert.NoError(t, err)
+	err = common.NewTestEndpoint(router, token, "/api/scenarios/3", "GET", nil, 200, msgScenarioUpdatedjson)
+	assert.NoError(t, err)
 
 	// test DELETE scenarios/:ScenarioID
-	common.TestEndpoint(t, router, token, "/api/scenarios/3", "DELETE", nil, 200, msgOKjson)
-	common.TestEndpoint(t, router, token, "/api/scenarios", "GET", nil, 200, msgScenariosjson)
+	err = common.NewTestEndpoint(router, token, "/api/scenarios/3", "DELETE", nil, 200, msgOKjson)
+	assert.NoError(t, err)
+	err = common.NewTestEndpoint(router, token, "/api/scenarios", "GET", nil, 200, msgScenariosjson)
+	assert.NoError(t, err)
 
 	// test GET scenarios/:ScenarioID/users
-	common.TestEndpoint(t, router, token, "/api/scenarios/1/users", "GET", nil, 200, msgUsersjson)
+	err = common.NewTestEndpoint(router, token, "/api/scenarios/1/users", "GET", nil, 200, msgUsersjson)
+	assert.NoError(t, err)
 
 	// test DELETE scenarios/:ScenarioID/user
-	common.TestEndpoint(t, router, token, "/api/scenarios/1/user?username=User_B", "DELETE", nil, 200, msgOKjson)
-	common.TestEndpoint(t, router, token, "/api/scenarios/1/users", "GET", nil, 200, msgUserAjson)
+	err = common.NewTestEndpoint(router, token, "/api/scenarios/1/user?username=User_B", "DELETE", nil, 200, msgOKjson)
+	assert.NoError(t, err)
+	err = common.NewTestEndpoint(router, token, "/api/scenarios/1/users", "GET", nil, 200, msgUserAjson)
+	assert.NoError(t, err)
 
 	// test PUT scenarios/:ScenarioID/user
-	common.TestEndpoint(t, router, token, "/api/scenarios/1/user?username=User_B", "PUT", nil, 200, msgOKjson)
-	common.TestEndpoint(t, router, token, "/api/scenarios/1/users", "GET", nil, 200, msgUsersjson)
+	err = common.NewTestEndpoint(router, token, "/api/scenarios/1/user?username=User_B", "PUT", nil, 200, msgOKjson)
+	assert.NoError(t, err)
+	err = common.NewTestEndpoint(router, token, "/api/scenarios/1/users", "GET", nil, 200, msgUsersjson)
+	assert.NoError(t, err)
 
 	// test DELETE scenarios/:ScenarioID/user for logged in user User_A
-	common.TestEndpoint(t, router, token, "/api/scenarios/1/user?username=User_A", "DELETE", nil, 200, msgOKjson)
+	err = common.NewTestEndpoint(router, token, "/api/scenarios/1/user?username=User_A", "DELETE", nil, 200, msgOKjson)
+	assert.NoError(t, err)
 
 	// test if deletion of user from scenario has worked
 	w2 := httptest.NewRecorder()
