@@ -6,7 +6,7 @@ import (
 )
 
 // Fields shared by all models (same as gorm.model but including proper json tags)
-type commonModelFields struct {
+type CommonModelFields struct {
 	// ID of the model (primary key in DB)
 	ID uint `gorm:"primary_key",json:"id"`
 	// Time the model object is created
@@ -19,7 +19,7 @@ type commonModelFields struct {
 
 // User data model
 type User struct {
-	commonModelFields
+	CommonModelFields
 	// Username of user
 	Username string `gorm:"unique;not null",json:"username"`
 	// Password of user
@@ -34,7 +34,7 @@ type User struct {
 
 // Scenario data model
 type Scenario struct {
-	commonModelFields
+	CommonModelFields
 	// Name of scenario
 	Name string `gorm:"not null",json:"name"`
 	// Running state of scenario
@@ -51,7 +51,7 @@ type Scenario struct {
 
 // SimulationModel data model
 type SimulationModel struct {
-	commonModelFields
+	CommonModelFields
 	// Name of simulation model
 	Name string `gorm:"not null",json:"name"`
 	// Number of output signals
@@ -74,7 +74,7 @@ type SimulationModel struct {
 
 // Signal data model
 type Signal struct {
-	commonModelFields
+	CommonModelFields
 	// Name of Signal
 	Name string `json:"name"`
 	// Unit of Signal
@@ -89,7 +89,7 @@ type Signal struct {
 
 // Simulator data model
 type Simulator struct {
-	commonModelFields
+	CommonModelFields
 	// UUID of the simulator
 	UUID string `gorm:"not null",json:"uuid"`
 	// Host if the simulator
@@ -112,7 +112,7 @@ type Simulator struct {
 
 // Dashboard data model
 type Dashboard struct {
-	commonModelFields
+	CommonModelFields
 	// Name of dashboard
 	Name string `gorm:"not null",json:"name"`
 	// Grid of dashboard
@@ -125,7 +125,7 @@ type Dashboard struct {
 
 // Widget data model
 type Widget struct {
-	commonModelFields
+	CommonModelFields
 	// Name of widget
 	Name string `gorm:"not null",json:"name"`
 	// Type of widget
@@ -156,7 +156,7 @@ type Widget struct {
 
 // File data model
 type File struct {
-	commonModelFields
+	CommonModelFields
 	// Name of file
 	Name string `gorm:"not null",json:"name"`
 	// Type of file (MIME type)
