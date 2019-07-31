@@ -15,6 +15,7 @@ import (
 type ModelName string
 
 const ModelUser = ModelName("user")
+const ModelUsers = ModelName("users")
 const ModelScenario = ModelName("scenario")
 const ModelSimulator = ModelName("simulator")
 const ModelSimulatorAction = ModelName("simulatoraction")
@@ -45,12 +46,14 @@ var crud = Permission{Create: true, Read: true, Update: true, Delete: true}
 var _ru_ = Permission{Create: false, Read: true, Update: true, Delete: false}
 var __u_ = Permission{Create: false, Read: false, Update: true, Delete: false}
 var _r__ = Permission{Create: false, Read: true, Update: false, Delete: false}
+var none = Permission{Create: false, Read: false, Update: false, Delete: false}
 
 // Roles is used as a look up variable to determine if a certain user is
 // allowed to do a certain action on a given model based on his role
 var Roles = RoleActions{
 	"Admin": {
 		ModelUser:            crud,
+		ModelUsers:           crud,
 		ModelScenario:        crud,
 		ModelSimulationModel: crud,
 		ModelSimulator:       crud,
@@ -61,7 +64,8 @@ var Roles = RoleActions{
 		ModelFile:            crud,
 	},
 	"User": {
-		ModelUser:            __u_,
+		ModelUser:            _ru_,
+		ModelUsers:           none,
 		ModelScenario:        crud,
 		ModelSimulationModel: crud,
 		ModelSimulator:       _r__,
@@ -79,6 +83,7 @@ var Roles = RoleActions{
 		ModelSimulator:       _r__,
 		ModelSimulatorAction: _r__,
 		ModelUser:            _ru_,
+		ModelUsers:           none,
 		ModelSignal:          _r__,
 		ModelFile:            _r__,
 	},

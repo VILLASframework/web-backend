@@ -147,7 +147,7 @@ func authenticate(c *gin.Context) {
 // @Router /users [get]
 func getUsers(c *gin.Context) {
 
-	err := common.ValidateRole(c, common.ModelUser, common.Read)
+	err := common.ValidateRole(c, common.ModelUsers, common.Read)
 	if err != nil {
 		c.JSON(http.StatusUnprocessableEntity, fmt.Sprintf("%v", err))
 		return
@@ -374,6 +374,17 @@ func getUser(c *gin.Context) {
 	var user User
 	id, _ := common.UintParamFromCtx(c, "userID")
 
+	reqUserID, _ := c.Get(common.UserIDCtx)
+	reqUserRole, _ := c.Get(common.UserRoleCtx)
+
+	if id != reqUserID && reqUserRole != "Admin" {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"message": "Invalid authorization",
+		})
+		return
+	}
+
 	err = user.ByID(id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, fmt.Sprintf("%v", err))
@@ -384,6 +395,7 @@ func getUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"user": serializer.Response(false),
 	})
+
 }
 
 // DeleteUser godoc
