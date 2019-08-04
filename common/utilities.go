@@ -93,6 +93,40 @@ func TestEndpoint(t *testing.T, router *gin.Engine, token string, url string, me
 
 }
 
+func NewAuthenticateForTest(router *gin.Engine, url string,
+	method string, body []byte, expected_code int) (string, error) {
+
+	w := httptest.NewRecorder()
+
+	req, _ := http.NewRequest(method, url, bytes.NewBuffer(body))
+	req.Header.Set("Content-Type", "application/json")
+	router.ServeHTTP(w, req)
+
+	// Check the return HTTP Code
+	if w.Code != expected_code {
+		return "", fmt.Errorf("HTTP Code: Expected \"%v\". Got \"%v\".",
+			expected_code, w.Code)
+	}
+
+	var body_data map[string]interface{}
+
+	// Get the response
+	err := json.Unmarshal([]byte(w.Body.String()), &body_data)
+	if err != nil {
+		return "", err
+	}
+
+	// Check the response
+	success := body_data["success"].(bool)
+	if !success {
+		fmt.Println("Authentication not successful: ", body_data["message"])
+		return "", fmt.Errorf("Authentication unsuccessful!")
+	}
+
+	// Return the token and nil error
+	return body_data["token"].(string), nil
+}
+
 func AuthenticateForTest(t *testing.T, router *gin.Engine, url string, method string, body []byte, expected_code int) string {
 	w := httptest.NewRecorder()
 

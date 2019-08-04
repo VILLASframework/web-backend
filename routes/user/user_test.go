@@ -29,11 +29,12 @@ func TestUserEndpoints(t *testing.T) {
 	credjson, _ := json.Marshal(common.CredAdmin)
 	msgUsersjson, _ := json.Marshal(msgUsers)
 
-	token := common.AuthenticateForTest(t, router, "/api/authenticate",
-		"POST", credjson, 200)
+	token, err := common.NewAuthenticateForTest(router,
+		"/api/authenticate", "POST", credjson, 200)
+	assert.NoError(t, err)
 
 	// test GET user/
-	err := common.NewTestEndpoint(router, token, "/api/users", "GET",
+	err = common.NewTestEndpoint(router, token, "/api/users", "GET",
 		nil, 200, msgUsersjson)
 	assert.NoError(t, err)
 }
