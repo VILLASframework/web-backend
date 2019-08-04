@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
 
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
 )
@@ -32,6 +33,7 @@ func TestUserEndpoints(t *testing.T) {
 		"POST", credjson, 200)
 
 	// test GET user/
-	common.TestEndpoint(t, router, token, "/api/users", "GET", nil, 200,
-		msgUsersjson)
+	err := common.NewTestEndpoint(router, token, "/api/users", "GET",
+		nil, 200, msgUsersjson)
+	assert.NoError(t, err)
 }
