@@ -10,25 +10,25 @@ import (
 // The type Model is exactly the same with gorm.Model (see jinzhu/gorm)
 // except the json tags that are needed for serializing the models
 type Model struct {
-	ID        uint       `json:"id",gorm:"primary_key"`
+	ID        uint       `json:"id" gorm:"primary_key:true"`
 	CreatedAt time.Time  `json:"-"`
 	UpdatedAt time.Time  `json:"-"`
-	DeletedAt *time.Time `json:"-",sql:"index"`
+	DeletedAt *time.Time `json:"-" sql:"index"`
 }
 
 // User data model
 type User struct {
 	Model
 	// Username of user
-	Username string `json:"username",gorm:"unique;not null"`
+	Username string `json:"username" gorm:"unique;not null"`
 	// Password of user
-	Password string `json:"-",gorm:"not null"`
+	Password string `json:"-" gorm:"not null"`
 	// Mail of user
-	Mail string `json:"mail",gorm:"default:''"`
+	Mail string `json:"mail" gorm:"default:''"`
 	// Role of user
-	Role string `json:"role",gorm:"default:'user'"`
+	Role string `json:"role" gorm:"default:'user'"`
 	// Scenarios to which user has access
-	Scenarios []*Scenario `json:"-",gorm:"many2many:user_scenarios"`
+	Scenarios []*Scenario `json:"-" gorm:"many2many:user_scenarios"`
 }
 
 // Scenario data model
