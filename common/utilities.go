@@ -36,6 +36,42 @@ func ProvideErrorResponse(c *gin.Context, err error) bool {
 	return false // No error
 }
 
+func LengthOfResponse(router *gin.Engine, token string, url string,
+	method string, body []byte) int {
+
+	w := httptest.NewRecorder()
+	responseLength := 0
+
+	if body != nil {
+		req, _ := http.NewRequest(method, url, bytes.NewBuffer(body))
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Add("Authorization", "Bearer "+token)
+		router.ServeHTTP(w, req)
+	} else {
+		req, _ := http.NewRequest(method, url, nil)
+		req.Header.Add("Authorization", "Bearer "+token)
+		router.ServeHTTP(w, req)
+	}
+
+	// Get the response
+	var body_data map[string][]interface{}
+
+	err := json.Unmarshal([]byte(w.Body.String()), &body_data)
+	if err != nil {
+		return responseLength
+	}
+
+	// Get an arbitrary key from tha map. The only key (entry) of course
+	// is the model's name. With that trick we do not have to pass the
+	// higher level key as argument.
+	for arbitrary_tag := range body_data {
+		responseLength = len(body_data[arbitrary_tag])
+		break
+	}
+
+	return responseLength
+}
+
 func NewTestEndpoint(router *gin.Engine, token string, url string,
 	method string, body []byte, expected_code int,
 	expected_response []byte) error {
