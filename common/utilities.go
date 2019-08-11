@@ -86,10 +86,16 @@ func LengthOfResponse(router *gin.Engine, token string, url string,
 }
 
 func NewTestEndpoint(router *gin.Engine, token string, url string,
-	method string, body []byte, expected_code int,
+	method string, responseBody interface{}, expected_code int,
 	expectedResponse interface{}) error {
 
 	w := httptest.NewRecorder()
+
+	// Marshal the HTTP request body
+	body, err := json.Marshal(responseBody)
+	if err != nil {
+		return fmt.Errorf("Failed to marshal reqeust body: %v", err)
+	}
 
 	if body != nil {
 		req, err := http.NewRequest(method, url, bytes.NewBuffer(body))
