@@ -68,8 +68,8 @@ func LengthOfResponse(router *gin.Engine, token string, url string,
 		// Get an arbitrary key from tha map. The only key (entry) of
 		// course is the model's name. With that trick we do not have to
 		// pass the higher level key as argument.
-		for arbitrary_tag := range arrayResponse {
-			return len(arrayResponse[arbitrary_tag]), nil
+		for arbitrary_key := range arrayResponse {
+			return len(arrayResponse[arbitrary_key]), nil
 		}
 	}
 
