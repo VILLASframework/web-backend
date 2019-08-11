@@ -87,7 +87,7 @@ func LengthOfResponse(router *gin.Engine, token string, url string,
 
 func NewTestEndpoint(router *gin.Engine, token string, url string,
 	method string, body []byte, expected_code int,
-	expected_response []byte) error {
+	expectedResponse interface{}) error {
 
 	w := httptest.NewRecorder()
 
@@ -108,9 +108,15 @@ func NewTestEndpoint(router *gin.Engine, token string, url string,
 			expected_code, w.Code)
 	}
 
+	// Serialize expected response
+	expectedBytes, err := json.Marshal(expectedResponse)
+	if err != nil {
+		return fmt.Errorf("Failed to marshal epxected response")
+	}
+
 	// Check the response
 	opts := jsondiff.DefaultConsoleOptions()
-	diff, _ := jsondiff.Compare(w.Body.Bytes(), expected_response, &opts)
+	diff, _ := jsondiff.Compare(w.Body.Bytes(), expectedBytes, &opts)
 	if diff.String() != "FullMatch" {
 		return fmt.Errorf("Response: Expected \"%v\". Got \"%v\".",
 			"FullMatch", diff.String())

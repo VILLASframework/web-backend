@@ -12,7 +12,7 @@ import (
 
 func TestUserEndpoints(t *testing.T) {
 
-	myUsers := []common.User{common.User0, common.UserA, common.UserB}
+	myUsers := []common.User{common.User0}
 	msgUsers := common.ResponseMsgUsers{Users: myUsers}
 
 	db := common.DummyInitDB()
@@ -27,7 +27,6 @@ func TestUserEndpoints(t *testing.T) {
 	RegisterUserEndpoints(api.Group("/users"))
 
 	credjson, _ := json.Marshal(common.CredAdmin)
-	msgUsersjson, _ := json.Marshal(msgUsers)
 
 	token, err := common.NewAuthenticateForTest(router,
 		"/api/authenticate", "POST", credjson, 200)
@@ -35,6 +34,6 @@ func TestUserEndpoints(t *testing.T) {
 
 	// test GET user/
 	err = common.NewTestEndpoint(router, token, "/api/users", "GET",
-		nil, 200, msgUsersjson)
+		nil, 200, msgUsers)
 	assert.NoError(t, err)
 }
