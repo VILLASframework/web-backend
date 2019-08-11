@@ -37,7 +37,7 @@ func ProvideErrorResponse(c *gin.Context, err error) bool {
 }
 
 func LengthOfResponse(router *gin.Engine, token string, url string,
-	method string, body []byte) int {
+	method string, body []byte) (int, error) {
 
 	w := httptest.NewRecorder()
 
@@ -69,7 +69,7 @@ func LengthOfResponse(router *gin.Engine, token string, url string,
 		// course is the model's name. With that trick we do not have to
 		// pass the higher level key as argument.
 		for arbitrary_tag := range arrayResponse {
-			return len(arrayResponse[arbitrary_tag])
+			return len(arrayResponse[arbitrary_tag]), nil
 		}
 	}
 
@@ -77,12 +77,12 @@ func LengthOfResponse(router *gin.Engine, token string, url string,
 	var singleResponse map[string]interface{}
 	err = json.Unmarshal(responseBytes, &singleResponse)
 	if err == nil {
-		return 1
+		return 1, nil
 	}
 
 	// Failed to identify response. It means we got a different HTTP
 	// code than 200.
-	return -1
+	return 0, fmt.Errorf("Length of response cannot be detected")
 }
 
 func NewTestEndpoint(router *gin.Engine, token string, url string,
