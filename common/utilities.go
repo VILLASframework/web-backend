@@ -92,12 +92,18 @@ func NewTestEndpoint(router *gin.Engine, token string, url string,
 	w := httptest.NewRecorder()
 
 	if body != nil {
-		req, _ := http.NewRequest(method, url, bytes.NewBuffer(body))
+		req, err := http.NewRequest(method, url, bytes.NewBuffer(body))
+		if err != nil {
+			return fmt.Errorf("Faile to create new request: %v", err)
+		}
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Add("Authorization", "Bearer "+token)
 		router.ServeHTTP(w, req)
 	} else {
-		req, _ := http.NewRequest(method, url, nil)
+		req, err := http.NewRequest(method, url, nil)
+		if err != nil {
+			return fmt.Errorf("Faile to create new request: %v", err)
+		}
 		req.Header.Add("Authorization", "Bearer "+token)
 		router.ServeHTTP(w, req)
 	}
@@ -111,7 +117,7 @@ func NewTestEndpoint(router *gin.Engine, token string, url string,
 	// Serialize expected response
 	expectedBytes, err := json.Marshal(expectedResponse)
 	if err != nil {
-		return fmt.Errorf("Failed to marshal epxected response")
+		return fmt.Errorf("Failed to marshal epxected response: %v", err)
 	}
 
 	// Check the response
@@ -149,11 +155,21 @@ func TestEndpoint(t *testing.T, router *gin.Engine, token string, url string, me
 }
 
 func NewAuthenticateForTest(router *gin.Engine, url string,
-	method string, body []byte, expected_code int) (string, error) {
+	method string, credentials interface{}, expected_code int) (string,
+	error) {
 
 	w := httptest.NewRecorder()
 
-	req, _ := http.NewRequest(method, url, bytes.NewBuffer(body))
+	// Marshal credentials
+	body, err := json.Marshal(credentials)
+	if err != nil {
+		return "", fmt.Errorf("Failed to marshal credentials: %v", err)
+	}
+
+	req, err := http.NewRequest(method, url, bytes.NewBuffer(body))
+	if err != nil {
+		return "", fmt.Errorf("Faile to create new request: %v", err)
+	}
 	req.Header.Set("Content-Type", "application/json")
 	router.ServeHTTP(w, req)
 
@@ -166,7 +182,7 @@ func NewAuthenticateForTest(router *gin.Engine, url string,
 	var body_data map[string]interface{}
 
 	// Get the response
-	err := json.Unmarshal([]byte(w.Body.String()), &body_data)
+	err = json.Unmarshal([]byte(w.Body.String()), &body_data)
 	if err != nil {
 		return "", err
 	}

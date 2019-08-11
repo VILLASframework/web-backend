@@ -1,7 +1,6 @@
 package user
 
 import (
-	"encoding/json"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -26,10 +25,8 @@ func TestUserEndpoints(t *testing.T) {
 	api.Use(Authentication(true))
 	RegisterUserEndpoints(api.Group("/users"))
 
-	credjson, _ := json.Marshal(common.CredAdmin)
-
 	token, err := common.NewAuthenticateForTest(router,
-		"/api/authenticate", "POST", credjson, 200)
+		"/api/authenticate", "POST", common.CredAdmin, 200)
 	assert.NoError(t, err)
 
 	// test GET user/
