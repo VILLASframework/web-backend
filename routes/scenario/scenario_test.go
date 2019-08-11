@@ -45,58 +45,65 @@ func TestScenarioEndpoints(t *testing.T) {
 	RegisterScenarioEndpoints(api.Group("/scenarios"))
 
 	credjson, _ := json.Marshal(common.CredUser)
-	msgOKjson, _ := json.Marshal(common.MsgOK)
-	msgScenariosjson, _ := json.Marshal(msgScenarios)
-	msgScenariojson, _ := json.Marshal(msgScenario)
-	msgScenarioUpdatedjson, _ := json.Marshal(msgScenarioUpdated)
 
-	msgUsersjson, _ := json.Marshal(msgUsers)
-	msgUserAjson, _ := json.Marshal(msgUserA)
-
-	token := common.AuthenticateForTest(t, router, "/api/authenticate", "POST", credjson, 200)
+	token := common.AuthenticateForTest(t, router, "/api/authenticate",
+		"POST", credjson, 200)
 
 	// test GET scenarios/
-	err := common.NewTestEndpoint(router, token, "/api/scenarios", "GET", nil, 200, msgScenariosjson)
+	err := common.NewTestEndpoint(router, token, "/api/scenarios",
+		"GET", nil, 200, msgScenarios)
 	assert.NoError(t, err)
 
 	// test POST scenarios/
-	err = common.NewTestEndpoint(router, token, "/api/scenarios", "POST", msgScenariojson, 200, msgOKjson)
+	err = common.NewTestEndpoint(router, token, "/api/scenarios",
+		"POST", msgScenario, 200, common.MsgOK)
 	assert.NoError(t, err)
 
 	// test GET scenarios/:ScenarioID
-	err = common.NewTestEndpoint(router, token, "/api/scenarios/3", "GET", nil, 200, msgScenariojson)
+	err = common.NewTestEndpoint(router, token, "/api/scenarios/3",
+		"GET", nil, 200, msgScenario)
 	assert.NoError(t, err)
 
 	// test PUT scenarios/:ScenarioID
-	err = common.NewTestEndpoint(router, token, "/api/scenarios/3", "PUT", msgScenarioUpdatedjson, 200, msgOKjson)
+	err = common.NewTestEndpoint(router, token, "/api/scenarios/3",
+		"PUT", msgScenarioUpdated, 200, common.MsgOK)
 	assert.NoError(t, err)
-	err = common.NewTestEndpoint(router, token, "/api/scenarios/3", "GET", nil, 200, msgScenarioUpdatedjson)
+	err = common.NewTestEndpoint(router, token, "/api/scenarios/3",
+		"GET", nil, 200, msgScenarioUpdated)
 	assert.NoError(t, err)
 
 	// test DELETE scenarios/:ScenarioID
-	err = common.NewTestEndpoint(router, token, "/api/scenarios/3", "DELETE", nil, 200, msgOKjson)
+	err = common.NewTestEndpoint(router, token, "/api/scenarios/3",
+		"DELETE", nil, 200, common.MsgOK)
 	assert.NoError(t, err)
-	err = common.NewTestEndpoint(router, token, "/api/scenarios", "GET", nil, 200, msgScenariosjson)
+	err = common.NewTestEndpoint(router, token, "/api/scenarios", "GET",
+		nil, 200, msgScenarios)
 	assert.NoError(t, err)
 
 	// test GET scenarios/:ScenarioID/users
-	err = common.NewTestEndpoint(router, token, "/api/scenarios/1/users", "GET", nil, 200, msgUsersjson)
+	err = common.NewTestEndpoint(router, token, "/api/scenarios/1/users",
+		"GET", nil, 200, msgUsers)
 	assert.NoError(t, err)
 
 	// test DELETE scenarios/:ScenarioID/user
-	err = common.NewTestEndpoint(router, token, "/api/scenarios/1/user?username=User_B", "DELETE", nil, 200, msgOKjson)
+	err = common.NewTestEndpoint(router, token,
+		"/api/scenarios/1/user?username=User_B", "DELETE", nil, 200, common.MsgOK)
 	assert.NoError(t, err)
-	err = common.NewTestEndpoint(router, token, "/api/scenarios/1/users", "GET", nil, 200, msgUserAjson)
+	err = common.NewTestEndpoint(router, token, "/api/scenarios/1/users",
+		"GET", nil, 200, msgUserA)
 	assert.NoError(t, err)
 
 	// test PUT scenarios/:ScenarioID/user
-	err = common.NewTestEndpoint(router, token, "/api/scenarios/1/user?username=User_B", "PUT", nil, 200, msgOKjson)
+	err = common.NewTestEndpoint(router, token,
+		"/api/scenarios/1/user?username=User_B", "PUT", nil, 200, common.MsgOK)
 	assert.NoError(t, err)
-	err = common.NewTestEndpoint(router, token, "/api/scenarios/1/users", "GET", nil, 200, msgUsersjson)
+	err = common.NewTestEndpoint(router, token, "/api/scenarios/1/users",
+		"GET", nil, 200, msgUsers)
 	assert.NoError(t, err)
 
 	// test DELETE scenarios/:ScenarioID/user for logged in user User_A
-	err = common.NewTestEndpoint(router, token, "/api/scenarios/1/user?username=User_A", "DELETE", nil, 200, msgOKjson)
+	err = common.NewTestEndpoint(router, token,
+		"/api/scenarios/1/user?username=User_A", "DELETE", nil, 200, common.MsgOK)
 	assert.NoError(t, err)
 
 	// test if deletion of user from scenario has worked
