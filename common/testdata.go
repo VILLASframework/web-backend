@@ -14,42 +14,33 @@ var MsgOK = ResponseMsg{
 }
 
 // Users
+var strPassword0 = "xyz789"
+var strPasswordA = "abc123"
+var strPasswordB = "bcd234"
 
 // Hash passwords with bcrypt algorithm
 var bcryptCost = 10
-var pw0, _ = bcrypt.GenerateFromPassword([]byte("xyz789"), bcryptCost)
-var pwA, _ = bcrypt.GenerateFromPassword([]byte("abc123"), bcryptCost)
-var pwB, _ = bcrypt.GenerateFromPassword([]byte("bcd234"), bcryptCost)
-
-// XXX: The IDs should NOT be hardcoded. In the future the expected
-// responses must be produced by the request send to the API. This will
-// also help to test the POST methods on the endpoints.
+var pw0, _ = bcrypt.GenerateFromPassword([]byte(strPassword0), bcryptCost)
+var pwA, _ = bcrypt.GenerateFromPassword([]byte(strPasswordA), bcryptCost)
+var pwB, _ = bcrypt.GenerateFromPassword([]byte(strPasswordB), bcryptCost)
 
 var User0 = User{Username: "User_0", Password: string(pw0),
 	Role: "Admin", Mail: "User_0@example.com", Model: Model{ID: 1}}
-var User0_response = UserResponse{Username: User0.Username,
-	Role: User0.Role, Mail: User0.Mail, ID: User0.ID}
-
 var UserA = User{Username: "User_A", Password: string(pwA),
 	Role: "User", Mail: "User_A@example.com", Model: Model{ID: 2}}
-var UserA_response = UserResponse{Username: UserA.Username,
-	Role: UserA.Role, Mail: UserA.Mail, ID: UserA.ID}
-
 var UserB = User{Username: "User_B", Password: string(pwB),
 	Role: "User", Mail: "User_B@example.com", Model: Model{ID: 3}}
-var UserB_response = UserResponse{Username: UserB.Username,
-	Role: UserB.Role, Mail: UserB.Mail, ID: UserB.ID}
 
 // Credentials
 
 var CredAdmin = credentials{
 	Username: User0.Username,
-	Password: "xyz789",
+	Password: strPassword0,
 }
 
 var CredUser = credentials{
 	Username: UserA.Username,
-	Password: "abc123",
+	Password: strPasswordA,
 }
 
 // Simulators
