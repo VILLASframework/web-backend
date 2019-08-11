@@ -17,7 +17,7 @@ func TestUserEndpoints(t *testing.T) {
 
 	db := common.DummyInitDB()
 	defer db.Close()
-	common.DummyPopulateDB(db)
+	common.DummyOnlyAdminDB(db)
 
 	router := gin.Default()
 	api := router.Group("/api")
