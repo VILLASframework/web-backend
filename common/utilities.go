@@ -40,7 +40,6 @@ func LengthOfResponse(router *gin.Engine, token string, url string,
 	method string, body []byte) int {
 
 	w := httptest.NewRecorder()
-	responseLength := 0
 
 	if body != nil {
 		req, _ := http.NewRequest(method, url, bytes.NewBuffer(body))
@@ -53,23 +52,37 @@ func LengthOfResponse(router *gin.Engine, token string, url string,
 		router.ServeHTTP(w, req)
 	}
 
-	// Get the response
-	var body_data map[string][]interface{}
+	// Convert the response in array of bytes
+	responseBytes := []byte(w.Body.String())
 
-	err := json.Unmarshal([]byte(w.Body.String()), &body_data)
-	if err != nil {
-		return responseLength
+	// First we are trying to unmarshal the response into an array of
+	// general type variables ([]interface{}). If this fails we will try
+	// to unmarshal into a single general type variable (interface{}).
+	// If that also fails we will return -1.
+
+	// Response might be array of objects
+	var arrayResponse map[string][]interface{}
+	err := json.Unmarshal(responseBytes, &arrayResponse)
+	if err == nil {
+
+		// Get an arbitrary key from tha map. The only key (entry) of
+		// course is the model's name. With that trick we do not have to
+		// pass the higher level key as argument.
+		for arbitrary_tag := range arrayResponse {
+			return len(arrayResponse[arbitrary_tag])
+		}
 	}
 
-	// Get an arbitrary key from tha map. The only key (entry) of course
-	// is the model's name. With that trick we do not have to pass the
-	// higher level key as argument.
-	for arbitrary_tag := range body_data {
-		responseLength = len(body_data[arbitrary_tag])
-		break
+	// Response might be a single object
+	var singleResponse map[string]interface{}
+	err = json.Unmarshal(responseBytes, &singleResponse)
+	if err == nil {
+		return 1
 	}
 
-	return responseLength
+	// Failed to identify response. It means we got a different HTTP
+	// code than 200.
+	return -1
 }
 
 func NewTestEndpoint(router *gin.Engine, token string, url string,
