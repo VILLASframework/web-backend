@@ -129,9 +129,9 @@ func NewTestEndpoint(router *gin.Engine, token string, url string,
 	// Check the response
 	opts := jsondiff.DefaultConsoleOptions()
 	diff, _ := jsondiff.Compare(w.Body.Bytes(), expectedBytes, &opts)
-	if diff.String() != "FullMatch" {
+	if diff.String() != "FullMatch" && diff.String() != "SupersetMatch" {
 		return fmt.Errorf("Response: Expected \"%v\". Got \"%v\".",
-			"FullMatch", diff.String())
+			"(FullMatch OR SupersetMatch)", diff.String())
 	}
 
 	return nil

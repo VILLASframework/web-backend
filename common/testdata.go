@@ -25,11 +25,11 @@ var pwA, _ = bcrypt.GenerateFromPassword([]byte(strPasswordA), bcryptCost)
 var pwB, _ = bcrypt.GenerateFromPassword([]byte(strPasswordB), bcryptCost)
 
 var User0 = User{Username: "User_0", Password: string(pw0),
-	Role: "Admin", Mail: "User_0@example.com", Model: Model{ID: 1}}
+	Role: "Admin", Mail: "User_0@example.com"}
 var UserA = User{Username: "User_A", Password: string(pwA),
-	Role: "User", Mail: "User_A@example.com", Model: Model{ID: 2}}
+	Role: "User", Mail: "User_A@example.com"}
 var UserB = User{Username: "User_B", Password: string(pwB),
-	Role: "User", Mail: "User_B@example.com", Model: Model{ID: 3}}
+	Role: "User", Mail: "User_B@example.com"}
 
 // Credentials
 

@@ -18,11 +18,15 @@ type updateUserRequest struct {
 	Mail     string `form:"Mail" validate:"omitempty,email"`
 }
 
-type addUserRequest struct {
+type validNewUser struct {
 	Username string `form:"Username" validate:"required"`
 	Password string `form:"Password" validate:"required,min=6"`
 	Role     string `form:"Role" validate:"required,oneof=Admin User Guest"`
 	Mail     string `form:"Mail" validate:"required,email"`
+}
+
+type addUserRequest struct {
+	validNewUser `json:"user"`
 }
 
 func (r *loginRequest) validate() error {
