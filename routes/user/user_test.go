@@ -33,4 +33,9 @@ func TestUserEndpoints(t *testing.T) {
 	err = common.NewTestEndpoint(router, token, "/api/users", "GET",
 		nil, 200, msgUsers)
 	assert.NoError(t, err)
+
+	// test GET user/1 (the admin)
+	err = common.NewTestEndpoint(router, token, "/api/users/1", "GET",
+		nil, 200, common.ResponseMsgUser{common.User0})
+	assert.NoError(t, err)
 }
