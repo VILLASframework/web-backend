@@ -22,8 +22,9 @@ func TestUserEndpoints(t *testing.T) {
 	api.Use(Authentication(true))
 	RegisterUserEndpoints(api.Group("/users"))
 
+	// authenticate
 	token, err := common.NewAuthenticateForTest(router,
-		"/api/authenticate", "POST", common.CredAdmin, 200)
+		"/api/authenticate", "POST", common.AdminCredentials, 200)
 	assert.NoError(t, err)
 
 	// test GET user/

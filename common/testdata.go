@@ -14,15 +14,15 @@ var MsgOK = ResponseMsg{
 }
 
 // Users
-var strPassword0 = "xyz789"
-var strPasswordA = "abc123"
-var strPasswordB = "bcd234"
+var StrPassword0 = "xyz789"
+var StrPasswordA = "abc123"
+var StrPasswordB = "bcd234"
 
 // Hash passwords with bcrypt algorithm
 var bcryptCost = 10
-var pw0, _ = bcrypt.GenerateFromPassword([]byte(strPassword0), bcryptCost)
-var pwA, _ = bcrypt.GenerateFromPassword([]byte(strPasswordA), bcryptCost)
-var pwB, _ = bcrypt.GenerateFromPassword([]byte(strPasswordB), bcryptCost)
+var pw0, _ = bcrypt.GenerateFromPassword([]byte(StrPassword0), bcryptCost)
+var pwA, _ = bcrypt.GenerateFromPassword([]byte(StrPasswordA), bcryptCost)
+var pwB, _ = bcrypt.GenerateFromPassword([]byte(StrPasswordB), bcryptCost)
 
 var User0 = User{Username: "User_0", Password: string(pw0),
 	Role: "Admin", Mail: "User_0@example.com"}
@@ -33,14 +33,9 @@ var UserB = User{Username: "User_B", Password: string(pwB),
 
 // Credentials
 
-var CredAdmin = credentials{
+var AdminCredentials = Request{
 	Username: User0.Username,
-	Password: strPassword0,
-}
-
-var CredUser = credentials{
-	Username: UserA.Username,
-	Password: strPasswordA,
+	Password: StrPassword0,
 }
 
 // Simulators

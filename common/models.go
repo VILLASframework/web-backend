@@ -175,9 +175,3 @@ type File struct {
 	// File itself
 	FileData []byte `gorm:"column:FileData"`
 }
-
-// Credentials type (not for DB)
-type credentials struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
