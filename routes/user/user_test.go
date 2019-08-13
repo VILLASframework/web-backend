@@ -11,9 +11,6 @@ import (
 
 func TestUserEndpoints(t *testing.T) {
 
-	myUsers := []common.User{common.User0}
-	msgUsers := common.ResponseMsgUsers{Users: myUsers}
-
 	db := common.DummyInitDB()
 	defer db.Close()
 	common.DummyOnlyAdminDB(db)
@@ -30,12 +27,14 @@ func TestUserEndpoints(t *testing.T) {
 	assert.NoError(t, err)
 
 	// test GET user/
-	err = common.NewTestEndpoint(router, token, "/api/users", "GET",
-		nil, 200, msgUsers)
+	err = common.NewTestEndpoint(router, token,
+		"/api/users", "GET", nil,
+		200, common.KeyModels{"users": []common.User{common.User0}})
 	assert.NoError(t, err)
 
 	// test GET user/1 (the admin)
-	err = common.NewTestEndpoint(router, token, "/api/users/1", "GET",
-		nil, 200, common.ResponseMsgUser{common.User0})
+	err = common.NewTestEndpoint(router, token,
+		"/api/users/1", "GET", nil,
+		200, common.KeyModels{"user": common.User0})
 	assert.NoError(t, err)
 }
