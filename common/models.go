@@ -10,7 +10,7 @@ import (
 // The type Model is exactly the same with gorm.Model (see jinzhu/gorm)
 // except the json tags that are needed for serializing the models
 type Model struct {
-	ID        uint       `json:"-" gorm:"unique;primary_key:true"`
+	ID        uint       `json:",omitempty" gorm:"unique;primary_key:true"`
 	CreatedAt time.Time  `json:"-"`
 	UpdatedAt time.Time  `json:"-"`
 	DeletedAt *time.Time `json:"-" sql:"index"`
