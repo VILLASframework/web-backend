@@ -80,14 +80,6 @@ type ResponseMsg struct {
 	Message string `json:"message"`
 }
 
-//type ResponseMsgUsers struct {
-//Users []User `json:"users"`
-//}
-
-//type ResponseMsgUser struct {
-//User `json:"user"`
-//}
-
 type ResponseMsgScenarios struct {
 	Scenarios []ScenarioResponse `json:"scenarios"`
 }
