@@ -22,7 +22,7 @@ func TestUserEndpoints(t *testing.T) {
 	api.Use(Authentication(true))
 	RegisterUserEndpoints(api.Group("/users"))
 
-	// authenticate
+	// authenticate as admin
 	token, err := common.NewAuthenticateForTest(router,
 		"/api/authenticate", "POST", common.AdminCredentials, 200)
 	assert.NoError(t, err)
@@ -37,5 +37,20 @@ func TestUserEndpoints(t *testing.T) {
 	err = common.NewTestEndpoint(router, token,
 		"/api/users/1", "GET", nil,
 		200, common.KeyModels{"user": common.User0})
+	assert.NoError(t, err)
+
+	// test POST user/ $newUser
+	newUser := common.Request{
+		Username: common.UserA.Username,
+		Password: common.StrPasswordA,
+		Mail:     common.UserA.Mail,
+		Role:     common.UserA.Role,
+	}
+	// TODO: For now the response from this endpoint has the form
+	// {"user":$Username}. Make sure that this should be the usual
+	// {"user":$User{}} response.
+	err = common.NewTestEndpoint(router, token,
+		"/api/users", "POST", common.KeyModels{"user": newUser},
+		200, common.KeyModels{"user": common.UserA.Username})
 	assert.NoError(t, err)
 }
