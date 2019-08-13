@@ -86,13 +86,13 @@ func LengthOfResponse(router *gin.Engine, token string, url string,
 }
 
 func NewTestEndpoint(router *gin.Engine, token string, url string,
-	method string, responseBody interface{}, expected_code int,
+	method string, requestBody interface{}, expected_code int,
 	expectedResponse interface{}) error {
 
 	w := httptest.NewRecorder()
 
 	// Marshal the HTTP request body
-	body, err := json.Marshal(responseBody)
+	body, err := json.Marshal(requestBody)
 	if err != nil {
 		return fmt.Errorf("Failed to marshal reqeust body: %v", err)
 	}
@@ -100,7 +100,7 @@ func NewTestEndpoint(router *gin.Engine, token string, url string,
 	if body != nil {
 		req, err := http.NewRequest(method, url, bytes.NewBuffer(body))
 		if err != nil {
-			return fmt.Errorf("Faile to create new request: %v", err)
+			return fmt.Errorf("Failed to create new request: %v", err)
 		}
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Add("Authorization", "Bearer "+token)
@@ -108,7 +108,7 @@ func NewTestEndpoint(router *gin.Engine, token string, url string,
 	} else {
 		req, err := http.NewRequest(method, url, nil)
 		if err != nil {
-			return fmt.Errorf("Faile to create new request: %v", err)
+			return fmt.Errorf("Failed to create new request: %v", err)
 		}
 		req.Header.Add("Authorization", "Bearer "+token)
 		router.ServeHTTP(w, req)
@@ -116,8 +116,8 @@ func NewTestEndpoint(router *gin.Engine, token string, url string,
 
 	// Check the return HTTP Code
 	if w.Code != expected_code {
-		return fmt.Errorf("HTTP Code: Expected \"%v\". Got \"%v\".",
-			expected_code, w.Code)
+		return fmt.Errorf("HTTP Code: Expected \"%v\". Got \"%v\".\n"+
+			"Response message:\n%v", expected_code, w.Code, w.Body.String())
 	}
 
 	// Serialize expected response
