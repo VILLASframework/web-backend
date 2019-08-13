@@ -1,11 +1,13 @@
 package user
 
 import (
+	"encoding/json"
 	"fmt"
-	"github.com/dgrijalva/jwt-go"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"time"
+
+	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-gonic/gin"
 
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
 )
@@ -124,13 +126,20 @@ func authenticate(c *gin.Context) {
 		return
 	}
 
-	serializer := common.UserSerializer{c, user.User}
+	response, err := json.Marshal(common.ResponseMsgUser{user.User})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
+		})
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "Authenticated",
 		"token":   tokenString,
-		"user":    serializer.Response(false),
+		"user":    response,
 	})
 }
 
@@ -380,9 +389,17 @@ func getUser(c *gin.Context) {
 		return
 	}
 
-	serializer := common.UserSerializer{c, user.User}
+	response, err := json.Marshal(common.ResponseMsgUser{user.User})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
+		})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"user": serializer.Response(false),
+		"user": response,
 	})
 }
 

@@ -92,7 +92,7 @@ type ResponseMsgUsers struct {
 }
 
 type ResponseMsgUser struct {
-	User UserResponse `json:"user"`
+	User `json:"user"`
 }
 
 type ResponseMsgScenarios struct {
