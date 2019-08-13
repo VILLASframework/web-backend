@@ -16,14 +16,6 @@ import (
 // Test /scenarios endpoints
 func TestScenarioEndpoints(t *testing.T) {
 
-	myUsers := []common.User{common.UserA, common.UserB}
-	msgUsers := common.ResponseMsgUsers{myUsers}
-
-	// TODO: rename that variable since it is not a user but userS with
-	// only one entry.
-	myUserA := []common.User{common.UserA}
-	msgUserA := common.ResponseMsgUsers{myUserA}
-
 	var myScenarios = []common.ScenarioResponse{common.ScenarioA_response, common.ScenarioB_response}
 	var msgScenarios = common.ResponseMsgScenarios{Scenarios: myScenarios}
 	var msgScenario = common.ResponseMsgScenario{Scenario: common.ScenarioC_response}
@@ -81,24 +73,27 @@ func TestScenarioEndpoints(t *testing.T) {
 	assert.NoError(t, err)
 
 	// test GET scenarios/:ScenarioID/users
-	err = common.NewTestEndpoint(router, token, "/api/scenarios/1/users",
-		"GET", nil, 200, msgUsers)
+	err = common.NewTestEndpoint(router, token,
+		"/api/scenarios/1/users", "GET", nil,
+		200, common.KeyModels{"users": []common.User{common.UserA, common.UserB}})
 	assert.NoError(t, err)
 
 	// test DELETE scenarios/:ScenarioID/user
 	err = common.NewTestEndpoint(router, token,
 		"/api/scenarios/1/user?username=User_B", "DELETE", nil, 200, common.MsgOK)
 	assert.NoError(t, err)
-	err = common.NewTestEndpoint(router, token, "/api/scenarios/1/users",
-		"GET", nil, 200, msgUserA)
+	err = common.NewTestEndpoint(router, token,
+		"/api/scenarios/1/users", "GET", nil,
+		200, common.KeyModels{"users": []common.User{common.UserA}})
 	assert.NoError(t, err)
 
 	// test PUT scenarios/:ScenarioID/user
 	err = common.NewTestEndpoint(router, token,
 		"/api/scenarios/1/user?username=User_B", "PUT", nil, 200, common.MsgOK)
 	assert.NoError(t, err)
-	err = common.NewTestEndpoint(router, token, "/api/scenarios/1/users",
-		"GET", nil, 200, msgUsers)
+	err = common.NewTestEndpoint(router, token,
+		"/api/scenarios/1/users", "GET", nil,
+		200, common.KeyModels{"users": []common.User{common.UserA, common.UserB}})
 	assert.NoError(t, err)
 
 	// test DELETE scenarios/:ScenarioID/user for logged in user User_A
