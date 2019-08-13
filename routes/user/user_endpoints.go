@@ -168,10 +168,8 @@ func getUsers(c *gin.Context) {
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
-	serializer := common.UsersSerializer{c, users}
-	c.JSON(http.StatusOK, gin.H{
-		"users": serializer.Response(true),
-	})
+
+	c.JSON(http.StatusOK, gin.H{"users": users})
 }
 
 // AddUser godoc
