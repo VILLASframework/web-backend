@@ -1,7 +1,6 @@
 package user
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
@@ -126,20 +125,11 @@ func authenticate(c *gin.Context) {
 		return
 	}
 
-	response, err := json.Marshal(common.ResponseMsgUser{user.User})
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
-		return
-	}
-
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "Authenticated",
 		"token":   tokenString,
-		"user":    response,
+		"user":    user.User,
 	})
 }
 
@@ -387,18 +377,7 @@ func getUser(c *gin.Context) {
 		return
 	}
 
-	response, err := json.Marshal(common.ResponseMsgUser{user.User})
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"user": response,
-	})
+	c.JSON(http.StatusOK, gin.H{"user": user.User})
 }
 
 // DeleteUser godoc
