@@ -4,53 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// User/s Serializers
-
-type UsersSerializer struct {
-	Ctx   *gin.Context
-	Users []User
-}
-
-func (self *UsersSerializer) Response(assoc bool) []UserResponse {
-	response := []UserResponse{}
-	for _, user := range self.Users {
-		serializer := UserSerializer{self.Ctx, user}
-		response = append(response, serializer.Response(assoc))
-	}
-	return response
-}
-
-type UserSerializer struct {
-	Ctx *gin.Context
-	User
-}
-
-func (self *UserSerializer) Response(assoc bool) UserResponse {
-
-	response := UserResponse{
-		Username: self.Username,
-		Role:     self.Role,
-		Mail:     self.Mail,
-		ID:       self.ID,
-	}
-
-	// Associated models MUST NOT called with assoc=true otherwise we
-	// will have an infinite loop due to the circular dependencies
-	if assoc {
-
-		// TODO: maybe all those should be made in one transaction
-
-		//scenarios, _, _ := scenario.FindUserScenarios(&self.User)
-		//scenariosSerializer :=
-		//	ScenariosSerializer{self.Ctx, scenarios}
-
-		// Add the associated models to the response
-		//response.Scenarios = scenariosSerializer.Response()
-	}
-
-	return response
-}
-
 // Scenario/s Serializers
 
 type ScenariosSerializer struct {

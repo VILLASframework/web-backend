@@ -2,13 +2,6 @@ package common
 
 import "github.com/jinzhu/gorm/dialects/postgres"
 
-type UserResponse struct {
-	Username string `json:"username"`
-	Role     string `json:"role"`
-	Mail     string `json:"mail"`
-	ID       uint   `json:"id"`
-}
-
 type ScenarioResponse struct {
 	Name            string         `json:"name"`
 	ID              uint           `json:"id"`

@@ -21,13 +21,6 @@ type tokenClaims struct {
 	jwt.StandardClaims
 }
 
-type AuthResponse struct {
-	Success bool                `json:"success"`
-	Message string              `json:"message"`
-	Token   string              `json:"token"`
-	User    common.UserResponse `json:"user"`
-}
-
 func VisitorAuthenticate(r *gin.RouterGroup) {
 	r.POST("", authenticate)
 }
