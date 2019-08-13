@@ -245,10 +245,7 @@ func getUsersOfScenario(c *gin.Context) {
 		return
 	}
 
-	serializer := common.UsersSerializer{c, allUsers}
-	c.JSON(http.StatusOK, gin.H{
-		"users": serializer.Response(false),
-	})
+	c.JSON(http.StatusOK, gin.H{"users": allUsers})
 }
 
 // addUserToScenario godoc
