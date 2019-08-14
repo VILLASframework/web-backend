@@ -253,9 +253,9 @@ func updateUser(c *gin.Context) {
 	}
 
 	// Find the user
-	var user User
+	var oldUser User
 	toBeUpdatedID, _ := common.UintParamFromCtx(c, "userID")
-	err = user.ByID(toBeUpdatedID)
+	err = oldUser.ByID(toBeUpdatedID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, fmt.Sprintf("%v", err))
 		return
@@ -265,13 +265,14 @@ func updateUser(c *gin.Context) {
 	// 1: If the logged in user has NOT the same id as the user that is
 	// going to be updated AND the role is NOT admin (is already saved
 	// in the context from the Authentication middleware) the operation
-	// is elegal
+	// is illegal
 	// 2: If the udpate is done by the Admin every field can be updated
-	// 3: If the update is done by a User everything except Role
-	userID, _ := c.Get(common.UserIDCtx)
-	userRole, _ := c.Get(common.UserRoleCtx)
+	// 3: If the update is done by a User everything can be updated
+	// except Role
+	callerID, _ := c.Get(common.UserIDCtx)
+	callerRole, _ := c.Get(common.UserRoleCtx)
 
-	if toBeUpdatedID != userID && userRole != "Admin" {
+	if toBeUpdatedID != callerID && callerRole != "Admin" {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
 			"message": "Invalid authorization",
@@ -279,7 +280,7 @@ func updateUser(c *gin.Context) {
 		return
 	}
 
-	// Bind the (context) with the User struct
+	// Bind the (context) with the updateUserRequest struct
 	var req updateUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{
@@ -289,7 +290,7 @@ func updateUser(c *gin.Context) {
 		return
 	}
 
-	// Validate the request (taking into acount the role)
+	// Validate the request based on struct updateUserRequest json tags
 	if err = req.validate(); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
@@ -298,37 +299,19 @@ func updateUser(c *gin.Context) {
 		return
 	}
 
-	updatedUser := req.createUser(userRole)
-
-	// Check that the username is NOT taken
-	err = updatedUser.ByUsername(updatedUser.Username)
-	if err == nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{
-			"message": "Username is already taken",
-		})
-		return
-	}
-
-	// Hash the password before updating it to the DB
-	err = updatedUser.setPassword(updatedUser.Password)
+	// Create the updatedUser from oldUser considering callerRole (in
+	// case that the request updates the role of the old user)
+	updatedUser, err := req.updatedUser(callerRole, oldUser)
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{
-			"message": "Unable to encrypt new password",
-		})
-		return
-	}
-
-	// To change the role of a user admin role is required
-	if (updatedUser.Role != user.Role) && (userRole != "Admin") {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
-			"message": "Invalid authorization. User role can only be changed by Admin",
+			"message": fmt.Sprintf("%v", err),
 		})
 		return
 	}
 
 	// Finaly update the user
-	err = user.update(updatedUser)
+	err = oldUser.update(updatedUser)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "Unable to update user",
