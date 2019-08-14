@@ -51,6 +51,13 @@ func TestUserEndpoints(t *testing.T) {
 	// {"user":$User{}} response.
 	err = common.NewTestEndpoint(router, token,
 		"/api/users", "POST", common.KeyModels{"user": newUser},
-		200, common.KeyModels{"user": common.UserA.Username})
+		200, common.KeyModels{"user": newUser.Username})
+	assert.NoError(t, err)
+
+	// test PUT user/1 $modifiedUser
+	modifiedUser := common.Request{Role: "Admin"}
+	err = common.NewTestEndpoint(router, token,
+		"/api/users/1", "PUT", common.KeyModels{"user": modifiedUser},
+		200, common.KeyModels{"user": modifiedUser.Username})
 	assert.NoError(t, err)
 }
