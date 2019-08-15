@@ -91,11 +91,9 @@ func DummyInitDB() *gorm.DB {
 	return test_db
 }
 
-func DummyOnlyAdminDB(test_db *gorm.DB) {
-
-	MigrateModels(test_db)
-
-	checkErr(test_db.Create(&User0).Error)
+func DummyAddOnlyUserTableWithAdminDB(db *gorm.DB) {
+	db.AutoMigrate(&User{})
+	checkErr(db.Create(&User0).Error)
 }
 
 // Migrates models and populates them with data

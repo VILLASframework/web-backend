@@ -1,36 +1,49 @@
 package user
 
 import (
+	"os"
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
 
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
 )
 
-func TestUserEndpoints(t *testing.T) {
+var router *gin.Engine
+var db *gorm.DB
 
-	db := common.DummyInitDB()
+func cleanUserTable() {
+	db.DropTable(&common.User{})
+	db.AutoMigrate(&common.User{})
+	db.Create(&common.User0)
+}
+
+func TestMain(m *testing.M) {
+
+	db = common.DummyInitDB()
 	defer db.Close()
-	common.DummyOnlyAdminDB(db)
 
-	router := gin.Default()
+	common.DummyAddOnlyUserTableWithAdminDB(db)
+
+	router = gin.Default()
 	api := router.Group("/api")
 
 	RegisterAuthenticate(api.Group("/authenticate"))
 	api.Use(Authentication(true))
 	RegisterUserEndpoints(api.Group("/users"))
 
+	os.Exit(m.Run())
+}
+
+func TestGetAllUsers(t *testing.T) {
+
+	defer cleanUserTable()
+
 	// authenticate as admin
 	token, err := common.NewAuthenticateForTest(router,
 		"/api/authenticate", "POST", common.AdminCredentials, 200)
-	assert.NoError(t, err)
-
-	// test GET user/
-	err = common.NewTestEndpoint(router, token,
-		"/api/users", "GET", nil,
-		200, common.KeyModels{"users": []common.User{common.User0}})
 	assert.NoError(t, err)
 
 	// test GET user/1 (the admin)
