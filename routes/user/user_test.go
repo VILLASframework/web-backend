@@ -46,18 +46,20 @@ func TestUserEndpoints(t *testing.T) {
 		Mail:     common.UserA.Mail,
 		Role:     common.UserA.Role,
 	}
-	// TODO: For now the response from this endpoint has the form
-	// {"user":$Username}. Make sure that this should be the usual
-	// {"user":$User{}} response.
+	// Get the number of alreday existing users so to know the expected
+	// id of the new user
+	maxid, err := common.LengthOfResponse(router, token,
+		"/api/users", "GET", nil)
+	assert.NoError(t, err)
 	err = common.NewTestEndpoint(router, token,
 		"/api/users", "POST", common.KeyModels{"user": newUser},
-		200, common.KeyModels{"user": newUser.Username})
+		200, common.KeyModels{"id": maxid + 1})
 	assert.NoError(t, err)
 
 	// test PUT user/1 $modifiedUser
 	modifiedUser := common.Request{Role: "Admin"}
 	err = common.NewTestEndpoint(router, token,
-		"/api/users/1", "PUT", common.KeyModels{"user": modifiedUser},
-		200, common.KeyModels{"user": modifiedUser.Username})
+		"/api/users/2", "PUT", common.KeyModels{"user": modifiedUser},
+		200, common.KeyModels{"id": 2})
 	assert.NoError(t, err)
 }
