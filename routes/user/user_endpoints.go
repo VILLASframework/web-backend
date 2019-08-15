@@ -226,7 +226,7 @@ func addUser(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"user": fmt.Sprintf(newUser.Username),
+		"id": newUser.ID,
 	})
 }
 
@@ -320,7 +320,7 @@ func updateUser(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"user": fmt.Sprintf(updatedUser.Username),
+		"id": updatedUser.ID,
 	})
 }
 
@@ -393,5 +393,7 @@ func deleteUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{})
+	c.JSON(http.StatusOK, gin.H{
+		"id": user.ID,
+	})
 }
