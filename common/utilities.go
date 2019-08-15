@@ -97,22 +97,14 @@ func NewTestEndpoint(router *gin.Engine, token string, url string,
 		return fmt.Errorf("Failed to marshal reqeust body: %v", err)
 	}
 
-	if body != nil {
-		req, err := http.NewRequest(method, url, bytes.NewBuffer(body))
-		if err != nil {
-			return fmt.Errorf("Failed to create new request: %v", err)
-		}
-		req.Header.Set("Content-Type", "application/json")
-		req.Header.Add("Authorization", "Bearer "+token)
-		router.ServeHTTP(w, req)
-	} else {
-		req, err := http.NewRequest(method, url, nil)
-		if err != nil {
-			return fmt.Errorf("Failed to create new request: %v", err)
-		}
-		req.Header.Add("Authorization", "Bearer "+token)
-		router.ServeHTTP(w, req)
+	// Create the request
+	req, err := http.NewRequest(method, url, bytes.NewBuffer(body))
+	if err != nil {
+		return fmt.Errorf("Failed to create new request: %v", err)
 	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Add("Authorization", "Bearer "+token)
+	router.ServeHTTP(w, req)
 
 	// Check the return HTTP Code
 	if w.Code != expected_code {
