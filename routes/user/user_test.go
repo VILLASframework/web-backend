@@ -18,7 +18,7 @@ func TestUserEndpoints(t *testing.T) {
 	router := gin.Default()
 	api := router.Group("/api")
 
-	VisitorAuthenticate(api.Group("/authenticate"))
+	RegisterAuthenticate(api.Group("/authenticate"))
 	api.Use(Authentication(true))
 	RegisterUserEndpoints(api.Group("/users"))
 

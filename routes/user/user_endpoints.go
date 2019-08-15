@@ -21,7 +21,7 @@ type tokenClaims struct {
 	jwt.StandardClaims
 }
 
-func VisitorAuthenticate(r *gin.RouterGroup) {
+func RegisterAuthenticate(r *gin.RouterGroup) {
 	r.POST("", authenticate)
 }
 

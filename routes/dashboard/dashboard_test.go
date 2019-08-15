@@ -29,7 +29,7 @@ func TestEndpoints(t *testing.T) {
 
 	// All endpoints require authentication except when someone wants to
 	// login (POST /authenticate)
-	user.VisitorAuthenticate(api.Group("/authenticate"))
+	user.RegisterAuthenticate(api.Group("/authenticate"))
 
 	api.Use(user.Authentication(true))
 
