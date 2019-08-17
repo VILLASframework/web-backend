@@ -41,15 +41,18 @@ func LengthOfResponse(router *gin.Engine, token string, url string,
 
 	w := httptest.NewRecorder()
 
-	if body != nil {
-		req, _ := http.NewRequest(method, url, bytes.NewBuffer(body))
-		req.Header.Set("Content-Type", "application/json")
-		req.Header.Add("Authorization", "Bearer "+token)
-		router.ServeHTTP(w, req)
-	} else {
-		req, _ := http.NewRequest(method, url, nil)
-		req.Header.Add("Authorization", "Bearer "+token)
-		router.ServeHTTP(w, req)
+	req, err := http.NewRequest(method, url, nil)
+	if err != nil {
+		return 0, fmt.Errorf("Failed to create new request: %v", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Add("Authorization", "Bearer "+token)
+	router.ServeHTTP(w, req)
+
+	// HTTP Code of response must be 200
+	if w.Code != 200 {
+		return 0, fmt.Errorf("HTTP Code: Expected \"200\". Got \"%v\""+
+			".\nResponse message:\n%v", w.Code, w.Body.String())
 	}
 
 	// Convert the response in array of bytes
@@ -58,11 +61,11 @@ func LengthOfResponse(router *gin.Engine, token string, url string,
 	// First we are trying to unmarshal the response into an array of
 	// general type variables ([]interface{}). If this fails we will try
 	// to unmarshal into a single general type variable (interface{}).
-	// If that also fails we will return -1.
+	// If that also fails we will return 0.
 
 	// Response might be array of objects
 	var arrayResponse map[string][]interface{}
-	err := json.Unmarshal(responseBytes, &arrayResponse)
+	err = json.Unmarshal(responseBytes, &arrayResponse)
 	if err == nil {
 
 		// Get an arbitrary key from tha map. The only key (entry) of
@@ -80,8 +83,7 @@ func LengthOfResponse(router *gin.Engine, token string, url string,
 		return 1, nil
 	}
 
-	// Failed to identify response. It means we got a different HTTP
-	// code than 200.
+	// Failed to identify response.
 	return 0, fmt.Errorf("Length of response cannot be detected")
 }
 
