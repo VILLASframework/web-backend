@@ -56,7 +56,7 @@ func (r *updateUserRequest) updatedUser(role interface{},
 	// Only the Admin must be able to update user's role
 	if role != "Admin" && r.Role != u.Role {
 		return u, fmt.Errorf("Only Admin can update user's Role")
-	} else {
+	} else if role == "Admin" && r.Role != "" {
 		u.Role = r.Role
 	}
 
@@ -64,7 +64,10 @@ func (r *updateUserRequest) updatedUser(role interface{},
 	if err := u.ByUsername(r.Username); err == nil {
 		return u, fmt.Errorf("Username is alreaday taken")
 	}
-	u.Username = r.Username
+
+	if r.Username != "" {
+		u.Username = r.Username
+	}
 
 	// If there is a new password then hash it and update it
 	if r.Password != "" {
@@ -74,8 +77,10 @@ func (r *updateUserRequest) updatedUser(role interface{},
 		}
 	}
 
-	// Update male
-	u.Mail = r.Mail
+	// Update mail
+	if r.Mail != "" {
+		u.Mail = r.Mail
+	}
 
 	return u, nil
 }

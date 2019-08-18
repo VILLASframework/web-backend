@@ -225,9 +225,7 @@ func addUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"id": newUser.ID,
-	})
+	c.JSON(http.StatusOK, gin.H{"user": newUser.User})
 }
 
 // UpdateUser godoc
@@ -319,9 +317,7 @@ func updateUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"id": updatedUser.ID,
-	})
+	c.JSON(http.StatusOK, gin.H{"user": updatedUser.User})
 }
 
 // GetUser godoc
@@ -393,7 +389,5 @@ func deleteUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"id": user.ID,
-	})
+	c.JSON(http.StatusOK, gin.H{"user": user})
 }
