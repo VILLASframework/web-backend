@@ -88,41 +88,37 @@ func LengthOfResponse(router *gin.Engine, token string, url string,
 }
 
 func NewTestEndpoint(router *gin.Engine, token string, url string,
-	method string, requestBody interface{}, expected_code int,
-	expectedResponse interface{}) error {
+	method string, requestBody interface{}) (int, *bytes.Buffer, error) {
 
 	w := httptest.NewRecorder()
 
 	// Marshal the HTTP request body
 	body, err := json.Marshal(requestBody)
 	if err != nil {
-		return fmt.Errorf("Failed to marshal reqeust body: %v", err)
+		return 0, nil, fmt.Errorf("Failed to marshal request body: %v", err)
 	}
 
 	// Create the request
 	req, err := http.NewRequest(method, url, bytes.NewBuffer(body))
 	if err != nil {
-		return fmt.Errorf("Failed to create new request: %v", err)
+		return 0, nil, fmt.Errorf("Failed to create new request: %v", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Add("Authorization", "Bearer "+token)
 	router.ServeHTTP(w, req)
 
-	// Check the return HTTP Code
-	if w.Code != expected_code {
-		return fmt.Errorf("HTTP Code: Expected \"%v\". Got \"%v\".\n"+
-			"Response message:\n%v", expected_code, w.Code, w.Body.String())
-	}
+	return w.Code, w.Body, nil
+}
 
+func CompareResponse(resp *bytes.Buffer, expected interface{}) error {
 	// Serialize expected response
-	expectedBytes, err := json.Marshal(expectedResponse)
+	expectedBytes, err := json.Marshal(expected)
 	if err != nil {
-		return fmt.Errorf("Failed to marshal epxected response: %v", err)
+		return fmt.Errorf("Failed to marshal expected response: %v", err)
 	}
-
-	// Check the response
+	// Compare
 	opts := jsondiff.DefaultConsoleOptions()
-	diff, _ := jsondiff.Compare(w.Body.Bytes(), expectedBytes, &opts)
+	diff, _ := jsondiff.Compare(resp.Bytes(), expectedBytes, &opts)
 	if diff.String() != "FullMatch" && diff.String() != "SupersetMatch" {
 		return fmt.Errorf("Response: Expected \"%v\". Got \"%v\".",
 			"(FullMatch OR SupersetMatch)", diff.String())
