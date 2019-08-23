@@ -155,7 +155,6 @@ func TestModifyAddedUserAsAdmin(t *testing.T) {
 
 	// modify newUser's password with INVALID password
 	modRequest4 := common.Request{Password: "short"}
-	newUser.Password = modRequest4.Password
 	code, resp, err = common.NewTestEndpoint(router, token,
 		fmt.Sprintf("/api/users/%v", maxid+1), "PUT",
 		common.KeyModels{"user": modRequest4})
@@ -164,11 +163,11 @@ func TestModifyAddedUserAsAdmin(t *testing.T) {
 
 	// modify newUser's password with VALID password
 	modRequest5 := common.Request{Password: "4_g00d_pw!"}
-	newUser.Password = modRequest5.Password
 	code, resp, err = common.NewTestEndpoint(router, token,
 		fmt.Sprintf("/api/users/%v", maxid+1), "PUT",
 		common.KeyModels{"user": modRequest5})
 	assert.NoError(t, err)
+	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// try to login as newUser with the modified username and password
 	_, err = common.NewAuthenticateForTest(router,
