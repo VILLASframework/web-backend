@@ -227,59 +227,59 @@ func TestModifyAddedUserAsAdmin(t *testing.T) {
 	newUser.Password = ""
 
 	// modify newUser's name
-	modRequest1 := common.Request{Username: "NewUsername"}
-	newUser.Username = modRequest1.Username
+	modRequest := common.Request{Username: "NewUsername"}
+	newUser.Username = modRequest.Username
 	code, resp, err = common.NewTestEndpoint(router, token,
 		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
-		common.KeyModels{"user": modRequest1})
+		common.KeyModels{"user": modRequest})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 	err = common.CompareResponse(resp, common.KeyModels{"user": newUser})
 	assert.NoError(t, err)
 
 	// modify newUser's email
-	modRequest2 := common.Request{Mail: "new@e.mail"}
-	newUser.Mail = modRequest2.Mail
+	modRequest = common.Request{Mail: "new@e.mail"}
+	newUser.Mail = modRequest.Mail
 	code, resp, err = common.NewTestEndpoint(router, token,
 		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
-		common.KeyModels{"user": modRequest2})
+		common.KeyModels{"user": modRequest})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 	err = common.CompareResponse(resp, common.KeyModels{"user": newUser})
 	assert.NoError(t, err)
 
 	// modify newUser's role
-	modRequest3 := common.Request{Role: "Admin"}
-	newUser.Role = modRequest3.Role
+	modRequest = common.Request{Role: "Admin"}
+	newUser.Role = modRequest.Role
 	code, resp, err = common.NewTestEndpoint(router, token,
 		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
-		common.KeyModels{"user": modRequest3})
+		common.KeyModels{"user": modRequest})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 	err = common.CompareResponse(resp, common.KeyModels{"user": newUser})
 	assert.NoError(t, err)
 
 	// modify newUser's password with INVALID password
-	modRequest4 := common.Request{Password: "short"}
+	modRequest = common.Request{Password: "short"}
 	code, resp, err = common.NewTestEndpoint(router, token,
 		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
-		common.KeyModels{"user": modRequest4})
+		common.KeyModels{"user": modRequest})
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp) // HTTP 400
 
 	// modify newUser's password with VALID password
-	modRequest5 := common.Request{Password: "4_g00d_pw!"}
+	modRequest = common.Request{Password: "4_g00d_pw!"}
 	code, resp, err = common.NewTestEndpoint(router, token,
 		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
-		common.KeyModels{"user": modRequest5})
+		common.KeyModels{"user": modRequest})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// try to login as newUser with the modified username and password
 	_, err = common.NewAuthenticateForTest(router,
 		"/api/authenticate", "POST", common.Request{
-			Username: modRequest1.Username,
-			Password: modRequest5.Password,
+			Username: newUser.Username,
+			Password: modRequest.Password,
 		})
 	assert.NoError(t, err)
 }
