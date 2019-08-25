@@ -36,6 +36,35 @@ func ProvideErrorResponse(c *gin.Context, err error) bool {
 	return false // No error
 }
 
+func GetResponseID(resp *bytes.Buffer) (int, error) {
+
+	// Transform bytes buffer into byte slice
+	respBytes := []byte(resp.String())
+
+	// Map JSON response to a map[string]map[string]interface{}
+	var respRemapped map[string]map[string]interface{}
+	err := json.Unmarshal(respBytes, &respRemapped)
+	if err != nil {
+		return 0, fmt.Errorf("Unmarshal failed for respRemapped %v", err)
+	}
+
+	// Get an arbitrary key from tha map. The only key (entry) of
+	// course is the model's name. With that trick we do not have to
+	// pass the higher level key as argument.
+	for arbitrary_key := range respRemapped {
+
+		// The marshaler turns numerical values into float64 types so we
+		// first have to make a type assertion to the interface and then
+		// the conversion to integer before returning
+		id, ok := respRemapped[arbitrary_key]["id"].(float64)
+		if !ok {
+			return 0, fmt.Errorf("Cannot type assert respRemapped")
+		}
+		return int(id), nil
+	}
+	return 0, fmt.Errorf("GetResponse reached exit")
+}
+
 func LengthOfResponse(router *gin.Engine, token string, url string,
 	method string, body []byte) (int, error) {
 
