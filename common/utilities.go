@@ -203,23 +203,30 @@ func NewAuthenticateForTest(router *gin.Engine, url string,
 			http.StatusOK, w.Code)
 	}
 
-	var body_data map[string]interface{}
-
 	// Get the response
+	var body_data map[string]interface{}
 	err = json.Unmarshal([]byte(w.Body.String()), &body_data)
 	if err != nil {
 		return "", err
 	}
 
 	// Check the response
-	success := body_data["success"].(bool)
+	success, ok := body_data["success"].(bool)
+	if !ok {
+		return "", fmt.Errorf("Type asssertion of response[\"success\"] failed")
+	}
 	if !success {
-		fmt.Println("Authentication not successful: ", body_data["message"])
-		return "", fmt.Errorf("Authentication unsuccessful!")
+		return "", fmt.Errorf("Authentication failed!", body_data["message"])
+	}
+
+	// Extract the token
+	token, ok := body_data["token"].(string)
+	if !ok {
+		return "", fmt.Errorf("Type assertion of response[\"token\"] failed")
 	}
 
 	// Return the token and nil error
-	return body_data["token"].(string), nil
+	return token, nil
 }
 
 func AuthenticateForTest(t *testing.T, router *gin.Engine, url string, method string, body []byte, expected_code int) string {
