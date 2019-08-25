@@ -54,8 +54,10 @@ func (r *updateUserRequest) updatedUser(role interface{},
 	u := oldUser
 
 	// Only the Admin must be able to update user's role
-	if role != "Admin" && r.Role != u.Role {
-		return u, fmt.Errorf("Only Admin can update user's Role")
+	if role != "Admin" && r.Role != "" {
+		if r.Role != u.Role {
+			return u, fmt.Errorf("Only Admin can update user's Role")
+		}
 	} else if role == "Admin" && r.Role != "" {
 		u.Role = r.Role
 	}
