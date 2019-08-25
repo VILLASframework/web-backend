@@ -322,3 +322,44 @@ func TestModifyAddedUserAsAdmin(t *testing.T) {
 		})
 	assert.NoError(t, err)
 }
+
+func TestDeleteUser(t *testing.T) {
+
+	// authenticate as admin
+	token, err := common.NewAuthenticateForTest(router,
+		"/api/authenticate", "POST", common.AdminCredentials)
+	assert.NoError(t, err)
+
+	// Add a user
+	newUser := common.Request{
+		Username: "toBeDeletedUser",
+		Password: "f0r_deletIOn_0ser",
+		Mail:     "to@be.deleted",
+		Role:     "User",
+	}
+	code, resp, err := common.NewTestEndpoint(router, token,
+		"/api/users", "POST", common.KeyModels{"user": newUser})
+	assert.NoError(t, err)
+	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
+
+	newUserID, err := common.GetResponseID(resp)
+	assert.NoError(t, err)
+
+	// Count the number of all the users returned
+	initialNumber, err := common.LengthOfResponse(router, token,
+		"/api/users", "GET", nil)
+	assert.NoError(t, err)
+
+	// Delete the added newUser
+	code, resp, err = common.NewTestEndpoint(router, token,
+		fmt.Sprintf("/api/users/%v", newUserID), "DELETE", nil)
+	assert.NoError(t, err)
+	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
+
+	// Again count the number of all the users returned
+	finalNumber, err := common.LengthOfResponse(router, token,
+		"/api/users", "GET", nil)
+	assert.NoError(t, err)
+
+	assert.Equal(t, finalNumber, initialNumber-1)
+}
