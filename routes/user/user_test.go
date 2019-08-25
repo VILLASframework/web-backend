@@ -32,7 +32,7 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-func TestAddUser(t *testing.T) {
+func TestAddGetUser(t *testing.T) {
 
 	// authenticate as admin
 	token, err := common.NewAuthenticateForTest(router,
@@ -50,12 +50,29 @@ func TestAddUser(t *testing.T) {
 		"/api/users", "POST", common.KeyModels{"user": newUser})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
-	err = common.CompareResponse(resp,
-		common.KeyModels{"user": common.Request{
-			Username: newUser.Username,
-			Mail:     newUser.Mail,
-			Role:     newUser.Role,
-		}})
+
+	// Turn password member of newUser to empty string so it is omitted
+	// in marshaling. The password will never be included in the
+	// response and if is non empty in request we will not be able to do
+	// request-response comparison
+	newUser.Password = ""
+
+	// Compare POST's response with the newUser (Password omitted)
+	err = common.CompareResponse(resp, common.KeyModels{"user": newUser})
+	assert.NoError(t, err)
+
+	// Read newUser's ID from the response
+	newUserID, err := common.GetResponseID(resp)
+	assert.NoError(t, err)
+
+	// Get the newUser
+	code, resp, err = common.NewTestEndpoint(router, token,
+		fmt.Sprintf("/api/users/%v", newUserID), "GET", nil)
+	assert.NoError(t, err)
+	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
+
+	// Compare GET's response with the newUser (Password omitted)
+	err = common.CompareResponse(resp, common.KeyModels{"user": newUser})
 	assert.NoError(t, err)
 }
 
