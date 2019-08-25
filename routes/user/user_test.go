@@ -98,10 +98,6 @@ func TestModifyAddedUserAsAdmin(t *testing.T) {
 		"/api/authenticate", "POST", common.AdminCredentials, 200)
 	assert.NoError(t, err)
 
-	maxid, err := common.LengthOfResponse(router, token,
-		"/api/users", "GET", nil)
-	assert.NoError(t, err)
-
 	// Add a user
 	newUser := common.Request{
 		Username: "modAddedUser",
@@ -114,6 +110,9 @@ func TestModifyAddedUserAsAdmin(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
+	newUserID, err := common.GetResponseID(resp)
+	assert.NoError(t, err)
+
 	// Turn password member of newUser to empty string so it is omitted
 	// in marshaling. The password will never be included in the
 	// response and if is non empty in request we will not be able to do
@@ -124,7 +123,7 @@ func TestModifyAddedUserAsAdmin(t *testing.T) {
 	modRequest1 := common.Request{Username: "NewUsername"}
 	newUser.Username = modRequest1.Username
 	code, resp, err = common.NewTestEndpoint(router, token,
-		fmt.Sprintf("/api/users/%v", maxid+1), "PUT",
+		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
 		common.KeyModels{"user": modRequest1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -135,7 +134,7 @@ func TestModifyAddedUserAsAdmin(t *testing.T) {
 	modRequest2 := common.Request{Mail: "new@e.mail"}
 	newUser.Mail = modRequest2.Mail
 	code, resp, err = common.NewTestEndpoint(router, token,
-		fmt.Sprintf("/api/users/%v", maxid+1), "PUT",
+		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
 		common.KeyModels{"user": modRequest2})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -146,7 +145,7 @@ func TestModifyAddedUserAsAdmin(t *testing.T) {
 	modRequest3 := common.Request{Role: "Admin"}
 	newUser.Role = modRequest3.Role
 	code, resp, err = common.NewTestEndpoint(router, token,
-		fmt.Sprintf("/api/users/%v", maxid+1), "PUT",
+		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
 		common.KeyModels{"user": modRequest3})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -156,7 +155,7 @@ func TestModifyAddedUserAsAdmin(t *testing.T) {
 	// modify newUser's password with INVALID password
 	modRequest4 := common.Request{Password: "short"}
 	code, resp, err = common.NewTestEndpoint(router, token,
-		fmt.Sprintf("/api/users/%v", maxid+1), "PUT",
+		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
 		common.KeyModels{"user": modRequest4})
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp) // HTTP 400
@@ -164,7 +163,7 @@ func TestModifyAddedUserAsAdmin(t *testing.T) {
 	// modify newUser's password with VALID password
 	modRequest5 := common.Request{Password: "4_g00d_pw!"}
 	code, resp, err = common.NewTestEndpoint(router, token,
-		fmt.Sprintf("/api/users/%v", maxid+1), "PUT",
+		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
 		common.KeyModels{"user": modRequest5})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
