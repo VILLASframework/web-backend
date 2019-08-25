@@ -198,6 +198,53 @@ func TestModifyAddedUserAsUser(t *testing.T) {
 	assert.Equalf(t, 403, code, "Response body: \n%v\n", resp)
 }
 
+func TestInvalidUserUpdate(t *testing.T) {
+
+	// authenticate as admin
+	token, err := common.NewAuthenticateForTest(router,
+		"/api/authenticate", "POST", common.AdminCredentials)
+	assert.NoError(t, err)
+
+	// Add a user
+	newUser := common.Request{
+		Username: "invalidUpdatedUser",
+		Password: "wr0ng_Upd@te!",
+		Mail:     "inv@user.upd",
+		Role:     "User",
+	}
+	code, resp, err := common.NewTestEndpoint(router, token,
+		"/api/users", "POST", common.KeyModels{"user": newUser})
+	assert.NoError(t, err)
+	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
+
+	newUserID, err := common.GetResponseID(resp)
+	assert.NoError(t, err)
+
+	// modify newUser's password with INVALID password
+	modRequest := common.Request{Password: "short"}
+	code, resp, err = common.NewTestEndpoint(router, token,
+		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
+		common.KeyModels{"user": modRequest})
+	assert.NoError(t, err)
+	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
+
+	// modify newUser's email with INVALID email
+	modRequest = common.Request{Mail: "notEmail"}
+	code, resp, err = common.NewTestEndpoint(router, token,
+		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
+		common.KeyModels{"user": modRequest})
+	assert.NoError(t, err)
+	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
+
+	// modify newUser's role with INVALID role
+	modRequest = common.Request{Role: "noRole"}
+	code, resp, err = common.NewTestEndpoint(router, token,
+		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
+		common.KeyModels{"user": modRequest})
+	assert.NoError(t, err)
+	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
+}
+
 func TestModifyAddedUserAsAdmin(t *testing.T) {
 
 	// authenticate as admin
@@ -259,15 +306,7 @@ func TestModifyAddedUserAsAdmin(t *testing.T) {
 	err = common.CompareResponse(resp, common.KeyModels{"user": newUser})
 	assert.NoError(t, err)
 
-	// modify newUser's password with INVALID password
-	modRequest = common.Request{Password: "short"}
-	code, resp, err = common.NewTestEndpoint(router, token,
-		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
-		common.KeyModels{"user": modRequest})
-	assert.NoError(t, err)
-	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp) // HTTP 400
-
-	// modify newUser's password with VALID password
+	// modify newUser's password
 	modRequest = common.Request{Password: "4_g00d_pw!"}
 	code, resp, err = common.NewTestEndpoint(router, token,
 		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
