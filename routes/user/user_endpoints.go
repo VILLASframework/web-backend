@@ -250,9 +250,16 @@ func updateUser(c *gin.Context) {
 		return
 	}
 
-	// Find the user
+	// Get the user's (to be updated) ID from the context
 	var oldUser User
-	toBeUpdatedID, _ := common.UintParamFromCtx(c, "userID")
+	toBeUpdatedID, err := common.UintParamFromCtx(c, "userID")
+	if err != nil {
+		c.JSON(http.StatusNotFound,
+			fmt.Sprintf("Could not get user's ID from context"))
+		return
+	}
+
+	// Find the user
 	err = oldUser.ByID(toBeUpdatedID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, fmt.Sprintf("%v", err))
@@ -267,8 +274,22 @@ func updateUser(c *gin.Context) {
 	// 2: If the udpate is done by the Admin every field can be updated
 	// 3: If the update is done by a User everything can be updated
 	// except Role
-	callerID, _ := c.Get(common.UserIDCtx)
-	callerRole, _ := c.Get(common.UserRoleCtx)
+
+	// Get caller's ID from context
+	callerID, exists := c.Get(common.UserIDCtx)
+	if !exists {
+		c.JSON(http.StatusNotFound,
+			fmt.Sprintf("Could not get caller's ID from context"))
+		return
+	}
+
+	// Get caller's Role from context
+	callerRole, exists := c.Get(common.UserRoleCtx)
+	if !exists {
+		c.JSON(http.StatusNotFound,
+			fmt.Sprintf("Could not get caller's Role from context"))
+		return
+	}
 
 	if toBeUpdatedID != callerID && callerRole != "Admin" {
 		c.JSON(http.StatusForbidden, gin.H{
@@ -340,9 +361,14 @@ func getUser(c *gin.Context) {
 		return
 	}
 
-	var user User
-	id, _ := common.UintParamFromCtx(c, "userID")
+	id, err := common.UintParamFromCtx(c, "userID")
+	if err != nil {
+		c.JSON(http.StatusNotFound,
+			fmt.Sprintf("Could not get user's ID from context"))
+		return
+	}
 
+	var user User
 	err = user.ByID(id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, fmt.Sprintf("%v", err))
@@ -373,7 +399,12 @@ func deleteUser(c *gin.Context) {
 	}
 
 	var user User
-	id, _ := common.UintParamFromCtx(c, "userID")
+	id, err := common.UintParamFromCtx(c, "userID")
+	if err != nil {
+		c.JSON(http.StatusNotFound,
+			fmt.Sprintf("Could not get user's ID from context"))
+		return
+	}
 
 	// Check that the user exist
 	err = user.ByID(uint(id))
