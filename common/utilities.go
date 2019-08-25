@@ -180,8 +180,7 @@ func TestEndpoint(t *testing.T, router *gin.Engine, token string, url string, me
 }
 
 func NewAuthenticateForTest(router *gin.Engine, url string,
-	method string, credentials interface{}, expected_code int) (string,
-	error) {
+	method string, credentials interface{}) (string, error) {
 
 	w := httptest.NewRecorder()
 
@@ -198,10 +197,10 @@ func NewAuthenticateForTest(router *gin.Engine, url string,
 	req.Header.Set("Content-Type", "application/json")
 	router.ServeHTTP(w, req)
 
-	// Check the return HTTP Code
-	if w.Code != expected_code {
+	// Check that return HTTP Code is 200 (OK)
+	if w.Code != http.StatusOK {
 		return "", fmt.Errorf("HTTP Code: Expected \"%v\". Got \"%v\".",
-			expected_code, w.Code)
+			http.StatusOK, w.Code)
 	}
 
 	var body_data map[string]interface{}
