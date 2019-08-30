@@ -106,6 +106,20 @@ func TestGetAllUsers(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.Equal(t, finalNumber, initialNumber+1)
+
+	// Authenticate as the added user
+	token, err = common.NewAuthenticateForTest(router,
+		"/api/authenticate", "POST", common.Request{
+			Username: newUser.Username,
+			Password: newUser.Password,
+		})
+	assert.NoError(t, err)
+
+	// Try to get all the users (NOT ALLOWED)
+	code, resp, err = common.NewTestEndpoint(router, token,
+		"/api/users", "POST", common.KeyModels{"user": newUser})
+	assert.NoError(t, err)
+	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 }
 
 func TestModifyAddedUserAsUser(t *testing.T) {
