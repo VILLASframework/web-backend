@@ -54,7 +54,7 @@ func TestAddGetUser(t *testing.T) {
 	// Turn password member of newUser to empty string so it is omitted
 	// in marshaling. The password will never be included in the
 	// response and if is non empty in request we will not be able to do
-	// request-response comparison
+	// request-response comparison. Reserve it also for later usage.
 	newUser.Password = ""
 
 	// Compare POST's response with the newUser (Password omitted)
@@ -74,6 +74,62 @@ func TestAddGetUser(t *testing.T) {
 	// Compare GET's response with the newUser (Password omitted)
 	err = common.CompareResponse(resp, common.KeyModels{"user": newUser})
 	assert.NoError(t, err)
+}
+
+func TestUsersNotAllowedActions(t *testing.T) {
+
+	// authenticate as admin
+	token, err := common.NewAuthenticateForTest(router,
+		"/api/authenticate", "POST", common.AdminCredentials)
+	assert.NoError(t, err)
+
+	// Add a user
+	newUser := common.Request{
+		Username: "NotAllowedActions",
+		Password: "N0t_@LLow3d_act10n5",
+		Mail:     "not@allowed.ac",
+		Role:     "User",
+	}
+	code, resp, err := common.NewTestEndpoint(router, token,
+		"/api/users", "POST", common.KeyModels{"user": newUser})
+	assert.NoError(t, err)
+	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
+
+	newUserID, err := common.GetResponseID(resp)
+	assert.NoError(t, err)
+
+	// Authenticate as the added user
+	token, err = common.NewAuthenticateForTest(router,
+		"/api/authenticate", "POST", common.Request{
+			Username: newUser.Username,
+			Password: newUser.Password,
+		})
+	assert.NoError(t, err)
+
+	// Try to get all the users (NOT ALLOWED)
+	code, resp, err = common.NewTestEndpoint(router, token,
+		"/api/users", "POST", common.KeyModels{"user": newUser})
+	assert.NoError(t, err)
+	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
+
+	// Try to read another user than self (eg. Admin) (NOT ALLOWED)
+	code, resp, err = common.NewTestEndpoint(router, token,
+		"/api/users/0", "GET", nil)
+	assert.NoError(t, err)
+	assert.Equalf(t, 403, code, "Response body: \n%v\n", resp)
+
+	// Try to delete another user (eg. Admin) (NOT ALLOWED)
+	code, resp, err = common.NewTestEndpoint(router, token,
+		"/api/users/0", "DELETE", nil)
+	assert.NoError(t, err)
+	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
+
+	// Try to delete self (NOT ALLOWED)
+	code, resp, err = common.NewTestEndpoint(router, token,
+		fmt.Sprintf("/api/users/%v", newUserID), "DELETE", nil)
+	assert.NoError(t, err)
+	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
+
 }
 
 func TestGetAllUsers(t *testing.T) {
@@ -106,20 +162,6 @@ func TestGetAllUsers(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.Equal(t, finalNumber, initialNumber+1)
-
-	// Authenticate as the added user
-	token, err = common.NewAuthenticateForTest(router,
-		"/api/authenticate", "POST", common.Request{
-			Username: newUser.Username,
-			Password: newUser.Password,
-		})
-	assert.NoError(t, err)
-
-	// Try to get all the users (NOT ALLOWED)
-	code, resp, err = common.NewTestEndpoint(router, token,
-		"/api/users", "POST", common.KeyModels{"user": newUser})
-	assert.NoError(t, err)
-	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 }
 
 func TestModifyAddedUserAsUser(t *testing.T) {
