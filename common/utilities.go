@@ -218,7 +218,7 @@ func NewAuthenticateForTest(router *gin.Engine, url string,
 		return "", fmt.Errorf("Type asssertion of response[\"success\"] failed")
 	}
 	if !success {
-		return "", fmt.Errorf("Authentication failed!", body_data["message"])
+		return "", fmt.Errorf("Authentication failed: %v", body_data["message"])
 	}
 
 	// Extract the token
