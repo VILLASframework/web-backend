@@ -158,8 +158,6 @@ var SimulationModelA = SimulationModel{
 	Name:            "SimulationModel_A",
 	OutputLength:    1,
 	InputLength:     1,
-	ScenarioID:      1,
-	SimulatorID:     1,
 	StartParameters: postgres.Jsonb{startParametersA},
 }
 
@@ -168,8 +166,6 @@ var SimulationModelA_response = SimulationModelResponse{
 	Name:            SimulationModelA.Name,
 	InputLength:     SimulationModelA.InputLength,
 	OutputLength:    SimulationModelA.OutputLength,
-	ScenarioID:      SimulationModelA.ScenarioID,
-	SimulatorID:     SimulationModelA.SimulatorID,
 	StartParameters: SimulationModelA.StartParameters,
 }
 
@@ -177,8 +173,6 @@ var SimulationModelB = SimulationModel{
 	Name:            "SimulationModel_B",
 	OutputLength:    1,
 	InputLength:     1,
-	ScenarioID:      1,
-	SimulatorID:     1,
 	StartParameters: postgres.Jsonb{startParametersB},
 }
 
@@ -187,8 +181,6 @@ var SimulationModelB_response = SimulationModelResponse{
 	Name:            SimulationModelB.Name,
 	InputLength:     SimulationModelB.InputLength,
 	OutputLength:    SimulationModelB.OutputLength,
-	ScenarioID:      SimulationModelB.ScenarioID,
-	SimulatorID:     SimulationModelB.SimulatorID,
 	StartParameters: SimulationModelB.StartParameters,
 }
 
@@ -196,8 +188,6 @@ var SimulationModelC = SimulationModel{
 	Name:            "SimulationModel_C",
 	OutputLength:    1,
 	InputLength:     1,
-	ScenarioID:      1,
-	SimulatorID:     1,
 	StartParameters: postgres.Jsonb{startParametersC},
 }
 
@@ -235,179 +225,155 @@ var SimulationModelCUpdated_response = SimulationModelResponse{
 // Signals
 
 var OutSignalA = Signal{
-	Name:              "outSignal_A",
-	Direction:         "out",
-	Index:             0,
-	Unit:              "V",
-	SimulationModelID: 1,
+	Name:      "outSignal_A",
+	Direction: "out",
+	Index:     0,
+	Unit:      "V",
 }
 
 var OutSignalA_response = SignalResponse{
-	Name:              OutSignalA.Name,
-	Direction:         OutSignalA.Direction,
-	Index:             OutSignalA.Index,
-	Unit:              OutSignalA.Unit,
-	SimulationModelID: OutSignalA.SimulationModelID,
+	Name:      OutSignalA.Name,
+	Direction: OutSignalA.Direction,
+	Index:     OutSignalA.Index,
+	Unit:      OutSignalA.Unit,
 }
 
 var OutSignalB = Signal{
-	Name:              "outSignal_B",
-	Direction:         "out",
-	Index:             1,
-	Unit:              "V",
-	SimulationModelID: 1,
+	Name:      "outSignal_B",
+	Direction: "out",
+	Index:     1,
+	Unit:      "V",
 }
 
 var OutSignalB_response = SignalResponse{
-	Name:              OutSignalB.Name,
-	Direction:         OutSignalB.Direction,
-	Index:             OutSignalB.Index,
-	Unit:              OutSignalB.Unit,
-	SimulationModelID: OutSignalB.SimulationModelID,
+	Name:      OutSignalB.Name,
+	Direction: OutSignalB.Direction,
+	Index:     OutSignalB.Index,
+	Unit:      OutSignalB.Unit,
 }
 
 var InSignalA = Signal{
-	Name:              "inSignal_A",
-	Direction:         "in",
-	Index:             0,
-	Unit:              "A",
-	SimulationModelID: 1,
+	Name:      "inSignal_A",
+	Direction: "in",
+	Index:     0,
+	Unit:      "A",
 }
 
 var InSignalA_response = SignalResponse{
-	Name:              InSignalA.Name,
-	Direction:         InSignalA.Direction,
-	Index:             InSignalA.Index,
-	Unit:              InSignalA.Unit,
-	SimulationModelID: InSignalA.SimulationModelID,
+	Name:      InSignalA.Name,
+	Direction: InSignalA.Direction,
+	Index:     InSignalA.Index,
+	Unit:      InSignalA.Unit,
 }
 
 var InSignalB = Signal{
-	Name:              "inSignal_B",
-	Direction:         "in",
-	Index:             1,
-	Unit:              "A",
-	SimulationModelID: 1,
+	Name:      "inSignal_B",
+	Direction: "in",
+	Index:     1,
+	Unit:      "A",
 }
 
 var InSignalB_response = SignalResponse{
-	Name:              InSignalB.Name,
-	Direction:         InSignalB.Direction,
-	Index:             InSignalB.Index,
-	Unit:              InSignalB.Unit,
-	SimulationModelID: InSignalB.SimulationModelID,
+	Name:      InSignalB.Name,
+	Direction: InSignalB.Direction,
+	Index:     InSignalB.Index,
+	Unit:      InSignalB.Unit,
 }
 
 var InSignalC = Signal{
-	Name:              "inSignal_C",
-	Direction:         "in",
-	Index:             2,
-	Unit:              "A",
-	SimulationModelID: 1,
+	Name:      "inSignal_C",
+	Direction: "in",
+	Index:     2,
+	Unit:      "A",
 }
 
 var InSignalC_response = SignalResponse{
-	Name:              InSignalC.Name,
-	Direction:         InSignalC.Direction,
-	Index:             InSignalC.Index,
-	Unit:              InSignalC.Unit,
-	SimulationModelID: InSignalC.SimulationModelID,
+	Name:      InSignalC.Name,
+	Direction: InSignalC.Direction,
+	Index:     InSignalC.Index,
+	Unit:      InSignalC.Unit,
 }
 
 var InSignalCUpdated = Signal{
-	Name:              "inSignalupdated_C",
-	Direction:         InSignalC.Direction,
-	Index:             InSignalC.Index,
-	Unit:              "Ohm",
-	SimulationModelID: InSignalC.SimulationModelID,
+	Name:      "inSignalupdated_C",
+	Direction: InSignalC.Direction,
+	Index:     InSignalC.Index,
+	Unit:      "Ohm",
 }
 
 var InSignalCUpdated_response = SignalResponse{
-	Name:              InSignalCUpdated.Name,
-	Direction:         InSignalCUpdated.Direction,
-	Index:             InSignalCUpdated.Index,
-	Unit:              InSignalCUpdated.Unit,
-	SimulationModelID: InSignalCUpdated.SimulationModelID,
+	Name:      InSignalCUpdated.Name,
+	Direction: InSignalCUpdated.Direction,
+	Index:     InSignalCUpdated.Index,
+	Unit:      InSignalCUpdated.Unit,
 }
 
 // Dashboards
 
-var DashboardA = Dashboard{Name: "Dashboard_A", Grid: 15, ScenarioID: 1}
+var DashboardA = Dashboard{Name: "Dashboard_A", Grid: 15}
 var DashboardA_response = DashboardResponse{ID: 1, Name: DashboardA.Name, Grid: DashboardA.Grid, ScenarioID: DashboardA.ScenarioID}
-var DashboardB = Dashboard{Name: "Dashboard_B", Grid: 10, ScenarioID: 1}
+var DashboardB = Dashboard{Name: "Dashboard_B", Grid: 10}
 var DashboardB_response = DashboardResponse{ID: 2, Name: DashboardB.Name, Grid: DashboardB.Grid, ScenarioID: DashboardB.ScenarioID}
-var DashboardC = Dashboard{Name: "Dashboard_C", Grid: 25, ScenarioID: 1}
+var DashboardC = Dashboard{Name: "Dashboard_C", Grid: 25}
 var DashboardC_response = DashboardResponse{ID: 3, Name: DashboardC.Name, Grid: DashboardC.Grid, ScenarioID: DashboardC.ScenarioID}
-var DashboardCUpdated = Dashboard{Name: "Dashboard_Cupdated", Grid: 24, ScenarioID: DashboardC.ScenarioID}
+var DashboardCUpdated = Dashboard{Name: "Dashboard_Cupdated", Grid: 24}
 var DashboardCUpdated_response = DashboardResponse{ID: 3, Name: DashboardCUpdated.Name, Grid: DashboardCUpdated.Grid, ScenarioID: DashboardCUpdated.ScenarioID}
 
 // Files
 
 var FileA = File{
-	Name:              "File_A",
-	Type:              "text/plain",
-	Size:              42,
-	ImageHeight:       333,
-	ImageWidth:        111,
-	Date:              time.Now().String(),
-	WidgetID:          1,
-	SimulationModelID: 0,
+	Name:        "File_A",
+	Type:        "text/plain",
+	Size:        42,
+	ImageHeight: 333,
+	ImageWidth:  111,
+	Date:        time.Now().String(),
 }
 
 var FileA_response = FileResponse{
-	ID:                1,
-	Name:              FileA.Name,
-	Type:              FileA.Type,
-	Size:              FileA.Size,
-	ImageWidth:        FileA.ImageWidth,
-	ImageHeight:       FileA.ImageHeight,
-	Date:              FileA.Date,
-	WidgetID:          FileA.WidgetID,
-	SimulationModelID: FileA.SimulationModelID,
+	ID:          1,
+	Name:        FileA.Name,
+	Type:        FileA.Type,
+	Size:        FileA.Size,
+	ImageWidth:  FileA.ImageWidth,
+	ImageHeight: FileA.ImageHeight,
+	Date:        FileA.Date,
 }
 
 var FileB = File{
-	Name:              "File_B",
-	Type:              "text/plain",
-	Size:              1234,
-	ImageHeight:       55,
-	ImageWidth:        22,
-	Date:              time.Now().String(),
-	WidgetID:          1,
-	SimulationModelID: 0,
+	Name:        "File_B",
+	Type:        "text/plain",
+	Size:        1234,
+	ImageHeight: 55,
+	ImageWidth:  22,
+	Date:        time.Now().String(),
 }
 
 var FileB_response = FileResponse{
-	ID:                2,
-	Name:              FileB.Name,
-	Type:              FileB.Type,
-	Size:              FileB.Size,
-	ImageWidth:        FileB.ImageWidth,
-	ImageHeight:       FileB.ImageHeight,
-	Date:              FileB.Date,
-	WidgetID:          FileB.WidgetID,
-	SimulationModelID: FileB.SimulationModelID,
+	ID:          2,
+	Name:        FileB.Name,
+	Type:        FileB.Type,
+	Size:        FileB.Size,
+	ImageWidth:  FileB.ImageWidth,
+	ImageHeight: FileB.ImageHeight,
+	Date:        FileB.Date,
 }
 
 var FileC = File{
-	Name:              "File_C",
-	Type:              "text/plain",
-	Size:              32,
-	ImageHeight:       10,
-	ImageWidth:        10,
-	Date:              time.Now().String(),
-	WidgetID:          0,
-	SimulationModelID: 1,
+	Name:        "File_C",
+	Type:        "text/plain",
+	Size:        32,
+	ImageHeight: 10,
+	ImageWidth:  10,
+	Date:        time.Now().String(),
 }
 var FileD = File{
-	Name:              "File_D",
-	Type:              "text/plain",
-	Size:              5000,
-	ImageHeight:       400,
-	ImageWidth:        800,
-	Date:              time.Now().String(),
-	WidgetID:          0,
-	SimulationModelID: 1,
+	Name:        "File_D",
+	Type:        "text/plain",
+	Size:        5000,
+	ImageHeight: 400,
+	ImageWidth:  800,
+	Date:        time.Now().String(),
 }
 
 // Widgets
@@ -427,7 +393,6 @@ var WidgetA = Widget{
 	Z:                10,
 	IsLocked:         false,
 	CustomProperties: postgres.Jsonb{customPropertiesA},
-	DashboardID:      1,
 }
 
 var WidgetA_response = WidgetResponse{
@@ -443,7 +408,6 @@ var WidgetA_response = WidgetResponse{
 	Z:                WidgetA.Z,
 	IsLocked:         WidgetA.IsLocked,
 	CustomProperties: WidgetA.CustomProperties,
-	DashboardID:      WidgetA.DashboardID,
 }
 
 var WidgetB = Widget{
@@ -458,7 +422,6 @@ var WidgetB = Widget{
 	Z:                0,
 	IsLocked:         false,
 	CustomProperties: postgres.Jsonb{customPropertiesB},
-	DashboardID:      1,
 }
 
 var WidgetB_response = WidgetResponse{
@@ -474,7 +437,6 @@ var WidgetB_response = WidgetResponse{
 	Z:                WidgetB.Z,
 	IsLocked:         WidgetB.IsLocked,
 	CustomProperties: WidgetB.CustomProperties,
-	DashboardID:      WidgetB.DashboardID,
 }
 
 var WidgetC = Widget{
@@ -489,7 +451,6 @@ var WidgetC = Widget{
 	Z:                13,
 	IsLocked:         false,
 	CustomProperties: postgres.Jsonb{customPropertiesC},
-	DashboardID:      1,
 }
 
 var WidgetC_response = WidgetResponse{
@@ -505,7 +466,6 @@ var WidgetC_response = WidgetResponse{
 	Z:                WidgetC.Z,
 	IsLocked:         WidgetC.IsLocked,
 	CustomProperties: WidgetC.CustomProperties,
-	DashboardID:      WidgetC.DashboardID,
 }
 
 var WidgetCUpdated_response = WidgetResponse{
@@ -521,5 +481,4 @@ var WidgetCUpdated_response = WidgetResponse{
 	Z:                WidgetC.Z,
 	IsLocked:         WidgetC.IsLocked,
 	CustomProperties: WidgetC.CustomProperties,
-	DashboardID:      WidgetC.DashboardID,
 }

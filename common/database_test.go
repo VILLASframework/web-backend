@@ -20,8 +20,6 @@ func TestMain(m *testing.M) {
 	db = DummyInitDB()
 	defer db.Close()
 
-	DummyPopulateDB(db)
-
 	os.Exit(m.Run())
 }
 
@@ -34,6 +32,33 @@ func TestDBConnection(t *testing.T) {
 }
 
 func TestUserAssociations(t *testing.T) {
+
+	DropTables(db)
+	MigrateModels(db)
+
+	// create copies of global test data
+	scenarioA := ScenarioA
+	scenarioB := ScenarioB
+	user0 := User0
+	userA := UserA
+	userB := UserB
+
+	// add three users to DB
+	assert.NoError(t, db.Create(&user0).Error) // Admin
+	assert.NoError(t, db.Create(&userA).Error) // Normal User
+	assert.NoError(t, db.Create(&userB).Error) // Normal User
+
+	// add two scenarios to DB
+	assert.NoError(t, db.Create(&scenarioA).Error)
+	assert.NoError(t, db.Create(&scenarioB).Error)
+
+	// add many-to-many associations between users and scenarios
+	// User HM Scenarios, Scenario HM Users (Many-to-Many)
+	assert.NoError(t, db.Model(&scenarioA).Association("Users").Append(&userA).Error)
+	assert.NoError(t, db.Model(&scenarioA).Association("Users").Append(&userB).Error)
+	assert.NoError(t, db.Model(&scenarioB).Association("Users").Append(&userA).Error)
+	assert.NoError(t, db.Model(&scenarioB).Association("Users").Append(&userB).Error)
+
 	var usr1 User
 	assert.NoError(t, db.Find(&usr1, "ID = ?", 2).Error, fM("User", 2))
 	assert.EqualValues(t, "User_A", usr1.Username)
@@ -48,6 +73,53 @@ func TestUserAssociations(t *testing.T) {
 }
 
 func TestScenarioAssociations(t *testing.T) {
+
+	DropTables(db)
+	MigrateModels(db)
+
+	// create copies of global test data
+	scenarioA := ScenarioA
+	scenarioB := ScenarioB
+	user0 := User0
+	userA := UserA
+	userB := UserB
+	modelA := SimulationModelA
+	modelB := SimulationModelB
+	dashboardA := DashboardA
+	dashboardB := DashboardB
+
+	// add scenarios to DB
+	assert.NoError(t, db.Create(&scenarioA).Error)
+	assert.NoError(t, db.Create(&scenarioB).Error)
+
+	// add users to DB
+	assert.NoError(t, db.Create(&user0).Error) // Admin
+	assert.NoError(t, db.Create(&userA).Error) // Normal User
+	assert.NoError(t, db.Create(&userB).Error) // Normal User
+
+	// add simulation models to DB
+	assert.NoError(t, db.Create(&modelA).Error)
+	assert.NoError(t, db.Create(&modelB).Error)
+
+	// add dashboards to DB
+	assert.NoError(t, db.Create(&dashboardA).Error)
+	assert.NoError(t, db.Create(&dashboardB).Error)
+
+	// add many-to-many associations between users and scenarios
+	// User HM Scenarios, Scenario HM Users (Many-to-Many)
+	assert.NoError(t, db.Model(&scenarioA).Association("Users").Append(&userA).Error)
+	assert.NoError(t, db.Model(&scenarioA).Association("Users").Append(&userB).Error)
+	assert.NoError(t, db.Model(&scenarioB).Association("Users").Append(&userA).Error)
+	assert.NoError(t, db.Model(&scenarioB).Association("Users").Append(&userB).Error)
+
+	// add scenario has many simulation models associations
+	assert.NoError(t, db.Model(&scenarioA).Association("SimulationModels").Append(&modelA).Error)
+	assert.NoError(t, db.Model(&scenarioA).Association("SimulationModels").Append(&modelB).Error)
+
+	// Scenario HM Dashboards
+	assert.NoError(t, db.Model(&scenarioA).Association("Dashboards").Append(&dashboardA).Error)
+	assert.NoError(t, db.Model(&scenarioA).Association("Dashboards").Append(&dashboardB).Error)
+
 	var scenario1 Scenario
 	assert.NoError(t, db.Find(&scenario1, 1).Error, fM("Scenario", 1))
 	assert.EqualValues(t, "Scenario_A", scenario1.Name)
@@ -78,6 +150,28 @@ func TestScenarioAssociations(t *testing.T) {
 }
 
 func TestSimulatorAssociations(t *testing.T) {
+
+	DropTables(db)
+	MigrateModels(db)
+
+	// create copies of global test data
+	simulatorA := SimulatorA
+	simulatorB := SimulatorB
+	modelA := SimulationModelA
+	modelB := SimulationModelB
+
+	// add simulators to DB
+	assert.NoError(t, db.Create(&simulatorA).Error)
+	assert.NoError(t, db.Create(&simulatorB).Error)
+
+	// add simulation models to DB
+	assert.NoError(t, db.Create(&modelA).Error)
+	assert.NoError(t, db.Create(&modelB).Error)
+
+	// add simulator has many simulation models association to DB
+	assert.NoError(t, db.Model(&simulatorA).Association("SimulationModels").Append(&modelA).Error)
+	assert.NoError(t, db.Model(&simulatorA).Association("SimulationModels").Append(&modelB).Error)
+
 	var simulator1 Simulator
 	assert.NoError(t, db.Find(&simulator1, 1).Error, fM("Simulator", 1))
 	assert.EqualValues(t, "Host_A", simulator1.Host)
@@ -92,6 +186,58 @@ func TestSimulatorAssociations(t *testing.T) {
 }
 
 func TestSimulationModelAssociations(t *testing.T) {
+
+	DropTables(db)
+	MigrateModels(db)
+
+	// create copies of global test data
+	modelA := SimulationModelA
+	modelB := SimulationModelB
+	outSignalA := OutSignalA
+	outSignalB := OutSignalB
+	inSignalA := InSignalA
+	inSignalB := InSignalB
+	fileA := FileA
+	fileB := FileB
+	fileC := FileC
+	fileD := FileD
+	simulatorA := SimulatorA
+	simulatorB := SimulatorB
+
+	// add simulation models to DB
+	assert.NoError(t, db.Create(&modelA).Error)
+	assert.NoError(t, db.Create(&modelB).Error)
+
+	// add signals to DB
+	assert.NoError(t, db.Create(&outSignalA).Error)
+	assert.NoError(t, db.Create(&outSignalB).Error)
+	assert.NoError(t, db.Create(&inSignalA).Error)
+	assert.NoError(t, db.Create(&inSignalB).Error)
+
+	// add files to DB
+	assert.NoError(t, db.Create(&fileA).Error)
+	assert.NoError(t, db.Create(&fileB).Error)
+	assert.NoError(t, db.Create(&fileC).Error)
+	assert.NoError(t, db.Create(&fileD).Error)
+
+	// add simulators to DB
+	assert.NoError(t, db.Create(&simulatorA).Error)
+	assert.NoError(t, db.Create(&simulatorB).Error)
+
+	// add simulation model has many signals associations
+	assert.NoError(t, db.Model(&modelA).Association("InputMapping").Append(&inSignalA).Error)
+	assert.NoError(t, db.Model(&modelA).Association("InputMapping").Append(&inSignalB).Error)
+	assert.NoError(t, db.Model(&modelA).Association("OutputMapping").Append(&outSignalA).Error)
+	assert.NoError(t, db.Model(&modelA).Association("OutputMapping").Append(&outSignalB).Error)
+
+	// add simulation model has many files associations
+	assert.NoError(t, db.Model(&modelA).Association("Files").Append(&fileC).Error)
+	assert.NoError(t, db.Model(&modelA).Association("Files").Append(&fileD).Error)
+
+	// associate simulation models with simulators
+	assert.NoError(t, db.Model(&simulatorA).Association("SimulationModels").Append(&modelA).Error)
+	assert.NoError(t, db.Model(&simulatorA).Association("SimulationModels").Append(&modelB).Error)
+
 	var model1 SimulationModel
 	assert.NoError(t, db.Find(&model1, 1).Error, fM("SimulationModel", 1))
 	assert.EqualValues(t, "SimulationModel_A", model1.Name)
@@ -119,6 +265,28 @@ func TestSimulationModelAssociations(t *testing.T) {
 }
 
 func TestDashboardAssociations(t *testing.T) {
+
+	DropTables(db)
+	MigrateModels(db)
+
+	// create copies of global test data
+	dashboardA := DashboardA
+	dashboardB := DashboardB
+	widgetA := WidgetA
+	widgetB := WidgetB
+
+	// add dashboards to DB
+	assert.NoError(t, db.Create(&dashboardA).Error)
+	assert.NoError(t, db.Create(&dashboardB).Error)
+
+	// add widgets to DB
+	assert.NoError(t, db.Create(&widgetA).Error)
+	assert.NoError(t, db.Create(&widgetB).Error)
+
+	// add dashboard has many widgets associations to DB
+	assert.NoError(t, db.Model(&dashboardA).Association("Widgets").Append(&widgetA).Error)
+	assert.NoError(t, db.Model(&dashboardA).Association("Widgets").Append(&widgetB).Error)
+
 	var dashboard1 Dashboard
 	assert.NoError(t, db.Find(&dashboard1, 1).Error, fM("Dashboard", 1))
 	assert.EqualValues(t, "Dashboard_A", dashboard1.Name)
@@ -133,6 +301,32 @@ func TestDashboardAssociations(t *testing.T) {
 }
 
 func TestWidgetAssociations(t *testing.T) {
+
+	DropTables(db)
+	MigrateModels(db)
+
+	// create copies of global test data
+	widgetA := WidgetA
+	widgetB := WidgetB
+	fileA := FileA
+	fileB := FileB
+	fileC := FileC
+	fileD := FileD
+
+	// add widgets to DB
+	assert.NoError(t, db.Create(&widgetA).Error)
+	assert.NoError(t, db.Create(&widgetB).Error)
+
+	// add files to DB
+	assert.NoError(t, db.Create(&fileA).Error)
+	assert.NoError(t, db.Create(&fileB).Error)
+	assert.NoError(t, db.Create(&fileC).Error)
+	assert.NoError(t, db.Create(&fileD).Error)
+
+	// add widget has many files associations to DB
+	assert.NoError(t, db.Model(&widgetA).Association("Files").Append(&fileA).Error)
+	assert.NoError(t, db.Model(&widgetA).Association("Files").Append(&fileB).Error)
+
 	var widget1 Widget
 	assert.NoError(t, db.Find(&widget1, 1).Error, fM("Widget", 1))
 	assert.EqualValues(t, "Widget_A", widget1.Name)
@@ -147,6 +341,22 @@ func TestWidgetAssociations(t *testing.T) {
 }
 
 func TestFileAssociations(t *testing.T) {
+
+	DropTables(db)
+	MigrateModels(db)
+
+	// create copies of global test data
+	fileA := FileA
+	fileB := FileB
+	fileC := FileC
+	fileD := FileD
+
+	// add files to DB
+	assert.NoError(t, db.Create(&fileA).Error)
+	assert.NoError(t, db.Create(&fileB).Error)
+	assert.NoError(t, db.Create(&fileC).Error)
+	assert.NoError(t, db.Create(&fileD).Error)
+
 	var file1 File
 	assert.NoError(t, db.Find(&file1, 1).Error, fM("File", 1))
 	assert.EqualValues(t, "File_A", file1.Name)
