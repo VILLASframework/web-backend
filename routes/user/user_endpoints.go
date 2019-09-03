@@ -3,12 +3,14 @@ package user
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
+	_ "git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/doc/api"
 )
 
 // TODO: the signing secret must be environmental variable
@@ -40,10 +42,11 @@ func RegisterUserEndpoints(r *gin.RouterGroup) {
 // @Produce json
 // @Tags users
 // @Param inputUser body user.loginRequest true "loginRequest of user"
-// @Success 200 {object} user.AuthResponse "JSON web token and message"
-// @Failure 401 "Unauthorized Access"
-// @Failure 404 "Not found"
-// @Failure 422 "Unprocessable entity."
+// @Success 200 {object} docs.ResponseAuthenticate "JSON web token, success status, message and authenticated user object"
+// @Failure 400 {object} docs.ResponseError "Bad request"
+// @Failure 401 {object} docs.ResponseError "Unauthorized"
+// @Failure 404 {object} docs.ResponseError "Not found"
+// @Failure 422 {object} docs.ResponseError "Unprocessable entity."
 // @Router /authenticate [post]
 func authenticate(c *gin.Context) {
 
@@ -131,17 +134,19 @@ func authenticate(c *gin.Context) {
 // @ID GetUsers
 // @Produce  json
 // @Tags users
-// @Success 200 {array} common.UserResponse "Array of users"
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
+// @Success 200 {object} docs.ResponseUsers "Array of users"
+// @Failure 404 {object} docs.ResponseError "Not found"
+// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
+// @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Router /users [get]
 func getUsers(c *gin.Context) {
 
 	err := common.ValidateRole(c, common.ModelUsers, common.Read)
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, fmt.Sprintf("%v", err))
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
+		})
 		return
 	}
 
@@ -152,7 +157,10 @@ func getUsers(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"users": users})
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"users":   users,
+	})
 }
 
 // AddUser godoc
@@ -161,25 +169,27 @@ func getUsers(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Tags users
-// @Param inputUser body common.UserResponse true "User to be added"
-// @Success 200 "OK."
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
+// @Param inputUser body user.validNewUser true "User to be added"
+// @Success 200 {object} docs.ResponseUser "Contains added user object"
+// @Failure 400 {object} docs.ResponseError "Bad request"
+// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
+// @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Router /users [post]
 func addUser(c *gin.Context) {
 
 	err := common.ValidateRole(c, common.ModelUser, common.Create)
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, fmt.Sprintf("%v", err))
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
+		})
 		return
 	}
 
 	// Bind the request
 	var req addUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{
+		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
 			"message": fmt.Sprintf("%v", err),
 		})
@@ -188,7 +198,7 @@ func addUser(c *gin.Context) {
 
 	// Validate the request
 	if err = req.validate(); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
 			"success": false,
 			"message": fmt.Sprintf("%v", err),
 		})
@@ -202,6 +212,7 @@ func addUser(c *gin.Context) {
 	err = newUser.ByUsername(newUser.Username)
 	if err == nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"success": false,
 			"message": "Username is already taken",
 		})
 		return
@@ -211,6 +222,7 @@ func addUser(c *gin.Context) {
 	err = newUser.setPassword(newUser.Password)
 	if err != nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"success": false,
 			"message": "Unable to encrypt the password",
 		})
 		return
@@ -219,13 +231,14 @@ func addUser(c *gin.Context) {
 	// Save the user in the DB
 	err = newUser.save()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Unable to create new user",
-		})
+		common.ProvideErrorResponse(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"user": newUser.User})
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"user":    newUser.User,
+	})
 }
 
 // UpdateUser godoc
@@ -234,19 +247,23 @@ func addUser(c *gin.Context) {
 // @Tags users
 // @Accept json
 // @Produce json
-// @Param inputUser body common.User true "User to be updated (anything except for ID can be changed, role can only be change by admin)"
-// @Success 200 "OK."
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
+// @Param inputUser body user.validUpdatedRequest true "User to be updated (anything except for ID can be changed, role can only be change by admin)"
+// @Success 200 {object} docs.ResponseUser "Contains updated user"
+// @Failure 400 {object} docs.ResponseError "Bad request."
+// @Failure 403 {object} docs.ResponseError "Access forbidden."
+// @Failure 404 {object} docs.ResponseError "Not found"
+// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
+// @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param userID path int true "User ID"
 // @Router /users/{userID} [put]
 func updateUser(c *gin.Context) {
 
 	err := common.ValidateRole(c, common.ModelUser, common.Update)
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, fmt.Sprintf("%v", err))
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
+		})
 		return
 	}
 
@@ -254,15 +271,17 @@ func updateUser(c *gin.Context) {
 	var oldUser User
 	toBeUpdatedID, err := common.UintParamFromCtx(c, "userID")
 	if err != nil {
-		c.JSON(http.StatusNotFound,
-			fmt.Sprintf("Could not get user's ID from context"))
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("Could not get user's ID from context"),
+		})
 		return
 	}
 
 	// Find the user
 	err = oldUser.ByID(toBeUpdatedID)
 	if err != nil {
-		c.JSON(http.StatusNotFound, fmt.Sprintf("%v", err))
+		common.ProvideErrorResponse(c, err)
 		return
 	}
 
@@ -278,16 +297,20 @@ func updateUser(c *gin.Context) {
 	// Get caller's ID from context
 	callerID, exists := c.Get(common.UserIDCtx)
 	if !exists {
-		c.JSON(http.StatusNotFound,
-			fmt.Sprintf("Could not get caller's ID from context"))
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("Could not get caller's ID from context"),
+		})
 		return
 	}
 
 	// Get caller's Role from context
 	callerRole, exists := c.Get(common.UserRoleCtx)
 	if !exists {
-		c.JSON(http.StatusNotFound,
-			fmt.Sprintf("Could not get caller's Role from context"))
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("Could not get caller's Role from context"),
+		})
 		return
 	}
 
@@ -322,23 +345,32 @@ func updateUser(c *gin.Context) {
 	// case that the request updates the role of the old user)
 	updatedUser, err := req.updatedUser(callerRole, oldUser)
 	if err != nil {
-		c.JSON(http.StatusForbidden, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
+		if strings.Contains(err.Error(), "Admin") {
+			c.JSON(http.StatusForbidden, gin.H{
+				"success": false,
+				"message": fmt.Sprintf("%v", err),
+			})
+
+		} else if strings.Contains(err.Error(), "Username") || strings.Contains(err.Error(), "password") {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"success": false,
+				"message": fmt.Sprintf("%v", err),
+			})
+		}
 		return
 	}
 
-	// Finaly update the user
+	// Finally update the user
 	err = oldUser.update(updatedUser)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Unable to update user",
-		})
+		common.ProvideErrorResponse(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"user": updatedUser.User})
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"user":    updatedUser.User,
+	})
 }
 
 // GetUser godoc
@@ -346,25 +378,30 @@ func updateUser(c *gin.Context) {
 // @ID GetUser
 // @Produce  json
 // @Tags users
-// @Success 200 {object} common.UserResponse "User requested by user"
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
+// @Success 200 {object} docs.ResponseUser "requested user"
+// @Failure 403 {object} docs.ResponseError "Access forbidden."
+// @Failure 404 {object} docs.ResponseError "Not found"
+// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
+// @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param userID path int true "User ID"
 // @Router /users/{userID} [get]
 func getUser(c *gin.Context) {
 
 	err := common.ValidateRole(c, common.ModelUser, common.Read)
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, fmt.Sprintf("%v", err))
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
+		})
 		return
 	}
 
 	id, err := common.UintParamFromCtx(c, "userID")
 	if err != nil {
-		c.JSON(http.StatusNotFound,
-			fmt.Sprintf("Could not get user's ID from context"))
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("Could not get user's ID from context"),
+		})
 		return
 	}
 
@@ -382,11 +419,14 @@ func getUser(c *gin.Context) {
 	var user User
 	err = user.ByID(id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, fmt.Sprintf("%v", err))
+		common.ProvideErrorResponse(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"user": user.User})
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"user":    user.User,
+	})
 }
 
 // DeleteUser godoc
@@ -394,42 +434,49 @@ func getUser(c *gin.Context) {
 // @ID DeleteUser
 // @Tags users
 // @Produce json
-// @Success 200 "OK."
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
+// @Success 200 {object} docs.ResponseUser "deleted user"
+// @Failure 404 {object} docs.ResponseError "Not found"
+// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
+// @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param userID path int true "User ID"
 // @Router /users/{userID} [delete]
 func deleteUser(c *gin.Context) {
 
 	err := common.ValidateRole(c, common.ModelUser, common.Delete)
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, fmt.Sprintf("%v", err))
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
+		})
 		return
 	}
 
 	var user User
 	id, err := common.UintParamFromCtx(c, "userID")
 	if err != nil {
-		c.JSON(http.StatusNotFound,
-			fmt.Sprintf("Could not get user's ID from context"))
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("Could not get user's ID from context"),
+		})
 		return
 	}
 
 	// Check that the user exist
 	err = user.ByID(uint(id))
 	if err != nil {
-		c.JSON(http.StatusNotFound, fmt.Sprintf("%v", err))
+		common.ProvideErrorResponse(c, err)
 		return
 	}
 
 	// Try to remove user
 	err = user.remove()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, fmt.Sprintf("%v", err))
+		common.ProvideErrorResponse(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"user": user})
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"user":    user.User,
+	})
 }

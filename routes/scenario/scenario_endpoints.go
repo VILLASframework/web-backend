@@ -25,7 +25,7 @@ func RegisterScenarioEndpoints(r *gin.RouterGroup) {
 // @ID getScenarios
 // @Produce  json
 // @Tags scenarios
-// @Success 200 {array} common.ScenarioResponse "Array of scenarios to which user has access"
+// @Success 200 {array} docs.ResponseScenarios "Array of scenarios to which user has access"
 // @Failure 401 "Unauthorized Access"
 // @Failure 403 "Access forbidden."
 // @Failure 404 "Not found"
@@ -135,7 +135,7 @@ func addScenario(c *gin.Context) {
 // @Tags scenarios
 // @Accept json
 // @Produce json
-// @Param inputScenario body common.ResponseMsgScenario true "Scenario to be updated"
+// @Param inputScenario body common.Scenario true "Scenario to be updated"
 // @Success 200 "OK."
 // @Failure 401 "Unauthorized Access"
 // @Failure 403 "Access forbidden."
@@ -226,7 +226,7 @@ func deleteScenario(c *gin.Context) {
 // @ID getUsersOfScenario
 // @Produce  json
 // @Tags scenarios
-// @Success 200 {array} common.UserResponse "Array of users that have access to the scenario"
+// @Success 200 {object} docs.ResponseUsers "Array of users that have access to the scenario"
 // @Failure 401 "Unauthorized Access"
 // @Failure 403 "Access forbidden."
 // @Failure 404 "Not found"
