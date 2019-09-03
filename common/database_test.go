@@ -18,17 +18,16 @@ func fM(s string, id uint) string {
 
 func TestMain(m *testing.M) {
 	db = DummyInitDB()
-	defer db.Close()
 
+	// Verify that you can connect to the database
+	err := db.DB().Ping()
+	if err != nil {
+		fmt.Println("Error: DB must ping to run tests")
+		return
+	}
+
+	defer db.Close()
 	os.Exit(m.Run())
-}
-
-// Verify that you can connect to the database
-func TestDBConnection(t *testing.T) {
-	db := InitDB()
-	defer db.Close()
-
-	assert.NoError(t, VerifyConnection(db), "DB must ping")
 }
 
 func TestUserAssociations(t *testing.T) {
