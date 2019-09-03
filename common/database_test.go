@@ -54,11 +54,8 @@ func TestUserAssociations(t *testing.T) {
 
 	// add many-to-many associations between users and scenarios
 	// User HM Scenarios, Scenario HM Users (Many-to-Many)
-	assert.NoError(t, db.Preload("Scenarios").First(&userA, "id = ?", 2).Error)
 	assert.NoError(t, db.Model(&userA).Association("Scenarios").Append(&scenarioA).Error)
 	assert.NoError(t, db.Model(&userA).Association("Scenarios").Append(&scenarioB).Error)
-
-	assert.NoError(t, db.Preload("Scenarios").First(&userB, "id = ?", 3).Error)
 	assert.NoError(t, db.Model(&userB).Association("Scenarios").Append(&scenarioA).Error)
 	assert.NoError(t, db.Model(&userB).Association("Scenarios").Append(&scenarioB).Error)
 
@@ -110,12 +107,8 @@ func TestScenarioAssociations(t *testing.T) {
 
 	// add many-to-many associations between users and scenarios
 	// User HM Scenarios, Scenario HM Users (Many-to-Many)
-
-	assert.NoError(t, db.Preload("Users").First(&scenarioA, "id = ?", 1).Error)
 	assert.NoError(t, db.Model(&scenarioA).Association("Users").Append(&userA).Error)
 	assert.NoError(t, db.Model(&scenarioA).Association("Users").Append(&userB).Error)
-
-	assert.NoError(t, db.Preload("Users").First(&scenarioB, "id = ?", 2).Error)
 	assert.NoError(t, db.Model(&scenarioB).Association("Users").Append(&userA).Error)
 	assert.NoError(t, db.Model(&scenarioB).Association("Users").Append(&userB).Error)
 
