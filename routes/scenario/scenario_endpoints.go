@@ -63,7 +63,7 @@ func getScenarios(c *gin.Context) {
 			return
 		}
 	}
-
+	// TODO return list of simulationModelIDs, dashboardIDs and userIDs per scenario
 	serializer := common.ScenariosSerializer{c, scenarios}
 	c.JSON(http.StatusOK, gin.H{
 		"scenarios": serializer.Response(),
@@ -187,6 +187,7 @@ func getScenario(c *gin.Context) {
 		return
 	}
 
+	// TODO return list of simulationModelIDs, dashboardIDs and userIDs per scenario
 	serializer := common.ScenarioSerializer{c, so.Scenario}
 	c.JSON(http.StatusOK, gin.H{
 		"scenario": serializer.Response(),
