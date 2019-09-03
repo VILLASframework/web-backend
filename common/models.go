@@ -27,7 +27,7 @@ type User struct {
 	// Role of user
 	Role string `json:"role" gorm:"default:'user'"`
 	// Scenarios to which user has access
-	Scenarios []*Scenario `json:"-" gorm:"many2many:user_scenarios"`
+	Scenarios []*Scenario `json:"-" gorm:"many2many:user_scenarios;"`
 }
 
 // Scenario data model
@@ -40,7 +40,7 @@ type Scenario struct {
 	// Start parameters of scenario as JSON
 	StartParameters postgres.Jsonb `json:"startParameters"`
 	// Users that have access to the scenario
-	Users []*User `json:"-" gorm:"not null;many2many:user_scenarios"`
+	Users []*User `json:"-" gorm:"many2many:user_scenarios;"`
 	// SimulationModels that belong to the scenario
 	SimulationModels []SimulationModel `json:"-" gorm:"foreignkey:ScenarioID" `
 	// Dashboards that belong to the Scenario
