@@ -18,31 +18,25 @@ type ResponseAuthenticate struct {
 }
 
 type ResponseUsers struct {
-	success bool
-	users   []common.User
+	users []common.User
 }
 
 type ResponseUser struct {
-	success bool
-	user    common.User
+	user common.User
 }
 
 type ResponseSimulators struct {
-	success    bool
 	simulators []common.Simulator
 }
 
 type ResponseSimulator struct {
-	success   bool
 	simulator common.Simulator
 }
 
 type ResponseScenarios struct {
-	success   bool
 	scenarios []common.Scenario
 }
 
 type ResponseScenario struct {
-	success  bool
 	scenario common.Scenario
 }

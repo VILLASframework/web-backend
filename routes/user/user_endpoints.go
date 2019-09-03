@@ -158,8 +158,7 @@ func getUsers(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"users":   users,
+		"users": users,
 	})
 }
 
@@ -236,8 +235,7 @@ func addUser(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"user":    newUser.User,
+		"user": newUser.User,
 	})
 }
 
@@ -368,8 +366,7 @@ func updateUser(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"user":    updatedUser.User,
+		"user": updatedUser.User,
 	})
 }
 
@@ -424,8 +421,7 @@ func getUser(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"user":    user.User,
+		"user": user.User,
 	})
 }
 
@@ -476,7 +472,6 @@ func deleteUser(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"user":    user.User,
+		"user": user.User,
 	})
 }
