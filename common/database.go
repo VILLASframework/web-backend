@@ -63,6 +63,7 @@ func DropTables(db *gorm.DB) {
 	db.DropTableIfExists(&User{})
 	db.DropTableIfExists(&Dashboard{})
 	db.DropTableIfExists(&Widget{})
+	db.DropTableIfExists("user_scenarios")
 }
 
 // AutoMigrate the models
