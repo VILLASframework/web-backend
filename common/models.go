@@ -34,28 +34,28 @@ type User struct {
 type Scenario struct {
 	Model
 	// Name of scenario
-	Name string `gorm:"not null",json:"name"`
+	Name string `json:"name" gorm:"not null"`
 	// Running state of scenario
-	Running bool `gorm:"default:false",json:"running"`
+	Running bool `json:"running" gorm:"default:false" `
 	// Start parameters of scenario as JSON
 	StartParameters postgres.Jsonb `json:"startParameters"`
 	// Users that have access to the scenario
-	Users []*User `gorm:"not null;many2many:user_scenarios",json:"-"`
+	Users []*User `json:"-" gorm:"not null;many2many:user_scenarios"`
 	// SimulationModels that belong to the scenario
-	SimulationModels []SimulationModel `gorm:"foreignkey:ScenarioID",json:"-"`
+	SimulationModels []SimulationModel `json:"-" gorm:"foreignkey:ScenarioID" `
 	// Dashboards that belong to the Scenario
-	Dashboards []Dashboard `gorm:"foreignkey:ScenarioID",json:"-"`
+	Dashboards []Dashboard `json:"-" gorm:"foreignkey:ScenarioID" `
 }
 
 // SimulationModel data model
 type SimulationModel struct {
 	Model
 	// Name of simulation model
-	Name string `gorm:"not null",json:"name"`
+	Name string `json:"name" gorm:"not null"`
 	// Number of output signals
-	OutputLength int `gorm:"default:1",json:"outputLength"`
+	OutputLength int `json:"outputLength" gorm:"default:1"`
 	// Number of input signals
-	InputLength int `gorm:"default:1",json:"inputLength"`
+	InputLength int `json:"inputLength" gorm:"default:1"`
 	// Start parameters of simulation model as JSON
 	StartParameters postgres.Jsonb `json:"startParameters"`
 	// ID of Scenario to which simulation model belongs
@@ -63,11 +63,11 @@ type SimulationModel struct {
 	// ID of simulator associated with simulation model
 	SimulatorID uint `json:"simulatorID"`
 	// Mapping of output signals of the simulation model, order of signals is important
-	OutputMapping []Signal `gorm:"foreignkey:SimulationModelID",json:"-"`
+	OutputMapping []Signal `json:"-" gorm:"foreignkey:SimulationModelID"`
 	// Mapping of input signals of the simulation model, order of signals is important
-	InputMapping []Signal `gorm:"foreignkey:SimulationModelID",json:"-"`
+	InputMapping []Signal `json:"-" gorm:"foreignkey:SimulationModelID"`
 	// Files of simulation model (can be CIM and other simulation model file formats)
-	Files []File `gorm:"foreignkey:SimulationModelID",json:"-"`
+	Files []File `json:"-" gorm:"foreignkey:SimulationModelID"`
 }
 
 // Signal data model
@@ -89,74 +89,74 @@ type Signal struct {
 type Simulator struct {
 	Model
 	// UUID of the simulator
-	UUID string `gorm:"not null",json:"uuid"`
+	UUID string `json:"uuid" gorm:"not null"`
 	// Host if the simulator
-	Host string `gorm:"default:''",json:"host"`
+	Host string `json:"host" gorm:"default:''"`
 	// Model type supported by the simulator
-	Modeltype string `gorm:"default:''",json:"modelType"`
+	Modeltype string `json:"modelType" gorm:"default:''"`
 	// Uptime of the simulator
-	Uptime int `gorm:"default:0",json:"uptime"`
+	Uptime int `json:"uptime" gorm:"default:0"`
 	// State of the simulator
-	State string `gorm:"default:''",json:"state"`
+	State string `json:"state" gorm:"default:''"`
 	// Time of last state update
-	StateUpdateAt string `gorm:"default:''",json:"stateUpdateAt"`
+	StateUpdateAt string `json:"stateUpdateAt" gorm:"default:''"`
 	// Properties of simulator as JSON string
 	Properties postgres.Jsonb `json:"properties"`
 	// Raw properties of simulator as JSON string
 	RawProperties postgres.Jsonb `json:"rawProperties"`
 	// SimulationModels in which the simulator is used
-	SimulationModels []SimulationModel `gorm:"foreignkey:SimulatorID",json:"-"`
+	SimulationModels []SimulationModel `json:"-" gorm:"foreignkey:SimulatorID"`
 }
 
 // Dashboard data model
 type Dashboard struct {
 	Model
 	// Name of dashboard
-	Name string `gorm:"not null",json:"name"`
+	Name string `json:"name" gorm:"not null"`
 	// Grid of dashboard
-	Grid int `gorm:"default:15",json:"grid"`
+	Grid int `json:"grid" gorm:"default:15"`
 	// ID of scenario to which dashboard belongs
 	ScenarioID uint `json:"scenarioID"`
 	// Widgets that belong to dashboard
-	Widgets []Widget `gorm:"foreignkey:DashboardID",json:"-"`
+	Widgets []Widget `json:"-" gorm:"foreignkey:DashboardID"`
 }
 
 // Widget data model
 type Widget struct {
 	Model
 	// Name of widget
-	Name string `gorm:"not null",json:"name"`
+	Name string `json:"name" gorm:"not null"`
 	// Type of widget
-	Type string `gorm:"not null",json:"type"`
+	Type string `json:"type" gorm:"not null"`
 	// Width of widget
-	Width uint `gorm:"not null",json:"width"`
+	Width uint `json:"width" gorm:"not null"`
 	// Height of widget
-	Height uint `gorm:"not null",json:"height"`
+	Height uint `json:"height" gorm:"not null"`
 	// Minimal width of widget
-	MinWidth uint `gorm:"not null",json:"minWidth"`
+	MinWidth uint `json:"minWidth" gorm:"not null"`
 	// Minimal height of widget
-	MinHeight uint `gorm:"not null",json:"minHeight"`
+	MinHeight uint `json:"minHeight" gorm:"not null"`
 	// X position of widget
-	X int `gorm:"not null",json:"x"`
+	X int `json:"x" gorm:"not null"`
 	// Y position of widget
-	Y int `gorm:"not null",json:"y"`
+	Y int `json:"y" gorm:"not null"`
 	// Z position of widget
-	Z int `gorm:"not null",json:"z"`
+	Z int `json:"z" gorm:"not null"`
 	// Locked state of widget
-	IsLocked bool `gorm:"default:false",json:"isLocked"`
+	IsLocked bool `json:"isLocked" gorm:"default:false"`
 	// Custom properties of widget as JSON string
 	CustomProperties postgres.Jsonb `json:"customProperties"`
 	// ID of dashboard to which widget belongs
 	DashboardID uint `json:"dashboardID"`
 	// Files that belong to widget (for example images)
-	Files []File `gorm:"foreignkey:WidgetID",json:"-"`
+	Files []File `json:"-" gorm:"foreignkey:WidgetID"`
 }
 
 // File data model
 type File struct {
 	Model
 	// Name of file
-	Name string `gorm:"not null",json:"name"`
+	Name string `json:"name" gorm:"not null"`
 	// Type of file (MIME type)
 	Type string `json:"type"`
 	// Size of file (in byte)
@@ -172,5 +172,5 @@ type File struct {
 	// ID of widget to which file belongs
 	WidgetID uint `json:"widgetID"`
 	// File itself
-	FileData []byte `gorm:"column:FileData",json:"-"`
+	FileData []byte `json:"-" gorm:"column:FileData"`
 }
