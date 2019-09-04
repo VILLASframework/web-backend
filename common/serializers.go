@@ -4,37 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Scenario/s Serializers
-
-type ScenariosSerializer struct {
-	Ctx       *gin.Context
-	Scenarios []Scenario
-}
-
-func (self *ScenariosSerializer) Response() []ScenarioResponse {
-	response := []ScenarioResponse{}
-	for _, so := range self.Scenarios {
-		serializer := ScenarioSerializer{self.Ctx, so}
-		response = append(response, serializer.Response())
-	}
-	return response
-}
-
-type ScenarioSerializer struct {
-	Ctx *gin.Context
-	Scenario
-}
-
-func (self *ScenarioSerializer) Response() ScenarioResponse {
-	response := ScenarioResponse{
-		Name:            self.Name,
-		ID:              self.ID,
-		Running:         self.Running,
-		StartParameters: self.StartParameters,
-	}
-	return response
-}
-
 // Model/s Serializers
 
 type SimulationModelsSerializer struct {

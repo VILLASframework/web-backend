@@ -2,13 +2,6 @@ package common
 
 import "github.com/jinzhu/gorm/dialects/postgres"
 
-type ScenarioResponse struct {
-	Name            string         `json:"name"`
-	ID              uint           `json:"id"`
-	Running         bool           `json:"running"`
-	StartParameters postgres.Jsonb `json:"startParameters"`
-}
-
 type SimulationModelResponse struct {
 	ID              uint           `json:"id"`
 	Name            string         `json:"name"`
@@ -78,14 +71,6 @@ type SignalResponse struct {
 
 type ResponseMsg struct {
 	Message string `json:"message"`
-}
-
-type ResponseMsgScenarios struct {
-	Scenarios []ScenarioResponse `json:"scenarios"`
-}
-
-type ResponseMsgScenario struct {
-	Scenario ScenarioResponse `json:"scenario"`
 }
 
 type ResponseMsgSimulationModels struct {

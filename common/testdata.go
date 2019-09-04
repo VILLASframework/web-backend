@@ -154,13 +154,7 @@ var startParametersB = json.RawMessage(`{"parameter1" : "testValue1B", "paramete
 var startParametersC = json.RawMessage(`{"parameter1" : "testValue1C", "parameter2" : "testValue2C", "parameter3" : 44}`)
 
 var ScenarioA = Scenario{Name: "Scenario_A", Running: true, StartParameters: postgres.Jsonb{startParametersA}}
-var ScenarioA_response = ScenarioResponse{ID: 1, Name: ScenarioA.Name, Running: ScenarioA.Running, StartParameters: ScenarioA.StartParameters}
 var ScenarioB = Scenario{Name: "Scenario_B", Running: false, StartParameters: postgres.Jsonb{startParametersB}}
-var ScenarioB_response = ScenarioResponse{ID: 2, Name: ScenarioB.Name, Running: ScenarioB.Running, StartParameters: ScenarioB.StartParameters}
-var ScenarioC = Scenario{Name: "Scenario_C", Running: false, StartParameters: postgres.Jsonb{startParametersC}}
-var ScenarioC_response = ScenarioResponse{ID: 3, Name: ScenarioC.Name, Running: ScenarioC.Running, StartParameters: ScenarioC.StartParameters}
-var ScenarioCUpdated = Scenario{Name: "Scenario_Cupdated", Running: true, StartParameters: postgres.Jsonb{startParametersC}}
-var ScenarioCUpdated_response = ScenarioResponse{ID: 3, Name: ScenarioCUpdated.Name, Running: ScenarioCUpdated.Running, StartParameters: ScenarioCUpdated.StartParameters}
 
 // Simulation Models
 

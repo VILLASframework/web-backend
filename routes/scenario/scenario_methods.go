@@ -2,9 +2,9 @@ package scenario
 
 import (
 	"fmt"
-
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/user"
+	"github.com/jinzhu/gorm"
 )
 
 type Scenario struct {
@@ -15,7 +15,7 @@ func (s *Scenario) ByID(id uint) error {
 	db := common.GetDB()
 	err := db.Find(s, id).Error
 	if err != nil {
-		return fmt.Errorf("scenario with id=%v does not exist", id)
+		return err
 	}
 	return nil
 }
@@ -33,9 +33,15 @@ func (s *Scenario) save() error {
 	return err
 }
 
-func (s *Scenario) update(modifiedScenario common.ScenarioResponse) error {
+func (s *Scenario) update(updatedScenario Scenario) error {
+
+	// TODO: if the field is empty member shouldn't be updated
+	s.Name = updatedScenario.Name
+	s.Running = updatedScenario.Running
+	s.StartParameters = updatedScenario.StartParameters
+
 	db := common.GetDB()
-	err := db.Model(s).Update(modifiedScenario).Error
+	err := db.Model(s).Update(updatedScenario).Error
 	return err
 }
 
@@ -69,7 +75,17 @@ func (s *Scenario) deleteUser(username string) error {
 			return err
 		}
 	} else {
-		return fmt.Errorf("cannot delete last user from scenario without deleting scenario itself, doing nothing")
+		// There is only one associated user
+		var remainingUser user.User
+		err = db.Model(s).Related(&remainingUser, "Users").Error
+		if remainingUser.Username == username {
+			// if the remaining user is the one to be deleted
+			return fmt.Errorf("cannot delete last user from scenario without deleting scenario itself, doing nothing")
+		} else {
+			// the remaining user is NOT the one to be deleted
+			// that means the user to be deleted is not associated with the scenario
+			return gorm.ErrRecordNotFound
+		}
 	}
 
 	return nil

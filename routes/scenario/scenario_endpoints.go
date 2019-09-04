@@ -1,6 +1,7 @@
 package scenario
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -64,9 +65,8 @@ func getScenarios(c *gin.Context) {
 		}
 	}
 	// TODO return list of simulationModelIDs, dashboardIDs and userIDs per scenario
-	serializer := common.ScenariosSerializer{c, scenarios}
 	c.JSON(http.StatusOK, gin.H{
-		"scenarios": serializer.Response(),
+		"scenarios": scenarios,
 	})
 }
 
@@ -98,35 +98,44 @@ func addScenario(c *gin.Context) {
 		return
 	}
 
-	var newScenarioData common.ResponseMsgScenario
-	err = c.BindJSON(&newScenarioData)
-	if err != nil {
-		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
+	var req addScenarioRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
 		})
 		return
 	}
 
-	var newScenario Scenario
-	newScenario.ID = newScenarioData.Scenario.ID
-	newScenario.StartParameters = newScenarioData.Scenario.StartParameters
-	newScenario.Running = newScenarioData.Scenario.Running
-	newScenario.Name = newScenarioData.Scenario.Name
+	// Validate the request
+	if err = req.validate(); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
+		})
+		return
+	}
 
-	// save new scenario to DB
+	// Create the new scenario from the request
+	newScenario := req.createScenario()
+
+	// Save the new scenario in the DB
 	err = newScenario.save()
-	if common.ProvideErrorResponse(c, err) {
+	if err != nil {
+		common.ProvideErrorResponse(c, err)
 		return
 	}
 
 	// add user to new scenario
 	err = newScenario.addUser(&(u.User))
-	if common.ProvideErrorResponse(c, err) == false {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "OK.",
-		})
+	if err != nil {
+		common.ProvideErrorResponse(c, err)
+		return
 	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"scenario": newScenario.Scenario,
+	})
 }
 
 // updateScenario godoc
@@ -145,27 +154,50 @@ func addScenario(c *gin.Context) {
 // @Router /scenarios/{scenarioID} [put]
 func updateScenario(c *gin.Context) {
 
-	ok, so := CheckPermissions(c, common.Update, "path", -1)
+	ok, oldScenario := CheckPermissions(c, common.Update, "path", -1)
 	if !ok {
 		return
 	}
 
-	var modifiedScenarioData common.ResponseMsgScenario
-	err := c.BindJSON(&modifiedScenarioData)
-	if err != nil {
-		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
+	// Bind the (context) with the updateScenarioRequest struct
+	var req updateScenarioRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
 		})
 		return
 	}
 
-	err = so.update(modifiedScenarioData.Scenario)
-	if common.ProvideErrorResponse(c, err) == false {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "OK.",
+	// Validate the request based on struct updateScenarioRequest json tags
+	if err := req.validate(); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
 		})
+		return
 	}
+
+	// Create the updatedScenario from oldScenario
+	updatedScenario, err := req.updatedScenario(oldScenario)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
+		})
+		return
+	}
+
+	// Finally update the scenario
+	err = oldScenario.update(updatedScenario)
+	if err != nil {
+		common.ProvideErrorResponse(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"scenario": updatedScenario.Scenario,
+	})
 }
 
 // getScenario godoc
@@ -188,9 +220,8 @@ func getScenario(c *gin.Context) {
 	}
 
 	// TODO return list of simulationModelIDs, dashboardIDs and userIDs per scenario
-	serializer := common.ScenarioSerializer{c, so.Scenario}
 	c.JSON(http.StatusOK, gin.H{
-		"scenario": serializer.Response(),
+		"scenario": so.Scenario,
 	})
 }
 
@@ -214,11 +245,14 @@ func deleteScenario(c *gin.Context) {
 	}
 
 	err := so.delete()
-	if common.ProvideErrorResponse(c, err) == false {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "OK.",
-		})
+	if err != nil {
+		common.ProvideErrorResponse(c, err)
+		return
 	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"scenario": so.Scenario,
+	})
 }
 
 // getUsersOfScenario godoc
@@ -283,7 +317,7 @@ func addUserToScenario(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "OK.",
+		"user": u.User,
 	})
 }
 
@@ -309,12 +343,18 @@ func deleteUserFromScenario(c *gin.Context) {
 
 	username := c.Request.URL.Query().Get("username")
 
-	err := so.deleteUser(username)
+	var u user.User
+	err := u.ByUsername(username)
+	if common.ProvideErrorResponse(c, err) {
+		return
+	}
+
+	err = so.deleteUser(username)
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "OK.",
+		"user": u.User,
 	})
 }
