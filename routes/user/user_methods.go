@@ -31,7 +31,7 @@ func (u *User) ByUsername(username string) error {
 	db := common.GetDB()
 	err := db.Find(u, "Username = ?", username).Error
 	if err != nil {
-		return fmt.Errorf("User with username=%v does not exist", username)
+		return err
 	}
 	return nil
 }
