@@ -11,11 +11,6 @@ import (
 
 var db *gorm.DB
 
-// find model string lambda
-func fM(s string, id uint) string {
-	return fmt.Sprintf("Find %s with ID=%d", s, id)
-}
-
 func TestMain(m *testing.M) {
 	db = DummyInitDB()
 
@@ -59,7 +54,7 @@ func TestUserAssociations(t *testing.T) {
 	assert.NoError(t, db.Model(&userB).Association("Scenarios").Append(&scenarioB).Error)
 
 	var usr1 User
-	assert.NoError(t, db.Find(&usr1, "ID = ?", 2).Error, fM("User", 2))
+	assert.NoError(t, db.Find(&usr1, "ID = ?", 2).Error, fmt.Sprintf("Find User with ID=2"))
 	assert.EqualValues(t, "User_A", usr1.Username)
 
 	// Get scenarios of usr1
@@ -120,7 +115,7 @@ func TestScenarioAssociations(t *testing.T) {
 	assert.NoError(t, db.Model(&scenarioA).Association("Dashboards").Append(&dashboardB).Error)
 
 	var scenario1 Scenario
-	assert.NoError(t, db.Find(&scenario1, 1).Error, fM("Scenario", 1))
+	assert.NoError(t, db.Find(&scenario1, 1).Error, fmt.Sprintf("Find Scenario with ID=1"))
 	assert.EqualValues(t, "Scenario_A", scenario1.Name)
 
 	// Get users of scenario1
@@ -172,7 +167,7 @@ func TestSimulatorAssociations(t *testing.T) {
 	assert.NoError(t, db.Model(&simulatorA).Association("SimulationModels").Append(&modelB).Error)
 
 	var simulator1 Simulator
-	assert.NoError(t, db.Find(&simulator1, 1).Error, fM("Simulator", 1))
+	assert.NoError(t, db.Find(&simulator1, 1).Error, fmt.Sprintf("Find Simulator with ID=1"))
 	assert.EqualValues(t, "Host_A", simulator1.Host)
 
 	// Get simulation models of simulator1
@@ -238,7 +233,7 @@ func TestSimulationModelAssociations(t *testing.T) {
 	assert.NoError(t, db.Model(&simulatorA).Association("SimulationModels").Append(&modelB).Error)
 
 	var model1 SimulationModel
-	assert.NoError(t, db.Find(&model1, 1).Error, fM("SimulationModel", 1))
+	assert.NoError(t, db.Find(&model1, 1).Error, fmt.Sprintf("Find SimulationModel with ID=1"))
 	assert.EqualValues(t, "SimulationModel_A", model1.Name)
 
 	// Check simulator ID
@@ -287,7 +282,7 @@ func TestDashboardAssociations(t *testing.T) {
 	assert.NoError(t, db.Model(&dashboardA).Association("Widgets").Append(&widgetB).Error)
 
 	var dashboard1 Dashboard
-	assert.NoError(t, db.Find(&dashboard1, 1).Error, fM("Dashboard", 1))
+	assert.NoError(t, db.Find(&dashboard1, 1).Error, fmt.Sprintf("Find Dashboard with ID=1"))
 	assert.EqualValues(t, "Dashboard_A", dashboard1.Name)
 
 	//Get widgets of dashboard1
@@ -327,7 +322,7 @@ func TestWidgetAssociations(t *testing.T) {
 	assert.NoError(t, db.Model(&widgetA).Association("Files").Append(&fileB).Error)
 
 	var widget1 Widget
-	assert.NoError(t, db.Find(&widget1, 1).Error, fM("Widget", 1))
+	assert.NoError(t, db.Find(&widget1, 1).Error, fmt.Sprintf("Find Widget with ID=1"))
 	assert.EqualValues(t, "Widget_A", widget1.Name)
 
 	// Get files of widget
@@ -357,6 +352,6 @@ func TestFileAssociations(t *testing.T) {
 	assert.NoError(t, db.Create(&fileD).Error)
 
 	var file1 File
-	assert.NoError(t, db.Find(&file1, 1).Error, fM("File", 1))
+	assert.NoError(t, db.Find(&file1, 1).Error, fmt.Sprintf("Find File with ID=1"))
 	assert.EqualValues(t, "File_A", file1.Name)
 }
