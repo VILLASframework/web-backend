@@ -22,15 +22,15 @@ func RegisterScenarioEndpoints(r *gin.RouterGroup) {
 }
 
 // getScenarios godoc
-// @Summary Get all scenarios
+// @Summary Get all scenarios of requesting user
 // @ID getScenarios
 // @Produce  json
 // @Tags scenarios
-// @Success 200 {array} docs.ResponseScenarios "Array of scenarios to which user has access"
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
+// @Success 200 {object} docs.ResponseScenarios "Scenarios to which user has access"
+// @Failure 400 {object} docs.ResponseError "Bad request"
+// @Failure 404 {object} docs.ResponseError "Not found"
+// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
+// @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Router /scenarios [get]
 func getScenarios(c *gin.Context) {
 
@@ -76,12 +76,12 @@ func getScenarios(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Tags scenarios
-// @Param inputScenario body common.ResponseMsgScenario true "Scenario to be added"
-// @Success 200 "OK."
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
+// @Param inputScenario body scenario.validNewScenario true "Scenario to be added"
+// @Success 200 {object} docs.ResponseScenario "scenario that was added"
+// @Failure 400 {object} docs.ResponseError "Bad request"
+// @Failure 404 {object} docs.ResponseError "Not found"
+// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
+// @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Router /scenarios [post]
 func addScenario(c *gin.Context) {
 
@@ -144,12 +144,12 @@ func addScenario(c *gin.Context) {
 // @Tags scenarios
 // @Accept json
 // @Produce json
-// @Param inputScenario body common.Scenario true "Scenario to be updated"
-// @Success 200 "OK."
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
+// @Param inputScenario body scenario.validUpdatedScenario true "Scenario to be updated"
+// @Success 200 {object} docs.ResponseScenario "Updated scenario."
+// @Failure 400 {object} docs.ResponseError "Bad request"
+// @Failure 404 {object} docs.ResponseError "Not found"
+// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
+// @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param scenarioID path int true "Scenario ID"
 // @Router /scenarios/{scenarioID} [put]
 func updateScenario(c *gin.Context) {
@@ -205,11 +205,10 @@ func updateScenario(c *gin.Context) {
 // @ID getScenario
 // @Produce  json
 // @Tags scenarios
-// @Success 200 {object} common.ScenarioResponse "Scenario requested by user"
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
+// @Success 200 {object} docs.ResponseScenario "Scenario requested by user"
+// @Failure 404 {object} docs.ResponseError "Not found"
+// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
+// @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param scenarioID path int true "Scenario ID"
 // @Router /scenarios/{scenarioID} [get]
 func getScenario(c *gin.Context) {
@@ -230,11 +229,10 @@ func getScenario(c *gin.Context) {
 // @ID deleteScenario
 // @Tags scenarios
 // @Produce json
-// @Success 200 "OK."
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
+// @Success 200 {object} docs.ResponseScenario  "Deleted scenario"
+// @Failure 404 {object} docs.ResponseError "Not found"
+// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
+// @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param scenarioID path int true "Scenario ID"
 // @Router /scenarios/{scenarioID} [delete]
 func deleteScenario(c *gin.Context) {
@@ -261,10 +259,9 @@ func deleteScenario(c *gin.Context) {
 // @Produce  json
 // @Tags scenarios
 // @Success 200 {object} docs.ResponseUsers "Array of users that have access to the scenario"
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
+// @Failure 404 {object} docs.ResponseError "Not found"
+// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
+// @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param scenarioID path int true "Scenario ID"
 // @Router /scenarios/{scenarioID}/users/ [get]
 func getUsersOfScenario(c *gin.Context) {
@@ -288,11 +285,10 @@ func getUsersOfScenario(c *gin.Context) {
 // @ID addUserToScenario
 // @Tags scenarios
 // @Produce json
-// @Success 200 "OK."
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
+// @Success 200 {object} docs.ResponseUser "User that was added to scenario"
+// @Failure 404 {object} docs.ResponseError "Not found"
+// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
+// @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param scenarioID path int true "Scenario ID"
 // @Param username query string true "User name"
 // @Router /scenarios/{scenarioID}/user [put]
@@ -326,11 +322,10 @@ func addUserToScenario(c *gin.Context) {
 // @ID deleteUserFromScenario
 // @Tags scenarios
 // @Produce json
-// @Success 200 "OK."
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
+// @Success 200 {object} docs.ResponseUser "User that was deleted from scenario"
+// @Failure 404 {object} docs.ResponseError "Not found"
+// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
+// @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param scenarioID path int true "Scenario ID"
 // @Param username query string true "User name"
 // @Router /scenarios/{scenarioID}/user [delete]
