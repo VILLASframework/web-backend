@@ -16,7 +16,10 @@ func CheckPermissions(c *gin.Context, operation common.CRUD, simIDSource string,
 
 	err := common.ValidateRole(c, common.ModelScenario, operation)
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, "Access denied (role validation failed).")
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("Access denied (role validation failed): %v", err),
+		})
 		return false, so
 	}
 
@@ -28,18 +31,18 @@ func CheckPermissions(c *gin.Context, operation common.CRUD, simIDSource string,
 	if simIDSource == "path" {
 		simID, err = strconv.Atoi(c.Param("scenarioID"))
 		if err != nil {
-			errormsg := fmt.Sprintf("Bad request. No or incorrect format of scenarioID path parameter")
 			c.JSON(http.StatusBadRequest, gin.H{
-				"error": errormsg,
+				"success": false,
+				"message": fmt.Sprintf("Bad request. No or incorrect format of scenarioID path parameter"),
 			})
 			return false, so
 		}
 	} else if simIDSource == "query" {
 		simID, err = strconv.Atoi(c.Request.URL.Query().Get("scenarioID"))
 		if err != nil {
-			errormsg := fmt.Sprintf("Bad request. No or incorrect format of scenarioID query parameter")
 			c.JSON(http.StatusBadRequest, gin.H{
-				"error": errormsg,
+				"success": false,
+				"message": fmt.Sprintf("Bad request. No or incorrect format of scenarioID query parameter"),
 			})
 			return false, so
 		}
@@ -47,9 +50,9 @@ func CheckPermissions(c *gin.Context, operation common.CRUD, simIDSource string,
 		simID = simIDBody
 
 	} else {
-		errormsg := fmt.Sprintf("Bad request. The following source of your scenario ID is not valid: %s", simIDSource)
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
+			"success": false,
+			"message": fmt.Sprintf("Bad request. The following source of your scenario ID is not valid: %s", simIDSource),
 		})
 		return false, so
 	}
@@ -63,7 +66,10 @@ func CheckPermissions(c *gin.Context, operation common.CRUD, simIDSource string,
 	}
 
 	if so.checkAccess(userID.(uint), userRole.(string)) == false {
-		c.JSON(http.StatusUnprocessableEntity, "Access denied (for scenario ID).")
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"success": false,
+			"message": "Access denied (for scenario ID).",
+		})
 		return false, so
 	}
 
