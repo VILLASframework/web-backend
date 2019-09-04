@@ -20,8 +20,6 @@ func TestMain(m *testing.M) {
 	db = common.DummyInitDB()
 	defer db.Close()
 
-	common.DummyAddOnlyUserTableWithAdminDB(db)
-
 	router = gin.Default()
 	api := router.Group("/api")
 
@@ -33,6 +31,10 @@ func TestMain(m *testing.M) {
 }
 
 func TestAddGetUser(t *testing.T) {
+
+	common.DropTables(db)
+	common.MigrateModels(db)
+	common.DummyAddOnlyUserTableWithAdminDB(db)
 
 	// authenticate as admin
 	token, err := common.NewAuthenticateForTest(router,
@@ -77,6 +79,10 @@ func TestAddGetUser(t *testing.T) {
 }
 
 func TestUsersNotAllowedActions(t *testing.T) {
+
+	common.DropTables(db)
+	common.MigrateModels(db)
+	common.DummyAddOnlyUserTableWithAdminDB(db)
 
 	// authenticate as admin
 	token, err := common.NewAuthenticateForTest(router,
@@ -134,6 +140,10 @@ func TestUsersNotAllowedActions(t *testing.T) {
 
 func TestGetAllUsers(t *testing.T) {
 
+	common.DropTables(db)
+	common.MigrateModels(db)
+	common.DummyAddOnlyUserTableWithAdminDB(db)
+
 	// authenticate as admin
 	token, err := common.NewAuthenticateForTest(router,
 		"/api/authenticate", "POST", common.AdminCredentials)
@@ -165,6 +175,10 @@ func TestGetAllUsers(t *testing.T) {
 }
 
 func TestModifyAddedUserAsUser(t *testing.T) {
+
+	common.DropTables(db)
+	common.MigrateModels(db)
+	common.DummyAddOnlyUserTableWithAdminDB(db)
 
 	// authenticate as admin
 	token, err := common.NewAuthenticateForTest(router,
@@ -273,6 +287,10 @@ func TestModifyAddedUserAsUser(t *testing.T) {
 
 func TestInvalidUserUpdate(t *testing.T) {
 
+	common.DropTables(db)
+	common.MigrateModels(db)
+	common.DummyAddOnlyUserTableWithAdminDB(db)
+
 	// authenticate as admin
 	token, err := common.NewAuthenticateForTest(router,
 		"/api/authenticate", "POST", common.AdminCredentials)
@@ -319,6 +337,10 @@ func TestInvalidUserUpdate(t *testing.T) {
 }
 
 func TestModifyAddedUserAsAdmin(t *testing.T) {
+
+	common.DropTables(db)
+	common.MigrateModels(db)
+	common.DummyAddOnlyUserTableWithAdminDB(db)
 
 	// authenticate as admin
 	token, err := common.NewAuthenticateForTest(router,
@@ -397,6 +419,10 @@ func TestModifyAddedUserAsAdmin(t *testing.T) {
 }
 
 func TestDeleteUser(t *testing.T) {
+
+	common.DropTables(db)
+	common.MigrateModels(db)
+	common.DummyAddOnlyUserTableWithAdminDB(db)
 
 	// authenticate as admin
 	token, err := common.NewAuthenticateForTest(router,
