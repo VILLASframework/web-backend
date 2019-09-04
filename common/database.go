@@ -94,7 +94,25 @@ func DummyInitDB() *gorm.DB {
 
 func DummyAddOnlyUserTableWithAdminDB(db *gorm.DB) {
 	db.AutoMigrate(&User{})
-	checkErr(db.Create(&User0).Error)
+
+	//create a copy of global test data
+	user0 := User0
+	// add admin user to DB
+	checkErr(db.Create(&user0).Error)
+}
+
+func DummyAddOnlyUserTableWithAdminAndUsersDB(db *gorm.DB) {
+	db.AutoMigrate(&User{})
+
+	//create a copy of global test data
+	user0 := User0
+	userA := UserA
+	userB := UserB
+	// add admin user to DB
+	checkErr(db.Create(&user0).Error)
+	// add normal users to DB
+	checkErr(db.Create(&userA).Error)
+	checkErr(db.Create(&userB).Error)
 }
 
 // Migrates models and populates them with data
