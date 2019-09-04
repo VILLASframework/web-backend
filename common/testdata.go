@@ -38,6 +38,16 @@ var AdminCredentials = Request{
 	Password: StrPassword0,
 }
 
+var UserACredentials = Request{
+	Username: UserA.Username,
+	Password: StrPasswordA,
+}
+
+var UserBCredentials = Request{
+	Username: UserB.Username,
+	Password: StrPasswordB,
+}
+
 // Simulators
 
 var propertiesA = json.RawMessage(`{"name" : "TestNameA", "category" : "CategoryA", "location" : "anywhere on earth", "type": "dummy"}`)
