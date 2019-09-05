@@ -152,8 +152,9 @@ func CompareResponse(resp *bytes.Buffer, expected interface{}) error {
 	}
 	// Compare
 	opts := jsondiff.DefaultConsoleOptions()
-	diff, _ := jsondiff.Compare(resp.Bytes(), expectedBytes, &opts)
+	diff, text := jsondiff.Compare(resp.Bytes(), expectedBytes, &opts)
 	if diff.String() != "FullMatch" && diff.String() != "SupersetMatch" {
+		fmt.Println(text)
 		return fmt.Errorf("Response: Expected \"%v\". Got \"%v\".",
 			"(FullMatch OR SupersetMatch)", diff.String())
 	}

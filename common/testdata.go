@@ -84,7 +84,6 @@ var SimulatorB = Simulator{
 
 var startParametersA = json.RawMessage(`{"parameter1" : "testValue1A", "parameter2" : "testValue2A", "parameter3" : 42}`)
 var startParametersB = json.RawMessage(`{"parameter1" : "testValue1B", "parameter2" : "testValue2B", "parameter3" : 43}`)
-var startParametersC = json.RawMessage(`{"parameter1" : "testValue1C", "parameter2" : "testValue2C", "parameter3" : 44}`)
 
 var ScenarioA = Scenario{
 	Name:            "Scenario_A",
@@ -101,70 +100,12 @@ var ScenarioB = Scenario{
 
 var SimulationModelA = SimulationModel{
 	Name:            "SimulationModel_A",
-	OutputLength:    1,
-	InputLength:     1,
 	StartParameters: postgres.Jsonb{startParametersA},
-}
-
-var SimulationModelA_response = SimulationModelResponse{
-	ID:              1,
-	Name:            SimulationModelA.Name,
-	InputLength:     SimulationModelA.InputLength,
-	OutputLength:    SimulationModelA.OutputLength,
-	StartParameters: SimulationModelA.StartParameters,
 }
 
 var SimulationModelB = SimulationModel{
 	Name:            "SimulationModel_B",
-	OutputLength:    1,
-	InputLength:     1,
 	StartParameters: postgres.Jsonb{startParametersB},
-}
-
-var SimulationModelB_response = SimulationModelResponse{
-	ID:              2,
-	Name:            SimulationModelB.Name,
-	InputLength:     SimulationModelB.InputLength,
-	OutputLength:    SimulationModelB.OutputLength,
-	StartParameters: SimulationModelB.StartParameters,
-}
-
-var SimulationModelC = SimulationModel{
-	Name:            "SimulationModel_C",
-	OutputLength:    1,
-	InputLength:     1,
-	StartParameters: postgres.Jsonb{startParametersC},
-}
-
-var SimulationModelC_response = SimulationModelResponse{
-	ID:              3,
-	Name:            SimulationModelC.Name,
-	InputLength:     SimulationModelC.InputLength,
-	OutputLength:    SimulationModelC.OutputLength,
-	ScenarioID:      SimulationModelC.ScenarioID,
-	SimulatorID:     SimulationModelC.SimulatorID,
-	StartParameters: SimulationModelC.StartParameters,
-}
-
-var SimulationModelCUpdated = SimulationModel{
-	Name:            "SimulationModel_CUpdated",
-	OutputLength:    SimulationModelC.OutputLength,
-	InputLength:     SimulationModelC.InputLength,
-	ScenarioID:      SimulationModelC.ScenarioID,
-	SimulatorID:     2,
-	StartParameters: SimulationModelC.StartParameters,
-	InputMapping:    SimulationModelC.InputMapping,
-	OutputMapping:   SimulationModelC.OutputMapping,
-}
-
-var SimulationModelCUpdated_response = SimulationModelResponse{
-	ID:              3,
-	Name:            SimulationModelCUpdated.Name,
-	InputLength:     SimulationModelCUpdated.InputLength,
-	OutputLength:    SimulationModelCUpdated.OutputLength,
-	ScenarioID:      SimulationModelCUpdated.ScenarioID,
-	SimulatorID:     SimulationModelCUpdated.SimulatorID,
-	StartParameters: SimulationModelCUpdated.StartParameters,
 }
 
 // Signals

@@ -17,7 +17,10 @@ func CheckPermissions(c *gin.Context, operation common.CRUD, modelIDSource strin
 
 	err := common.ValidateRole(c, common.ModelSimulationModel, operation)
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, "Access denied (role validation failed).")
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("Access denied (role validation failed): %v", err),
+		})
 		return false, m
 	}
 
@@ -27,16 +30,17 @@ func CheckPermissions(c *gin.Context, operation common.CRUD, modelIDSource strin
 		if err != nil {
 			errormsg := fmt.Sprintf("Bad request. No or incorrect format of modelID path parameter")
 			c.JSON(http.StatusBadRequest, gin.H{
-				"error": errormsg,
+				"success": false,
+				"message": errormsg,
 			})
 			return false, m
 		}
 	} else if modelIDSource == "query" {
 		modelID, err = strconv.Atoi(c.Request.URL.Query().Get("modelID"))
 		if err != nil {
-			errormsg := fmt.Sprintf("Bad request. No or incorrect format of modelID query parameter")
 			c.JSON(http.StatusBadRequest, gin.H{
-				"error": errormsg,
+				"success": false,
+				"message": fmt.Sprintf("Bad request. No or incorrect format of modelID query parameter"),
 			})
 			return false, m
 		}

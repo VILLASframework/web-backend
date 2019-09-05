@@ -1,6 +1,7 @@
 package simulationmodel
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -22,11 +23,10 @@ func RegisterSimulationModelEndpoints(r *gin.RouterGroup) {
 // @ID getSimulationModels
 // @Produce  json
 // @Tags models
-// @Success 200 {array} common.SimulationModelResponse "Array of models to which belong to scenario"
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
+// @Success 200 {object} docs.ResponseSimulationModels "Simulation models which belong to scenario"
+// @Failure 404 {object} docs.ResponseError "Not found"
+// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
+// @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param scenarioID query int true "Scenario ID"
 // @Router /models [get]
 func getSimulationModels(c *gin.Context) {
@@ -43,9 +43,8 @@ func getSimulationModels(c *gin.Context) {
 		return
 	}
 
-	serializer := common.SimulationModelsSerializer{c, models}
 	c.JSON(http.StatusOK, gin.H{
-		"models": serializer.Response(),
+		"models": models,
 	})
 }
 
@@ -55,45 +54,54 @@ func getSimulationModels(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Tags models
-// @Param inputSimulationModel body common.ResponseMsgSimulationModel true "Simulation model to be added incl. IDs of scenario and simulator"
-// @Success 200 "OK."
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
+// @Param inputSimulationModel body simulationmodel.validNewSimulationModel true "Simulation model to be added incl. IDs of scenario and simulator"
+// @Success 200 {object} docs.ResponseSimulationModel "simulation model that was added"
+// @Failure 400 {object} docs.ResponseError "Bad request"
+// @Failure 404 {object} docs.ResponseError "Not found"
+// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
+// @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Router /models [post]
 func addSimulationModel(c *gin.Context) {
 
-	var newModelData common.ResponseMsgSimulationModel
-	err := c.BindJSON(&newModelData)
+	// Bind the request to JSON
+	var req addSimulationModelRequest
+	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
+			"success": false,
+			"message": "Bad request. Error binding form data to JSON: " + err.Error(),
 		})
 		return
 	}
 
-	var newModel SimulationModel
-	newModel.ID = newModelData.SimulationModel.ID
-	newModel.Name = newModelData.SimulationModel.Name
-	newModel.SimulatorID = newModelData.SimulationModel.SimulatorID
-	newModel.ScenarioID = newModelData.SimulationModel.ScenarioID
-	newModel.StartParameters = newModelData.SimulationModel.StartParameters
-	newModel.OutputLength = 0
-	newModel.InputLength = 0
+	// validate the request
+	if err = req.validate(); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
+		})
+		return
+	}
 
-	ok, _ := scenario.CheckPermissions(c, common.Create, "body", int(newModel.ScenarioID))
+	// Create the new simulation model from the request
+	newSimulationModel := req.createSimulationModel()
+
+	// check access to the scenario
+	ok, _ := scenario.CheckPermissions(c, common.Create, "body", int(newSimulationModel.ScenarioID))
 	if !ok {
 		return
 	}
 
-	err = newModel.addToScenario()
-	if common.ProvideErrorResponse(c, err) == false {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "OK.",
-		})
+	// add the new simulation model to the scenario
+	err = newSimulationModel.addToScenario()
+	if err != nil {
+		common.ProvideErrorResponse(c, err)
+		return
 	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"model": newSimulationModel.SimulationModel,
+	})
 }
 
 // updateSimulationModel godoc
@@ -102,37 +110,61 @@ func addSimulationModel(c *gin.Context) {
 // @Tags models
 // @Accept json
 // @Produce json
-// @Param inputSimulationModel body common.ResponseMsgSimulationModel true "Simulation model to be updated"
-// @Success 200 "OK."
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
+// @Param inputSimulationModel body simulationmodel.validUpdatedSimulationModel true "Simulation model to be updated"
+// @Success 200 {object} docs.ResponseSimulationModel "simulation model that was added"
+// @Failure 400 {object} docs.ResponseError "Bad request"
+// @Failure 404 {object} docs.ResponseError "Not found"
+// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
+// @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param modelID path int true "Model ID"
 // @Router /models/{modelID} [put]
 func updateSimulationModel(c *gin.Context) {
 
-	ok, m := CheckPermissions(c, common.Update, "path", -1)
+	ok, oldSimulationModel := CheckPermissions(c, common.Update, "path", -1)
 	if !ok {
 		return
 	}
 
-	var modifiedModel common.ResponseMsgSimulationModel
-	err := c.BindJSON(&modifiedModel)
+	var req updateSimulationModelRequest
+	err := c.BindJSON(&req)
 	if err != nil {
-		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
+			"success": false,
+			"message": "Bad request. Error binding form data to JSON: " + err.Error(),
 		})
 		return
 	}
 
-	err = m.Update(modifiedModel.SimulationModel)
-	if common.ProvideErrorResponse(c, err) == false {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "OK.",
+	// Validate the request
+	if err := req.validate(); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
 		})
+		return
 	}
+
+	// Create the updatedSimulationModel from oldSimulationModel
+	updatedSimulationModel, err := req.updatedSimulationModel(oldSimulationModel)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
+		})
+		return
+	}
+
+	// Finally, update the simulation model
+	err = oldSimulationModel.Update(updatedSimulationModel)
+	if err != nil {
+		common.ProvideErrorResponse(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"model": updatedSimulationModel.SimulationModel,
+	})
+
 }
 
 // getSimulationModel godoc
@@ -140,11 +172,11 @@ func updateSimulationModel(c *gin.Context) {
 // @ID getSimulationModel
 // @Tags models
 // @Produce json
-// @Success 200 {object} common.SimulationModelResponse "Requested simulation model."
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
+// @Success 200 {object} docs.ResponseSimulationModel "simulation model that was requested"
+// @Failure 400 {object} docs.ResponseError "Bad request"
+// @Failure 404 {object} docs.ResponseError "Not found"
+// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
+// @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param modelID path int true "Model ID"
 // @Router /models/{modelID} [get]
 func getSimulationModel(c *gin.Context) {
@@ -154,9 +186,8 @@ func getSimulationModel(c *gin.Context) {
 		return
 	}
 
-	serializer := common.SimulationModelSerializer{c, m.SimulationModel}
 	c.JSON(http.StatusOK, gin.H{
-		"model": serializer.Response(),
+		"model": m.SimulationModel,
 	})
 }
 
@@ -165,11 +196,11 @@ func getSimulationModel(c *gin.Context) {
 // @ID deleteSimulationModel
 // @Tags models
 // @Produce json
-// @Success 200 "OK."
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
+// @Success 200 {object} docs.ResponseSimulationModel "simulation model that was deleted"
+// @Failure 400 {object} docs.ResponseError "Bad request"
+// @Failure 404 {object} docs.ResponseError "Not found"
+// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
+// @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param modelID path int true "Model ID"
 // @Router /models/{modelID} [delete]
 func deleteSimulationModel(c *gin.Context) {
@@ -185,6 +216,6 @@ func deleteSimulationModel(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "OK.",
+		"model": m.SimulationModel,
 	})
 }

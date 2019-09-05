@@ -1,8 +1,6 @@
 package simulationmodel
 
 import (
-	"fmt"
-
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/scenario"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulator"
@@ -22,7 +20,7 @@ func (m *SimulationModel) ByID(id uint) error {
 	db := common.GetDB()
 	err := db.Find(m, id).Error
 	if err != nil {
-		return fmt.Errorf("Simulation Model with id=%v does not exist", id)
+		return err
 	}
 	return nil
 }
@@ -55,7 +53,7 @@ func (m *SimulationModel) addToScenario() error {
 	return err
 }
 
-func (m *SimulationModel) Update(modifiedSimulationModel common.SimulationModelResponse) error {
+func (m *SimulationModel) Update(modifiedSimulationModel SimulationModel) error {
 	db := common.GetDB()
 
 	if m.SimulatorID != modifiedSimulationModel.SimulatorID {
@@ -82,12 +80,15 @@ func (m *SimulationModel) Update(modifiedSimulationModel common.SimulationModelR
 		}
 	}
 
+	if m.ScenarioID != modifiedSimulationModel.ScenarioID {
+		// TODO do we allow this case?
+	}
+
 	err := db.Model(m).Updates(map[string]interface{}{
 		"Name":            modifiedSimulationModel.Name,
-		"OutputLength":    modifiedSimulationModel.OutputLength,
-		"InputLength":     modifiedSimulationModel.InputLength,
 		"StartParameters": modifiedSimulationModel.StartParameters,
 		"SimulatorID":     modifiedSimulationModel.SimulatorID,
+		//"ScenarioID":     modifiedSimulationModel.ScenarioID,
 	}).Error
 
 	return err

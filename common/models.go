@@ -53,9 +53,9 @@ type SimulationModel struct {
 	// Name of simulation model
 	Name string `json:"name" gorm:"not null"`
 	// Number of output signals
-	OutputLength int `json:"outputLength" gorm:"default:1"`
+	OutputLength int `json:"outputLength" gorm:"default:0"`
 	// Number of input signals
-	InputLength int `json:"inputLength" gorm:"default:1"`
+	InputLength int `json:"inputLength" gorm:"default:0"`
 	// Start parameters of simulation model as JSON
 	StartParameters postgres.Jsonb `json:"startParameters"`
 	// ID of Scenario to which simulation model belongs
