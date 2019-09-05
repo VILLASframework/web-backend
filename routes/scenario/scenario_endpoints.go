@@ -27,7 +27,6 @@ func RegisterScenarioEndpoints(r *gin.RouterGroup) {
 // @Produce  json
 // @Tags scenarios
 // @Success 200 {object} docs.ResponseScenarios "Scenarios to which user has access"
-// @Failure 400 {object} docs.ResponseError "Bad request"
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"

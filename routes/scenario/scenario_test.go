@@ -311,7 +311,7 @@ func TestDeleteScenario(t *testing.T) {
 	err = common.CompareResponse(resp, common.KeyModels{"scenario": newScenario})
 	assert.NoError(t, err)
 
-	// Again count the number of all the users returned
+	// Again count the number of all the scenarios returned
 	finalNumber, err := common.LengthOfResponse(router, token,
 		"/api/scenarios", "GET", nil)
 	assert.NoError(t, err)
