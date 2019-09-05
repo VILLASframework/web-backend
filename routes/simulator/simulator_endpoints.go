@@ -35,18 +35,14 @@ func RegisterSimulatorEndpoints(r *gin.RouterGroup) {
 // @Router /simulators [get]
 func getSimulators(c *gin.Context) {
 
-	err := common.ValidateRole(c, common.ModelSimulator, common.Read)
-	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
+	ok, _ := checkPermissions(c, common.ModelSimulator, common.Read, false)
+	if !ok {
 		return
 	}
 
 	db := common.GetDB()
 	var simulators []common.Simulator
-	err = db.Order("ID asc").Find(&simulators).Error
+	err := db.Order("ID asc").Find(&simulators).Error
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
@@ -71,17 +67,13 @@ func getSimulators(c *gin.Context) {
 // @Router /simulators [post]
 func addSimulator(c *gin.Context) {
 
-	err := common.ValidateRole(c, common.ModelSimulator, common.Create)
-	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
+	ok, _ := checkPermissions(c, common.ModelSimulator, common.Create, false)
+	if !ok {
 		return
 	}
 
 	var req addSimulatorRequest
-	err = c.BindJSON(&req)
+	err := c.BindJSON(&req)
 	if err != nil {
 		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -130,17 +122,14 @@ func addSimulator(c *gin.Context) {
 // @Param simulatorID path int true "Simulator ID"
 // @Router /simulators/{simulatorID} [put]
 func updateSimulator(c *gin.Context) {
-	err := common.ValidateRole(c, common.ModelSimulator, common.Update)
-	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
+
+	ok, oldSimulator := checkPermissions(c, common.ModelSimulator, common.Update, true)
+	if !ok {
 		return
 	}
 
 	var req updateSimulatorRequest
-	err = c.BindJSON(&req)
+	err := c.BindJSON(&req)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
@@ -155,22 +144,6 @@ func updateSimulator(c *gin.Context) {
 			"success": false,
 			"message": fmt.Sprintf("%v", err),
 		})
-		return
-	}
-
-	// Get the ID of the simulator to be updated from the context
-	toBeUpdatedID, err := common.UintParamFromCtx(c, "simulatorID")
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("Could not get simulator's ID from context"),
-		})
-		return
-	}
-
-	var oldSimulator Simulator
-	err = oldSimulator.ByID(toBeUpdatedID)
-	if common.ProvideErrorResponse(c, err) {
 		return
 	}
 
@@ -211,28 +184,8 @@ func updateSimulator(c *gin.Context) {
 // @Router /simulators/{simulatorID} [get]
 func getSimulator(c *gin.Context) {
 
-	err := common.ValidateRole(c, common.ModelSimulator, common.Read)
-	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
-		return
-	}
-
-	// Get the ID of the simulator from the context
-	simulatorID, err := common.UintParamFromCtx(c, "simulatorID")
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("Could not get simulator's ID from context"),
-		})
-		return
-	}
-
-	var s Simulator
-	err = s.ByID(simulatorID)
-	if common.ProvideErrorResponse(c, err) {
+	ok, s := checkPermissions(c, common.ModelSimulator, common.Read, true)
+	if !ok {
 		return
 	}
 
@@ -255,33 +208,13 @@ func getSimulator(c *gin.Context) {
 // @Router /simulators/{simulatorID} [delete]
 func deleteSimulator(c *gin.Context) {
 
-	err := common.ValidateRole(c, common.ModelSimulator, common.Delete)
-	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
-		return
-	}
-
-	// Get the ID of the simulator from the context
-	simulatorID, err := common.UintParamFromCtx(c, "simulatorID")
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("Could not get simulator's ID from context"),
-		})
-		return
-	}
-
-	var s Simulator
-	err = s.ByID(simulatorID)
-	if common.ProvideErrorResponse(c, err) {
+	ok, s := checkPermissions(c, common.ModelSimulator, common.Delete, true)
+	if !ok {
 		return
 	}
 
 	// Delete the simulator
-	err = s.delete()
+	err := s.delete()
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
@@ -305,28 +238,8 @@ func deleteSimulator(c *gin.Context) {
 // @Router /simulators/{simulatorID}/models [get]
 func getModelsOfSimulator(c *gin.Context) {
 
-	err := common.ValidateRole(c, common.ModelSimulator, common.Read)
-	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
-		return
-	}
-
-	// Get the ID of the simulator from the context
-	simulatorID, err := common.UintParamFromCtx(c, "simulatorID")
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("Could not get simulator's ID from context"),
-		})
-		return
-	}
-
-	var s Simulator
-	err = s.ByID(simulatorID)
-	if common.ProvideErrorResponse(c, err) {
+	ok, s := checkPermissions(c, common.ModelSimulator, common.Read, true)
+	if !ok {
 		return
 	}
 
@@ -356,38 +269,18 @@ func getModelsOfSimulator(c *gin.Context) {
 // @Router /simulators/{simulatorID}/action [post]
 func sendActionToSimulator(c *gin.Context) {
 
-	err := common.ValidateRole(c, common.ModelSimulatorAction, common.Update)
-	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
-		return
-	}
-
-	// Get the ID of the simulator from the context
-	simulatorID, err := common.UintParamFromCtx(c, "simulatorID")
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("Could not get simulator's ID from context"),
-		})
+	ok, s := checkPermissions(c, common.ModelSimulatorAction, common.Update, true)
+	if !ok {
 		return
 	}
 
 	var actions []common.Action
-	err = c.BindJSON(&actions)
+	err := c.BindJSON(&actions)
 	if err != nil {
 		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": errormsg,
 		})
-		return
-	}
-
-	var s Simulator
-	err = s.ByID(uint(simulatorID))
-	if common.ProvideErrorResponse(c, err) {
 		return
 	}
 
