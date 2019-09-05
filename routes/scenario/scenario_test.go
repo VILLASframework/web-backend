@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
+	"github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
@@ -14,6 +15,12 @@ import (
 
 var router *gin.Engine
 var db *gorm.DB
+
+type ScenarioRequest struct {
+	Name            string         `json:"name,omitempty"`
+	Running         bool           `json:"running,omitempty"`
+	StartParameters postgres.Jsonb `json:"startParameters,omitempty"`
+}
 
 func TestMain(m *testing.M) {
 
@@ -42,7 +49,7 @@ func TestAddScenario(t *testing.T) {
 	assert.NoError(t, err)
 
 	// test POST scenarios/ $newScenario
-	newScenario := common.Request{
+	newScenario := ScenarioRequest{
 		Name:            common.ScenarioA.Name,
 		Running:         common.ScenarioA.Running,
 		StartParameters: common.ScenarioA.StartParameters,
@@ -71,9 +78,9 @@ func TestAddScenario(t *testing.T) {
 	assert.NoError(t, err)
 
 	// try to POST a malformed scenario
-	// Required field StartParameters is missing
-	malformedNewScenario := common.Request{
-		Username: "thisisnotneeded",
+	// Required fields are missing
+	malformedNewScenario := ScenarioRequest{
+		Running: false,
 	}
 	// this should NOT work and return a unprocessable entity 442 status code
 	code, resp, err = common.NewTestEndpoint(router, token,
@@ -94,7 +101,7 @@ func TestUpdateScenario(t *testing.T) {
 	assert.NoError(t, err)
 
 	// test POST scenarios/ $newScenario
-	newScenario := common.Request{
+	newScenario := ScenarioRequest{
 		Name:            common.ScenarioA.Name,
 		Running:         common.ScenarioA.Running,
 		StartParameters: common.ScenarioA.StartParameters,
@@ -112,7 +119,7 @@ func TestUpdateScenario(t *testing.T) {
 	newScenarioID, err := common.GetResponseID(resp)
 	assert.NoError(t, err)
 
-	updatedScenario := common.Request{
+	updatedScenario := ScenarioRequest{
 		Name:            "Updated name",
 		Running:         !common.ScenarioA.Running,
 		StartParameters: common.ScenarioA.StartParameters,
@@ -167,7 +174,7 @@ func TestGetAllScenariosAsAdmin(t *testing.T) {
 	assert.NoError(t, err)
 
 	// test POST scenarios/ $newScenarioB
-	newScenarioB := common.Request{
+	newScenarioB := ScenarioRequest{
 		Name:            common.ScenarioB.Name,
 		Running:         common.ScenarioB.Running,
 		StartParameters: common.ScenarioB.StartParameters,
@@ -183,7 +190,7 @@ func TestGetAllScenariosAsAdmin(t *testing.T) {
 	assert.NoError(t, err)
 
 	// test POST scenarios/ $newScenarioA
-	newScenarioA := common.Request{
+	newScenarioA := ScenarioRequest{
 		Name:            common.ScenarioA.Name,
 		Running:         common.ScenarioA.Running,
 		StartParameters: common.ScenarioA.StartParameters,
@@ -223,7 +230,7 @@ func TestGetAllScenariosAsUser(t *testing.T) {
 	assert.NoError(t, err)
 
 	// test POST scenarios/ $newScenarioB
-	newScenarioB := common.Request{
+	newScenarioB := ScenarioRequest{
 		Name:            common.ScenarioB.Name,
 		Running:         common.ScenarioB.Running,
 		StartParameters: common.ScenarioB.StartParameters,
@@ -240,7 +247,7 @@ func TestGetAllScenariosAsUser(t *testing.T) {
 	assert.NoError(t, err)
 
 	// test POST scenarios/ $newScenarioA
-	newScenarioA := common.Request{
+	newScenarioA := ScenarioRequest{
 		Name:            common.ScenarioA.Name,
 		Running:         common.ScenarioA.Running,
 		StartParameters: common.ScenarioA.StartParameters,
@@ -275,7 +282,7 @@ func TestDeleteScenario(t *testing.T) {
 	assert.NoError(t, err)
 
 	// test POST scenarios/ $newScenario
-	newScenario := common.Request{
+	newScenario := ScenarioRequest{
 		Name:            common.ScenarioA.Name,
 		Running:         common.ScenarioA.Running,
 		StartParameters: common.ScenarioA.StartParameters,
@@ -324,7 +331,7 @@ func TestAddUserToScenario(t *testing.T) {
 	assert.NoError(t, err)
 
 	// test POST scenarios/ $newScenario
-	newScenario := common.Request{
+	newScenario := ScenarioRequest{
 		Name:            common.ScenarioA.Name,
 		Running:         common.ScenarioA.Running,
 		StartParameters: common.ScenarioA.StartParameters,
@@ -379,7 +386,7 @@ func TestGetAllUsersOfScenario(t *testing.T) {
 	assert.NoError(t, err)
 
 	// test POST scenarios/ $newScenario
-	newScenario := common.Request{
+	newScenario := ScenarioRequest{
 		Name:            common.ScenarioA.Name,
 		Running:         common.ScenarioA.Running,
 		StartParameters: common.ScenarioA.StartParameters,
@@ -424,7 +431,7 @@ func TestRemoveUserFromScenario(t *testing.T) {
 	assert.NoError(t, err)
 
 	// test POST scenarios/ $newScenario
-	newScenario := common.Request{
+	newScenario := ScenarioRequest{
 		Name:            common.ScenarioA.Name,
 		Running:         common.ScenarioA.Running,
 		StartParameters: common.ScenarioA.StartParameters,

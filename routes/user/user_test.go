@@ -15,6 +15,13 @@ import (
 var router *gin.Engine
 var db *gorm.DB
 
+type UserRequest struct {
+	Username string `json:"username,omitempty"`
+	Password string `json:"password,omitempty"`
+	Mail     string `json:"mail,omitempty"`
+	Role     string `json:"role,omitempty"`
+}
+
 func TestMain(m *testing.M) {
 
 	db = common.DummyInitDB()
@@ -42,7 +49,7 @@ func TestAddGetUser(t *testing.T) {
 	assert.NoError(t, err)
 
 	// test POST user/ $newUser
-	newUser := common.Request{
+	newUser := UserRequest{
 		Username: "Alice483",
 		Password: "th1s_I5_@lice#",
 		Mail:     "mail@domain.com",
@@ -90,7 +97,7 @@ func TestUsersNotAllowedActions(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Add a user
-	newUser := common.Request{
+	newUser := UserRequest{
 		Username: "NotAllowedActions",
 		Password: "N0t_@LLow3d_act10n5",
 		Mail:     "not@allowed.ac",
@@ -106,7 +113,7 @@ func TestUsersNotAllowedActions(t *testing.T) {
 
 	// Authenticate as the added user
 	token, err = common.NewAuthenticateForTest(router,
-		"/api/authenticate", "POST", common.Request{
+		"/api/authenticate", "POST", UserRequest{
 			Username: newUser.Username,
 			Password: newUser.Password,
 		})
@@ -155,7 +162,7 @@ func TestGetAllUsers(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Add a user
-	newUser := common.Request{
+	newUser := UserRequest{
 		Username: "UserGetAllUsers",
 		Password: "get@ll_User5",
 		Mail:     "get@all.users",
@@ -186,7 +193,7 @@ func TestModifyAddedUserAsUser(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Add a user that will modify itself
-	newUser := common.Request{
+	newUser := UserRequest{
 		Username: "modMyself",
 		Password: "mod_My5elf",
 		Mail:     "mod@my.self",
@@ -202,7 +209,7 @@ func TestModifyAddedUserAsUser(t *testing.T) {
 
 	// authenticate as the new user
 	token, err = common.NewAuthenticateForTest(router,
-		"/api/authenticate", "POST", common.Request{
+		"/api/authenticate", "POST", UserRequest{
 			Username: newUser.Username,
 			Password: newUser.Password,
 		})
@@ -215,7 +222,7 @@ func TestModifyAddedUserAsUser(t *testing.T) {
 	newUser.Password = ""
 
 	// modify newUser's own name
-	modRequest := common.Request{Username: "myNewName"}
+	modRequest := UserRequest{Username: "myNewName"}
 	newUser.Username = modRequest.Username
 	code, resp, err = common.NewTestEndpoint(router, token,
 		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
@@ -226,7 +233,7 @@ func TestModifyAddedUserAsUser(t *testing.T) {
 	assert.NoError(t, err)
 
 	// modify Admin's name (ILLEGAL)
-	modRequest = common.Request{Username: "myNewName"}
+	modRequest = UserRequest{Username: "myNewName"}
 	newUser.Username = modRequest.Username
 	code, resp, err = common.NewTestEndpoint(router, token,
 		"/api/users/1", "PUT", common.KeyModels{"user": modRequest})
@@ -234,7 +241,7 @@ func TestModifyAddedUserAsUser(t *testing.T) {
 	assert.Equalf(t, 403, code, "Response body: \n%v\n", resp)
 
 	// modify newUser's own email
-	modRequest = common.Request{Mail: "my@new.email"}
+	modRequest = UserRequest{Mail: "my@new.email"}
 	newUser.Mail = modRequest.Mail
 	code, resp, err = common.NewTestEndpoint(router, token,
 		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
@@ -245,7 +252,7 @@ func TestModifyAddedUserAsUser(t *testing.T) {
 	assert.NoError(t, err)
 
 	// modify Admin's own email (ILLEGAL)
-	modRequest = common.Request{Mail: "my@new.email"}
+	modRequest = UserRequest{Mail: "my@new.email"}
 	newUser.Mail = modRequest.Mail
 	code, resp, err = common.NewTestEndpoint(router, token,
 		"/api/users/1", "PUT", common.KeyModels{"user": modRequest})
@@ -253,7 +260,7 @@ func TestModifyAddedUserAsUser(t *testing.T) {
 	assert.Equalf(t, 403, code, "Response body: \n%v\n", resp)
 
 	// modify newUser's role (ILLEGAL)
-	modRequest = common.Request{Role: "Admin"}
+	modRequest = UserRequest{Role: "Admin"}
 	newUser.Role = modRequest.Role
 	code, resp, err = common.NewTestEndpoint(router, token,
 		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
@@ -262,7 +269,7 @@ func TestModifyAddedUserAsUser(t *testing.T) {
 	assert.Equalf(t, 403, code, "Response body: \n%v\n", resp)
 
 	// modify newUser's password
-	modRequest = common.Request{Password: "5tr0ng_pw!"}
+	modRequest = UserRequest{Password: "5tr0ng_pw!"}
 	code, resp, err = common.NewTestEndpoint(router, token,
 		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
 		common.KeyModels{"user": modRequest})
@@ -271,14 +278,14 @@ func TestModifyAddedUserAsUser(t *testing.T) {
 
 	// try to login as newUser with the modified username and password
 	token, err = common.NewAuthenticateForTest(router,
-		"/api/authenticate", "POST", common.Request{
+		"/api/authenticate", "POST", UserRequest{
 			Username: newUser.Username,
 			Password: modRequest.Password,
 		})
 	assert.NoError(t, err)
 
 	// modify Admin's password (ILLEGAL)
-	modRequest = common.Request{Password: "4dm1ns_pw!"}
+	modRequest = UserRequest{Password: "4dm1ns_pw!"}
 	code, resp, err = common.NewTestEndpoint(router, token,
 		"/api/users/1", "PUT", common.KeyModels{"user": modRequest})
 	assert.NoError(t, err)
@@ -297,7 +304,7 @@ func TestInvalidUserUpdate(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Add a user
-	newUser := common.Request{
+	newUser := UserRequest{
 		Username: "invalidUpdatedUser",
 		Password: "wr0ng_Upd@te!",
 		Mail:     "inv@user.upd",
@@ -312,7 +319,7 @@ func TestInvalidUserUpdate(t *testing.T) {
 	assert.NoError(t, err)
 
 	// modify newUser's password with INVALID password
-	modRequest := common.Request{Password: "short"}
+	modRequest := UserRequest{Password: "short"}
 	code, resp, err = common.NewTestEndpoint(router, token,
 		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
 		common.KeyModels{"user": modRequest})
@@ -320,7 +327,7 @@ func TestInvalidUserUpdate(t *testing.T) {
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 
 	// modify newUser's email with INVALID email
-	modRequest = common.Request{Mail: "notEmail"}
+	modRequest = UserRequest{Mail: "notEmail"}
 	code, resp, err = common.NewTestEndpoint(router, token,
 		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
 		common.KeyModels{"user": modRequest})
@@ -328,7 +335,7 @@ func TestInvalidUserUpdate(t *testing.T) {
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 
 	// modify newUser's role with INVALID role
-	modRequest = common.Request{Role: "noRole"}
+	modRequest = UserRequest{Role: "noRole"}
 	code, resp, err = common.NewTestEndpoint(router, token,
 		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
 		common.KeyModels{"user": modRequest})
@@ -348,7 +355,7 @@ func TestModifyAddedUserAsAdmin(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Add a user
-	newUser := common.Request{
+	newUser := UserRequest{
 		Username: "modAddedUser",
 		Password: "mod_4d^2ed_0ser",
 		Mail:     "mod@added.user",
@@ -369,7 +376,7 @@ func TestModifyAddedUserAsAdmin(t *testing.T) {
 	newUser.Password = ""
 
 	// modify newUser's name
-	modRequest := common.Request{Username: "NewUsername"}
+	modRequest := UserRequest{Username: "NewUsername"}
 	newUser.Username = modRequest.Username
 	code, resp, err = common.NewTestEndpoint(router, token,
 		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
@@ -380,7 +387,7 @@ func TestModifyAddedUserAsAdmin(t *testing.T) {
 	assert.NoError(t, err)
 
 	// modify newUser's email
-	modRequest = common.Request{Mail: "new@e.mail"}
+	modRequest = UserRequest{Mail: "new@e.mail"}
 	newUser.Mail = modRequest.Mail
 	code, resp, err = common.NewTestEndpoint(router, token,
 		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
@@ -391,7 +398,7 @@ func TestModifyAddedUserAsAdmin(t *testing.T) {
 	assert.NoError(t, err)
 
 	// modify newUser's role
-	modRequest = common.Request{Role: "Admin"}
+	modRequest = UserRequest{Role: "Admin"}
 	newUser.Role = modRequest.Role
 	code, resp, err = common.NewTestEndpoint(router, token,
 		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
@@ -402,7 +409,7 @@ func TestModifyAddedUserAsAdmin(t *testing.T) {
 	assert.NoError(t, err)
 
 	// modify newUser's password
-	modRequest = common.Request{Password: "4_g00d_pw!"}
+	modRequest = UserRequest{Password: "4_g00d_pw!"}
 	code, resp, err = common.NewTestEndpoint(router, token,
 		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
 		common.KeyModels{"user": modRequest})
@@ -411,7 +418,7 @@ func TestModifyAddedUserAsAdmin(t *testing.T) {
 
 	// try to login as newUser with the modified username and password
 	_, err = common.NewAuthenticateForTest(router,
-		"/api/authenticate", "POST", common.Request{
+		"/api/authenticate", "POST", UserRequest{
 			Username: newUser.Username,
 			Password: modRequest.Password,
 		})
@@ -430,7 +437,7 @@ func TestDeleteUser(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Add a user
-	newUser := common.Request{
+	newUser := UserRequest{
 		Username: "toBeDeletedUser",
 		Password: "f0r_deletIOn_0ser",
 		Mail:     "to@be.deleted",

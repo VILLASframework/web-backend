@@ -18,6 +18,9 @@ import (
 const UserIDCtx = "user_id"
 const UserRoleCtx = "user_role"
 
+// used in testing
+type KeyModels map[string]interface{}
+
 func ProvideErrorResponse(c *gin.Context, err error) bool {
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {

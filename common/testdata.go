@@ -33,17 +33,22 @@ var UserB = User{Username: "User_B", Password: string(pwB),
 
 // Credentials
 
-var AdminCredentials = Request{
+type Credentials struct {
+	Username string
+	Password string
+}
+
+var AdminCredentials = Credentials{
 	Username: User0.Username,
 	Password: StrPassword0,
 }
 
-var UserACredentials = Request{
+var UserACredentials = Credentials{
 	Username: UserA.Username,
 	Password: StrPasswordA,
 }
 
-var UserBCredentials = Request{
+var UserBCredentials = Credentials{
 	Username: UserB.Username,
 	Password: StrPasswordB,
 }
