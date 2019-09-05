@@ -1,7 +1,9 @@
 package simulator
 
 import (
+	"encoding/json"
 	"github.com/jinzhu/gorm/dialects/postgres"
+	"github.com/nsf/jsondiff"
 	"gopkg.in/go-playground/validator.v9"
 )
 
@@ -75,8 +77,17 @@ func (r *updateSimulatorRequest) updatedSimulator(oldSimulator Simulator) (Simul
 	if r.State != "" {
 		s.State = r.State
 	}
-	// TODO check for empty properties?
-	s.Properties = r.Properties
+
+	// only update props if not empty
+	var emptyJson postgres.Jsonb
+	// Serialize empty json and params
+	emptyJson_ser, _ := json.Marshal(emptyJson)
+	startParams_ser, _ := json.Marshal(r.Properties)
+	opts := jsondiff.DefaultConsoleOptions()
+	diff, _ := jsondiff.Compare(emptyJson_ser, startParams_ser, &opts)
+	if diff.String() != "FullMatch" {
+		s.Properties = r.Properties
+	}
 
 	return s, nil
 }
