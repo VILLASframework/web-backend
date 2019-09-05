@@ -25,13 +25,12 @@ func (s *Simulator) ByID(id uint) error {
 	return nil
 }
 
-func (s *Simulator) update(modifiedSimulator common.SimulatorResponse) error {
+func (s *Simulator) update(updatedSimulator Simulator) error {
 
 	db := common.GetDB()
-	err := db.Model(s).Updates(modifiedSimulator).Error
+	err := db.Model(s).Updates(updatedSimulator).Error
 
 	return err
-
 }
 
 func (s *Simulator) delete() error {

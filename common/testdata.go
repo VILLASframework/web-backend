@@ -57,8 +57,6 @@ var UserBCredentials = Credentials{
 
 var propertiesA = json.RawMessage(`{"name" : "TestNameA", "category" : "CategoryA", "location" : "anywhere on earth", "type": "dummy"}`)
 var propertiesB = json.RawMessage(`{"name" : "TestNameB", "category" : "CategoryB", "location" : "where ever you want", "type": "generic"}`)
-var propertiesC = json.RawMessage(`{"name" : "TestNameC", "category" : "CategoryC", "location" : "my desk", "type": "blubb"}`)
-var propertiesCupdated = json.RawMessage(`{"name" : "TestNameCUpdate", "category" : "CategoryC", "location" : "my desk", "type": "blubb"}`)
 
 var SimulatorA = Simulator{
 	UUID:          "4854af30-325f-44a5-ad59-b67b2597de68",
@@ -69,18 +67,6 @@ var SimulatorA = Simulator{
 	StateUpdateAt: time.Now().String(),
 	Properties:    postgres.Jsonb{propertiesA},
 	RawProperties: postgres.Jsonb{propertiesA},
-}
-
-var SimulatorA_response = SimulatorResponse{
-	ID:            1,
-	UUID:          SimulatorA.UUID,
-	Host:          SimulatorA.Host,
-	Modeltype:     SimulatorA.Modeltype,
-	Uptime:        SimulatorA.Uptime,
-	State:         SimulatorA.State,
-	StateUpdateAt: SimulatorA.StateUpdateAt,
-	Properties:    SimulatorA.Properties,
-	RawProperties: SimulatorA.RawProperties,
 }
 
 var SimulatorB = Simulator{
@@ -94,72 +80,22 @@ var SimulatorB = Simulator{
 	RawProperties: postgres.Jsonb{propertiesB},
 }
 
-var SimulatorB_response = SimulatorResponse{
-	ID:            2,
-	UUID:          SimulatorB.UUID,
-	Host:          SimulatorB.Host,
-	Modeltype:     SimulatorB.Modeltype,
-	Uptime:        SimulatorB.Uptime,
-	State:         SimulatorB.State,
-	StateUpdateAt: SimulatorB.StateUpdateAt,
-	Properties:    SimulatorB.Properties,
-	RawProperties: SimulatorB.RawProperties,
-}
-
-var SimulatorC = Simulator{
-	UUID:          "6d9776bf-b693-45e8-97b6-4c13d151043f",
-	Host:          "Host_C",
-	Modeltype:     "ModelTypeC",
-	Uptime:        0,
-	State:         "idle",
-	StateUpdateAt: time.Now().String(),
-	Properties:    postgres.Jsonb{propertiesC},
-	RawProperties: postgres.Jsonb{propertiesC},
-}
-
-var SimulatorC_response = SimulatorResponse{
-	ID:            3,
-	UUID:          SimulatorC.UUID,
-	Host:          SimulatorC.Host,
-	Modeltype:     SimulatorC.Modeltype,
-	Uptime:        SimulatorC.Uptime,
-	State:         SimulatorC.State,
-	StateUpdateAt: SimulatorC.StateUpdateAt,
-	Properties:    SimulatorC.Properties,
-	RawProperties: SimulatorC.RawProperties,
-}
-
-var SimulatorCUpdated = Simulator{
-	UUID:          SimulatorC.UUID,
-	Host:          "Host_Cupdated",
-	Modeltype:     "ModelTypeCUpdated",
-	Uptime:        SimulatorC.Uptime,
-	State:         "running",
-	StateUpdateAt: time.Now().String(),
-	Properties:    postgres.Jsonb{propertiesCupdated},
-	RawProperties: postgres.Jsonb{propertiesCupdated},
-}
-
-var SimulatorCUpdated_response = SimulatorResponse{
-	ID:            3,
-	UUID:          SimulatorCUpdated.UUID,
-	Host:          SimulatorCUpdated.Host,
-	Modeltype:     SimulatorCUpdated.Modeltype,
-	Uptime:        SimulatorCUpdated.Uptime,
-	State:         SimulatorCUpdated.State,
-	StateUpdateAt: SimulatorCUpdated.StateUpdateAt,
-	Properties:    SimulatorCUpdated.Properties,
-	RawProperties: SimulatorCUpdated.RawProperties,
-}
-
 // Scenarios
 
 var startParametersA = json.RawMessage(`{"parameter1" : "testValue1A", "parameter2" : "testValue2A", "parameter3" : 42}`)
 var startParametersB = json.RawMessage(`{"parameter1" : "testValue1B", "parameter2" : "testValue2B", "parameter3" : 43}`)
 var startParametersC = json.RawMessage(`{"parameter1" : "testValue1C", "parameter2" : "testValue2C", "parameter3" : 44}`)
 
-var ScenarioA = Scenario{Name: "Scenario_A", Running: true, StartParameters: postgres.Jsonb{startParametersA}}
-var ScenarioB = Scenario{Name: "Scenario_B", Running: false, StartParameters: postgres.Jsonb{startParametersB}}
+var ScenarioA = Scenario{
+	Name:            "Scenario_A",
+	Running:         true,
+	StartParameters: postgres.Jsonb{startParametersA},
+}
+var ScenarioB = Scenario{
+	Name:            "Scenario_B",
+	Running:         false,
+	StartParameters: postgres.Jsonb{startParametersB},
+}
 
 // Simulation Models
 

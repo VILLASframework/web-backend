@@ -38,43 +38,6 @@ func (self *SimulationModelSerializer) Response() SimulationModelResponse {
 	return response
 }
 
-// Simulator/s Serializers
-
-type SimulatorsSerializer struct {
-	Ctx        *gin.Context
-	Simulators []Simulator
-}
-
-func (self *SimulatorsSerializer) Response() []SimulatorResponse {
-	response := []SimulatorResponse{}
-	for _, simulator := range self.Simulators {
-		serializer := SimulatorSerializer{self.Ctx, simulator}
-		response = append(response, serializer.Response())
-	}
-	return response
-}
-
-type SimulatorSerializer struct {
-	Ctx *gin.Context
-	Simulator
-}
-
-func (self *SimulatorSerializer) Response() SimulatorResponse {
-
-	response := SimulatorResponse{
-		ID:            self.ID,
-		UUID:          self.UUID,
-		Host:          self.Host,
-		Modeltype:     self.Modeltype,
-		Uptime:        self.Uptime,
-		State:         self.State,
-		StateUpdateAt: self.StateUpdateAt,
-		Properties:    self.Properties,
-		RawProperties: self.RawProperties,
-	}
-	return response
-}
-
 // Dashboard/s Serializers
 
 type DashboardsSerializer struct {

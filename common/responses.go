@@ -12,18 +12,6 @@ type SimulationModelResponse struct {
 	StartParameters postgres.Jsonb `json:"startParameters"`
 }
 
-type SimulatorResponse struct {
-	ID            uint           `json:"id"`
-	UUID          string         `json:"uuid"`
-	Host          string         `json:"host"`
-	Modeltype     string         `json:"modelType"`
-	Uptime        int            `json:"uptime"`
-	State         string         `json:"state"`
-	StateUpdateAt string         `json:"stateUpdateAt"`
-	Properties    postgres.Jsonb `json:"properties"`
-	RawProperties postgres.Jsonb `json:"rawProperties"`
-}
-
 type DashboardResponse struct {
 	ID         uint   `json:"id"`
 	Name       string `json:"name"`
@@ -103,14 +91,6 @@ type ResponseMsgWidgets struct {
 
 type ResponseMsgWidget struct {
 	Widget WidgetResponse `json:"widget"`
-}
-
-type ResponseMsgSimulators struct {
-	Simulators []SimulatorResponse `json:"simulators"`
-}
-
-type ResponseMsgSimulator struct {
-	Simulator SimulatorResponse `json:"simulator"`
 }
 
 type ResponseMsgFiles struct {

@@ -40,3 +40,11 @@ type ResponseScenarios struct {
 type ResponseScenario struct {
 	scenario common.Scenario
 }
+
+type ResponseSimulationModels struct {
+	models []common.SimulationModel
+}
+
+type ResponseSimulationModel struct {
+	model common.SimulationModel
+}

@@ -3,7 +3,6 @@ package simulator
 import (
 	"fmt"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -29,17 +28,19 @@ func RegisterSimulatorEndpoints(r *gin.RouterGroup) {
 // @ID getSimulators
 // @Tags simulators
 // @Produce json
-// @Success 200 {array} common.ResponseMsgSimulators "Simulator parameters requested by user"
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
+// @Success 200 {object} docs.ResponseSimulators "Simulators requested"
+// @Failure 404 {object} docs.ResponseError "Not found"
+// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
+// @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Router /simulators [get]
 func getSimulators(c *gin.Context) {
 
 	err := common.ValidateRole(c, common.ModelSimulator, common.Read)
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, "Access denied (role validation failed).")
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
+		})
 		return
 	}
 
@@ -49,9 +50,9 @@ func getSimulators(c *gin.Context) {
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
-	serializer := common.SimulatorsSerializer{c, simulators}
+
 	c.JSON(http.StatusOK, gin.H{
-		"simulators": serializer.Response(),
+		"simulators": simulators,
 	})
 }
 
@@ -61,48 +62,57 @@ func getSimulators(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Tags simulators
-// @Param inputSimulator body common.ResponseMsgSimulator true "Simulator to be added"
-// @Success 200 "OK."
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
+// @Param inputSimulator body simulator.validNewSimulator true "Simulator to be added"
+// @Success 200 {object} docs.ResponseSimulator "Simulator that was added"
+// @Failure 400 {object} docs.ResponseError "Bad request"
+// @Failure 404 {object} docs.ResponseError "Not found"
+// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
+// @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Router /simulators [post]
 func addSimulator(c *gin.Context) {
 
 	err := common.ValidateRole(c, common.ModelSimulator, common.Create)
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, "Access denied (role validation failed).")
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
+		})
 		return
 	}
 
-	var newSimulatorData common.ResponseMsgSimulator
-	err = c.BindJSON(&newSimulatorData)
+	var req addSimulatorRequest
+	err = c.BindJSON(&req)
 	if err != nil {
 		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
+			"success": false,
+			"message": errormsg,
 		})
 		return
 	}
 
-	var newSimulator Simulator
-	newSimulator.ID = newSimulatorData.Simulator.ID
-	newSimulator.State = newSimulatorData.Simulator.State
-	newSimulator.StateUpdateAt = newSimulatorData.Simulator.StateUpdateAt
-	newSimulator.Modeltype = newSimulatorData.Simulator.Modeltype
-	newSimulator.UUID = newSimulatorData.Simulator.UUID
-	newSimulator.Uptime = newSimulatorData.Simulator.Uptime
-	newSimulator.Host = newSimulatorData.Simulator.Host
-	newSimulator.RawProperties = newSimulatorData.Simulator.RawProperties
-	newSimulator.Properties = newSimulatorData.Simulator.Properties
-
-	err = newSimulator.save()
-	if common.ProvideErrorResponse(c, err) == false {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "OK.",
+	// Validate the request
+	if err = req.validate(); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
 		})
+		return
 	}
+
+	// Create the new simulator from the request
+	newSimulator := req.createSimulator()
+
+	// Save new simulator to DB
+	err = newSimulator.save()
+	if err != nil {
+		common.ProvideErrorResponse(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"simulator": newSimulator.Simulator,
+	})
 }
 
 // updateSimulator godoc
@@ -111,53 +121,80 @@ func addSimulator(c *gin.Context) {
 // @Tags simulators
 // @Accept json
 // @Produce json
-// @Param inputSimulator body common.ResponseMsgSimulator true "Simulator to be updated"
-// @Success 200 "OK."
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
+// @Param inputSimulator body simulator.validUpdatedSimulator true "Simulator to be updated"
+// @Success 200 {object} docs.ResponseSimulator "Simulator that was updated"
+// @Failure 400 {object} docs.ResponseError "Bad request"
+// @Failure 404 {object} docs.ResponseError "Not found"
+// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
+// @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param simulatorID path int true "Simulator ID"
 // @Router /simulators/{simulatorID} [put]
 func updateSimulator(c *gin.Context) {
 	err := common.ValidateRole(c, common.ModelSimulator, common.Update)
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, "Access denied (role validation failed).")
-		return
-	}
-
-	var modifiedSimulator common.ResponseMsgSimulator
-
-	err = c.BindJSON(&modifiedSimulator)
-	if err != nil {
-		errormsg := "Bad request. Error unmarshalling data to JSON: " + err.Error()
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
 		})
 		return
 	}
 
-	simulatorID, err := strconv.Atoi(c.Param("simulatorID"))
+	var req updateSimulatorRequest
+	err = c.BindJSON(&req)
 	if err != nil {
-		errormsg := fmt.Sprintf("Bad request. No or incorrect format of simulatorID path parameter")
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
+			"success": false,
+			"message": "Bad request. Error binding form data to JSON: " + err.Error(),
 		})
 		return
 	}
 
-	var s Simulator
-	err = s.ByID(uint(simulatorID))
+	// Validate the request
+	if err = req.validate(); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
+		})
+		return
+	}
+
+	// Get the ID of the simulator to be updated from the context
+	toBeUpdatedID, err := common.UintParamFromCtx(c, "simulatorID")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("Could not get simulator's ID from context"),
+		})
+		return
+	}
+
+	var oldSimulator Simulator
+	err = oldSimulator.ByID(toBeUpdatedID)
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
 
-	err = s.update(modifiedSimulator.Simulator)
-	if common.ProvideErrorResponse(c, err) == false {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "OK.",
+	// Create the updatedSimulator from oldSimulator
+	updatedSimulator, err := req.updatedSimulator(oldSimulator)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
 		})
+		return
 	}
+
+	// Finally update the simulator in the DB
+	err = oldSimulator.update(updatedSimulator)
+	if err != nil {
+		common.ProvideErrorResponse(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"simulator": updatedSimulator.Simulator,
+	})
+
 }
 
 // getSimulator godoc
@@ -165,39 +202,42 @@ func updateSimulator(c *gin.Context) {
 // @ID getSimulator
 // @Produce  json
 // @Tags simulators
-// @Success 200 {object} common.ResponseMsgSimulator "Simulator requested by user"
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
+// @Success 200 {object} docs.ResponseSimulator "Simulator that was requested"
+// @Failure 400 {object} docs.ResponseError "Bad request"
+// @Failure 404 {object} docs.ResponseError "Not found"
+// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
+// @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param simulatorID path int true "Simulator ID"
 // @Router /simulators/{simulatorID} [get]
 func getSimulator(c *gin.Context) {
 
 	err := common.ValidateRole(c, common.ModelSimulator, common.Read)
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, "Access denied (role validation failed).")
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
+		})
 		return
 	}
 
-	simulatorID, err := strconv.Atoi(c.Param("simulatorID"))
+	// Get the ID of the simulator from the context
+	simulatorID, err := common.UintParamFromCtx(c, "simulatorID")
 	if err != nil {
-		errormsg := fmt.Sprintf("Bad request. No or incorrect format of simulatorID path parameter")
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
+			"success": false,
+			"message": fmt.Sprintf("Could not get simulator's ID from context"),
 		})
 		return
 	}
 
 	var s Simulator
-	err = s.ByID(uint(simulatorID))
+	err = s.ByID(simulatorID)
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
 
-	serializer := common.SimulatorSerializer{c, s.Simulator}
 	c.JSON(http.StatusOK, gin.H{
-		"simulator": serializer.Response(),
+		"simulator": s.Simulator,
 	})
 }
 
@@ -206,43 +246,48 @@ func getSimulator(c *gin.Context) {
 // @ID deleteSimulator
 // @Tags simulators
 // @Produce json
-// @Success 200 "OK."
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
+// @Success 200 {object} docs.ResponseSimulator "Simulator that was deleted"
+// @Failure 400 {object} docs.ResponseError "Bad request"
+// @Failure 404 {object} docs.ResponseError "Not found"
+// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
+// @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param simulatorID path int true "Simulator ID"
 // @Router /simulators/{simulatorID} [delete]
 func deleteSimulator(c *gin.Context) {
 
 	err := common.ValidateRole(c, common.ModelSimulator, common.Delete)
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, "Access denied (role validation failed).")
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
+		})
 		return
 	}
 
-	simulatorID, err := strconv.Atoi(c.Param("simulatorID"))
+	// Get the ID of the simulator from the context
+	simulatorID, err := common.UintParamFromCtx(c, "simulatorID")
 	if err != nil {
-		errormsg := fmt.Sprintf("Bad request. No or incorrect format of simulatorID path parameter")
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
+			"success": false,
+			"message": fmt.Sprintf("Could not get simulator's ID from context"),
 		})
 		return
 	}
 
 	var s Simulator
-	err = s.ByID(uint(simulatorID))
+	err = s.ByID(simulatorID)
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
 
+	// Delete the simulator
 	err = s.delete()
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "OK.",
+		"simulator": s.Simulator,
 	})
 }
 
@@ -251,32 +296,36 @@ func deleteSimulator(c *gin.Context) {
 // @ID getModelsOfSimulator
 // @Tags simulators
 // @Produce json
-// @Success 200 {object} common.ResponseMsgSimulationModels "Simulation models requested by user"
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
+// @Success 200 {object} docs.ResponseSimulationModels "Simulation models requested by user"
+// @Failure 400 {object} docs.ResponseError "Bad request"
+// @Failure 404 {object} docs.ResponseError "Not found"
+// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
+// @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param simulatorID path int true "Simulator ID"
 // @Router /simulators/{simulatorID}/models [get]
 func getModelsOfSimulator(c *gin.Context) {
 
 	err := common.ValidateRole(c, common.ModelSimulator, common.Read)
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, "Access denied (role validation failed).")
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
+		})
 		return
 	}
 
-	simulatorID, err := strconv.Atoi(c.Param("simulatorID"))
+	// Get the ID of the simulator from the context
+	simulatorID, err := common.UintParamFromCtx(c, "simulatorID")
 	if err != nil {
-		errormsg := fmt.Sprintf("Bad request. No or incorrect format of simulatorID path parameter")
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
+			"success": false,
+			"message": fmt.Sprintf("Could not get simulator's ID from context"),
 		})
 		return
 	}
 
 	var s Simulator
-	err = s.ByID(uint(simulatorID))
+	err = s.ByID(simulatorID)
 	if common.ProvideErrorResponse(c, err) {
 		return
 	}
@@ -287,11 +336,9 @@ func getModelsOfSimulator(c *gin.Context) {
 		return
 	}
 
-	serializer := common.SimulationModelsSerializer{c, allModels}
 	c.JSON(http.StatusOK, gin.H{
-		"models": serializer.Response(),
+		"models": allModels,
 	})
-
 }
 
 // sendActionToSimulator godoc
@@ -300,26 +347,30 @@ func getModelsOfSimulator(c *gin.Context) {
 // @Tags simulators
 // @Produce json
 // @Param inputAction query string true "Action for simulator"
-// @Success 200 "OK."
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
+// @Success 200 {object} docs.ResponseError "Action sent successfully"
+// @Failure 400 {object} docs.ResponseError "Bad request"
+// @Failure 404 {object} docs.ResponseError "Not found"
+// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
+// @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param simulatorID path int true "Simulator ID"
 // @Router /simulators/{simulatorID}/action [post]
 func sendActionToSimulator(c *gin.Context) {
 
 	err := common.ValidateRole(c, common.ModelSimulatorAction, common.Update)
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, "Access denied (role validation failed).")
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
+		})
 		return
 	}
 
-	simulatorID, err := strconv.Atoi(c.Param("simulatorID"))
+	// Get the ID of the simulator from the context
+	simulatorID, err := common.UintParamFromCtx(c, "simulatorID")
 	if err != nil {
-		errormsg := fmt.Sprintf("Bad request. No or incorrect format of simulatorID path parameter")
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
+			"success": false,
+			"message": fmt.Sprintf("Could not get simulator's ID from context"),
 		})
 		return
 	}
@@ -358,6 +409,7 @@ func sendActionToSimulator(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
+		"success": true,
 		"message": "OK.",
 	})
 }
