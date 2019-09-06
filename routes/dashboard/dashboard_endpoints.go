@@ -112,7 +112,7 @@ func addDashboard(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param inputDab body dashboard.validUpdatedDashboard true "Dashboard to be updated"
-// @Success 200 {object} docs.ResponseDashboard "Dashboards that was updated"
+// @Success 200 {object} docs.ResponseDashboard "Dashboard that was updated"
 // @Failure 400 {object} docs.ResponseError "Bad request"
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
@@ -143,7 +143,7 @@ func updateDashboard(c *gin.Context) {
 		})
 		return
 	}
-	// Create the updatedScenario from oldScenario
+	// Create the updatedDashboard from oldDashboard
 	updatedDashboard, err := req.updatedDashboard(oldDashboard)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -171,7 +171,7 @@ func updateDashboard(c *gin.Context) {
 // @ID getDashboard
 // @Tags dashboards
 // @Produce json
-// @Success 200 {object} docs.ResponseDashboard "Dashboards that was requested"
+// @Success 200 {object} docs.ResponseDashboard "Dashboard that was requested"
 // @Failure 400 {object} docs.ResponseError "Bad request"
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
@@ -195,7 +195,7 @@ func getDashboard(c *gin.Context) {
 // @ID deleteDashboard
 // @Tags dashboards
 // @Produce json
-// @Success 200 {object} docs.ResponseDashboard "Dashboards that was deleted"
+// @Success 200 {object} docs.ResponseDashboard "Dashboard that was deleted"
 // @Failure 400 {object} docs.ResponseError "Bad request"
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
