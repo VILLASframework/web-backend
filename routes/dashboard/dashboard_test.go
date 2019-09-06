@@ -91,12 +91,12 @@ func TestAddDashboard(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Read newDashboard's ID from the response
-	newDashbaordID, err := common.GetResponseID(resp)
+	newDashboardID, err := common.GetResponseID(resp)
 	assert.NoError(t, err)
 
 	// Get the newDashboard
 	code, resp, err = common.NewTestEndpoint(router, token,
-		fmt.Sprintf("/api/dashboards/%v", newDashbaordID), "GET", nil)
+		fmt.Sprintf("/api/dashboards/%v", newDashboardID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -141,7 +141,7 @@ func TestUpdateDashboard(t *testing.T) {
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// Read newDashboard's ID from the response
-	newDashbaordID, err := common.GetResponseID(resp)
+	newDashboardID, err := common.GetResponseID(resp)
 	assert.NoError(t, err)
 
 	updatedDashboard := DashboardRequest{
@@ -150,7 +150,7 @@ func TestUpdateDashboard(t *testing.T) {
 	}
 
 	code, resp, err = common.NewTestEndpoint(router, token,
-		fmt.Sprintf("/api/dashboards/%v", newDashbaordID), "PUT", common.KeyModels{"dashboard": updatedDashboard})
+		fmt.Sprintf("/api/dashboards/%v", newDashboardID), "PUT", common.KeyModels{"dashboard": updatedDashboard})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -160,7 +160,7 @@ func TestUpdateDashboard(t *testing.T) {
 
 	// Get the updatedDashboard
 	code, resp, err = common.NewTestEndpoint(router, token,
-		fmt.Sprintf("/api/dashboards/%v", newDashbaordID), "GET", nil)
+		fmt.Sprintf("/api/dashboards/%v", newDashboardID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -170,7 +170,7 @@ func TestUpdateDashboard(t *testing.T) {
 
 	// try to update a dashboard that does not exist (should return not found 404 status code)
 	code, resp, err = common.NewTestEndpoint(router, token,
-		fmt.Sprintf("/api/dashboards/%v", newDashbaordID+1), "PUT", common.KeyModels{"dashboard": updatedDashboard})
+		fmt.Sprintf("/api/dashboards/%v", newDashboardID+1), "PUT", common.KeyModels{"dashboard": updatedDashboard})
 	assert.NoError(t, err)
 	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
 
@@ -201,7 +201,7 @@ func TestDeleteDashboard(t *testing.T) {
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// Read newDashboard's ID from the response
-	newDashbaordID, err := common.GetResponseID(resp)
+	newDashboardID, err := common.GetResponseID(resp)
 	assert.NoError(t, err)
 
 	// Count the number of all the dashboards returned for scenario
@@ -211,7 +211,7 @@ func TestDeleteDashboard(t *testing.T) {
 
 	// Delete the added newDashboard
 	code, resp, err = common.NewTestEndpoint(router, token,
-		fmt.Sprintf("/api/dashboards/%v", newDashbaordID), "DELETE", nil)
+		fmt.Sprintf("/api/dashboards/%v", newDashboardID), "DELETE", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
