@@ -22,7 +22,7 @@ func (f *File) byPath(path string) error {
 	db := common.GetDB()
 	err := db.Where("Path = ?", path).Find(f).Error
 	if err != nil {
-		return fmt.Errorf("File with path=%s does not exist", path)
+		return err
 	}
 	return err
 }
@@ -31,7 +31,7 @@ func (f *File) byID(id uint) error {
 	db := common.GetDB()
 	err := db.Find(f, id).Error
 	if err != nil {
-		return fmt.Errorf("File with id=%v does not exist", id)
+		return err
 	}
 	return nil
 }
@@ -137,7 +137,6 @@ func (f *File) update(fileHeader *multipart.FileHeader) error {
 	}
 
 	fileData, err := ioutil.ReadAll(fileContent)
-	fmt.Println("File content: ", string(fileData))
 	defer fileContent.Close()
 
 	db := common.GetDB()

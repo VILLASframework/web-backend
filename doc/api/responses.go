@@ -72,3 +72,11 @@ type ResponseSignals struct {
 type ResponseSignal struct {
 	signal common.Signal
 }
+
+type ResponseFiles struct {
+	files []common.File
+}
+
+type ResponseFile struct {
+	file common.File
+}

@@ -7,12 +7,6 @@ import (
 	"time"
 )
 
-// Generic
-
-var MsgOK = ResponseMsg{
-	Message: "OK.",
-}
-
 // Users
 var StrPassword0 = "xyz789"
 var StrPasswordA = "abc123"
@@ -160,16 +154,6 @@ var FileA = File{
 	Date:        time.Now().String(),
 }
 
-var FileA_response = FileResponse{
-	ID:          1,
-	Name:        FileA.Name,
-	Type:        FileA.Type,
-	Size:        FileA.Size,
-	ImageWidth:  FileA.ImageWidth,
-	ImageHeight: FileA.ImageHeight,
-	Date:        FileA.Date,
-}
-
 var FileB = File{
 	Name:        "File_B",
 	Type:        "text/plain",
@@ -177,16 +161,6 @@ var FileB = File{
 	ImageHeight: 55,
 	ImageWidth:  22,
 	Date:        time.Now().String(),
-}
-
-var FileB_response = FileResponse{
-	ID:          2,
-	Name:        FileB.Name,
-	Type:        FileB.Type,
-	Size:        FileB.Size,
-	ImageWidth:  FileB.ImageWidth,
-	ImageHeight: FileB.ImageHeight,
-	Date:        FileB.Date,
 }
 
 var FileC = File{

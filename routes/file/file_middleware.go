@@ -16,15 +16,18 @@ func checkPermissions(c *gin.Context, operation common.CRUD) (bool, File) {
 
 	err := common.ValidateRole(c, common.ModelFile, operation)
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, "Access denied (role validation failed).")
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("Access denied (role validation failed): %v", err),
+		})
 		return false, f
 	}
 
 	fileID, err := strconv.Atoi(c.Param("fileID"))
 	if err != nil {
-		errormsg := fmt.Sprintf("Bad request. No or incorrect format of fileID path parameter")
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
+			"success": false,
+			"error":   fmt.Sprintf("Bad request. No or incorrect format of fileID path parameter"),
 		})
 		return false, f
 	}

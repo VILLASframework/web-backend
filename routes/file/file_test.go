@@ -2,11 +2,15 @@ package file
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/scenario"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulationmodel"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulator"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/user"
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
+	"github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/stretchr/testify/assert"
 	"io"
 	"io/ioutil"
@@ -17,185 +21,431 @@ import (
 	"testing"
 )
 
-// Test /files endpoints
-func TestSignalEndpoints(t *testing.T) {
+var router *gin.Engine
+var db *gorm.DB
 
-	var token string
-	var filecontent = "This is my testfile"
-	var filecontent_update = "This is my updated testfile with a dot at the end."
-	var filename = "testfile.txt"
-	var filename_update = "testfileupdate.txt"
+type SimulationModelRequest struct {
+	Name            string         `json:"name,omitempty"`
+	ScenarioID      uint           `json:"scenarioID,omitempty"`
+	SimulatorID     uint           `json:"simulatorID,omitempty"`
+	StartParameters postgres.Jsonb `json:"startParameters,omitempty"`
+}
 
-	var myFiles = []common.FileResponse{common.FileA_response, common.FileB_response}
-	var msgFiles = common.ResponseMsgFiles{Files: myFiles}
+type SimulatorRequest struct {
+	UUID       string         `json:"uuid,omitempty"`
+	Host       string         `json:"host,omitempty"`
+	Modeltype  string         `json:"modelType,omitempty"`
+	State      string         `json:"state,omitempty"`
+	Properties postgres.Jsonb `json:"properties,omitempty"`
+}
 
-	db := common.DummyInitDB()
+type ScenarioRequest struct {
+	Name            string         `json:"name,omitempty"`
+	Running         bool           `json:"running,omitempty"`
+	StartParameters postgres.Jsonb `json:"startParameters,omitempty"`
+}
+
+func addScenarioAndSimulatorAndSimulationModel() (scenarioID uint, simulatorID uint, simulationModelID uint) {
+
+	// authenticate as admin
+	token, _ := common.NewAuthenticateForTest(router,
+		"/api/authenticate", "POST", common.AdminCredentials)
+
+	// POST $newSimulatorA
+	newSimulatorA := SimulatorRequest{
+		UUID:       common.SimulatorA.UUID,
+		Host:       common.SimulatorA.Host,
+		Modeltype:  common.SimulatorA.Modeltype,
+		State:      common.SimulatorA.State,
+		Properties: common.SimulatorA.Properties,
+	}
+	_, resp, _ := common.NewTestEndpoint(router, token,
+		"/api/simulators", "POST", common.KeyModels{"simulator": newSimulatorA})
+
+	// Read newSimulator's ID from the response
+	newSimulatorID, _ := common.GetResponseID(resp)
+
+	// authenticate as normal user
+	token, _ = common.NewAuthenticateForTest(router,
+		"/api/authenticate", "POST", common.UserACredentials)
+
+	// POST $newScenario
+	newScenario := ScenarioRequest{
+		Name:            common.ScenarioA.Name,
+		Running:         common.ScenarioA.Running,
+		StartParameters: common.ScenarioA.StartParameters,
+	}
+	_, resp, _ = common.NewTestEndpoint(router, token,
+		"/api/scenarios", "POST", common.KeyModels{"scenario": newScenario})
+
+	// Read newScenario's ID from the response
+	newScenarioID, _ := common.GetResponseID(resp)
+
+	// test POST models/ $newSimulationModel
+	newSimulationModel := SimulationModelRequest{
+		Name:            common.SimulationModelA.Name,
+		ScenarioID:      uint(newScenarioID),
+		SimulatorID:     uint(newSimulatorID),
+		StartParameters: common.SimulationModelA.StartParameters,
+	}
+	_, resp, _ = common.NewTestEndpoint(router, token,
+		"/api/models", "POST", common.KeyModels{"model": newSimulationModel})
+
+	// Read newSimulationModel's ID from the response
+	newSimulationModelID, _ := common.GetResponseID(resp)
+
+	return uint(newScenarioID), uint(newSimulatorID), uint(newSimulationModelID)
+}
+
+func TestMain(m *testing.M) {
+
+	db = common.DummyInitDB()
 	defer db.Close()
-	common.DummyPopulateDB(db)
 
-	// create a testfile in local folder
-	c1 := []byte(filecontent)
-	c2 := []byte(filecontent_update)
-	err := ioutil.WriteFile(filename, c1, 0644)
-	if err != nil {
-		panic(err)
-	}
-	err = ioutil.WriteFile(filename_update, c2, 0644)
-	if err != nil {
-		panic(err)
-	}
-
-	router := gin.Default()
+	router = gin.Default()
 	api := router.Group("/api")
 
-	// All endpoints require authentication except when someone wants to
-	// login (POST /authenticate)
 	user.RegisterAuthenticate(api.Group("/authenticate"))
-
 	api.Use(user.Authentication(true))
-
+	// simulationmodel endpoints required here to first add a simulation to the DB
+	// that can be associated with a new signal model
+	simulationmodel.RegisterSimulationModelEndpoints(api.Group("/models"))
+	// scenario endpoints required here to first add a scenario to the DB
+	// that can be associated with a new simulation model
+	scenario.RegisterScenarioEndpoints(api.Group("/scenarios"))
+	// simulator endpoints required here to first add a simulator to the DB
+	// that can be associated with a new simulation model
+	simulator.RegisterSimulatorEndpoints(api.Group("/simulators"))
 	RegisterFileEndpoints(api.Group("/files"))
 
-	credjson, err := json.Marshal(common.CredUser)
-	if err != nil {
-		panic(err)
-	}
+	os.Exit(m.Run())
+}
 
-	msgOKjson, err := json.Marshal(common.MsgOK)
-	if err != nil {
-		panic(err)
-	}
+func TestAddFile(t *testing.T) {
+	common.DropTables(db)
+	common.MigrateModels(db)
+	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
 
-	msgFilesjson, err := json.Marshal(msgFiles)
-	if err != nil {
-		panic(err)
-	}
+	// prepare the content of the DB for testing
+	// by adding a scenario and a simulator to the DB
+	// using the respective endpoints of the API
+	_, _, simulationModelID := addScenarioAndSimulatorAndSimulationModel()
 
-	token = common.AuthenticateForTest(t, router, "/api/authenticate", "POST", credjson, 200)
+	// authenticate as normal user
+	token, err := common.NewAuthenticateForTest(router,
+		"/api/authenticate", "POST", common.UserACredentials)
+	assert.NoError(t, err)
 
-	// test GET files
-	common.TestEndpoint(t, router, token, "/api/files?objectID=1&objectType=widget", "GET", nil, 200, msgFilesjson)
+	// create a testfile.txt in local folder
+	c1 := []byte("This is my testfile\n")
+	err = ioutil.WriteFile("testfile.txt", c1, 0644)
+	assert.NoError(t, err)
 
 	// test POST files
 	bodyBuf := &bytes.Buffer{}
 	bodyWriter := multipart.NewWriter(bodyBuf)
 	fileWriter, err := bodyWriter.CreateFormFile("file", "testuploadfile.txt")
-	if err != nil {
-		fmt.Println("error writing to buffer")
-		panic(err)
-	}
+	assert.NoError(t, err, "writing to buffer")
 
 	// open file handle
-	fh, err := os.Open(filename)
-	if err != nil {
-		fmt.Println("error opening file")
-		panic(err)
-	}
+	fh, err := os.Open("testfile.txt")
+	assert.NoError(t, err, "opening file")
 	defer fh.Close()
 
 	// io copy
 	_, err = io.Copy(fileWriter, fh)
-	if err != nil {
-		fmt.Println("error on IO copy")
-		panic(err)
-	}
+	assert.NoError(t, err, "IO copy")
 
 	contentType := bodyWriter.FormDataContentType()
 	bodyWriter.Close()
+	//req, err := http.NewRequest("POST", "/api/files?objectID=1&objectType=widget", bodyBuf)
 
+	// Create the request
 	w := httptest.NewRecorder()
-	req, err := http.NewRequest("POST", "/api/files?objectID=1&objectType=widget", bodyBuf)
-	req.Header.Add("Authorization", "Bearer "+token)
-	req.Header.Set("Content-Type", contentType)
-	if err != nil {
-		fmt.Println("error creating post request")
-		panic(err)
-	}
+	req, err := http.NewRequest("POST", fmt.Sprintf("/api/files?objectID=%v&objectType=model", simulationModelID), bodyBuf)
+	assert.NoError(t, err, "create request")
 
+	req.Header.Set("Content-Type", contentType)
+	req.Header.Add("Authorization", "Bearer "+token)
 	router.ServeHTTP(w, req)
 
-	assert.Equal(t, 200, w.Code)
-	fmt.Println(w.Body.String())
-	assert.Equal(t, string(msgOKjson), w.Body.String())
+	assert.Equalf(t, 200, w.Code, "Response body: \n%v\n", w.Body)
+	fmt.Println(w.Body)
 
-	// test GET files/:fileID
-	w2 := httptest.NewRecorder()
-	req2, _ := http.NewRequest("GET", "/api/files/5", nil)
-	req2.Header.Add("Authorization", "Bearer "+token)
-	router.ServeHTTP(w2, req2)
+	newFileID, err := common.GetResponseID(w.Body)
+	assert.NoError(t, err)
 
-	assert.Equal(t, 200, w2.Code)
-	fmt.Println(w2.Body.String())
-	assert.Equal(t, filecontent, w2.Body.String())
+	// Get the new file
+	code, resp, err := common.NewTestEndpoint(router, token,
+		fmt.Sprintf("/api/files/%v", newFileID), "GET", nil)
+	assert.NoError(t, err)
+	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
-	//common.TestEndpoint(t, router, token, "/api/files?objectID=1&objectType=widget", "GET", nil, 200, string(msgFilesjson))
+}
 
-	// test PUT files/:fileID
-	bodyBuf_update := &bytes.Buffer{}
-	bodyWriter_update := multipart.NewWriter(bodyBuf_update)
-	fileWriter_update, err := bodyWriter_update.CreateFormFile("file", "testuploadfile.txt")
-	if err != nil {
-		fmt.Println("error writing to buffer")
-		panic(err)
-	}
+func TestUpdateFile(t *testing.T) {
+
+	common.DropTables(db)
+	common.MigrateModels(db)
+	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
+
+	// prepare the content of the DB for testing
+	// by adding a scenario and a simulator to the DB
+	// using the respective endpoints of the API
+	_, _, simulationModelID := addScenarioAndSimulatorAndSimulationModel()
+
+	// authenticate as normal user
+	token, err := common.NewAuthenticateForTest(router,
+		"/api/authenticate", "POST", common.UserACredentials)
+	assert.NoError(t, err)
+
+	// create a testfile.txt in local folder
+	c1 := []byte("This is my testfile\n")
+	err = ioutil.WriteFile("testfile.txt", c1, 0644)
+	assert.NoError(t, err)
+
+	bodyBuf := &bytes.Buffer{}
+	bodyWriter := multipart.NewWriter(bodyBuf)
+	fileWriter, err := bodyWriter.CreateFormFile("file", "testfile.txt")
+	assert.NoError(t, err, "writing to buffer")
 
 	// open file handle
-	fh_update, err := os.Open(filename_update)
-	if err != nil {
-		fmt.Println("error opening file")
-		panic(err)
-	}
-	defer fh_update.Close()
+	fh, err := os.Open("testfile.txt")
+	assert.NoError(t, err, "opening file")
+	defer fh.Close()
 
 	// io copy
-	_, err = io.Copy(fileWriter_update, fh_update)
-	if err != nil {
-		fmt.Println("error on IO copy")
-		panic(err)
-	}
+	_, err = io.Copy(fileWriter, fh)
+	assert.NoError(t, err, "IO copy")
 
-	contentType_update := bodyWriter_update.FormDataContentType()
-	bodyWriter_update.Close()
-	w_update := httptest.NewRecorder()
-	req_update, err := http.NewRequest("PUT", "/api/files/5", bodyBuf_update)
-	req_update.Header.Add("Authorization", "Bearer "+token)
-	req_update.Header.Set("Content-Type", contentType_update)
-	if err != nil {
-		fmt.Println("error creating post request")
-		panic(err)
-	}
+	contentType := bodyWriter.FormDataContentType()
+	bodyWriter.Close()
+	//req, err := http.NewRequest("POST", "/api/files?objectID=1&objectType=widget", bodyBuf)
 
-	router.ServeHTTP(w_update, req_update)
+	// Create the POST request
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest("POST", fmt.Sprintf("/api/files?objectID=%v&objectType=model", simulationModelID), bodyBuf)
+	assert.NoError(t, err, "create request")
 
-	assert.Equal(t, 200, w_update.Code)
-	fmt.Println(w_update.Body.String())
-	assert.Equal(t, string(msgOKjson), w_update.Body.String())
+	req.Header.Set("Content-Type", contentType)
+	req.Header.Add("Authorization", "Bearer "+token)
+	router.ServeHTTP(w, req)
 
-	// Test GET on updated file content
-	w3 := httptest.NewRecorder()
-	req3, _ := http.NewRequest("GET", "/api/files/5", nil)
-	req3.Header.Add("Authorization", "Bearer "+token)
-	router.ServeHTTP(w3, req3)
+	assert.Equalf(t, 200, w.Code, "Response body: \n%v\n", w.Body)
+	fmt.Println(w.Body)
 
-	assert.Equal(t, 200, w3.Code)
-	fmt.Println(w3.Body.String())
-	assert.Equal(t, filecontent_update, w3.Body.String())
+	newFileID, err := common.GetResponseID(w.Body)
+	assert.NoError(t, err)
 
-	// test DELETE files/:fileID
-	common.TestEndpoint(t, router, token, "/api/files/5", "DELETE", nil, 200, msgOKjson)
-	common.TestEndpoint(t, router, token, "/api/files?objectID=1&objectType=widget", "GET", nil, 200, msgFilesjson)
+	// Prepare update
 
-	// TODO add testing for other return codes
+	// create a testfile_updated.txt in local folder
+	c2 := []byte("This is my updated testfile\n")
+	err = ioutil.WriteFile("testfileupdated.txt", c2, 0644)
+	assert.NoError(t, err)
 
-	// clean up temporary file
-	err = os.Remove(filename)
-	if err != nil {
-		panic(err)
-	}
+	bodyBufUpdated := &bytes.Buffer{}
+	bodyWriterUpdated := multipart.NewWriter(bodyBufUpdated)
+	fileWriterUpdated, err := bodyWriterUpdated.CreateFormFile("file", "testfileupdated.txt")
+	assert.NoError(t, err, "writing to buffer")
 
-	err = os.Remove(filename_update)
-	if err != nil {
-		panic(err)
-	}
+	// open file handle for updated file
+	fh_updated, err := os.Open("testfileupdated.txt")
+	assert.NoError(t, err, "opening file")
+	defer fh_updated.Close()
 
+	// io copy
+	_, err = io.Copy(fileWriterUpdated, fh_updated)
+	assert.NoError(t, err, "IO copy")
+
+	contentType = bodyWriterUpdated.FormDataContentType()
+	bodyWriterUpdated.Close()
+
+	// Create the PUT request
+	w_updated := httptest.NewRecorder()
+	req, err = http.NewRequest("PUT", fmt.Sprintf("/api/files/%v", newFileID), bodyBufUpdated)
+	assert.NoError(t, err, "create request")
+
+	req.Header.Set("Content-Type", contentType)
+	req.Header.Add("Authorization", "Bearer "+token)
+	router.ServeHTTP(w_updated, req)
+
+	assert.Equalf(t, 200, w_updated.Code, "Response body: \n%v\n", w_updated.Body)
+	fmt.Println(w_updated.Body)
+
+	newFileIDUpdated, err := common.GetResponseID(w_updated.Body)
+
+	assert.Equal(t, newFileID, newFileIDUpdated)
+
+	// Get the updated file
+	code, resp, err := common.NewTestEndpoint(router, token,
+		fmt.Sprintf("/api/files/%v", newFileIDUpdated), "GET", nil)
+	assert.NoError(t, err)
+	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
+
+}
+
+func TestDeleteFile(t *testing.T) {
+	common.DropTables(db)
+	common.MigrateModels(db)
+	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
+
+	// prepare the content of the DB for testing
+	// by adding a scenario and a simulator to the DB
+	// using the respective endpoints of the API
+	_, _, simulationModelID := addScenarioAndSimulatorAndSimulationModel()
+
+	// authenticate as normal user
+	token, err := common.NewAuthenticateForTest(router,
+		"/api/authenticate", "POST", common.UserACredentials)
+	assert.NoError(t, err)
+
+	// create a testfile.txt in local folder
+	c1 := []byte("This is my testfile\n")
+	err = ioutil.WriteFile("testfile.txt", c1, 0644)
+	assert.NoError(t, err)
+
+	// test POST files
+	bodyBuf := &bytes.Buffer{}
+	bodyWriter := multipart.NewWriter(bodyBuf)
+	fileWriter, err := bodyWriter.CreateFormFile("file", "testuploadfile.txt")
+	assert.NoError(t, err, "writing to buffer")
+
+	// open file handle
+	fh, err := os.Open("testfile.txt")
+	assert.NoError(t, err, "opening file")
+	defer fh.Close()
+
+	// io copy
+	_, err = io.Copy(fileWriter, fh)
+	assert.NoError(t, err, "IO copy")
+
+	contentType := bodyWriter.FormDataContentType()
+	bodyWriter.Close()
+	//req, err := http.NewRequest("POST", "/api/files?objectID=1&objectType=widget", bodyBuf)
+
+	// Create the request
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest("POST", fmt.Sprintf("/api/files?objectID=%v&objectType=model", simulationModelID), bodyBuf)
+	assert.NoError(t, err, "create request")
+
+	req.Header.Set("Content-Type", contentType)
+	req.Header.Add("Authorization", "Bearer "+token)
+	router.ServeHTTP(w, req)
+
+	assert.Equalf(t, 200, w.Code, "Response body: \n%v\n", w.Body)
+	//fmt.Println(w.Body)
+
+	newFileID, err := common.GetResponseID(w.Body)
+	assert.NoError(t, err)
+
+	// Count the number of all files returned for simulation model
+	initialNumber, err := common.LengthOfResponse(router, token,
+		fmt.Sprintf("/api/files?objectID=%v&objectType=model", simulationModelID), "GET", nil)
+	assert.NoError(t, err)
+
+	// Delete the added file
+	code, resp, err := common.NewTestEndpoint(router, token,
+		fmt.Sprintf("/api/files/%v", newFileID), "DELETE", nil)
+	assert.NoError(t, err)
+	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
+
+	// Again count the number of all the files returned for simulation model
+	finalNumber, err := common.LengthOfResponse(router, token,
+		fmt.Sprintf("/api/files?objectID=%v&objectType=model", simulationModelID), "GET", nil)
+	assert.NoError(t, err)
+
+	assert.Equal(t, initialNumber-1, finalNumber)
+}
+
+func TestGetAllFilesOfSimulationModel(t *testing.T) {
+
+	common.DropTables(db)
+	common.MigrateModels(db)
+	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
+
+	// prepare the content of the DB for testing
+	// by adding a scenario and a simulator to the DB
+	// using the respective endpoints of the API
+	_, _, simulationModelID := addScenarioAndSimulatorAndSimulationModel()
+
+	// authenticate as normal user
+	token, err := common.NewAuthenticateForTest(router,
+		"/api/authenticate", "POST", common.UserACredentials)
+	assert.NoError(t, err)
+
+	// Count the number of all files returned for simulation model
+	initialNumber, err := common.LengthOfResponse(router, token,
+		fmt.Sprintf("/api/files?objectID=%v&objectType=model", simulationModelID), "GET", nil)
+	assert.NoError(t, err)
+
+	// create a testfile.txt in local folder
+	c1 := []byte("This is my testfile\n")
+	err = ioutil.WriteFile("testfile.txt", c1, 0644)
+	assert.NoError(t, err)
+
+	// test POST files
+	bodyBuf := &bytes.Buffer{}
+	bodyWriter := multipart.NewWriter(bodyBuf)
+	fileWriter, err := bodyWriter.CreateFormFile("file", "testuploadfile.txt")
+	assert.NoError(t, err, "writing to buffer")
+
+	// open file handle
+	fh, err := os.Open("testfile.txt")
+	assert.NoError(t, err, "opening file")
+	defer fh.Close()
+
+	// io copy
+	_, err = io.Copy(fileWriter, fh)
+	assert.NoError(t, err, "IO copy")
+
+	contentType := bodyWriter.FormDataContentType()
+	bodyWriter.Close()
+	//req, err := http.NewRequest("POST", "/api/files?objectID=1&objectType=widget", bodyBuf)
+
+	// Create the request
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest("POST", fmt.Sprintf("/api/files?objectID=%v&objectType=model", simulationModelID), bodyBuf)
+	assert.NoError(t, err, "create request")
+
+	req.Header.Set("Content-Type", contentType)
+	req.Header.Add("Authorization", "Bearer "+token)
+	router.ServeHTTP(w, req)
+	assert.Equalf(t, 200, w.Code, "Response body: \n%v\n", w.Body)
+	//fmt.Println(w.Body)
+
+	// POST a second file
+
+	bodyBuf2 := &bytes.Buffer{}
+	bodyWriter2 := multipart.NewWriter(bodyBuf2)
+	fileWriter2, err := bodyWriter2.CreateFormFile("file", "testuploadfile2.txt")
+	assert.NoError(t, err, "writing to buffer")
+
+	// open file handle
+	fh2, err := os.Open("testfile.txt")
+	assert.NoError(t, err, "opening file")
+	defer fh2.Close()
+
+	// io copy
+	_, err = io.Copy(fileWriter2, fh2)
+	assert.NoError(t, err, "IO copy")
+
+	contentType = bodyWriter2.FormDataContentType()
+	bodyWriter2.Close()
+
+	w2 := httptest.NewRecorder()
+	req, err = http.NewRequest("POST", fmt.Sprintf("/api/files?objectID=%v&objectType=model", simulationModelID), bodyBuf2)
+	assert.NoError(t, err, "create request")
+
+	req.Header.Set("Content-Type", contentType)
+	req.Header.Add("Authorization", "Bearer "+token)
+	router.ServeHTTP(w2, req)
+	assert.Equalf(t, 200, w2.Code, "Response body: \n%v\n", w2.Body)
+
+	// Again count the number of all the files returned for simulation model
+	finalNumber, err := common.LengthOfResponse(router, token,
+		fmt.Sprintf("/api/files?objectID=%v&objectType=model", simulationModelID), "GET", nil)
+	assert.NoError(t, err)
+
+	assert.Equal(t, initialNumber+2, finalNumber)
 }

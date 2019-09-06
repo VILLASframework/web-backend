@@ -25,11 +25,10 @@ func RegisterFileEndpoints(r *gin.RouterGroup) {
 // @ID getFiles
 // @Tags files
 // @Produce json
-// @Success 200 {array} common.FileResponse "File parameters requested by user"
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
+// @Success 200 {object} docs.ResponseFiles "Files which belong to simulation model or widget"
+// @Failure 404 {object} docs.ResponseError "Not found"
+// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
+// @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param objectType query string true "Set to model for files of model, set to widget for files of widget"
 // @Param objectID query int true "ID of either model or widget of which files are requested"
 // @Router /files [get]
@@ -37,18 +36,18 @@ func getFiles(c *gin.Context) {
 
 	objectType := c.Request.URL.Query().Get("objectType")
 	if objectType != "model" && objectType != "widget" {
-		errormsg := fmt.Sprintf("Bad request. Object type not supported for files: %s", objectType)
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
+			"success": false,
+			"message": fmt.Sprintf("Bad request. Object type not supported for files: %s", objectType),
 		})
 		return
 	}
 	objectID_s := c.Request.URL.Query().Get("objectID")
 	objectID, err := strconv.Atoi(objectID_s)
 	if err != nil {
-		errormsg := fmt.Sprintf("Bad request. Error on ID conversion: %s", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
+			"success": false,
+			"message": fmt.Sprintf("Bad request. Error on ID conversion: %s", err.Error()),
 		})
 		return
 	}
@@ -85,9 +84,8 @@ func getFiles(c *gin.Context) {
 		}
 	}
 
-	serializer := common.FilesSerializerNoAssoc{c, files}
 	c.JSON(http.StatusOK, gin.H{
-		"files": serializer.Response(),
+		"files": files,
 	})
 
 }
@@ -103,11 +101,11 @@ func getFiles(c *gin.Context) {
 // @Accept gif
 // @Accept model/x-cim
 // @Accept model/x-cim.zip
-// @Success 200 "OK"
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
+// @Success 200 {object} docs.ResponseFile "File that was added"
+// @Failure 400 {object} docs.ResponseError "Bad request"
+// @Failure 404 {object} docs.ResponseError "Not found"
+// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
+// @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param inputFile formData file true "File to be uploaded"
 // @Param objectType query string true "Set to model for files of model, set to widget for files of widget"
 // @Param objectID query int true "ID of either model or widget of which files are requested"
@@ -116,18 +114,18 @@ func addFile(c *gin.Context) {
 
 	objectType := c.Request.URL.Query().Get("objectType")
 	if objectType != "model" && objectType != "widget" {
-		errormsg := fmt.Sprintf("Bad request. Object type not supported for files: %s", objectType)
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
+			"success": false,
+			"message": fmt.Sprintf("Bad request. Object type not supported for files: %s", objectType),
 		})
 		return
 	}
 	objectID_s := c.Request.URL.Query().Get("objectID")
 	objectID, err := strconv.Atoi(objectID_s)
 	if err != nil {
-		errormsg := fmt.Sprintf("Bad request. Error on ID conversion: %s", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
+			"success": false,
+			"message": fmt.Sprintf("Bad request. Error on ID conversion: %s", err.Error()),
 		})
 		return
 	}
@@ -149,20 +147,23 @@ func addFile(c *gin.Context) {
 	// Extract file from POST request form
 	file_header, err := c.FormFile("file")
 	if err != nil {
-		errormsg := fmt.Sprintf("Bad request. Get form error: %s", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
+			"success": false,
+			"message": fmt.Sprintf("Bad request. Get form error: %s", err.Error()),
 		})
 		return
 	}
 
 	var newFile File
 	err = newFile.register(file_header, objectType, uint(objectID))
-	if common.ProvideErrorResponse(c, err) == false {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "OK.",
-		})
+	if err != nil {
+		common.ProvideErrorResponse(c, err)
+		return
 	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"file": newFile.File,
+	})
 }
 
 // getFile godoc
@@ -175,11 +176,11 @@ func addFile(c *gin.Context) {
 // @Produce gif
 // @Produce model/x-cim
 // @Produce model/x-cim.zip
-// @Success 200 "OK"
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
+// @Success 200 {object} docs.ResponseFile "File that was requested"
+// @Failure 400 {object} docs.ResponseError "Bad request"
+// @Failure 404 {object} docs.ResponseError "Not found"
+// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
+// @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param fileID path int true "ID of the file to download"
 // @Router /files/{fileID} [get]
 func getFile(c *gin.Context) {
@@ -191,9 +192,15 @@ func getFile(c *gin.Context) {
 	}
 
 	err := f.download(c)
-	if common.ProvideErrorResponse(c, err) {
+	if err != nil {
+		common.ProvideErrorResponse(c, err)
 		return
 	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"file": f.File,
+	})
+
 }
 
 // updateFile godoc
@@ -207,11 +214,11 @@ func getFile(c *gin.Context) {
 // @Accept gif
 // @Accept model/x-cim
 // @Accept model/x-cim.zip
-// @Success 200 "OK"
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
+// @Success 200 {object} docs.ResponseFile "File that was updated"
+// @Failure 400 {object} docs.ResponseError "Bad request"
+// @Failure 404 {object} docs.ResponseError "Not found"
+// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
+// @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param inputFile formData file true "File to be uploaded"
 // @Param fileID path int true "ID of the file to update"
 // @Router /files/{fileID} [put]
@@ -226,28 +233,31 @@ func updateFile(c *gin.Context) {
 	// Extract file from PUT request form
 	err := c.Request.ParseForm()
 	if err != nil {
-		errormsg := fmt.Sprintf("Bad request. Get form error: %s", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
+			"success": false,
+			"message": fmt.Sprintf("Bad request. Get form error: %s", err.Error()),
 		})
 		return
 	}
 
 	file_header, err := c.FormFile("file")
 	if err != nil {
-		errormsg := fmt.Sprintf("Bad request. Get form error: %s", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
+			"success": false,
+			"error":   fmt.Sprintf("Bad request. Get form error: %s", err.Error()),
 		})
 		return
 	}
 
 	err = f.update(file_header)
-	if common.ProvideErrorResponse(c, err) == false {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "OK.",
-		})
+	if err != nil {
+		common.ProvideErrorResponse(c, err)
+		return
 	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"file": f.File,
+	})
 }
 
 // deleteFile godoc
@@ -255,11 +265,11 @@ func updateFile(c *gin.Context) {
 // @ID deleteFile
 // @Tags files
 // @Produce json
-// @Success 200 "OK"
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
+// @Success 200 {object} docs.ResponseFile "File that was deleted"
+// @Failure 400 {object} docs.ResponseError "Bad request"
+// @Failure 404 {object} docs.ResponseError "Not found"
+// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
+// @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param fileID path int true "ID of the file to update"
 // @Router /files/{fileID} [delete]
 func deleteFile(c *gin.Context) {
@@ -271,9 +281,12 @@ func deleteFile(c *gin.Context) {
 	}
 
 	err := f.delete()
-	if common.ProvideErrorResponse(c, err) == false {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "OK.",
-		})
+	if err != nil {
+		common.ProvideErrorResponse(c, err)
+		return
 	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"file": f.File,
+	})
 }
