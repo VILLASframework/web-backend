@@ -1,8 +1,6 @@
 package signal
 
 import (
-	"fmt"
-
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulationmodel"
 )
@@ -21,7 +19,7 @@ func (s *Signal) byID(id uint) error {
 	db := common.GetDB()
 	err := db.Find(s, id).Error
 	if err != nil {
-		return fmt.Errorf("Signal with id=%v does not exist", id)
+		return err
 	}
 	return nil
 }
@@ -64,7 +62,7 @@ func (s *Signal) addToSimulationModel() error {
 	return err
 }
 
-func (s *Signal) update(modifiedSignal common.SignalResponse) error {
+func (s *Signal) update(modifiedSignal Signal) error {
 	db := common.GetDB()
 
 	err := db.Model(s).Updates(map[string]interface{}{

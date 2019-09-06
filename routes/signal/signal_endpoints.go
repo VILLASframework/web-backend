@@ -1,6 +1,7 @@
 package signal
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -24,11 +25,10 @@ func RegisterSignalEndpoints(r *gin.RouterGroup) {
 // @Tags signals
 // @Param direction query string true "Direction of signal (in or out)"
 // @Param modelID query string true "Model ID of signals to be obtained"
-// @Success 200 {array} common.Signal "Requested signals."
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
+// @Success 200 {object} docs.ResponseSignals "Signals which belong to simulation model"
+// @Failure 404 {object} docs.ResponseError "Not found"
+// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
+// @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Router /signals [get]
 func getSignals(c *gin.Context) {
 
@@ -44,9 +44,9 @@ func getSignals(c *gin.Context) {
 	} else if direction == "out" {
 		mapping = "OutputMapping"
 	} else {
-		errormsg := "Bad request. Direction has to be in or out"
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
+			"success": false,
+			"error":   "Bad request. Direction has to be in or out",
 		})
 		return
 	}
@@ -58,9 +58,8 @@ func getSignals(c *gin.Context) {
 		return
 	}
 
-	serializer := common.SignalsSerializer{c, sigs}
 	c.JSON(http.StatusOK, gin.H{
-		"signals": serializer.Response(),
+		"signals": sigs,
 	})
 }
 
@@ -70,31 +69,35 @@ func getSignals(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Tags signals
-// @Param inputSignal body common.ResponseMsgSignal true "A signal to be added to the model incl. direction and model ID to which signal shall be added"
-// @Success 200 "OK."
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
+// @Param inputSignal body signal.validNewSignal true "A signal to be added to the model incl. direction and model ID to which signal shall be added"
+// @Success 200 {object} docs.ResponseSignal "Signal that was added"
+// @Failure 400 {object} docs.ResponseError "Bad request"
+// @Failure 404 {object} docs.ResponseError "Not found"
+// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
+// @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Router /signals [post]
 func addSignal(c *gin.Context) {
 
-	var newSignalData common.ResponseMsgSignal
-	err := c.BindJSON(&newSignalData)
-	if err != nil {
-		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
+	var req addSignalRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
 		})
 		return
 	}
 
-	var newSignal Signal
-	newSignal.Index = newSignalData.Signal.Index
-	newSignal.SimulationModelID = newSignalData.Signal.SimulationModelID
-	newSignal.Direction = newSignalData.Signal.Direction
-	newSignal.Unit = newSignalData.Signal.Unit
-	newSignal.Name = newSignalData.Signal.Name
+	// Validate the request
+	if err := req.validate(); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
+		})
+		return
+	}
+
+	// Create the new signal from the request
+	newSignal := req.createSignal()
 
 	ok, _ := simulationmodel.CheckPermissions(c, common.Update, "body", int(newSignal.SimulationModelID))
 	if !ok {
@@ -102,12 +105,15 @@ func addSignal(c *gin.Context) {
 	}
 
 	// Add signal to model
-	err = newSignal.addToSimulationModel()
-	if common.ProvideErrorResponse(c, err) == false {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "OK.",
-		})
+	err := newSignal.addToSimulationModel()
+	if err != nil {
+		common.ProvideErrorResponse(c, err)
+		return
 	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"signal": newSignal.Signal,
+	})
 }
 
 // updateSignal godoc
@@ -115,35 +121,58 @@ func addSignal(c *gin.Context) {
 // @ID updateSignal
 // @Tags signals
 // @Produce json
-// @Success 200 "OK."
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
+// @Param inputSignal body signal.validUpdatedSignal true "A signal to be updated"
+// @Success 200 {object} docs.ResponseSignal "Signal that was updated"
+// @Failure 400 {object} docs.ResponseError "Bad request"
+// @Failure 404 {object} docs.ResponseError "Not found"
+// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
+// @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param signalID path int true "ID of signal to be updated"
 // @Router /signals/{signalID} [put]
 func updateSignal(c *gin.Context) {
-	ok, sig := checkPermissions(c, common.Delete)
+	ok, oldSignal := checkPermissions(c, common.Delete)
 	if !ok {
 		return
 	}
 
-	var modifiedSignal common.ResponseMsgSignal
-	err := c.BindJSON(&modifiedSignal)
-	if err != nil {
-		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
+	var req updateSignalRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
 		})
 		return
 	}
 
-	err = sig.update(modifiedSignal.Signal)
-	if common.ProvideErrorResponse(c, err) == false {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "OK.",
+	// Validate the request
+	if err := req.validate(); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
 		})
+		return
 	}
+
+	// Create the updatedSignal from oldDashboard
+	updatedSignal, err := req.updatedSignal(oldSignal)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
+		})
+		return
+	}
+
+	// Update the signal in the DB
+	err = oldSignal.update(updatedSignal)
+	if err != nil {
+		common.ProvideErrorResponse(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"signal": updatedSignal.Signal,
+	})
 }
 
 // getSignal godoc
@@ -151,11 +180,11 @@ func updateSignal(c *gin.Context) {
 // @ID getSignal
 // @Tags signals
 // @Produce json
-// @Success 200 "OK."
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
+// @Success 200 {object} docs.ResponseSignal "Signal that was requested"
+// @Failure 400 {object} docs.ResponseError "Bad request"
+// @Failure 404 {object} docs.ResponseError "Not found"
+// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
+// @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param signalID path int true "ID of signal to be obtained"
 // @Router /signals/{signalID} [get]
 func getSignal(c *gin.Context) {
@@ -164,9 +193,8 @@ func getSignal(c *gin.Context) {
 		return
 	}
 
-	serializer := common.SignalSerializer{c, sig.Signal}
 	c.JSON(http.StatusOK, gin.H{
-		"signal": serializer.Response(),
+		"signal": sig.Signal,
 	})
 }
 
@@ -175,11 +203,11 @@ func getSignal(c *gin.Context) {
 // @ID deleteSignal
 // @Tags signals
 // @Produce json
-// @Success 200 "OK."
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
+// @Success 200 {object} docs.ResponseSignal "Signal that was deleted"
+// @Failure 400 {object} docs.ResponseError "Bad request"
+// @Failure 404 {object} docs.ResponseError "Not found"
+// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
+// @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param signalID path int true "ID of signal to be deleted"
 // @Router /signals/{signalID} [delete]
 func deleteSignal(c *gin.Context) {
@@ -190,10 +218,12 @@ func deleteSignal(c *gin.Context) {
 	}
 
 	err := sig.delete()
-	if common.ProvideErrorResponse(c, err) == false {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "OK.",
-		})
+	if err != nil {
+		common.ProvideErrorResponse(c, err)
+		return
 	}
 
+	c.JSON(http.StatusOK, gin.H{
+		"signal": sig.Signal,
+	})
 }

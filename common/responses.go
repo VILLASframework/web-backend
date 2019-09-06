@@ -12,26 +12,10 @@ type FileResponse struct {
 	SimulationModelID uint   `json:"simulationModelID"`
 }
 
-type SignalResponse struct {
-	Name              string `json:"name"`
-	Unit              string `json:"unit"`
-	Index             uint   `json:"index"`
-	Direction         string `json:"direction"`
-	SimulationModelID uint   `json:"simulationModelID"`
-}
-
 // Response messages
 
 type ResponseMsg struct {
 	Message string `json:"message"`
-}
-
-type ResponseMsgSignals struct {
-	Signals []SignalResponse `json:"signals"`
-}
-
-type ResponseMsgSignal struct {
-	Signal SignalResponse `json:"signal"`
 }
 
 type ResponseMsgFiles struct {

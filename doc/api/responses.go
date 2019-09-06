@@ -64,3 +64,11 @@ type ResponseWidgets struct {
 type ResponseWidget struct {
 	widget common.Widget
 }
+
+type ResponseSignals struct {
+	signals []common.Signal
+}
+
+type ResponseSignal struct {
+	signal common.Signal
+}

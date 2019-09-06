@@ -117,25 +117,11 @@ var OutSignalA = Signal{
 	Unit:      "V",
 }
 
-var OutSignalA_response = SignalResponse{
-	Name:      OutSignalA.Name,
-	Direction: OutSignalA.Direction,
-	Index:     OutSignalA.Index,
-	Unit:      OutSignalA.Unit,
-}
-
 var OutSignalB = Signal{
 	Name:      "outSignal_B",
 	Direction: "out",
 	Index:     1,
 	Unit:      "V",
-}
-
-var OutSignalB_response = SignalResponse{
-	Name:      OutSignalB.Name,
-	Direction: OutSignalB.Direction,
-	Index:     OutSignalB.Index,
-	Unit:      OutSignalB.Unit,
 }
 
 var InSignalA = Signal{
@@ -145,53 +131,11 @@ var InSignalA = Signal{
 	Unit:      "A",
 }
 
-var InSignalA_response = SignalResponse{
-	Name:      InSignalA.Name,
-	Direction: InSignalA.Direction,
-	Index:     InSignalA.Index,
-	Unit:      InSignalA.Unit,
-}
-
 var InSignalB = Signal{
 	Name:      "inSignal_B",
 	Direction: "in",
 	Index:     1,
 	Unit:      "A",
-}
-
-var InSignalB_response = SignalResponse{
-	Name:      InSignalB.Name,
-	Direction: InSignalB.Direction,
-	Index:     InSignalB.Index,
-	Unit:      InSignalB.Unit,
-}
-
-var InSignalC = Signal{
-	Name:      "inSignal_C",
-	Direction: "in",
-	Index:     2,
-	Unit:      "A",
-}
-
-var InSignalC_response = SignalResponse{
-	Name:      InSignalC.Name,
-	Direction: InSignalC.Direction,
-	Index:     InSignalC.Index,
-	Unit:      InSignalC.Unit,
-}
-
-var InSignalCUpdated = Signal{
-	Name:      "inSignalupdated_C",
-	Direction: InSignalC.Direction,
-	Index:     InSignalC.Index,
-	Unit:      "Ohm",
-}
-
-var InSignalCUpdated_response = SignalResponse{
-	Name:      InSignalCUpdated.Name,
-	Direction: InSignalCUpdated.Direction,
-	Index:     InSignalCUpdated.Index,
-	Unit:      InSignalCUpdated.Unit,
 }
 
 // Dashboards

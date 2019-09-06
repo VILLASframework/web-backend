@@ -17,15 +17,18 @@ func checkPermissions(c *gin.Context, operation common.CRUD) (bool, Signal) {
 
 	err := common.ValidateRole(c, common.ModelSignal, operation)
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, "Access denied (role validation failed).")
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("Access denied (role validation failed): %v", err),
+		})
 		return false, sig
 	}
 
 	signalID, err := strconv.Atoi(c.Param("signalID"))
 	if err != nil {
-		errormsg := fmt.Sprintf("Bad request. No or incorrect format of signalID path parameter")
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
+			"success": false,
+			"error":   fmt.Sprintf("Bad request. No or incorrect format of signalID path parameter"),
 		})
 		return false, sig
 	}
