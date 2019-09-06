@@ -214,7 +214,7 @@ func TestUpdateSimulationModel(t *testing.T) {
 
 	// try to update a simulation model that does not exist (should return not found 404 status code)
 	code, resp, err = common.NewTestEndpoint(router, token,
-		fmt.Sprintf("/api/models/%v", newSimulationModelID+1), "PUT", common.KeyModels{"scenario": updatedSimulationModel})
+		fmt.Sprintf("/api/models/%v", newSimulationModelID+1), "PUT", common.KeyModels{"model": updatedSimulationModel})
 	assert.NoError(t, err)
 	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
 }
