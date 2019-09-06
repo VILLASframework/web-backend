@@ -1,23 +1,5 @@
 package common
 
-import "github.com/jinzhu/gorm/dialects/postgres"
-
-type WidgetResponse struct {
-	ID               uint           `json:"id"`
-	Name             string         `json:"name"`
-	Type             string         `json:"type"`
-	Width            uint           `json:"width"`
-	Height           uint           `json:"height"`
-	MinWidth         uint           `json:"minWidth"`
-	MinHeight        uint           `json:"minHeight"`
-	X                int            `json:"x"`
-	Y                int            `json:"y"`
-	Z                int            `json:"z"`
-	DashboardID      uint           `json:"dashboardID"`
-	IsLocked         bool           `json:"isLocked"`
-	CustomProperties postgres.Jsonb `json:"customProperties"`
-}
-
 type FileResponse struct {
 	Name              string `json:"name"`
 	ID                uint   `json:"id"`
@@ -50,14 +32,6 @@ type ResponseMsgSignals struct {
 
 type ResponseMsgSignal struct {
 	Signal SignalResponse `json:"signal"`
-}
-
-type ResponseMsgWidgets struct {
-	Widgets []WidgetResponse `json:"widgets"`
-}
-
-type ResponseMsgWidget struct {
-	Widget WidgetResponse `json:"widget"`
 }
 
 type ResponseMsgFiles struct {

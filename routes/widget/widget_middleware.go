@@ -17,7 +17,10 @@ func CheckPermissions(c *gin.Context, operation common.CRUD, widgetIDBody int) (
 
 	err := common.ValidateRole(c, common.ModelWidget, operation)
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, "Access denied (role validation failed).")
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("Access denied (role validation failed): %v", err),
+		})
 		return false, w
 	}
 
@@ -25,9 +28,10 @@ func CheckPermissions(c *gin.Context, operation common.CRUD, widgetIDBody int) (
 	if widgetIDBody < 0 {
 		widgetID, err = strconv.Atoi(c.Param("widgetID"))
 		if err != nil {
-			errormsg := fmt.Sprintf("Bad request. No or incorrect format of widgetID path parameter")
+
 			c.JSON(http.StatusBadRequest, gin.H{
-				"error": errormsg,
+				"success": false,
+				"message": fmt.Sprintf("Bad request. No or incorrect format of widgetID path parameter"),
 			})
 			return false, w
 		}

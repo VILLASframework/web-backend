@@ -265,7 +265,6 @@ var FileD = File{
 // Widgets
 var customPropertiesA = json.RawMessage(`{"property1" : "testValue1A", "property2" : "testValue2A", "property3" : 42}`)
 var customPropertiesB = json.RawMessage(`{"property1" : "testValue1B", "property2" : "testValue2B", "property3" : 43}`)
-var customPropertiesC = json.RawMessage(`{"property1" : "testValue1C", "property2" : "testValue2C", "property3" : 44}`)
 
 var WidgetA = Widget{
 	Name:             "Widget_A",
@@ -281,21 +280,6 @@ var WidgetA = Widget{
 	CustomProperties: postgres.Jsonb{customPropertiesA},
 }
 
-var WidgetA_response = WidgetResponse{
-	ID:               1,
-	Name:             WidgetA.Name,
-	Type:             WidgetA.Type,
-	Width:            WidgetA.Width,
-	Height:           WidgetA.Height,
-	MinWidth:         WidgetA.MinWidth,
-	MinHeight:        WidgetA.MinHeight,
-	X:                WidgetA.X,
-	Y:                WidgetA.Y,
-	Z:                WidgetA.Z,
-	IsLocked:         WidgetA.IsLocked,
-	CustomProperties: WidgetA.CustomProperties,
-}
-
 var WidgetB = Widget{
 	Name:             "Widget_B",
 	Type:             "slider",
@@ -305,66 +289,7 @@ var WidgetB = Widget{
 	MinWidth:         50,
 	X:                100,
 	Y:                -40,
-	Z:                0,
+	Z:                -1,
 	IsLocked:         false,
 	CustomProperties: postgres.Jsonb{customPropertiesB},
-}
-
-var WidgetB_response = WidgetResponse{
-	ID:               2,
-	Name:             WidgetB.Name,
-	Type:             WidgetB.Type,
-	Width:            WidgetB.Width,
-	Height:           WidgetB.Height,
-	MinWidth:         WidgetB.MinWidth,
-	MinHeight:        WidgetB.MinHeight,
-	X:                WidgetB.X,
-	Y:                WidgetB.Y,
-	Z:                WidgetB.Z,
-	IsLocked:         WidgetB.IsLocked,
-	CustomProperties: WidgetB.CustomProperties,
-}
-
-var WidgetC = Widget{
-	Name:             "Widget_C",
-	Type:             "bargraph",
-	Height:           30,
-	Width:            100,
-	MinHeight:        20,
-	MinWidth:         50,
-	X:                11,
-	Y:                12,
-	Z:                13,
-	IsLocked:         false,
-	CustomProperties: postgres.Jsonb{customPropertiesC},
-}
-
-var WidgetC_response = WidgetResponse{
-	ID:               3,
-	Name:             WidgetC.Name,
-	Type:             WidgetC.Type,
-	Width:            WidgetC.Width,
-	Height:           WidgetC.Height,
-	MinWidth:         WidgetC.MinWidth,
-	MinHeight:        WidgetC.MinHeight,
-	X:                WidgetC.X,
-	Y:                WidgetC.Y,
-	Z:                WidgetC.Z,
-	IsLocked:         WidgetC.IsLocked,
-	CustomProperties: WidgetC.CustomProperties,
-}
-
-var WidgetCUpdated_response = WidgetResponse{
-	ID:               3,
-	Name:             "Widget_CUpdated",
-	Type:             WidgetC.Type,
-	Height:           35,
-	Width:            110,
-	MinHeight:        WidgetC.MinHeight,
-	MinWidth:         WidgetC.MinWidth,
-	X:                WidgetC.X,
-	Y:                WidgetC.Y,
-	Z:                WidgetC.Z,
-	IsLocked:         WidgetC.IsLocked,
-	CustomProperties: WidgetC.CustomProperties,
 }

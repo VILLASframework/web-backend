@@ -1,6 +1,7 @@
 package widget
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -22,11 +23,10 @@ func RegisterWidgetEndpoints(r *gin.RouterGroup) {
 // @ID getWidgets
 // @Produce  json
 // @Tags widgets
-// @Success 200 {array} common.WidgetResponse "Array of widgets to which belong to dashboard"
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
+// @Success 200 {object} docs.ResponseWidgets "Widgets to which belong to dashboard"
+// @Failure 404 {object} docs.ResponseError "Not found"
+// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
+// @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param dashboardID query int true "Dashboard ID"
 // @Router /widgets [get]
 func getWidgets(c *gin.Context) {
@@ -43,9 +43,8 @@ func getWidgets(c *gin.Context) {
 		return
 	}
 
-	serializer := common.WidgetsSerializer{c, widgets}
 	c.JSON(http.StatusOK, gin.H{
-		"widgets": serializer.Response(),
+		"widgets": widgets,
 	})
 }
 
@@ -55,51 +54,51 @@ func getWidgets(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Tags widgets
-// @Param inputWidget body common.ResponseMsgWidget true "Widget to be added incl. ID of dashboard"
-// @Success 200 "OK."
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
+// @Param inputWidget body widget.validNewWidget true "Widget to be added incl. ID of dashboard"
+// @Success 200 {object} docs.ResponseWidget "Widget that was added"
+// @Failure 400 {object} docs.ResponseError "Bad request"
+// @Failure 404 {object} docs.ResponseError "Not found"
+// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
+// @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Router /widgets [post]
 func addWidget(c *gin.Context) {
 
-	var newWidgetData common.ResponseMsgWidget
-	err := c.BindJSON(&newWidgetData)
-	if err != nil {
-		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
+	var req addWidgetRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
 		})
 		return
 	}
 
-	var newWidget Widget
-	newWidget.Name = newWidgetData.Widget.Name
-	newWidget.Type = newWidgetData.Widget.Type
-	newWidget.Height = newWidgetData.Widget.Height
-	newWidget.Width = newWidgetData.Widget.Width
-	newWidget.MinHeight = newWidgetData.Widget.MinHeight
-	newWidget.MinWidth = newWidgetData.Widget.MinWidth
-	newWidget.X = newWidgetData.Widget.X
-	newWidget.Y = newWidgetData.Widget.Y
-	newWidget.Z = newWidgetData.Widget.Z
-	newWidget.CustomProperties = newWidgetData.Widget.CustomProperties
-	newWidget.IsLocked = newWidgetData.Widget.IsLocked
-	newWidget.DashboardID = newWidgetData.Widget.DashboardID
+	// Validate the request
+	if err := req.validate(); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
+		})
+		return
+	}
 
+	// Create the new widget from the request
+	newWidget := req.createWidget()
+
+	// Check if user is allowed to modify selected dashboard (scenario)
 	ok, _ := dashboard.CheckPermissions(c, common.Create, "body", int(newWidget.DashboardID))
 	if !ok {
 		return
 	}
 
-	err = newWidget.addToDashboard()
-
-	if common.ProvideErrorResponse(c, err) == false {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "OK.",
-		})
+	err := newWidget.addToDashboard()
+	if err != nil {
+		common.ProvideErrorResponse(c, err)
+		return
 	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"widget": newWidget.Widget,
+	})
 }
 
 // updateWidget godoc
@@ -108,37 +107,60 @@ func addWidget(c *gin.Context) {
 // @Tags widgets
 // @Accept json
 // @Produce json
-// @Param inputWidget body common.ResponseMsgWidget true "Widget to be updated"
-// @Success 200 "OK."
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
+// @Param inputWidget body widget.validUpdatedWidget true "Widget to be updated"
+// @Success 200 {object} docs.ResponseWidget "Widget that was updated"
+// @Failure 400 {object} docs.ResponseError "Bad request"
+// @Failure 404 {object} docs.ResponseError "Not found"
+// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
+// @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param widgetID path int true "Widget ID"
 // @Router /widgets/{widgetID} [put]
 func updateWidget(c *gin.Context) {
 
-	ok, w := CheckPermissions(c, common.Update, -1)
+	ok, oldWidget := CheckPermissions(c, common.Update, -1)
 	if !ok {
 		return
 	}
 
-	var modifiedWidget common.ResponseMsgWidget
-	err := c.BindJSON(&modifiedWidget)
-	if err != nil {
-		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
+	var req updateWidgetRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
 		})
 		return
 	}
 
-	err = w.update(modifiedWidget.Widget)
-	if common.ProvideErrorResponse(c, err) == false {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "OK.",
+	// Validate the request
+	if err := req.validate(); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
 		})
+		return
 	}
+
+	// Create the updatedScenario from oldScenario
+	updatedWidget, err := req.updatedWidget(oldWidget)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
+		})
+		return
+	}
+
+	// Update the widget in the DB
+	err = oldWidget.update(updatedWidget)
+	if err != nil {
+		common.ProvideErrorResponse(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"widget": updatedWidget.Widget,
+	})
+
 }
 
 // getWidget godoc
@@ -146,11 +168,11 @@ func updateWidget(c *gin.Context) {
 // @ID getWidget
 // @Tags widgets
 // @Produce json
-// @Success 200 {object} common.WidgetResponse "Requested widget."
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
+// @Success 200 {object} docs.ResponseWidget "Widget that was requested"
+// @Failure 400 {object} docs.ResponseError "Bad request"
+// @Failure 404 {object} docs.ResponseError "Not found"
+// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
+// @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param widgetID path int true "Widget ID"
 // @Router /widgets/{widgetID} [get]
 func getWidget(c *gin.Context) {
@@ -160,9 +182,8 @@ func getWidget(c *gin.Context) {
 		return
 	}
 
-	serializer := common.WidgetSerializer{c, w.Widget}
 	c.JSON(http.StatusOK, gin.H{
-		"widget": serializer.Response(),
+		"widget": w.Widget,
 	})
 }
 
@@ -171,11 +192,11 @@ func getWidget(c *gin.Context) {
 // @ID deleteWidget
 // @Tags widgets
 // @Produce json
-// @Success 200 "OK."
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
+// @Success 200 {object} docs.ResponseWidget "Widget that was deleted"
+// @Failure 400 {object} docs.ResponseError "Bad request"
+// @Failure 404 {object} docs.ResponseError "Not found"
+// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
+// @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param widgetID path int true "Widget ID"
 // @Router /widgets/{widgetID} [delete]
 func deleteWidget(c *gin.Context) {
@@ -191,6 +212,6 @@ func deleteWidget(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "OK.",
+		"widget": w.Widget,
 	})
 }

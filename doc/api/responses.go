@@ -56,3 +56,11 @@ type ResponseDashboards struct {
 type ResponseDashboard struct {
 	dashboard common.Dashboard
 }
+
+type ResponseWidgets struct {
+	widgets []common.Widget
+}
+
+type ResponseWidget struct {
+	widget common.Widget
+}

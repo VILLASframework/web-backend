@@ -1,8 +1,6 @@
 package widget
 
 import (
-	"fmt"
-
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/dashboard"
 )
@@ -21,7 +19,7 @@ func (w *Widget) ByID(id uint) error {
 	db := common.GetDB()
 	err := db.Find(w, id).Error
 	if err != nil {
-		return fmt.Errorf("Widget with id=%v does not exist", id)
+		return err
 	}
 	return nil
 }
@@ -46,7 +44,7 @@ func (w *Widget) addToDashboard() error {
 	return err
 }
 
-func (w *Widget) update(modifiedWidget common.WidgetResponse) error {
+func (w *Widget) update(modifiedWidget Widget) error {
 
 	db := common.GetDB()
 	err := db.Model(w).Updates(map[string]interface{}{

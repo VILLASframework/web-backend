@@ -4,47 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Widget/s Serializers
-
-type WidgetsSerializer struct {
-	Ctx     *gin.Context
-	Widgets []Widget
-}
-
-func (self *WidgetsSerializer) Response() []WidgetResponse {
-	response := []WidgetResponse{}
-	for _, widget := range self.Widgets {
-		serializer := WidgetSerializer{self.Ctx, widget}
-		response = append(response, serializer.Response())
-	}
-	return response
-}
-
-type WidgetSerializer struct {
-	Ctx *gin.Context
-	Widget
-}
-
-func (self *WidgetSerializer) Response() WidgetResponse {
-
-	response := WidgetResponse{
-		ID:               self.ID,
-		Name:             self.Name,
-		Type:             self.Type,
-		Width:            self.Width,
-		Height:           self.Height,
-		MinWidth:         self.MinWidth,
-		MinHeight:        self.MinHeight,
-		X:                self.X,
-		Y:                self.Y,
-		Z:                self.Z,
-		DashboardID:      self.DashboardID,
-		IsLocked:         self.IsLocked,
-		CustomProperties: self.CustomProperties,
-	}
-	return response
-}
-
 // File/s Serializers
 
 type FilesSerializerNoAssoc struct {
