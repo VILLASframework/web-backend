@@ -10,7 +10,7 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
 )
 
-func CheckPermissions(c *gin.Context, operation common.CRUD, simIDSource string, simIDBody int) (bool, Scenario) {
+func CheckPermissions(c *gin.Context, operation common.CRUD, screnarioIDSource string, screnarioIDBody int) (bool, Scenario) {
 
 	var so Scenario
 
@@ -23,13 +23,13 @@ func CheckPermissions(c *gin.Context, operation common.CRUD, simIDSource string,
 		return false, so
 	}
 
-	if operation == common.Create || (operation == common.Read && simIDSource == "none") {
+	if operation == common.Create || (operation == common.Read && screnarioIDSource == "none") {
 		return true, so
 	}
 
-	var simID int
-	if simIDSource == "path" {
-		simID, err = strconv.Atoi(c.Param("scenarioID"))
+	var scenarioID int
+	if screnarioIDSource == "path" {
+		scenarioID, err = strconv.Atoi(c.Param("scenarioID"))
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"success": false,
@@ -37,8 +37,8 @@ func CheckPermissions(c *gin.Context, operation common.CRUD, simIDSource string,
 			})
 			return false, so
 		}
-	} else if simIDSource == "query" {
-		simID, err = strconv.Atoi(c.Request.URL.Query().Get("scenarioID"))
+	} else if screnarioIDSource == "query" {
+		scenarioID, err = strconv.Atoi(c.Request.URL.Query().Get("scenarioID"))
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"success": false,
@@ -46,13 +46,13 @@ func CheckPermissions(c *gin.Context, operation common.CRUD, simIDSource string,
 			})
 			return false, so
 		}
-	} else if simIDSource == "body" {
-		simID = simIDBody
+	} else if screnarioIDSource == "body" {
+		scenarioID = screnarioIDBody
 
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
-			"message": fmt.Sprintf("Bad request. The following source of your scenario ID is not valid: %s", simIDSource),
+			"message": fmt.Sprintf("Bad request. The following source of your scenario ID is not valid: %s", screnarioIDSource),
 		})
 		return false, so
 	}
@@ -60,7 +60,7 @@ func CheckPermissions(c *gin.Context, operation common.CRUD, simIDSource string,
 	userID, _ := c.Get(common.UserIDCtx)
 	userRole, _ := c.Get(common.UserRoleCtx)
 
-	err = so.ByID(uint(simID))
+	err = so.ByID(uint(scenarioID))
 	if common.ProvideErrorResponse(c, err) {
 		return false, so
 	}
