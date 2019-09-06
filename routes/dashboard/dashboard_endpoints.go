@@ -24,7 +24,7 @@ func RegisterDashboardEndpoints(r *gin.RouterGroup) {
 // @ID getDashboards
 // @Produce  json
 // @Tags dashboards
-// @Success 200 {object} docs.ResponseDashboards "Dashboards to which belong to scenario"
+// @Success 200 {object} docs.ResponseDashboards "Dashboards which belong to scenario"
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
@@ -56,7 +56,7 @@ func getDashboards(c *gin.Context) {
 // @Produce json
 // @Tags dashboards
 // @Param inputDab body dashboard.validNewDashboard true "Dashboard to be added incl. ID of Scenario"
-// @Success 200 {object} docs.ResponseDashboard "Dashboards that was added"
+// @Success 200 {object} docs.ResponseDashboard "Dashboard that was added"
 // @Failure 400 {object} docs.ResponseError "Bad request"
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
