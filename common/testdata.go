@@ -196,14 +196,14 @@ var InSignalCUpdated_response = SignalResponse{
 
 // Dashboards
 
-var DashboardA = Dashboard{Name: "Dashboard_A", Grid: 15}
-var DashboardA_response = DashboardResponse{ID: 1, Name: DashboardA.Name, Grid: DashboardA.Grid, ScenarioID: DashboardA.ScenarioID}
-var DashboardB = Dashboard{Name: "Dashboard_B", Grid: 10}
-var DashboardB_response = DashboardResponse{ID: 2, Name: DashboardB.Name, Grid: DashboardB.Grid, ScenarioID: DashboardB.ScenarioID}
-var DashboardC = Dashboard{Name: "Dashboard_C", Grid: 25}
-var DashboardC_response = DashboardResponse{ID: 3, Name: DashboardC.Name, Grid: DashboardC.Grid, ScenarioID: DashboardC.ScenarioID}
-var DashboardCUpdated = Dashboard{Name: "Dashboard_Cupdated", Grid: 24}
-var DashboardCUpdated_response = DashboardResponse{ID: 3, Name: DashboardCUpdated.Name, Grid: DashboardCUpdated.Grid, ScenarioID: DashboardCUpdated.ScenarioID}
+var DashboardA = Dashboard{
+	Name: "Dashboard_A",
+	Grid: 15,
+}
+var DashboardB = Dashboard{
+	Name: "Dashboard_B",
+	Grid: 10,
+}
 
 // Files
 

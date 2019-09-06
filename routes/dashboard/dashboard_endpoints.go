@@ -1,6 +1,7 @@
 package dashboard
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -23,11 +24,10 @@ func RegisterDashboardEndpoints(r *gin.RouterGroup) {
 // @ID getDashboards
 // @Produce  json
 // @Tags dashboards
-// @Success 200 {array} common.DashboardResponse "Array of dashboards to which belong to scenario"
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
+// @Success 200 {object} docs.ResponseDashboards "Dashboards to which belong to scenario"
+// @Failure 404 {object} docs.ResponseError "Not found"
+// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
+// @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param scenarioID query int true "Scenario ID"
 // @Router /dashboards [get]
 func getDashboards(c *gin.Context) {
@@ -44,9 +44,8 @@ func getDashboards(c *gin.Context) {
 		return
 	}
 
-	serializer := common.DashboardsSerializer{c, dab}
 	c.JSON(http.StatusOK, gin.H{
-		"dashboards": serializer.Response(),
+		"dashboards": dab,
 	})
 }
 
@@ -56,43 +55,53 @@ func getDashboards(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Tags dashboards
-// @Param inputDab body common.ResponseMsgDashboard true "Dashboard to be added incl. ID of Scenario"
-// @Success 200 "OK."
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
+// @Param inputDab body dashboard.validNewDashboard true "Dashboard to be added incl. ID of Scenario"
+// @Success 200 {object} docs.ResponseDashboard "Dashboards that was added"
+// @Failure 400 {object} docs.ResponseError "Bad request"
+// @Failure 404 {object} docs.ResponseError "Not found"
+// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
+// @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Router /dashboards [post]
 func addDashboard(c *gin.Context) {
 
-	var newDabData common.ResponseMsgDashboard
-	err := c.BindJSON(&newDabData)
-	if err != nil {
-		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
+	// bind request to JSON
+	var req addDashboardRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
 		})
 		return
 	}
 
-	var newDab Dashboard
-	newDab.ID = newDabData.Dashboard.ID
-	newDab.Grid = newDabData.Dashboard.Grid
-	newDab.ScenarioID = newDabData.Dashboard.ScenarioID
-	newDab.Name = newDabData.Dashboard.Name
+	// Validate the request
+	if err := req.validate(); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
+		})
+		return
+	}
 
-	ok, _ := scenario.CheckPermissions(c, common.Create, "body", int(newDab.ScenarioID))
+	// Create the new dashboard from the request
+	newDashboard := req.createDashboard()
+
+	// Check if user is allowed to modify scenario specified in request
+	ok, _ := scenario.CheckPermissions(c, common.Create, "body", int(newDashboard.ScenarioID))
 	if !ok {
 		return
 	}
 
 	// add dashboard to DB and add association to scenario
-	err = newDab.addToScenario()
-	if common.ProvideErrorResponse(c, err) == false {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "OK.",
-		})
+	err := newDashboard.addToScenario()
+	if err != nil {
+		common.ProvideErrorResponse(c, err)
+		return
 	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"dashboard": newDashboard.Dashboard,
+	})
 
 }
 
@@ -102,37 +111,59 @@ func addDashboard(c *gin.Context) {
 // @Tags dashboards
 // @Accept json
 // @Produce json
-// @Param inputDab body common.ResponseMsgDashboard true "Dashboard to be updated"
-// @Success 200 "OK."
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
+// @Param inputDab body dashboard.validUpdatedDashboard true "Dashboard to be updated"
+// @Success 200 {object} docs.ResponseDashboard "Dashboards that was updated"
+// @Failure 400 {object} docs.ResponseError "Bad request"
+// @Failure 404 {object} docs.ResponseError "Not found"
+// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
+// @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param dashboardID path int true "Dashboard ID"
 // @Router /dashboards/{dashboardID} [put]
 func updateDashboard(c *gin.Context) {
 
-	ok, d := CheckPermissions(c, common.Update, "path", -1)
+	ok, oldDashboard := CheckPermissions(c, common.Update, "path", -1)
 	if !ok {
 		return
 	}
 
-	var modifiedDab common.ResponseMsgDashboard
-	err := c.BindJSON(&modifiedDab)
-	if err != nil {
-		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
+	var req updateDashboardRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
 		})
 		return
 	}
 
-	err = d.update(modifiedDab.Dashboard)
-	if common.ProvideErrorResponse(c, err) == false {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "OK.",
+	// Validate the request
+	if err := req.validate(); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
 		})
+		return
 	}
+	// Create the updatedScenario from oldScenario
+	updatedDashboard, err := req.updatedDashboard(oldDashboard)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
+		})
+		return
+	}
+
+	// update the dashboard in the DB
+	err = oldDashboard.update(updatedDashboard)
+	if err != nil {
+		common.ProvideErrorResponse(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"dashboard": updatedDashboard.Dashboard,
+	})
+
 }
 
 // getDashboard godoc
@@ -140,11 +171,11 @@ func updateDashboard(c *gin.Context) {
 // @ID getDashboard
 // @Tags dashboards
 // @Produce json
-// @Success 200 {object} common.DashboardResponse "Requested dashboard."
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
+// @Success 200 {object} docs.ResponseDashboard "Dashboards that was requested"
+// @Failure 400 {object} docs.ResponseError "Bad request"
+// @Failure 404 {object} docs.ResponseError "Not found"
+// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
+// @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param dashboardID path int true "Dashboard ID"
 // @Router /dashboards/{dashboardID} [get]
 func getDashboard(c *gin.Context) {
@@ -154,9 +185,8 @@ func getDashboard(c *gin.Context) {
 		return
 	}
 
-	serializer := common.DashboardSerializer{c, dab.Dashboard}
 	c.JSON(http.StatusOK, gin.H{
-		"dashboard": serializer.Response(),
+		"dashboard": dab.Dashboard,
 	})
 }
 
@@ -165,11 +195,11 @@ func getDashboard(c *gin.Context) {
 // @ID deleteDashboard
 // @Tags dashboards
 // @Produce json
-// @Success 200 "OK."
-// @Failure 401 "Unauthorized Access"
-// @Failure 403 "Access forbidden."
-// @Failure 404 "Not found"
-// @Failure 500 "Internal server error"
+// @Success 200 {object} docs.ResponseDashboard "Dashboards that was deleted"
+// @Failure 400 {object} docs.ResponseError "Bad request"
+// @Failure 404 {object} docs.ResponseError "Not found"
+// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
+// @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param dashboardID path int true "Dashboard ID"
 // @Router /dashboards/{dashboardID} [delete]
 func deleteDashboard(c *gin.Context) {
@@ -184,6 +214,6 @@ func deleteDashboard(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "OK.",
+		"dashboard": dab.Dashboard,
 	})
 }

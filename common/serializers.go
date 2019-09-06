@@ -4,38 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Dashboard/s Serializers
-
-type DashboardsSerializer struct {
-	Ctx        *gin.Context
-	Dashboards []Dashboard
-}
-
-func (self *DashboardsSerializer) Response() []DashboardResponse {
-	response := []DashboardResponse{}
-	for _, dashboard := range self.Dashboards {
-		serializer := DashboardSerializer{self.Ctx, dashboard}
-		response = append(response, serializer.Response())
-	}
-	return response
-}
-
-type DashboardSerializer struct {
-	Ctx *gin.Context
-	Dashboard
-}
-
-func (self *DashboardSerializer) Response() DashboardResponse {
-
-	response := DashboardResponse{
-		Name:       self.Name,
-		Grid:       self.Grid,
-		ScenarioID: self.ScenarioID,
-		ID:         self.ID,
-	}
-	return response
-}
-
 // Widget/s Serializers
 
 type WidgetsSerializer struct {

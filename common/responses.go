@@ -2,13 +2,6 @@ package common
 
 import "github.com/jinzhu/gorm/dialects/postgres"
 
-type DashboardResponse struct {
-	ID         uint   `json:"id"`
-	Name       string `json:"name"`
-	Grid       int    `json:"grid"`
-	ScenarioID uint   `json:"scenarioID"`
-}
-
 type WidgetResponse struct {
 	ID               uint           `json:"id"`
 	Name             string         `json:"name"`
@@ -57,14 +50,6 @@ type ResponseMsgSignals struct {
 
 type ResponseMsgSignal struct {
 	Signal SignalResponse `json:"signal"`
-}
-
-type ResponseMsgDashboards struct {
-	Dashboards []DashboardResponse `json:"dashboards"`
-}
-
-type ResponseMsgDashboard struct {
-	Dashboard DashboardResponse `json:"dashboard"`
 }
 
 type ResponseMsgWidgets struct {

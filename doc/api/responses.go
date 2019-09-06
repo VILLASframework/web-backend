@@ -48,3 +48,11 @@ type ResponseSimulationModels struct {
 type ResponseSimulationModel struct {
 	model common.SimulationModel
 }
+
+type ResponseDashboards struct {
+	dashboards []common.Dashboard
+}
+
+type ResponseDashboard struct {
+	dashboard common.Dashboard
+}

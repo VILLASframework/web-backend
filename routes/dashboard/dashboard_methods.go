@@ -1,8 +1,6 @@
 package dashboard
 
 import (
-	"fmt"
-
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/scenario"
 )
@@ -21,7 +19,7 @@ func (d *Dashboard) ByID(id uint) error {
 	db := common.GetDB()
 	err := db.Find(d, id).Error
 	if err != nil {
-		return fmt.Errorf("Dashboard with id=%v does not exist", id)
+		return err
 	}
 	return nil
 }
@@ -46,10 +44,11 @@ func (d *Dashboard) addToScenario() error {
 	return err
 }
 
-func (d *Dashboard) update(modifiedDab common.DashboardResponse) error {
+func (d *Dashboard) update(modifiedDab Dashboard) error {
 
 	db := common.GetDB()
 
+	// TODO do we allow to update scenarioID here as well?
 	err := db.Model(d).Updates(map[string]interface{}{
 		"Name": modifiedDab.Name,
 		"Grid": modifiedDab.Grid,

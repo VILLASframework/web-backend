@@ -17,7 +17,10 @@ func CheckPermissions(c *gin.Context, operation common.CRUD, dabIDSource string,
 
 	err := common.ValidateRole(c, common.ModelDashboard, operation)
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, "Access denied (role validation failed).")
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("Access denied (role validation failed): %v", err),
+		})
 		return false, dab
 	}
 
@@ -25,18 +28,18 @@ func CheckPermissions(c *gin.Context, operation common.CRUD, dabIDSource string,
 	if dabIDSource == "path" {
 		dabID, err = strconv.Atoi(c.Param("dashboardID"))
 		if err != nil {
-			errormsg := fmt.Sprintf("Bad request. No or incorrect format of dashboardID path parameter")
 			c.JSON(http.StatusBadRequest, gin.H{
-				"error": errormsg,
+				"success": false,
+				"message": fmt.Sprintf("Bad request. No or incorrect format of dashboardID path parameter"),
 			})
 			return false, dab
 		}
 	} else if dabIDSource == "query" {
 		dabID, err = strconv.Atoi(c.Request.URL.Query().Get("dashboardID"))
 		if err != nil {
-			errormsg := fmt.Sprintf("Bad request. No or incorrect format of dashboardID query parameter")
 			c.JSON(http.StatusBadRequest, gin.H{
-				"error": errormsg,
+				"success": false,
+				"message": fmt.Sprintf("Bad request. No or incorrect format of dashboardID query parameter"),
 			})
 			return false, dab
 		}
