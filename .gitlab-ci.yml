@@ -130,6 +130,22 @@ test:user:
   variables:
     TEST_FOLDER: routes/user
 
+test:all:
+  stage: test
+  tags:
+    - docker
+  image: villaswebbackendgo:ubuntu
+  script:
+    - /etc/init.d/postgresql start
+    - go mod tidy
+    - go get -u github.com/swaggo/swag/cmd/swag
+    - ~/go/bin/swag init -p pascalcase -g "start.go" -o "./doc/api/"
+    - go test $(go list ./... ) -v -p 1 -covermode=count -coverprofile ./testcover.txt
+    - go tool cover -func=testcover.txt
+  dependencies:
+    - build:backend
+
+
 
 # Stage: deploy
 ##############################################################################
