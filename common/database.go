@@ -20,7 +20,7 @@ var DBpool *gorm.DB
 
 // Initialize input command line flags
 func init() {
-	flag.StringVar(&DB_HOST, "dbhost", "/tmp", "Host of the PostgreSQL database (default is /tmp)")
+	flag.StringVar(&DB_HOST, "dbhost", "/var/run/postgresql", "Host of the PostgreSQL database (default is /var/run/postgresql for localhost DB on Ubuntu systems)")
 	flag.StringVar(&DB_NAME, "dbname", "villasdb", "Name of the database to use (default is villasdb)")
 	flag.StringVar(&DB_DUMMY, "dbdummy", "testvillasdb", "Name of the test database to use (default is testvillasdb)")
 	flag.StringVar(&DB_SSLMODE, "dbsslmode", "disable", "SSL mode of DB (default is disable)") // TODO: change default for production
