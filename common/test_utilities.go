@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 	"github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/nsf/jsondiff"
 	"golang.org/x/crypto/bcrypt"
@@ -403,4 +404,112 @@ func AuthenticateForTest(router *gin.Engine, url string,
 
 	// Return the token and nil error
 	return token, nil
+}
+
+func DBAddAdminUser(db *gorm.DB) {
+	db.AutoMigrate(&User{})
+
+	//create a copy of global test data
+	user0 := User0
+	// add admin user to DB
+	checkErr(db.Create(&user0).Error)
+}
+
+func DBAddAdminAndUser(db *gorm.DB) {
+	db.AutoMigrate(&User{})
+
+	//create a copy of global test data
+	user0 := User0
+	userA := UserA
+	userB := UserB
+	// add admin user to DB
+	checkErr(db.Create(&user0).Error)
+	// add normal users to DB
+	checkErr(db.Create(&userA).Error)
+	checkErr(db.Create(&userB).Error)
+}
+
+// Migrates models and populates them with data
+func AddTestData(test_db *gorm.DB) {
+
+	MigrateModels(test_db)
+
+	// Create entries of each model (data defined in testdata.go)
+
+	// Users
+	checkErr(test_db.Create(&User0).Error) // Admin
+	checkErr(test_db.Create(&UserA).Error) // Normal User
+	checkErr(test_db.Create(&UserB).Error) // Normal User
+
+	// Simulators
+	checkErr(test_db.Create(&SimulatorA).Error)
+	checkErr(test_db.Create(&SimulatorB).Error)
+
+	// Scenarios
+	checkErr(test_db.Create(&ScenarioA).Error)
+	checkErr(test_db.Create(&ScenarioB).Error)
+
+	// Signals
+	checkErr(test_db.Create(&OutSignalA).Error)
+	checkErr(test_db.Create(&OutSignalB).Error)
+	checkErr(test_db.Create(&InSignalA).Error)
+	checkErr(test_db.Create(&InSignalB).Error)
+
+	// Simulation Models
+	checkErr(test_db.Create(&SimulationModelA).Error)
+	checkErr(test_db.Create(&SimulationModelB).Error)
+
+	// Dashboards
+	checkErr(test_db.Create(&DashboardA).Error)
+	checkErr(test_db.Create(&DashboardB).Error)
+
+	// Files
+	checkErr(test_db.Create(&FileA).Error)
+	checkErr(test_db.Create(&FileB).Error)
+	checkErr(test_db.Create(&FileC).Error)
+	checkErr(test_db.Create(&FileD).Error)
+
+	// Widgets
+	checkErr(test_db.Create(&WidgetA).Error)
+	checkErr(test_db.Create(&WidgetB).Error)
+
+	// Associations between models
+	// For `belongs to` use the model with id=1
+	// For `has many` use the models with id=1 and id=2
+
+	// User HM Scenarios, Scenario HM Users (Many-to-Many)
+	checkErr(test_db.Model(&ScenarioA).Association("Users").Append(&UserA).Error)
+	checkErr(test_db.Model(&ScenarioA).Association("Users").Append(&UserB).Error)
+	checkErr(test_db.Model(&ScenarioB).Association("Users").Append(&UserA).Error)
+	checkErr(test_db.Model(&ScenarioB).Association("Users").Append(&UserB).Error)
+
+	// Scenario HM SimulationModels
+	checkErr(test_db.Model(&ScenarioA).Association("SimulationModels").Append(&SimulationModelA).Error)
+	checkErr(test_db.Model(&ScenarioA).Association("SimulationModels").Append(&SimulationModelB).Error)
+
+	// Scenario HM Dashboards
+	checkErr(test_db.Model(&ScenarioA).Association("Dashboards").Append(&DashboardA).Error)
+	checkErr(test_db.Model(&ScenarioA).Association("Dashboards").Append(&DashboardB).Error)
+
+	// Dashboard HM Widget
+	checkErr(test_db.Model(&DashboardA).Association("Widgets").Append(&WidgetA).Error)
+	checkErr(test_db.Model(&DashboardA).Association("Widgets").Append(&WidgetB).Error)
+
+	// SimulationModel HM Signals
+	checkErr(test_db.Model(&SimulationModelA).Association("InputMapping").Append(&InSignalA).Error)
+	checkErr(test_db.Model(&SimulationModelA).Association("InputMapping").Append(&InSignalB).Error)
+	checkErr(test_db.Model(&SimulationModelA).Association("OutputMapping").Append(&OutSignalA).Error)
+	checkErr(test_db.Model(&SimulationModelA).Association("OutputMapping").Append(&OutSignalB).Error)
+
+	// SimulationModel HM Files
+	checkErr(test_db.Model(&SimulationModelA).Association("Files").Append(&FileC).Error)
+	checkErr(test_db.Model(&SimulationModelA).Association("Files").Append(&FileD).Error)
+
+	// Simulator HM SimulationModels
+	checkErr(test_db.Model(&SimulatorA).Association("SimulationModels").Append(&SimulationModelA).Error)
+	checkErr(test_db.Model(&SimulatorA).Association("SimulationModels").Append(&SimulationModelB).Error)
+
+	// Widget HM Files
+	checkErr(test_db.Model(&WidgetA).Association("Files").Append(&FileA).Error)
+	checkErr(test_db.Model(&WidgetA).Association("Files").Append(&FileB).Error)
 }

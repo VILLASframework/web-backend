@@ -37,12 +37,13 @@ import (
 // @host localhost:4000
 // @BasePath /api/v2
 func main() {
-	// Testing
-	db := common.DummyInitDB()
+	// TODO DB_TEST is used for testing, should be DB_NAME in production
+	db := common.InitDB(common.DB_TEST)
 	common.MigrateModels(db)
 	defer db.Close()
 
-	common.DummyPopulateDB(db)
+	// TODO the following line should be removed in production, it adds test data to the DB
+	common.AddTestData(db)
 
 	r := gin.Default()
 

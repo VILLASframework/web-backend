@@ -1,7 +1,6 @@
 package signal
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -44,10 +43,7 @@ func getSignals(c *gin.Context) {
 	} else if direction == "out" {
 		mapping = "OutputMapping"
 	} else {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"error":   "Bad request. Direction has to be in or out",
-		})
+		common.BadRequestError(c, "Bad request. Direction has to be in or out")
 		return
 	}
 
@@ -58,9 +54,7 @@ func getSignals(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"signals": sigs,
-	})
+	c.JSON(http.StatusOK, gin.H{"signals": sigs})
 }
 
 // AddSignal godoc
@@ -80,19 +74,13 @@ func addSignal(c *gin.Context) {
 
 	var req addSignalRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
+		common.BadRequestError(c, err.Error())
 		return
 	}
 
 	// Validate the request
 	if err := req.validate(); err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
+		common.UnprocessableEntityError(c, err.Error())
 		return
 	}
 
@@ -111,9 +99,7 @@ func addSignal(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"signal": newSignal.Signal,
-	})
+	c.JSON(http.StatusOK, gin.H{"signal": newSignal.Signal})
 }
 
 // updateSignal godoc
@@ -137,29 +123,20 @@ func updateSignal(c *gin.Context) {
 
 	var req updateSignalRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
+		common.BadRequestError(c, err.Error())
 		return
 	}
 
 	// Validate the request
 	if err := req.validate(); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
+		common.BadRequestError(c, err.Error())
 		return
 	}
 
 	// Create the updatedSignal from oldDashboard
 	updatedSignal, err := req.updatedSignal(oldSignal)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
+		common.BadRequestError(c, err.Error())
 		return
 	}
 
@@ -170,9 +147,7 @@ func updateSignal(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"signal": updatedSignal.Signal,
-	})
+	c.JSON(http.StatusOK, gin.H{"signal": updatedSignal.Signal})
 }
 
 // getSignal godoc
@@ -193,9 +168,7 @@ func getSignal(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"signal": sig.Signal,
-	})
+	c.JSON(http.StatusOK, gin.H{"signal": sig.Signal})
 }
 
 // deleteSignal godoc
@@ -223,7 +196,5 @@ func deleteSignal(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"signal": sig.Signal,
-	})
+	c.JSON(http.StatusOK, gin.H{"signal": sig.Signal})
 }

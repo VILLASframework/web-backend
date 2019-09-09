@@ -1,7 +1,6 @@
 package simulationmodel
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -43,9 +42,7 @@ func getSimulationModels(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"models": models,
-	})
+	c.JSON(http.StatusOK, gin.H{"models": models})
 }
 
 // addSimulationModel godoc
@@ -67,19 +64,13 @@ func addSimulationModel(c *gin.Context) {
 	var req addSimulationModelRequest
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "Bad request. Error binding form data to JSON: " + err.Error(),
-		})
+		common.BadRequestError(c, "Bad request. Error binding form data to JSON: "+err.Error())
 		return
 	}
 
 	// validate the request
 	if err = req.validate(); err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
+		common.UnprocessableEntityError(c, err.Error())
 		return
 	}
 
@@ -99,9 +90,7 @@ func addSimulationModel(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"model": newSimulationModel.SimulationModel,
-	})
+	c.JSON(http.StatusOK, gin.H{"model": newSimulationModel.SimulationModel})
 }
 
 // updateSimulationModel godoc
@@ -128,29 +117,20 @@ func updateSimulationModel(c *gin.Context) {
 	var req updateSimulationModelRequest
 	err := c.BindJSON(&req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "Bad request. Error binding form data to JSON: " + err.Error(),
-		})
+		common.BadRequestError(c, "Error binding form data to JSON: "+err.Error())
 		return
 	}
 
 	// Validate the request
 	if err := req.validate(); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
+		common.BadRequestError(c, err.Error())
 		return
 	}
 
 	// Create the updatedSimulationModel from oldSimulationModel
 	updatedSimulationModel, err := req.updatedSimulationModel(oldSimulationModel)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
+		common.BadRequestError(c, err.Error())
 		return
 	}
 
@@ -161,9 +141,7 @@ func updateSimulationModel(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"model": updatedSimulationModel.SimulationModel,
-	})
+	c.JSON(http.StatusOK, gin.H{"model": updatedSimulationModel.SimulationModel})
 
 }
 
@@ -186,9 +164,7 @@ func getSimulationModel(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"model": m.SimulationModel,
-	})
+	c.JSON(http.StatusOK, gin.H{"model": m.SimulationModel})
 }
 
 // deleteSimulationModel godoc
@@ -215,7 +191,5 @@ func deleteSimulationModel(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"model": m.SimulationModel,
-	})
+	c.JSON(http.StatusOK, gin.H{"model": m.SimulationModel})
 }

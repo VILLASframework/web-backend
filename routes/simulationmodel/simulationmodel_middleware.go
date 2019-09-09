@@ -2,7 +2,6 @@ package simulationmodel
 
 import (
 	"fmt"
-	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -17,10 +16,7 @@ func CheckPermissions(c *gin.Context, operation common.CRUD, modelIDSource strin
 
 	err := common.ValidateRole(c, common.ModelSimulationModel, operation)
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("Access denied (role validation failed): %v", err),
-		})
+		common.UnprocessableEntityError(c, fmt.Sprintf("Access denied (role validation failed): %v", err.Error()))
 		return false, m
 	}
 
@@ -28,20 +24,13 @@ func CheckPermissions(c *gin.Context, operation common.CRUD, modelIDSource strin
 	if modelIDSource == "path" {
 		modelID, err = strconv.Atoi(c.Param("modelID"))
 		if err != nil {
-			errormsg := fmt.Sprintf("Bad request. No or incorrect format of modelID path parameter")
-			c.JSON(http.StatusBadRequest, gin.H{
-				"success": false,
-				"message": errormsg,
-			})
+			common.BadRequestError(c, fmt.Sprintf("No or incorrect format of modelID path parameter"))
 			return false, m
 		}
 	} else if modelIDSource == "query" {
 		modelID, err = strconv.Atoi(c.Request.URL.Query().Get("modelID"))
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"success": false,
-				"message": fmt.Sprintf("Bad request. No or incorrect format of modelID query parameter"),
-			})
+			common.BadRequestError(c, fmt.Sprintf("No or incorrect format of modelID query parameter"))
 			return false, m
 		}
 	} else if modelIDSource == "body" {

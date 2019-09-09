@@ -27,7 +27,7 @@ type SimulatorRequest struct {
 
 func TestMain(m *testing.M) {
 
-	db = common.DummyInitDB()
+	db = common.InitDB(common.DB_TEST)
 	defer db.Close()
 
 	router = gin.Default()
@@ -43,7 +43,7 @@ func TestMain(m *testing.M) {
 func TestAddSimulatorAsAdmin(t *testing.T) {
 	common.DropTables(db)
 	common.MigrateModels(db)
-	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
+	common.DBAddAdminAndUser(db)
 
 	// authenticate as admin
 	token, err := common.AuthenticateForTest(router,
@@ -86,7 +86,7 @@ func TestAddSimulatorAsAdmin(t *testing.T) {
 func TestAddSimulatorAsUser(t *testing.T) {
 	common.DropTables(db)
 	common.MigrateModels(db)
-	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
+	common.DBAddAdminAndUser(db)
 
 	// authenticate as user
 	token, err := common.AuthenticateForTest(router,
@@ -113,7 +113,7 @@ func TestAddSimulatorAsUser(t *testing.T) {
 func TestUpdateSimulatorAsAdmin(t *testing.T) {
 	common.DropTables(db)
 	common.MigrateModels(db)
-	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
+	common.DBAddAdminAndUser(db)
 
 	// authenticate as admin
 	token, err := common.AuthenticateForTest(router,
@@ -168,7 +168,7 @@ func TestUpdateSimulatorAsAdmin(t *testing.T) {
 func TestUpdateSimulatorAsUser(t *testing.T) {
 	common.DropTables(db)
 	common.MigrateModels(db)
-	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
+	common.DBAddAdminAndUser(db)
 
 	// authenticate as admin
 	token, err := common.AuthenticateForTest(router,
@@ -210,7 +210,7 @@ func TestUpdateSimulatorAsUser(t *testing.T) {
 func TestDeleteSimulatorAsAdmin(t *testing.T) {
 	common.DropTables(db)
 	common.MigrateModels(db)
-	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
+	common.DBAddAdminAndUser(db)
 
 	// authenticate as admin
 	token, err := common.AuthenticateForTest(router,
@@ -260,7 +260,7 @@ func TestDeleteSimulatorAsAdmin(t *testing.T) {
 func TestDeleteSimulatorAsUser(t *testing.T) {
 	common.DropTables(db)
 	common.MigrateModels(db)
-	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
+	common.DBAddAdminAndUser(db)
 
 	// authenticate as admin
 	token, err := common.AuthenticateForTest(router,
@@ -301,7 +301,7 @@ func TestDeleteSimulatorAsUser(t *testing.T) {
 func TestGetAllSimulators(t *testing.T) {
 	common.DropTables(db)
 	common.MigrateModels(db)
-	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
+	common.DBAddAdminAndUser(db)
 
 	// authenticate as admin
 	token, err := common.AuthenticateForTest(router,
@@ -362,7 +362,7 @@ func TestGetAllSimulators(t *testing.T) {
 func TestGetSimulationModelsOfSimulator(t *testing.T) {
 	common.DropTables(db)
 	common.MigrateModels(db)
-	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
+	common.DBAddAdminAndUser(db)
 
 	// authenticate as admin
 	token, err := common.AuthenticateForTest(router,

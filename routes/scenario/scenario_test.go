@@ -24,7 +24,7 @@ type ScenarioRequest struct {
 
 func TestMain(m *testing.M) {
 
-	db = common.DummyInitDB()
+	db = common.InitDB(common.DB_TEST)
 	defer db.Close()
 
 	router = gin.Default()
@@ -41,7 +41,7 @@ func TestAddScenario(t *testing.T) {
 
 	common.DropTables(db)
 	common.MigrateModels(db)
-	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
+	common.DBAddAdminAndUser(db)
 
 	// authenticate as normal user
 	token, err := common.AuthenticateForTest(router,
@@ -93,7 +93,7 @@ func TestUpdateScenario(t *testing.T) {
 
 	common.DropTables(db)
 	common.MigrateModels(db)
-	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
+	common.DBAddAdminAndUser(db)
 
 	// authenticate as normal user
 	token, err := common.AuthenticateForTest(router,
@@ -156,7 +156,7 @@ func TestGetAllScenariosAsAdmin(t *testing.T) {
 
 	common.DropTables(db)
 	common.MigrateModels(db)
-	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
+	common.DBAddAdminAndUser(db)
 
 	// authenticate as admin
 	token, err := common.AuthenticateForTest(router,
@@ -217,7 +217,7 @@ func TestGetAllScenariosAsUser(t *testing.T) {
 
 	common.DropTables(db)
 	common.MigrateModels(db)
-	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
+	common.DBAddAdminAndUser(db)
 
 	// authenticate as normal userB
 	token, err := common.AuthenticateForTest(router,
@@ -274,7 +274,7 @@ func TestDeleteScenario(t *testing.T) {
 
 	common.DropTables(db)
 	common.MigrateModels(db)
-	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
+	common.DBAddAdminAndUser(db)
 
 	// authenticate as normal user
 	token, err := common.AuthenticateForTest(router,
@@ -323,7 +323,7 @@ func TestAddUserToScenario(t *testing.T) {
 
 	common.DropTables(db)
 	common.MigrateModels(db)
-	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
+	common.DBAddAdminAndUser(db)
 
 	// authenticate as normal user
 	token, err := common.AuthenticateForTest(router,
@@ -378,7 +378,7 @@ func TestGetAllUsersOfScenario(t *testing.T) {
 
 	common.DropTables(db)
 	common.MigrateModels(db)
-	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
+	common.DBAddAdminAndUser(db)
 
 	// authenticate as normal user
 	token, err := common.AuthenticateForTest(router,
@@ -423,7 +423,7 @@ func TestRemoveUserFromScenario(t *testing.T) {
 
 	common.DropTables(db)
 	common.MigrateModels(db)
-	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
+	common.DBAddAdminAndUser(db)
 
 	// authenticate as normal user
 	token, err := common.AuthenticateForTest(router,

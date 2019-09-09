@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
@@ -18,116 +17,12 @@ import (
 const jwtSigningSecret = "This should NOT be here!!@33$8&"
 const weekHours = time.Hour * 24 * 7
 
-type tokenClaims struct {
-	UserID uint   `json:"id"`
-	Role   string `json:"role"`
-	jwt.StandardClaims
-}
-
-func RegisterAuthenticate(r *gin.RouterGroup) {
-	r.POST("", authenticate)
-}
-
 func RegisterUserEndpoints(r *gin.RouterGroup) {
 	r.POST("", addUser)
 	r.PUT("/:userID", updateUser)
 	r.GET("", getUsers)
 	r.GET("/:userID", getUser)
 	r.DELETE("/:userID", deleteUser)
-}
-
-// authenticate godoc
-// @Summary Authentication for user
-// @ID authenticate
-// @Accept json
-// @Produce json
-// @Tags users
-// @Param inputUser body user.loginRequest true "loginRequest of user"
-// @Success 200 {object} docs.ResponseAuthenticate "JSON web token, success status, message and authenticated user object"
-// @Failure 400 {object} docs.ResponseError "Bad request"
-// @Failure 401 {object} docs.ResponseError "Unauthorized"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity."
-// @Router /authenticate [post]
-func authenticate(c *gin.Context) {
-
-	// Bind the response (context) with the loginRequest struct
-	var credentials loginRequest
-	if err := c.ShouldBindJSON(&credentials); err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
-		return
-	}
-
-	// Validate the login request
-	if errs := credentials.validate(); errs != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", errs),
-		})
-		return
-	}
-
-	// Check if the Username or Password are empty
-	if credentials.Username == "" || credentials.Password == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"success": false,
-			"message": "Invalid credentials",
-		})
-		return
-	}
-
-	// Find the username in the database
-	var user User
-	err := user.ByUsername(credentials.Username)
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"success": false,
-			"message": "User not found",
-		})
-		return
-	}
-
-	// Validate the password
-	err = user.validatePassword(credentials.Password)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"success": false,
-			"message": "Invalid password",
-		})
-		return
-	}
-
-	// create authentication token
-	claims := tokenClaims{
-		user.ID,
-		user.Role,
-		jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(weekHours).Unix(),
-			IssuedAt:  time.Now().Unix(),
-			Issuer:    "http://web.villas.fein-aachen.org/",
-		},
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	tokenString, err := token.SignedString([]byte(jwtSigningSecret))
-	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"message": "Authenticated",
-		"token":   tokenString,
-		"user":    user.User,
-	})
 }
 
 // GetUsers godoc
@@ -144,10 +39,7 @@ func getUsers(c *gin.Context) {
 
 	err := common.ValidateRole(c, common.ModelUsers, common.Read)
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
+		common.UnprocessableEntityError(c, err.Error())
 		return
 	}
 
@@ -158,9 +50,7 @@ func getUsers(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"users": users,
-	})
+	c.JSON(http.StatusOK, gin.H{"users": users})
 }
 
 // AddUser godoc
@@ -179,29 +69,20 @@ func addUser(c *gin.Context) {
 
 	err := common.ValidateRole(c, common.ModelUser, common.Create)
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
+		common.UnprocessableEntityError(c, err.Error())
 		return
 	}
 
 	// Bind the request
 	var req addUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
+		common.BadRequestError(c, err.Error())
 		return
 	}
 
 	// Validate the request
 	if err = req.validate(); err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
+		common.UnprocessableEntityError(c, err.Error())
 		return
 	}
 
@@ -211,20 +92,14 @@ func addUser(c *gin.Context) {
 	// Check that the username is NOT taken
 	err = newUser.ByUsername(newUser.Username)
 	if err == nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{
-			"success": false,
-			"message": "Username is already taken",
-		})
+		common.UnprocessableEntityError(c, "Username is already taken")
 		return
 	}
 
 	// Hash the password before saving it to the DB
 	err = newUser.setPassword(newUser.Password)
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{
-			"success": false,
-			"message": "Unable to encrypt the password",
-		})
+		common.UnprocessableEntityError(c, "Unable to encrypt the password")
 		return
 	}
 
@@ -235,9 +110,7 @@ func addUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"user": newUser.User,
-	})
+	c.JSON(http.StatusOK, gin.H{"user": newUser.User})
 }
 
 // UpdateUser godoc
@@ -259,10 +132,7 @@ func updateUser(c *gin.Context) {
 
 	err := common.ValidateRole(c, common.ModelUser, common.Update)
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
+		common.UnprocessableEntityError(c, err.Error())
 		return
 	}
 
@@ -270,10 +140,7 @@ func updateUser(c *gin.Context) {
 	var oldUser User
 	toBeUpdatedID, err := strconv.Atoi(c.Param("userID"))
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("Could not get user's ID from context"),
-		})
+		common.NotFoundError(c, fmt.Sprintf("Could not get user's ID from context"))
 		return
 	}
 
@@ -296,47 +163,32 @@ func updateUser(c *gin.Context) {
 	// Get caller's ID from context
 	callerID, exists := c.Get(common.UserIDCtx)
 	if !exists {
-		c.JSON(http.StatusNotFound, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("Could not get caller's ID from context"),
-		})
+		common.NotFoundError(c, fmt.Sprintf("Could not get caller's ID from context"))
 		return
 	}
 
 	// Get caller's Role from context
 	callerRole, exists := c.Get(common.UserRoleCtx)
 	if !exists {
-		c.JSON(http.StatusNotFound, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("Could not get caller's Role from context"),
-		})
+		common.NotFoundError(c, fmt.Sprintf("Could not get caller's Role from context"))
 		return
 	}
 
 	if uint(toBeUpdatedID) != callerID && callerRole != "Admin" {
-		c.JSON(http.StatusForbidden, gin.H{
-			"success": false,
-			"message": "Invalid authorization",
-		})
+		common.ForbiddenError(c, "Invalid authorization")
 		return
 	}
 
 	// Bind the (context) with the updateUserRequest struct
 	var req updateUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
+		common.UnprocessableEntityError(c, fmt.Sprintf("%v", err))
 		return
 	}
 
 	// Validate the request based on struct updateUserRequest json tags
 	if err = req.validate(); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
+		common.BadRequestError(c, err.Error())
 		return
 	}
 
@@ -345,16 +197,10 @@ func updateUser(c *gin.Context) {
 	updatedUser, err := req.updatedUser(callerRole, oldUser)
 	if err != nil {
 		if strings.Contains(err.Error(), "Admin") {
-			c.JSON(http.StatusForbidden, gin.H{
-				"success": false,
-				"message": fmt.Sprintf("%v", err),
-			})
+			common.ForbiddenError(c, err.Error())
 
 		} else if strings.Contains(err.Error(), "Username") || strings.Contains(err.Error(), "password") {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"success": false,
-				"message": fmt.Sprintf("%v", err),
-			})
+			common.BadRequestError(c, err.Error())
 		}
 		return
 	}
@@ -366,9 +212,7 @@ func updateUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"user": updatedUser.User,
-	})
+	c.JSON(http.StatusOK, gin.H{"user": updatedUser.User})
 }
 
 // GetUser godoc
@@ -387,19 +231,13 @@ func getUser(c *gin.Context) {
 
 	err := common.ValidateRole(c, common.ModelUser, common.Read)
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
+		common.UnprocessableEntityError(c, err.Error())
 		return
 	}
 
 	id, err := strconv.Atoi(c.Param("userID"))
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("Could not get user's ID from context"),
-		})
+		common.NotFoundError(c, fmt.Sprintf("Could not get user's ID from context"))
 		return
 	}
 
@@ -407,10 +245,7 @@ func getUser(c *gin.Context) {
 	reqUserRole, _ := c.Get(common.UserRoleCtx)
 
 	if id != reqUserID && reqUserRole != "Admin" {
-		c.JSON(http.StatusForbidden, gin.H{
-			"success": false,
-			"message": "Invalid authorization",
-		})
+		common.ForbiddenError(c, "Invalid authorization")
 		return
 	}
 
@@ -421,9 +256,7 @@ func getUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"user": user.User,
-	})
+	c.JSON(http.StatusOK, gin.H{"user": user.User})
 }
 
 // DeleteUser godoc
@@ -441,20 +274,14 @@ func deleteUser(c *gin.Context) {
 
 	err := common.ValidateRole(c, common.ModelUser, common.Delete)
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
+		common.UnprocessableEntityError(c, err.Error())
 		return
 	}
 
 	var user User
 	id, err := strconv.Atoi(c.Param("userID"))
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("Could not get user's ID from context"),
-		})
+		common.NotFoundError(c, fmt.Sprintf("Could not get user's ID from context"))
 		return
 	}
 
@@ -472,7 +299,5 @@ func deleteUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"user": user.User,
-	})
+	c.JSON(http.StatusOK, gin.H{"user": user.User})
 }

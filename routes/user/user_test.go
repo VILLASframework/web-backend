@@ -24,7 +24,7 @@ type UserRequest struct {
 
 func TestMain(m *testing.M) {
 
-	db = common.DummyInitDB()
+	db = common.InitDB(common.DB_TEST)
 	defer db.Close()
 
 	router = gin.Default()
@@ -41,7 +41,7 @@ func TestAddGetUser(t *testing.T) {
 
 	common.DropTables(db)
 	common.MigrateModels(db)
-	common.DummyAddOnlyUserTableWithAdminDB(db)
+	common.DBAddAdminUser(db)
 
 	// authenticate as admin
 	token, err := common.AuthenticateForTest(router,
@@ -89,7 +89,7 @@ func TestUsersNotAllowedActions(t *testing.T) {
 
 	common.DropTables(db)
 	common.MigrateModels(db)
-	common.DummyAddOnlyUserTableWithAdminDB(db)
+	common.DBAddAdminUser(db)
 
 	// authenticate as admin
 	token, err := common.AuthenticateForTest(router,
@@ -149,7 +149,7 @@ func TestGetAllUsers(t *testing.T) {
 
 	common.DropTables(db)
 	common.MigrateModels(db)
-	common.DummyAddOnlyUserTableWithAdminDB(db)
+	common.DBAddAdminUser(db)
 
 	// authenticate as admin
 	token, err := common.AuthenticateForTest(router,
@@ -185,7 +185,7 @@ func TestModifyAddedUserAsUser(t *testing.T) {
 
 	common.DropTables(db)
 	common.MigrateModels(db)
-	common.DummyAddOnlyUserTableWithAdminDB(db)
+	common.DBAddAdminUser(db)
 
 	// authenticate as admin
 	token, err := common.AuthenticateForTest(router,
@@ -296,7 +296,7 @@ func TestInvalidUserUpdate(t *testing.T) {
 
 	common.DropTables(db)
 	common.MigrateModels(db)
-	common.DummyAddOnlyUserTableWithAdminDB(db)
+	common.DBAddAdminUser(db)
 
 	// authenticate as admin
 	token, err := common.AuthenticateForTest(router,
@@ -347,7 +347,7 @@ func TestModifyAddedUserAsAdmin(t *testing.T) {
 
 	common.DropTables(db)
 	common.MigrateModels(db)
-	common.DummyAddOnlyUserTableWithAdminDB(db)
+	common.DBAddAdminUser(db)
 
 	// authenticate as admin
 	token, err := common.AuthenticateForTest(router,
@@ -429,7 +429,7 @@ func TestDeleteUser(t *testing.T) {
 
 	common.DropTables(db)
 	common.MigrateModels(db)
-	common.DummyAddOnlyUserTableWithAdminDB(db)
+	common.DBAddAdminUser(db)
 
 	// authenticate as admin
 	token, err := common.AuthenticateForTest(router,

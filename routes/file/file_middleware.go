@@ -6,7 +6,6 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulationmodel"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/widget"
 	"github.com/gin-gonic/gin"
-	"net/http"
 	"strconv"
 )
 
@@ -16,19 +15,13 @@ func checkPermissions(c *gin.Context, operation common.CRUD) (bool, File) {
 
 	err := common.ValidateRole(c, common.ModelFile, operation)
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("Access denied (role validation failed): %v", err),
-		})
+		common.UnprocessableEntityError(c, fmt.Sprintf("Access denied (role validation failed): %v", err.Error()))
 		return false, f
 	}
 
 	fileID, err := strconv.Atoi(c.Param("fileID"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"error":   fmt.Sprintf("Bad request. No or incorrect format of fileID path parameter"),
-		})
+		common.BadRequestError(c, fmt.Sprintf("No or incorrect format of fileID path parameter"))
 		return false, f
 	}
 

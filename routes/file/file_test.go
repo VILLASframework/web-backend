@@ -99,7 +99,7 @@ func addScenarioAndSimulatorAndSimulationModel() (scenarioID uint, simulatorID u
 
 func TestMain(m *testing.M) {
 
-	db = common.DummyInitDB()
+	db = common.InitDB(common.DB_TEST)
 	defer db.Close()
 
 	router = gin.Default()
@@ -124,7 +124,7 @@ func TestMain(m *testing.M) {
 func TestAddFile(t *testing.T) {
 	common.DropTables(db)
 	common.MigrateModels(db)
-	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
+	common.DBAddAdminAndUser(db)
 
 	// prepare the content of the DB for testing
 	// by adding a scenario and a simulator to the DB
@@ -187,7 +187,7 @@ func TestUpdateFile(t *testing.T) {
 
 	common.DropTables(db)
 	common.MigrateModels(db)
-	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
+	common.DBAddAdminAndUser(db)
 
 	// prepare the content of the DB for testing
 	// by adding a scenario and a simulator to the DB
@@ -288,7 +288,7 @@ func TestUpdateFile(t *testing.T) {
 func TestDeleteFile(t *testing.T) {
 	common.DropTables(db)
 	common.MigrateModels(db)
-	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
+	common.DBAddAdminAndUser(db)
 
 	// prepare the content of the DB for testing
 	// by adding a scenario and a simulator to the DB
@@ -362,7 +362,7 @@ func TestGetAllFilesOfSimulationModel(t *testing.T) {
 
 	common.DropTables(db)
 	common.MigrateModels(db)
-	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
+	common.DBAddAdminAndUser(db)
 
 	// prepare the content of the DB for testing
 	// by adding a scenario and a simulator to the DB

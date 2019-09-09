@@ -12,7 +12,7 @@ import (
 var db *gorm.DB
 
 func TestMain(m *testing.M) {
-	db = DummyInitDB()
+	db = InitDB(DB_TEST)
 
 	// Verify that you can connect to the database
 	err := db.DB().Ping()

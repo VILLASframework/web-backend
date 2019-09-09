@@ -2,7 +2,6 @@ package widget
 
 import (
 	"fmt"
-	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -17,10 +16,7 @@ func CheckPermissions(c *gin.Context, operation common.CRUD, widgetIDBody int) (
 
 	err := common.ValidateRole(c, common.ModelWidget, operation)
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("Access denied (role validation failed): %v", err),
-		})
+		common.UnprocessableEntityError(c, fmt.Sprintf("Access denied (role validation failed): %v", err.Error()))
 		return false, w
 	}
 
@@ -28,11 +24,7 @@ func CheckPermissions(c *gin.Context, operation common.CRUD, widgetIDBody int) (
 	if widgetIDBody < 0 {
 		widgetID, err = strconv.Atoi(c.Param("widgetID"))
 		if err != nil {
-
-			c.JSON(http.StatusBadRequest, gin.H{
-				"success": false,
-				"message": fmt.Sprintf("Bad request. No or incorrect format of widgetID path parameter"),
-			})
+			common.BadRequestError(c, fmt.Sprintf("No or incorrect format of widgetID path parameter"))
 			return false, w
 		}
 	} else {

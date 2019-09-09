@@ -1,7 +1,6 @@
 package simulator
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
@@ -47,9 +46,7 @@ func getSimulators(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"simulators": simulators,
-	})
+	c.JSON(http.StatusOK, gin.H{"simulators": simulators})
 }
 
 // addSimulator godoc
@@ -75,20 +72,13 @@ func addSimulator(c *gin.Context) {
 	var req addSimulatorRequest
 	err := c.BindJSON(&req)
 	if err != nil {
-		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": errormsg,
-		})
+		common.BadRequestError(c, "Error binding form data to JSON: "+err.Error())
 		return
 	}
 
 	// Validate the request
 	if err = req.validate(); err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
+		common.UnprocessableEntityError(c, err.Error())
 		return
 	}
 
@@ -102,9 +92,7 @@ func addSimulator(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"simulator": newSimulator.Simulator,
-	})
+	c.JSON(http.StatusOK, gin.H{"simulator": newSimulator.Simulator})
 }
 
 // updateSimulator godoc
@@ -131,29 +119,20 @@ func updateSimulator(c *gin.Context) {
 	var req updateSimulatorRequest
 	err := c.BindJSON(&req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "Bad request. Error binding form data to JSON: " + err.Error(),
-		})
+		common.BadRequestError(c, "Error binding form data to JSON: "+err.Error())
 		return
 	}
 
 	// Validate the request
 	if err = req.validate(); err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
+		common.UnprocessableEntityError(c, err.Error())
 		return
 	}
 
 	// Create the updatedSimulator from oldSimulator
 	updatedSimulator, err := req.updatedSimulator(oldSimulator)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
+		common.BadRequestError(c, err.Error())
 		return
 	}
 
@@ -164,9 +143,7 @@ func updateSimulator(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"simulator": updatedSimulator.Simulator,
-	})
+	c.JSON(http.StatusOK, gin.H{"simulator": updatedSimulator.Simulator})
 
 }
 
@@ -189,9 +166,7 @@ func getSimulator(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"simulator": s.Simulator,
-	})
+	c.JSON(http.StatusOK, gin.H{"simulator": s.Simulator})
 }
 
 // deleteSimulator godoc
@@ -219,9 +194,7 @@ func deleteSimulator(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"simulator": s.Simulator,
-	})
+	c.JSON(http.StatusOK, gin.H{"simulator": s.Simulator})
 }
 
 // getModelsOfSimulator godoc
@@ -249,9 +222,7 @@ func getModelsOfSimulator(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"models": allModels,
-	})
+	c.JSON(http.StatusOK, gin.H{"models": allModels})
 }
 
 // sendActionToSimulator godoc
@@ -277,10 +248,7 @@ func sendActionToSimulator(c *gin.Context) {
 	var actions []common.Action
 	err := c.BindJSON(&actions)
 	if err != nil {
-		errormsg := "Bad request. Error binding form data to JSON: " + err.Error()
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": errormsg,
-		})
+		common.BadRequestError(c, "Error binding form data to JSON: "+err.Error())
 		return
 	}
 
@@ -293,10 +261,7 @@ func sendActionToSimulator(c *gin.Context) {
 
 		err = common.SendActionAMQP(action, s.UUID)
 		if err != nil {
-			errormsg := "Internal Server Error. Unable to send actions to simulator: " + err.Error()
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": errormsg,
-			})
+			common.InternalServerError(c, "Unable to send actions to simulator: "+err.Error())
 			return
 		}
 	}

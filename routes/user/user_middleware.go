@@ -6,7 +6,6 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/dgrijalva/jwt-go/request"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 func userToContext(ctx *gin.Context, user_id uint) {
@@ -15,10 +14,7 @@ func userToContext(ctx *gin.Context, user_id uint) {
 
 	err := user.ByID(user_id)
 	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-			"succes":  false,
-			"message": "Authentication failed (user not found)",
-		})
+		common.UnauthorizedAbort(ctx, "Authentication failed (user not found)")
 		return
 	}
 
@@ -52,10 +48,7 @@ func Authentication(unauthorized bool) gin.HandlerFunc {
 		// If the authentication extraction fails return HTTP CODE 401
 		if err != nil {
 			if unauthorized {
-				ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-					"succes":  false,
-					"message": "Authentication failed (claims extraction)",
-				})
+				common.UnauthorizedAbort(ctx, "Authentication failed (claims extraction)")
 			}
 			return
 		}
@@ -66,10 +59,7 @@ func Authentication(unauthorized bool) gin.HandlerFunc {
 			user_id, ok := claims["id"].(float64)
 
 			if !ok {
-				ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-					"succes":  false,
-					"message": "Authentication failed (claims casting)",
-				})
+				common.UnauthorizedAbort(ctx, "Authentication failed (claims casting)")
 				return
 			}
 

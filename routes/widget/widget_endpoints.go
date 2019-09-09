@@ -1,7 +1,6 @@
 package widget
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -43,9 +42,7 @@ func getWidgets(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"widgets": widgets,
-	})
+	c.JSON(http.StatusOK, gin.H{"widgets": widgets})
 }
 
 // addWidget godoc
@@ -65,19 +62,13 @@ func addWidget(c *gin.Context) {
 
 	var req addWidgetRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
+		common.BadRequestError(c, err.Error())
 		return
 	}
 
 	// Validate the request
 	if err := req.validate(); err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
+		common.UnprocessableEntityError(c, err.Error())
 		return
 	}
 
@@ -96,9 +87,7 @@ func addWidget(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"widget": newWidget.Widget,
-	})
+	c.JSON(http.StatusOK, gin.H{"widget": newWidget.Widget})
 }
 
 // updateWidget godoc
@@ -124,29 +113,20 @@ func updateWidget(c *gin.Context) {
 
 	var req updateWidgetRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
+		common.BadRequestError(c, err.Error())
 		return
 	}
 
 	// Validate the request
 	if err := req.validate(); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
+		common.BadRequestError(c, err.Error())
 		return
 	}
 
 	// Create the updatedScenario from oldScenario
 	updatedWidget, err := req.updatedWidget(oldWidget)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
+		common.BadRequestError(c, err.Error())
 		return
 	}
 
@@ -157,9 +137,7 @@ func updateWidget(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"widget": updatedWidget.Widget,
-	})
+	c.JSON(http.StatusOK, gin.H{"widget": updatedWidget.Widget})
 
 }
 
@@ -182,9 +160,7 @@ func getWidget(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"widget": w.Widget,
-	})
+	c.JSON(http.StatusOK, gin.H{"widget": w.Widget})
 }
 
 // deleteWidget godoc
@@ -211,7 +187,5 @@ func deleteWidget(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"widget": w.Widget,
-	})
+	c.JSON(http.StatusOK, gin.H{"widget": w.Widget})
 }

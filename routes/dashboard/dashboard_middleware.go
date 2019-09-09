@@ -3,7 +3,6 @@ package dashboard
 import (
 	"fmt"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/scenario"
-	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -17,10 +16,7 @@ func CheckPermissions(c *gin.Context, operation common.CRUD, dabIDSource string,
 
 	err := common.ValidateRole(c, common.ModelDashboard, operation)
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("Access denied (role validation failed): %v", err),
-		})
+		common.UnprocessableEntityError(c, fmt.Sprintf("Access denied (role validation failed): %v", err.Error()))
 		return false, dab
 	}
 
@@ -28,19 +24,13 @@ func CheckPermissions(c *gin.Context, operation common.CRUD, dabIDSource string,
 	if dabIDSource == "path" {
 		dabID, err = strconv.Atoi(c.Param("dashboardID"))
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"success": false,
-				"message": fmt.Sprintf("Bad request. No or incorrect format of dashboardID path parameter"),
-			})
+			common.BadRequestError(c, fmt.Sprintf("No or incorrect format of dashboardID path parameter"))
 			return false, dab
 		}
 	} else if dabIDSource == "query" {
 		dabID, err = strconv.Atoi(c.Request.URL.Query().Get("dashboardID"))
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"success": false,
-				"message": fmt.Sprintf("Bad request. No or incorrect format of dashboardID query parameter"),
-			})
+			common.BadRequestError(c, fmt.Sprintf("No or incorrect format of dashboardID query parameter"))
 			return false, dab
 		}
 	} else if dabIDSource == "body" {

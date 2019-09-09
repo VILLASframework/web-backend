@@ -1,7 +1,6 @@
 package dashboard
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -44,9 +43,7 @@ func getDashboards(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"dashboards": dab,
-	})
+	c.JSON(http.StatusOK, gin.H{"dashboards": dab})
 }
 
 // addDashboard godoc
@@ -67,19 +64,13 @@ func addDashboard(c *gin.Context) {
 	// bind request to JSON
 	var req addDashboardRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
+		common.BadRequestError(c, err.Error())
 		return
 	}
 
 	// Validate the request
 	if err := req.validate(); err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
+		common.UnprocessableEntityError(c, err.Error())
 		return
 	}
 
@@ -99,10 +90,7 @@ func addDashboard(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"dashboard": newDashboard.Dashboard,
-	})
-
+	c.JSON(http.StatusOK, gin.H{"dashboard": newDashboard.Dashboard})
 }
 
 // updateDashboard godoc
@@ -128,28 +116,19 @@ func updateDashboard(c *gin.Context) {
 
 	var req updateDashboardRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
+		common.BadRequestError(c, err.Error())
 		return
 	}
 
 	// Validate the request
 	if err := req.validate(); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
+		common.BadRequestError(c, err.Error())
 		return
 	}
 	// Create the updatedDashboard from oldDashboard
 	updatedDashboard, err := req.updatedDashboard(oldDashboard)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
+		common.BadRequestError(c, err.Error())
 		return
 	}
 
@@ -160,10 +139,7 @@ func updateDashboard(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"dashboard": updatedDashboard.Dashboard,
-	})
-
+	c.JSON(http.StatusOK, gin.H{"dashboard": updatedDashboard.Dashboard})
 }
 
 // getDashboard godoc
@@ -185,9 +161,7 @@ func getDashboard(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"dashboard": dab.Dashboard,
-	})
+	c.JSON(http.StatusOK, gin.H{"dashboard": dab.Dashboard})
 }
 
 // deleteDashboard godoc
@@ -213,7 +187,5 @@ func deleteDashboard(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"dashboard": dab.Dashboard,
-	})
+	c.JSON(http.StatusOK, gin.H{"dashboard": dab.Dashboard})
 }

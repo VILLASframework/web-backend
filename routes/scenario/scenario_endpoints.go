@@ -1,7 +1,6 @@
 package scenario
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -64,9 +63,7 @@ func getScenarios(c *gin.Context) {
 		}
 	}
 	// TODO return list of simulationModelIDs, dashboardIDs and userIDs per scenario
-	c.JSON(http.StatusOK, gin.H{
-		"scenarios": scenarios,
-	})
+	c.JSON(http.StatusOK, gin.H{"scenarios": scenarios})
 }
 
 // addScenario godoc
@@ -99,19 +96,13 @@ func addScenario(c *gin.Context) {
 
 	var req addScenarioRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
+		common.BadRequestError(c, err.Error())
 		return
 	}
 
 	// Validate the request
 	if err = req.validate(); err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
+		common.UnprocessableEntityError(c, err.Error())
 		return
 	}
 
@@ -132,9 +123,7 @@ func addScenario(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"scenario": newScenario.Scenario,
-	})
+	c.JSON(http.StatusOK, gin.H{"scenario": newScenario.Scenario})
 }
 
 // updateScenario godoc
@@ -161,29 +150,20 @@ func updateScenario(c *gin.Context) {
 	// Bind the (context) with the updateScenarioRequest struct
 	var req updateScenarioRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
+		common.BadRequestError(c, err.Error())
 		return
 	}
 
 	// Validate the request based on struct updateScenarioRequest json tags
 	if err := req.validate(); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
+		common.BadRequestError(c, err.Error())
 		return
 	}
 
 	// Create the updatedScenario from oldScenario
 	updatedScenario, err := req.updatedScenario(oldScenario)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
+		common.BadRequestError(c, err.Error())
 		return
 	}
 
@@ -194,9 +174,7 @@ func updateScenario(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"scenario": updatedScenario.Scenario,
-	})
+	c.JSON(http.StatusOK, gin.H{"scenario": updatedScenario.Scenario})
 }
 
 // getScenario godoc
@@ -218,9 +196,7 @@ func getScenario(c *gin.Context) {
 	}
 
 	// TODO return list of simulationModelIDs, dashboardIDs and userIDs per scenario
-	c.JSON(http.StatusOK, gin.H{
-		"scenario": so.Scenario,
-	})
+	c.JSON(http.StatusOK, gin.H{"scenario": so.Scenario})
 }
 
 // deleteScenario godoc
@@ -247,9 +223,7 @@ func deleteScenario(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"scenario": so.Scenario,
-	})
+	c.JSON(http.StatusOK, gin.H{"scenario": so.Scenario})
 }
 
 // getUsersOfScenario godoc
@@ -311,9 +285,7 @@ func addUserToScenario(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"user": u.User,
-	})
+	c.JSON(http.StatusOK, gin.H{"user": u.User})
 }
 
 // deleteUserFromScenario godoc
@@ -348,7 +320,5 @@ func deleteUserFromScenario(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"user": u.User,
-	})
+	c.JSON(http.StatusOK, gin.H{"user": u.User})
 }

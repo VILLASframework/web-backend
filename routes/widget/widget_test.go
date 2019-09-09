@@ -75,7 +75,7 @@ func addScenarioAndDashboard(token string) (scenarioID uint, dashboardID uint) {
 
 func TestMain(m *testing.M) {
 
-	db = common.DummyInitDB()
+	db = common.InitDB(common.DB_TEST)
 	defer db.Close()
 
 	router = gin.Default()
@@ -97,7 +97,7 @@ func TestMain(m *testing.M) {
 func TestAddWidget(t *testing.T) {
 	common.DropTables(db)
 	common.MigrateModels(db)
-	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
+	common.DBAddAdminAndUser(db)
 
 	// authenticate as normal user
 	token, err := common.AuthenticateForTest(router,
@@ -159,7 +159,7 @@ func TestAddWidget(t *testing.T) {
 func TestUpdateWidget(t *testing.T) {
 	common.DropTables(db)
 	common.MigrateModels(db)
-	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
+	common.DBAddAdminAndUser(db)
 
 	// authenticate as normal user
 	token, err := common.AuthenticateForTest(router,
@@ -232,7 +232,7 @@ func TestUpdateWidget(t *testing.T) {
 func TestDeleteWidget(t *testing.T) {
 	common.DropTables(db)
 	common.MigrateModels(db)
-	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
+	common.DBAddAdminAndUser(db)
 
 	// authenticate as normal user
 	token, err := common.AuthenticateForTest(router,
@@ -291,7 +291,7 @@ func TestDeleteWidget(t *testing.T) {
 func TestGetAllWidgetsOfDashboard(t *testing.T) {
 	common.DropTables(db)
 	common.MigrateModels(db)
-	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
+	common.DBAddAdminAndUser(db)
 
 	// authenticate as normal user
 	token, err := common.AuthenticateForTest(router,

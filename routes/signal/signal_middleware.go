@@ -2,7 +2,6 @@ package signal
 
 import (
 	"fmt"
-	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -17,19 +16,13 @@ func checkPermissions(c *gin.Context, operation common.CRUD) (bool, Signal) {
 
 	err := common.ValidateRole(c, common.ModelSignal, operation)
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("Access denied (role validation failed): %v", err),
-		})
+		common.UnprocessableEntityError(c, fmt.Sprintf("Access denied (role validation failed): %v", err.Error()))
 		return false, sig
 	}
 
 	signalID, err := strconv.Atoi(c.Param("signalID"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"error":   fmt.Sprintf("Bad request. No or incorrect format of signalID path parameter"),
-		})
+		common.BadRequestError(c, fmt.Sprintf("No or incorrect format of signalID path parameter"))
 		return false, sig
 	}
 
