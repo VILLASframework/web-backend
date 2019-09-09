@@ -268,7 +268,7 @@ func updateUser(c *gin.Context) {
 
 	// Get the user's (to be updated) ID from the context
 	var oldUser User
-	toBeUpdatedID, err := strconv.Atoi("userID")
+	toBeUpdatedID, err := strconv.Atoi(c.Param("userID"))
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
@@ -313,7 +313,7 @@ func updateUser(c *gin.Context) {
 		return
 	}
 
-	if toBeUpdatedID != callerID && callerRole != "Admin" {
+	if uint(toBeUpdatedID) != callerID && callerRole != "Admin" {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
 			"message": "Invalid authorization",
@@ -394,7 +394,7 @@ func getUser(c *gin.Context) {
 		return
 	}
 
-	id, err := strconv.Atoi("userID")
+	id, err := strconv.Atoi(c.Param("userID"))
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
@@ -449,7 +449,7 @@ func deleteUser(c *gin.Context) {
 	}
 
 	var user User
-	id, err := strconv.Atoi("userID")
+	id, err := strconv.Atoi(c.Param("userID"))
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
