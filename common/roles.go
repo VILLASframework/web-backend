@@ -95,7 +95,7 @@ func ValidateRole(c *gin.Context, model ModelName, action CRUD) error {
 	// of invalid role return an error.
 
 	// Get user's role from context
-	role, exists := c.Get("user_role")
+	role, exists := c.Get(UserRoleCtx)
 	if !exists {
 		return fmt.Errorf("Request does not contain user's role")
 	}
