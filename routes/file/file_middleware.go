@@ -33,7 +33,7 @@ func checkPermissions(c *gin.Context, operation common.CRUD) (bool, File) {
 	}
 
 	err = f.byID(uint(fileID))
-	if common.ProvideErrorResponse(c, err) {
+	if common.DBError(c, err) {
 		return false, f
 	}
 

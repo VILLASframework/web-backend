@@ -74,12 +74,12 @@ func getFiles(c *gin.Context) {
 	var files []common.File
 	if objectType == "model" {
 		err = db.Order("ID asc").Model(&m).Related(&files, "Files").Error
-		if common.ProvideErrorResponse(c, err) {
+		if common.DBError(c, err) {
 			return
 		}
 	} else {
 		err = db.Order("ID asc").Model(&w).Related(&files, "Files").Error
-		if common.ProvideErrorResponse(c, err) {
+		if common.DBError(c, err) {
 			return
 		}
 	}
@@ -157,7 +157,7 @@ func addFile(c *gin.Context) {
 	var newFile File
 	err = newFile.register(file_header, objectType, uint(objectID))
 	if err != nil {
-		common.ProvideErrorResponse(c, err)
+		common.DBError(c, err)
 		return
 	}
 
@@ -193,7 +193,7 @@ func getFile(c *gin.Context) {
 
 	err := f.download(c)
 	if err != nil {
-		common.ProvideErrorResponse(c, err)
+		common.DBError(c, err)
 		return
 	}
 
@@ -251,7 +251,7 @@ func updateFile(c *gin.Context) {
 
 	err = f.update(file_header)
 	if err != nil {
-		common.ProvideErrorResponse(c, err)
+		common.DBError(c, err)
 		return
 	}
 
@@ -282,7 +282,7 @@ func deleteFile(c *gin.Context) {
 
 	err := f.delete()
 	if err != nil {
-		common.ProvideErrorResponse(c, err)
+		common.DBError(c, err)
 		return
 	}
 

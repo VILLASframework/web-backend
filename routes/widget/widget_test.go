@@ -52,7 +52,7 @@ func addScenarioAndDashboard(token string) (scenarioID uint, dashboardID uint) {
 		Running:         common.ScenarioA.Running,
 		StartParameters: common.ScenarioA.StartParameters,
 	}
-	_, resp, _ := common.NewTestEndpoint(router, token,
+	_, resp, _ := common.TestEndpoint(router, token,
 		"/api/scenarios", "POST", common.KeyModels{"scenario": newScenario})
 
 	// Read newScenario's ID from the response
@@ -64,7 +64,7 @@ func addScenarioAndDashboard(token string) (scenarioID uint, dashboardID uint) {
 		Grid:       common.DashboardA.Grid,
 		ScenarioID: uint(newScenarioID),
 	}
-	_, resp, _ = common.NewTestEndpoint(router, token,
+	_, resp, _ = common.TestEndpoint(router, token,
 		"/api/dashboards", "POST", common.KeyModels{"dashboard": newDashboard})
 
 	// Read newDashboard's ID from the response
@@ -100,7 +100,7 @@ func TestAddWidget(t *testing.T) {
 	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
 
 	// authenticate as normal user
-	token, err := common.NewAuthenticateForTest(router,
+	token, err := common.AuthenticateForTest(router,
 		"/api/authenticate", "POST", common.UserACredentials)
 	assert.NoError(t, err)
 
@@ -121,7 +121,7 @@ func TestAddWidget(t *testing.T) {
 		CustomProperties: common.WidgetA.CustomProperties,
 		DashboardID:      dashboardID,
 	}
-	code, resp, err := common.NewTestEndpoint(router, token,
+	code, resp, err := common.TestEndpoint(router, token,
 		"/api/widgets", "POST", common.KeyModels{"widget": newWidget})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -135,7 +135,7 @@ func TestAddWidget(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Get the newWidget
-	code, resp, err = common.NewTestEndpoint(router, token,
+	code, resp, err = common.TestEndpoint(router, token,
 		fmt.Sprintf("/api/widgets/%v", newWidgetID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -150,7 +150,7 @@ func TestAddWidget(t *testing.T) {
 		Name: "ThisIsAMalformedDashboard",
 	}
 	// this should NOT work and return a unprocessable entity 442 status code
-	code, resp, err = common.NewTestEndpoint(router, token,
+	code, resp, err = common.TestEndpoint(router, token,
 		"/api/widgets", "POST", common.KeyModels{"widget": malformedNewWidget})
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
@@ -162,7 +162,7 @@ func TestUpdateWidget(t *testing.T) {
 	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
 
 	// authenticate as normal user
-	token, err := common.NewAuthenticateForTest(router,
+	token, err := common.AuthenticateForTest(router,
 		"/api/authenticate", "POST", common.UserACredentials)
 	assert.NoError(t, err)
 
@@ -183,7 +183,7 @@ func TestUpdateWidget(t *testing.T) {
 		CustomProperties: common.WidgetA.CustomProperties,
 		DashboardID:      dashboardID,
 	}
-	code, resp, err := common.NewTestEndpoint(router, token,
+	code, resp, err := common.TestEndpoint(router, token,
 		"/api/widgets", "POST", common.KeyModels{"widget": newWidget})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -202,7 +202,7 @@ func TestUpdateWidget(t *testing.T) {
 		CustomProperties: common.WidgetA.CustomProperties,
 	}
 
-	code, resp, err = common.NewTestEndpoint(router, token,
+	code, resp, err = common.TestEndpoint(router, token,
 		fmt.Sprintf("/api/widgets/%v", newWidgetID), "PUT", common.KeyModels{"widget": updatedWidget})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -212,7 +212,7 @@ func TestUpdateWidget(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Get the updatedWidget
-	code, resp, err = common.NewTestEndpoint(router, token,
+	code, resp, err = common.TestEndpoint(router, token,
 		fmt.Sprintf("/api/widgets/%v", newWidgetID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -222,7 +222,7 @@ func TestUpdateWidget(t *testing.T) {
 	assert.NoError(t, err)
 
 	// try to update a widget that does not exist (should return not found 404 status code)
-	code, resp, err = common.NewTestEndpoint(router, token,
+	code, resp, err = common.TestEndpoint(router, token,
 		fmt.Sprintf("/api/widgets/%v", newWidgetID+1), "PUT", common.KeyModels{"widget": updatedWidget})
 	assert.NoError(t, err)
 	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
@@ -235,7 +235,7 @@ func TestDeleteWidget(t *testing.T) {
 	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
 
 	// authenticate as normal user
-	token, err := common.NewAuthenticateForTest(router,
+	token, err := common.AuthenticateForTest(router,
 		"/api/authenticate", "POST", common.UserACredentials)
 	assert.NoError(t, err)
 
@@ -256,7 +256,7 @@ func TestDeleteWidget(t *testing.T) {
 		CustomProperties: common.WidgetA.CustomProperties,
 		DashboardID:      dashboardID,
 	}
-	code, resp, err := common.NewTestEndpoint(router, token,
+	code, resp, err := common.TestEndpoint(router, token,
 		"/api/widgets", "POST", common.KeyModels{"widget": newWidget})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -271,7 +271,7 @@ func TestDeleteWidget(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Delete the added newWidget
-	code, resp, err = common.NewTestEndpoint(router, token,
+	code, resp, err = common.TestEndpoint(router, token,
 		fmt.Sprintf("/api/widgets/%v", newWidgetID), "DELETE", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -294,7 +294,7 @@ func TestGetAllWidgetsOfDashboard(t *testing.T) {
 	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
 
 	// authenticate as normal user
-	token, err := common.NewAuthenticateForTest(router,
+	token, err := common.AuthenticateForTest(router,
 		"/api/authenticate", "POST", common.UserACredentials)
 	assert.NoError(t, err)
 
@@ -320,7 +320,7 @@ func TestGetAllWidgetsOfDashboard(t *testing.T) {
 		CustomProperties: common.WidgetA.CustomProperties,
 		DashboardID:      dashboardID,
 	}
-	code, resp, err := common.NewTestEndpoint(router, token,
+	code, resp, err := common.TestEndpoint(router, token,
 		"/api/widgets", "POST", common.KeyModels{"widget": newWidgetA})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -339,7 +339,7 @@ func TestGetAllWidgetsOfDashboard(t *testing.T) {
 		CustomProperties: common.WidgetB.CustomProperties,
 		DashboardID:      dashboardID,
 	}
-	code, resp, err = common.NewTestEndpoint(router, token,
+	code, resp, err = common.TestEndpoint(router, token,
 		"/api/widgets", "POST", common.KeyModels{"widget": newWidgetB})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)

@@ -44,7 +44,7 @@ func TestAddScenario(t *testing.T) {
 	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
 
 	// authenticate as normal user
-	token, err := common.NewAuthenticateForTest(router,
+	token, err := common.AuthenticateForTest(router,
 		"/api/authenticate", "POST", common.UserACredentials)
 	assert.NoError(t, err)
 
@@ -54,7 +54,7 @@ func TestAddScenario(t *testing.T) {
 		Running:         common.ScenarioA.Running,
 		StartParameters: common.ScenarioA.StartParameters,
 	}
-	code, resp, err := common.NewTestEndpoint(router, token,
+	code, resp, err := common.TestEndpoint(router, token,
 		"/api/scenarios", "POST", common.KeyModels{"scenario": newScenario})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -68,7 +68,7 @@ func TestAddScenario(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Get the newScenario
-	code, resp, err = common.NewTestEndpoint(router, token,
+	code, resp, err = common.TestEndpoint(router, token,
 		fmt.Sprintf("/api/scenarios/%v", newScenarioID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -83,7 +83,7 @@ func TestAddScenario(t *testing.T) {
 		Running: false,
 	}
 	// this should NOT work and return a unprocessable entity 442 status code
-	code, resp, err = common.NewTestEndpoint(router, token,
+	code, resp, err = common.TestEndpoint(router, token,
 		"/api/scenarios", "POST", common.KeyModels{"scenario": malformedNewScenario})
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
@@ -96,7 +96,7 @@ func TestUpdateScenario(t *testing.T) {
 	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
 
 	// authenticate as normal user
-	token, err := common.NewAuthenticateForTest(router,
+	token, err := common.AuthenticateForTest(router,
 		"/api/authenticate", "POST", common.UserACredentials)
 	assert.NoError(t, err)
 
@@ -106,7 +106,7 @@ func TestUpdateScenario(t *testing.T) {
 		Running:         common.ScenarioA.Running,
 		StartParameters: common.ScenarioA.StartParameters,
 	}
-	code, resp, err := common.NewTestEndpoint(router, token,
+	code, resp, err := common.TestEndpoint(router, token,
 		"/api/scenarios", "POST", common.KeyModels{"scenario": newScenario})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -125,7 +125,7 @@ func TestUpdateScenario(t *testing.T) {
 		StartParameters: common.ScenarioA.StartParameters,
 	}
 
-	code, resp, err = common.NewTestEndpoint(router, token,
+	code, resp, err = common.TestEndpoint(router, token,
 		fmt.Sprintf("/api/scenarios/%v", newScenarioID), "PUT", common.KeyModels{"scenario": updatedScenario})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -135,7 +135,7 @@ func TestUpdateScenario(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Get the updatedScenario
-	code, resp, err = common.NewTestEndpoint(router, token,
+	code, resp, err = common.TestEndpoint(router, token,
 		fmt.Sprintf("/api/scenarios/%v", newScenarioID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -145,7 +145,7 @@ func TestUpdateScenario(t *testing.T) {
 	assert.NoError(t, err)
 
 	// try to update a scenario that does not exist (should return not found 404 status code)
-	code, resp, err = common.NewTestEndpoint(router, token,
+	code, resp, err = common.TestEndpoint(router, token,
 		fmt.Sprintf("/api/scenarios/%v", newScenarioID+1), "PUT", common.KeyModels{"scenario": updatedScenario})
 	assert.NoError(t, err)
 	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
@@ -159,7 +159,7 @@ func TestGetAllScenariosAsAdmin(t *testing.T) {
 	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
 
 	// authenticate as admin
-	token, err := common.NewAuthenticateForTest(router,
+	token, err := common.AuthenticateForTest(router,
 		"/api/authenticate", "POST", common.AdminCredentials)
 	assert.NoError(t, err)
 
@@ -169,7 +169,7 @@ func TestGetAllScenariosAsAdmin(t *testing.T) {
 	assert.NoError(t, err)
 
 	// authenticate as normal userB
-	token, err = common.NewAuthenticateForTest(router,
+	token, err = common.AuthenticateForTest(router,
 		"/api/authenticate", "POST", common.UserBCredentials)
 	assert.NoError(t, err)
 
@@ -179,13 +179,13 @@ func TestGetAllScenariosAsAdmin(t *testing.T) {
 		Running:         common.ScenarioB.Running,
 		StartParameters: common.ScenarioB.StartParameters,
 	}
-	code, resp, err := common.NewTestEndpoint(router, token,
+	code, resp, err := common.TestEndpoint(router, token,
 		"/api/scenarios", "POST", common.KeyModels{"scenario": newScenarioB})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// authenticate as normal userA
-	token, err = common.NewAuthenticateForTest(router,
+	token, err = common.AuthenticateForTest(router,
 		"/api/authenticate", "POST", common.UserACredentials)
 	assert.NoError(t, err)
 
@@ -195,13 +195,13 @@ func TestGetAllScenariosAsAdmin(t *testing.T) {
 		Running:         common.ScenarioA.Running,
 		StartParameters: common.ScenarioA.StartParameters,
 	}
-	code, resp, err = common.NewTestEndpoint(router, token,
+	code, resp, err = common.TestEndpoint(router, token,
 		"/api/scenarios", "POST", common.KeyModels{"scenario": newScenarioA})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// authenticate as admin
-	token, err = common.NewAuthenticateForTest(router,
+	token, err = common.AuthenticateForTest(router,
 		"/api/authenticate", "POST", common.AdminCredentials)
 	assert.NoError(t, err)
 
@@ -220,7 +220,7 @@ func TestGetAllScenariosAsUser(t *testing.T) {
 	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
 
 	// authenticate as normal userB
-	token, err := common.NewAuthenticateForTest(router,
+	token, err := common.AuthenticateForTest(router,
 		"/api/authenticate", "POST", common.UserBCredentials)
 	assert.NoError(t, err)
 
@@ -236,13 +236,13 @@ func TestGetAllScenariosAsUser(t *testing.T) {
 		StartParameters: common.ScenarioB.StartParameters,
 	}
 
-	code, resp, err := common.NewTestEndpoint(router, token,
+	code, resp, err := common.TestEndpoint(router, token,
 		"/api/scenarios", "POST", common.KeyModels{"scenario": newScenarioB})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// authenticate as normal userA
-	token, err = common.NewAuthenticateForTest(router,
+	token, err = common.AuthenticateForTest(router,
 		"/api/authenticate", "POST", common.UserACredentials)
 	assert.NoError(t, err)
 
@@ -252,13 +252,13 @@ func TestGetAllScenariosAsUser(t *testing.T) {
 		Running:         common.ScenarioA.Running,
 		StartParameters: common.ScenarioA.StartParameters,
 	}
-	code, resp, err = common.NewTestEndpoint(router, token,
+	code, resp, err = common.TestEndpoint(router, token,
 		"/api/scenarios", "POST", common.KeyModels{"scenario": newScenarioA})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// authenticate as normal userB
-	token, err = common.NewAuthenticateForTest(router,
+	token, err = common.AuthenticateForTest(router,
 		"/api/authenticate", "POST", common.UserBCredentials)
 	assert.NoError(t, err)
 
@@ -277,7 +277,7 @@ func TestDeleteScenario(t *testing.T) {
 	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
 
 	// authenticate as normal user
-	token, err := common.NewAuthenticateForTest(router,
+	token, err := common.AuthenticateForTest(router,
 		"/api/authenticate", "POST", common.UserACredentials)
 	assert.NoError(t, err)
 
@@ -287,7 +287,7 @@ func TestDeleteScenario(t *testing.T) {
 		Running:         common.ScenarioA.Running,
 		StartParameters: common.ScenarioA.StartParameters,
 	}
-	code, resp, err := common.NewTestEndpoint(router, token,
+	code, resp, err := common.TestEndpoint(router, token,
 		"/api/scenarios", "POST", common.KeyModels{"scenario": newScenario})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -302,7 +302,7 @@ func TestDeleteScenario(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Delete the added newScenario
-	code, resp, err = common.NewTestEndpoint(router, token,
+	code, resp, err = common.TestEndpoint(router, token,
 		fmt.Sprintf("/api/scenarios/%v", newScenarioID), "DELETE", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -326,7 +326,7 @@ func TestAddUserToScenario(t *testing.T) {
 	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
 
 	// authenticate as normal user
-	token, err := common.NewAuthenticateForTest(router,
+	token, err := common.AuthenticateForTest(router,
 		"/api/authenticate", "POST", common.UserACredentials)
 	assert.NoError(t, err)
 
@@ -336,7 +336,7 @@ func TestAddUserToScenario(t *testing.T) {
 		Running:         common.ScenarioA.Running,
 		StartParameters: common.ScenarioA.StartParameters,
 	}
-	code, resp, err := common.NewTestEndpoint(router, token,
+	code, resp, err := common.TestEndpoint(router, token,
 		"/api/scenarios", "POST", common.KeyModels{"scenario": newScenario})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -352,7 +352,7 @@ func TestAddUserToScenario(t *testing.T) {
 	assert.Equal(t, initialNumber, 1)
 
 	// add userB to newScenario
-	code, resp, err = common.NewTestEndpoint(router, token,
+	code, resp, err = common.TestEndpoint(router, token,
 		fmt.Sprintf("/api/scenarios/%v/user?username=User_B", newScenarioID), "PUT", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -368,7 +368,7 @@ func TestAddUserToScenario(t *testing.T) {
 	assert.Equal(t, finalNumber, initialNumber+1)
 
 	// try to add a non-existing user to newScenario, should return a not found 404
-	code, resp, err = common.NewTestEndpoint(router, token,
+	code, resp, err = common.TestEndpoint(router, token,
 		fmt.Sprintf("/api/scenarios/%v/user?username=User_C", newScenarioID), "PUT", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
@@ -381,7 +381,7 @@ func TestGetAllUsersOfScenario(t *testing.T) {
 	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
 
 	// authenticate as normal user
-	token, err := common.NewAuthenticateForTest(router,
+	token, err := common.AuthenticateForTest(router,
 		"/api/authenticate", "POST", common.UserACredentials)
 	assert.NoError(t, err)
 
@@ -391,7 +391,7 @@ func TestGetAllUsersOfScenario(t *testing.T) {
 		Running:         common.ScenarioA.Running,
 		StartParameters: common.ScenarioA.StartParameters,
 	}
-	code, resp, err := common.NewTestEndpoint(router, token,
+	code, resp, err := common.TestEndpoint(router, token,
 		"/api/scenarios", "POST", common.KeyModels{"scenario": newScenario})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -407,7 +407,7 @@ func TestGetAllUsersOfScenario(t *testing.T) {
 	assert.Equal(t, initialNumber, 1)
 
 	// add userB to newScenario
-	code, resp, err = common.NewTestEndpoint(router, token,
+	code, resp, err = common.TestEndpoint(router, token,
 		fmt.Sprintf("/api/scenarios/%v/user?username=User_B", newScenarioID), "PUT", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -426,7 +426,7 @@ func TestRemoveUserFromScenario(t *testing.T) {
 	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
 
 	// authenticate as normal user
-	token, err := common.NewAuthenticateForTest(router,
+	token, err := common.AuthenticateForTest(router,
 		"/api/authenticate", "POST", common.UserACredentials)
 	assert.NoError(t, err)
 
@@ -436,7 +436,7 @@ func TestRemoveUserFromScenario(t *testing.T) {
 		Running:         common.ScenarioA.Running,
 		StartParameters: common.ScenarioA.StartParameters,
 	}
-	code, resp, err := common.NewTestEndpoint(router, token,
+	code, resp, err := common.TestEndpoint(router, token,
 		"/api/scenarios", "POST", common.KeyModels{"scenario": newScenario})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -446,7 +446,7 @@ func TestRemoveUserFromScenario(t *testing.T) {
 	assert.NoError(t, err)
 
 	// add userB to newScenario
-	code, resp, err = common.NewTestEndpoint(router, token,
+	code, resp, err = common.TestEndpoint(router, token,
 		fmt.Sprintf("/api/scenarios/%v/user?username=User_B", newScenarioID), "PUT", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -458,7 +458,7 @@ func TestRemoveUserFromScenario(t *testing.T) {
 	assert.Equal(t, 2, initialNumber)
 
 	// remove userB from newScenario
-	code, resp, err = common.NewTestEndpoint(router, token,
+	code, resp, err = common.TestEndpoint(router, token,
 		fmt.Sprintf("/api/scenarios/%v/user?username=User_B", newScenarioID), "DELETE", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -475,21 +475,21 @@ func TestRemoveUserFromScenario(t *testing.T) {
 
 	// Try to remove userA from new scenario
 	// This should fail since User_A is the last user of newScenario
-	code, resp, err = common.NewTestEndpoint(router, token,
+	code, resp, err = common.TestEndpoint(router, token,
 		fmt.Sprintf("/api/scenarios/%v/user?username=User_A", newScenarioID), "DELETE", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 500, code, "Response body: \n%v\n", resp)
 
 	// Try to remove a user that does not exist in DB
 	// This should fail with not found 404 status code
-	code, resp, err = common.NewTestEndpoint(router, token,
+	code, resp, err = common.TestEndpoint(router, token,
 		fmt.Sprintf("/api/scenarios/%v/user?username=User_C", newScenarioID), "DELETE", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
 
 	// Try to remove an admin user that is not explicitly a user of the scenario
 	// This should fail with not found 404 status code
-	code, resp, err = common.NewTestEndpoint(router, token,
+	code, resp, err = common.TestEndpoint(router, token,
 		fmt.Sprintf("/api/scenarios/%v/user?username=User_0", newScenarioID), "DELETE", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)

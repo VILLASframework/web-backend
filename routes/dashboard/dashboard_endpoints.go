@@ -40,7 +40,7 @@ func getDashboards(c *gin.Context) {
 	db := common.GetDB()
 	var dab []common.Dashboard
 	err := db.Order("ID asc").Model(sim).Related(&dab, "Dashboards").Error
-	if common.ProvideErrorResponse(c, err) {
+	if common.DBError(c, err) {
 		return
 	}
 
@@ -95,7 +95,7 @@ func addDashboard(c *gin.Context) {
 	// add dashboard to DB and add association to scenario
 	err := newDashboard.addToScenario()
 	if err != nil {
-		common.ProvideErrorResponse(c, err)
+		common.DBError(c, err)
 		return
 	}
 
@@ -156,7 +156,7 @@ func updateDashboard(c *gin.Context) {
 	// update the dashboard in the DB
 	err = oldDashboard.update(updatedDashboard)
 	if err != nil {
-		common.ProvideErrorResponse(c, err)
+		common.DBError(c, err)
 		return
 	}
 
@@ -209,7 +209,7 @@ func deleteDashboard(c *gin.Context) {
 	}
 
 	err := dab.delete()
-	if common.ProvideErrorResponse(c, err) {
+	if common.DBError(c, err) {
 		return
 	}
 

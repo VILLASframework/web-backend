@@ -44,7 +44,7 @@ func getScenarios(c *gin.Context) {
 
 	var u user.User
 	err := u.ByID(userID.(uint))
-	if common.ProvideErrorResponse(c, err) {
+	if common.DBError(c, err) {
 		return
 	}
 
@@ -53,13 +53,13 @@ func getScenarios(c *gin.Context) {
 	var scenarios []common.Scenario
 	if userRole == "Admin" { // Admin can see all scenarios
 		err = db.Order("ID asc").Find(&scenarios).Error
-		if common.ProvideErrorResponse(c, err) {
+		if common.DBError(c, err) {
 			return
 		}
 
 	} else { // User or Guest roles see only their scenarios
 		err = db.Order("ID asc").Model(&u).Related(&scenarios, "Scenarios").Error
-		if common.ProvideErrorResponse(c, err) {
+		if common.DBError(c, err) {
 			return
 		}
 	}
@@ -93,7 +93,7 @@ func addScenario(c *gin.Context) {
 
 	var u user.User
 	err := u.ByID(userID.(uint))
-	if common.ProvideErrorResponse(c, err) {
+	if common.DBError(c, err) {
 		return
 	}
 
@@ -121,14 +121,14 @@ func addScenario(c *gin.Context) {
 	// Save the new scenario in the DB
 	err = newScenario.save()
 	if err != nil {
-		common.ProvideErrorResponse(c, err)
+		common.DBError(c, err)
 		return
 	}
 
 	// add user to new scenario
 	err = newScenario.addUser(&(u.User))
 	if err != nil {
-		common.ProvideErrorResponse(c, err)
+		common.DBError(c, err)
 		return
 	}
 
@@ -190,7 +190,7 @@ func updateScenario(c *gin.Context) {
 	// Finally update the scenario
 	err = oldScenario.update(updatedScenario)
 	if err != nil {
-		common.ProvideErrorResponse(c, err)
+		common.DBError(c, err)
 		return
 	}
 
@@ -243,7 +243,7 @@ func deleteScenario(c *gin.Context) {
 
 	err := so.delete()
 	if err != nil {
-		common.ProvideErrorResponse(c, err)
+		common.DBError(c, err)
 		return
 	}
 
@@ -272,7 +272,7 @@ func getUsersOfScenario(c *gin.Context) {
 
 	// Find all users of scenario
 	allUsers, _, err := so.getUsers()
-	if common.ProvideErrorResponse(c, err) {
+	if common.DBError(c, err) {
 		return
 	}
 
@@ -302,12 +302,12 @@ func addUserToScenario(c *gin.Context) {
 
 	var u user.User
 	err := u.ByUsername(username)
-	if common.ProvideErrorResponse(c, err) {
+	if common.DBError(c, err) {
 		return
 	}
 
 	err = so.addUser(&(u.User))
-	if common.ProvideErrorResponse(c, err) {
+	if common.DBError(c, err) {
 		return
 	}
 
@@ -339,12 +339,12 @@ func deleteUserFromScenario(c *gin.Context) {
 
 	var u user.User
 	err := u.ByUsername(username)
-	if common.ProvideErrorResponse(c, err) {
+	if common.DBError(c, err) {
 		return
 	}
 
 	err = so.deleteUser(username)
-	if common.ProvideErrorResponse(c, err) {
+	if common.DBError(c, err) {
 		return
 	}
 

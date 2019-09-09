@@ -41,7 +41,7 @@ type ScenarioRequest struct {
 func addScenarioAndSimulator() (scenarioID uint, simulatorID uint) {
 
 	// authenticate as admin
-	token, _ := common.NewAuthenticateForTest(router,
+	token, _ := common.AuthenticateForTest(router,
 		"/api/authenticate", "POST", common.AdminCredentials)
 
 	// POST $newSimulatorA
@@ -52,14 +52,14 @@ func addScenarioAndSimulator() (scenarioID uint, simulatorID uint) {
 		State:      common.SimulatorA.State,
 		Properties: common.SimulatorA.Properties,
 	}
-	_, resp, _ := common.NewTestEndpoint(router, token,
+	_, resp, _ := common.TestEndpoint(router, token,
 		"/api/simulators", "POST", common.KeyModels{"simulator": newSimulatorA})
 
 	// Read newSimulator's ID from the response
 	newSimulatorID, _ := common.GetResponseID(resp)
 
 	// authenticate as normal user
-	token, _ = common.NewAuthenticateForTest(router,
+	token, _ = common.AuthenticateForTest(router,
 		"/api/authenticate", "POST", common.UserACredentials)
 
 	// POST $newScenario
@@ -68,7 +68,7 @@ func addScenarioAndSimulator() (scenarioID uint, simulatorID uint) {
 		Running:         common.ScenarioA.Running,
 		StartParameters: common.ScenarioA.StartParameters,
 	}
-	_, resp, _ = common.NewTestEndpoint(router, token,
+	_, resp, _ = common.TestEndpoint(router, token,
 		"/api/scenarios", "POST", common.KeyModels{"scenario": newScenario})
 
 	// Read newScenario's ID from the response
@@ -109,7 +109,7 @@ func TestAddSimulationModel(t *testing.T) {
 	scenarioID, simulatorID := addScenarioAndSimulator()
 
 	// authenticate as normal user
-	token, err := common.NewAuthenticateForTest(router,
+	token, err := common.AuthenticateForTest(router,
 		"/api/authenticate", "POST", common.UserACredentials)
 	assert.NoError(t, err)
 
@@ -120,7 +120,7 @@ func TestAddSimulationModel(t *testing.T) {
 		SimulatorID:     simulatorID,
 		StartParameters: common.SimulationModelA.StartParameters,
 	}
-	code, resp, err := common.NewTestEndpoint(router, token,
+	code, resp, err := common.TestEndpoint(router, token,
 		"/api/models", "POST", common.KeyModels{"model": newSimulationModel})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -134,7 +134,7 @@ func TestAddSimulationModel(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Get the newSimulationModel
-	code, resp, err = common.NewTestEndpoint(router, token,
+	code, resp, err = common.TestEndpoint(router, token,
 		fmt.Sprintf("/api/models/%v", newSimulationModelID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -149,7 +149,7 @@ func TestAddSimulationModel(t *testing.T) {
 		Name: "ThisIsAMalformedRequest",
 	}
 	// this should NOT work and return a unprocessable entity 442 status code
-	code, resp, err = common.NewTestEndpoint(router, token,
+	code, resp, err = common.TestEndpoint(router, token,
 		"/api/models", "POST", common.KeyModels{"model": malformedNewSimulationModel})
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
@@ -168,7 +168,7 @@ func TestUpdateSimulationModel(t *testing.T) {
 	scenarioID, simulatorID := addScenarioAndSimulator()
 
 	// authenticate as normal user
-	token, err := common.NewAuthenticateForTest(router,
+	token, err := common.AuthenticateForTest(router,
 		"/api/authenticate", "POST", common.UserACredentials)
 	assert.NoError(t, err)
 
@@ -179,7 +179,7 @@ func TestUpdateSimulationModel(t *testing.T) {
 		SimulatorID:     simulatorID,
 		StartParameters: common.SimulationModelA.StartParameters,
 	}
-	code, resp, err := common.NewTestEndpoint(router, token,
+	code, resp, err := common.TestEndpoint(router, token,
 		"/api/models", "POST", common.KeyModels{"model": newSimulationModel})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -193,7 +193,7 @@ func TestUpdateSimulationModel(t *testing.T) {
 		StartParameters: common.SimulationModelB.StartParameters,
 	}
 
-	code, resp, err = common.NewTestEndpoint(router, token,
+	code, resp, err = common.TestEndpoint(router, token,
 		fmt.Sprintf("/api/models/%v", newSimulationModelID), "PUT", common.KeyModels{"model": updatedSimulationModel})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -203,7 +203,7 @@ func TestUpdateSimulationModel(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Get the updatedSimulationModel
-	code, resp, err = common.NewTestEndpoint(router, token,
+	code, resp, err = common.TestEndpoint(router, token,
 		fmt.Sprintf("/api/models/%v", newSimulationModelID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -213,7 +213,7 @@ func TestUpdateSimulationModel(t *testing.T) {
 	assert.NoError(t, err)
 
 	// try to update a simulation model that does not exist (should return not found 404 status code)
-	code, resp, err = common.NewTestEndpoint(router, token,
+	code, resp, err = common.TestEndpoint(router, token,
 		fmt.Sprintf("/api/models/%v", newSimulationModelID+1), "PUT", common.KeyModels{"model": updatedSimulationModel})
 	assert.NoError(t, err)
 	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
@@ -230,7 +230,7 @@ func TestDeleteSimulationModel(t *testing.T) {
 	scenarioID, simulatorID := addScenarioAndSimulator()
 
 	// authenticate as normal user
-	token, err := common.NewAuthenticateForTest(router,
+	token, err := common.AuthenticateForTest(router,
 		"/api/authenticate", "POST", common.UserACredentials)
 	assert.NoError(t, err)
 
@@ -241,7 +241,7 @@ func TestDeleteSimulationModel(t *testing.T) {
 		SimulatorID:     simulatorID,
 		StartParameters: common.SimulationModelA.StartParameters,
 	}
-	code, resp, err := common.NewTestEndpoint(router, token,
+	code, resp, err := common.TestEndpoint(router, token,
 		"/api/models", "POST", common.KeyModels{"model": newSimulationModel})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -256,7 +256,7 @@ func TestDeleteSimulationModel(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Delete the added newSimulationModel
-	code, resp, err = common.NewTestEndpoint(router, token,
+	code, resp, err = common.TestEndpoint(router, token,
 		fmt.Sprintf("/api/models/%v", newSimulationModelID), "DELETE", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -284,7 +284,7 @@ func TestGetAllSimulationModelsOfScenario(t *testing.T) {
 	scenarioID, simulatorID := addScenarioAndSimulator()
 
 	// authenticate as normal user
-	token, err := common.NewAuthenticateForTest(router,
+	token, err := common.AuthenticateForTest(router,
 		"/api/authenticate", "POST", common.UserACredentials)
 	assert.NoError(t, err)
 
@@ -295,7 +295,7 @@ func TestGetAllSimulationModelsOfScenario(t *testing.T) {
 		SimulatorID:     simulatorID,
 		StartParameters: common.SimulationModelA.StartParameters,
 	}
-	code, resp, err := common.NewTestEndpoint(router, token,
+	code, resp, err := common.TestEndpoint(router, token,
 		"/api/models", "POST", common.KeyModels{"model": newSimulationModel})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)

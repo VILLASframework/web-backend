@@ -40,7 +40,7 @@ func CheckPermissions(c *gin.Context, operation common.CRUD, widgetIDBody int) (
 	}
 
 	err = w.ByID(uint(widgetID))
-	if common.ProvideErrorResponse(c, err) {
+	if common.DBError(c, err) {
 		return false, w
 	}
 

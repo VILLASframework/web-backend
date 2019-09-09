@@ -54,7 +54,7 @@ func getSignals(c *gin.Context) {
 	db := common.GetDB()
 	var sigs []common.Signal
 	err := db.Order("ID asc").Model(m).Where("Direction = ?", direction).Related(&sigs, mapping).Error
-	if common.ProvideErrorResponse(c, err) {
+	if common.DBError(c, err) {
 		return
 	}
 
@@ -107,7 +107,7 @@ func addSignal(c *gin.Context) {
 	// Add signal to model
 	err := newSignal.addToSimulationModel()
 	if err != nil {
-		common.ProvideErrorResponse(c, err)
+		common.DBError(c, err)
 		return
 	}
 
@@ -166,7 +166,7 @@ func updateSignal(c *gin.Context) {
 	// Update the signal in the DB
 	err = oldSignal.update(updatedSignal)
 	if err != nil {
-		common.ProvideErrorResponse(c, err)
+		common.DBError(c, err)
 		return
 	}
 
@@ -219,7 +219,7 @@ func deleteSignal(c *gin.Context) {
 
 	err := sig.delete()
 	if err != nil {
-		common.ProvideErrorResponse(c, err)
+		common.DBError(c, err)
 		return
 	}
 

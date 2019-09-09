@@ -39,7 +39,7 @@ func getSimulationModels(c *gin.Context) {
 	db := common.GetDB()
 	var models []common.SimulationModel
 	err := db.Order("ID asc").Model(so).Related(&models, "Models").Error
-	if common.ProvideErrorResponse(c, err) {
+	if common.DBError(c, err) {
 		return
 	}
 
@@ -95,7 +95,7 @@ func addSimulationModel(c *gin.Context) {
 	// add the new simulation model to the scenario
 	err = newSimulationModel.addToScenario()
 	if err != nil {
-		common.ProvideErrorResponse(c, err)
+		common.DBError(c, err)
 		return
 	}
 
@@ -157,7 +157,7 @@ func updateSimulationModel(c *gin.Context) {
 	// Finally, update the simulation model
 	err = oldSimulationModel.Update(updatedSimulationModel)
 	if err != nil {
-		common.ProvideErrorResponse(c, err)
+		common.DBError(c, err)
 		return
 	}
 
@@ -211,7 +211,7 @@ func deleteSimulationModel(c *gin.Context) {
 	}
 
 	err := m.delete()
-	if common.ProvideErrorResponse(c, err) {
+	if common.DBError(c, err) {
 		return
 	}
 

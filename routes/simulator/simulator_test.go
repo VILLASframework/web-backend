@@ -46,7 +46,7 @@ func TestAddSimulatorAsAdmin(t *testing.T) {
 	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
 
 	// authenticate as admin
-	token, err := common.NewAuthenticateForTest(router,
+	token, err := common.AuthenticateForTest(router,
 		"/api/authenticate", "POST", common.AdminCredentials)
 	assert.NoError(t, err)
 
@@ -58,7 +58,7 @@ func TestAddSimulatorAsAdmin(t *testing.T) {
 		State:      common.SimulatorA.State,
 		Properties: common.SimulatorA.Properties,
 	}
-	code, resp, err := common.NewTestEndpoint(router, token,
+	code, resp, err := common.TestEndpoint(router, token,
 		"/api/simulators", "POST", common.KeyModels{"simulator": newSimulator})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -72,7 +72,7 @@ func TestAddSimulatorAsAdmin(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Get the newSimulator
-	code, resp, err = common.NewTestEndpoint(router, token,
+	code, resp, err = common.TestEndpoint(router, token,
 		fmt.Sprintf("/api/simulators/%v", newSimulatorID), "GET", nil)
 	assert.NoError(t, err)
 
@@ -89,7 +89,7 @@ func TestAddSimulatorAsUser(t *testing.T) {
 	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
 
 	// authenticate as user
-	token, err := common.NewAuthenticateForTest(router,
+	token, err := common.AuthenticateForTest(router,
 		"/api/authenticate", "POST", common.UserACredentials)
 	assert.NoError(t, err)
 
@@ -104,7 +104,7 @@ func TestAddSimulatorAsUser(t *testing.T) {
 
 	// This should fail with unprocessable entity 422 error code
 	// Normal users are not allowed to add simulators
-	code, resp, err := common.NewTestEndpoint(router, token,
+	code, resp, err := common.TestEndpoint(router, token,
 		"/api/simulators", "POST", common.KeyModels{"simulator": newSimulator})
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
@@ -116,7 +116,7 @@ func TestUpdateSimulatorAsAdmin(t *testing.T) {
 	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
 
 	// authenticate as admin
-	token, err := common.NewAuthenticateForTest(router,
+	token, err := common.AuthenticateForTest(router,
 		"/api/authenticate", "POST", common.AdminCredentials)
 	assert.NoError(t, err)
 
@@ -128,7 +128,7 @@ func TestUpdateSimulatorAsAdmin(t *testing.T) {
 		State:      common.SimulatorA.State,
 		Properties: common.SimulatorA.Properties,
 	}
-	code, resp, err := common.NewTestEndpoint(router, token,
+	code, resp, err := common.TestEndpoint(router, token,
 		"/api/simulators", "POST", common.KeyModels{"simulator": newSimulator})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -143,7 +143,7 @@ func TestUpdateSimulatorAsAdmin(t *testing.T) {
 
 	// Test PUT simulators
 	newSimulator.Host = "ThisIsMyNewHost"
-	code, resp, err = common.NewTestEndpoint(router, token,
+	code, resp, err = common.TestEndpoint(router, token,
 		fmt.Sprintf("/api/simulators/%v", newSimulatorID), "PUT", common.KeyModels{"simulator": newSimulator})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -153,7 +153,7 @@ func TestUpdateSimulatorAsAdmin(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Get the updated newSimulator
-	code, resp, err = common.NewTestEndpoint(router, token,
+	code, resp, err = common.TestEndpoint(router, token,
 		fmt.Sprintf("/api/simulators/%v", newSimulatorID), "GET", nil)
 	assert.NoError(t, err)
 
@@ -171,7 +171,7 @@ func TestUpdateSimulatorAsUser(t *testing.T) {
 	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
 
 	// authenticate as admin
-	token, err := common.NewAuthenticateForTest(router,
+	token, err := common.AuthenticateForTest(router,
 		"/api/authenticate", "POST", common.AdminCredentials)
 	assert.NoError(t, err)
 
@@ -183,7 +183,7 @@ func TestUpdateSimulatorAsUser(t *testing.T) {
 		State:      common.SimulatorA.State,
 		Properties: common.SimulatorA.Properties,
 	}
-	code, resp, err := common.NewTestEndpoint(router, token,
+	code, resp, err := common.TestEndpoint(router, token,
 		"/api/simulators", "POST", common.KeyModels{"simulator": newSimulator})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -193,14 +193,14 @@ func TestUpdateSimulatorAsUser(t *testing.T) {
 	assert.NoError(t, err)
 
 	// authenticate as user
-	token, err = common.NewAuthenticateForTest(router,
+	token, err = common.AuthenticateForTest(router,
 		"/api/authenticate", "POST", common.UserACredentials)
 	assert.NoError(t, err)
 
 	// Test PUT simulators
 	// This should fail with unprocessable entity status code 422
 	newSimulator.Host = "ThisIsMyNewHost"
-	code, resp, err = common.NewTestEndpoint(router, token,
+	code, resp, err = common.TestEndpoint(router, token,
 		fmt.Sprintf("/api/simulators/%v", newSimulatorID), "PUT", common.KeyModels{"simulator": newSimulator})
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
@@ -213,7 +213,7 @@ func TestDeleteSimulatorAsAdmin(t *testing.T) {
 	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
 
 	// authenticate as admin
-	token, err := common.NewAuthenticateForTest(router,
+	token, err := common.AuthenticateForTest(router,
 		"/api/authenticate", "POST", common.AdminCredentials)
 	assert.NoError(t, err)
 
@@ -225,7 +225,7 @@ func TestDeleteSimulatorAsAdmin(t *testing.T) {
 		State:      common.SimulatorA.State,
 		Properties: common.SimulatorA.Properties,
 	}
-	code, resp, err := common.NewTestEndpoint(router, token,
+	code, resp, err := common.TestEndpoint(router, token,
 		"/api/simulators", "POST", common.KeyModels{"simulator": newSimulator})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -240,7 +240,7 @@ func TestDeleteSimulatorAsAdmin(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Delete the added newSimulator
-	code, resp, err = common.NewTestEndpoint(router, token,
+	code, resp, err = common.TestEndpoint(router, token,
 		fmt.Sprintf("/api/simulators/%v", newSimulatorID), "DELETE", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -263,7 +263,7 @@ func TestDeleteSimulatorAsUser(t *testing.T) {
 	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
 
 	// authenticate as admin
-	token, err := common.NewAuthenticateForTest(router,
+	token, err := common.AuthenticateForTest(router,
 		"/api/authenticate", "POST", common.AdminCredentials)
 	assert.NoError(t, err)
 
@@ -275,7 +275,7 @@ func TestDeleteSimulatorAsUser(t *testing.T) {
 		State:      common.SimulatorA.State,
 		Properties: common.SimulatorA.Properties,
 	}
-	code, resp, err := common.NewTestEndpoint(router, token,
+	code, resp, err := common.TestEndpoint(router, token,
 		"/api/simulators", "POST", common.KeyModels{"simulator": newSimulator})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -285,14 +285,14 @@ func TestDeleteSimulatorAsUser(t *testing.T) {
 	assert.NoError(t, err)
 
 	// authenticate as user
-	token, err = common.NewAuthenticateForTest(router,
+	token, err = common.AuthenticateForTest(router,
 		"/api/authenticate", "POST", common.UserACredentials)
 	assert.NoError(t, err)
 
 	// Test DELETE simulators
 	// This should fail with unprocessable entity status code 422
 	newSimulator.Host = "ThisIsMyNewHost"
-	code, resp, err = common.NewTestEndpoint(router, token,
+	code, resp, err = common.TestEndpoint(router, token,
 		fmt.Sprintf("/api/simulators/%v", newSimulatorID), "DELETE", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
@@ -304,7 +304,7 @@ func TestGetAllSimulators(t *testing.T) {
 	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
 
 	// authenticate as admin
-	token, err := common.NewAuthenticateForTest(router,
+	token, err := common.AuthenticateForTest(router,
 		"/api/authenticate", "POST", common.AdminCredentials)
 	assert.NoError(t, err)
 
@@ -321,7 +321,7 @@ func TestGetAllSimulators(t *testing.T) {
 		State:      common.SimulatorA.State,
 		Properties: common.SimulatorA.Properties,
 	}
-	code, resp, err := common.NewTestEndpoint(router, token,
+	code, resp, err := common.TestEndpoint(router, token,
 		"/api/simulators", "POST", common.KeyModels{"simulator": newSimulatorA})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -334,7 +334,7 @@ func TestGetAllSimulators(t *testing.T) {
 		State:      common.SimulatorB.State,
 		Properties: common.SimulatorB.Properties,
 	}
-	code, resp, err = common.NewTestEndpoint(router, token,
+	code, resp, err = common.TestEndpoint(router, token,
 		"/api/simulators", "POST", common.KeyModels{"simulator": newSimulatorB})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -347,7 +347,7 @@ func TestGetAllSimulators(t *testing.T) {
 	assert.Equal(t, finalNumber, initialNumber+2)
 
 	// authenticate as normal user
-	token, err = common.NewAuthenticateForTest(router,
+	token, err = common.AuthenticateForTest(router,
 		"/api/authenticate", "POST", common.UserACredentials)
 	assert.NoError(t, err)
 
@@ -365,7 +365,7 @@ func TestGetSimulationModelsOfSimulator(t *testing.T) {
 	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
 
 	// authenticate as admin
-	token, err := common.NewAuthenticateForTest(router,
+	token, err := common.AuthenticateForTest(router,
 		"/api/authenticate", "POST", common.AdminCredentials)
 	assert.NoError(t, err)
 
@@ -377,7 +377,7 @@ func TestGetSimulationModelsOfSimulator(t *testing.T) {
 		State:      common.SimulatorA.State,
 		Properties: common.SimulatorA.Properties,
 	}
-	code, resp, err := common.NewTestEndpoint(router, token,
+	code, resp, err := common.TestEndpoint(router, token,
 		"/api/simulators", "POST", common.KeyModels{"simulator": newSimulatorA})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -396,7 +396,7 @@ func TestGetSimulationModelsOfSimulator(t *testing.T) {
 	assert.Equal(t, 0, numberOfModels)
 
 	// authenticate as normal user
-	token, err = common.NewAuthenticateForTest(router,
+	token, err = common.AuthenticateForTest(router,
 		"/api/authenticate", "POST", common.UserACredentials)
 	assert.NoError(t, err)
 

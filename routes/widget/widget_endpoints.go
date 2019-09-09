@@ -39,7 +39,7 @@ func getWidgets(c *gin.Context) {
 	db := common.GetDB()
 	var widgets []common.Widget
 	err := db.Order("ID asc").Model(dab).Related(&widgets, "Widgets").Error
-	if common.ProvideErrorResponse(c, err) {
+	if common.DBError(c, err) {
 		return
 	}
 
@@ -92,7 +92,7 @@ func addWidget(c *gin.Context) {
 
 	err := newWidget.addToDashboard()
 	if err != nil {
-		common.ProvideErrorResponse(c, err)
+		common.DBError(c, err)
 		return
 	}
 
@@ -153,7 +153,7 @@ func updateWidget(c *gin.Context) {
 	// Update the widget in the DB
 	err = oldWidget.update(updatedWidget)
 	if err != nil {
-		common.ProvideErrorResponse(c, err)
+		common.DBError(c, err)
 		return
 	}
 
@@ -207,7 +207,7 @@ func deleteWidget(c *gin.Context) {
 	}
 
 	err := w.delete()
-	if common.ProvideErrorResponse(c, err) {
+	if common.DBError(c, err) {
 		return
 	}
 

@@ -36,7 +36,7 @@ func addScenario(token string) (scenarioID uint) {
 		Running:         common.ScenarioA.Running,
 		StartParameters: common.ScenarioA.StartParameters,
 	}
-	_, resp, _ := common.NewTestEndpoint(router, token,
+	_, resp, _ := common.TestEndpoint(router, token,
 		"/api/scenarios", "POST", common.KeyModels{"scenario": newScenario})
 
 	// Read newScenario's ID from the response
@@ -69,7 +69,7 @@ func TestAddDashboard(t *testing.T) {
 	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
 
 	// authenticate as normal user
-	token, err := common.NewAuthenticateForTest(router,
+	token, err := common.AuthenticateForTest(router,
 		"/api/authenticate", "POST", common.UserACredentials)
 	assert.NoError(t, err)
 
@@ -81,7 +81,7 @@ func TestAddDashboard(t *testing.T) {
 		Grid:       common.DashboardA.Grid,
 		ScenarioID: scenarioID,
 	}
-	code, resp, err := common.NewTestEndpoint(router, token,
+	code, resp, err := common.TestEndpoint(router, token,
 		"/api/dashboards", "POST", common.KeyModels{"dashboard": newDashboard})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -95,7 +95,7 @@ func TestAddDashboard(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Get the newDashboard
-	code, resp, err = common.NewTestEndpoint(router, token,
+	code, resp, err = common.TestEndpoint(router, token,
 		fmt.Sprintf("/api/dashboards/%v", newDashboardID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -110,7 +110,7 @@ func TestAddDashboard(t *testing.T) {
 		Name: "ThisIsAMalformedDashboard",
 	}
 	// this should NOT work and return a unprocessable entity 442 status code
-	code, resp, err = common.NewTestEndpoint(router, token,
+	code, resp, err = common.TestEndpoint(router, token,
 		"/api/dashboards", "POST", common.KeyModels{"dashboard": malformedNewDashboard})
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
@@ -123,7 +123,7 @@ func TestUpdateDashboard(t *testing.T) {
 	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
 
 	// authenticate as normal user
-	token, err := common.NewAuthenticateForTest(router,
+	token, err := common.AuthenticateForTest(router,
 		"/api/authenticate", "POST", common.UserACredentials)
 	assert.NoError(t, err)
 
@@ -135,7 +135,7 @@ func TestUpdateDashboard(t *testing.T) {
 		Grid:       common.DashboardA.Grid,
 		ScenarioID: scenarioID,
 	}
-	code, resp, err := common.NewTestEndpoint(router, token,
+	code, resp, err := common.TestEndpoint(router, token,
 		"/api/dashboards", "POST", common.KeyModels{"dashboard": newDashboard})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -149,7 +149,7 @@ func TestUpdateDashboard(t *testing.T) {
 		Grid: common.DashboardB.Grid,
 	}
 
-	code, resp, err = common.NewTestEndpoint(router, token,
+	code, resp, err = common.TestEndpoint(router, token,
 		fmt.Sprintf("/api/dashboards/%v", newDashboardID), "PUT", common.KeyModels{"dashboard": updatedDashboard})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -159,7 +159,7 @@ func TestUpdateDashboard(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Get the updatedDashboard
-	code, resp, err = common.NewTestEndpoint(router, token,
+	code, resp, err = common.TestEndpoint(router, token,
 		fmt.Sprintf("/api/dashboards/%v", newDashboardID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -169,7 +169,7 @@ func TestUpdateDashboard(t *testing.T) {
 	assert.NoError(t, err)
 
 	// try to update a dashboard that does not exist (should return not found 404 status code)
-	code, resp, err = common.NewTestEndpoint(router, token,
+	code, resp, err = common.TestEndpoint(router, token,
 		fmt.Sprintf("/api/dashboards/%v", newDashboardID+1), "PUT", common.KeyModels{"dashboard": updatedDashboard})
 	assert.NoError(t, err)
 	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
@@ -182,7 +182,7 @@ func TestDeleteDashboard(t *testing.T) {
 	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
 
 	// authenticate as normal user
-	token, err := common.NewAuthenticateForTest(router,
+	token, err := common.AuthenticateForTest(router,
 		"/api/authenticate", "POST", common.UserACredentials)
 	assert.NoError(t, err)
 
@@ -195,7 +195,7 @@ func TestDeleteDashboard(t *testing.T) {
 		Grid:       common.DashboardA.Grid,
 		ScenarioID: scenarioID,
 	}
-	code, resp, err := common.NewTestEndpoint(router, token,
+	code, resp, err := common.TestEndpoint(router, token,
 		"/api/dashboards", "POST", common.KeyModels{"dashboard": newDashboard})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -210,7 +210,7 @@ func TestDeleteDashboard(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Delete the added newDashboard
-	code, resp, err = common.NewTestEndpoint(router, token,
+	code, resp, err = common.TestEndpoint(router, token,
 		fmt.Sprintf("/api/dashboards/%v", newDashboardID), "DELETE", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -234,7 +234,7 @@ func TestGetAllDashboardsOfScenario(t *testing.T) {
 	common.DummyAddOnlyUserTableWithAdminAndUsersDB(db)
 
 	// authenticate as normal user
-	token, err := common.NewAuthenticateForTest(router,
+	token, err := common.AuthenticateForTest(router,
 		"/api/authenticate", "POST", common.UserACredentials)
 	assert.NoError(t, err)
 
@@ -252,7 +252,7 @@ func TestGetAllDashboardsOfScenario(t *testing.T) {
 		Grid:       common.DashboardA.Grid,
 		ScenarioID: scenarioID,
 	}
-	code, resp, err := common.NewTestEndpoint(router, token,
+	code, resp, err := common.TestEndpoint(router, token,
 		"/api/dashboards", "POST", common.KeyModels{"dashboard": newDashboardA})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -263,7 +263,7 @@ func TestGetAllDashboardsOfScenario(t *testing.T) {
 		Grid:       common.DashboardB.Grid,
 		ScenarioID: scenarioID,
 	}
-	code, resp, err = common.NewTestEndpoint(router, token,
+	code, resp, err = common.TestEndpoint(router, token,
 		"/api/dashboards", "POST", common.KeyModels{"dashboard": newDashboardB})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)

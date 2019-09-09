@@ -48,7 +48,7 @@ func CheckPermissions(c *gin.Context, operation common.CRUD, dabIDSource string,
 	}
 
 	err = dab.ByID(uint(dabID))
-	if common.ProvideErrorResponse(c, err) {
+	if common.DBError(c, err) {
 		return false, dab
 	}
 

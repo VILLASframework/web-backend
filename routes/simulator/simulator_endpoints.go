@@ -43,7 +43,7 @@ func getSimulators(c *gin.Context) {
 	db := common.GetDB()
 	var simulators []common.Simulator
 	err := db.Order("ID asc").Find(&simulators).Error
-	if common.ProvideErrorResponse(c, err) {
+	if common.DBError(c, err) {
 		return
 	}
 
@@ -98,7 +98,7 @@ func addSimulator(c *gin.Context) {
 	// Save new simulator to DB
 	err = newSimulator.save()
 	if err != nil {
-		common.ProvideErrorResponse(c, err)
+		common.DBError(c, err)
 		return
 	}
 
@@ -160,7 +160,7 @@ func updateSimulator(c *gin.Context) {
 	// Finally update the simulator in the DB
 	err = oldSimulator.update(updatedSimulator)
 	if err != nil {
-		common.ProvideErrorResponse(c, err)
+		common.DBError(c, err)
 		return
 	}
 
@@ -215,7 +215,7 @@ func deleteSimulator(c *gin.Context) {
 
 	// Delete the simulator
 	err := s.delete()
-	if common.ProvideErrorResponse(c, err) {
+	if common.DBError(c, err) {
 		return
 	}
 
@@ -245,7 +245,7 @@ func getModelsOfSimulator(c *gin.Context) {
 
 	// get all associated simulation models
 	allModels, _, err := s.getModels()
-	if common.ProvideErrorResponse(c, err) {
+	if common.DBError(c, err) {
 		return
 	}
 

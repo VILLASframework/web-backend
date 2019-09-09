@@ -3,6 +3,7 @@ package user
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -153,7 +154,7 @@ func getUsers(c *gin.Context) {
 	db := common.GetDB()
 	var users []common.User
 	err = db.Order("ID asc").Find(&users).Error
-	if common.ProvideErrorResponse(c, err) {
+	if common.DBError(c, err) {
 		return
 	}
 
@@ -230,7 +231,7 @@ func addUser(c *gin.Context) {
 	// Save the user in the DB
 	err = newUser.save()
 	if err != nil {
-		common.ProvideErrorResponse(c, err)
+		common.DBError(c, err)
 		return
 	}
 
@@ -267,7 +268,7 @@ func updateUser(c *gin.Context) {
 
 	// Get the user's (to be updated) ID from the context
 	var oldUser User
-	toBeUpdatedID, err := common.UintParamFromCtx(c, "userID")
+	toBeUpdatedID, err := strconv.Atoi("userID")
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
@@ -277,9 +278,9 @@ func updateUser(c *gin.Context) {
 	}
 
 	// Find the user
-	err = oldUser.ByID(toBeUpdatedID)
+	err = oldUser.ByID(uint(toBeUpdatedID))
 	if err != nil {
-		common.ProvideErrorResponse(c, err)
+		common.DBError(c, err)
 		return
 	}
 
@@ -361,7 +362,7 @@ func updateUser(c *gin.Context) {
 	// Finally update the user
 	err = oldUser.update(updatedUser)
 	if err != nil {
-		common.ProvideErrorResponse(c, err)
+		common.DBError(c, err)
 		return
 	}
 
@@ -393,7 +394,7 @@ func getUser(c *gin.Context) {
 		return
 	}
 
-	id, err := common.UintParamFromCtx(c, "userID")
+	id, err := strconv.Atoi("userID")
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
@@ -414,9 +415,9 @@ func getUser(c *gin.Context) {
 	}
 
 	var user User
-	err = user.ByID(id)
+	err = user.ByID(uint(id))
 	if err != nil {
-		common.ProvideErrorResponse(c, err)
+		common.DBError(c, err)
 		return
 	}
 
@@ -448,7 +449,7 @@ func deleteUser(c *gin.Context) {
 	}
 
 	var user User
-	id, err := common.UintParamFromCtx(c, "userID")
+	id, err := strconv.Atoi("userID")
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
@@ -460,14 +461,14 @@ func deleteUser(c *gin.Context) {
 	// Check that the user exist
 	err = user.ByID(uint(id))
 	if err != nil {
-		common.ProvideErrorResponse(c, err)
+		common.DBError(c, err)
 		return
 	}
 
 	// Try to remove user
 	err = user.remove()
 	if err != nil {
-		common.ProvideErrorResponse(c, err)
+		common.DBError(c, err)
 		return
 	}
 

@@ -49,7 +49,7 @@ func CheckPermissions(c *gin.Context, operation common.CRUD, modelIDSource strin
 	}
 
 	err = m.ByID(uint(modelID))
-	if common.ProvideErrorResponse(c, err) {
+	if common.DBError(c, err) {
 		return false, m
 	}
 

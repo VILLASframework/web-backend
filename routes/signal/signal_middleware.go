@@ -34,7 +34,7 @@ func checkPermissions(c *gin.Context, operation common.CRUD) (bool, Signal) {
 	}
 
 	err = sig.byID(uint(signalID))
-	if common.ProvideErrorResponse(c, err) {
+	if common.DBError(c, err) {
 		return false, sig
 	}
 

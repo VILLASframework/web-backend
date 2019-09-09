@@ -3,9 +3,11 @@ package common
 import (
 	"flag"
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"log"
+	"net/http"
 )
 
 var DB_HOST string
@@ -211,4 +213,24 @@ func checkErr(err error) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func DBError(c *gin.Context, err error) bool {
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			errormsg := "Record not Found in DB: " + err.Error()
+			c.JSON(http.StatusNotFound, gin.H{
+				"success": false,
+				"message": errormsg,
+			})
+		} else {
+			errormsg := "Error on DB Query or transaction: " + err.Error()
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+				"message": errormsg,
+			})
+		}
+		return true // Error
+	}
+	return false // No error
 }

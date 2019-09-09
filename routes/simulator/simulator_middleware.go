@@ -5,6 +5,7 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strconv"
 )
 
 func checkPermissions(c *gin.Context, modeltype common.ModelName, operation common.CRUD, hasID bool) (bool, Simulator) {
@@ -22,7 +23,7 @@ func checkPermissions(c *gin.Context, modeltype common.ModelName, operation comm
 
 	if hasID {
 		// Get the ID of the simulator from the context
-		simulatorID, err := common.UintParamFromCtx(c, "simulatorID")
+		simulatorID, err := strconv.Atoi(c.Param("simulatorID"))
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"success": false,
@@ -32,7 +33,7 @@ func checkPermissions(c *gin.Context, modeltype common.ModelName, operation comm
 		}
 
 		err = s.ByID(uint(simulatorID))
-		if common.ProvideErrorResponse(c, err) {
+		if common.DBError(c, err) {
 			return false, s
 		}
 

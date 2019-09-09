@@ -61,7 +61,7 @@ func CheckPermissions(c *gin.Context, operation common.CRUD, screnarioIDSource s
 	userRole, _ := c.Get(common.UserRoleCtx)
 
 	err = so.ByID(uint(scenarioID))
-	if common.ProvideErrorResponse(c, err) {
+	if common.DBError(c, err) {
 		return false, so
 	}
 

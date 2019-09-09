@@ -48,7 +48,7 @@ type ScenarioRequest struct {
 func addScenarioAndSimulatorAndSimulationModel() (scenarioID uint, simulatorID uint, simulationModelID uint) {
 
 	// authenticate as admin
-	token, _ := common.NewAuthenticateForTest(router,
+	token, _ := common.AuthenticateForTest(router,
 		"/api/authenticate", "POST", common.AdminCredentials)
 
 	// POST $newSimulatorA
@@ -59,14 +59,14 @@ func addScenarioAndSimulatorAndSimulationModel() (scenarioID uint, simulatorID u
 		State:      common.SimulatorA.State,
 		Properties: common.SimulatorA.Properties,
 	}
-	_, resp, _ := common.NewTestEndpoint(router, token,
+	_, resp, _ := common.TestEndpoint(router, token,
 		"/api/simulators", "POST", common.KeyModels{"simulator": newSimulatorA})
 
 	// Read newSimulator's ID from the response
 	newSimulatorID, _ := common.GetResponseID(resp)
 
 	// authenticate as normal user
-	token, _ = common.NewAuthenticateForTest(router,
+	token, _ = common.AuthenticateForTest(router,
 		"/api/authenticate", "POST", common.UserACredentials)
 
 	// POST $newScenario
@@ -75,7 +75,7 @@ func addScenarioAndSimulatorAndSimulationModel() (scenarioID uint, simulatorID u
 		Running:         common.ScenarioA.Running,
 		StartParameters: common.ScenarioA.StartParameters,
 	}
-	_, resp, _ = common.NewTestEndpoint(router, token,
+	_, resp, _ = common.TestEndpoint(router, token,
 		"/api/scenarios", "POST", common.KeyModels{"scenario": newScenario})
 
 	// Read newScenario's ID from the response
@@ -88,7 +88,7 @@ func addScenarioAndSimulatorAndSimulationModel() (scenarioID uint, simulatorID u
 		SimulatorID:     uint(newSimulatorID),
 		StartParameters: common.SimulationModelA.StartParameters,
 	}
-	_, resp, _ = common.NewTestEndpoint(router, token,
+	_, resp, _ = common.TestEndpoint(router, token,
 		"/api/models", "POST", common.KeyModels{"model": newSimulationModel})
 
 	// Read newSimulationModel's ID from the response
@@ -132,7 +132,7 @@ func TestAddFile(t *testing.T) {
 	_, _, simulationModelID := addScenarioAndSimulatorAndSimulationModel()
 
 	// authenticate as normal user
-	token, err := common.NewAuthenticateForTest(router,
+	token, err := common.AuthenticateForTest(router,
 		"/api/authenticate", "POST", common.UserACredentials)
 	assert.NoError(t, err)
 
@@ -176,7 +176,7 @@ func TestAddFile(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Get the new file
-	code, resp, err := common.NewTestEndpoint(router, token,
+	code, resp, err := common.TestEndpoint(router, token,
 		fmt.Sprintf("/api/files/%v", newFileID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -195,7 +195,7 @@ func TestUpdateFile(t *testing.T) {
 	_, _, simulationModelID := addScenarioAndSimulatorAndSimulationModel()
 
 	// authenticate as normal user
-	token, err := common.NewAuthenticateForTest(router,
+	token, err := common.AuthenticateForTest(router,
 		"/api/authenticate", "POST", common.UserACredentials)
 	assert.NoError(t, err)
 
@@ -278,7 +278,7 @@ func TestUpdateFile(t *testing.T) {
 	assert.Equal(t, newFileID, newFileIDUpdated)
 
 	// Get the updated file
-	code, resp, err := common.NewTestEndpoint(router, token,
+	code, resp, err := common.TestEndpoint(router, token,
 		fmt.Sprintf("/api/files/%v", newFileIDUpdated), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -296,7 +296,7 @@ func TestDeleteFile(t *testing.T) {
 	_, _, simulationModelID := addScenarioAndSimulatorAndSimulationModel()
 
 	// authenticate as normal user
-	token, err := common.NewAuthenticateForTest(router,
+	token, err := common.AuthenticateForTest(router,
 		"/api/authenticate", "POST", common.UserACredentials)
 	assert.NoError(t, err)
 
@@ -345,7 +345,7 @@ func TestDeleteFile(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Delete the added file
-	code, resp, err := common.NewTestEndpoint(router, token,
+	code, resp, err := common.TestEndpoint(router, token,
 		fmt.Sprintf("/api/files/%v", newFileID), "DELETE", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -370,7 +370,7 @@ func TestGetAllFilesOfSimulationModel(t *testing.T) {
 	_, _, simulationModelID := addScenarioAndSimulatorAndSimulationModel()
 
 	// authenticate as normal user
-	token, err := common.NewAuthenticateForTest(router,
+	token, err := common.AuthenticateForTest(router,
 		"/api/authenticate", "POST", common.UserACredentials)
 	assert.NoError(t, err)
 

@@ -107,3 +107,7 @@ func ValidateRole(c *gin.Context, model ModelName, action CRUD) error {
 
 	return nil
 }
+
+// elements added to context about a user
+const UserIDCtx = "user_id"
+const UserRoleCtx = "user_role"
