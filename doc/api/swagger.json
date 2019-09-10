@@ -1,0 +1,3499 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This is the API of the VILLASweb Backend\nWORK IN PROGRESS! PLEASE BE PATIENT!\nThe tool https://github.com/swaggo/swag is used to auto-generate API docs for gin.",
+        "title": "VILLASweb Backend API",
+        "contact": {
+            "name": "Sonja Happ",
+            "email": "sonja.happ@eonerc.rwth-aachen.de"
+        },
+        "license": {
+            "name": "GNU GPL 3.0",
+            "url": "http://www.gnu.de/documents/gpl-3.0.en.html"
+        },
+        "version": "2.0"
+    },
+    "host": "localhost:4000",
+    "basePath": "/api/v2",
+    "paths": {
+        "/authenticate": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "authentication"
+                ],
+                "summary": "Authentication for user",
+                "operationId": "authenticate",
+                "parameters": [
+                    {
+                        "description": "loginRequest of user",
+                        "name": "inputUser",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/user.loginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "JSON web token, success status, message and authenticated user object",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseAuthenticate"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity.",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/dashboards": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "dashboards"
+                ],
+                "summary": "Get all dashboards of scenario",
+                "operationId": "getDashboards",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Scenario ID",
+                        "name": "scenarioID",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Dashboards which belong to scenario",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseDashboards"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "dashboards"
+                ],
+                "summary": "Add a dashboard to a scenario",
+                "operationId": "addDashboard",
+                "parameters": [
+                    {
+                        "description": "Dashboard to be added incl. ID of Scenario",
+                        "name": "inputDab",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/dashboard.validNewDashboard"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Dashboard that was added",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseDashboard"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/dashboards/{dashboardID}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "dashboards"
+                ],
+                "summary": "Get a dashboard",
+                "operationId": "getDashboard",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Dashboard ID",
+                        "name": "dashboardID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Dashboard that was requested",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseDashboard"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "dashboards"
+                ],
+                "summary": "Update a dashboard",
+                "operationId": "updateDashboard",
+                "parameters": [
+                    {
+                        "description": "Dashboard to be updated",
+                        "name": "inputDab",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/dashboard.validUpdatedDashboard"
+                        }
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Dashboard ID",
+                        "name": "dashboardID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Dashboard that was updated",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseDashboard"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "dashboards"
+                ],
+                "summary": "Delete a dashboard",
+                "operationId": "deleteDashboard",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Dashboard ID",
+                        "name": "dashboardID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Dashboard that was deleted",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseDashboard"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/files": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "files"
+                ],
+                "summary": "Get all files of a specific model or widget",
+                "operationId": "getFiles",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Set to model for files of model, set to widget for files of widget",
+                        "name": "objectType",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID of either model or widget of which files are requested",
+                        "name": "objectID",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Files which belong to simulation model or widget",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseFiles"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "text/plain",
+                    "image/png",
+                    "image/jpeg",
+                    "image/gif",
+                    "model/x-cim",
+                    "model/x-cim.zip"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "files"
+                ],
+                "summary": "Add a file to a specific model or widget",
+                "operationId": "addFile",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "File to be uploaded",
+                        "name": "inputFile",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Set to model for files of model, set to widget for files of widget",
+                        "name": "objectType",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID of either model or widget of which files are requested",
+                        "name": "objectID",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "File that was added",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseFile"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/files/{fileID}": {
+            "get": {
+                "produces": [
+                    "text/plain",
+                    "image/png",
+                    "image/jpeg",
+                    "image/gif",
+                    "model/x-cim",
+                    "model/x-cim.zip"
+                ],
+                "tags": [
+                    "files"
+                ],
+                "summary": "Download a file",
+                "operationId": "getFile",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID of the file to download",
+                        "name": "fileID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "File that was requested",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseFile"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "text/plain",
+                    "image/png",
+                    "image/jpeg",
+                    "image/gif",
+                    "model/x-cim",
+                    "model/x-cim.zip"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "files"
+                ],
+                "summary": "Update a file",
+                "operationId": "updateFile",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "File to be uploaded",
+                        "name": "inputFile",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID of the file to update",
+                        "name": "fileID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "File that was updated",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseFile"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "files"
+                ],
+                "summary": "Delete a file",
+                "operationId": "deleteFile",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID of the file to update",
+                        "name": "fileID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "File that was deleted",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseFile"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/models": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "models"
+                ],
+                "summary": "Get all simulation models of scenario",
+                "operationId": "getSimulationModels",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Scenario ID",
+                        "name": "scenarioID",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Simulation models which belong to scenario",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseSimulationModels"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "models"
+                ],
+                "summary": "Add a simulation model to a scenario",
+                "operationId": "addSimulationModel",
+                "parameters": [
+                    {
+                        "description": "Simulation model to be added incl. IDs of scenario and simulator",
+                        "name": "inputSimulationModel",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/simulationmodel.validNewSimulationModel"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "simulation model that was added",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseSimulationModel"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/models/{modelID}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "models"
+                ],
+                "summary": "Get a simulation model",
+                "operationId": "getSimulationModel",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Model ID",
+                        "name": "modelID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "simulation model that was requested",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseSimulationModel"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "models"
+                ],
+                "summary": "Update a simulation model",
+                "operationId": "updateSimulationModel",
+                "parameters": [
+                    {
+                        "description": "Simulation model to be updated",
+                        "name": "inputSimulationModel",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/simulationmodel.validUpdatedSimulationModel"
+                        }
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Model ID",
+                        "name": "modelID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "simulation model that was added",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseSimulationModel"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "models"
+                ],
+                "summary": "Delete a simulation model",
+                "operationId": "deleteSimulationModel",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Model ID",
+                        "name": "modelID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "simulation model that was deleted",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseSimulationModel"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/scenarios": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "scenarios"
+                ],
+                "summary": "Get all scenarios of requesting user",
+                "operationId": "getScenarios",
+                "responses": {
+                    "200": {
+                        "description": "Scenarios to which user has access",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseScenarios"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "scenarios"
+                ],
+                "summary": "Add a scenario",
+                "operationId": "addScenario",
+                "parameters": [
+                    {
+                        "description": "Scenario to be added",
+                        "name": "inputScenario",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/scenario.validNewScenario"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "scenario that was added",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseScenario"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/scenarios/{scenarioID}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "scenarios"
+                ],
+                "summary": "Get scenario",
+                "operationId": "getScenario",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Scenario ID",
+                        "name": "scenarioID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Scenario requested by user",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseScenario"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "scenarios"
+                ],
+                "summary": "Update a scenario",
+                "operationId": "updateScenario",
+                "parameters": [
+                    {
+                        "description": "Scenario to be updated",
+                        "name": "inputScenario",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/scenario.validUpdatedScenario"
+                        }
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Scenario ID",
+                        "name": "scenarioID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated scenario.",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseScenario"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "scenarios"
+                ],
+                "summary": "Delete a scenario",
+                "operationId": "deleteScenario",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Scenario ID",
+                        "name": "scenarioID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Deleted scenario",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseScenario"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/scenarios/{scenarioID}/user": {
+            "put": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "scenarios"
+                ],
+                "summary": "Add a user to a a scenario",
+                "operationId": "addUserToScenario",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Scenario ID",
+                        "name": "scenarioID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "User name",
+                        "name": "username",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User that was added to scenario",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseUser"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "scenarios"
+                ],
+                "summary": "Delete a user from a scenario",
+                "operationId": "deleteUserFromScenario",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Scenario ID",
+                        "name": "scenarioID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "User name",
+                        "name": "username",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User that was deleted from scenario",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseUser"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/scenarios/{scenarioID}/users/": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "scenarios"
+                ],
+                "summary": "Get users of a scenario",
+                "operationId": "getUsersOfScenario",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Scenario ID",
+                        "name": "scenarioID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Array of users that have access to the scenario",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseUsers"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/signals": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "signals"
+                ],
+                "summary": "Get all signals of one direction",
+                "operationId": "getSignals",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Direction of signal (in or out)",
+                        "name": "direction",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Model ID of signals to be obtained",
+                        "name": "modelID",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Signals which belong to simulation model",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseSignals"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "signals"
+                ],
+                "summary": "Add a signal to a signal mapping of a model",
+                "operationId": "AddSignal",
+                "parameters": [
+                    {
+                        "description": "A signal to be added to the model incl. direction and model ID to which signal shall be added",
+                        "name": "inputSignal",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/signal.validNewSignal"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Signal that was added",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseSignal"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/signals/{signalID}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "signals"
+                ],
+                "summary": "Get a signal",
+                "operationId": "getSignal",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID of signal to be obtained",
+                        "name": "signalID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Signal that was requested",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseSignal"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "signals"
+                ],
+                "summary": "Update a signal",
+                "operationId": "updateSignal",
+                "parameters": [
+                    {
+                        "description": "A signal to be updated",
+                        "name": "inputSignal",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/signal.validUpdatedSignal"
+                        }
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID of signal to be updated",
+                        "name": "signalID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Signal that was updated",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseSignal"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "signals"
+                ],
+                "summary": "Delete a signal",
+                "operationId": "deleteSignal",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID of signal to be deleted",
+                        "name": "signalID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Signal that was deleted",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseSignal"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/simulators": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "simulators"
+                ],
+                "summary": "Get all simulators",
+                "operationId": "getSimulators",
+                "responses": {
+                    "200": {
+                        "description": "Simulators requested",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseSimulators"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "simulators"
+                ],
+                "summary": "Add a simulator",
+                "operationId": "addSimulator",
+                "parameters": [
+                    {
+                        "description": "Simulator to be added",
+                        "name": "inputSimulator",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/simulator.validNewSimulator"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Simulator that was added",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseSimulator"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/simulators/{simulatorID}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "simulators"
+                ],
+                "summary": "Get simulator",
+                "operationId": "getSimulator",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Simulator ID",
+                        "name": "simulatorID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Simulator that was requested",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseSimulator"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "simulators"
+                ],
+                "summary": "Update a simulator",
+                "operationId": "updateSimulator",
+                "parameters": [
+                    {
+                        "description": "Simulator to be updated",
+                        "name": "inputSimulator",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/simulator.validUpdatedSimulator"
+                        }
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Simulator ID",
+                        "name": "simulatorID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Simulator that was updated",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseSimulator"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "simulators"
+                ],
+                "summary": "Delete a simulator",
+                "operationId": "deleteSimulator",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Simulator ID",
+                        "name": "simulatorID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Simulator that was deleted",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseSimulator"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/simulators/{simulatorID}/action": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "simulators"
+                ],
+                "summary": "Send an action to simulator (only available if backend server is started with -amqp parameter)",
+                "operationId": "sendActionToSimulator",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Action for simulator",
+                        "name": "inputAction",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Simulator ID",
+                        "name": "simulatorID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Action sent successfully",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/simulators/{simulatorID}/models": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "simulators"
+                ],
+                "summary": "Get all simulation models in which the simulator is used",
+                "operationId": "getModelsOfSimulator",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Simulator ID",
+                        "name": "simulatorID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Simulation models requested by user",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseSimulationModels"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/users": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get all users",
+                "operationId": "GetUsers",
+                "responses": {
+                    "200": {
+                        "description": "Array of users",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseUsers"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Add a user",
+                "operationId": "AddUser",
+                "parameters": [
+                    {
+                        "description": "User to be added",
+                        "name": "inputUser",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/user.validNewUser"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Contains added user object",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseUser"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{userID}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get user",
+                "operationId": "GetUser",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "userID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "requested user",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseUser"
+                        }
+                    },
+                    "403": {
+                        "description": "Access forbidden.",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Update a user",
+                "operationId": "UpdateUser",
+                "parameters": [
+                    {
+                        "description": "User to be updated (anything except for ID can be changed, role can only be change by admin)",
+                        "name": "inputUser",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/user.validUpdatedRequest"
+                        }
+                    },
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "userID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Contains updated user",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseUser"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request.",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "403": {
+                        "description": "Access forbidden.",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Delete a user",
+                "operationId": "DeleteUser",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "userID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "deleted user",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseUser"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/widgets": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "widgets"
+                ],
+                "summary": "Get all widgets of dashboard",
+                "operationId": "getWidgets",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Dashboard ID",
+                        "name": "dashboardID",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Widgets to which belong to dashboard",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseWidgets"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "widgets"
+                ],
+                "summary": "Add a widget to a dashboard",
+                "operationId": "addWidget",
+                "parameters": [
+                    {
+                        "description": "Widget to be added incl. ID of dashboard",
+                        "name": "inputWidget",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/widget.validNewWidget"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Widget that was added",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseWidget"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/widgets/{widgetID}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "widgets"
+                ],
+                "summary": "Get a widget",
+                "operationId": "getWidget",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Widget ID",
+                        "name": "widgetID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Widget that was requested",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseWidget"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "widgets"
+                ],
+                "summary": "Update a widget",
+                "operationId": "updateWidget",
+                "parameters": [
+                    {
+                        "description": "Widget to be updated",
+                        "name": "inputWidget",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/widget.validUpdatedWidget"
+                        }
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Widget ID",
+                        "name": "widgetID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Widget that was updated",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseWidget"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "widgets"
+                ],
+                "summary": "Delete a widget",
+                "operationId": "deleteWidget",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Widget ID",
+                        "name": "widgetID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Widget that was deleted",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseWidget"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "common.Dashboard": {
+            "type": "object",
+            "properties": {
+                "grid": {
+                    "description": "Grid of dashboard",
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "description": "Name of dashboard",
+                    "type": "string"
+                },
+                "scenarioID": {
+                    "description": "ID of scenario to which dashboard belongs",
+                    "type": "integer"
+                }
+            }
+        },
+        "common.File": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "description": "Last modification time of file",
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "imageHeight": {
+                    "description": "Height of image (only needed in case of image)",
+                    "type": "integer"
+                },
+                "imageWidth": {
+                    "description": "Width of image (only needed in case of image)",
+                    "type": "integer"
+                },
+                "name": {
+                    "description": "Name of file",
+                    "type": "string"
+                },
+                "simulationModelID": {
+                    "description": "ID of model to which file belongs",
+                    "type": "integer"
+                },
+                "size": {
+                    "description": "Size of file (in byte)",
+                    "type": "integer"
+                },
+                "type": {
+                    "description": "Type of file (MIME type)",
+                    "type": "string"
+                },
+                "widgetID": {
+                    "description": "ID of widget to which file belongs",
+                    "type": "integer"
+                }
+            }
+        },
+        "common.Scenario": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "description": "Name of scenario",
+                    "type": "string"
+                },
+                "running": {
+                    "description": "Running state of scenario",
+                    "type": "boolean"
+                },
+                "startParameters": {
+                    "description": "Start parameters of scenario as JSON",
+                    "type": "string"
+                }
+            }
+        },
+        "common.Signal": {
+            "type": "object",
+            "properties": {
+                "direction": {
+                    "description": "Direction of the signal (in or out)",
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "index": {
+                    "description": "Index of the Signal in the mapping",
+                    "type": "integer"
+                },
+                "name": {
+                    "description": "Name of Signal",
+                    "type": "string"
+                },
+                "simulationModelID": {
+                    "description": "ID of simulation model",
+                    "type": "integer"
+                },
+                "unit": {
+                    "description": "Unit of Signal",
+                    "type": "string"
+                }
+            }
+        },
+        "common.SimulationModel": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "inputLength": {
+                    "description": "Number of input signals",
+                    "type": "integer"
+                },
+                "name": {
+                    "description": "Name of simulation model",
+                    "type": "string"
+                },
+                "outputLength": {
+                    "description": "Number of output signals",
+                    "type": "integer"
+                },
+                "scenarioID": {
+                    "description": "ID of Scenario to which simulation model belongs",
+                    "type": "integer"
+                },
+                "simulatorID": {
+                    "description": "ID of simulator associated with simulation model",
+                    "type": "integer"
+                },
+                "startParameters": {
+                    "description": "Start parameters of simulation model as JSON",
+                    "type": "string"
+                }
+            }
+        },
+        "common.Simulator": {
+            "type": "object",
+            "properties": {
+                "host": {
+                    "description": "Host if the simulator",
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "modelType": {
+                    "description": "Model type supported by the simulator",
+                    "type": "string"
+                },
+                "properties": {
+                    "description": "Properties of simulator as JSON string",
+                    "type": "string"
+                },
+                "rawProperties": {
+                    "description": "Raw properties of simulator as JSON string",
+                    "type": "string"
+                },
+                "state": {
+                    "description": "State of the simulator",
+                    "type": "string"
+                },
+                "stateUpdateAt": {
+                    "description": "Time of last state update",
+                    "type": "string"
+                },
+                "uptime": {
+                    "description": "Uptime of the simulator",
+                    "type": "integer"
+                },
+                "uuid": {
+                    "description": "UUID of the simulator",
+                    "type": "string"
+                }
+            }
+        },
+        "common.User": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "mail": {
+                    "description": "Mail of user",
+                    "type": "string"
+                },
+                "role": {
+                    "description": "Role of user",
+                    "type": "string"
+                },
+                "username": {
+                    "description": "Username of user",
+                    "type": "string"
+                }
+            }
+        },
+        "common.Widget": {
+            "type": "object",
+            "properties": {
+                "customProperties": {
+                    "description": "Custom properties of widget as JSON string",
+                    "type": "string"
+                },
+                "dashboardID": {
+                    "description": "ID of dashboard to which widget belongs",
+                    "type": "integer"
+                },
+                "height": {
+                    "description": "Height of widget",
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isLocked": {
+                    "description": "Locked state of widget",
+                    "type": "boolean"
+                },
+                "minHeight": {
+                    "description": "Minimal height of widget",
+                    "type": "integer"
+                },
+                "minWidth": {
+                    "description": "Minimal width of widget",
+                    "type": "integer"
+                },
+                "name": {
+                    "description": "Name of widget",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "Type of widget",
+                    "type": "string"
+                },
+                "width": {
+                    "description": "Width of widget",
+                    "type": "integer"
+                },
+                "x": {
+                    "description": "X position of widget",
+                    "type": "integer"
+                },
+                "y": {
+                    "description": "Y position of widget",
+                    "type": "integer"
+                },
+                "z": {
+                    "description": "Z position of widget",
+                    "type": "integer"
+                }
+            }
+        },
+        "dashboard.validNewDashboard": {
+            "type": "object",
+            "required": [
+                "Grid",
+                "Name",
+                "ScenarioID"
+            ],
+            "properties": {
+                "Grid": {
+                    "type": "integer"
+                },
+                "Name": {
+                    "type": "string"
+                },
+                "ScenarioID": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dashboard.validUpdatedDashboard": {
+            "type": "object",
+            "properties": {
+                "Grid": {
+                    "type": "integer"
+                },
+                "Name": {
+                    "type": "string"
+                }
+            }
+        },
+        "docs.ResponseAuthenticate": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                },
+                "token": {
+                    "type": "string"
+                },
+                "user": {
+                    "type": "object",
+                    "$ref": "#/definitions/common.User"
+                }
+            }
+        },
+        "docs.ResponseDashboard": {
+            "type": "object",
+            "properties": {
+                "dashboard": {
+                    "type": "object",
+                    "$ref": "#/definitions/common.Dashboard"
+                }
+            }
+        },
+        "docs.ResponseDashboards": {
+            "type": "object",
+            "properties": {
+                "dashboards": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/common.Dashboard"
+                    }
+                }
+            }
+        },
+        "docs.ResponseError": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "docs.ResponseFile": {
+            "type": "object",
+            "properties": {
+                "file": {
+                    "type": "object",
+                    "$ref": "#/definitions/common.File"
+                }
+            }
+        },
+        "docs.ResponseFiles": {
+            "type": "object",
+            "properties": {
+                "files": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/common.File"
+                    }
+                }
+            }
+        },
+        "docs.ResponseScenario": {
+            "type": "object",
+            "properties": {
+                "scenario": {
+                    "type": "object",
+                    "$ref": "#/definitions/common.Scenario"
+                }
+            }
+        },
+        "docs.ResponseScenarios": {
+            "type": "object",
+            "properties": {
+                "scenarios": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/common.Scenario"
+                    }
+                }
+            }
+        },
+        "docs.ResponseSignal": {
+            "type": "object",
+            "properties": {
+                "signal": {
+                    "type": "object",
+                    "$ref": "#/definitions/common.Signal"
+                }
+            }
+        },
+        "docs.ResponseSignals": {
+            "type": "object",
+            "properties": {
+                "signals": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/common.Signal"
+                    }
+                }
+            }
+        },
+        "docs.ResponseSimulationModel": {
+            "type": "object",
+            "properties": {
+                "model": {
+                    "type": "object",
+                    "$ref": "#/definitions/common.SimulationModel"
+                }
+            }
+        },
+        "docs.ResponseSimulationModels": {
+            "type": "object",
+            "properties": {
+                "models": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/common.SimulationModel"
+                    }
+                }
+            }
+        },
+        "docs.ResponseSimulator": {
+            "type": "object",
+            "properties": {
+                "simulator": {
+                    "type": "object",
+                    "$ref": "#/definitions/common.Simulator"
+                }
+            }
+        },
+        "docs.ResponseSimulators": {
+            "type": "object",
+            "properties": {
+                "simulators": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/common.Simulator"
+                    }
+                }
+            }
+        },
+        "docs.ResponseUser": {
+            "type": "object",
+            "properties": {
+                "user": {
+                    "type": "object",
+                    "$ref": "#/definitions/common.User"
+                }
+            }
+        },
+        "docs.ResponseUsers": {
+            "type": "object",
+            "properties": {
+                "users": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/common.User"
+                    }
+                }
+            }
+        },
+        "docs.ResponseWidget": {
+            "type": "object",
+            "properties": {
+                "widget": {
+                    "type": "object",
+                    "$ref": "#/definitions/common.Widget"
+                }
+            }
+        },
+        "docs.ResponseWidgets": {
+            "type": "object",
+            "properties": {
+                "widgets": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/common.Widget"
+                    }
+                }
+            }
+        },
+        "scenario.validNewScenario": {
+            "type": "object",
+            "required": [
+                "Name",
+                "StartParameters"
+            ],
+            "properties": {
+                "Name": {
+                    "type": "string"
+                },
+                "Running": {
+                    "type": "boolean"
+                },
+                "StartParameters": {
+                    "type": "string"
+                }
+            }
+        },
+        "scenario.validUpdatedScenario": {
+            "type": "object",
+            "properties": {
+                "Name": {
+                    "type": "string"
+                },
+                "Running": {
+                    "type": "boolean"
+                },
+                "StartParameters": {
+                    "type": "string"
+                }
+            }
+        },
+        "signal.validNewSignal": {
+            "type": "object",
+            "required": [
+                "Direction",
+                "Index",
+                "Name",
+                "SimulationModelID"
+            ],
+            "properties": {
+                "Direction": {
+                    "type": "string"
+                },
+                "Index": {
+                    "type": "integer"
+                },
+                "Name": {
+                    "type": "string"
+                },
+                "SimulationModelID": {
+                    "type": "integer"
+                },
+                "Unit": {
+                    "type": "string"
+                }
+            }
+        },
+        "signal.validUpdatedSignal": {
+            "type": "object",
+            "properties": {
+                "Index": {
+                    "type": "integer"
+                },
+                "Name": {
+                    "type": "string"
+                },
+                "Unit": {
+                    "type": "string"
+                }
+            }
+        },
+        "simulationmodel.validNewSimulationModel": {
+            "type": "object",
+            "required": [
+                "Name",
+                "ScenarioID",
+                "SimulatorID",
+                "StartParameters"
+            ],
+            "properties": {
+                "Name": {
+                    "type": "string"
+                },
+                "ScenarioID": {
+                    "type": "integer"
+                },
+                "SimulatorID": {
+                    "type": "integer"
+                },
+                "StartParameters": {
+                    "type": "string"
+                }
+            }
+        },
+        "simulationmodel.validUpdatedSimulationModel": {
+            "type": "object",
+            "properties": {
+                "Name": {
+                    "type": "string"
+                },
+                "SimulatorID": {
+                    "type": "integer"
+                },
+                "StartParameters": {
+                    "type": "string"
+                }
+            }
+        },
+        "simulator.validNewSimulator": {
+            "type": "object",
+            "required": [
+                "Host",
+                "Modeltype",
+                "Properties",
+                "UUID"
+            ],
+            "properties": {
+                "Host": {
+                    "type": "string"
+                },
+                "Modeltype": {
+                    "type": "string"
+                },
+                "Properties": {
+                    "type": "string"
+                },
+                "State": {
+                    "type": "string"
+                },
+                "UUID": {
+                    "type": "string"
+                }
+            }
+        },
+        "simulator.validUpdatedSimulator": {
+            "type": "object",
+            "properties": {
+                "Host": {
+                    "type": "string"
+                },
+                "Modeltype": {
+                    "type": "string"
+                },
+                "Properties": {
+                    "type": "string"
+                },
+                "State": {
+                    "type": "string"
+                },
+                "UUID": {
+                    "type": "string"
+                }
+            }
+        },
+        "user.loginRequest": {
+            "type": "object",
+            "required": [
+                "Password",
+                "Username"
+            ],
+            "properties": {
+                "Password": {
+                    "type": "string"
+                },
+                "Username": {
+                    "type": "string"
+                }
+            }
+        },
+        "user.validNewUser": {
+            "type": "object",
+            "required": [
+                "Mail",
+                "Password",
+                "Role",
+                "Username"
+            ],
+            "properties": {
+                "Mail": {
+                    "type": "string"
+                },
+                "Password": {
+                    "type": "string"
+                },
+                "Role": {
+                    "type": "string"
+                },
+                "Username": {
+                    "type": "string"
+                }
+            }
+        },
+        "user.validUpdatedRequest": {
+            "type": "object",
+            "properties": {
+                "Mail": {
+                    "type": "string"
+                },
+                "Password": {
+                    "type": "string"
+                },
+                "Role": {
+                    "type": "string"
+                },
+                "Username": {
+                    "type": "string"
+                }
+            }
+        },
+        "widget.validNewWidget": {
+            "type": "object",
+            "required": [
+                "DashboardID",
+                "Height",
+                "Name",
+                "Type",
+                "Width"
+            ],
+            "properties": {
+                "CustomProperties": {
+                    "type": "string"
+                },
+                "DashboardID": {
+                    "type": "integer"
+                },
+                "Height": {
+                    "type": "integer"
+                },
+                "IsLocked": {
+                    "type": "boolean"
+                },
+                "MinHeight": {
+                    "type": "integer"
+                },
+                "MinWidth": {
+                    "type": "integer"
+                },
+                "Name": {
+                    "type": "string"
+                },
+                "Type": {
+                    "type": "string"
+                },
+                "Width": {
+                    "type": "integer"
+                },
+                "X": {
+                    "type": "integer"
+                },
+                "Y": {
+                    "type": "integer"
+                },
+                "Z": {
+                    "type": "integer"
+                }
+            }
+        },
+        "widget.validUpdatedWidget": {
+            "type": "object",
+            "properties": {
+                "CustomProperties": {
+                    "type": "string"
+                },
+                "Height": {
+                    "type": "integer"
+                },
+                "IsLocked": {
+                    "type": "boolean"
+                },
+                "MinHeight": {
+                    "type": "integer"
+                },
+                "MinWidth": {
+                    "type": "integer"
+                },
+                "Name": {
+                    "type": "string"
+                },
+                "Type": {
+                    "type": "string"
+                },
+                "Width": {
+                    "type": "integer"
+                },
+                "X": {
+                    "type": "integer"
+                },
+                "Y": {
+                    "type": "integer"
+                },
+                "Z": {
+                    "type": "integer"
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,2427 @@
+basePath: /api/v2
+definitions:
+  common.Dashboard:
+    properties:
+      grid:
+        description: Grid of dashboard
+        type: integer
+      id:
+        type: integer
+      name:
+        description: Name of dashboard
+        type: string
+      scenarioID:
+        description: ID of scenario to which dashboard belongs
+        type: integer
+    type: object
+  common.File:
+    properties:
+      date:
+        description: Last modification time of file
+        type: string
+      id:
+        type: integer
+      imageHeight:
+        description: Height of image (only needed in case of image)
+        type: integer
+      imageWidth:
+        description: Width of image (only needed in case of image)
+        type: integer
+      name:
+        description: Name of file
+        type: string
+      simulationModelID:
+        description: ID of model to which file belongs
+        type: integer
+      size:
+        description: Size of file (in byte)
+        type: integer
+      type:
+        description: Type of file (MIME type)
+        type: string
+      widgetID:
+        description: ID of widget to which file belongs
+        type: integer
+    type: object
+  common.Scenario:
+    properties:
+      id:
+        type: integer
+      name:
+        description: Name of scenario
+        type: string
+      running:
+        description: Running state of scenario
+        type: boolean
+      startParameters:
+        description: Start parameters of scenario as JSON
+        type: string
+    type: object
+  common.Signal:
+    properties:
+      direction:
+        description: Direction of the signal (in or out)
+        type: string
+      id:
+        type: integer
+      index:
+        description: Index of the Signal in the mapping
+        type: integer
+      name:
+        description: Name of Signal
+        type: string
+      simulationModelID:
+        description: ID of simulation model
+        type: integer
+      unit:
+        description: Unit of Signal
+        type: string
+    type: object
+  common.SimulationModel:
+    properties:
+      id:
+        type: integer
+      inputLength:
+        description: Number of input signals
+        type: integer
+      name:
+        description: Name of simulation model
+        type: string
+      outputLength:
+        description: Number of output signals
+        type: integer
+      scenarioID:
+        description: ID of Scenario to which simulation model belongs
+        type: integer
+      simulatorID:
+        description: ID of simulator associated with simulation model
+        type: integer
+      startParameters:
+        description: Start parameters of simulation model as JSON
+        type: string
+    type: object
+  common.Simulator:
+    properties:
+      host:
+        description: Host if the simulator
+        type: string
+      id:
+        type: integer
+      modelType:
+        description: Model type supported by the simulator
+        type: string
+      properties:
+        description: Properties of simulator as JSON string
+        type: string
+      rawProperties:
+        description: Raw properties of simulator as JSON string
+        type: string
+      state:
+        description: State of the simulator
+        type: string
+      stateUpdateAt:
+        description: Time of last state update
+        type: string
+      uptime:
+        description: Uptime of the simulator
+        type: integer
+      uuid:
+        description: UUID of the simulator
+        type: string
+    type: object
+  common.User:
+    properties:
+      id:
+        type: integer
+      mail:
+        description: Mail of user
+        type: string
+      role:
+        description: Role of user
+        type: string
+      username:
+        description: Username of user
+        type: string
+    type: object
+  common.Widget:
+    properties:
+      customProperties:
+        description: Custom properties of widget as JSON string
+        type: string
+      dashboardID:
+        description: ID of dashboard to which widget belongs
+        type: integer
+      height:
+        description: Height of widget
+        type: integer
+      id:
+        type: integer
+      isLocked:
+        description: Locked state of widget
+        type: boolean
+      minHeight:
+        description: Minimal height of widget
+        type: integer
+      minWidth:
+        description: Minimal width of widget
+        type: integer
+      name:
+        description: Name of widget
+        type: string
+      type:
+        description: Type of widget
+        type: string
+      width:
+        description: Width of widget
+        type: integer
+      x:
+        description: X position of widget
+        type: integer
+      "y":
+        description: Y position of widget
+        type: integer
+      z:
+        description: Z position of widget
+        type: integer
+    type: object
+  dashboard.validNewDashboard:
+    properties:
+      Grid:
+        type: integer
+      Name:
+        type: string
+      ScenarioID:
+        type: integer
+    required:
+    - Grid
+    - Name
+    - ScenarioID
+    type: object
+  dashboard.validUpdatedDashboard:
+    properties:
+      Grid:
+        type: integer
+      Name:
+        type: string
+    type: object
+  docs.ResponseAuthenticate:
+    properties:
+      message:
+        type: string
+      success:
+        type: boolean
+      token:
+        type: string
+      user:
+        $ref: '#/definitions/common.User'
+        type: object
+    type: object
+  docs.ResponseDashboard:
+    properties:
+      dashboard:
+        $ref: '#/definitions/common.Dashboard'
+        type: object
+    type: object
+  docs.ResponseDashboards:
+    properties:
+      dashboards:
+        items:
+          $ref: '#/definitions/common.Dashboard'
+        type: array
+    type: object
+  docs.ResponseError:
+    properties:
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+  docs.ResponseFile:
+    properties:
+      file:
+        $ref: '#/definitions/common.File'
+        type: object
+    type: object
+  docs.ResponseFiles:
+    properties:
+      files:
+        items:
+          $ref: '#/definitions/common.File'
+        type: array
+    type: object
+  docs.ResponseScenario:
+    properties:
+      scenario:
+        $ref: '#/definitions/common.Scenario'
+        type: object
+    type: object
+  docs.ResponseScenarios:
+    properties:
+      scenarios:
+        items:
+          $ref: '#/definitions/common.Scenario'
+        type: array
+    type: object
+  docs.ResponseSignal:
+    properties:
+      signal:
+        $ref: '#/definitions/common.Signal'
+        type: object
+    type: object
+  docs.ResponseSignals:
+    properties:
+      signals:
+        items:
+          $ref: '#/definitions/common.Signal'
+        type: array
+    type: object
+  docs.ResponseSimulationModel:
+    properties:
+      model:
+        $ref: '#/definitions/common.SimulationModel'
+        type: object
+    type: object
+  docs.ResponseSimulationModels:
+    properties:
+      models:
+        items:
+          $ref: '#/definitions/common.SimulationModel'
+        type: array
+    type: object
+  docs.ResponseSimulator:
+    properties:
+      simulator:
+        $ref: '#/definitions/common.Simulator'
+        type: object
+    type: object
+  docs.ResponseSimulators:
+    properties:
+      simulators:
+        items:
+          $ref: '#/definitions/common.Simulator'
+        type: array
+    type: object
+  docs.ResponseUser:
+    properties:
+      user:
+        $ref: '#/definitions/common.User'
+        type: object
+    type: object
+  docs.ResponseUsers:
+    properties:
+      users:
+        items:
+          $ref: '#/definitions/common.User'
+        type: array
+    type: object
+  docs.ResponseWidget:
+    properties:
+      widget:
+        $ref: '#/definitions/common.Widget'
+        type: object
+    type: object
+  docs.ResponseWidgets:
+    properties:
+      widgets:
+        items:
+          $ref: '#/definitions/common.Widget'
+        type: array
+    type: object
+  scenario.validNewScenario:
+    properties:
+      Name:
+        type: string
+      Running:
+        type: boolean
+      StartParameters:
+        type: string
+    required:
+    - Name
+    - StartParameters
+    type: object
+  scenario.validUpdatedScenario:
+    properties:
+      Name:
+        type: string
+      Running:
+        type: boolean
+      StartParameters:
+        type: string
+    type: object
+  signal.validNewSignal:
+    properties:
+      Direction:
+        type: string
+      Index:
+        type: integer
+      Name:
+        type: string
+      SimulationModelID:
+        type: integer
+      Unit:
+        type: string
+    required:
+    - Direction
+    - Index
+    - Name
+    - SimulationModelID
+    type: object
+  signal.validUpdatedSignal:
+    properties:
+      Index:
+        type: integer
+      Name:
+        type: string
+      Unit:
+        type: string
+    type: object
+  simulationmodel.validNewSimulationModel:
+    properties:
+      Name:
+        type: string
+      ScenarioID:
+        type: integer
+      SimulatorID:
+        type: integer
+      StartParameters:
+        type: string
+    required:
+    - Name
+    - ScenarioID
+    - SimulatorID
+    - StartParameters
+    type: object
+  simulationmodel.validUpdatedSimulationModel:
+    properties:
+      Name:
+        type: string
+      SimulatorID:
+        type: integer
+      StartParameters:
+        type: string
+    type: object
+  simulator.validNewSimulator:
+    properties:
+      Host:
+        type: string
+      Modeltype:
+        type: string
+      Properties:
+        type: string
+      State:
+        type: string
+      UUID:
+        type: string
+    required:
+    - Host
+    - Modeltype
+    - Properties
+    - UUID
+    type: object
+  simulator.validUpdatedSimulator:
+    properties:
+      Host:
+        type: string
+      Modeltype:
+        type: string
+      Properties:
+        type: string
+      State:
+        type: string
+      UUID:
+        type: string
+    type: object
+  user.loginRequest:
+    properties:
+      Password:
+        type: string
+      Username:
+        type: string
+    required:
+    - Password
+    - Username
+    type: object
+  user.validNewUser:
+    properties:
+      Mail:
+        type: string
+      Password:
+        type: string
+      Role:
+        type: string
+      Username:
+        type: string
+    required:
+    - Mail
+    - Password
+    - Role
+    - Username
+    type: object
+  user.validUpdatedRequest:
+    properties:
+      Mail:
+        type: string
+      Password:
+        type: string
+      Role:
+        type: string
+      Username:
+        type: string
+    type: object
+  widget.validNewWidget:
+    properties:
+      CustomProperties:
+        type: string
+      DashboardID:
+        type: integer
+      Height:
+        type: integer
+      IsLocked:
+        type: boolean
+      MinHeight:
+        type: integer
+      MinWidth:
+        type: integer
+      Name:
+        type: string
+      Type:
+        type: string
+      Width:
+        type: integer
+      X:
+        type: integer
+      "Y":
+        type: integer
+      Z:
+        type: integer
+    required:
+    - DashboardID
+    - Height
+    - Name
+    - Type
+    - Width
+    type: object
+  widget.validUpdatedWidget:
+    properties:
+      CustomProperties:
+        type: string
+      Height:
+        type: integer
+      IsLocked:
+        type: boolean
+      MinHeight:
+        type: integer
+      MinWidth:
+        type: integer
+      Name:
+        type: string
+      Type:
+        type: string
+      Width:
+        type: integer
+      X:
+        type: integer
+      "Y":
+        type: integer
+      Z:
+        type: integer
+    type: object
+host: localhost:4000
+info:
+  contact:
+    email: sonja.happ@eonerc.rwth-aachen.de
+    name: Sonja Happ
+  description: |-
+    This is the API of the VILLASweb Backend
+    WORK IN PROGRESS! PLEASE BE PATIENT!
+    The tool https://github.com/swaggo/swag is used to auto-generate API docs for gin.
+  license:
+    name: GNU GPL 3.0
+    url: http://www.gnu.de/documents/gpl-3.0.en.html
+  title: VILLASweb Backend API
+  version: "2.0"
+paths:
+  /authenticate:
+    post:
+      consumes:
+      - application/json
+      operationId: authenticate
+      parameters:
+      - description: loginRequest of user
+        in: body
+        name: inputUser
+        required: true
+        schema:
+          $ref: '#/definitions/user.loginRequest'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: JSON web token, success status, message and authenticated user
+            object
+          schema:
+            $ref: '#/definitions/docs.ResponseAuthenticate'
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity.
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Authentication for user
+      tags:
+      - authentication
+  /dashboards:
+    get:
+      operationId: getDashboards
+      parameters:
+      - description: Scenario ID
+        in: query
+        name: scenarioID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Dashboards which belong to scenario
+          schema:
+            $ref: '#/definitions/docs.ResponseDashboards'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Get all dashboards of scenario
+      tags:
+      - dashboards
+    post:
+      consumes:
+      - application/json
+      operationId: addDashboard
+      parameters:
+      - description: Dashboard to be added incl. ID of Scenario
+        in: body
+        name: inputDab
+        required: true
+        schema:
+          $ref: '#/definitions/dashboard.validNewDashboard'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Dashboard that was added
+          schema:
+            $ref: '#/definitions/docs.ResponseDashboard'
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Add a dashboard to a scenario
+      tags:
+      - dashboards
+  /dashboards/{dashboardID}:
+    delete:
+      operationId: deleteDashboard
+      parameters:
+      - description: Dashboard ID
+        in: path
+        name: dashboardID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Dashboard that was deleted
+          schema:
+            $ref: '#/definitions/docs.ResponseDashboard'
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Delete a dashboard
+      tags:
+      - dashboards
+    get:
+      operationId: getDashboard
+      parameters:
+      - description: Dashboard ID
+        in: path
+        name: dashboardID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Dashboard that was requested
+          schema:
+            $ref: '#/definitions/docs.ResponseDashboard'
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Get a dashboard
+      tags:
+      - dashboards
+    put:
+      consumes:
+      - application/json
+      operationId: updateDashboard
+      parameters:
+      - description: Dashboard to be updated
+        in: body
+        name: inputDab
+        required: true
+        schema:
+          $ref: '#/definitions/dashboard.validUpdatedDashboard'
+          type: object
+      - description: Dashboard ID
+        in: path
+        name: dashboardID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Dashboard that was updated
+          schema:
+            $ref: '#/definitions/docs.ResponseDashboard'
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Update a dashboard
+      tags:
+      - dashboards
+  /files:
+    get:
+      operationId: getFiles
+      parameters:
+      - description: Set to model for files of model, set to widget for files of widget
+        in: query
+        name: objectType
+        required: true
+        type: string
+      - description: ID of either model or widget of which files are requested
+        in: query
+        name: objectID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Files which belong to simulation model or widget
+          schema:
+            $ref: '#/definitions/docs.ResponseFiles'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Get all files of a specific model or widget
+      tags:
+      - files
+    post:
+      consumes:
+      - text/plain
+      - image/png
+      - image/jpeg
+      - image/gif
+      - model/x-cim
+      - model/x-cim.zip
+      operationId: addFile
+      parameters:
+      - description: File to be uploaded
+        in: formData
+        name: inputFile
+        required: true
+        type: file
+      - description: Set to model for files of model, set to widget for files of widget
+        in: query
+        name: objectType
+        required: true
+        type: string
+      - description: ID of either model or widget of which files are requested
+        in: query
+        name: objectID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: File that was added
+          schema:
+            $ref: '#/definitions/docs.ResponseFile'
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Add a file to a specific model or widget
+      tags:
+      - files
+  /files/{fileID}:
+    delete:
+      operationId: deleteFile
+      parameters:
+      - description: ID of the file to update
+        in: path
+        name: fileID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: File that was deleted
+          schema:
+            $ref: '#/definitions/docs.ResponseFile'
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Delete a file
+      tags:
+      - files
+    get:
+      operationId: getFile
+      parameters:
+      - description: ID of the file to download
+        in: path
+        name: fileID
+        required: true
+        type: integer
+      produces:
+      - text/plain
+      - image/png
+      - image/jpeg
+      - image/gif
+      - model/x-cim
+      - model/x-cim.zip
+      responses:
+        "200":
+          description: File that was requested
+          schema:
+            $ref: '#/definitions/docs.ResponseFile'
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Download a file
+      tags:
+      - files
+    put:
+      consumes:
+      - text/plain
+      - image/png
+      - image/jpeg
+      - image/gif
+      - model/x-cim
+      - model/x-cim.zip
+      operationId: updateFile
+      parameters:
+      - description: File to be uploaded
+        in: formData
+        name: inputFile
+        required: true
+        type: file
+      - description: ID of the file to update
+        in: path
+        name: fileID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: File that was updated
+          schema:
+            $ref: '#/definitions/docs.ResponseFile'
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Update a file
+      tags:
+      - files
+  /models:
+    get:
+      operationId: getSimulationModels
+      parameters:
+      - description: Scenario ID
+        in: query
+        name: scenarioID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Simulation models which belong to scenario
+          schema:
+            $ref: '#/definitions/docs.ResponseSimulationModels'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Get all simulation models of scenario
+      tags:
+      - models
+    post:
+      consumes:
+      - application/json
+      operationId: addSimulationModel
+      parameters:
+      - description: Simulation model to be added incl. IDs of scenario and simulator
+        in: body
+        name: inputSimulationModel
+        required: true
+        schema:
+          $ref: '#/definitions/simulationmodel.validNewSimulationModel'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: simulation model that was added
+          schema:
+            $ref: '#/definitions/docs.ResponseSimulationModel'
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Add a simulation model to a scenario
+      tags:
+      - models
+  /models/{modelID}:
+    delete:
+      operationId: deleteSimulationModel
+      parameters:
+      - description: Model ID
+        in: path
+        name: modelID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: simulation model that was deleted
+          schema:
+            $ref: '#/definitions/docs.ResponseSimulationModel'
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Delete a simulation model
+      tags:
+      - models
+    get:
+      operationId: getSimulationModel
+      parameters:
+      - description: Model ID
+        in: path
+        name: modelID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: simulation model that was requested
+          schema:
+            $ref: '#/definitions/docs.ResponseSimulationModel'
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Get a simulation model
+      tags:
+      - models
+    put:
+      consumes:
+      - application/json
+      operationId: updateSimulationModel
+      parameters:
+      - description: Simulation model to be updated
+        in: body
+        name: inputSimulationModel
+        required: true
+        schema:
+          $ref: '#/definitions/simulationmodel.validUpdatedSimulationModel'
+          type: object
+      - description: Model ID
+        in: path
+        name: modelID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: simulation model that was added
+          schema:
+            $ref: '#/definitions/docs.ResponseSimulationModel'
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Update a simulation model
+      tags:
+      - models
+  /scenarios:
+    get:
+      operationId: getScenarios
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Scenarios to which user has access
+          schema:
+            $ref: '#/definitions/docs.ResponseScenarios'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Get all scenarios of requesting user
+      tags:
+      - scenarios
+    post:
+      consumes:
+      - application/json
+      operationId: addScenario
+      parameters:
+      - description: Scenario to be added
+        in: body
+        name: inputScenario
+        required: true
+        schema:
+          $ref: '#/definitions/scenario.validNewScenario'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: scenario that was added
+          schema:
+            $ref: '#/definitions/docs.ResponseScenario'
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Add a scenario
+      tags:
+      - scenarios
+  /scenarios/{scenarioID}:
+    delete:
+      operationId: deleteScenario
+      parameters:
+      - description: Scenario ID
+        in: path
+        name: scenarioID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Deleted scenario
+          schema:
+            $ref: '#/definitions/docs.ResponseScenario'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Delete a scenario
+      tags:
+      - scenarios
+    get:
+      operationId: getScenario
+      parameters:
+      - description: Scenario ID
+        in: path
+        name: scenarioID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Scenario requested by user
+          schema:
+            $ref: '#/definitions/docs.ResponseScenario'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Get scenario
+      tags:
+      - scenarios
+    put:
+      consumes:
+      - application/json
+      operationId: updateScenario
+      parameters:
+      - description: Scenario to be updated
+        in: body
+        name: inputScenario
+        required: true
+        schema:
+          $ref: '#/definitions/scenario.validUpdatedScenario'
+          type: object
+      - description: Scenario ID
+        in: path
+        name: scenarioID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated scenario.
+          schema:
+            $ref: '#/definitions/docs.ResponseScenario'
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Update a scenario
+      tags:
+      - scenarios
+  /scenarios/{scenarioID}/user:
+    delete:
+      operationId: deleteUserFromScenario
+      parameters:
+      - description: Scenario ID
+        in: path
+        name: scenarioID
+        required: true
+        type: integer
+      - description: User name
+        in: query
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User that was deleted from scenario
+          schema:
+            $ref: '#/definitions/docs.ResponseUser'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Delete a user from a scenario
+      tags:
+      - scenarios
+    put:
+      operationId: addUserToScenario
+      parameters:
+      - description: Scenario ID
+        in: path
+        name: scenarioID
+        required: true
+        type: integer
+      - description: User name
+        in: query
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User that was added to scenario
+          schema:
+            $ref: '#/definitions/docs.ResponseUser'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Add a user to a a scenario
+      tags:
+      - scenarios
+  /scenarios/{scenarioID}/users/:
+    get:
+      operationId: getUsersOfScenario
+      parameters:
+      - description: Scenario ID
+        in: path
+        name: scenarioID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Array of users that have access to the scenario
+          schema:
+            $ref: '#/definitions/docs.ResponseUsers'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Get users of a scenario
+      tags:
+      - scenarios
+  /signals:
+    get:
+      operationId: getSignals
+      parameters:
+      - description: Direction of signal (in or out)
+        in: query
+        name: direction
+        required: true
+        type: string
+      - description: Model ID of signals to be obtained
+        in: query
+        name: modelID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Signals which belong to simulation model
+          schema:
+            $ref: '#/definitions/docs.ResponseSignals'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Get all signals of one direction
+      tags:
+      - signals
+    post:
+      consumes:
+      - application/json
+      operationId: AddSignal
+      parameters:
+      - description: A signal to be added to the model incl. direction and model ID
+          to which signal shall be added
+        in: body
+        name: inputSignal
+        required: true
+        schema:
+          $ref: '#/definitions/signal.validNewSignal'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Signal that was added
+          schema:
+            $ref: '#/definitions/docs.ResponseSignal'
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Add a signal to a signal mapping of a model
+      tags:
+      - signals
+  /signals/{signalID}:
+    delete:
+      operationId: deleteSignal
+      parameters:
+      - description: ID of signal to be deleted
+        in: path
+        name: signalID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Signal that was deleted
+          schema:
+            $ref: '#/definitions/docs.ResponseSignal'
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Delete a signal
+      tags:
+      - signals
+    get:
+      operationId: getSignal
+      parameters:
+      - description: ID of signal to be obtained
+        in: path
+        name: signalID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Signal that was requested
+          schema:
+            $ref: '#/definitions/docs.ResponseSignal'
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Get a signal
+      tags:
+      - signals
+    put:
+      operationId: updateSignal
+      parameters:
+      - description: A signal to be updated
+        in: body
+        name: inputSignal
+        required: true
+        schema:
+          $ref: '#/definitions/signal.validUpdatedSignal'
+          type: object
+      - description: ID of signal to be updated
+        in: path
+        name: signalID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Signal that was updated
+          schema:
+            $ref: '#/definitions/docs.ResponseSignal'
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Update a signal
+      tags:
+      - signals
+  /simulators:
+    get:
+      operationId: getSimulators
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Simulators requested
+          schema:
+            $ref: '#/definitions/docs.ResponseSimulators'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Get all simulators
+      tags:
+      - simulators
+    post:
+      consumes:
+      - application/json
+      operationId: addSimulator
+      parameters:
+      - description: Simulator to be added
+        in: body
+        name: inputSimulator
+        required: true
+        schema:
+          $ref: '#/definitions/simulator.validNewSimulator'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Simulator that was added
+          schema:
+            $ref: '#/definitions/docs.ResponseSimulator'
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Add a simulator
+      tags:
+      - simulators
+  /simulators/{simulatorID}:
+    delete:
+      operationId: deleteSimulator
+      parameters:
+      - description: Simulator ID
+        in: path
+        name: simulatorID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Simulator that was deleted
+          schema:
+            $ref: '#/definitions/docs.ResponseSimulator'
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Delete a simulator
+      tags:
+      - simulators
+    get:
+      operationId: getSimulator
+      parameters:
+      - description: Simulator ID
+        in: path
+        name: simulatorID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Simulator that was requested
+          schema:
+            $ref: '#/definitions/docs.ResponseSimulator'
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Get simulator
+      tags:
+      - simulators
+    put:
+      consumes:
+      - application/json
+      operationId: updateSimulator
+      parameters:
+      - description: Simulator to be updated
+        in: body
+        name: inputSimulator
+        required: true
+        schema:
+          $ref: '#/definitions/simulator.validUpdatedSimulator'
+          type: object
+      - description: Simulator ID
+        in: path
+        name: simulatorID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Simulator that was updated
+          schema:
+            $ref: '#/definitions/docs.ResponseSimulator'
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Update a simulator
+      tags:
+      - simulators
+  /simulators/{simulatorID}/action:
+    post:
+      operationId: sendActionToSimulator
+      parameters:
+      - description: Action for simulator
+        in: query
+        name: inputAction
+        required: true
+        type: string
+      - description: Simulator ID
+        in: path
+        name: simulatorID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Action sent successfully
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Send an action to simulator (only available if backend server is started
+        with -amqp parameter)
+      tags:
+      - simulators
+  /simulators/{simulatorID}/models:
+    get:
+      operationId: getModelsOfSimulator
+      parameters:
+      - description: Simulator ID
+        in: path
+        name: simulatorID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Simulation models requested by user
+          schema:
+            $ref: '#/definitions/docs.ResponseSimulationModels'
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Get all simulation models in which the simulator is used
+      tags:
+      - simulators
+  /users:
+    get:
+      operationId: GetUsers
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Array of users
+          schema:
+            $ref: '#/definitions/docs.ResponseUsers'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Get all users
+      tags:
+      - users
+    post:
+      consumes:
+      - application/json
+      operationId: AddUser
+      parameters:
+      - description: User to be added
+        in: body
+        name: inputUser
+        required: true
+        schema:
+          $ref: '#/definitions/user.validNewUser'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Contains added user object
+          schema:
+            $ref: '#/definitions/docs.ResponseUser'
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Add a user
+      tags:
+      - users
+  /users/{userID}:
+    delete:
+      operationId: DeleteUser
+      parameters:
+      - description: User ID
+        in: path
+        name: userID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: deleted user
+          schema:
+            $ref: '#/definitions/docs.ResponseUser'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Delete a user
+      tags:
+      - users
+    get:
+      operationId: GetUser
+      parameters:
+      - description: User ID
+        in: path
+        name: userID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: requested user
+          schema:
+            $ref: '#/definitions/docs.ResponseUser'
+            type: object
+        "403":
+          description: Access forbidden.
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Get user
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      operationId: UpdateUser
+      parameters:
+      - description: User to be updated (anything except for ID can be changed, role
+          can only be change by admin)
+        in: body
+        name: inputUser
+        required: true
+        schema:
+          $ref: '#/definitions/user.validUpdatedRequest'
+          type: object
+      - description: User ID
+        in: path
+        name: userID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Contains updated user
+          schema:
+            $ref: '#/definitions/docs.ResponseUser'
+            type: object
+        "400":
+          description: Bad request.
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "403":
+          description: Access forbidden.
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Update a user
+      tags:
+      - users
+  /widgets:
+    get:
+      operationId: getWidgets
+      parameters:
+      - description: Dashboard ID
+        in: query
+        name: dashboardID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Widgets to which belong to dashboard
+          schema:
+            $ref: '#/definitions/docs.ResponseWidgets'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Get all widgets of dashboard
+      tags:
+      - widgets
+    post:
+      consumes:
+      - application/json
+      operationId: addWidget
+      parameters:
+      - description: Widget to be added incl. ID of dashboard
+        in: body
+        name: inputWidget
+        required: true
+        schema:
+          $ref: '#/definitions/widget.validNewWidget'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Widget that was added
+          schema:
+            $ref: '#/definitions/docs.ResponseWidget'
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Add a widget to a dashboard
+      tags:
+      - widgets
+  /widgets/{widgetID}:
+    delete:
+      operationId: deleteWidget
+      parameters:
+      - description: Widget ID
+        in: path
+        name: widgetID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Widget that was deleted
+          schema:
+            $ref: '#/definitions/docs.ResponseWidget'
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Delete a widget
+      tags:
+      - widgets
+    get:
+      operationId: getWidget
+      parameters:
+      - description: Widget ID
+        in: path
+        name: widgetID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Widget that was requested
+          schema:
+            $ref: '#/definitions/docs.ResponseWidget'
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Get a widget
+      tags:
+      - widgets
+    put:
+      consumes:
+      - application/json
+      operationId: updateWidget
+      parameters:
+      - description: Widget to be updated
+        in: body
+        name: inputWidget
+        required: true
+        schema:
+          $ref: '#/definitions/widget.validUpdatedWidget'
+          type: object
+      - description: Widget ID
+        in: path
+        name: widgetID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Widget that was updated
+          schema:
+            $ref: '#/definitions/docs.ResponseWidget'
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Update a widget
+      tags:
+      - widgets
+swagger: "2.0"
