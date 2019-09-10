@@ -40,7 +40,7 @@ build:backend:
   image: villaswebbackendgo:ubuntu
   script:
     - go mod tidy
-    - go get -u github.com/swaggo/swag/cmd/swag@1.6.0
+    - go get -u github.com/swaggo/swag/cmd/swag@v1.6.0
     - ~/go/bin/swag init -p pascalcase -g "start.go" -o "./doc/api/"
     - go build
   artifacts:
@@ -73,7 +73,7 @@ test:database:
   script:
     - /etc/init.d/postgresql start
     - go mod tidy
-    - go get -u github.com/swaggo/swag/cmd/swag@1.6.0
+    - go get -u github.com/swaggo/swag/cmd/swag@v1.6.0
     - ~/go/bin/swag init -p pascalcase -g "start.go" -o "./doc/api/"
     - cd common
     - go test -v -args -dbhost=/var/run/postgresql
@@ -88,7 +88,7 @@ test:scenario:
   script:
     - /etc/init.d/postgresql start
     - go mod tidy
-    - go get -u github.com/swaggo/swag/cmd/swag@1.6.0
+    - go get -u github.com/swaggo/swag/cmd/swag@v1.6.0
     - ~/go/bin/swag init -p pascalcase -g "start.go" -o "./doc/api/"
     - cd ${TEST_FOLDER}
     - go test -v -args -dbhost=/var/run/postgresql
@@ -138,7 +138,7 @@ test:all:
   script:
     - /etc/init.d/postgresql start
     - go mod tidy
-    - go get -u github.com/swaggo/swag/cmd/swag@1.6.0
+    - go get -u github.com/swaggo/swag/cmd/swag@v1.6.0
     - ~/go/bin/swag init -p pascalcase -g "start.go" -o "./doc/api/"
     - go test $(go list ./... ) -v -p 1 -covermode=count -coverprofile ./testcover.txt
     - go tool cover -func=testcover.txt
