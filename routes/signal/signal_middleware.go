@@ -3,8 +3,6 @@ package signal
 import (
 	"fmt"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/helper"
-	"strconv"
-
 	"github.com/gin-gonic/gin"
 
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
@@ -21,9 +19,8 @@ func checkPermissions(c *gin.Context, operation database.CRUD) (bool, Signal) {
 		return false, sig
 	}
 
-	signalID, err := strconv.Atoi(c.Param("signalID"))
+	signalID, err := helper.GetIDOfElement(c, "signalID", "path", -1)
 	if err != nil {
-		helper.BadRequestError(c, fmt.Sprintf("No or incorrect format of signalID path parameter"))
 		return false, sig
 	}
 

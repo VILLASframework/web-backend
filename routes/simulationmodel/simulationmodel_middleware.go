@@ -3,8 +3,6 @@ package simulationmodel
 import (
 	"fmt"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/helper"
-	"strconv"
-
 	"github.com/gin-gonic/gin"
 
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
@@ -21,21 +19,9 @@ func CheckPermissions(c *gin.Context, operation database.CRUD, modelIDSource str
 		return false, m
 	}
 
-	var modelID int
-	if modelIDSource == "path" {
-		modelID, err = strconv.Atoi(c.Param("modelID"))
-		if err != nil {
-			helper.BadRequestError(c, fmt.Sprintf("No or incorrect format of modelID path parameter"))
-			return false, m
-		}
-	} else if modelIDSource == "query" {
-		modelID, err = strconv.Atoi(c.Request.URL.Query().Get("modelID"))
-		if err != nil {
-			helper.BadRequestError(c, fmt.Sprintf("No or incorrect format of modelID query parameter"))
-			return false, m
-		}
-	} else if modelIDSource == "body" {
-		modelID = modelIDBody
+	modelID, err := helper.GetIDOfElement(c, "modelID", modelIDSource, modelIDBody)
+	if err != nil {
+		return false, m
 	}
 
 	err = m.ByID(uint(modelID))

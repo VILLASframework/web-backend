@@ -3,8 +3,6 @@ package widget
 import (
 	"fmt"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/helper"
-	"strconv"
-
 	"github.com/gin-gonic/gin"
 
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
@@ -14,8 +12,8 @@ import (
 func CheckPermissions(c *gin.Context, operation database.CRUD, widgetIDBody int) (bool, Widget) {
 
 	var w Widget
-
-	err := database.ValidateRole(c, database.ModelWidget, operation)
+	var err error
+	err = database.ValidateRole(c, database.ModelWidget, operation)
 	if err != nil {
 		helper.UnprocessableEntityError(c, fmt.Sprintf("Access denied (role validation failed): %v", err.Error()))
 		return false, w
@@ -23,9 +21,8 @@ func CheckPermissions(c *gin.Context, operation database.CRUD, widgetIDBody int)
 
 	var widgetID int
 	if widgetIDBody < 0 {
-		widgetID, err = strconv.Atoi(c.Param("widgetID"))
+		widgetID, err = helper.GetIDOfElement(c, "widgetID", "path", -1)
 		if err != nil {
-			helper.BadRequestError(c, fmt.Sprintf("No or incorrect format of widgetID path parameter"))
 			return false, w
 		}
 	} else {

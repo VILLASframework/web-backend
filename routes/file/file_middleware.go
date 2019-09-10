@@ -7,7 +7,6 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulationmodel"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/widget"
 	"github.com/gin-gonic/gin"
-	"strconv"
 )
 
 func checkPermissions(c *gin.Context, operation database.CRUD) (bool, File) {
@@ -20,9 +19,8 @@ func checkPermissions(c *gin.Context, operation database.CRUD) (bool, File) {
 		return false, f
 	}
 
-	fileID, err := strconv.Atoi(c.Param("fileID"))
+	fileID, err := helper.GetIDOfElement(c, "fileID", "path", -1)
 	if err != nil {
-		helper.BadRequestError(c, fmt.Sprintf("No or incorrect format of fileID path parameter"))
 		return false, f
 	}
 
