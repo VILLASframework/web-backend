@@ -43,6 +43,8 @@ build:backend:
 #    - go get -u github.com/swaggo/swag/cmd/swag
 #    - ~/go/bin/swag init -p pascalcase -g "start.go" -o "./doc/api/"
     - go build
+  dependencies:
+    - prepare:ubuntu
 #  artifacts:
 #    paths:
 #      - doc/api/swagger.json
@@ -57,7 +59,7 @@ build:api:
     - cd doc/api
     - redoc-cli bundle --cdn --title "VILLASweb Backend API Documentation" --output index.html swagger.json
   dependencies:
-    - build:backend
+    - prepare:redoc
   artifacts:
     paths:
       - doc/api/index.html
