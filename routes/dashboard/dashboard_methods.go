@@ -48,7 +48,6 @@ func (d *Dashboard) update(modifiedDab Dashboard) error {
 
 	db := common.GetDB()
 
-	// TODO do we allow to update scenarioID here as well?
 	err := db.Model(d).Updates(map[string]interface{}{
 		"Name": modifiedDab.Name,
 		"Grid": modifiedDab.Grid,

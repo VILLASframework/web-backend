@@ -36,8 +36,11 @@ func addScenario(token string) (scenarioID uint) {
 		Running:         common.ScenarioA.Running,
 		StartParameters: common.ScenarioA.StartParameters,
 	}
-	_, resp, _ := common.TestEndpoint(router, token,
+	_, resp, err := common.TestEndpoint(router, token,
 		"/api/scenarios", "POST", common.KeyModels{"scenario": newScenario})
+	if err != nil {
+		panic(fmt.Sprint("The following error happend on POSTing a scenario: ", err.Error()))
+	}
 
 	// Read newScenario's ID from the response
 	newScenarioID, _ := common.GetResponseID(resp)
@@ -105,7 +108,7 @@ func TestAddDashboard(t *testing.T) {
 	assert.NoError(t, err)
 
 	// try to POST a malformed dashboard
-	// Required fields are missing
+	// Required fields are missing (validation should fail)
 	malformedNewDashboard := DashboardRequest{
 		Name: "ThisIsAMalformedDashboard",
 	}
@@ -115,6 +118,38 @@ func TestAddDashboard(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
+	// this should NOT work and return a bad request 400 status code
+	code, resp, err = common.TestEndpoint(router, token,
+		"/api/dashboards", "POST", "This is a test using plain text as body")
+	assert.NoError(t, err)
+	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
+
+	// try to add a dashboard to a scenario that does not exist
+	// should return not found error
+	newDashboard.ScenarioID = scenarioID + 1
+	code, resp, err = common.TestEndpoint(router, token,
+		"/api/dashboards", "POST", common.KeyModels{"dashboard": newDashboard})
+	assert.NoError(t, err)
+	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
+
+	// try to get dashboard as a user that is not in the scenario (userB)
+	token, err = common.AuthenticateForTest(router,
+		"/api/authenticate", "POST", common.UserBCredentials)
+	assert.NoError(t, err)
+
+	// this should fail with unprocessable entity
+	code, resp, err = common.TestEndpoint(router, token,
+		fmt.Sprintf("/api/dashboards/%v", newDashboardID), "GET", nil)
+	assert.NoError(t, err)
+	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
+
+	// try to add a dashboard to a scenario to which the user has no access
+	// this should give an unprocessable entity error
+	newDashboard.ScenarioID = scenarioID
+	code, resp, err = common.TestEndpoint(router, token,
+		"/api/dashboards", "POST", common.KeyModels{"dashboard": newDashboard})
+	assert.NoError(t, err)
+	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 }
 
 func TestUpdateDashboard(t *testing.T) {
@@ -174,6 +209,11 @@ func TestUpdateDashboard(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
 
+	// try to update with a malformed body, should return a bad request error
+	code, resp, err = common.TestEndpoint(router, token,
+		fmt.Sprintf("/api/dashboards/%v", newDashboardID), "PUT", "This is the body of a malformed update request.")
+	assert.NoError(t, err)
+	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 }
 
 func TestDeleteDashboard(t *testing.T) {
@@ -187,7 +227,6 @@ func TestDeleteDashboard(t *testing.T) {
 	assert.NoError(t, err)
 
 	scenarioID := addScenario(token)
-	fmt.Println(scenarioID)
 
 	// test POST dashboards/ $newDashboard
 	newDashboard := DashboardRequest{
@@ -203,6 +242,28 @@ func TestDeleteDashboard(t *testing.T) {
 	// Read newDashboard's ID from the response
 	newDashboardID, err := common.GetResponseID(resp)
 	assert.NoError(t, err)
+
+	// try to delete a dashboard from a scenario to which the user has no access
+	token, err = common.AuthenticateForTest(router,
+		"/api/authenticate", "POST", common.UserBCredentials)
+	assert.NoError(t, err)
+
+	// this should fail with unprocessable entity
+	code, resp, err = common.TestEndpoint(router, token,
+		fmt.Sprintf("/api/dashboards/%v", newDashboardID), "DELETE", nil)
+	assert.NoError(t, err)
+	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
+
+	// authenticate as normal user
+	token, err = common.AuthenticateForTest(router,
+		"/api/authenticate", "POST", common.UserACredentials)
+	assert.NoError(t, err)
+
+	// try to delete a dashboard that does not exist; should return a not found error
+	code, resp, err = common.TestEndpoint(router, token,
+		fmt.Sprintf("/api/dashboards/%v", newDashboardID+1), "DELETE", nil)
+	assert.NoError(t, err)
+	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
 
 	// Count the number of all the dashboards returned for scenario
 	initialNumber, err := common.LengthOfResponse(router, token,
@@ -239,7 +300,6 @@ func TestGetAllDashboardsOfScenario(t *testing.T) {
 	assert.NoError(t, err)
 
 	scenarioID := addScenario(token)
-	fmt.Println(scenarioID)
 
 	// Count the number of all the dashboards returned for scenario
 	initialNumber, err := common.LengthOfResponse(router, token,
@@ -274,4 +334,22 @@ func TestGetAllDashboardsOfScenario(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.Equal(t, initialNumber+2, finalNumber)
+
+	// try to get all dashboards of a scenario that does not exist (should fail with not found)
+	code, resp, err = common.TestEndpoint(router, token,
+		fmt.Sprintf("/api/dashboards?scenarioID=%v", scenarioID+1), "GET", nil)
+	assert.NoError(t, err)
+	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
+
+	// try to get all dashboards as a user that does not belong to scenario
+	token, err = common.AuthenticateForTest(router,
+		"/api/authenticate", "POST", common.UserBCredentials)
+	assert.NoError(t, err)
+
+	// this should fail with unprocessable entity
+	code, resp, err = common.TestEndpoint(router, token,
+		fmt.Sprintf("/api/dashboards?scenarioID=%v", scenarioID), "GET", nil)
+	assert.NoError(t, err)
+	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
+
 }

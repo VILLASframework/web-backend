@@ -78,15 +78,14 @@ func addDashboard(c *gin.Context) {
 	newDashboard := req.createDashboard()
 
 	// Check if user is allowed to modify scenario specified in request
-	ok, _ := scenario.CheckPermissions(c, common.Create, "body", int(newDashboard.ScenarioID))
+	ok, _ := scenario.CheckPermissions(c, common.Update, "body", int(newDashboard.ScenarioID))
 	if !ok {
 		return
 	}
 
 	// add dashboard to DB and add association to scenario
 	err := newDashboard.addToScenario()
-	if err != nil {
-		common.DBError(c, err)
+	if common.DBError(c, err) {
 		return
 	}
 
@@ -126,16 +125,11 @@ func updateDashboard(c *gin.Context) {
 		return
 	}
 	// Create the updatedDashboard from oldDashboard
-	updatedDashboard, err := req.updatedDashboard(oldDashboard)
-	if err != nil {
-		common.BadRequestError(c, err.Error())
-		return
-	}
+	updatedDashboard := req.updatedDashboard(oldDashboard)
 
 	// update the dashboard in the DB
-	err = oldDashboard.update(updatedDashboard)
-	if err != nil {
-		common.DBError(c, err)
+	err := oldDashboard.update(updatedDashboard)
+	if common.DBError(c, err) {
 		return
 	}
 

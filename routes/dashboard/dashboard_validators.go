@@ -13,9 +13,8 @@ type validNewDashboard struct {
 }
 
 type validUpdatedDashboard struct {
-	Name       string `form:"Name" validate:"omitempty"`
-	Grid       int    `form:"Grid" validate:"omitempty"`
-	ScenarioID uint   `form:"ScenarioID" validate:"omitempty"`
+	Name string `form:"Name" validate:"omitempty"`
+	Grid int    `form:"Grid" validate:"omitempty"`
 }
 
 type addDashboardRequest struct {
@@ -48,7 +47,7 @@ func (r *addDashboardRequest) createDashboard() Dashboard {
 	return s
 }
 
-func (r *updateDashboardRequest) updatedDashboard(oldDashboard Dashboard) (Dashboard, error) {
+func (r *updateDashboardRequest) updatedDashboard(oldDashboard Dashboard) Dashboard {
 	// Use the old Dashboard as a basis for the updated Dashboard `s`
 	s := oldDashboard
 
@@ -60,10 +59,5 @@ func (r *updateDashboardRequest) updatedDashboard(oldDashboard Dashboard) (Dashb
 		s.Grid = r.Grid
 	}
 
-	if r.ScenarioID != 0 {
-		// TODO do we allow this case?
-		//s.ScenarioID = r.ScenarioID
-	}
-
-	return s, nil
+	return s
 }
