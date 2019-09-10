@@ -40,18 +40,16 @@ build:backend:
   image: villaswebbackendgo:ubuntu
   script:
     - go mod tidy
-    - go get -u github.com/swaggo/swag/cmd/swag
-    - ~/go/bin/swag init -p pascalcase -g "start.go" -o "./doc/api/"
+#    - go get -u github.com/swaggo/swag/cmd/swag
+#    - ~/go/bin/swag init -p pascalcase -g "start.go" -o "./doc/api/"
     - go build
-  artifacts:
-    paths:
-      - doc/api/swagger.json
+#  artifacts:
+#    paths:
+#      - doc/api/swagger.json
+#      - doc/api/docs.go
 
-# Stage: test
-##############################################################################
-
-test:api:bundle:
-  stage: test
+build:api:
+  stage: build
   tags:
     - docker
   image: redoc
@@ -65,6 +63,10 @@ test:api:bundle:
       - doc/api/index.html
       - doc/api/swagger.json
 
+
+# Stage: test
+##############################################################################
+
 test:database:
   stage: test
   tags:
@@ -73,8 +75,6 @@ test:database:
   script:
     - /etc/init.d/postgresql start
     - go mod tidy
-    - go get -u github.com/swaggo/swag/cmd/swag
-    - ~/go/bin/swag init -p pascalcase -g "start.go" -o "./doc/api/"
     - cd common
     - go test -v -args -dbhost=/var/run/postgresql
   dependencies:
@@ -88,8 +88,6 @@ test:scenario:
   script:
     - /etc/init.d/postgresql start
     - go mod tidy
-    - go get -u github.com/swaggo/swag/cmd/swag
-    - ~/go/bin/swag init -p pascalcase -g "start.go" -o "./doc/api/"
     - cd ${TEST_FOLDER}
     - go test -v -args -dbhost=/var/run/postgresql
   dependencies:
@@ -138,8 +136,6 @@ test:all:
   script:
     - /etc/init.d/postgresql start
     - go mod tidy
-    - go get -u github.com/swaggo/swag/cmd/swag
-    - ~/go/bin/swag init -p pascalcase -g "start.go" -o "./doc/api/"
     - go test $(go list ./... ) -v -p 1 -covermode=count -coverprofile ./testcover.txt
     - go tool cover -func=testcover.txt
   dependencies:
@@ -156,7 +152,7 @@ deploy:upload:
     - cd doc/api
     - rsync --copy-links --chown ${DEPLOY_USER}:${DEPLOY_USER} index.html swagger.json ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}
   dependencies:
-    - test:api:bundle
+    - build:api
   only:
     - master
   tags:
