@@ -77,7 +77,7 @@ test:database:
   script:
     - /etc/init.d/postgresql start
     - go mod tidy
-    - cd common
+    - cd database
     - go test -v -args -dbhost=/var/run/postgresql
   dependencies:
     - build:backend
