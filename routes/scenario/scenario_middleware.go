@@ -9,7 +9,7 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
 )
 
-func CheckPermissions(c *gin.Context, operation common.CRUD, screnarioIDSource string, screnarioIDBody int) (bool, Scenario) {
+func CheckPermissions(c *gin.Context, operation common.CRUD, screnarioIDSource string, scenarioIDbody int) (bool, Scenario) {
 
 	var so Scenario
 
@@ -37,7 +37,7 @@ func CheckPermissions(c *gin.Context, operation common.CRUD, screnarioIDSource s
 			return false, so
 		}
 	} else if screnarioIDSource == "body" {
-		scenarioID = screnarioIDBody
+		scenarioID = scenarioIDbody
 
 	} else {
 		common.BadRequestError(c, fmt.Sprintf("The following source of scenario ID is not valid: %s", screnarioIDSource))
