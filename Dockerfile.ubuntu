@@ -11,10 +11,10 @@ RUN apt-get update && apt-get upgrade -y
 # Install dependencies
 RUN apt-get install -y git ca-certificates g++ gcc libc6 libc6-dev pkg-config wget tar lsb-release
 
-# Install Go 1.11
+# Install Go 1.13
 RUN cd /tmp && mkdir golang && cd golang && \
-    wget https://dl.google.com/go/go1.11.9.linux-amd64.tar.gz && \
-    tar -xvf go1.11.9.linux-amd64.tar.gz && \
+    wget https://dl.google.com/go/go1.13.linux-amd64.tar.gz && \
+    tar -xvf go1.13.linux-amd64.tar.gz && \
     mv go /usr/local && \
     rm -rf /tmp/*
 
