@@ -1,11 +1,12 @@
 package dashboard
 
 import (
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/helper"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/scenario"
 )
 
@@ -31,15 +32,15 @@ func RegisterDashboardEndpoints(r *gin.RouterGroup) {
 // @Router /dashboards [get]
 func getDashboards(c *gin.Context) {
 
-	ok, sim := scenario.CheckPermissions(c, common.Read, "query", -1)
+	ok, sim := scenario.CheckPermissions(c, database.Read, "query", -1)
 	if !ok {
 		return
 	}
 
-	db := common.GetDB()
-	var dab []common.Dashboard
+	db := database.GetDB()
+	var dab []database.Dashboard
 	err := db.Order("ID asc").Model(sim).Related(&dab, "Dashboards").Error
-	if common.DBError(c, err) {
+	if helper.DBError(c, err) {
 		return
 	}
 
@@ -64,13 +65,13 @@ func addDashboard(c *gin.Context) {
 	// bind request to JSON
 	var req addDashboardRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		common.BadRequestError(c, err.Error())
+		helper.BadRequestError(c, err.Error())
 		return
 	}
 
 	// Validate the request
 	if err := req.validate(); err != nil {
-		common.UnprocessableEntityError(c, err.Error())
+		helper.UnprocessableEntityError(c, err.Error())
 		return
 	}
 
@@ -78,14 +79,14 @@ func addDashboard(c *gin.Context) {
 	newDashboard := req.createDashboard()
 
 	// Check if user is allowed to modify scenario specified in request
-	ok, _ := scenario.CheckPermissions(c, common.Update, "body", int(newDashboard.ScenarioID))
+	ok, _ := scenario.CheckPermissions(c, database.Update, "body", int(newDashboard.ScenarioID))
 	if !ok {
 		return
 	}
 
 	// add dashboard to DB and add association to scenario
 	err := newDashboard.addToScenario()
-	if common.DBError(c, err) {
+	if helper.DBError(c, err) {
 		return
 	}
 
@@ -108,20 +109,20 @@ func addDashboard(c *gin.Context) {
 // @Router /dashboards/{dashboardID} [put]
 func updateDashboard(c *gin.Context) {
 
-	ok, oldDashboard := CheckPermissions(c, common.Update, "path", -1)
+	ok, oldDashboard := CheckPermissions(c, database.Update, "path", -1)
 	if !ok {
 		return
 	}
 
 	var req updateDashboardRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		common.BadRequestError(c, err.Error())
+		helper.BadRequestError(c, err.Error())
 		return
 	}
 
 	// Validate the request
 	if err := req.validate(); err != nil {
-		common.BadRequestError(c, err.Error())
+		helper.BadRequestError(c, err.Error())
 		return
 	}
 	// Create the updatedDashboard from oldDashboard
@@ -129,7 +130,7 @@ func updateDashboard(c *gin.Context) {
 
 	// update the dashboard in the DB
 	err := oldDashboard.update(updatedDashboard)
-	if common.DBError(c, err) {
+	if helper.DBError(c, err) {
 		return
 	}
 
@@ -150,7 +151,7 @@ func updateDashboard(c *gin.Context) {
 // @Router /dashboards/{dashboardID} [get]
 func getDashboard(c *gin.Context) {
 
-	ok, dab := CheckPermissions(c, common.Read, "path", -1)
+	ok, dab := CheckPermissions(c, database.Read, "path", -1)
 	if !ok {
 		return
 	}
@@ -171,13 +172,13 @@ func getDashboard(c *gin.Context) {
 // @Param dashboardID path int true "Dashboard ID"
 // @Router /dashboards/{dashboardID} [delete]
 func deleteDashboard(c *gin.Context) {
-	ok, dab := CheckPermissions(c, common.Delete, "path", -1)
+	ok, dab := CheckPermissions(c, database.Delete, "path", -1)
 	if !ok {
 		return
 	}
 
 	err := dab.delete()
-	if common.DBError(c, err) {
+	if helper.DBError(c, err) {
 		return
 	}
 

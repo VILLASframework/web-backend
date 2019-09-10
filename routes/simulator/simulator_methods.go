@@ -3,21 +3,21 @@ package simulator
 import (
 	"fmt"
 
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
 )
 
 type Simulator struct {
-	common.Simulator
+	database.Simulator
 }
 
 func (s *Simulator) save() error {
-	db := common.GetDB()
+	db := database.GetDB()
 	err := db.Create(s).Error
 	return err
 }
 
 func (s *Simulator) ByID(id uint) error {
-	db := common.GetDB()
+	db := database.GetDB()
 	err := db.Find(s, id).Error
 	if err != nil {
 		return fmt.Errorf("Simulator with id=%v does not exist", id)
@@ -27,14 +27,14 @@ func (s *Simulator) ByID(id uint) error {
 
 func (s *Simulator) update(updatedSimulator Simulator) error {
 
-	db := common.GetDB()
+	db := database.GetDB()
 	err := db.Model(s).Updates(updatedSimulator).Error
 
 	return err
 }
 
 func (s *Simulator) delete() error {
-	db := common.GetDB()
+	db := database.GetDB()
 
 	no_simulationmodels := db.Model(s).Association("SimulationModels").Count()
 
@@ -47,9 +47,9 @@ func (s *Simulator) delete() error {
 	return err
 }
 
-func (s *Simulator) getModels() ([]common.SimulationModel, int, error) {
-	db := common.GetDB()
-	var models []common.SimulationModel
+func (s *Simulator) getModels() ([]database.SimulationModel, int, error) {
+	db := database.GetDB()
+	var models []database.SimulationModel
 	err := db.Order("ID asc").Model(s).Related(&models, "SimulationModels").Error
 	return models, len(models), err
 }

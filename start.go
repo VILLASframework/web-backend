@@ -2,13 +2,14 @@ package main
 
 import (
 	"fmt"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/amqp"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
 
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
 	_ "git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/doc/api" // doc/api folder is used by Swag CLI, you have to import it
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/dashboard"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/file"
@@ -38,12 +39,12 @@ import (
 // @BasePath /api/v2
 func main() {
 	// TODO DB_TEST is used for testing, should be DB_NAME in production
-	db := common.InitDB(common.DB_TEST)
-	common.MigrateModels(db)
+	db := database.InitDB(database.DB_TEST)
+	database.MigrateModels(db)
 	defer db.Close()
 
 	// TODO the following line should be removed in production, it adds test data to the DB
-	common.AddTestData(db)
+	database.DBAddTestData(db)
 
 	r := gin.Default()
 
@@ -66,9 +67,9 @@ func main() {
 
 	r.GET("swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	if common.WITH_AMQP == true {
+	if database.WITH_AMQP == true {
 		fmt.Println("Starting AMQP client")
-		err := common.ConnectAMQP("amqp://localhost")
+		err := amqp.ConnectAMQP("amqp://localhost")
 		if err != nil {
 			panic(err)
 		}
@@ -80,7 +81,7 @@ func main() {
 			for {
 				select {
 				case <-ticker.C:
-					err = common.PingAMQP()
+					err = amqp.PingAMQP()
 					if err != nil {
 						fmt.Println("AMQP Error: ", err.Error())
 					}

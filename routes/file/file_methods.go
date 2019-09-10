@@ -9,17 +9,17 @@ import (
 	"path/filepath"
 	"time"
 
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulationmodel"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/widget"
 )
 
 type File struct {
-	common.File
+	database.File
 }
 
 func (f *File) byPath(path string) error {
-	db := common.GetDB()
+	db := database.GetDB()
 	err := db.Where("Path = ?", path).Find(f).Error
 	if err != nil {
 		return err
@@ -28,7 +28,7 @@ func (f *File) byPath(path string) error {
 }
 
 func (f *File) byID(id uint) error {
-	db := common.GetDB()
+	db := database.GetDB()
 	err := db.Find(f, id).Error
 	if err != nil {
 		return err
@@ -37,7 +37,7 @@ func (f *File) byID(id uint) error {
 }
 
 func (f *File) save() error {
-	db := common.GetDB()
+	db := database.GetDB()
 	err := db.Create(f).Error
 
 	return err
@@ -112,13 +112,13 @@ func (f *File) register(fileHeader *multipart.FileHeader, objectType string, obj
 
 	// Create association to model or widget
 	if objectType == "model" {
-		db := common.GetDB()
+		db := database.GetDB()
 		err := db.Model(&m).Association("Files").Append(f).Error
 		if err != nil {
 			return err
 		}
 	} else {
-		db := common.GetDB()
+		db := database.GetDB()
 		err := db.Model(&w).Association("Files").Append(f).Error
 		if err != nil {
 			return err
@@ -139,7 +139,7 @@ func (f *File) update(fileHeader *multipart.FileHeader) error {
 	fileData, err := ioutil.ReadAll(fileContent)
 	defer fileContent.Close()
 
-	db := common.GetDB()
+	db := database.GetDB()
 	err = db.Model(f).Updates(map[string]interface{}{"Size": fileHeader.Size,
 		"FileData": fileData,
 		"Date":     time.Now().String()}).Error
@@ -148,7 +148,7 @@ func (f *File) update(fileHeader *multipart.FileHeader) error {
 
 func (f *File) delete() error {
 
-	db := common.GetDB()
+	db := database.GetDB()
 
 	if f.WidgetID > 0 {
 		// remove association between file and widget

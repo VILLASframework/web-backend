@@ -2,12 +2,13 @@ package file
 
 import (
 	"fmt"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/helper"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulationmodel"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/widget"
 )
@@ -36,13 +37,13 @@ func getFiles(c *gin.Context) {
 
 	objectType := c.Request.URL.Query().Get("objectType")
 	if objectType != "model" && objectType != "widget" {
-		common.BadRequestError(c, fmt.Sprintf("Object type not supported for files: %s", objectType))
+		helper.BadRequestError(c, fmt.Sprintf("Object type not supported for files: %s", objectType))
 		return
 	}
 	objectID_s := c.Request.URL.Query().Get("objectID")
 	objectID, err := strconv.Atoi(objectID_s)
 	if err != nil {
-		common.BadRequestError(c, fmt.Sprintf("Error on ID conversion: %s", err.Error()))
+		helper.BadRequestError(c, fmt.Sprintf("Error on ID conversion: %s", err.Error()))
 		return
 	}
 
@@ -51,29 +52,29 @@ func getFiles(c *gin.Context) {
 	var m simulationmodel.SimulationModel
 	var w widget.Widget
 	if objectType == "model" {
-		ok, m = simulationmodel.CheckPermissions(c, common.Read, "body", objectID)
+		ok, m = simulationmodel.CheckPermissions(c, database.Read, "body", objectID)
 		if !ok {
 			return
 		}
 	} else {
-		ok, w = widget.CheckPermissions(c, common.Read, objectID)
+		ok, w = widget.CheckPermissions(c, database.Read, objectID)
 		if !ok {
 			return
 		}
 	}
 
 	// get meta data of files
-	db := common.GetDB()
+	db := database.GetDB()
 
-	var files []common.File
+	var files []database.File
 	if objectType == "model" {
 		err = db.Order("ID asc").Model(&m).Related(&files, "Files").Error
-		if common.DBError(c, err) {
+		if helper.DBError(c, err) {
 			return
 		}
 	} else {
 		err = db.Order("ID asc").Model(&w).Related(&files, "Files").Error
-		if common.DBError(c, err) {
+		if helper.DBError(c, err) {
 			return
 		}
 	}
@@ -105,25 +106,25 @@ func addFile(c *gin.Context) {
 
 	objectType := c.Request.URL.Query().Get("objectType")
 	if objectType != "model" && objectType != "widget" {
-		common.BadRequestError(c, fmt.Sprintf("Object type not supported for files: %s", objectType))
+		helper.BadRequestError(c, fmt.Sprintf("Object type not supported for files: %s", objectType))
 		return
 	}
 	objectID_s := c.Request.URL.Query().Get("objectID")
 	objectID, err := strconv.Atoi(objectID_s)
 	if err != nil {
-		common.BadRequestError(c, fmt.Sprintf("Error on ID conversion: %s", err.Error()))
+		helper.BadRequestError(c, fmt.Sprintf("Error on ID conversion: %s", err.Error()))
 		return
 	}
 
 	// Check access
 	var ok bool
 	if objectType == "model" {
-		ok, _ = simulationmodel.CheckPermissions(c, common.Create, "body", objectID)
+		ok, _ = simulationmodel.CheckPermissions(c, database.Create, "body", objectID)
 		if !ok {
 			return
 		}
 	} else {
-		ok, _ = widget.CheckPermissions(c, common.Create, objectID)
+		ok, _ = widget.CheckPermissions(c, database.Create, objectID)
 		if !ok {
 			return
 		}
@@ -132,14 +133,14 @@ func addFile(c *gin.Context) {
 	// Extract file from POST request form
 	file_header, err := c.FormFile("file")
 	if err != nil {
-		common.BadRequestError(c, fmt.Sprintf("Get form error: %s", err.Error()))
+		helper.BadRequestError(c, fmt.Sprintf("Get form error: %s", err.Error()))
 		return
 	}
 
 	var newFile File
 	err = newFile.register(file_header, objectType, uint(objectID))
 	if err != nil {
-		common.DBError(c, err)
+		helper.DBError(c, err)
 		return
 	}
 
@@ -166,14 +167,14 @@ func addFile(c *gin.Context) {
 func getFile(c *gin.Context) {
 
 	// check access
-	ok, f := checkPermissions(c, common.Read)
+	ok, f := checkPermissions(c, database.Read)
 	if !ok {
 		return
 	}
 
 	err := f.download(c)
 	if err != nil {
-		common.DBError(c, err)
+		helper.DBError(c, err)
 		return
 	}
 
@@ -202,7 +203,7 @@ func getFile(c *gin.Context) {
 func updateFile(c *gin.Context) {
 
 	// check access
-	ok, f := checkPermissions(c, common.Update)
+	ok, f := checkPermissions(c, database.Update)
 	if !ok {
 		return
 	}
@@ -210,19 +211,19 @@ func updateFile(c *gin.Context) {
 	// Extract file from PUT request form
 	err := c.Request.ParseForm()
 	if err != nil {
-		common.BadRequestError(c, fmt.Sprintf("Get form error: %s", err.Error()))
+		helper.BadRequestError(c, fmt.Sprintf("Get form error: %s", err.Error()))
 		return
 	}
 
 	file_header, err := c.FormFile("file")
 	if err != nil {
-		common.BadRequestError(c, fmt.Sprintf("Get form error: %s", err.Error()))
+		helper.BadRequestError(c, fmt.Sprintf("Get form error: %s", err.Error()))
 		return
 	}
 
 	err = f.update(file_header)
 	if err != nil {
-		common.DBError(c, err)
+		helper.DBError(c, err)
 		return
 	}
 
@@ -244,14 +245,14 @@ func updateFile(c *gin.Context) {
 func deleteFile(c *gin.Context) {
 
 	// check access
-	ok, f := checkPermissions(c, common.Delete)
+	ok, f := checkPermissions(c, database.Delete)
 	if !ok {
 		return
 	}
 
 	err := f.delete()
 	if err != nil {
-		common.DBError(c, err)
+		helper.DBError(c, err)
 		return
 	}
 

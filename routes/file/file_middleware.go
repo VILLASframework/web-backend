@@ -2,31 +2,32 @@ package file
 
 import (
 	"fmt"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/helper"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulationmodel"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/widget"
 	"github.com/gin-gonic/gin"
 	"strconv"
 )
 
-func checkPermissions(c *gin.Context, operation common.CRUD) (bool, File) {
+func checkPermissions(c *gin.Context, operation database.CRUD) (bool, File) {
 
 	var f File
 
-	err := common.ValidateRole(c, common.ModelFile, operation)
+	err := database.ValidateRole(c, database.ModelFile, operation)
 	if err != nil {
-		common.UnprocessableEntityError(c, fmt.Sprintf("Access denied (role validation failed): %v", err.Error()))
+		helper.UnprocessableEntityError(c, fmt.Sprintf("Access denied (role validation failed): %v", err.Error()))
 		return false, f
 	}
 
 	fileID, err := strconv.Atoi(c.Param("fileID"))
 	if err != nil {
-		common.BadRequestError(c, fmt.Sprintf("No or incorrect format of fileID path parameter"))
+		helper.BadRequestError(c, fmt.Sprintf("No or incorrect format of fileID path parameter"))
 		return false, f
 	}
 
 	err = f.byID(uint(fileID))
-	if common.DBError(c, err) {
+	if helper.DBError(c, err) {
 		return false, f
 	}
 

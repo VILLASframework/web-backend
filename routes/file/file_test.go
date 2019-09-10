@@ -3,7 +3,8 @@ package file
 import (
 	"bytes"
 	"fmt"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/helper"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/scenario"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulationmodel"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulator"
@@ -48,58 +49,58 @@ type ScenarioRequest struct {
 func addScenarioAndSimulatorAndSimulationModel() (scenarioID uint, simulatorID uint, simulationModelID uint) {
 
 	// authenticate as admin
-	token, _ := common.AuthenticateForTest(router,
-		"/api/authenticate", "POST", common.AdminCredentials)
+	token, _ := helper.AuthenticateForTest(router,
+		"/api/authenticate", "POST", helper.AdminCredentials)
 
 	// POST $newSimulatorA
 	newSimulatorA := SimulatorRequest{
-		UUID:       common.SimulatorA.UUID,
-		Host:       common.SimulatorA.Host,
-		Modeltype:  common.SimulatorA.Modeltype,
-		State:      common.SimulatorA.State,
-		Properties: common.SimulatorA.Properties,
+		UUID:       database.SimulatorA.UUID,
+		Host:       database.SimulatorA.Host,
+		Modeltype:  database.SimulatorA.Modeltype,
+		State:      database.SimulatorA.State,
+		Properties: database.SimulatorA.Properties,
 	}
-	_, resp, _ := common.TestEndpoint(router, token,
-		"/api/simulators", "POST", common.KeyModels{"simulator": newSimulatorA})
+	_, resp, _ := helper.TestEndpoint(router, token,
+		"/api/simulators", "POST", helper.KeyModels{"simulator": newSimulatorA})
 
 	// Read newSimulator's ID from the response
-	newSimulatorID, _ := common.GetResponseID(resp)
+	newSimulatorID, _ := helper.GetResponseID(resp)
 
 	// authenticate as normal user
-	token, _ = common.AuthenticateForTest(router,
-		"/api/authenticate", "POST", common.UserACredentials)
+	token, _ = helper.AuthenticateForTest(router,
+		"/api/authenticate", "POST", helper.UserACredentials)
 
 	// POST $newScenario
 	newScenario := ScenarioRequest{
-		Name:            common.ScenarioA.Name,
-		Running:         common.ScenarioA.Running,
-		StartParameters: common.ScenarioA.StartParameters,
+		Name:            database.ScenarioA.Name,
+		Running:         database.ScenarioA.Running,
+		StartParameters: database.ScenarioA.StartParameters,
 	}
-	_, resp, _ = common.TestEndpoint(router, token,
-		"/api/scenarios", "POST", common.KeyModels{"scenario": newScenario})
+	_, resp, _ = helper.TestEndpoint(router, token,
+		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenario})
 
 	// Read newScenario's ID from the response
-	newScenarioID, _ := common.GetResponseID(resp)
+	newScenarioID, _ := helper.GetResponseID(resp)
 
 	// test POST models/ $newSimulationModel
 	newSimulationModel := SimulationModelRequest{
-		Name:            common.SimulationModelA.Name,
+		Name:            database.SimulationModelA.Name,
 		ScenarioID:      uint(newScenarioID),
 		SimulatorID:     uint(newSimulatorID),
-		StartParameters: common.SimulationModelA.StartParameters,
+		StartParameters: database.SimulationModelA.StartParameters,
 	}
-	_, resp, _ = common.TestEndpoint(router, token,
-		"/api/models", "POST", common.KeyModels{"model": newSimulationModel})
+	_, resp, _ = helper.TestEndpoint(router, token,
+		"/api/models", "POST", helper.KeyModels{"model": newSimulationModel})
 
 	// Read newSimulationModel's ID from the response
-	newSimulationModelID, _ := common.GetResponseID(resp)
+	newSimulationModelID, _ := helper.GetResponseID(resp)
 
 	return uint(newScenarioID), uint(newSimulatorID), uint(newSimulationModelID)
 }
 
 func TestMain(m *testing.M) {
 
-	db = common.InitDB(common.DB_TEST)
+	db = database.InitDB(database.DB_TEST)
 	defer db.Close()
 
 	router = gin.Default()
@@ -122,9 +123,9 @@ func TestMain(m *testing.M) {
 }
 
 func TestAddFile(t *testing.T) {
-	common.DropTables(db)
-	common.MigrateModels(db)
-	common.DBAddAdminAndUser(db)
+	database.DropTables(db)
+	database.MigrateModels(db)
+	assert.NoError(t, database.DBAddAdminAndUser(db))
 
 	// prepare the content of the DB for testing
 	// by adding a scenario and a simulator to the DB
@@ -132,8 +133,8 @@ func TestAddFile(t *testing.T) {
 	_, _, simulationModelID := addScenarioAndSimulatorAndSimulationModel()
 
 	// authenticate as normal user
-	token, err := common.AuthenticateForTest(router,
-		"/api/authenticate", "POST", common.UserACredentials)
+	token, err := helper.AuthenticateForTest(router,
+		"/api/authenticate", "POST", helper.UserACredentials)
 	assert.NoError(t, err)
 
 	// create a testfile.txt in local folder
@@ -172,11 +173,11 @@ func TestAddFile(t *testing.T) {
 	assert.Equalf(t, 200, w.Code, "Response body: \n%v\n", w.Body)
 	fmt.Println(w.Body)
 
-	newFileID, err := common.GetResponseID(w.Body)
+	newFileID, err := helper.GetResponseID(w.Body)
 	assert.NoError(t, err)
 
 	// Get the new file
-	code, resp, err := common.TestEndpoint(router, token,
+	code, resp, err := helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/files/%v", newFileID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -185,9 +186,9 @@ func TestAddFile(t *testing.T) {
 
 func TestUpdateFile(t *testing.T) {
 
-	common.DropTables(db)
-	common.MigrateModels(db)
-	common.DBAddAdminAndUser(db)
+	database.DropTables(db)
+	database.MigrateModels(db)
+	assert.NoError(t, database.DBAddAdminAndUser(db))
 
 	// prepare the content of the DB for testing
 	// by adding a scenario and a simulator to the DB
@@ -195,8 +196,8 @@ func TestUpdateFile(t *testing.T) {
 	_, _, simulationModelID := addScenarioAndSimulatorAndSimulationModel()
 
 	// authenticate as normal user
-	token, err := common.AuthenticateForTest(router,
-		"/api/authenticate", "POST", common.UserACredentials)
+	token, err := helper.AuthenticateForTest(router,
+		"/api/authenticate", "POST", helper.UserACredentials)
 	assert.NoError(t, err)
 
 	// create a testfile.txt in local folder
@@ -234,7 +235,7 @@ func TestUpdateFile(t *testing.T) {
 	assert.Equalf(t, 200, w.Code, "Response body: \n%v\n", w.Body)
 	fmt.Println(w.Body)
 
-	newFileID, err := common.GetResponseID(w.Body)
+	newFileID, err := helper.GetResponseID(w.Body)
 	assert.NoError(t, err)
 
 	// Prepare update
@@ -273,12 +274,12 @@ func TestUpdateFile(t *testing.T) {
 	assert.Equalf(t, 200, w_updated.Code, "Response body: \n%v\n", w_updated.Body)
 	fmt.Println(w_updated.Body)
 
-	newFileIDUpdated, err := common.GetResponseID(w_updated.Body)
+	newFileIDUpdated, err := helper.GetResponseID(w_updated.Body)
 
 	assert.Equal(t, newFileID, newFileIDUpdated)
 
 	// Get the updated file
-	code, resp, err := common.TestEndpoint(router, token,
+	code, resp, err := helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/files/%v", newFileIDUpdated), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -286,9 +287,9 @@ func TestUpdateFile(t *testing.T) {
 }
 
 func TestDeleteFile(t *testing.T) {
-	common.DropTables(db)
-	common.MigrateModels(db)
-	common.DBAddAdminAndUser(db)
+	database.DropTables(db)
+	database.MigrateModels(db)
+	assert.NoError(t, database.DBAddAdminAndUser(db))
 
 	// prepare the content of the DB for testing
 	// by adding a scenario and a simulator to the DB
@@ -296,8 +297,8 @@ func TestDeleteFile(t *testing.T) {
 	_, _, simulationModelID := addScenarioAndSimulatorAndSimulationModel()
 
 	// authenticate as normal user
-	token, err := common.AuthenticateForTest(router,
-		"/api/authenticate", "POST", common.UserACredentials)
+	token, err := helper.AuthenticateForTest(router,
+		"/api/authenticate", "POST", helper.UserACredentials)
 	assert.NoError(t, err)
 
 	// create a testfile.txt in local folder
@@ -336,22 +337,22 @@ func TestDeleteFile(t *testing.T) {
 	assert.Equalf(t, 200, w.Code, "Response body: \n%v\n", w.Body)
 	//fmt.Println(w.Body)
 
-	newFileID, err := common.GetResponseID(w.Body)
+	newFileID, err := helper.GetResponseID(w.Body)
 	assert.NoError(t, err)
 
 	// Count the number of all files returned for simulation model
-	initialNumber, err := common.LengthOfResponse(router, token,
+	initialNumber, err := helper.LengthOfResponse(router, token,
 		fmt.Sprintf("/api/files?objectID=%v&objectType=model", simulationModelID), "GET", nil)
 	assert.NoError(t, err)
 
 	// Delete the added file
-	code, resp, err := common.TestEndpoint(router, token,
+	code, resp, err := helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/files/%v", newFileID), "DELETE", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// Again count the number of all the files returned for simulation model
-	finalNumber, err := common.LengthOfResponse(router, token,
+	finalNumber, err := helper.LengthOfResponse(router, token,
 		fmt.Sprintf("/api/files?objectID=%v&objectType=model", simulationModelID), "GET", nil)
 	assert.NoError(t, err)
 
@@ -360,9 +361,9 @@ func TestDeleteFile(t *testing.T) {
 
 func TestGetAllFilesOfSimulationModel(t *testing.T) {
 
-	common.DropTables(db)
-	common.MigrateModels(db)
-	common.DBAddAdminAndUser(db)
+	database.DropTables(db)
+	database.MigrateModels(db)
+	assert.NoError(t, database.DBAddAdminAndUser(db))
 
 	// prepare the content of the DB for testing
 	// by adding a scenario and a simulator to the DB
@@ -370,12 +371,12 @@ func TestGetAllFilesOfSimulationModel(t *testing.T) {
 	_, _, simulationModelID := addScenarioAndSimulatorAndSimulationModel()
 
 	// authenticate as normal user
-	token, err := common.AuthenticateForTest(router,
-		"/api/authenticate", "POST", common.UserACredentials)
+	token, err := helper.AuthenticateForTest(router,
+		"/api/authenticate", "POST", helper.UserACredentials)
 	assert.NoError(t, err)
 
 	// Count the number of all files returned for simulation model
-	initialNumber, err := common.LengthOfResponse(router, token,
+	initialNumber, err := helper.LengthOfResponse(router, token,
 		fmt.Sprintf("/api/files?objectID=%v&objectType=model", simulationModelID), "GET", nil)
 	assert.NoError(t, err)
 
@@ -443,7 +444,7 @@ func TestGetAllFilesOfSimulationModel(t *testing.T) {
 	assert.Equalf(t, 200, w2.Code, "Response body: \n%v\n", w2.Body)
 
 	// Again count the number of all the files returned for simulation model
-	finalNumber, err := common.LengthOfResponse(router, token,
+	finalNumber, err := helper.LengthOfResponse(router, token,
 		fmt.Sprintf("/api/files?objectID=%v&objectType=model", simulationModelID), "GET", nil)
 	assert.NoError(t, err)
 

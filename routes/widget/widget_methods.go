@@ -1,22 +1,22 @@
 package widget
 
 import (
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/dashboard"
 )
 
 type Widget struct {
-	common.Widget
+	database.Widget
 }
 
 func (w *Widget) save() error {
-	db := common.GetDB()
+	db := database.GetDB()
 	err := db.Create(w).Error
 	return err
 }
 
 func (w *Widget) ByID(id uint) error {
-	db := common.GetDB()
+	db := database.GetDB()
 	err := db.Find(w, id).Error
 	if err != nil {
 		return err
@@ -25,7 +25,7 @@ func (w *Widget) ByID(id uint) error {
 }
 
 func (w *Widget) addToDashboard() error {
-	db := common.GetDB()
+	db := database.GetDB()
 	var dab dashboard.Dashboard
 	err := dab.ByID(uint(w.DashboardID))
 	if err != nil {
@@ -46,7 +46,7 @@ func (w *Widget) addToDashboard() error {
 
 func (w *Widget) update(modifiedWidget Widget) error {
 
-	db := common.GetDB()
+	db := database.GetDB()
 	err := db.Model(w).Updates(map[string]interface{}{
 		"Name":             modifiedWidget.Name,
 		"Type":             modifiedWidget.Type,
@@ -66,7 +66,7 @@ func (w *Widget) update(modifiedWidget Widget) error {
 
 func (w *Widget) delete() error {
 
-	db := common.GetDB()
+	db := database.GetDB()
 	var dab dashboard.Dashboard
 	err := dab.ByID(w.DashboardID)
 	if err != nil {

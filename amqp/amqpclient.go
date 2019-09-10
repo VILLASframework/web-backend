@@ -1,8 +1,9 @@
-package common
+package amqp
 
 import (
 	"encoding/json"
 	"fmt"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
 	"github.com/streadway/amqp"
 	"github.com/tidwall/gjson"
 	"strings"
@@ -97,8 +98,8 @@ func ConnectAMQP(uri string) error {
 				continue
 			}
 
-			var sToBeUpdated Simulator
-			db := GetDB()
+			var sToBeUpdated database.Simulator
+			db := database.GetDB()
 			err = db.Where("UUID = ?", gjson.Get(content, "properties.uuid")).Find(sToBeUpdated).Error
 			if err != nil {
 				fmt.Println("AMQP: Unable to find simulator with UUID: ", gjson.Get(content, "properties.uuid"), " DB error message: ", err)

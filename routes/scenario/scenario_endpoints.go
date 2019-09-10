@@ -1,11 +1,12 @@
 package scenario
 
 import (
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/helper"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/user"
 )
 
@@ -32,33 +33,33 @@ func RegisterScenarioEndpoints(r *gin.RouterGroup) {
 // @Router /scenarios [get]
 func getScenarios(c *gin.Context) {
 
-	ok, _ := CheckPermissions(c, common.Read, "none", -1)
+	ok, _ := CheckPermissions(c, database.Read, "none", -1)
 	if !ok {
 		return
 	}
 
 	// ATTENTION: do not use c.GetInt (common.UserIDCtx) since user_id is of type uint and not int
-	userID, _ := c.Get(common.UserIDCtx)
-	userRole, _ := c.Get(common.UserRoleCtx)
+	userID, _ := c.Get(database.UserIDCtx)
+	userRole, _ := c.Get(database.UserRoleCtx)
 
 	var u user.User
 	err := u.ByID(userID.(uint))
-	if common.DBError(c, err) {
+	if helper.DBError(c, err) {
 		return
 	}
 
 	// get all scenarios for the user who issues the request
-	db := common.GetDB()
-	var scenarios []common.Scenario
+	db := database.GetDB()
+	var scenarios []database.Scenario
 	if userRole == "Admin" { // Admin can see all scenarios
 		err = db.Order("ID asc").Find(&scenarios).Error
-		if common.DBError(c, err) {
+		if helper.DBError(c, err) {
 			return
 		}
 
 	} else { // User or Guest roles see only their scenarios
 		err = db.Order("ID asc").Model(&u).Related(&scenarios, "Scenarios").Error
-		if common.DBError(c, err) {
+		if helper.DBError(c, err) {
 			return
 		}
 	}
@@ -81,28 +82,28 @@ func getScenarios(c *gin.Context) {
 // @Router /scenarios [post]
 func addScenario(c *gin.Context) {
 
-	ok, _ := CheckPermissions(c, common.Create, "none", -1)
+	ok, _ := CheckPermissions(c, database.Create, "none", -1)
 	if !ok {
 		return
 	}
 
-	userID, _ := c.Get(common.UserIDCtx)
+	userID, _ := c.Get(database.UserIDCtx)
 
 	var u user.User
 	err := u.ByID(userID.(uint))
-	if common.DBError(c, err) {
+	if helper.DBError(c, err) {
 		return
 	}
 
 	var req addScenarioRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		common.BadRequestError(c, err.Error())
+		helper.BadRequestError(c, err.Error())
 		return
 	}
 
 	// Validate the request
 	if err = req.validate(); err != nil {
-		common.UnprocessableEntityError(c, err.Error())
+		helper.UnprocessableEntityError(c, err.Error())
 		return
 	}
 
@@ -112,14 +113,14 @@ func addScenario(c *gin.Context) {
 	// Save the new scenario in the DB
 	err = newScenario.save()
 	if err != nil {
-		common.DBError(c, err)
+		helper.DBError(c, err)
 		return
 	}
 
 	// add user to new scenario
 	err = newScenario.addUser(&(u.User))
 	if err != nil {
-		common.DBError(c, err)
+		helper.DBError(c, err)
 		return
 	}
 
@@ -142,7 +143,7 @@ func addScenario(c *gin.Context) {
 // @Router /scenarios/{scenarioID} [put]
 func updateScenario(c *gin.Context) {
 
-	ok, oldScenario := CheckPermissions(c, common.Update, "path", -1)
+	ok, oldScenario := CheckPermissions(c, database.Update, "path", -1)
 	if !ok {
 		return
 	}
@@ -150,27 +151,27 @@ func updateScenario(c *gin.Context) {
 	// Bind the (context) with the updateScenarioRequest struct
 	var req updateScenarioRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		common.BadRequestError(c, err.Error())
+		helper.BadRequestError(c, err.Error())
 		return
 	}
 
 	// Validate the request based on struct updateScenarioRequest json tags
 	if err := req.validate(); err != nil {
-		common.BadRequestError(c, err.Error())
+		helper.BadRequestError(c, err.Error())
 		return
 	}
 
 	// Create the updatedScenario from oldScenario
 	updatedScenario, err := req.updatedScenario(oldScenario)
 	if err != nil {
-		common.BadRequestError(c, err.Error())
+		helper.BadRequestError(c, err.Error())
 		return
 	}
 
 	// Finally update the scenario
 	err = oldScenario.update(updatedScenario)
 	if err != nil {
-		common.DBError(c, err)
+		helper.DBError(c, err)
 		return
 	}
 
@@ -190,7 +191,7 @@ func updateScenario(c *gin.Context) {
 // @Router /scenarios/{scenarioID} [get]
 func getScenario(c *gin.Context) {
 
-	ok, so := CheckPermissions(c, common.Read, "path", -1)
+	ok, so := CheckPermissions(c, database.Read, "path", -1)
 	if !ok {
 		return
 	}
@@ -212,14 +213,14 @@ func getScenario(c *gin.Context) {
 // @Router /scenarios/{scenarioID} [delete]
 func deleteScenario(c *gin.Context) {
 
-	ok, so := CheckPermissions(c, common.Delete, "path", -1)
+	ok, so := CheckPermissions(c, database.Delete, "path", -1)
 	if !ok {
 		return
 	}
 
 	err := so.delete()
 	if err != nil {
-		common.DBError(c, err)
+		helper.DBError(c, err)
 		return
 	}
 
@@ -239,14 +240,14 @@ func deleteScenario(c *gin.Context) {
 // @Router /scenarios/{scenarioID}/users/ [get]
 func getUsersOfScenario(c *gin.Context) {
 
-	ok, so := CheckPermissions(c, common.Read, "path", -1)
+	ok, so := CheckPermissions(c, database.Read, "path", -1)
 	if !ok {
 		return
 	}
 
 	// Find all users of scenario
 	allUsers, _, err := so.getUsers()
-	if common.DBError(c, err) {
+	if helper.DBError(c, err) {
 		return
 	}
 
@@ -267,7 +268,7 @@ func getUsersOfScenario(c *gin.Context) {
 // @Router /scenarios/{scenarioID}/user [put]
 func addUserToScenario(c *gin.Context) {
 
-	ok, so := CheckPermissions(c, common.Update, "path", -1)
+	ok, so := CheckPermissions(c, database.Update, "path", -1)
 	if !ok {
 		return
 	}
@@ -276,12 +277,12 @@ func addUserToScenario(c *gin.Context) {
 
 	var u user.User
 	err := u.ByUsername(username)
-	if common.DBError(c, err) {
+	if helper.DBError(c, err) {
 		return
 	}
 
 	err = so.addUser(&(u.User))
-	if common.DBError(c, err) {
+	if helper.DBError(c, err) {
 		return
 	}
 
@@ -302,7 +303,7 @@ func addUserToScenario(c *gin.Context) {
 // @Router /scenarios/{scenarioID}/user [delete]
 func deleteUserFromScenario(c *gin.Context) {
 
-	ok, so := CheckPermissions(c, common.Update, "path", -1)
+	ok, so := CheckPermissions(c, database.Update, "path", -1)
 	if !ok {
 		return
 	}
@@ -311,12 +312,12 @@ func deleteUserFromScenario(c *gin.Context) {
 
 	var u user.User
 	err := u.ByUsername(username)
-	if common.DBError(c, err) {
+	if helper.DBError(c, err) {
 		return
 	}
 
 	err = so.deleteUser(username)
-	if common.DBError(c, err) {
+	if helper.DBError(c, err) {
 		return
 	}
 

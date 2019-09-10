@@ -2,7 +2,8 @@ package user
 
 import (
 	"fmt"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/helper"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/dgrijalva/jwt-go/request"
 	"github.com/gin-gonic/gin"
@@ -14,12 +15,12 @@ func userToContext(ctx *gin.Context, user_id uint) {
 
 	err := user.ByID(user_id)
 	if err != nil {
-		common.UnauthorizedAbort(ctx, "Authentication failed (user not found)")
+		helper.UnauthorizedAbort(ctx, "Authentication failed (user not found)")
 		return
 	}
 
-	ctx.Set(common.UserRoleCtx, user.Role)
-	ctx.Set(common.UserIDCtx, user_id)
+	ctx.Set(database.UserRoleCtx, user.Role)
+	ctx.Set(database.UserIDCtx, user_id)
 }
 
 func Authentication(unauthorized bool) gin.HandlerFunc {
@@ -48,7 +49,7 @@ func Authentication(unauthorized bool) gin.HandlerFunc {
 		// If the authentication extraction fails return HTTP CODE 401
 		if err != nil {
 			if unauthorized {
-				common.UnauthorizedAbort(ctx, "Authentication failed (claims extraction)")
+				helper.UnauthorizedAbort(ctx, "Authentication failed (claims extraction)")
 			}
 			return
 		}
@@ -59,7 +60,7 @@ func Authentication(unauthorized bool) gin.HandlerFunc {
 			user_id, ok := claims["id"].(float64)
 
 			if !ok {
-				common.UnauthorizedAbort(ctx, "Authentication failed (claims casting)")
+				helper.UnauthorizedAbort(ctx, "Authentication failed (claims casting)")
 				return
 			}
 

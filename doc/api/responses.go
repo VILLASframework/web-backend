@@ -1,6 +1,6 @@
 package docs
 
-import "git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
+import "git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
 
 // This file defines the responses to any endpoint in the backend
 // The defined structures are only used for documentation purposes with swaggo and are NOT used in the code
@@ -14,69 +14,69 @@ type ResponseAuthenticate struct {
 	success bool
 	token   string
 	message string
-	user    common.User
+	user    database.User
 }
 
 type ResponseUsers struct {
-	users []common.User
+	users []database.User
 }
 
 type ResponseUser struct {
-	user common.User
+	user database.User
 }
 
 type ResponseSimulators struct {
-	simulators []common.Simulator
+	simulators []database.Simulator
 }
 
 type ResponseSimulator struct {
-	simulator common.Simulator
+	simulator database.Simulator
 }
 
 type ResponseScenarios struct {
-	scenarios []common.Scenario
+	scenarios []database.Scenario
 }
 
 type ResponseScenario struct {
-	scenario common.Scenario
+	scenario database.Scenario
 }
 
 type ResponseSimulationModels struct {
-	models []common.SimulationModel
+	models []database.SimulationModel
 }
 
 type ResponseSimulationModel struct {
-	model common.SimulationModel
+	model database.SimulationModel
 }
 
 type ResponseDashboards struct {
-	dashboards []common.Dashboard
+	dashboards []database.Dashboard
 }
 
 type ResponseDashboard struct {
-	dashboard common.Dashboard
+	dashboard database.Dashboard
 }
 
 type ResponseWidgets struct {
-	widgets []common.Widget
+	widgets []database.Widget
 }
 
 type ResponseWidget struct {
-	widget common.Widget
+	widget database.Widget
 }
 
 type ResponseSignals struct {
-	signals []common.Signal
+	signals []database.Signal
 }
 
 type ResponseSignal struct {
-	signal common.Signal
+	signal database.Signal
 }
 
 type ResponseFiles struct {
-	files []common.File
+	files []database.File
 }
 
 type ResponseFile struct {
-	file common.File
+	file database.File
 }

@@ -1,12 +1,14 @@
 package simulator
 
 import (
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/amqp"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/helper"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
 
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
 )
 
 func RegisterSimulatorEndpoints(r *gin.RouterGroup) {
@@ -17,7 +19,7 @@ func RegisterSimulatorEndpoints(r *gin.RouterGroup) {
 	r.DELETE("/:simulatorID", deleteSimulator)
 	r.GET("/:simulatorID/models", getModelsOfSimulator)
 	// register action endpoint only if AMQP client is used
-	if common.WITH_AMQP == true {
+	if database.WITH_AMQP == true {
 		r.POST("/:simulatorID/action", sendActionToSimulator)
 	}
 }
@@ -34,15 +36,15 @@ func RegisterSimulatorEndpoints(r *gin.RouterGroup) {
 // @Router /simulators [get]
 func getSimulators(c *gin.Context) {
 
-	ok, _ := checkPermissions(c, common.ModelSimulator, common.Read, false)
+	ok, _ := checkPermissions(c, database.ModelSimulator, database.Read, false)
 	if !ok {
 		return
 	}
 
-	db := common.GetDB()
-	var simulators []common.Simulator
+	db := database.GetDB()
+	var simulators []database.Simulator
 	err := db.Order("ID asc").Find(&simulators).Error
-	if common.DBError(c, err) {
+	if helper.DBError(c, err) {
 		return
 	}
 
@@ -64,7 +66,7 @@ func getSimulators(c *gin.Context) {
 // @Router /simulators [post]
 func addSimulator(c *gin.Context) {
 
-	ok, _ := checkPermissions(c, common.ModelSimulator, common.Create, false)
+	ok, _ := checkPermissions(c, database.ModelSimulator, database.Create, false)
 	if !ok {
 		return
 	}
@@ -72,13 +74,13 @@ func addSimulator(c *gin.Context) {
 	var req addSimulatorRequest
 	err := c.BindJSON(&req)
 	if err != nil {
-		common.BadRequestError(c, "Error binding form data to JSON: "+err.Error())
+		helper.BadRequestError(c, "Error binding form data to JSON: "+err.Error())
 		return
 	}
 
 	// Validate the request
 	if err = req.validate(); err != nil {
-		common.UnprocessableEntityError(c, err.Error())
+		helper.UnprocessableEntityError(c, err.Error())
 		return
 	}
 
@@ -88,7 +90,7 @@ func addSimulator(c *gin.Context) {
 	// Save new simulator to DB
 	err = newSimulator.save()
 	if err != nil {
-		common.DBError(c, err)
+		helper.DBError(c, err)
 		return
 	}
 
@@ -111,7 +113,7 @@ func addSimulator(c *gin.Context) {
 // @Router /simulators/{simulatorID} [put]
 func updateSimulator(c *gin.Context) {
 
-	ok, oldSimulator := checkPermissions(c, common.ModelSimulator, common.Update, true)
+	ok, oldSimulator := checkPermissions(c, database.ModelSimulator, database.Update, true)
 	if !ok {
 		return
 	}
@@ -119,27 +121,27 @@ func updateSimulator(c *gin.Context) {
 	var req updateSimulatorRequest
 	err := c.BindJSON(&req)
 	if err != nil {
-		common.BadRequestError(c, "Error binding form data to JSON: "+err.Error())
+		helper.BadRequestError(c, "Error binding form data to JSON: "+err.Error())
 		return
 	}
 
 	// Validate the request
 	if err = req.validate(); err != nil {
-		common.UnprocessableEntityError(c, err.Error())
+		helper.UnprocessableEntityError(c, err.Error())
 		return
 	}
 
 	// Create the updatedSimulator from oldSimulator
 	updatedSimulator, err := req.updatedSimulator(oldSimulator)
 	if err != nil {
-		common.BadRequestError(c, err.Error())
+		helper.BadRequestError(c, err.Error())
 		return
 	}
 
 	// Finally update the simulator in the DB
 	err = oldSimulator.update(updatedSimulator)
 	if err != nil {
-		common.DBError(c, err)
+		helper.DBError(c, err)
 		return
 	}
 
@@ -161,7 +163,7 @@ func updateSimulator(c *gin.Context) {
 // @Router /simulators/{simulatorID} [get]
 func getSimulator(c *gin.Context) {
 
-	ok, s := checkPermissions(c, common.ModelSimulator, common.Read, true)
+	ok, s := checkPermissions(c, database.ModelSimulator, database.Read, true)
 	if !ok {
 		return
 	}
@@ -183,14 +185,14 @@ func getSimulator(c *gin.Context) {
 // @Router /simulators/{simulatorID} [delete]
 func deleteSimulator(c *gin.Context) {
 
-	ok, s := checkPermissions(c, common.ModelSimulator, common.Delete, true)
+	ok, s := checkPermissions(c, database.ModelSimulator, database.Delete, true)
 	if !ok {
 		return
 	}
 
 	// Delete the simulator
 	err := s.delete()
-	if common.DBError(c, err) {
+	if helper.DBError(c, err) {
 		return
 	}
 
@@ -211,14 +213,14 @@ func deleteSimulator(c *gin.Context) {
 // @Router /simulators/{simulatorID}/models [get]
 func getModelsOfSimulator(c *gin.Context) {
 
-	ok, s := checkPermissions(c, common.ModelSimulator, common.Read, true)
+	ok, s := checkPermissions(c, database.ModelSimulator, database.Read, true)
 	if !ok {
 		return
 	}
 
 	// get all associated simulation models
 	allModels, _, err := s.getModels()
-	if common.DBError(c, err) {
+	if helper.DBError(c, err) {
 		return
 	}
 
@@ -240,15 +242,15 @@ func getModelsOfSimulator(c *gin.Context) {
 // @Router /simulators/{simulatorID}/action [post]
 func sendActionToSimulator(c *gin.Context) {
 
-	ok, s := checkPermissions(c, common.ModelSimulatorAction, common.Update, true)
+	ok, s := checkPermissions(c, database.ModelSimulatorAction, database.Update, true)
 	if !ok {
 		return
 	}
 
-	var actions []common.Action
+	var actions []amqp.Action
 	err := c.BindJSON(&actions)
 	if err != nil {
-		common.BadRequestError(c, "Error binding form data to JSON: "+err.Error())
+		helper.BadRequestError(c, "Error binding form data to JSON: "+err.Error())
 		return
 	}
 
@@ -259,9 +261,9 @@ func sendActionToSimulator(c *gin.Context) {
 			action.When = float32(now.Unix())
 		}
 
-		err = common.SendActionAMQP(action, s.UUID)
+		err = amqp.SendActionAMQP(action, s.UUID)
 		if err != nil {
-			common.InternalServerError(c, "Unable to send actions to simulator: "+err.Error())
+			helper.InternalServerError(c, "Unable to send actions to simulator: "+err.Error())
 			return
 		}
 	}

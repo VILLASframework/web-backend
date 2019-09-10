@@ -1,11 +1,12 @@
 package simulationmodel
 
 import (
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/helper"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/scenario"
 )
 
@@ -30,15 +31,15 @@ func RegisterSimulationModelEndpoints(r *gin.RouterGroup) {
 // @Router /models [get]
 func getSimulationModels(c *gin.Context) {
 
-	ok, so := scenario.CheckPermissions(c, common.Read, "query", -1)
+	ok, so := scenario.CheckPermissions(c, database.Read, "query", -1)
 	if !ok {
 		return
 	}
 
-	db := common.GetDB()
-	var models []common.SimulationModel
+	db := database.GetDB()
+	var models []database.SimulationModel
 	err := db.Order("ID asc").Model(so).Related(&models, "Models").Error
-	if common.DBError(c, err) {
+	if helper.DBError(c, err) {
 		return
 	}
 
@@ -64,13 +65,13 @@ func addSimulationModel(c *gin.Context) {
 	var req addSimulationModelRequest
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		common.BadRequestError(c, "Bad request. Error binding form data to JSON: "+err.Error())
+		helper.BadRequestError(c, "Bad request. Error binding form data to JSON: "+err.Error())
 		return
 	}
 
 	// validate the request
 	if err = req.validate(); err != nil {
-		common.UnprocessableEntityError(c, err.Error())
+		helper.UnprocessableEntityError(c, err.Error())
 		return
 	}
 
@@ -78,7 +79,7 @@ func addSimulationModel(c *gin.Context) {
 	newSimulationModel := req.createSimulationModel()
 
 	// check access to the scenario
-	ok, _ := scenario.CheckPermissions(c, common.Create, "body", int(newSimulationModel.ScenarioID))
+	ok, _ := scenario.CheckPermissions(c, database.Create, "body", int(newSimulationModel.ScenarioID))
 	if !ok {
 		return
 	}
@@ -86,7 +87,7 @@ func addSimulationModel(c *gin.Context) {
 	// add the new simulation model to the scenario
 	err = newSimulationModel.addToScenario()
 	if err != nil {
-		common.DBError(c, err)
+		helper.DBError(c, err)
 		return
 	}
 
@@ -109,7 +110,7 @@ func addSimulationModel(c *gin.Context) {
 // @Router /models/{modelID} [put]
 func updateSimulationModel(c *gin.Context) {
 
-	ok, oldSimulationModel := CheckPermissions(c, common.Update, "path", -1)
+	ok, oldSimulationModel := CheckPermissions(c, database.Update, "path", -1)
 	if !ok {
 		return
 	}
@@ -117,27 +118,27 @@ func updateSimulationModel(c *gin.Context) {
 	var req updateSimulationModelRequest
 	err := c.BindJSON(&req)
 	if err != nil {
-		common.BadRequestError(c, "Error binding form data to JSON: "+err.Error())
+		helper.BadRequestError(c, "Error binding form data to JSON: "+err.Error())
 		return
 	}
 
 	// Validate the request
 	if err := req.validate(); err != nil {
-		common.BadRequestError(c, err.Error())
+		helper.BadRequestError(c, err.Error())
 		return
 	}
 
 	// Create the updatedSimulationModel from oldSimulationModel
 	updatedSimulationModel, err := req.updatedSimulationModel(oldSimulationModel)
 	if err != nil {
-		common.BadRequestError(c, err.Error())
+		helper.BadRequestError(c, err.Error())
 		return
 	}
 
 	// Finally, update the simulation model
 	err = oldSimulationModel.Update(updatedSimulationModel)
 	if err != nil {
-		common.DBError(c, err)
+		helper.DBError(c, err)
 		return
 	}
 
@@ -159,7 +160,7 @@ func updateSimulationModel(c *gin.Context) {
 // @Router /models/{modelID} [get]
 func getSimulationModel(c *gin.Context) {
 
-	ok, m := CheckPermissions(c, common.Read, "path", -1)
+	ok, m := CheckPermissions(c, database.Read, "path", -1)
 	if !ok {
 		return
 	}
@@ -181,13 +182,13 @@ func getSimulationModel(c *gin.Context) {
 // @Router /models/{modelID} [delete]
 func deleteSimulationModel(c *gin.Context) {
 
-	ok, m := CheckPermissions(c, common.Delete, "path", -1)
+	ok, m := CheckPermissions(c, database.Delete, "path", -1)
 	if !ok {
 		return
 	}
 
 	err := m.delete()
-	if common.DBError(c, err) {
+	if helper.DBError(c, err) {
 		return
 	}
 

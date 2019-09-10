@@ -2,18 +2,19 @@ package simulator
 
 import (
 	"fmt"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/helper"
 	"github.com/gin-gonic/gin"
 	"strconv"
 )
 
-func checkPermissions(c *gin.Context, modeltype common.ModelName, operation common.CRUD, hasID bool) (bool, Simulator) {
+func checkPermissions(c *gin.Context, modeltype database.ModelName, operation database.CRUD, hasID bool) (bool, Simulator) {
 
 	var s Simulator
 
-	err := common.ValidateRole(c, modeltype, operation)
+	err := database.ValidateRole(c, modeltype, operation)
 	if err != nil {
-		common.UnprocessableEntityError(c, err.Error())
+		helper.UnprocessableEntityError(c, err.Error())
 		return false, s
 	}
 
@@ -21,12 +22,12 @@ func checkPermissions(c *gin.Context, modeltype common.ModelName, operation comm
 		// Get the ID of the simulator from the context
 		simulatorID, err := strconv.Atoi(c.Param("simulatorID"))
 		if err != nil {
-			common.BadRequestError(c, fmt.Sprintf("Could not get simulator's ID from context"))
+			helper.BadRequestError(c, fmt.Sprintf("Could not get simulator's ID from context"))
 			return false, s
 		}
 
 		err = s.ByID(uint(simulatorID))
-		if common.DBError(c, err) {
+		if helper.DBError(c, err) {
 			return false, s
 		}
 

@@ -1,11 +1,12 @@
 package widget
 
 import (
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/helper"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/dashboard"
 )
 
@@ -30,15 +31,15 @@ func RegisterWidgetEndpoints(r *gin.RouterGroup) {
 // @Router /widgets [get]
 func getWidgets(c *gin.Context) {
 
-	ok, dab := dashboard.CheckPermissions(c, common.Read, "query", -1)
+	ok, dab := dashboard.CheckPermissions(c, database.Read, "query", -1)
 	if !ok {
 		return
 	}
 
-	db := common.GetDB()
-	var widgets []common.Widget
+	db := database.GetDB()
+	var widgets []database.Widget
 	err := db.Order("ID asc").Model(dab).Related(&widgets, "Widgets").Error
-	if common.DBError(c, err) {
+	if helper.DBError(c, err) {
 		return
 	}
 
@@ -62,13 +63,13 @@ func addWidget(c *gin.Context) {
 
 	var req addWidgetRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		common.BadRequestError(c, err.Error())
+		helper.BadRequestError(c, err.Error())
 		return
 	}
 
 	// Validate the request
 	if err := req.validate(); err != nil {
-		common.UnprocessableEntityError(c, err.Error())
+		helper.UnprocessableEntityError(c, err.Error())
 		return
 	}
 
@@ -76,14 +77,14 @@ func addWidget(c *gin.Context) {
 	newWidget := req.createWidget()
 
 	// Check if user is allowed to modify selected dashboard (scenario)
-	ok, _ := dashboard.CheckPermissions(c, common.Create, "body", int(newWidget.DashboardID))
+	ok, _ := dashboard.CheckPermissions(c, database.Create, "body", int(newWidget.DashboardID))
 	if !ok {
 		return
 	}
 
 	err := newWidget.addToDashboard()
 	if err != nil {
-		common.DBError(c, err)
+		helper.DBError(c, err)
 		return
 	}
 
@@ -106,34 +107,34 @@ func addWidget(c *gin.Context) {
 // @Router /widgets/{widgetID} [put]
 func updateWidget(c *gin.Context) {
 
-	ok, oldWidget := CheckPermissions(c, common.Update, -1)
+	ok, oldWidget := CheckPermissions(c, database.Update, -1)
 	if !ok {
 		return
 	}
 
 	var req updateWidgetRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		common.BadRequestError(c, err.Error())
+		helper.BadRequestError(c, err.Error())
 		return
 	}
 
 	// Validate the request
 	if err := req.validate(); err != nil {
-		common.BadRequestError(c, err.Error())
+		helper.BadRequestError(c, err.Error())
 		return
 	}
 
 	// Create the updatedScenario from oldScenario
 	updatedWidget, err := req.updatedWidget(oldWidget)
 	if err != nil {
-		common.BadRequestError(c, err.Error())
+		helper.BadRequestError(c, err.Error())
 		return
 	}
 
 	// Update the widget in the DB
 	err = oldWidget.update(updatedWidget)
 	if err != nil {
-		common.DBError(c, err)
+		helper.DBError(c, err)
 		return
 	}
 
@@ -155,7 +156,7 @@ func updateWidget(c *gin.Context) {
 // @Router /widgets/{widgetID} [get]
 func getWidget(c *gin.Context) {
 
-	ok, w := CheckPermissions(c, common.Read, -1)
+	ok, w := CheckPermissions(c, database.Read, -1)
 	if !ok {
 		return
 	}
@@ -177,13 +178,13 @@ func getWidget(c *gin.Context) {
 // @Router /widgets/{widgetID} [delete]
 func deleteWidget(c *gin.Context) {
 
-	ok, w := CheckPermissions(c, common.Delete, -1)
+	ok, w := CheckPermissions(c, database.Delete, -1)
 	if !ok {
 		return
 	}
 
 	err := w.delete()
-	if common.DBError(c, err) {
+	if helper.DBError(c, err) {
 		return
 	}
 

@@ -1,23 +1,23 @@
 package simulationmodel
 
 import (
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/scenario"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulator"
 )
 
 type SimulationModel struct {
-	common.SimulationModel
+	database.SimulationModel
 }
 
 func (m *SimulationModel) save() error {
-	db := common.GetDB()
+	db := database.GetDB()
 	err := db.Create(m).Error
 	return err
 }
 
 func (m *SimulationModel) ByID(id uint) error {
-	db := common.GetDB()
+	db := database.GetDB()
 	err := db.Find(m, id).Error
 	if err != nil {
 		return err
@@ -26,7 +26,7 @@ func (m *SimulationModel) ByID(id uint) error {
 }
 
 func (m *SimulationModel) addToScenario() error {
-	db := common.GetDB()
+	db := database.GetDB()
 	var so scenario.Scenario
 	err := so.ByID(m.ScenarioID)
 	if err != nil {
@@ -54,7 +54,7 @@ func (m *SimulationModel) addToScenario() error {
 }
 
 func (m *SimulationModel) Update(modifiedSimulationModel SimulationModel) error {
-	db := common.GetDB()
+	db := database.GetDB()
 
 	if m.SimulatorID != modifiedSimulationModel.SimulatorID {
 		// update simulator
@@ -96,7 +96,7 @@ func (m *SimulationModel) Update(modifiedSimulationModel SimulationModel) error 
 
 func (m *SimulationModel) delete() error {
 
-	db := common.GetDB()
+	db := database.GetDB()
 	var so scenario.Scenario
 	err := so.ByID(m.ScenarioID)
 	if err != nil {

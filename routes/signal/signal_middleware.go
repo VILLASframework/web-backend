@@ -2,32 +2,33 @@ package signal
 
 import (
 	"fmt"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/helper"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulationmodel"
 )
 
-func checkPermissions(c *gin.Context, operation common.CRUD) (bool, Signal) {
+func checkPermissions(c *gin.Context, operation database.CRUD) (bool, Signal) {
 
 	var sig Signal
 
-	err := common.ValidateRole(c, common.ModelSignal, operation)
+	err := database.ValidateRole(c, database.ModelSignal, operation)
 	if err != nil {
-		common.UnprocessableEntityError(c, fmt.Sprintf("Access denied (role validation failed): %v", err.Error()))
+		helper.UnprocessableEntityError(c, fmt.Sprintf("Access denied (role validation failed): %v", err.Error()))
 		return false, sig
 	}
 
 	signalID, err := strconv.Atoi(c.Param("signalID"))
 	if err != nil {
-		common.BadRequestError(c, fmt.Sprintf("No or incorrect format of signalID path parameter"))
+		helper.BadRequestError(c, fmt.Sprintf("No or incorrect format of signalID path parameter"))
 		return false, sig
 	}
 
 	err = sig.byID(uint(signalID))
-	if common.DBError(c, err) {
+	if helper.DBError(c, err) {
 		return false, sig
 	}
 

@@ -2,7 +2,7 @@ package user
 
 import (
 	"fmt"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -12,23 +12,23 @@ const bcryptCost = 10
 // package since we have circular dependencies. Methods of a type must
 // live in the same package.
 type User struct {
-	common.User // check golang embedding types
+	database.User // check golang embedding types
 }
 
 func (u *User) save() error {
-	db := common.GetDB()
+	db := database.GetDB()
 	err := db.Create(u).Error
 	return err
 }
 
 func (u *User) remove() error {
-	db := common.GetDB()
+	db := database.GetDB()
 	err := db.Delete(u).Error
 	return err
 }
 
 func (u *User) ByUsername(username string) error {
-	db := common.GetDB()
+	db := database.GetDB()
 	err := db.Find(u, "Username = ?", username).Error
 	if err != nil {
 		return err
@@ -37,7 +37,7 @@ func (u *User) ByUsername(username string) error {
 }
 
 func (u *User) ByID(id uint) error {
-	db := common.GetDB()
+	db := database.GetDB()
 	err := db.Find(u, id).Error
 	if err != nil {
 		return fmt.Errorf("User with id=%v does not exist", id)
@@ -72,7 +72,7 @@ func (u *User) update(updatedUser User) error {
 	u.Mail = updatedUser.Mail
 	u.Role = updatedUser.Role
 
-	db := common.GetDB()
+	db := database.GetDB()
 	err := db.Model(u).Update(updatedUser).Error
 	return err
 }

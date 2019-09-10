@@ -2,6 +2,7 @@ package user
 
 import (
 	"fmt"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/helper"
 	"net/http"
 	"strconv"
 	"strings"
@@ -9,7 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
 	_ "git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/doc/api"
 )
 
@@ -37,16 +38,16 @@ func RegisterUserEndpoints(r *gin.RouterGroup) {
 // @Router /users [get]
 func getUsers(c *gin.Context) {
 
-	err := common.ValidateRole(c, common.ModelUsers, common.Read)
+	err := database.ValidateRole(c, database.ModelUsers, database.Read)
 	if err != nil {
-		common.UnprocessableEntityError(c, err.Error())
+		helper.UnprocessableEntityError(c, err.Error())
 		return
 	}
 
-	db := common.GetDB()
-	var users []common.User
+	db := database.GetDB()
+	var users []database.User
 	err = db.Order("ID asc").Find(&users).Error
-	if common.DBError(c, err) {
+	if helper.DBError(c, err) {
 		return
 	}
 
@@ -67,22 +68,22 @@ func getUsers(c *gin.Context) {
 // @Router /users [post]
 func addUser(c *gin.Context) {
 
-	err := common.ValidateRole(c, common.ModelUser, common.Create)
+	err := database.ValidateRole(c, database.ModelUser, database.Create)
 	if err != nil {
-		common.UnprocessableEntityError(c, err.Error())
+		helper.UnprocessableEntityError(c, err.Error())
 		return
 	}
 
 	// Bind the request
 	var req addUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		common.BadRequestError(c, err.Error())
+		helper.BadRequestError(c, err.Error())
 		return
 	}
 
 	// Validate the request
 	if err = req.validate(); err != nil {
-		common.UnprocessableEntityError(c, err.Error())
+		helper.UnprocessableEntityError(c, err.Error())
 		return
 	}
 
@@ -92,21 +93,21 @@ func addUser(c *gin.Context) {
 	// Check that the username is NOT taken
 	err = newUser.ByUsername(newUser.Username)
 	if err == nil {
-		common.UnprocessableEntityError(c, "Username is already taken")
+		helper.UnprocessableEntityError(c, "Username is already taken")
 		return
 	}
 
 	// Hash the password before saving it to the DB
 	err = newUser.setPassword(newUser.Password)
 	if err != nil {
-		common.UnprocessableEntityError(c, "Unable to encrypt the password")
+		helper.UnprocessableEntityError(c, "Unable to encrypt the password")
 		return
 	}
 
 	// Save the user in the DB
 	err = newUser.save()
 	if err != nil {
-		common.DBError(c, err)
+		helper.DBError(c, err)
 		return
 	}
 
@@ -130,9 +131,9 @@ func addUser(c *gin.Context) {
 // @Router /users/{userID} [put]
 func updateUser(c *gin.Context) {
 
-	err := common.ValidateRole(c, common.ModelUser, common.Update)
+	err := database.ValidateRole(c, database.ModelUser, database.Update)
 	if err != nil {
-		common.UnprocessableEntityError(c, err.Error())
+		helper.UnprocessableEntityError(c, err.Error())
 		return
 	}
 
@@ -140,14 +141,14 @@ func updateUser(c *gin.Context) {
 	var oldUser User
 	toBeUpdatedID, err := strconv.Atoi(c.Param("userID"))
 	if err != nil {
-		common.NotFoundError(c, fmt.Sprintf("Could not get user's ID from context"))
+		helper.NotFoundError(c, fmt.Sprintf("Could not get user's ID from context"))
 		return
 	}
 
 	// Find the user
 	err = oldUser.ByID(uint(toBeUpdatedID))
 	if err != nil {
-		common.DBError(c, err)
+		helper.DBError(c, err)
 		return
 	}
 
@@ -161,34 +162,34 @@ func updateUser(c *gin.Context) {
 	// except Role
 
 	// Get caller's ID from context
-	callerID, exists := c.Get(common.UserIDCtx)
+	callerID, exists := c.Get(database.UserIDCtx)
 	if !exists {
-		common.NotFoundError(c, fmt.Sprintf("Could not get caller's ID from context"))
+		helper.NotFoundError(c, fmt.Sprintf("Could not get caller's ID from context"))
 		return
 	}
 
 	// Get caller's Role from context
-	callerRole, exists := c.Get(common.UserRoleCtx)
+	callerRole, exists := c.Get(database.UserRoleCtx)
 	if !exists {
-		common.NotFoundError(c, fmt.Sprintf("Could not get caller's Role from context"))
+		helper.NotFoundError(c, fmt.Sprintf("Could not get caller's Role from context"))
 		return
 	}
 
 	if uint(toBeUpdatedID) != callerID && callerRole != "Admin" {
-		common.ForbiddenError(c, "Invalid authorization")
+		helper.ForbiddenError(c, "Invalid authorization")
 		return
 	}
 
 	// Bind the (context) with the updateUserRequest struct
 	var req updateUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		common.UnprocessableEntityError(c, fmt.Sprintf("%v", err))
+		helper.UnprocessableEntityError(c, fmt.Sprintf("%v", err))
 		return
 	}
 
 	// Validate the request based on struct updateUserRequest json tags
 	if err = req.validate(); err != nil {
-		common.BadRequestError(c, err.Error())
+		helper.BadRequestError(c, err.Error())
 		return
 	}
 
@@ -197,10 +198,10 @@ func updateUser(c *gin.Context) {
 	updatedUser, err := req.updatedUser(callerRole, oldUser)
 	if err != nil {
 		if strings.Contains(err.Error(), "Admin") {
-			common.ForbiddenError(c, err.Error())
+			helper.ForbiddenError(c, err.Error())
 
 		} else if strings.Contains(err.Error(), "Username") || strings.Contains(err.Error(), "password") {
-			common.BadRequestError(c, err.Error())
+			helper.BadRequestError(c, err.Error())
 		}
 		return
 	}
@@ -208,7 +209,7 @@ func updateUser(c *gin.Context) {
 	// Finally update the user
 	err = oldUser.update(updatedUser)
 	if err != nil {
-		common.DBError(c, err)
+		helper.DBError(c, err)
 		return
 	}
 
@@ -229,30 +230,30 @@ func updateUser(c *gin.Context) {
 // @Router /users/{userID} [get]
 func getUser(c *gin.Context) {
 
-	err := common.ValidateRole(c, common.ModelUser, common.Read)
+	err := database.ValidateRole(c, database.ModelUser, database.Read)
 	if err != nil {
-		common.UnprocessableEntityError(c, err.Error())
+		helper.UnprocessableEntityError(c, err.Error())
 		return
 	}
 
 	id, err := strconv.Atoi(c.Param("userID"))
 	if err != nil {
-		common.NotFoundError(c, fmt.Sprintf("Could not get user's ID from context"))
+		helper.NotFoundError(c, fmt.Sprintf("Could not get user's ID from context"))
 		return
 	}
 
-	reqUserID, _ := c.Get(common.UserIDCtx)
-	reqUserRole, _ := c.Get(common.UserRoleCtx)
+	reqUserID, _ := c.Get(database.UserIDCtx)
+	reqUserRole, _ := c.Get(database.UserRoleCtx)
 
 	if id != reqUserID && reqUserRole != "Admin" {
-		common.ForbiddenError(c, "Invalid authorization")
+		helper.ForbiddenError(c, "Invalid authorization")
 		return
 	}
 
 	var user User
 	err = user.ByID(uint(id))
 	if err != nil {
-		common.DBError(c, err)
+		helper.DBError(c, err)
 		return
 	}
 
@@ -272,30 +273,30 @@ func getUser(c *gin.Context) {
 // @Router /users/{userID} [delete]
 func deleteUser(c *gin.Context) {
 
-	err := common.ValidateRole(c, common.ModelUser, common.Delete)
+	err := database.ValidateRole(c, database.ModelUser, database.Delete)
 	if err != nil {
-		common.UnprocessableEntityError(c, err.Error())
+		helper.UnprocessableEntityError(c, err.Error())
 		return
 	}
 
 	var user User
 	id, err := strconv.Atoi(c.Param("userID"))
 	if err != nil {
-		common.NotFoundError(c, fmt.Sprintf("Could not get user's ID from context"))
+		helper.NotFoundError(c, fmt.Sprintf("Could not get user's ID from context"))
 		return
 	}
 
 	// Check that the user exist
 	err = user.ByID(uint(id))
 	if err != nil {
-		common.DBError(c, err)
+		helper.DBError(c, err)
 		return
 	}
 
 	// Try to remove user
 	err = user.remove()
 	if err != nil {
-		common.DBError(c, err)
+		helper.DBError(c, err)
 		return
 	}
 

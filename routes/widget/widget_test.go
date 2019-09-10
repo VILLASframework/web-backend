@@ -2,7 +2,8 @@ package widget
 
 import (
 	"fmt"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/helper"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/dashboard"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/scenario"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/user"
@@ -48,34 +49,34 @@ func addScenarioAndDashboard(token string) (scenarioID uint, dashboardID uint) {
 
 	// POST $newScenario
 	newScenario := ScenarioRequest{
-		Name:            common.ScenarioA.Name,
-		Running:         common.ScenarioA.Running,
-		StartParameters: common.ScenarioA.StartParameters,
+		Name:            database.ScenarioA.Name,
+		Running:         database.ScenarioA.Running,
+		StartParameters: database.ScenarioA.StartParameters,
 	}
-	_, resp, _ := common.TestEndpoint(router, token,
-		"/api/scenarios", "POST", common.KeyModels{"scenario": newScenario})
+	_, resp, _ := helper.TestEndpoint(router, token,
+		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenario})
 
 	// Read newScenario's ID from the response
-	newScenarioID, _ := common.GetResponseID(resp)
+	newScenarioID, _ := helper.GetResponseID(resp)
 
 	// test POST dashboards/ $newDashboard
 	newDashboard := DashboardRequest{
-		Name:       common.DashboardA.Name,
-		Grid:       common.DashboardA.Grid,
+		Name:       database.DashboardA.Name,
+		Grid:       database.DashboardA.Grid,
 		ScenarioID: uint(newScenarioID),
 	}
-	_, resp, _ = common.TestEndpoint(router, token,
-		"/api/dashboards", "POST", common.KeyModels{"dashboard": newDashboard})
+	_, resp, _ = helper.TestEndpoint(router, token,
+		"/api/dashboards", "POST", helper.KeyModels{"dashboard": newDashboard})
 
 	// Read newDashboard's ID from the response
-	newDashboardID, _ := common.GetResponseID(resp)
+	newDashboardID, _ := helper.GetResponseID(resp)
 
 	return uint(newScenarioID), uint(newDashboardID)
 }
 
 func TestMain(m *testing.M) {
 
-	db = common.InitDB(common.DB_TEST)
+	db = database.InitDB(database.DB_TEST)
 	defer db.Close()
 
 	router = gin.Default()
@@ -95,53 +96,53 @@ func TestMain(m *testing.M) {
 }
 
 func TestAddWidget(t *testing.T) {
-	common.DropTables(db)
-	common.MigrateModels(db)
-	common.DBAddAdminAndUser(db)
+	database.DropTables(db)
+	database.MigrateModels(db)
+	assert.NoError(t, database.DBAddAdminAndUser(db))
 
 	// authenticate as normal user
-	token, err := common.AuthenticateForTest(router,
-		"/api/authenticate", "POST", common.UserACredentials)
+	token, err := helper.AuthenticateForTest(router,
+		"/api/authenticate", "POST", helper.UserACredentials)
 	assert.NoError(t, err)
 
 	_, dashboardID := addScenarioAndDashboard(token)
 
 	// test POST widgets/ $newWidget
 	newWidget := WidgetRequest{
-		Name:             common.WidgetA.Name,
-		Type:             common.WidgetA.Type,
-		Width:            common.WidgetA.Width,
-		Height:           common.WidgetA.Height,
-		MinWidth:         common.WidgetA.MinWidth,
-		MinHeight:        common.WidgetA.MinHeight,
-		X:                common.WidgetA.X,
-		Y:                common.WidgetA.Y,
-		Z:                common.WidgetA.Z,
-		IsLocked:         common.WidgetA.IsLocked,
-		CustomProperties: common.WidgetA.CustomProperties,
+		Name:             database.WidgetA.Name,
+		Type:             database.WidgetA.Type,
+		Width:            database.WidgetA.Width,
+		Height:           database.WidgetA.Height,
+		MinWidth:         database.WidgetA.MinWidth,
+		MinHeight:        database.WidgetA.MinHeight,
+		X:                database.WidgetA.X,
+		Y:                database.WidgetA.Y,
+		Z:                database.WidgetA.Z,
+		IsLocked:         database.WidgetA.IsLocked,
+		CustomProperties: database.WidgetA.CustomProperties,
 		DashboardID:      dashboardID,
 	}
-	code, resp, err := common.TestEndpoint(router, token,
-		"/api/widgets", "POST", common.KeyModels{"widget": newWidget})
+	code, resp, err := helper.TestEndpoint(router, token,
+		"/api/widgets", "POST", helper.KeyModels{"widget": newWidget})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// Compare POST's response with the newWidget
-	err = common.CompareResponse(resp, common.KeyModels{"widget": newWidget})
+	err = helper.CompareResponse(resp, helper.KeyModels{"widget": newWidget})
 	assert.NoError(t, err)
 
 	// Read newWidget's ID from the response
-	newWidgetID, err := common.GetResponseID(resp)
+	newWidgetID, err := helper.GetResponseID(resp)
 	assert.NoError(t, err)
 
 	// Get the newWidget
-	code, resp, err = common.TestEndpoint(router, token,
+	code, resp, err = helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/widgets/%v", newWidgetID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// Compare GET's response with the newWidget
-	err = common.CompareResponse(resp, common.KeyModels{"widget": newWidget})
+	err = helper.CompareResponse(resp, helper.KeyModels{"widget": newWidget})
 	assert.NoError(t, err)
 
 	// try to POST a malformed widget
@@ -150,138 +151,138 @@ func TestAddWidget(t *testing.T) {
 		Name: "ThisIsAMalformedDashboard",
 	}
 	// this should NOT work and return a unprocessable entity 442 status code
-	code, resp, err = common.TestEndpoint(router, token,
-		"/api/widgets", "POST", common.KeyModels{"widget": malformedNewWidget})
+	code, resp, err = helper.TestEndpoint(router, token,
+		"/api/widgets", "POST", helper.KeyModels{"widget": malformedNewWidget})
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 }
 
 func TestUpdateWidget(t *testing.T) {
-	common.DropTables(db)
-	common.MigrateModels(db)
-	common.DBAddAdminAndUser(db)
+	database.DropTables(db)
+	database.MigrateModels(db)
+	assert.NoError(t, database.DBAddAdminAndUser(db))
 
 	// authenticate as normal user
-	token, err := common.AuthenticateForTest(router,
-		"/api/authenticate", "POST", common.UserACredentials)
+	token, err := helper.AuthenticateForTest(router,
+		"/api/authenticate", "POST", helper.UserACredentials)
 	assert.NoError(t, err)
 
 	_, dashboardID := addScenarioAndDashboard(token)
 
 	// test POST widgets/ $newWidget
 	newWidget := WidgetRequest{
-		Name:             common.WidgetA.Name,
-		Type:             common.WidgetA.Type,
-		Width:            common.WidgetA.Width,
-		Height:           common.WidgetA.Height,
-		MinWidth:         common.WidgetA.MinWidth,
-		MinHeight:        common.WidgetA.MinHeight,
-		X:                common.WidgetA.X,
-		Y:                common.WidgetA.Y,
-		Z:                common.WidgetA.Z,
-		IsLocked:         common.WidgetA.IsLocked,
-		CustomProperties: common.WidgetA.CustomProperties,
+		Name:             database.WidgetA.Name,
+		Type:             database.WidgetA.Type,
+		Width:            database.WidgetA.Width,
+		Height:           database.WidgetA.Height,
+		MinWidth:         database.WidgetA.MinWidth,
+		MinHeight:        database.WidgetA.MinHeight,
+		X:                database.WidgetA.X,
+		Y:                database.WidgetA.Y,
+		Z:                database.WidgetA.Z,
+		IsLocked:         database.WidgetA.IsLocked,
+		CustomProperties: database.WidgetA.CustomProperties,
 		DashboardID:      dashboardID,
 	}
-	code, resp, err := common.TestEndpoint(router, token,
-		"/api/widgets", "POST", common.KeyModels{"widget": newWidget})
+	code, resp, err := helper.TestEndpoint(router, token,
+		"/api/widgets", "POST", helper.KeyModels{"widget": newWidget})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// Read newWidget's ID from the response
-	newWidgetID, err := common.GetResponseID(resp)
+	newWidgetID, err := helper.GetResponseID(resp)
 	assert.NoError(t, err)
 
 	updatedWidget := WidgetRequest{
-		Name:             common.WidgetB.Name,
-		Type:             common.WidgetB.Type,
-		Width:            common.WidgetB.Width,
-		Height:           common.WidgetB.Height,
-		MinWidth:         common.WidgetB.MinWidth,
-		MinHeight:        common.WidgetB.MinHeight,
-		CustomProperties: common.WidgetA.CustomProperties,
+		Name:             database.WidgetB.Name,
+		Type:             database.WidgetB.Type,
+		Width:            database.WidgetB.Width,
+		Height:           database.WidgetB.Height,
+		MinWidth:         database.WidgetB.MinWidth,
+		MinHeight:        database.WidgetB.MinHeight,
+		CustomProperties: database.WidgetA.CustomProperties,
 	}
 
-	code, resp, err = common.TestEndpoint(router, token,
-		fmt.Sprintf("/api/widgets/%v", newWidgetID), "PUT", common.KeyModels{"widget": updatedWidget})
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/widgets/%v", newWidgetID), "PUT", helper.KeyModels{"widget": updatedWidget})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// Compare PUT's response with the updatedWidget
-	err = common.CompareResponse(resp, common.KeyModels{"widget": updatedWidget})
+	err = helper.CompareResponse(resp, helper.KeyModels{"widget": updatedWidget})
 	assert.NoError(t, err)
 
 	// Get the updatedWidget
-	code, resp, err = common.TestEndpoint(router, token,
+	code, resp, err = helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/widgets/%v", newWidgetID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// Compare GET's response with the updatedWidget
-	err = common.CompareResponse(resp, common.KeyModels{"widget": updatedWidget})
+	err = helper.CompareResponse(resp, helper.KeyModels{"widget": updatedWidget})
 	assert.NoError(t, err)
 
 	// try to update a widget that does not exist (should return not found 404 status code)
-	code, resp, err = common.TestEndpoint(router, token,
-		fmt.Sprintf("/api/widgets/%v", newWidgetID+1), "PUT", common.KeyModels{"widget": updatedWidget})
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/widgets/%v", newWidgetID+1), "PUT", helper.KeyModels{"widget": updatedWidget})
 	assert.NoError(t, err)
 	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
 
 }
 
 func TestDeleteWidget(t *testing.T) {
-	common.DropTables(db)
-	common.MigrateModels(db)
-	common.DBAddAdminAndUser(db)
+	database.DropTables(db)
+	database.MigrateModels(db)
+	assert.NoError(t, database.DBAddAdminAndUser(db))
 
 	// authenticate as normal user
-	token, err := common.AuthenticateForTest(router,
-		"/api/authenticate", "POST", common.UserACredentials)
+	token, err := helper.AuthenticateForTest(router,
+		"/api/authenticate", "POST", helper.UserACredentials)
 	assert.NoError(t, err)
 
 	_, dashboardID := addScenarioAndDashboard(token)
 
 	// test POST widgets/ $newWidget
 	newWidget := WidgetRequest{
-		Name:             common.WidgetA.Name,
-		Type:             common.WidgetA.Type,
-		Width:            common.WidgetA.Width,
-		Height:           common.WidgetA.Height,
-		MinWidth:         common.WidgetA.MinWidth,
-		MinHeight:        common.WidgetA.MinHeight,
-		X:                common.WidgetA.X,
-		Y:                common.WidgetA.Y,
-		Z:                common.WidgetA.Z,
-		IsLocked:         common.WidgetA.IsLocked,
-		CustomProperties: common.WidgetA.CustomProperties,
+		Name:             database.WidgetA.Name,
+		Type:             database.WidgetA.Type,
+		Width:            database.WidgetA.Width,
+		Height:           database.WidgetA.Height,
+		MinWidth:         database.WidgetA.MinWidth,
+		MinHeight:        database.WidgetA.MinHeight,
+		X:                database.WidgetA.X,
+		Y:                database.WidgetA.Y,
+		Z:                database.WidgetA.Z,
+		IsLocked:         database.WidgetA.IsLocked,
+		CustomProperties: database.WidgetA.CustomProperties,
 		DashboardID:      dashboardID,
 	}
-	code, resp, err := common.TestEndpoint(router, token,
-		"/api/widgets", "POST", common.KeyModels{"widget": newWidget})
+	code, resp, err := helper.TestEndpoint(router, token,
+		"/api/widgets", "POST", helper.KeyModels{"widget": newWidget})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// Read newWidget's ID from the response
-	newWidgetID, err := common.GetResponseID(resp)
+	newWidgetID, err := helper.GetResponseID(resp)
 	assert.NoError(t, err)
 
 	// Count the number of all the widgets returned for dashboard
-	initialNumber, err := common.LengthOfResponse(router, token,
+	initialNumber, err := helper.LengthOfResponse(router, token,
 		fmt.Sprintf("/api/widgets?dashboardID=%v", dashboardID), "GET", nil)
 	assert.NoError(t, err)
 
 	// Delete the added newWidget
-	code, resp, err = common.TestEndpoint(router, token,
+	code, resp, err = helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/widgets/%v", newWidgetID), "DELETE", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// Compare DELETE's response with the newWidget
-	err = common.CompareResponse(resp, common.KeyModels{"widget": newWidget})
+	err = helper.CompareResponse(resp, helper.KeyModels{"widget": newWidget})
 	assert.NoError(t, err)
 
 	// Again count the number of all the widgets returned for dashboard
-	finalNumber, err := common.LengthOfResponse(router, token,
+	finalNumber, err := helper.LengthOfResponse(router, token,
 		fmt.Sprintf("/api/widgets?dashboardID=%v", dashboardID), "GET", nil)
 	assert.NoError(t, err)
 
@@ -289,63 +290,63 @@ func TestDeleteWidget(t *testing.T) {
 }
 
 func TestGetAllWidgetsOfDashboard(t *testing.T) {
-	common.DropTables(db)
-	common.MigrateModels(db)
-	common.DBAddAdminAndUser(db)
+	database.DropTables(db)
+	database.MigrateModels(db)
+	assert.NoError(t, database.DBAddAdminAndUser(db))
 
 	// authenticate as normal user
-	token, err := common.AuthenticateForTest(router,
-		"/api/authenticate", "POST", common.UserACredentials)
+	token, err := helper.AuthenticateForTest(router,
+		"/api/authenticate", "POST", helper.UserACredentials)
 	assert.NoError(t, err)
 
 	_, dashboardID := addScenarioAndDashboard(token)
 
 	// Count the number of all the widgets returned for dashboard
-	initialNumber, err := common.LengthOfResponse(router, token,
+	initialNumber, err := helper.LengthOfResponse(router, token,
 		fmt.Sprintf("/api/widgets?dashboardID=%v", dashboardID), "GET", nil)
 	assert.NoError(t, err)
 
 	// test POST widgets/ $newWidget
 	newWidgetA := WidgetRequest{
-		Name:             common.WidgetA.Name,
-		Type:             common.WidgetA.Type,
-		Width:            common.WidgetA.Width,
-		Height:           common.WidgetA.Height,
-		MinWidth:         common.WidgetA.MinWidth,
-		MinHeight:        common.WidgetA.MinHeight,
-		X:                common.WidgetA.X,
-		Y:                common.WidgetA.Y,
-		Z:                common.WidgetA.Z,
-		IsLocked:         common.WidgetA.IsLocked,
-		CustomProperties: common.WidgetA.CustomProperties,
+		Name:             database.WidgetA.Name,
+		Type:             database.WidgetA.Type,
+		Width:            database.WidgetA.Width,
+		Height:           database.WidgetA.Height,
+		MinWidth:         database.WidgetA.MinWidth,
+		MinHeight:        database.WidgetA.MinHeight,
+		X:                database.WidgetA.X,
+		Y:                database.WidgetA.Y,
+		Z:                database.WidgetA.Z,
+		IsLocked:         database.WidgetA.IsLocked,
+		CustomProperties: database.WidgetA.CustomProperties,
 		DashboardID:      dashboardID,
 	}
-	code, resp, err := common.TestEndpoint(router, token,
-		"/api/widgets", "POST", common.KeyModels{"widget": newWidgetA})
+	code, resp, err := helper.TestEndpoint(router, token,
+		"/api/widgets", "POST", helper.KeyModels{"widget": newWidgetA})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	newWidgetB := WidgetRequest{
-		Name:             common.WidgetB.Name,
-		Type:             common.WidgetB.Type,
-		Width:            common.WidgetB.Width,
-		Height:           common.WidgetB.Height,
-		MinWidth:         common.WidgetB.MinWidth,
-		MinHeight:        common.WidgetB.MinHeight,
-		X:                common.WidgetB.X,
-		Y:                common.WidgetB.Y,
-		Z:                common.WidgetB.Z,
-		IsLocked:         common.WidgetB.IsLocked,
-		CustomProperties: common.WidgetB.CustomProperties,
+		Name:             database.WidgetB.Name,
+		Type:             database.WidgetB.Type,
+		Width:            database.WidgetB.Width,
+		Height:           database.WidgetB.Height,
+		MinWidth:         database.WidgetB.MinWidth,
+		MinHeight:        database.WidgetB.MinHeight,
+		X:                database.WidgetB.X,
+		Y:                database.WidgetB.Y,
+		Z:                database.WidgetB.Z,
+		IsLocked:         database.WidgetB.IsLocked,
+		CustomProperties: database.WidgetB.CustomProperties,
 		DashboardID:      dashboardID,
 	}
-	code, resp, err = common.TestEndpoint(router, token,
-		"/api/widgets", "POST", common.KeyModels{"widget": newWidgetB})
+	code, resp, err = helper.TestEndpoint(router, token,
+		"/api/widgets", "POST", helper.KeyModels{"widget": newWidgetB})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// Again count the number of all the widgets returned for dashboard
-	finalNumber, err := common.LengthOfResponse(router, token,
+	finalNumber, err := helper.LengthOfResponse(router, token,
 		fmt.Sprintf("/api/widgets?dashboardID=%v", dashboardID), "GET", nil)
 	assert.NoError(t, err)
 

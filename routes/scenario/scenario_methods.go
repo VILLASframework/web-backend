@@ -2,17 +2,17 @@ package scenario
 
 import (
 	"fmt"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/user"
 	"github.com/jinzhu/gorm"
 )
 
 type Scenario struct {
-	common.Scenario
+	database.Scenario
 }
 
 func (s *Scenario) ByID(id uint) error {
-	db := common.GetDB()
+	db := database.GetDB()
 	err := db.Find(s, id).Error
 	if err != nil {
 		return err
@@ -20,15 +20,15 @@ func (s *Scenario) ByID(id uint) error {
 	return nil
 }
 
-func (s *Scenario) getUsers() ([]common.User, int, error) {
-	db := common.GetDB()
-	var users []common.User
+func (s *Scenario) getUsers() ([]database.User, int, error) {
+	db := database.GetDB()
+	var users []database.User
 	err := db.Order("ID asc").Model(s).Related(&users, "Users").Error
 	return users, len(users), err
 }
 
 func (s *Scenario) save() error {
-	db := common.GetDB()
+	db := database.GetDB()
 	err := db.Create(s).Error
 	return err
 }
@@ -40,20 +40,20 @@ func (s *Scenario) update(updatedScenario Scenario) error {
 	s.Running = updatedScenario.Running
 	s.StartParameters = updatedScenario.StartParameters
 
-	db := common.GetDB()
+	db := database.GetDB()
 	err := db.Model(s).Update(updatedScenario).Error
 	return err
 }
 
-func (s *Scenario) addUser(u *common.User) error {
+func (s *Scenario) addUser(u *database.User) error {
 
-	db := common.GetDB()
+	db := database.GetDB()
 	err := db.Model(s).Association("Users").Append(u).Error
 	return err
 }
 
 func (s *Scenario) deleteUser(username string) error {
-	db := common.GetDB()
+	db := database.GetDB()
 
 	var deletedUser user.User
 	err := deletedUser.ByUsername(username)
@@ -92,7 +92,7 @@ func (s *Scenario) deleteUser(username string) error {
 }
 
 func (s *Scenario) delete() error {
-	db := common.GetDB()
+	db := database.GetDB()
 
 	// delete scenario from all users and vice versa
 
@@ -133,8 +133,8 @@ func (s *Scenario) checkAccess(userID uint, userRole string) bool {
 	if userRole == "Admin" {
 		return true
 	} else {
-		db := common.GetDB()
-		u := common.User{}
+		db := database.GetDB()
+		u := database.User{}
 		u.Username = ""
 		err := db.Order("ID asc").Model(s).Where("ID = ?", userID).Related(&u, "Users").Error
 		if err != nil {

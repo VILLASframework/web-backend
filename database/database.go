@@ -1,4 +1,4 @@
-package common
+package database
 
 import (
 	"flag"
@@ -36,7 +36,9 @@ func InitDB(dbname string) *gorm.DB {
 	dbinfo := fmt.Sprintf("host=%s sslmode=%s dbname=%s",
 		DB_HOST, DB_SSLMODE, dbname)
 	db, err := gorm.Open("postgres", dbinfo)
-	checkErr(err)
+	if err != nil {
+		log.Fatal(err)
+	}
 	DBpool = db
 
 	if dbname == DB_TEST {
@@ -79,12 +81,4 @@ func MigrateModels(db *gorm.DB) {
 	db.AutoMigrate(&User{})
 	db.AutoMigrate(&Dashboard{})
 	db.AutoMigrate(&Widget{})
-}
-
-// Quick error check
-// NOTE: maybe this is not a good idea
-func checkErr(err error) {
-	if err != nil {
-		log.Fatal(err)
-	}
 }

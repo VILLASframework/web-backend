@@ -2,21 +2,22 @@ package dashboard
 
 import (
 	"fmt"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/helper"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/scenario"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
 )
 
-func CheckPermissions(c *gin.Context, operation common.CRUD, dabIDSource string, dabIDBody int) (bool, Dashboard) {
+func CheckPermissions(c *gin.Context, operation database.CRUD, dabIDSource string, dabIDBody int) (bool, Dashboard) {
 
 	var dab Dashboard
 
-	err := common.ValidateRole(c, common.ModelDashboard, operation)
+	err := database.ValidateRole(c, database.ModelDashboard, operation)
 	if err != nil {
-		common.UnprocessableEntityError(c, fmt.Sprintf("Access denied (role validation failed): %v", err.Error()))
+		helper.UnprocessableEntityError(c, fmt.Sprintf("Access denied (role validation failed): %v", err.Error()))
 		return false, dab
 	}
 
@@ -24,13 +25,13 @@ func CheckPermissions(c *gin.Context, operation common.CRUD, dabIDSource string,
 	if dabIDSource == "path" {
 		dabID, err = strconv.Atoi(c.Param("dashboardID"))
 		if err != nil {
-			common.BadRequestError(c, fmt.Sprintf("No or incorrect format of dashboardID path parameter"))
+			helper.BadRequestError(c, fmt.Sprintf("No or incorrect format of dashboardID path parameter"))
 			return false, dab
 		}
 	} else if dabIDSource == "query" {
 		dabID, err = strconv.Atoi(c.Request.URL.Query().Get("dashboardID"))
 		if err != nil {
-			common.BadRequestError(c, fmt.Sprintf("No or incorrect format of dashboardID query parameter"))
+			helper.BadRequestError(c, fmt.Sprintf("No or incorrect format of dashboardID query parameter"))
 			return false, dab
 		}
 	} else if dabIDSource == "body" {
@@ -38,7 +39,7 @@ func CheckPermissions(c *gin.Context, operation common.CRUD, dabIDSource string,
 	}
 
 	err = dab.ByID(uint(dabID))
-	if common.DBError(c, err) {
+	if helper.DBError(c, err) {
 		return false, dab
 	}
 

@@ -1,22 +1,22 @@
 package signal
 
 import (
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulationmodel"
 )
 
 type Signal struct {
-	common.Signal
+	database.Signal
 }
 
 func (s *Signal) save() error {
-	db := common.GetDB()
+	db := database.GetDB()
 	err := db.Create(s).Error
 	return err
 }
 
 func (s *Signal) byID(id uint) error {
-	db := common.GetDB()
+	db := database.GetDB()
 	err := db.Find(s, id).Error
 	if err != nil {
 		return err
@@ -25,7 +25,7 @@ func (s *Signal) byID(id uint) error {
 }
 
 func (s *Signal) addToSimulationModel() error {
-	db := common.GetDB()
+	db := database.GetDB()
 	var m simulationmodel.SimulationModel
 	err := m.ByID(s.SimulationModelID)
 	if err != nil {
@@ -63,7 +63,7 @@ func (s *Signal) addToSimulationModel() error {
 }
 
 func (s *Signal) update(modifiedSignal Signal) error {
-	db := common.GetDB()
+	db := database.GetDB()
 
 	err := db.Model(s).Updates(map[string]interface{}{
 		"Name":  modifiedSignal.Name,
@@ -77,7 +77,7 @@ func (s *Signal) update(modifiedSignal Signal) error {
 
 func (s *Signal) delete() error {
 
-	db := common.GetDB()
+	db := database.GetDB()
 	var m simulationmodel.SimulationModel
 	err := m.ByID(s.SimulationModelID)
 	if err != nil {

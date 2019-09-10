@@ -1,7 +1,7 @@
 package user
 
 import (
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/helper"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -36,19 +36,19 @@ func authenticate(c *gin.Context) {
 	// Bind the response (context) with the loginRequest struct
 	var credentials loginRequest
 	if err := c.ShouldBindJSON(&credentials); err != nil {
-		common.UnprocessableEntityError(c, err.Error())
+		helper.UnprocessableEntityError(c, err.Error())
 		return
 	}
 
 	// Validate the login request
 	if errs := credentials.validate(); errs != nil {
-		common.BadRequestError(c, errs.Error())
+		helper.BadRequestError(c, errs.Error())
 		return
 	}
 
 	// Check if the Username or Password are empty
 	if credentials.Username == "" || credentials.Password == "" {
-		common.UnauthorizedError(c, "Invalid credentials")
+		helper.UnauthorizedError(c, "Invalid credentials")
 		return
 	}
 
@@ -56,14 +56,14 @@ func authenticate(c *gin.Context) {
 	var user User
 	err := user.ByUsername(credentials.Username)
 	if err != nil {
-		common.NotFoundError(c, "User not found")
+		helper.NotFoundError(c, "User not found")
 		return
 	}
 
 	// Validate the password
 	err = user.validatePassword(credentials.Password)
 	if err != nil {
-		common.UnauthorizedError(c, "Invalid password")
+		helper.UnauthorizedError(c, "Invalid password")
 		return
 	}
 
@@ -82,7 +82,7 @@ func authenticate(c *gin.Context) {
 
 	tokenString, err := token.SignedString([]byte(jwtSigningSecret))
 	if err != nil {
-		common.UnprocessableEntityError(c, err.Error())
+		helper.UnprocessableEntityError(c, err.Error())
 		return
 	}
 

@@ -2,21 +2,22 @@ package simulationmodel
 
 import (
 	"fmt"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/helper"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/scenario"
 )
 
-func CheckPermissions(c *gin.Context, operation common.CRUD, modelIDSource string, modelIDBody int) (bool, SimulationModel) {
+func CheckPermissions(c *gin.Context, operation database.CRUD, modelIDSource string, modelIDBody int) (bool, SimulationModel) {
 
 	var m SimulationModel
 
-	err := common.ValidateRole(c, common.ModelSimulationModel, operation)
+	err := database.ValidateRole(c, database.ModelSimulationModel, operation)
 	if err != nil {
-		common.UnprocessableEntityError(c, fmt.Sprintf("Access denied (role validation failed): %v", err.Error()))
+		helper.UnprocessableEntityError(c, fmt.Sprintf("Access denied (role validation failed): %v", err.Error()))
 		return false, m
 	}
 
@@ -24,13 +25,13 @@ func CheckPermissions(c *gin.Context, operation common.CRUD, modelIDSource strin
 	if modelIDSource == "path" {
 		modelID, err = strconv.Atoi(c.Param("modelID"))
 		if err != nil {
-			common.BadRequestError(c, fmt.Sprintf("No or incorrect format of modelID path parameter"))
+			helper.BadRequestError(c, fmt.Sprintf("No or incorrect format of modelID path parameter"))
 			return false, m
 		}
 	} else if modelIDSource == "query" {
 		modelID, err = strconv.Atoi(c.Request.URL.Query().Get("modelID"))
 		if err != nil {
-			common.BadRequestError(c, fmt.Sprintf("No or incorrect format of modelID query parameter"))
+			helper.BadRequestError(c, fmt.Sprintf("No or incorrect format of modelID query parameter"))
 			return false, m
 		}
 	} else if modelIDSource == "body" {
@@ -38,7 +39,7 @@ func CheckPermissions(c *gin.Context, operation common.CRUD, modelIDSource strin
 	}
 
 	err = m.ByID(uint(modelID))
-	if common.DBError(c, err) {
+	if helper.DBError(c, err) {
 		return false, m
 	}
 

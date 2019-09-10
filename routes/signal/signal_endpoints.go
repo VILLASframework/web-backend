@@ -1,11 +1,12 @@
 package signal
 
 import (
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/helper"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulationmodel"
 )
 
@@ -31,7 +32,7 @@ func RegisterSignalEndpoints(r *gin.RouterGroup) {
 // @Router /signals [get]
 func getSignals(c *gin.Context) {
 
-	ok, m := simulationmodel.CheckPermissions(c, common.Read, "query", -1)
+	ok, m := simulationmodel.CheckPermissions(c, database.Read, "query", -1)
 	if !ok {
 		return
 	}
@@ -43,14 +44,14 @@ func getSignals(c *gin.Context) {
 	} else if direction == "out" {
 		mapping = "OutputMapping"
 	} else {
-		common.BadRequestError(c, "Bad request. Direction has to be in or out")
+		helper.BadRequestError(c, "Bad request. Direction has to be in or out")
 		return
 	}
 
-	db := common.GetDB()
-	var sigs []common.Signal
+	db := database.GetDB()
+	var sigs []database.Signal
 	err := db.Order("ID asc").Model(m).Where("Direction = ?", direction).Related(&sigs, mapping).Error
-	if common.DBError(c, err) {
+	if helper.DBError(c, err) {
 		return
 	}
 
@@ -74,20 +75,20 @@ func addSignal(c *gin.Context) {
 
 	var req addSignalRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		common.BadRequestError(c, err.Error())
+		helper.BadRequestError(c, err.Error())
 		return
 	}
 
 	// Validate the request
 	if err := req.validate(); err != nil {
-		common.UnprocessableEntityError(c, err.Error())
+		helper.UnprocessableEntityError(c, err.Error())
 		return
 	}
 
 	// Create the new signal from the request
 	newSignal := req.createSignal()
 
-	ok, _ := simulationmodel.CheckPermissions(c, common.Update, "body", int(newSignal.SimulationModelID))
+	ok, _ := simulationmodel.CheckPermissions(c, database.Update, "body", int(newSignal.SimulationModelID))
 	if !ok {
 		return
 	}
@@ -95,7 +96,7 @@ func addSignal(c *gin.Context) {
 	// Add signal to model
 	err := newSignal.addToSimulationModel()
 	if err != nil {
-		common.DBError(c, err)
+		helper.DBError(c, err)
 		return
 	}
 
@@ -116,34 +117,34 @@ func addSignal(c *gin.Context) {
 // @Param signalID path int true "ID of signal to be updated"
 // @Router /signals/{signalID} [put]
 func updateSignal(c *gin.Context) {
-	ok, oldSignal := checkPermissions(c, common.Delete)
+	ok, oldSignal := checkPermissions(c, database.Delete)
 	if !ok {
 		return
 	}
 
 	var req updateSignalRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		common.BadRequestError(c, err.Error())
+		helper.BadRequestError(c, err.Error())
 		return
 	}
 
 	// Validate the request
 	if err := req.validate(); err != nil {
-		common.BadRequestError(c, err.Error())
+		helper.BadRequestError(c, err.Error())
 		return
 	}
 
 	// Create the updatedSignal from oldDashboard
 	updatedSignal, err := req.updatedSignal(oldSignal)
 	if err != nil {
-		common.BadRequestError(c, err.Error())
+		helper.BadRequestError(c, err.Error())
 		return
 	}
 
 	// Update the signal in the DB
 	err = oldSignal.update(updatedSignal)
 	if err != nil {
-		common.DBError(c, err)
+		helper.DBError(c, err)
 		return
 	}
 
@@ -163,7 +164,7 @@ func updateSignal(c *gin.Context) {
 // @Param signalID path int true "ID of signal to be obtained"
 // @Router /signals/{signalID} [get]
 func getSignal(c *gin.Context) {
-	ok, sig := checkPermissions(c, common.Delete)
+	ok, sig := checkPermissions(c, database.Delete)
 	if !ok {
 		return
 	}
@@ -185,14 +186,14 @@ func getSignal(c *gin.Context) {
 // @Router /signals/{signalID} [delete]
 func deleteSignal(c *gin.Context) {
 
-	ok, sig := checkPermissions(c, common.Delete)
+	ok, sig := checkPermissions(c, database.Delete)
 	if !ok {
 		return
 	}
 
 	err := sig.delete()
 	if err != nil {
-		common.DBError(c, err)
+		helper.DBError(c, err)
 		return
 	}
 

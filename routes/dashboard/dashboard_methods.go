@@ -1,22 +1,22 @@
 package dashboard
 
 import (
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/common"
+	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/scenario"
 )
 
 type Dashboard struct {
-	common.Dashboard
+	database.Dashboard
 }
 
 func (v *Dashboard) save() error {
-	db := common.GetDB()
+	db := database.GetDB()
 	err := db.Create(v).Error
 	return err
 }
 
 func (d *Dashboard) ByID(id uint) error {
-	db := common.GetDB()
+	db := database.GetDB()
 	err := db.Find(d, id).Error
 	if err != nil {
 		return err
@@ -25,7 +25,7 @@ func (d *Dashboard) ByID(id uint) error {
 }
 
 func (d *Dashboard) addToScenario() error {
-	db := common.GetDB()
+	db := database.GetDB()
 	var sim scenario.Scenario
 	err := sim.ByID(d.ScenarioID)
 	if err != nil {
@@ -46,7 +46,7 @@ func (d *Dashboard) addToScenario() error {
 
 func (d *Dashboard) update(modifiedDab Dashboard) error {
 
-	db := common.GetDB()
+	db := database.GetDB()
 
 	err := db.Model(d).Updates(map[string]interface{}{
 		"Name": modifiedDab.Name,
@@ -58,7 +58,7 @@ func (d *Dashboard) update(modifiedDab Dashboard) error {
 
 func (d *Dashboard) delete() error {
 
-	db := common.GetDB()
+	db := database.GetDB()
 	var sim scenario.Scenario
 	err := sim.ByID(d.ScenarioID)
 	if err != nil {

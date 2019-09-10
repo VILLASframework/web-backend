@@ -1,4 +1,4 @@
-package common
+package database
 
 import (
 	"fmt"
@@ -354,4 +354,25 @@ func TestFileAssociations(t *testing.T) {
 	var file1 File
 	assert.NoError(t, db.Find(&file1, 1).Error, fmt.Sprintf("Find File with ID=1"))
 	assert.EqualValues(t, "File_A", file1.Name)
+}
+
+func TestAddAdmin(t *testing.T) {
+	DropTables(db)
+	MigrateModels(db)
+
+	assert.NoError(t, DBAddAdminUser(db))
+}
+
+func TestAddAdminAndUsers(t *testing.T) {
+	DropTables(db)
+	MigrateModels(db)
+
+	assert.NoError(t, DBAddAdminAndUser(db))
+}
+
+func TestAddData(t *testing.T) {
+	DropTables(db)
+	MigrateModels(db)
+
+	assert.NoError(t, DBAddTestData(db))
 }
