@@ -40,11 +40,10 @@ func getDashboards(c *gin.Context) {
 	db := database.GetDB()
 	var dab []database.Dashboard
 	err := db.Order("ID asc").Model(sim).Related(&dab, "Dashboards").Error
-	if helper.DBError(c, err) {
-		return
+	if !helper.DBError(c, err) {
+		c.JSON(http.StatusOK, gin.H{"dashboards": dab})
 	}
 
-	c.JSON(http.StatusOK, gin.H{"dashboards": dab})
 }
 
 // addDashboard godoc
@@ -86,11 +85,10 @@ func addDashboard(c *gin.Context) {
 
 	// add dashboard to DB and add association to scenario
 	err := newDashboard.addToScenario()
-	if helper.DBError(c, err) {
-		return
+	if !helper.DBError(c, err) {
+		c.JSON(http.StatusOK, gin.H{"dashboard": newDashboard.Dashboard})
 	}
 
-	c.JSON(http.StatusOK, gin.H{"dashboard": newDashboard.Dashboard})
 }
 
 // updateDashboard godoc
@@ -130,11 +128,10 @@ func updateDashboard(c *gin.Context) {
 
 	// update the dashboard in the DB
 	err := oldDashboard.update(updatedDashboard)
-	if helper.DBError(c, err) {
-		return
+	if !helper.DBError(c, err) {
+		c.JSON(http.StatusOK, gin.H{"dashboard": updatedDashboard.Dashboard})
 	}
 
-	c.JSON(http.StatusOK, gin.H{"dashboard": updatedDashboard.Dashboard})
 }
 
 // getDashboard godoc
@@ -178,9 +175,8 @@ func deleteDashboard(c *gin.Context) {
 	}
 
 	err := dab.delete()
-	if helper.DBError(c, err) {
-		return
+	if !helper.DBError(c, err) {
+		c.JSON(http.StatusOK, gin.H{"dashboard": dab.Dashboard})
 	}
 
-	c.JSON(http.StatusOK, gin.H{"dashboard": dab.Dashboard})
 }

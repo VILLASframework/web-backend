@@ -35,6 +35,7 @@ func RegisterFileEndpoints(r *gin.RouterGroup) {
 // @Router /files [get]
 func getFiles(c *gin.Context) {
 
+	var err error
 	objectType := c.Request.URL.Query().Get("objectType")
 	if objectType != "model" && objectType != "widget" {
 		helper.BadRequestError(c, fmt.Sprintf("Object type not supported for files: %s", objectType))
@@ -53,33 +54,28 @@ func getFiles(c *gin.Context) {
 	var w widget.Widget
 	if objectType == "model" {
 		ok, m = simulationmodel.CheckPermissions(c, database.Read, "body", objectID)
-		if !ok {
-			return
-		}
 	} else {
 		ok, w = widget.CheckPermissions(c, database.Read, objectID)
-		if !ok {
-			return
-		}
+	}
+	if !ok {
+		return
 	}
 
 	// get meta data of files
 	db := database.GetDB()
 
 	var files []database.File
+
 	if objectType == "model" {
 		err = db.Order("ID asc").Model(&m).Related(&files, "Files").Error
-		if helper.DBError(c, err) {
-			return
-		}
 	} else {
 		err = db.Order("ID asc").Model(&w).Related(&files, "Files").Error
-		if helper.DBError(c, err) {
-			return
-		}
 	}
 
-	c.JSON(http.StatusOK, gin.H{"files": files})
+	if !helper.DBError(c, err) {
+		c.JSON(http.StatusOK, gin.H{"files": files})
+	}
+
 }
 
 // addFile godoc
@@ -139,11 +135,10 @@ func addFile(c *gin.Context) {
 
 	var newFile File
 	err = newFile.register(file_header, objectType, uint(objectID))
-	if helper.DBError(c, err) {
-		return
+	if !helper.DBError(c, err) {
+		c.JSON(http.StatusOK, gin.H{"file": newFile.File})
 	}
 
-	c.JSON(http.StatusOK, gin.H{"file": newFile.File})
 }
 
 // getFile godoc
@@ -172,9 +167,7 @@ func getFile(c *gin.Context) {
 	}
 
 	err := f.download(c)
-	if helper.DBError(c, err) {
-		return
-	}
+	helper.DBError(c, err)
 }
 
 // updateFile godoc
@@ -212,11 +205,9 @@ func updateFile(c *gin.Context) {
 	}
 
 	err = f.update(fileHeader)
-	if helper.DBError(c, err) {
-		return
+	if !helper.DBError(c, err) {
+		c.JSON(http.StatusOK, gin.H{"file": f.File})
 	}
-
-	c.JSON(http.StatusOK, gin.H{"file": f.File})
 }
 
 // deleteFile godoc
@@ -240,9 +231,8 @@ func deleteFile(c *gin.Context) {
 	}
 
 	err := f.delete()
-	if helper.DBError(c, err) {
-		return
+	if !helper.DBError(c, err) {
+		c.JSON(http.StatusOK, gin.H{"file": f.File})
 	}
 
-	c.JSON(http.StatusOK, gin.H{"file": f.File})
 }

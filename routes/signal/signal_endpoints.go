@@ -51,11 +51,10 @@ func getSignals(c *gin.Context) {
 	db := database.GetDB()
 	var sigs []database.Signal
 	err := db.Order("ID asc").Model(m).Where("Direction = ?", direction).Related(&sigs, mapping).Error
-	if helper.DBError(c, err) {
-		return
+	if !helper.DBError(c, err) {
+		c.JSON(http.StatusOK, gin.H{"signals": sigs})
 	}
 
-	c.JSON(http.StatusOK, gin.H{"signals": sigs})
 }
 
 // AddSignal godoc
@@ -95,11 +94,10 @@ func addSignal(c *gin.Context) {
 
 	// Add signal to model
 	err := newSignal.addToSimulationModel()
-	if helper.DBError(c, err) {
-		return
+	if !helper.DBError(c, err) {
+		c.JSON(http.StatusOK, gin.H{"signal": newSignal.Signal})
 	}
 
-	c.JSON(http.StatusOK, gin.H{"signal": newSignal.Signal})
 }
 
 // updateSignal godoc
@@ -138,11 +136,10 @@ func updateSignal(c *gin.Context) {
 
 	// Update the signal in the DB
 	err := oldSignal.update(updatedSignal)
-	if helper.DBError(c, err) {
-		return
+	if !helper.DBError(c, err) {
+		c.JSON(http.StatusOK, gin.H{"signal": updatedSignal.Signal})
 	}
 
-	c.JSON(http.StatusOK, gin.H{"signal": updatedSignal.Signal})
 }
 
 // getSignal godoc
@@ -186,9 +183,8 @@ func deleteSignal(c *gin.Context) {
 	}
 
 	err := sig.delete()
-	if helper.DBError(c, err) {
-		return
+	if !helper.DBError(c, err) {
+		c.JSON(http.StatusOK, gin.H{"signal": sig.Signal})
 	}
 
-	c.JSON(http.StatusOK, gin.H{"signal": sig.Signal})
 }
