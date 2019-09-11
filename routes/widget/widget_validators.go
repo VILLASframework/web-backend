@@ -76,7 +76,7 @@ func (r *addWidgetRequest) createWidget() Widget {
 	return s
 }
 
-func (r *updateWidgetRequest) updatedWidget(oldWidget Widget) (Widget, error) {
+func (r *updateWidgetRequest) updatedWidget(oldWidget Widget) Widget {
 	// Use the old Widget as a basis for the updated Widget `s`
 	s := oldWidget
 
@@ -105,5 +105,5 @@ func (r *updateWidgetRequest) updatedWidget(oldWidget Widget) (Widget, error) {
 		s.CustomProperties = r.CustomProperties
 	}
 
-	return s, nil
+	return s
 }

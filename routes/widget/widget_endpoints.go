@@ -39,11 +39,10 @@ func getWidgets(c *gin.Context) {
 	db := database.GetDB()
 	var widgets []database.Widget
 	err := db.Order("ID asc").Model(dab).Related(&widgets, "Widgets").Error
-	if helper.DBError(c, err) {
-		return
+	if !helper.DBError(c, err) {
+		c.JSON(http.StatusOK, gin.H{"widgets": widgets})
 	}
 
-	c.JSON(http.StatusOK, gin.H{"widgets": widgets})
 }
 
 // addWidget godoc
@@ -77,18 +76,16 @@ func addWidget(c *gin.Context) {
 	newWidget := req.createWidget()
 
 	// Check if user is allowed to modify selected dashboard (scenario)
-	ok, _ := dashboard.CheckPermissions(c, database.Create, "body", int(newWidget.DashboardID))
+	ok, _ := dashboard.CheckPermissions(c, database.Update, "body", int(newWidget.DashboardID))
 	if !ok {
 		return
 	}
 
 	err := newWidget.addToDashboard()
-	if err != nil {
-		helper.DBError(c, err)
-		return
+	if !helper.DBError(c, err) {
+		c.JSON(http.StatusOK, gin.H{"widget": newWidget.Widget})
 	}
 
-	c.JSON(http.StatusOK, gin.H{"widget": newWidget.Widget})
 }
 
 // updateWidget godoc
@@ -125,20 +122,13 @@ func updateWidget(c *gin.Context) {
 	}
 
 	// Create the updatedScenario from oldScenario
-	updatedWidget, err := req.updatedWidget(oldWidget)
-	if err != nil {
-		helper.BadRequestError(c, err.Error())
-		return
-	}
+	updatedWidget := req.updatedWidget(oldWidget)
 
 	// Update the widget in the DB
-	err = oldWidget.update(updatedWidget)
-	if err != nil {
-		helper.DBError(c, err)
-		return
+	err := oldWidget.update(updatedWidget)
+	if !helper.DBError(c, err) {
+		c.JSON(http.StatusOK, gin.H{"widget": updatedWidget.Widget})
 	}
-
-	c.JSON(http.StatusOK, gin.H{"widget": updatedWidget.Widget})
 
 }
 
@@ -184,9 +174,8 @@ func deleteWidget(c *gin.Context) {
 	}
 
 	err := w.delete()
-	if helper.DBError(c, err) {
-		return
+	if !helper.DBError(c, err) {
+		c.JSON(http.StatusOK, gin.H{"widget": w.Widget})
 	}
 
-	c.JSON(http.StatusOK, gin.H{"widget": w.Widget})
 }
