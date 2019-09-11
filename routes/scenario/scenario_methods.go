@@ -140,11 +140,7 @@ func (s *Scenario) checkAccess(userID uint, userRole string) bool {
 		if err != nil {
 			return false
 		} else {
-			if u.Username != "" {
-				return true
-			} else {
-				return false
-			}
+			return true
 		}
 	}
 

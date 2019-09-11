@@ -8,7 +8,7 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
 )
 
-func CheckPermissions(c *gin.Context, operation database.CRUD, screnarioIDSource string, scenarioIDbody int) (bool, Scenario) {
+func CheckPermissions(c *gin.Context, operation database.CRUD, scenarioIDsource string, scenarioIDbody int) (bool, Scenario) {
 
 	var so Scenario
 
@@ -18,11 +18,11 @@ func CheckPermissions(c *gin.Context, operation database.CRUD, screnarioIDSource
 		return false, so
 	}
 
-	if operation == database.Create || (operation == database.Read && screnarioIDSource == "none") {
+	if operation == database.Create || (operation == database.Read && scenarioIDsource == "none") {
 		return true, so
 	}
 
-	scenarioID, err := helper.GetIDOfElement(c, "scenarioID", screnarioIDSource, scenarioIDbody)
+	scenarioID, err := helper.GetIDOfElement(c, "scenarioID", scenarioIDsource, scenarioIDbody)
 	if err != nil {
 		return false, so
 	}

@@ -33,10 +33,7 @@ func RegisterScenarioEndpoints(r *gin.RouterGroup) {
 // @Router /scenarios [get]
 func getScenarios(c *gin.Context) {
 
-	ok, _ := CheckPermissions(c, database.Read, "none", -1)
-	if !ok {
-		return
-	}
+	// Checking permissions is not required here as read access is independent of user's role
 
 	// ATTENTION: do not use c.GetInt (common.UserIDCtx) since user_id is of type uint and not int
 	userID, _ := c.Get(database.UserIDCtx)
@@ -112,15 +109,13 @@ func addScenario(c *gin.Context) {
 
 	// Save the new scenario in the DB
 	err = newScenario.save()
-	if err != nil {
-		helper.DBError(c, err)
+	if helper.DBError(c, err) {
 		return
 	}
 
 	// add user to new scenario
 	err = newScenario.addUser(&(u.User))
-	if err != nil {
-		helper.DBError(c, err)
+	if helper.DBError(c, err) {
 		return
 	}
 
@@ -162,16 +157,11 @@ func updateScenario(c *gin.Context) {
 	}
 
 	// Create the updatedScenario from oldScenario
-	updatedScenario, err := req.updatedScenario(oldScenario)
-	if err != nil {
-		helper.BadRequestError(c, err.Error())
-		return
-	}
+	updatedScenario := req.updatedScenario(oldScenario)
 
 	// Finally update the scenario
-	err = oldScenario.update(updatedScenario)
-	if err != nil {
-		helper.DBError(c, err)
+	err := oldScenario.update(updatedScenario)
+	if helper.DBError(c, err) {
 		return
 	}
 
@@ -219,8 +209,7 @@ func deleteScenario(c *gin.Context) {
 	}
 
 	err := so.delete()
-	if err != nil {
-		helper.DBError(c, err)
+	if helper.DBError(c, err) {
 		return
 	}
 

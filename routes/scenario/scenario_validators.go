@@ -51,7 +51,7 @@ func (r *addScenarioRequest) createScenario() Scenario {
 	return s
 }
 
-func (r *updateScenarioRequest) updatedScenario(oldScenario Scenario) (Scenario, error) {
+func (r *updateScenarioRequest) updatedScenario(oldScenario Scenario) Scenario {
 	// Use the old Scenario as a basis for the updated Scenario `s`
 	s := oldScenario
 
@@ -72,5 +72,5 @@ func (r *updateScenarioRequest) updatedScenario(oldScenario Scenario) (Scenario,
 		s.StartParameters = r.StartParameters
 	}
 
-	return s, nil
+	return s
 }
