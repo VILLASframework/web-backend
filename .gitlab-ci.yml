@@ -138,7 +138,7 @@ test:all:
   script:
     - /etc/init.d/postgresql start
     - go mod tidy
-    - go test $(go list ./... ) -v -p 1 -covermode=count -coverprofile ./testcover.txt
+    - go test $(go list ./... ) -p 1 -covermode=count -coverprofile ./testcover.txt
     - go tool cover -func=testcover.txt
   dependencies:
     - build:backend
