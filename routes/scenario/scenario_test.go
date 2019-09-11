@@ -370,7 +370,7 @@ func TestAddUserToScenario(t *testing.T) {
 
 	// try to add a non-existing user to newScenario, should return a not found 404
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/scenarios/%v/user?username=User_C", newScenarioID), "PUT", nil)
+		fmt.Sprintf("/api/scenarios/%v/user?username=User_D", newScenarioID), "PUT", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
 }
