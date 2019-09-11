@@ -30,6 +30,7 @@ func RegisterAuthenticate(r *gin.RouterGroup) {
 // @Failure 401 {object} docs.ResponseError "Unauthorized"
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity."
+// @Failure 500 {object} docs.ResponseError "Internal server error."
 // @Router /authenticate [post]
 func authenticate(c *gin.Context) {
 
@@ -43,12 +44,6 @@ func authenticate(c *gin.Context) {
 	// Validate the login request
 	if errs := credentials.validate(); errs != nil {
 		helper.BadRequestError(c, errs.Error())
-		return
-	}
-
-	// Check if the Username or Password are empty
-	if credentials.Username == "" || credentials.Password == "" {
-		helper.UnauthorizedError(c, "Invalid credentials")
 		return
 	}
 
@@ -82,7 +77,7 @@ func authenticate(c *gin.Context) {
 
 	tokenString, err := token.SignedString([]byte(jwtSigningSecret))
 	if err != nil {
-		helper.UnprocessableEntityError(c, err.Error())
+		helper.InternalServerError(c, err.Error())
 		return
 	}
 

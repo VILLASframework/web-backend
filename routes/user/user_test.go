@@ -1,8 +1,12 @@
 package user
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/helper"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"testing"
 
@@ -36,6 +40,60 @@ func TestMain(m *testing.M) {
 	RegisterUserEndpoints(api.Group("/users"))
 
 	os.Exit(m.Run())
+}
+
+func TestAuthenticate(t *testing.T) {
+	database.DropTables(db)
+	database.MigrateModels(db)
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
+
+	// try to authenticate with non JSON body
+	// should result in unprocessable entity
+	w1 := httptest.NewRecorder()
+	body, _ := json.Marshal("This is no JSON")
+	req, err := http.NewRequest("POST", "/api/authenticate", bytes.NewBuffer(body))
+	assert.NoError(t, err)
+	req.Header.Set("Content-Type", "application/json")
+	router.ServeHTTP(w1, req)
+	assert.Equalf(t, 422, w1.Code, "Response body: \n%v\n", w1.Body)
+
+	malformedCredentials := helper.Credentials{
+		Username: "TEST1",
+	}
+	// try to authenticate with non JSON body
+	// should result in bad request
+	w2 := httptest.NewRecorder()
+	body, _ = json.Marshal(malformedCredentials)
+	req, err = http.NewRequest("POST", "/api/authenticate", bytes.NewBuffer(body))
+	assert.NoError(t, err)
+	req.Header.Set("Content-Type", "application/json")
+	router.ServeHTTP(w2, req)
+	assert.Equal(t, 400, w2.Code, w2.Body)
+
+	// try to authenticate with a username that does not exist in the DB
+	// should result in not found
+	malformedCredentials.Username = "NOTEXIST"
+	malformedCredentials.Password = "blablabla"
+	w3 := httptest.NewRecorder()
+	body, _ = json.Marshal(malformedCredentials)
+	req, err = http.NewRequest("POST", "/api/authenticate", bytes.NewBuffer(body))
+	assert.NoError(t, err)
+	req.Header.Set("Content-Type", "application/json")
+	router.ServeHTTP(w3, req)
+	assert.Equal(t, 404, w3.Code, w3.Body)
+
+	// try to authenticate with a correct user name and a wrong password
+	// should result in unauthorized
+	malformedCredentials.Username = "User_A"
+	malformedCredentials.Password = "wrong password"
+	w4 := httptest.NewRecorder()
+	body, _ = json.Marshal(malformedCredentials)
+	req, err = http.NewRequest("POST", "/api/authenticate", bytes.NewBuffer(body))
+	assert.NoError(t, err)
+	req.Header.Set("Content-Type", "application/json")
+	router.ServeHTTP(w4, req)
+	assert.Equal(t, 401, w4.Code, w4.Body)
+
 }
 
 func TestAddGetUser(t *testing.T) {
