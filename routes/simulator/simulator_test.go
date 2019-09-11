@@ -44,7 +44,7 @@ func TestMain(m *testing.M) {
 func TestAddSimulatorAsAdmin(t *testing.T) {
 	database.DropTables(db)
 	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUser(db))
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -87,7 +87,7 @@ func TestAddSimulatorAsAdmin(t *testing.T) {
 func TestAddSimulatorAsUser(t *testing.T) {
 	database.DropTables(db)
 	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUser(db))
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
 
 	// authenticate as user
 	token, err := helper.AuthenticateForTest(router,
@@ -114,7 +114,7 @@ func TestAddSimulatorAsUser(t *testing.T) {
 func TestUpdateSimulatorAsAdmin(t *testing.T) {
 	database.DropTables(db)
 	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUser(db))
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -169,7 +169,7 @@ func TestUpdateSimulatorAsAdmin(t *testing.T) {
 func TestUpdateSimulatorAsUser(t *testing.T) {
 	database.DropTables(db)
 	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUser(db))
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -211,7 +211,7 @@ func TestUpdateSimulatorAsUser(t *testing.T) {
 func TestDeleteSimulatorAsAdmin(t *testing.T) {
 	database.DropTables(db)
 	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUser(db))
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -261,7 +261,7 @@ func TestDeleteSimulatorAsAdmin(t *testing.T) {
 func TestDeleteSimulatorAsUser(t *testing.T) {
 	database.DropTables(db)
 	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUser(db))
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -302,7 +302,7 @@ func TestDeleteSimulatorAsUser(t *testing.T) {
 func TestGetAllSimulators(t *testing.T) {
 	database.DropTables(db)
 	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUser(db))
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -363,7 +363,7 @@ func TestGetAllSimulators(t *testing.T) {
 func TestGetSimulationModelsOfSimulator(t *testing.T) {
 	database.DropTables(db)
 	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUser(db))
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,

@@ -18,15 +18,6 @@ type File struct {
 	database.File
 }
 
-func (f *File) byPath(path string) error {
-	db := database.GetDB()
-	err := db.Where("Path = ?", path).Find(f).Error
-	if err != nil {
-		return err
-	}
-	return err
-}
-
 func (f *File) byID(id uint) error {
 	db := database.GetDB()
 	err := db.Find(f, id).Error

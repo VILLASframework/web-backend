@@ -42,7 +42,7 @@ func TestAddScenario(t *testing.T) {
 
 	database.DropTables(db)
 	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUser(db))
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
@@ -94,7 +94,7 @@ func TestUpdateScenario(t *testing.T) {
 
 	database.DropTables(db)
 	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUser(db))
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
@@ -157,7 +157,7 @@ func TestGetAllScenariosAsAdmin(t *testing.T) {
 
 	database.DropTables(db)
 	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUser(db))
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -218,7 +218,7 @@ func TestGetAllScenariosAsUser(t *testing.T) {
 
 	database.DropTables(db)
 	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUser(db))
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
 
 	// authenticate as normal userB
 	token, err := helper.AuthenticateForTest(router,
@@ -275,7 +275,7 @@ func TestDeleteScenario(t *testing.T) {
 
 	database.DropTables(db)
 	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUser(db))
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
@@ -324,7 +324,7 @@ func TestAddUserToScenario(t *testing.T) {
 
 	database.DropTables(db)
 	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUser(db))
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
@@ -379,7 +379,7 @@ func TestGetAllUsersOfScenario(t *testing.T) {
 
 	database.DropTables(db)
 	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUser(db))
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
@@ -424,7 +424,7 @@ func TestRemoveUserFromScenario(t *testing.T) {
 
 	database.DropTables(db)
 	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUser(db))
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,

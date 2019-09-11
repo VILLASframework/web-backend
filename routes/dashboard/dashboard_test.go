@@ -70,7 +70,7 @@ func TestMain(m *testing.M) {
 func TestAddDashboard(t *testing.T) {
 	database.DropTables(db)
 	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUser(db))
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
@@ -156,7 +156,7 @@ func TestAddDashboard(t *testing.T) {
 func TestUpdateDashboard(t *testing.T) {
 	database.DropTables(db)
 	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUser(db))
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
@@ -220,7 +220,7 @@ func TestUpdateDashboard(t *testing.T) {
 func TestDeleteDashboard(t *testing.T) {
 	database.DropTables(db)
 	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUser(db))
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
@@ -293,7 +293,7 @@ func TestDeleteDashboard(t *testing.T) {
 func TestGetAllDashboardsOfScenario(t *testing.T) {
 	database.DropTables(db)
 	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUser(db))
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,

@@ -15,7 +15,7 @@ func checkPermissions(c *gin.Context, operation database.CRUD) (bool, File) {
 
 	err := database.ValidateRole(c, database.ModelFile, operation)
 	if err != nil {
-		helper.UnprocessableEntityError(c, fmt.Sprintf("Access denied (role validation failed): %v", err.Error()))
+		helper.UnprocessableEntityError(c, fmt.Sprintf("Access denied (role validation of file failed): %v", err.Error()))
 		return false, f
 	}
 

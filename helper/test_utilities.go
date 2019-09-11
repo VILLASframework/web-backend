@@ -22,6 +22,7 @@ type KeyModels map[string]interface{}
 var StrPassword0 = "xyz789"
 var StrPasswordA = "abc123"
 var StrPasswordB = "bcd234"
+var StrPasswordC = "guestpw"
 
 type Credentials struct {
 	Username string
@@ -41,6 +42,11 @@ var UserACredentials = Credentials{
 var UserBCredentials = Credentials{
 	Username: "User_B",
 	Password: StrPasswordB,
+}
+
+var GuestCredentials = Credentials{
+	Username: "User_C",
+	Password: StrPasswordC,
 }
 
 // ############################################################################

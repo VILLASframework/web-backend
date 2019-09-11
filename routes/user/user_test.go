@@ -42,7 +42,7 @@ func TestAddGetUser(t *testing.T) {
 
 	database.DropTables(db)
 	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUser(db))
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -90,7 +90,7 @@ func TestUsersNotAllowedActions(t *testing.T) {
 
 	database.DropTables(db)
 	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUser(db))
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -150,7 +150,7 @@ func TestGetAllUsers(t *testing.T) {
 
 	database.DropTables(db)
 	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUser(db))
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -186,7 +186,7 @@ func TestModifyAddedUserAsUser(t *testing.T) {
 
 	database.DropTables(db)
 	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUser(db))
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -297,7 +297,7 @@ func TestInvalidUserUpdate(t *testing.T) {
 
 	database.DropTables(db)
 	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUser(db))
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -348,7 +348,7 @@ func TestModifyAddedUserAsAdmin(t *testing.T) {
 
 	database.DropTables(db)
 	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUser(db))
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -430,7 +430,7 @@ func TestDeleteUser(t *testing.T) {
 
 	database.DropTables(db)
 	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUser(db))
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,

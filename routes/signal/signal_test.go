@@ -127,7 +127,7 @@ func TestMain(m *testing.M) {
 func TestAddSignal(t *testing.T) {
 	database.DropTables(db)
 	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUser(db))
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
 
 	// prepare the content of the DB for testing
 	// by adding a scenario and a simulator to the DB
@@ -185,7 +185,7 @@ func TestAddSignal(t *testing.T) {
 func TestUpdateSignal(t *testing.T) {
 	database.DropTables(db)
 	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUser(db))
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
 
 	// prepare the content of the DB for testing
 	// by adding a scenario and a simulator to the DB
@@ -249,7 +249,7 @@ func TestUpdateSignal(t *testing.T) {
 func TestDeleteSignal(t *testing.T) {
 	database.DropTables(db)
 	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUser(db))
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
 
 	// prepare the content of the DB for testing
 	// by adding a scenario and a simulator to the DB
@@ -317,7 +317,7 @@ func TestDeleteSignal(t *testing.T) {
 func TestGetAllInputSignalsOfSimulationModel(t *testing.T) {
 	database.DropTables(db)
 	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUser(db))
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
 
 	// prepare the content of the DB for testing
 	// by adding a scenario and a simulator to the DB

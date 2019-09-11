@@ -1,6 +1,7 @@
 package simulator
 
 import (
+	"fmt"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/helper"
 	"github.com/gin-gonic/gin"
@@ -12,7 +13,7 @@ func checkPermissions(c *gin.Context, modeltype database.ModelName, operation da
 
 	err := database.ValidateRole(c, modeltype, operation)
 	if err != nil {
-		helper.UnprocessableEntityError(c, err.Error())
+		helper.UnprocessableEntityError(c, fmt.Sprintf("Access denied (role validation of simulator failed): %v", err.Error()))
 		return false, s
 	}
 

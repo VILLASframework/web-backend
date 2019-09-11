@@ -119,12 +119,12 @@ func addFile(c *gin.Context) {
 	// Check access
 	var ok bool
 	if objectType == "model" {
-		ok, _ = simulationmodel.CheckPermissions(c, database.Create, "body", objectID)
+		ok, _ = simulationmodel.CheckPermissions(c, database.Update, "body", objectID)
 		if !ok {
 			return
 		}
 	} else {
-		ok, _ = widget.CheckPermissions(c, database.Create, objectID)
+		ok, _ = widget.CheckPermissions(c, database.Update, objectID)
 		if !ok {
 			return
 		}
@@ -139,8 +139,7 @@ func addFile(c *gin.Context) {
 
 	var newFile File
 	err = newFile.register(file_header, objectType, uint(objectID))
-	if err != nil {
-		helper.DBError(c, err)
+	if helper.DBError(c, err) {
 		return
 	}
 
@@ -173,12 +172,9 @@ func getFile(c *gin.Context) {
 	}
 
 	err := f.download(c)
-	if err != nil {
-		helper.DBError(c, err)
+	if helper.DBError(c, err) {
 		return
 	}
-
-	c.JSON(http.StatusOK, gin.H{"file": f.File})
 }
 
 // updateFile godoc
@@ -209,21 +205,14 @@ func updateFile(c *gin.Context) {
 	}
 
 	// Extract file from PUT request form
-	err := c.Request.ParseForm()
+	fileHeader, err := c.FormFile("file")
 	if err != nil {
 		helper.BadRequestError(c, fmt.Sprintf("Get form error: %s", err.Error()))
 		return
 	}
 
-	file_header, err := c.FormFile("file")
-	if err != nil {
-		helper.BadRequestError(c, fmt.Sprintf("Get form error: %s", err.Error()))
-		return
-	}
-
-	err = f.update(file_header)
-	if err != nil {
-		helper.DBError(c, err)
+	err = f.update(fileHeader)
+	if helper.DBError(c, err) {
 		return
 	}
 
@@ -251,8 +240,7 @@ func deleteFile(c *gin.Context) {
 	}
 
 	err := f.delete()
-	if err != nil {
-		helper.DBError(c, err)
+	if helper.DBError(c, err) {
 		return
 	}
 

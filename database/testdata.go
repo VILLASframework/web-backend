@@ -16,12 +16,14 @@ import (
 var StrPassword0 = "xyz789"
 var StrPasswordA = "abc123"
 var StrPasswordB = "bcd234"
+var StrPasswordC = "guestpw"
 
 // Hash passwords with bcrypt algorithm
 var bcryptCost = 10
 var pw0, _ = bcrypt.GenerateFromPassword([]byte(StrPassword0), bcryptCost)
 var pwA, _ = bcrypt.GenerateFromPassword([]byte(StrPasswordA), bcryptCost)
 var pwB, _ = bcrypt.GenerateFromPassword([]byte(StrPasswordB), bcryptCost)
+var pwC, _ = bcrypt.GenerateFromPassword([]byte(StrPasswordC), bcryptCost)
 
 var User0 = User{Username: "User_0", Password: string(pw0),
 	Role: "Admin", Mail: "User_0@example.com"}
@@ -29,6 +31,8 @@ var UserA = User{Username: "User_A", Password: string(pwA),
 	Role: "User", Mail: "User_A@example.com"}
 var UserB = User{Username: "User_B", Password: string(pwB),
 	Role: "User", Mail: "User_B@example.com"}
+var UserC = User{Username: "User_C", Password: string(pwC),
+	Role: "Guest", Mail: "User_C@example.com"}
 
 // Simulators
 
@@ -205,19 +209,22 @@ func DBAddAdminUser(db *gorm.DB) error {
 	return err
 }
 
-func DBAddAdminAndUser(db *gorm.DB) error {
+func DBAddAdminAndUserAndGuest(db *gorm.DB) error {
 	db.AutoMigrate(&User{})
 
 	//create a copy of global test data
 	user0 := User0
 	userA := UserA
 	userB := UserB
-	// add admin user to DB
+	userC := UserC
 
+	// add admin user to DB
 	err := db.Create(&user0).Error
 	// add normal users to DB
 	err = db.Create(&userA).Error
 	err = db.Create(&userB).Error
+	// add guest user to DB
+	err = db.Create(&userC).Error
 	return err
 }
 

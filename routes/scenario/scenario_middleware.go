@@ -14,7 +14,7 @@ func CheckPermissions(c *gin.Context, operation database.CRUD, screnarioIDSource
 
 	err := database.ValidateRole(c, database.ModelScenario, operation)
 	if err != nil {
-		helper.UnprocessableEntityError(c, fmt.Sprintf("Access denied (role validation failed): %v", err))
+		helper.UnprocessableEntityError(c, fmt.Sprintf("Access denied (role validation of scenario failed): %v", err))
 		return false, so
 	}
 
