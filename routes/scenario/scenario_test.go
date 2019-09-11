@@ -484,7 +484,7 @@ func TestRemoveUserFromScenario(t *testing.T) {
 	// Try to remove a user that does not exist in DB
 	// This should fail with not found 404 status code
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/scenarios/%v/user?username=User_C", newScenarioID), "DELETE", nil)
+		fmt.Sprintf("/api/scenarios/%v/user?username=User_D", newScenarioID), "DELETE", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
 
