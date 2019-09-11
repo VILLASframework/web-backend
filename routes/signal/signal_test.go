@@ -97,6 +97,10 @@ func addScenarioAndSimulatorAndSimulationModel() (scenarioID uint, simulatorID u
 	// Read newSimulationModel's ID from the response
 	newSimulationModelID, _ := helper.GetResponseID(resp)
 
+	// add the guest user to the new scenario
+	_, resp, _ = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/scenarios/%v/user?username=User_C", newScenarioID), "PUT", nil)
+
 	return uint(newScenarioID), uint(newSimulatorID), uint(newSimulationModelID)
 }
 
@@ -139,7 +143,6 @@ func TestAddSignal(t *testing.T) {
 		"/api/authenticate", "POST", helper.UserACredentials)
 	assert.NoError(t, err)
 
-	// test POST signals/ $newSignal
 	newSignal := SignalRequest{
 		Name:              database.InSignalA.Name,
 		Unit:              database.InSignalA.Unit,
@@ -147,7 +150,33 @@ func TestAddSignal(t *testing.T) {
 		Index:             1,
 		SimulationModelID: simulationModelID,
 	}
+
+	// authenticate as normal userB who has no access to new scenario
+	token, err = helper.AuthenticateForTest(router,
+		"/api/authenticate", "POST", helper.UserBCredentials)
+	assert.NoError(t, err)
+
+	// try to POST to simulation model without access
+	// should result in unprocessable entity
 	code, resp, err := helper.TestEndpoint(router, token,
+		"/api/signals", "POST", helper.KeyModels{"signal": newSignal})
+	assert.NoError(t, err)
+	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
+
+	// authenticate as normal user
+	token, err = helper.AuthenticateForTest(router,
+		"/api/authenticate", "POST", helper.UserACredentials)
+	assert.NoError(t, err)
+
+	// try to POST a signal with non JSON body
+	// should result in a bad request
+	code, resp, err = helper.TestEndpoint(router, token,
+		"/api/signals", "POST", "this is not a JSON")
+	assert.NoError(t, err)
+	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
+
+	// test POST signals/ $newSignal
+	code, resp, err = helper.TestEndpoint(router, token,
 		"/api/signals", "POST", helper.KeyModels{"signal": newSignal})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -178,6 +207,18 @@ func TestAddSignal(t *testing.T) {
 	// this should NOT work and return a unprocessable entity 442 status code
 	code, resp, err = helper.TestEndpoint(router, token,
 		"/api/signals", "POST", helper.KeyModels{"model": malformedNewSignal})
+	assert.NoError(t, err)
+	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
+
+	// authenticate as normal userB who has no access to new scenario
+	token, err = helper.AuthenticateForTest(router,
+		"/api/authenticate", "POST", helper.UserBCredentials)
+	assert.NoError(t, err)
+
+	// Try to Get the newSignal as user B
+	// should result in unprocessable entity
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/signals/%v", newSignalID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 }
@@ -219,6 +260,44 @@ func TestUpdateSignal(t *testing.T) {
 		Unit:  database.InSignalB.Unit,
 		Index: 1,
 	}
+
+	// authenticate as normal userB who has no access to new scenario
+	token, err = helper.AuthenticateForTest(router,
+		"/api/authenticate", "POST", helper.UserBCredentials)
+	assert.NoError(t, err)
+
+	// try to PUT signal without access
+	// should result in unprocessable entity
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/signals/%v", newSignalID), "PUT", helper.KeyModels{"signal": updatedSignal})
+	assert.NoError(t, err)
+	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
+
+	// authenticate as guest user
+	token, err = helper.AuthenticateForTest(router,
+		"/api/authenticate", "POST", helper.GuestCredentials)
+	assert.NoError(t, err)
+
+	// try to update signal as guest who has access to scenario
+	// should result in unprocessable entity
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/signals/%v", newSignalID), "PUT", helper.KeyModels{"signal": updatedSignal})
+	assert.NoError(t, err)
+	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
+
+	// authenticate as normal user
+	token, err = helper.AuthenticateForTest(router,
+		"/api/authenticate", "POST", helper.UserACredentials)
+	assert.NoError(t, err)
+
+	// try to PUT with non JSON body
+	// should result in bad request
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/signals/%v", newSignalID), "PUT", "This is not JSON")
+	assert.NoError(t, err)
+	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
+
+	// test PUT
 	code, resp, err = helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/signals/%v", newSignalID), "PUT", helper.KeyModels{"signal": updatedSignal})
 	assert.NoError(t, err)
@@ -278,6 +357,23 @@ func TestDeleteSignal(t *testing.T) {
 	newSignalID, err := helper.GetResponseID(resp)
 	assert.NoError(t, err)
 
+	// authenticate as normal userB who has no access to new scenario
+	token, err = helper.AuthenticateForTest(router,
+		"/api/authenticate", "POST", helper.UserBCredentials)
+	assert.NoError(t, err)
+
+	// Try to DELETE signal with no access
+	// should result in unprocessable entity
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/signals/%v", newSignalID), "DELETE", nil)
+	assert.NoError(t, err)
+	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
+
+	// authenticate as normal user
+	token, err = helper.AuthenticateForTest(router,
+		"/api/authenticate", "POST", helper.UserACredentials)
+	assert.NoError(t, err)
+
 	// Count the number of all the input signals returned for simulation model
 	initialNumber, err := helper.LengthOfResponse(router, token,
 		fmt.Sprintf("/api/signals?modelID=%v&direction=in", simulationModelID), "GET", nil)
@@ -296,6 +392,10 @@ func TestDeleteSignal(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
+	// Read newSignalout's ID from the response
+	newSignaloutID, err := helper.GetResponseID(resp)
+	assert.NoError(t, err)
+
 	// Delete the added newSignal
 	code, resp, err = helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/signals/%v", newSignalID), "DELETE", nil)
@@ -312,6 +412,12 @@ func TestDeleteSignal(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.Equal(t, initialNumber-1, finalNumber)
+
+	// Delete the output signal
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/signals/%v", newSignaloutID), "DELETE", nil)
+	assert.NoError(t, err)
+	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 }
 
 func TestGetAllInputSignalsOfSimulationModel(t *testing.T) {
@@ -392,5 +498,30 @@ func TestGetAllInputSignalsOfSimulationModel(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.Equal(t, initialNumber+2, finalNumber)
+
+	// Get the number of output signals
+	outputNumber, err := helper.LengthOfResponse(router, token,
+		fmt.Sprintf("/api/signals?modelID=%v&direction=out", simulationModelID), "GET", nil)
+	assert.NoError(t, err)
+	assert.Equal(t, initialNumber+2, outputNumber)
+
+	// Try to get all signals for non-existing direction
+	// should result in bad request
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/signals?modelID=%v&direction=thisiswrong", simulationModelID), "GET", nil)
+	assert.NoError(t, err)
+	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
+
+	// authenticate as normal userB who has no access to new scenario
+	token, err = helper.AuthenticateForTest(router,
+		"/api/authenticate", "POST", helper.UserBCredentials)
+	assert.NoError(t, err)
+
+	// try to get all input signals
+	// should result in unprocessable entity
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/signals?modelID=%v&direction=in", simulationModelID), "GET", nil)
+	assert.NoError(t, err)
+	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 }

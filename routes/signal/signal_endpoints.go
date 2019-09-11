@@ -95,8 +95,7 @@ func addSignal(c *gin.Context) {
 
 	// Add signal to model
 	err := newSignal.addToSimulationModel()
-	if err != nil {
-		helper.DBError(c, err)
+	if helper.DBError(c, err) {
 		return
 	}
 
@@ -135,16 +134,11 @@ func updateSignal(c *gin.Context) {
 	}
 
 	// Create the updatedSignal from oldDashboard
-	updatedSignal, err := req.updatedSignal(oldSignal)
-	if err != nil {
-		helper.BadRequestError(c, err.Error())
-		return
-	}
+	updatedSignal := req.updatedSignal(oldSignal)
 
 	// Update the signal in the DB
-	err = oldSignal.update(updatedSignal)
-	if err != nil {
-		helper.DBError(c, err)
+	err := oldSignal.update(updatedSignal)
+	if helper.DBError(c, err) {
 		return
 	}
 
@@ -192,8 +186,7 @@ func deleteSignal(c *gin.Context) {
 	}
 
 	err := sig.delete()
-	if err != nil {
-		helper.DBError(c, err)
+	if helper.DBError(c, err) {
 		return
 	}
 

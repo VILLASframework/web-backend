@@ -52,7 +52,7 @@ func (r *addSignalRequest) createSignal() Signal {
 	return s
 }
 
-func (r *updateSignalRequest) updatedSignal(oldSignal Signal) (Signal, error) {
+func (r *updateSignalRequest) updatedSignal(oldSignal Signal) Signal {
 	// Use the old Signal as a basis for the updated Signal `s`
 	s := oldSignal
 
@@ -69,5 +69,5 @@ func (r *updateSignalRequest) updatedSignal(oldSignal Signal) (Signal, error) {
 		s.Unit = r.Unit
 	}
 
-	return s, nil
+	return s
 }
