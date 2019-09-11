@@ -51,6 +51,23 @@ func TestAddSimulatorAsAdmin(t *testing.T) {
 		"/api/authenticate", "POST", helper.AdminCredentials)
 	assert.NoError(t, err)
 
+	// try to POST with non JSON body
+	// should result in bad request
+	code, resp, err := helper.TestEndpoint(router, token,
+		"/api/simulators", "POST", "This is no JSON")
+	assert.NoError(t, err)
+	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
+
+	// try to POST malformed simulator (required fields missing, validation should fail)
+	// should result in an unprocessable entity
+	newMalformedSimulator := SimulatorRequest{
+		UUID: database.SimulatorB.UUID,
+	}
+	code, resp, err = helper.TestEndpoint(router, token,
+		"/api/simulators", "POST", helper.KeyModels{"simulator": newMalformedSimulator})
+	assert.NoError(t, err)
+	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
+
 	// test POST simulators/ $newSimulator
 	newSimulator := SimulatorRequest{
 		UUID:       database.SimulatorA.UUID,
@@ -59,7 +76,7 @@ func TestAddSimulatorAsAdmin(t *testing.T) {
 		State:      database.SimulatorA.State,
 		Properties: database.SimulatorA.Properties,
 	}
-	code, resp, err := helper.TestEndpoint(router, token,
+	code, resp, err = helper.TestEndpoint(router, token,
 		"/api/simulators", "POST", helper.KeyModels{"simulator": newSimulator})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -82,6 +99,13 @@ func TestAddSimulatorAsAdmin(t *testing.T) {
 	// Compare GET's response with the newSimulator
 	err = helper.CompareResponse(resp, helper.KeyModels{"simulator": newSimulator})
 	assert.NoError(t, err)
+
+	// Try to GET a simulator that does not exist
+	// should result in not found
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/simulators/%v", newSimulatorID+1), "GET", nil)
+	assert.NoError(t, err)
+	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
 }
 
 func TestAddSimulatorAsUser(t *testing.T) {
@@ -141,6 +165,13 @@ func TestUpdateSimulatorAsAdmin(t *testing.T) {
 	// Read newSimulator's ID from the response
 	newSimulatorID, err := helper.GetResponseID(resp)
 	assert.NoError(t, err)
+
+	// try to PUT with non JSON body
+	// should result in bad request
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/simulators/%v", newSimulatorID), "PUT", "This is no JSON")
+	assert.NoError(t, err)
+	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 
 	// Test PUT simulators
 	newSimulator.Host = "ThisIsMyNewHost"
@@ -409,4 +440,11 @@ func TestGetSimulationModelsOfSimulator(t *testing.T) {
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	assert.Equal(t, 0, numberOfModels)
+
+	// Try to get models of simulator that does not exist
+	// should result in not found
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/simulators/%v/models", newSimulatorID+1), "GET", nil)
+	assert.NoError(t, err)
+	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
 }

@@ -64,6 +64,10 @@ func main() {
 	file.RegisterFileEndpoints(api.Group("/files"))
 	user.RegisterUserEndpoints(api.Group("/users"))
 	simulator.RegisterSimulatorEndpoints(api.Group("/simulators"))
+	// register simulator action endpoint only if AMQP client is used
+	if database.WITH_AMQP == true {
+		amqp.RegisterAMQPEndpoint(api.Group("/simulators"))
+	}
 
 	r.GET("swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 

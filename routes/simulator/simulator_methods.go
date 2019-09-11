@@ -19,10 +19,7 @@ func (s *Simulator) save() error {
 func (s *Simulator) ByID(id uint) error {
 	db := database.GetDB()
 	err := db.Find(s, id).Error
-	if err != nil {
-		return fmt.Errorf("Simulator with id=%v does not exist", id)
-	}
-	return nil
+	return err
 }
 
 func (s *Simulator) update(updatedSimulator Simulator) error {

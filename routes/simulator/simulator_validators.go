@@ -58,7 +58,7 @@ func (r *addSimulatorRequest) createSimulator() Simulator {
 	return s
 }
 
-func (r *updateSimulatorRequest) updatedSimulator(oldSimulator Simulator) (Simulator, error) {
+func (r *updateSimulatorRequest) updatedSimulator(oldSimulator Simulator) Simulator {
 	// Use the old Simulator as a basis for the updated Simulator `s`
 	s := oldSimulator
 
@@ -89,5 +89,5 @@ func (r *updateSimulatorRequest) updatedSimulator(oldSimulator Simulator) (Simul
 		s.Properties = r.Properties
 	}
 
-	return s, nil
+	return s
 }
