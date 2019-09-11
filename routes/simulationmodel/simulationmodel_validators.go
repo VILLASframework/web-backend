@@ -53,7 +53,7 @@ func (r *addSimulationModelRequest) createSimulationModel() SimulationModel {
 	return s
 }
 
-func (r *updateSimulationModelRequest) updatedSimulationModel(oldSimulationModel SimulationModel) (SimulationModel, error) {
+func (r *updateSimulationModelRequest) updatedSimulationModel(oldSimulationModel SimulationModel) SimulationModel {
 	// Use the old SimulationModel as a basis for the updated Simulation model
 	s := oldSimulationModel
 
@@ -76,5 +76,5 @@ func (r *updateSimulationModelRequest) updatedSimulationModel(oldSimulationModel
 		s.StartParameters = r.StartParameters
 	}
 
-	return s, nil
+	return s
 }

@@ -59,6 +59,17 @@ func addScenarioAndSimulator() (scenarioID uint, simulatorID uint) {
 	// Read newSimulator's ID from the response
 	newSimulatorID, _ := helper.GetResponseID(resp)
 
+	// POST a second simulator to change to that simulator during testing
+	newSimulatorB := SimulatorRequest{
+		UUID:       database.SimulatorB.UUID,
+		Host:       database.SimulatorB.Host,
+		Modeltype:  database.SimulatorB.Modeltype,
+		State:      database.SimulatorB.State,
+		Properties: database.SimulatorB.Properties,
+	}
+	_, resp, _ = helper.TestEndpoint(router, token,
+		"/api/simulators", "POST", helper.KeyModels{"simulator": newSimulatorB})
+
 	// authenticate as normal user
 	token, _ = helper.AuthenticateForTest(router,
 		"/api/authenticate", "POST", helper.UserACredentials)
@@ -74,6 +85,10 @@ func addScenarioAndSimulator() (scenarioID uint, simulatorID uint) {
 
 	// Read newScenario's ID from the response
 	newScenarioID, _ := helper.GetResponseID(resp)
+
+	// add the guest user to the new scenario
+	_, resp, _ = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/scenarios/%v/user?username=User_C", newScenarioID), "PUT", nil)
 
 	return uint(newScenarioID), uint(newSimulatorID)
 }
@@ -109,19 +124,43 @@ func TestAddSimulationModel(t *testing.T) {
 	// using the respective endpoints of the API
 	scenarioID, simulatorID := addScenarioAndSimulator()
 
-	// authenticate as normal user
-	token, err := helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.UserACredentials)
-	assert.NoError(t, err)
-
-	// test POST models/ $newSimulationModel
 	newSimulationModel := SimulationModelRequest{
 		Name:            database.SimulationModelA.Name,
 		ScenarioID:      scenarioID,
 		SimulatorID:     simulatorID,
 		StartParameters: database.SimulationModelA.StartParameters,
 	}
+
+	// authenticate as normal userB who has no access to new scenario
+	token, err := helper.AuthenticateForTest(router,
+		"/api/authenticate", "POST", helper.UserBCredentials)
+	assert.NoError(t, err)
+
+	// try to POST with no access
+	// should result in unprocessable entity
 	code, resp, err := helper.TestEndpoint(router, token,
+		"/api/models", "POST", helper.KeyModels{"model": newSimulationModel})
+	assert.NoError(t, err)
+	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
+
+	// authenticate as normal user
+	token, err = helper.AuthenticateForTest(router,
+		"/api/authenticate", "POST", helper.UserACredentials)
+	assert.NoError(t, err)
+
+	// try to POST non JSON body
+	code, resp, err = helper.TestEndpoint(router, token,
+		"/api/models", "POST", "this is not JSON")
+	assert.NoError(t, err)
+	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
+
+	// authenticate as normal user
+	token, err = helper.AuthenticateForTest(router,
+		"/api/authenticate", "POST", helper.UserACredentials)
+	assert.NoError(t, err)
+
+	// test POST models/ $newSimulationModel
+	code, resp, err = helper.TestEndpoint(router, token,
 		"/api/models", "POST", helper.KeyModels{"model": newSimulationModel})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -152,6 +191,18 @@ func TestAddSimulationModel(t *testing.T) {
 	// this should NOT work and return a unprocessable entity 442 status code
 	code, resp, err = helper.TestEndpoint(router, token,
 		"/api/models", "POST", helper.KeyModels{"model": malformedNewSimulationModel})
+	assert.NoError(t, err)
+	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
+
+	// authenticate as normal userB who has no access to new scenario
+	token, err = helper.AuthenticateForTest(router,
+		"/api/authenticate", "POST", helper.UserBCredentials)
+	assert.NoError(t, err)
+
+	// Try to GET the newSimulationModel with no access
+	// Should result in unprocessable entity
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/models/%v", newSimulationModelID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
@@ -194,6 +245,55 @@ func TestUpdateSimulationModel(t *testing.T) {
 		StartParameters: database.SimulationModelB.StartParameters,
 	}
 
+	// authenticate as normal userB who has no access to new scenario
+	token, err = helper.AuthenticateForTest(router,
+		"/api/authenticate", "POST", helper.UserBCredentials)
+	assert.NoError(t, err)
+
+	// try to PUT with no access
+	// should result in unprocessable entity
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/models/%v", newSimulationModelID), "PUT", helper.KeyModels{"model": updatedSimulationModel})
+	assert.NoError(t, err)
+	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
+
+	// authenticate as guest user who has access to simulation model
+	token, err = helper.AuthenticateForTest(router,
+		"/api/authenticate", "POST", helper.GuestCredentials)
+	assert.NoError(t, err)
+
+	// try to PUT as guest
+	// should NOT work and result in unprocessable entity
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/models/%v", newSimulationModelID), "PUT", helper.KeyModels{"model": updatedSimulationModel})
+	assert.NoError(t, err)
+	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
+
+	// authenticate as normal user
+	token, err = helper.AuthenticateForTest(router,
+		"/api/authenticate", "POST", helper.UserACredentials)
+	assert.NoError(t, err)
+
+	// try to PUT a non JSON body
+	// should result in a bad request
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/models/%v", newSimulationModelID), "PUT", "This is not JSON")
+	assert.NoError(t, err)
+	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
+
+	// test PUT
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/models/%v", newSimulationModelID), "PUT", helper.KeyModels{"model": updatedSimulationModel})
+	assert.NoError(t, err)
+	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
+
+	// Compare PUT's response with the updatedSimulationModel
+	err = helper.CompareResponse(resp, helper.KeyModels{"model": updatedSimulationModel})
+	assert.NoError(t, err)
+
+	//Change simulator ID to use second simulator available in DB
+	updatedSimulationModel.SimulatorID = simulatorID + 1
+	// test PUT again
 	code, resp, err = helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/models/%v", newSimulationModelID), "PUT", helper.KeyModels{"model": updatedSimulationModel})
 	assert.NoError(t, err)
@@ -230,18 +330,19 @@ func TestDeleteSimulationModel(t *testing.T) {
 	// using the respective endpoints of the API
 	scenarioID, simulatorID := addScenarioAndSimulator()
 
-	// authenticate as normal user
-	token, err := helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.UserACredentials)
-	assert.NoError(t, err)
-
-	// test POST models/ $newSimulationModel
 	newSimulationModel := SimulationModelRequest{
 		Name:            database.SimulationModelA.Name,
 		ScenarioID:      scenarioID,
 		SimulatorID:     simulatorID,
 		StartParameters: database.SimulationModelA.StartParameters,
 	}
+
+	// authenticate as normal user
+	token, err := helper.AuthenticateForTest(router,
+		"/api/authenticate", "POST", helper.UserACredentials)
+	assert.NoError(t, err)
+
+	// test POST models/ $newSimulationModel
 	code, resp, err := helper.TestEndpoint(router, token,
 		"/api/models", "POST", helper.KeyModels{"model": newSimulationModel})
 	assert.NoError(t, err)
@@ -249,6 +350,23 @@ func TestDeleteSimulationModel(t *testing.T) {
 
 	// Read newSimulationModel's ID from the response
 	newSimulationModelID, err := helper.GetResponseID(resp)
+	assert.NoError(t, err)
+
+	// authenticate as normal userB who has no access to new scenario
+	token, err = helper.AuthenticateForTest(router,
+		"/api/authenticate", "POST", helper.UserBCredentials)
+	assert.NoError(t, err)
+
+	// try to DELETE with no access
+	// should result in unprocessable entity
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/models/%v", newSimulationModelID), "DELETE", nil)
+	assert.NoError(t, err)
+	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
+
+	// authenticate as normal user
+	token, err = helper.AuthenticateForTest(router,
+		"/api/authenticate", "POST", helper.UserACredentials)
 	assert.NoError(t, err)
 
 	// Count the number of all the simulation models returned for scenario
@@ -307,5 +425,17 @@ func TestGetAllSimulationModelsOfScenario(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.Equal(t, 1, NumberOfSimulationModels)
+
+	// authenticate as normal userB who has no access to scenario
+	token, err = helper.AuthenticateForTest(router,
+		"/api/authenticate", "POST", helper.UserBCredentials)
+	assert.NoError(t, err)
+
+	// try to get models without access
+	// should result in unprocessable entity
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/models?scenarioID=%v", scenarioID), "GET", nil)
+	assert.NoError(t, err)
+	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 }

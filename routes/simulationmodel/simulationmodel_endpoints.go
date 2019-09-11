@@ -39,11 +39,10 @@ func getSimulationModels(c *gin.Context) {
 	db := database.GetDB()
 	var models []database.SimulationModel
 	err := db.Order("ID asc").Model(so).Related(&models, "Models").Error
-	if helper.DBError(c, err) {
-		return
+	if !helper.DBError(c, err) {
+		c.JSON(http.StatusOK, gin.H{"models": models})
 	}
 
-	c.JSON(http.StatusOK, gin.H{"models": models})
 }
 
 // addSimulationModel godoc
@@ -79,19 +78,17 @@ func addSimulationModel(c *gin.Context) {
 	newSimulationModel := req.createSimulationModel()
 
 	// check access to the scenario
-	ok, _ := scenario.CheckPermissions(c, database.Create, "body", int(newSimulationModel.ScenarioID))
+	ok, _ := scenario.CheckPermissions(c, database.Update, "body", int(newSimulationModel.ScenarioID))
 	if !ok {
 		return
 	}
 
 	// add the new simulation model to the scenario
 	err = newSimulationModel.addToScenario()
-	if err != nil {
-		helper.DBError(c, err)
-		return
+	if !helper.DBError(c, err) {
+		c.JSON(http.StatusOK, gin.H{"model": newSimulationModel.SimulationModel})
 	}
 
-	c.JSON(http.StatusOK, gin.H{"model": newSimulationModel.SimulationModel})
 }
 
 // updateSimulationModel godoc
@@ -129,20 +126,13 @@ func updateSimulationModel(c *gin.Context) {
 	}
 
 	// Create the updatedSimulationModel from oldSimulationModel
-	updatedSimulationModel, err := req.updatedSimulationModel(oldSimulationModel)
-	if err != nil {
-		helper.BadRequestError(c, err.Error())
-		return
-	}
+	updatedSimulationModel := req.updatedSimulationModel(oldSimulationModel)
 
 	// Finally, update the simulation model
 	err = oldSimulationModel.Update(updatedSimulationModel)
-	if err != nil {
-		helper.DBError(c, err)
-		return
+	if !helper.DBError(c, err) {
+		c.JSON(http.StatusOK, gin.H{"model": updatedSimulationModel.SimulationModel})
 	}
-
-	c.JSON(http.StatusOK, gin.H{"model": updatedSimulationModel.SimulationModel})
 
 }
 
@@ -188,9 +178,7 @@ func deleteSimulationModel(c *gin.Context) {
 	}
 
 	err := m.delete()
-	if helper.DBError(c, err) {
-		return
+	if !helper.DBError(c, err) {
+		c.JSON(http.StatusOK, gin.H{"model": m.SimulationModel})
 	}
-
-	c.JSON(http.StatusOK, gin.H{"model": m.SimulationModel})
 }

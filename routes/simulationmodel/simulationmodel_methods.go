@@ -56,6 +56,7 @@ func (m *SimulationModel) addToScenario() error {
 func (m *SimulationModel) Update(modifiedSimulationModel SimulationModel) error {
 	db := database.GetDB()
 
+	// check if simulator has been updated
 	if m.SimulatorID != modifiedSimulationModel.SimulatorID {
 		// update simulator
 		var s simulator.Simulator
@@ -80,15 +81,10 @@ func (m *SimulationModel) Update(modifiedSimulationModel SimulationModel) error 
 		}
 	}
 
-	if m.ScenarioID != modifiedSimulationModel.ScenarioID {
-		// TODO do we allow this case?
-	}
-
 	err := db.Model(m).Updates(map[string]interface{}{
 		"Name":            modifiedSimulationModel.Name,
 		"StartParameters": modifiedSimulationModel.StartParameters,
 		"SimulatorID":     modifiedSimulationModel.SimulatorID,
-		//"ScenarioID":     modifiedSimulationModel.ScenarioID,
 	}).Error
 
 	return err
