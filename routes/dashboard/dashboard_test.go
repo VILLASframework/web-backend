@@ -46,6 +46,10 @@ func addScenario(token string) (scenarioID uint) {
 	// Read newScenario's ID from the response
 	newScenarioID, _ := helper.GetResponseID(resp)
 
+	// add the guest user to the new scenario
+	_, resp, _ = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/scenarios/%v/user?username=User_C", newScenarioID), "PUT", nil)
+
 	return uint(newScenarioID)
 }
 
@@ -184,6 +188,23 @@ func TestUpdateDashboard(t *testing.T) {
 		Name: database.DashboardB.Name,
 		Grid: database.DashboardB.Grid,
 	}
+
+	// authenticate as guest user
+	token, err = helper.AuthenticateForTest(router,
+		"/api/authenticate", "POST", helper.GuestCredentials)
+	assert.NoError(t, err)
+
+	// try to update a dashboard as guest
+	// should return an unprocessable entity error
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/dashboards/%v", newDashboardID), "PUT", helper.KeyModels{"dashboard": updatedDashboard})
+	assert.NoError(t, err)
+	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
+
+	// authenticate as normal user
+	token, err = helper.AuthenticateForTest(router,
+		"/api/authenticate", "POST", helper.UserACredentials)
+	assert.NoError(t, err)
 
 	code, resp, err = helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/dashboards/%v", newDashboardID), "PUT", helper.KeyModels{"dashboard": updatedDashboard})
