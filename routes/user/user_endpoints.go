@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/helper"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
@@ -47,11 +46,10 @@ func getUsers(c *gin.Context) {
 	db := database.GetDB()
 	var users []database.User
 	err = db.Order("ID asc").Find(&users).Error
-	if helper.DBError(c, err) {
-		return
+	if !helper.DBError(c, err) {
+		c.JSON(http.StatusOK, gin.H{"users": users})
 	}
 
-	c.JSON(http.StatusOK, gin.H{"users": users})
 }
 
 // AddUser godoc
@@ -83,7 +81,7 @@ func addUser(c *gin.Context) {
 
 	// Validate the request
 	if err = req.validate(); err != nil {
-		helper.UnprocessableEntityError(c, err.Error())
+		helper.BadRequestError(c, err.Error())
 		return
 	}
 
@@ -100,18 +98,16 @@ func addUser(c *gin.Context) {
 	// Hash the password before saving it to the DB
 	err = newUser.setPassword(newUser.Password)
 	if err != nil {
-		helper.UnprocessableEntityError(c, "Unable to encrypt the password")
+		helper.InternalServerError(c, "Unable to encrypt the password")
 		return
 	}
 
 	// Save the user in the DB
 	err = newUser.save()
-	if err != nil {
-		helper.DBError(c, err)
-		return
+	if !helper.DBError(c, err) {
+		c.JSON(http.StatusOK, gin.H{"user": newUser.User})
 	}
 
-	c.JSON(http.StatusOK, gin.H{"user": newUser.User})
 }
 
 // UpdateUser godoc
@@ -131,24 +127,16 @@ func addUser(c *gin.Context) {
 // @Router /users/{userID} [put]
 func updateUser(c *gin.Context) {
 
-	err := database.ValidateRole(c, database.ModelUser, database.Update)
-	if err != nil {
-		helper.UnprocessableEntityError(c, err.Error())
-		return
-	}
+	// no need to validate the role since updating a single user is role independent
+	//err := database.ValidateRole(c, database.ModelUser, database.Update)
+	//if err != nil {
+	//	helper.UnprocessableEntityError(c, err.Error())
+	//	return
+	//}
 
 	// Get the user's (to be updated) ID from the context
-	var oldUser User
-	toBeUpdatedID, err := strconv.Atoi(c.Param("userID"))
+	toBeUpdatedID, err := helper.GetIDOfElement(c, "userID", "path", -1)
 	if err != nil {
-		helper.NotFoundError(c, fmt.Sprintf("Could not get user's ID from context"))
-		return
-	}
-
-	// Find the user
-	err = oldUser.ByID(uint(toBeUpdatedID))
-	if err != nil {
-		helper.DBError(c, err)
 		return
 	}
 
@@ -162,18 +150,10 @@ func updateUser(c *gin.Context) {
 	// except Role
 
 	// Get caller's ID from context
-	callerID, exists := c.Get(database.UserIDCtx)
-	if !exists {
-		helper.NotFoundError(c, fmt.Sprintf("Could not get caller's ID from context"))
-		return
-	}
+	callerID, _ := c.Get(database.UserIDCtx)
 
 	// Get caller's Role from context
-	callerRole, exists := c.Get(database.UserRoleCtx)
-	if !exists {
-		helper.NotFoundError(c, fmt.Sprintf("Could not get caller's Role from context"))
-		return
-	}
+	callerRole, _ := c.Get(database.UserRoleCtx)
 
 	if uint(toBeUpdatedID) != callerID && callerRole != "Admin" {
 		helper.ForbiddenError(c, "Invalid authorization")
@@ -183,7 +163,7 @@ func updateUser(c *gin.Context) {
 	// Bind the (context) with the updateUserRequest struct
 	var req updateUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		helper.UnprocessableEntityError(c, fmt.Sprintf("%v", err))
+		helper.BadRequestError(c, fmt.Sprintf("%v", err))
 		return
 	}
 
@@ -193,27 +173,33 @@ func updateUser(c *gin.Context) {
 		return
 	}
 
+	// Find the user
+	var oldUser User
+	err = oldUser.ByID(uint(toBeUpdatedID))
+	if helper.DBError(c, err) {
+		return
+	}
+
 	// Create the updatedUser from oldUser considering callerRole (in
 	// case that the request updates the role of the old user)
 	updatedUser, err := req.updatedUser(callerRole, oldUser)
 	if err != nil {
 		if strings.Contains(err.Error(), "Admin") {
 			helper.ForbiddenError(c, err.Error())
-
-		} else if strings.Contains(err.Error(), "Username") || strings.Contains(err.Error(), "password") {
+		} else if strings.Contains(err.Error(), "Username") {
 			helper.BadRequestError(c, err.Error())
+		} else { // password encryption failed
+			helper.InternalServerError(c, err.Error())
 		}
 		return
 	}
 
 	// Finally update the user
 	err = oldUser.update(updatedUser)
-	if err != nil {
-		helper.DBError(c, err)
-		return
+	if !helper.DBError(c, err) {
+		c.JSON(http.StatusOK, gin.H{"user": updatedUser.User})
 	}
 
-	c.JSON(http.StatusOK, gin.H{"user": updatedUser.User})
 }
 
 // GetUser godoc
@@ -230,15 +216,15 @@ func updateUser(c *gin.Context) {
 // @Router /users/{userID} [get]
 func getUser(c *gin.Context) {
 
-	err := database.ValidateRole(c, database.ModelUser, database.Read)
-	if err != nil {
-		helper.UnprocessableEntityError(c, err.Error())
-		return
-	}
+	// role validation not needed because updating a single user is role-independent
+	//err := database.ValidateRole(c, database.ModelUser, database.Read)
+	//if err != nil {
+	//	helper.UnprocessableEntityError(c, err.Error())
+	//	return
+	//}
 
-	id, err := strconv.Atoi(c.Param("userID"))
+	id, err := helper.GetIDOfElement(c, "userID", "path", -1)
 	if err != nil {
-		helper.NotFoundError(c, fmt.Sprintf("Could not get user's ID from context"))
 		return
 	}
 
@@ -252,12 +238,10 @@ func getUser(c *gin.Context) {
 
 	var user User
 	err = user.ByID(uint(id))
-	if err != nil {
-		helper.DBError(c, err)
-		return
+	if !helper.DBError(c, err) {
+		c.JSON(http.StatusOK, gin.H{"user": user.User})
 	}
 
-	c.JSON(http.StatusOK, gin.H{"user": user.User})
 }
 
 // DeleteUser godoc
@@ -280,25 +264,21 @@ func deleteUser(c *gin.Context) {
 	}
 
 	var user User
-	id, err := strconv.Atoi(c.Param("userID"))
+	id, err := helper.GetIDOfElement(c, "userID", "path", -1)
 	if err != nil {
-		helper.NotFoundError(c, fmt.Sprintf("Could not get user's ID from context"))
 		return
 	}
 
 	// Check that the user exist
 	err = user.ByID(uint(id))
-	if err != nil {
-		helper.DBError(c, err)
+	if helper.DBError(c, err) {
 		return
 	}
 
 	// Try to remove user
 	err = user.remove()
-	if err != nil {
-		helper.DBError(c, err)
-		return
+	if !helper.DBError(c, err) {
+		c.JSON(http.StatusOK, gin.H{"user": user.User})
 	}
 
-	c.JSON(http.StatusOK, gin.H{"user": user.User})
 }

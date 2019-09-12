@@ -30,19 +30,13 @@ func (u *User) remove() error {
 func (u *User) ByUsername(username string) error {
 	db := database.GetDB()
 	err := db.Find(u, "Username = ?", username).Error
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 func (u *User) ByID(id uint) error {
 	db := database.GetDB()
 	err := db.Find(u, id).Error
-	if err != nil {
-		return fmt.Errorf("User with id=%v does not exist", id)
-	}
-	return nil
+	return err
 }
 
 func (u *User) setPassword(password string) error {

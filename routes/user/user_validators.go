@@ -10,11 +10,11 @@ var validate *validator.Validate
 
 type loginRequest struct {
 	Username string `form:"Username" validate:"required"`
-	Password string `form:"Password" validate:"required,min=6"`
+	Password string `form:"Password" validate:"required"`
 }
 
 type validUpdatedRequest struct {
-	Username string `form:"Username" validate:"omitempty"`
+	Username string `form:"Username" validate:"omitempty,min=3"`
 	Password string `form:"Password" validate:"omitempty,min=6"`
 	Role     string `form:"Role" validate:"omitempty,oneof=Admin User Guest"`
 	Mail     string `form:"Mail" validate:"omitempty,email"`
@@ -25,7 +25,7 @@ type updateUserRequest struct {
 }
 
 type validNewUser struct {
-	Username string `form:"Username" validate:"required"`
+	Username string `form:"Username" validate:"required,min=3"`
 	Password string `form:"Password" validate:"required,min=6"`
 	Role     string `form:"Role" validate:"required,oneof=Admin User Guest"`
 	Mail     string `form:"Mail" validate:"required,email"`
@@ -63,7 +63,8 @@ func (r *updateUserRequest) updatedUser(role interface{},
 	}
 
 	// Update the username making sure is NOT taken
-	if err := u.ByUsername(r.Username); err == nil {
+	var testUser User
+	if err := testUser.ByUsername(r.Username); err == nil {
 		return u, fmt.Errorf("Username is alreaday taken")
 	}
 

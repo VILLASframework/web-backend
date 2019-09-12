@@ -26,10 +26,7 @@ func RegisterAuthenticate(r *gin.RouterGroup) {
 // @Tags authentication
 // @Param inputUser body user.loginRequest true "loginRequest of user"
 // @Success 200 {object} docs.ResponseAuthenticate "JSON web token, success status, message and authenticated user object"
-// @Failure 400 {object} docs.ResponseError "Bad request"
 // @Failure 401 {object} docs.ResponseError "Unauthorized"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity."
 // @Failure 500 {object} docs.ResponseError "Internal server error."
 // @Router /authenticate [post]
 func authenticate(c *gin.Context) {
@@ -37,13 +34,13 @@ func authenticate(c *gin.Context) {
 	// Bind the response (context) with the loginRequest struct
 	var credentials loginRequest
 	if err := c.ShouldBindJSON(&credentials); err != nil {
-		helper.UnprocessableEntityError(c, err.Error())
+		helper.UnauthorizedError(c, "Wrong username or password")
 		return
 	}
 
 	// Validate the login request
 	if errs := credentials.validate(); errs != nil {
-		helper.BadRequestError(c, errs.Error())
+		helper.UnauthorizedError(c, "Wrong username or password")
 		return
 	}
 
@@ -51,14 +48,14 @@ func authenticate(c *gin.Context) {
 	var user User
 	err := user.ByUsername(credentials.Username)
 	if err != nil {
-		helper.NotFoundError(c, "User not found")
+		helper.UnauthorizedError(c, "Wrong username or password")
 		return
 	}
 
 	// Validate the password
 	err = user.validatePassword(credentials.Password)
 	if err != nil {
-		helper.UnauthorizedError(c, "Invalid password")
+		helper.UnauthorizedError(c, "Wrong username or password")
 		return
 	}
 
