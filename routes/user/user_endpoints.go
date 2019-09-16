@@ -10,7 +10,6 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
-	_ "git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/doc/api"
 )
 
 // TODO: the signing secret must be environmental variable

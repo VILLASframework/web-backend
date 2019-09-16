@@ -49,13 +49,6 @@
                             "$ref": "#/definitions/docs.ResponseAuthenticate"
                         }
                     },
-                    "400": {
-                        "description": "Bad request",
-                        "schema": {
-                            "type": "object",
-                            "$ref": "#/definitions/docs.ResponseError"
-                        }
-                    },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
@@ -63,15 +56,8 @@
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
-                    "404": {
-                        "description": "Not found",
-                        "schema": {
-                            "type": "object",
-                            "$ref": "#/definitions/docs.ResponseError"
-                        }
-                    },
-                    "422": {
-                        "description": "Unprocessable entity.",
+                    "500": {
+                        "description": "Internal server error.",
                         "schema": {
                             "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
@@ -2029,7 +2015,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "simulators"
+                    "AMQP"
                 ],
                 "summary": "Send an action to simulator (only available if backend server is started with -amqp parameter)",
                 "operationId": "sendActionToSimulator",
@@ -2724,7 +2710,37 @@
         }
     },
     "definitions": {
-        "common.Dashboard": {
+        "dashboard.validNewDashboard": {
+            "type": "object",
+            "required": [
+                "Grid",
+                "Name",
+                "ScenarioID"
+            ],
+            "properties": {
+                "Grid": {
+                    "type": "integer"
+                },
+                "Name": {
+                    "type": "string"
+                },
+                "ScenarioID": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dashboard.validUpdatedDashboard": {
+            "type": "object",
+            "properties": {
+                "Grid": {
+                    "type": "integer"
+                },
+                "Name": {
+                    "type": "string"
+                }
+            }
+        },
+        "database.Dashboard": {
             "type": "object",
             "properties": {
                 "grid": {
@@ -2744,7 +2760,7 @@
                 }
             }
         },
-        "common.File": {
+        "database.File": {
             "type": "object",
             "properties": {
                 "date": {
@@ -2784,7 +2800,7 @@
                 }
             }
         },
-        "common.Scenario": {
+        "database.Scenario": {
             "type": "object",
             "properties": {
                 "id": {
@@ -2804,7 +2820,7 @@
                 }
             }
         },
-        "common.Signal": {
+        "database.Signal": {
             "type": "object",
             "properties": {
                 "direction": {
@@ -2832,7 +2848,7 @@
                 }
             }
         },
-        "common.SimulationModel": {
+        "database.SimulationModel": {
             "type": "object",
             "properties": {
                 "id": {
@@ -2864,7 +2880,7 @@
                 }
             }
         },
-        "common.Simulator": {
+        "database.Simulator": {
             "type": "object",
             "properties": {
                 "host": {
@@ -2904,7 +2920,7 @@
                 }
             }
         },
-        "common.User": {
+        "database.User": {
             "type": "object",
             "properties": {
                 "id": {
@@ -2924,7 +2940,7 @@
                 }
             }
         },
-        "common.Widget": {
+        "database.Widget": {
             "type": "object",
             "properties": {
                 "customProperties": {
@@ -2980,36 +2996,6 @@
                 }
             }
         },
-        "dashboard.validNewDashboard": {
-            "type": "object",
-            "required": [
-                "Grid",
-                "Name",
-                "ScenarioID"
-            ],
-            "properties": {
-                "Grid": {
-                    "type": "integer"
-                },
-                "Name": {
-                    "type": "string"
-                },
-                "ScenarioID": {
-                    "type": "integer"
-                }
-            }
-        },
-        "dashboard.validUpdatedDashboard": {
-            "type": "object",
-            "properties": {
-                "Grid": {
-                    "type": "integer"
-                },
-                "Name": {
-                    "type": "string"
-                }
-            }
-        },
         "docs.ResponseAuthenticate": {
             "type": "object",
             "properties": {
@@ -3024,7 +3010,7 @@
                 },
                 "user": {
                     "type": "object",
-                    "$ref": "#/definitions/common.User"
+                    "$ref": "#/definitions/database.User"
                 }
             }
         },
@@ -3033,7 +3019,7 @@
             "properties": {
                 "dashboard": {
                     "type": "object",
-                    "$ref": "#/definitions/common.Dashboard"
+                    "$ref": "#/definitions/database.Dashboard"
                 }
             }
         },
@@ -3043,7 +3029,7 @@
                 "dashboards": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/common.Dashboard"
+                        "$ref": "#/definitions/database.Dashboard"
                     }
                 }
             }
@@ -3064,7 +3050,7 @@
             "properties": {
                 "file": {
                     "type": "object",
-                    "$ref": "#/definitions/common.File"
+                    "$ref": "#/definitions/database.File"
                 }
             }
         },
@@ -3074,7 +3060,7 @@
                 "files": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/common.File"
+                        "$ref": "#/definitions/database.File"
                     }
                 }
             }
@@ -3084,7 +3070,7 @@
             "properties": {
                 "scenario": {
                     "type": "object",
-                    "$ref": "#/definitions/common.Scenario"
+                    "$ref": "#/definitions/database.Scenario"
                 }
             }
         },
@@ -3094,7 +3080,7 @@
                 "scenarios": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/common.Scenario"
+                        "$ref": "#/definitions/database.Scenario"
                     }
                 }
             }
@@ -3104,7 +3090,7 @@
             "properties": {
                 "signal": {
                     "type": "object",
-                    "$ref": "#/definitions/common.Signal"
+                    "$ref": "#/definitions/database.Signal"
                 }
             }
         },
@@ -3114,7 +3100,7 @@
                 "signals": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/common.Signal"
+                        "$ref": "#/definitions/database.Signal"
                     }
                 }
             }
@@ -3124,7 +3110,7 @@
             "properties": {
                 "model": {
                     "type": "object",
-                    "$ref": "#/definitions/common.SimulationModel"
+                    "$ref": "#/definitions/database.SimulationModel"
                 }
             }
         },
@@ -3134,7 +3120,7 @@
                 "models": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/common.SimulationModel"
+                        "$ref": "#/definitions/database.SimulationModel"
                     }
                 }
             }
@@ -3144,7 +3130,7 @@
             "properties": {
                 "simulator": {
                     "type": "object",
-                    "$ref": "#/definitions/common.Simulator"
+                    "$ref": "#/definitions/database.Simulator"
                 }
             }
         },
@@ -3154,7 +3140,7 @@
                 "simulators": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/common.Simulator"
+                        "$ref": "#/definitions/database.Simulator"
                     }
                 }
             }
@@ -3164,7 +3150,7 @@
             "properties": {
                 "user": {
                     "type": "object",
-                    "$ref": "#/definitions/common.User"
+                    "$ref": "#/definitions/database.User"
                 }
             }
         },
@@ -3174,7 +3160,7 @@
                 "users": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/common.User"
+                        "$ref": "#/definitions/database.User"
                     }
                 }
             }
@@ -3184,7 +3170,7 @@
             "properties": {
                 "widget": {
                     "type": "object",
-                    "$ref": "#/definitions/common.Widget"
+                    "$ref": "#/definitions/database.Widget"
                 }
             }
         },
@@ -3194,7 +3180,7 @@
                 "widgets": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/common.Widget"
+                        "$ref": "#/definitions/database.Widget"
                     }
                 }
             }

@@ -40,17 +40,21 @@ build:backend:
   image: villaswebbackendgo:ubuntu
   script:
     - go mod tidy
-#    - go get -u github.com/swaggo/swag/cmd/swag
-#    - ~/go/bin/swag init -p pascalcase -g "start.go" -o "./doc/api/"
+    - go get -u github.com/swaggo/swag/cmd/swag
+    - ~/go/bin/swag init -p pascalcase -g "start.go" -o "./doc/api/"
     - go build
   dependencies:
     - prepare:ubuntu
-#  artifacts:
-#    paths:
-#      - doc/api/swagger.json
-#      - doc/api/docs.go
+  artifacts:
+    paths:
+      - doc/api/swagger.json
+      - doc/api/docs.go
 
-build:api:
+
+# Stage: test
+##############################################################################
+
+test:apidoc:
   stage: build
   tags:
     - docker
@@ -59,76 +63,11 @@ build:api:
     - cd doc/api
     - redoc-cli bundle --cdn --title "VILLASweb Backend API Documentation" --output index.html swagger.json
   dependencies:
-    - prepare:redoc
+    - build:backend
   artifacts:
     paths:
       - doc/api/index.html
       - doc/api/swagger.json
-
-
-# Stage: test
-##############################################################################
-
-test:database:
-  stage: test
-  tags:
-    - docker
-  image: villaswebbackendgo:ubuntu
-  script:
-    - /etc/init.d/postgresql start
-    - go mod tidy
-    - cd database
-    - go test -v -args -dbhost=/var/run/postgresql
-  dependencies:
-    - build:backend
-
-test:scenario:
-  stage: test
-  tags:
-    - docker
-  image: villaswebbackendgo:ubuntu
-  script:
-    - /etc/init.d/postgresql start
-    - go mod tidy
-    - cd ${TEST_FOLDER}
-    - go test -v -args -dbhost=/var/run/postgresql
-  dependencies:
-    - build:backend
-
-test:simulationmodel:
-  extends: test:scenario
-  variables:
-    TEST_FOLDER: routes/simulationmodel
-
-test:signal:
-  extends: test:scenario
-  variables:
-    TEST_FOLDER: routes/signal
-
-test:dashboard:
-  extends: test:scenario
-  variables:
-    TEST_FOLDER: routes/dashboard
-
-test:widget:
-  extends: test:scenario
-  variables:
-    TEST_FOLDER: routes/widget
-
-test:simulator:
-  extends: test:scenario
-  variables:
-    TEST_FOLDER: routes/simulator
-
-test:file:
-  extends: test:scenario
-  variables:
-    TEST_FOLDER: routes/file
-
-test:user:
-  extends: test:scenario
-  variables:
-    TEST_FOLDER: routes/user
 
 test:all:
   stage: test
@@ -143,7 +82,58 @@ test:all:
   dependencies:
     - build:backend
 
+test:database:
+  stage: test
+  tags:
+    - docker
+  image: villaswebbackendgo:ubuntu
+  script:
+    - /etc/init.d/postgresql start
+    - go mod tidy
+    - cd database
+    - go test -v
+  dependencies:
+    - build:backend
 
+test:scenario:
+  extends: test:database
+  variables:
+    TEST_FOLDER: routes/scenario
+
+test:simulationmodel:
+  extends: test:scenario
+  variables:
+    TEST_FOLDER: routes/simulationmodel
+
+test:signal:
+  extends: test:database
+  variables:
+    TEST_FOLDER: routes/signal
+
+test:dashboard:
+  extends: test:database
+  variables:
+    TEST_FOLDER: routes/dashboard
+
+test:widget:
+  extends: test:database
+  variables:
+    TEST_FOLDER: routes/widget
+
+test:simulator:
+  extends: test:database
+  variables:
+    TEST_FOLDER: routes/simulator
+
+test:file:
+  extends: test:database
+  variables:
+    TEST_FOLDER: routes/file
+
+test:user:
+  extends: test:database
+  variables:
+    TEST_FOLDER: routes/user
 
 # Stage: deploy
 ##############################################################################
@@ -154,7 +144,7 @@ deploy:upload:
     - cd doc/api
     - rsync --copy-links --chown ${DEPLOY_USER}:${DEPLOY_USER} index.html swagger.json ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}
   dependencies:
-    - build:api
+    - test:apidoc
   only:
     - master
   tags:

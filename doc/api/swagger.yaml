@@ -1,6 +1,26 @@
 basePath: /api/v2
 definitions:
-  common.Dashboard:
+  dashboard.validNewDashboard:
+    properties:
+      Grid:
+        type: integer
+      Name:
+        type: string
+      ScenarioID:
+        type: integer
+    required:
+    - Grid
+    - Name
+    - ScenarioID
+    type: object
+  dashboard.validUpdatedDashboard:
+    properties:
+      Grid:
+        type: integer
+      Name:
+        type: string
+    type: object
+  database.Dashboard:
     properties:
       grid:
         description: Grid of dashboard
@@ -14,7 +34,7 @@ definitions:
         description: ID of scenario to which dashboard belongs
         type: integer
     type: object
-  common.File:
+  database.File:
     properties:
       date:
         description: Last modification time of file
@@ -43,7 +63,7 @@ definitions:
         description: ID of widget to which file belongs
         type: integer
     type: object
-  common.Scenario:
+  database.Scenario:
     properties:
       id:
         type: integer
@@ -57,7 +77,7 @@ definitions:
         description: Start parameters of scenario as JSON
         type: string
     type: object
-  common.Signal:
+  database.Signal:
     properties:
       direction:
         description: Direction of the signal (in or out)
@@ -77,7 +97,7 @@ definitions:
         description: Unit of Signal
         type: string
     type: object
-  common.SimulationModel:
+  database.SimulationModel:
     properties:
       id:
         type: integer
@@ -100,7 +120,7 @@ definitions:
         description: Start parameters of simulation model as JSON
         type: string
     type: object
-  common.Simulator:
+  database.Simulator:
     properties:
       host:
         description: Host if the simulator
@@ -129,7 +149,7 @@ definitions:
         description: UUID of the simulator
         type: string
     type: object
-  common.User:
+  database.User:
     properties:
       id:
         type: integer
@@ -143,7 +163,7 @@ definitions:
         description: Username of user
         type: string
     type: object
-  common.Widget:
+  database.Widget:
     properties:
       customProperties:
         description: Custom properties of widget as JSON string
@@ -184,26 +204,6 @@ definitions:
         description: Z position of widget
         type: integer
     type: object
-  dashboard.validNewDashboard:
-    properties:
-      Grid:
-        type: integer
-      Name:
-        type: string
-      ScenarioID:
-        type: integer
-    required:
-    - Grid
-    - Name
-    - ScenarioID
-    type: object
-  dashboard.validUpdatedDashboard:
-    properties:
-      Grid:
-        type: integer
-      Name:
-        type: string
-    type: object
   docs.ResponseAuthenticate:
     properties:
       message:
@@ -213,20 +213,20 @@ definitions:
       token:
         type: string
       user:
-        $ref: '#/definitions/common.User'
+        $ref: '#/definitions/database.User'
         type: object
     type: object
   docs.ResponseDashboard:
     properties:
       dashboard:
-        $ref: '#/definitions/common.Dashboard'
+        $ref: '#/definitions/database.Dashboard'
         type: object
     type: object
   docs.ResponseDashboards:
     properties:
       dashboards:
         items:
-          $ref: '#/definitions/common.Dashboard'
+          $ref: '#/definitions/database.Dashboard'
         type: array
     type: object
   docs.ResponseError:
@@ -239,92 +239,92 @@ definitions:
   docs.ResponseFile:
     properties:
       file:
-        $ref: '#/definitions/common.File'
+        $ref: '#/definitions/database.File'
         type: object
     type: object
   docs.ResponseFiles:
     properties:
       files:
         items:
-          $ref: '#/definitions/common.File'
+          $ref: '#/definitions/database.File'
         type: array
     type: object
   docs.ResponseScenario:
     properties:
       scenario:
-        $ref: '#/definitions/common.Scenario'
+        $ref: '#/definitions/database.Scenario'
         type: object
     type: object
   docs.ResponseScenarios:
     properties:
       scenarios:
         items:
-          $ref: '#/definitions/common.Scenario'
+          $ref: '#/definitions/database.Scenario'
         type: array
     type: object
   docs.ResponseSignal:
     properties:
       signal:
-        $ref: '#/definitions/common.Signal'
+        $ref: '#/definitions/database.Signal'
         type: object
     type: object
   docs.ResponseSignals:
     properties:
       signals:
         items:
-          $ref: '#/definitions/common.Signal'
+          $ref: '#/definitions/database.Signal'
         type: array
     type: object
   docs.ResponseSimulationModel:
     properties:
       model:
-        $ref: '#/definitions/common.SimulationModel'
+        $ref: '#/definitions/database.SimulationModel'
         type: object
     type: object
   docs.ResponseSimulationModels:
     properties:
       models:
         items:
-          $ref: '#/definitions/common.SimulationModel'
+          $ref: '#/definitions/database.SimulationModel'
         type: array
     type: object
   docs.ResponseSimulator:
     properties:
       simulator:
-        $ref: '#/definitions/common.Simulator'
+        $ref: '#/definitions/database.Simulator'
         type: object
     type: object
   docs.ResponseSimulators:
     properties:
       simulators:
         items:
-          $ref: '#/definitions/common.Simulator'
+          $ref: '#/definitions/database.Simulator'
         type: array
     type: object
   docs.ResponseUser:
     properties:
       user:
-        $ref: '#/definitions/common.User'
+        $ref: '#/definitions/database.User'
         type: object
     type: object
   docs.ResponseUsers:
     properties:
       users:
         items:
-          $ref: '#/definitions/common.User'
+          $ref: '#/definitions/database.User'
         type: array
     type: object
   docs.ResponseWidget:
     properties:
       widget:
-        $ref: '#/definitions/common.Widget'
+        $ref: '#/definitions/database.Widget'
         type: object
     type: object
   docs.ResponseWidgets:
     properties:
       widgets:
         items:
-          $ref: '#/definitions/common.Widget'
+          $ref: '#/definitions/database.Widget'
         type: array
     type: object
   scenario.validNewScenario:
@@ -563,23 +563,13 @@ paths:
           schema:
             $ref: '#/definitions/docs.ResponseAuthenticate'
             type: object
-        "400":
-          description: Bad request
-          schema:
-            $ref: '#/definitions/docs.ResponseError'
-            type: object
         "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/docs.ResponseError'
             type: object
-        "404":
-          description: Not found
-          schema:
-            $ref: '#/definitions/docs.ResponseError'
-            type: object
-        "422":
-          description: Unprocessable entity.
+        "500":
+          description: Internal server error.
           schema:
             $ref: '#/definitions/docs.ResponseError'
             type: object
@@ -1983,7 +1973,7 @@ paths:
       summary: Send an action to simulator (only available if backend server is started
         with -amqp parameter)
       tags:
-      - simulators
+      - AMQP
   /simulators/{simulatorID}/models:
     get:
       operationId: getModelsOfSimulator
