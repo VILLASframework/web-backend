@@ -55,7 +55,7 @@ build:backend:
 ##############################################################################
 
 test:apidoc:
-  stage: build
+  stage: test
   tags:
     - docker
   image: redoc
