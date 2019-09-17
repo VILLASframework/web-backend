@@ -2,7 +2,6 @@ package user
 
 import (
 	"fmt"
-
 	"gopkg.in/go-playground/validator.v9"
 )
 
@@ -18,7 +17,7 @@ type validUpdatedRequest struct {
 	Password string `form:"Password" validate:"omitempty,min=6"`
 	Role     string `form:"Role" validate:"omitempty,oneof=Admin User Guest"`
 	Mail     string `form:"Mail" validate:"omitempty,email"`
-	Active   bool   `form:"Active" validate:"omitempty"`
+	Active   string `form:"Active" validate:"omitempty,oneof=yes no"`
 }
 
 type updateUserRequest struct {
@@ -64,11 +63,11 @@ func (r *updateUserRequest) updatedUser(role interface{},
 	}
 
 	// Only the Admin must be able to update users Active state
-	if r.Active != u.Active {
+	if (r.Active == "yes" && u.Active == false) || (r.Active == "no" && u.Active == true) {
 		if role != "Admin" {
 			return u, fmt.Errorf("Only Admin can update user's Active state")
 		} else {
-			u.Active = r.Active
+			u.Active = !u.Active
 		}
 	}
 
