@@ -270,6 +270,11 @@ func addUserToScenario(c *gin.Context) {
 		return
 	}
 
+	if !u.Active {
+		helper.BadRequestError(c, "bad user")
+		return
+	}
+
 	err = so.addUser(&(u.User))
 	if helper.DBError(c, err) {
 		return

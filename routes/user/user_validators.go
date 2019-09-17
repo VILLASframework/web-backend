@@ -18,6 +18,7 @@ type validUpdatedRequest struct {
 	Password string `form:"Password" validate:"omitempty,min=6"`
 	Role     string `form:"Role" validate:"omitempty,oneof=Admin User Guest"`
 	Mail     string `form:"Mail" validate:"omitempty,email"`
+	Active   bool   `form:"Active" validate:"omitempty"`
 }
 
 type updateUserRequest struct {
@@ -62,6 +63,15 @@ func (r *updateUserRequest) updatedUser(role interface{},
 		u.Role = r.Role
 	}
 
+	// Only the Admin must be able to update users Active state
+	if r.Active != u.Active {
+		if role != "Admin" {
+			return u, fmt.Errorf("Only Admin can update user's Active state")
+		} else {
+			u.Active = r.Active
+		}
+	}
+
 	// Update the username making sure is NOT taken
 	var testUser User
 	if err := testUser.ByUsername(r.Username); err == nil {
@@ -101,6 +111,7 @@ func (r *addUserRequest) createUser() User {
 	u.Password = r.Password
 	u.Mail = r.Mail
 	u.Role = r.Role
+	u.Active = true
 
 	return u
 }

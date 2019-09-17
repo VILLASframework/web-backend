@@ -60,13 +60,17 @@ func (u *User) validatePassword(password string) error {
 
 func (u *User) update(updatedUser User) error {
 
-	// TODO: if the field is empty string member shouldn't be updated
 	u.Username = updatedUser.Username
 	u.Password = updatedUser.Password
 	u.Mail = updatedUser.Mail
 	u.Role = updatedUser.Role
+	u.Active = updatedUser.Active
 
 	db := database.GetDB()
 	err := db.Model(u).Update(updatedUser).Error
+
+	// extra update for bool active since it is ignored if false
+	err = db.Model(u).Updates(map[string]interface{}{"Active": updatedUser.Active}).Error
+
 	return err
 }

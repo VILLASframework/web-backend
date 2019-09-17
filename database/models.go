@@ -26,6 +26,8 @@ type User struct {
 	Mail string `json:"mail" gorm:"default:''"`
 	// Role of user
 	Role string `json:"role" gorm:"default:'user'"`
+	// Indicating status of user (false means user is inactive and should not be able to login)
+	Active bool `json:"active" gorm:"default:true"`
 	// Scenarios to which user has access
 	Scenarios []*Scenario `json:"-" gorm:"many2many:user_scenarios;"`
 }

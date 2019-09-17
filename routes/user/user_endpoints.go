@@ -146,7 +146,7 @@ func updateUser(c *gin.Context) {
 	// is illegal
 	// 2: If the udpate is done by the Admin every field can be updated
 	// 3: If the update is done by a User everything can be updated
-	// except Role
+	// except Role and Active state
 
 	// Get caller's ID from context
 	callerID, _ := c.Get(database.UserIDCtx)

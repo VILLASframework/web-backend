@@ -25,6 +25,7 @@ type UserRequest struct {
 	Password string `json:"password,omitempty"`
 	Mail     string `json:"mail,omitempty"`
 	Role     string `json:"role,omitempty"`
+	Active   bool   `json:"active,omitempty"`
 }
 
 func TestMain(m *testing.M) {
@@ -388,8 +389,16 @@ func TestModifyAddedUserAsUser(t *testing.T) {
 	// request-response comparison
 	newUser.Password = ""
 
+	// try to modify active state of user
+	// should result in forbidden
+	modActiveState := UserRequest{Active: false}
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/users/%v", newUserID), "PUT", helper.KeyModels{"user": modActiveState})
+	assert.NoError(t, err)
+	assert.Equalf(t, 403, code, "Response body: \n%v\n", resp)
+
 	// modify newUser's own name
-	modRequest := UserRequest{Username: "myNewName"}
+	modRequest := UserRequest{Username: "myNewName", Active: true}
 	newUser.Username = modRequest.Username
 	code, resp, err = helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
@@ -400,7 +409,7 @@ func TestModifyAddedUserAsUser(t *testing.T) {
 	assert.NoError(t, err)
 
 	// modify Admin's name (ILLEGAL)
-	modRequest = UserRequest{Username: "myNewName"}
+	modRequest = UserRequest{Username: "myNewName", Active: true}
 	newUser.Username = modRequest.Username
 	code, resp, err = helper.TestEndpoint(router, token,
 		"/api/users/1", "PUT", helper.KeyModels{"user": modRequest})
@@ -408,7 +417,7 @@ func TestModifyAddedUserAsUser(t *testing.T) {
 	assert.Equalf(t, 403, code, "Response body: \n%v\n", resp)
 
 	// modify newUser's own email
-	modRequest = UserRequest{Mail: "my@new.email"}
+	modRequest = UserRequest{Mail: "my@new.email", Active: true}
 	newUser.Mail = modRequest.Mail
 	code, resp, err = helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
@@ -419,7 +428,7 @@ func TestModifyAddedUserAsUser(t *testing.T) {
 	assert.NoError(t, err)
 
 	// modify Admin's own email (ILLEGAL)
-	modRequest = UserRequest{Mail: "my@new.email"}
+	modRequest = UserRequest{Mail: "my@new.email", Active: true}
 	newUser.Mail = modRequest.Mail
 	code, resp, err = helper.TestEndpoint(router, token,
 		"/api/users/1", "PUT", helper.KeyModels{"user": modRequest})
@@ -427,7 +436,7 @@ func TestModifyAddedUserAsUser(t *testing.T) {
 	assert.Equalf(t, 403, code, "Response body: \n%v\n", resp)
 
 	// modify newUser's role (ILLEGAL)
-	modRequest = UserRequest{Role: "Admin"}
+	modRequest = UserRequest{Role: "Admin", Active: true}
 	newUser.Role = modRequest.Role
 	code, resp, err = helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
@@ -436,7 +445,7 @@ func TestModifyAddedUserAsUser(t *testing.T) {
 	assert.Equalf(t, 403, code, "Response body: \n%v\n", resp)
 
 	// modify newUser's password
-	modRequest = UserRequest{Password: "5tr0ng_pw!"}
+	modRequest = UserRequest{Password: "5tr0ng_pw!", Active: true}
 	code, resp, err = helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
 		helper.KeyModels{"user": modRequest})
@@ -452,7 +461,7 @@ func TestModifyAddedUserAsUser(t *testing.T) {
 	assert.NoError(t, err)
 
 	// modify Admin's password (ILLEGAL)
-	modRequest = UserRequest{Password: "4dm1ns_pw!"}
+	modRequest = UserRequest{Password: "4dm1ns_pw!", Active: true}
 	code, resp, err = helper.TestEndpoint(router, token,
 		"/api/users/1", "PUT", helper.KeyModels{"user": modRequest})
 	assert.NoError(t, err)
@@ -487,7 +496,7 @@ func TestInvalidUserUpdate(t *testing.T) {
 
 	// try PUT with userID that does not exist
 	// should result in not found
-	modRequest := UserRequest{Password: "longenough"}
+	modRequest := UserRequest{Password: "longenough", Active: true}
 	code, resp, err = helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/users/%v", newUserID+1), "PUT",
 		helper.KeyModels{"user": modRequest})
@@ -513,7 +522,7 @@ func TestInvalidUserUpdate(t *testing.T) {
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 
 	// modify newUser's email with INVALID email
-	modRequest = UserRequest{Mail: "notEmail"}
+	modRequest = UserRequest{Mail: "notEmail", Active: true}
 	code, resp, err = helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
 		helper.KeyModels{"user": modRequest})
@@ -521,7 +530,7 @@ func TestInvalidUserUpdate(t *testing.T) {
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 
 	// modify newUser's role with INVALID role
-	modRequest = UserRequest{Role: "noRole"}
+	modRequest = UserRequest{Role: "noRole", Active: true}
 	code, resp, err = helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
 		helper.KeyModels{"user": modRequest})
@@ -563,7 +572,7 @@ func TestModifyAddedUserAsAdmin(t *testing.T) {
 	newUser.Password = ""
 
 	// modify newUser's name
-	modRequest := UserRequest{Username: "NewUsername"}
+	modRequest := UserRequest{Username: "NewUsername", Active: true}
 	newUser.Username = modRequest.Username
 	code, resp, err = helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
@@ -574,7 +583,7 @@ func TestModifyAddedUserAsAdmin(t *testing.T) {
 	assert.NoError(t, err)
 
 	// modify newUser's email
-	modRequest = UserRequest{Mail: "new@e.mail"}
+	modRequest = UserRequest{Mail: "new@e.mail", Active: true}
 	newUser.Mail = modRequest.Mail
 	code, resp, err = helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
@@ -585,7 +594,7 @@ func TestModifyAddedUserAsAdmin(t *testing.T) {
 	assert.NoError(t, err)
 
 	// modify newUser's role
-	modRequest = UserRequest{Role: "Admin"}
+	modRequest = UserRequest{Role: "Admin", Active: true}
 	newUser.Role = modRequest.Role
 	code, resp, err = helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
@@ -596,7 +605,7 @@ func TestModifyAddedUserAsAdmin(t *testing.T) {
 	assert.NoError(t, err)
 
 	// modify newUser's password
-	modRequest = UserRequest{Password: "4_g00d_pw!"}
+	modRequest = UserRequest{Password: "4_g00d_pw!", Active: true}
 	code, resp, err = helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
 		helper.KeyModels{"user": modRequest})
@@ -610,6 +619,30 @@ func TestModifyAddedUserAsAdmin(t *testing.T) {
 			Password: modRequest.Password,
 		})
 	assert.NoError(t, err)
+
+	// authenticate as admin
+	token, err = helper.AuthenticateForTest(router,
+		"/api/authenticate", "POST", helper.AdminCredentials)
+	assert.NoError(t, err)
+
+	// modify newUser's Active status
+	modRequest = UserRequest{Active: false}
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
+		helper.KeyModels{"user": modRequest})
+	assert.NoError(t, err)
+	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
+
+	// try to login as newUser with the modified active status
+	// should NOT work anymore!
+	code, resp, err = helper.TestEndpoint(router, token,
+		"/api/authenticate", "POST",
+		UserRequest{
+			Username: newUser.Username,
+			Password: "4_g00d_pw!",
+		})
+	assert.NoError(t, err)
+	assert.Equalf(t, 401, code, "Response body: \n%v\n", resp)
 }
 
 func TestDeleteUser(t *testing.T) {

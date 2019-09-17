@@ -26,13 +26,13 @@ var pwB, _ = bcrypt.GenerateFromPassword([]byte(StrPasswordB), bcryptCost)
 var pwC, _ = bcrypt.GenerateFromPassword([]byte(StrPasswordC), bcryptCost)
 
 var User0 = User{Username: "User_0", Password: string(pw0),
-	Role: "Admin", Mail: "User_0@example.com"}
+	Role: "Admin", Mail: "User_0@example.com", Active: true}
 var UserA = User{Username: "User_A", Password: string(pwA),
-	Role: "User", Mail: "User_A@example.com"}
+	Role: "User", Mail: "User_A@example.com", Active: true}
 var UserB = User{Username: "User_B", Password: string(pwB),
-	Role: "User", Mail: "User_B@example.com"}
+	Role: "User", Mail: "User_B@example.com", Active: true}
 var UserC = User{Username: "User_C", Password: string(pwC),
-	Role: "Guest", Mail: "User_C@example.com"}
+	Role: "Guest", Mail: "User_C@example.com", Active: true}
 
 // Simulators
 

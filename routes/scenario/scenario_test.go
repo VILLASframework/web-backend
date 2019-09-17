@@ -477,6 +477,8 @@ func TestAddUserToScenario(t *testing.T) {
 		fmt.Sprintf("/api/scenarios/%v/user?username=User_D", newScenarioID), "PUT", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
+
+	// TODO add test for adding an inactive user to a scenario (should fail)
 }
 
 func TestGetAllUsersOfScenario(t *testing.T) {
@@ -539,6 +541,8 @@ func TestGetAllUsersOfScenario(t *testing.T) {
 		fmt.Sprintf("/api/scenarios/%v/users", newScenarioID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equal(t, finalNumber, initialNumber+1)
+
+	// TODO add test where scenario contains active and inactive users, get all users should only give active users
 }
 
 func TestRemoveUserFromScenario(t *testing.T) {

@@ -52,6 +52,12 @@ func authenticate(c *gin.Context) {
 		return
 	}
 
+	// Check if this is an active user
+	if !user.Active {
+		helper.UnauthorizedError(c, "Wrong username or password")
+		return
+	}
+
 	// Validate the password
 	err = user.validatePassword(credentials.Password)
 	if err != nil {

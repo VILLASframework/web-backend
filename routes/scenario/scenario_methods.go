@@ -23,7 +23,7 @@ func (s *Scenario) ByID(id uint) error {
 func (s *Scenario) getUsers() ([]database.User, int, error) {
 	db := database.GetDB()
 	var users []database.User
-	err := db.Order("ID asc").Model(s).Related(&users, "Users").Error
+	err := db.Order("ID asc").Model(s).Where("Active = ?", true).Related(&users, "Users").Error
 	return users, len(users), err
 }
 
@@ -137,7 +137,7 @@ func (s *Scenario) checkAccess(userID uint, userRole string) bool {
 		u := database.User{}
 		u.Username = ""
 		err := db.Order("ID asc").Model(s).Where("ID = ?", userID).Related(&u, "Users").Error
-		if err != nil {
+		if err != nil || !u.Active {
 			return false
 		} else {
 			return true
