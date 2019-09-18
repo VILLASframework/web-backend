@@ -23,6 +23,14 @@ type ScenarioRequest struct {
 	StartParameters postgres.Jsonb `json:"startParameters,omitempty"`
 }
 
+type UserRequest struct {
+	Username string `json:"username,omitempty"`
+	Password string `json:"password,omitempty"`
+	Mail     string `json:"mail,omitempty"`
+	Role     string `json:"role,omitempty"`
+	Active   string `json:"active,omitempty"`
+}
+
 func TestMain(m *testing.M) {
 
 	db = database.InitDB(database.DB_TEST)
@@ -33,6 +41,9 @@ func TestMain(m *testing.M) {
 
 	user.RegisterAuthenticate(api.Group("/authenticate"))
 	api.Use(user.Authentication(true))
+
+	// user endpoints required to set user to inactive
+	user.RegisterUserEndpoints(api.Group("/users"))
 	RegisterScenarioEndpoints(api.Group("/scenarios"))
 
 	os.Exit(m.Run())
@@ -478,7 +489,6 @@ func TestAddUserToScenario(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
 
-	// TODO add test for adding an inactive user to a scenario (should fail)
 }
 
 func TestGetAllUsersOfScenario(t *testing.T) {
@@ -542,7 +552,28 @@ func TestGetAllUsersOfScenario(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, finalNumber, initialNumber+1)
 
-	// TODO add test where scenario contains active and inactive users, get all users should only give active users
+	// authenticate as admin
+	token, err = helper.AuthenticateForTest(router,
+		"/api/authenticate", "POST", helper.AdminCredentials)
+	assert.NoError(t, err)
+
+	// set userB as inactive
+	modUserB := UserRequest{Active: "no"}
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/users/%v", 3), "PUT", helper.KeyModels{"user": modUserB})
+	assert.NoError(t, err)
+	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
+
+	// authenticate as normal user
+	token, err = helper.AuthenticateForTest(router,
+		"/api/authenticate", "POST", helper.UserACredentials)
+	assert.NoError(t, err)
+
+	// Count AGAIN the number of all the users returned for newScenario
+	finalNumber2, err := helper.LengthOfResponse(router, token,
+		fmt.Sprintf("/api/scenarios/%v/users", newScenarioID), "GET", nil)
+	assert.NoError(t, err)
+	assert.Equal(t, finalNumber2, initialNumber)
 }
 
 func TestRemoveUserFromScenario(t *testing.T) {
