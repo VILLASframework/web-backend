@@ -238,6 +238,7 @@ func DBAddTestData(db *gorm.DB) error {
 	user0 := User0
 	userA := UserA
 	userB := UserB
+	userC := UserC
 
 	simulatorA := SimulatorA
 	simulatorB := SimulatorB
@@ -270,6 +271,9 @@ func DBAddTestData(db *gorm.DB) error {
 	// add normal users to DB
 	err = db.Create(&userA).Error
 	err = db.Create(&userB).Error
+
+	// add Guest user to DB
+	err = db.Create(&userC).Error
 
 	// Simulators
 	err = db.Create(&simulatorA).Error
@@ -311,6 +315,7 @@ func DBAddTestData(db *gorm.DB) error {
 	err = db.Model(&scenarioA).Association("Users").Append(&userA).Error
 	err = db.Model(&scenarioB).Association("Users").Append(&userA).Error
 	err = db.Model(&scenarioB).Association("Users").Append(&userB).Error
+	err = db.Model(&scenarioA).Association("Users").Append(&userC).Error
 
 	// Scenario HM SimulationModels
 	err = db.Model(&scenarioA).Association("SimulationModels").Append(&modelA).Error
