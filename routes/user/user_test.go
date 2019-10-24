@@ -21,11 +21,12 @@ var router *gin.Engine
 var db *gorm.DB
 
 type UserRequest struct {
-	Username string `json:"username,omitempty"`
-	Password string `json:"password,omitempty"`
-	Mail     string `json:"mail,omitempty"`
-	Role     string `json:"role,omitempty"`
-	Active   string `json:"active,omitempty"`
+	Username    string `json:"username,omitempty"`
+	Password    string `json:"password,omitempty"`
+	OldPassword string `json:"oldPassword,omitempty"`
+	Mail        string `json:"mail,omitempty"`
+	Role        string `json:"role,omitempty"`
+	Active      string `json:"active,omitempty"`
 }
 
 func TestMain(m *testing.M) {
@@ -444,8 +445,21 @@ func TestModifyAddedUserAsUser(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equalf(t, 403, code, "Response body: \n%v\n", resp)
 
+	// modify newUser's password without providing old password
+	modRequest = UserRequest{
+		Password: "5tr0ng_pw!",
+	}
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
+		helper.KeyModels{"user": modRequest})
+	assert.NoError(t, err)
+	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
+
 	// modify newUser's password
-	modRequest = UserRequest{Password: "5tr0ng_pw!"}
+	modRequest = UserRequest{
+		Password:    "5tr0ng_pw!",
+		OldPassword: "mod_My5elf",
+	}
 	code, resp, err = helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
 		helper.KeyModels{"user": modRequest})
@@ -496,7 +510,10 @@ func TestInvalidUserUpdate(t *testing.T) {
 
 	// try PUT with userID that does not exist
 	// should result in not found
-	modRequest := UserRequest{Password: "longenough"}
+	modRequest := UserRequest{
+		Password:    "longenough",
+		OldPassword: "wr0ng_Upd@te!",
+	}
 	code, resp, err = helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/users/%v", newUserID+1), "PUT",
 		helper.KeyModels{"user": modRequest})
@@ -605,7 +622,10 @@ func TestModifyAddedUserAsAdmin(t *testing.T) {
 	assert.NoError(t, err)
 
 	// modify newUser's password
-	modRequest = UserRequest{Password: "4_g00d_pw!"}
+	modRequest = UserRequest{
+		Password:    "4_g00d_pw!",
+		OldPassword: "mod_4d^2ed_0ser",
+	}
 	code, resp, err = helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
 		helper.KeyModels{"user": modRequest})
