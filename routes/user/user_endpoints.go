@@ -230,7 +230,7 @@ func getUser(c *gin.Context) {
 	reqUserID, _ := c.Get(database.UserIDCtx)
 	reqUserRole, _ := c.Get(database.UserRoleCtx)
 
-	if id != reqUserID && reqUserRole != "Admin" {
+	if uint(id) != reqUserID && reqUserRole != "Admin" {
 		helper.ForbiddenError(c, "Invalid authorization")
 		return
 	}
