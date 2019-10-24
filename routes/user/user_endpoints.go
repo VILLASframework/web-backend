@@ -183,9 +183,9 @@ func updateUser(c *gin.Context) {
 	// case that the request updates the role of the old user)
 	updatedUser, err := req.updatedUser(callerRole, oldUser)
 	if err != nil {
-		if strings.Contains(err.Error(), "Admin") {
+		if strings.Contains(err.Error(), "Admin") || strings.Contains(err.Error(), "pw not changed") {
 			helper.ForbiddenError(c, err.Error())
-		} else if strings.Contains(err.Error(), "Username") {
+		} else if strings.Contains(err.Error(), "Username") || strings.Contains(err.Error(), "old password") {
 			helper.BadRequestError(c, err.Error())
 		} else { // password encryption failed
 			helper.InternalServerError(c, err.Error())

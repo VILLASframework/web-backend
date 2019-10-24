@@ -455,6 +455,17 @@ func TestModifyAddedUserAsUser(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 
+	// modify newUser's password with wring old password
+	modRequest = UserRequest{
+		Password:    "5tr0ng_pw!",
+		OldPassword: "wrongoldpassword",
+	}
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
+		helper.KeyModels{"user": modRequest})
+	assert.NoError(t, err)
+	assert.Equalf(t, 403, code, "Response body: \n%v\n", resp)
+
 	// modify newUser's password
 	modRequest = UserRequest{
 		Password:    "5tr0ng_pw!",
@@ -511,8 +522,7 @@ func TestInvalidUserUpdate(t *testing.T) {
 	// try PUT with userID that does not exist
 	// should result in not found
 	modRequest := UserRequest{
-		Password:    "longenough",
-		OldPassword: "wr0ng_Upd@te!",
+		Password: "longenough",
 	}
 	code, resp, err = helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/users/%v", newUserID+1), "PUT",
@@ -621,10 +631,9 @@ func TestModifyAddedUserAsAdmin(t *testing.T) {
 	err = helper.CompareResponse(resp, helper.KeyModels{"user": newUser})
 	assert.NoError(t, err)
 
-	// modify newUser's password
+	// modify newUser's password, should work without old password
 	modRequest = UserRequest{
-		Password:    "4_g00d_pw!",
-		OldPassword: "mod_4d^2ed_0ser",
+		Password: "4_g00d_pw!",
 	}
 	code, resp, err = helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/users/%v", newUserID), "PUT",

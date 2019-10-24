@@ -49,16 +49,6 @@ func (r *updateUserRequest) validate() error {
 		return errs
 	}
 
-	if r.Password != "" {
-		// if user wants to change password
-		// old password has to be contained in update request
-		if r.OldPassword == "" {
-			return fmt.Errorf("old password is missing in request")
-		} else {
-			return nil
-		}
-	}
-
 	return nil
 }
 
@@ -98,12 +88,19 @@ func (r *updateUserRequest) updatedUser(role interface{},
 
 	// If there is a new password then hash it and update it
 	if r.Password != "" {
-		err := oldUser.validatePassword(r.OldPassword)
-		if err != nil {
-			return u, fmt.Errorf("previous password not correct, pw not changed")
+		if role != "Admin" { // if requesting user is NOT admin, old password needs to be validated
+
+			if r.OldPassword == "" {
+				return u, fmt.Errorf("old password is missing in request")
+			}
+
+			err := oldUser.validatePassword(r.OldPassword)
+			if err != nil {
+				return u, fmt.Errorf("previous password not correct, pw not changed")
+			}
 		}
 
-		err = u.setPassword(r.Password)
+		err := u.setPassword(r.Password)
 		if err != nil {
 			return u, fmt.Errorf("unable to encrypt new password")
 		}
