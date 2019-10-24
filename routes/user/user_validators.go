@@ -13,11 +13,12 @@ type loginRequest struct {
 }
 
 type validUpdatedRequest struct {
-	Username string `form:"Username" validate:"omitempty,min=3"`
-	Password string `form:"Password" validate:"omitempty,min=6"`
-	Role     string `form:"Role" validate:"omitempty,oneof=Admin User Guest"`
-	Mail     string `form:"Mail" validate:"omitempty,email"`
-	Active   string `form:"Active" validate:"omitempty,oneof=yes no"`
+	Username    string `form:"Username" validate:"omitempty,min=3"`
+	Password    string `form:"Password" validate:"omitempty,min=6"`
+	OldPassword string `form:"OldPassword" validate:"omitempty,min=6"`
+	Role        string `form:"Role" validate:"omitempty,oneof=Admin User Guest"`
+	Mail        string `form:"Mail" validate:"omitempty,email"`
+	Active      string `form:"Active" validate:"omitempty,oneof=yes no"`
 }
 
 type updateUserRequest struct {
@@ -44,7 +45,21 @@ func (r *loginRequest) validate() error {
 func (r *updateUserRequest) validate() error {
 	validate = validator.New()
 	errs := validate.Struct(r)
-	return errs
+	if errs != nil {
+		return errs
+	}
+
+	if r.Password != "" {
+		// if user wants to change password
+		// old password has to be contained in update request
+		if r.OldPassword == "" {
+			return fmt.Errorf("old password is missing in request")
+		} else {
+			return nil
+		}
+	}
+
+	return nil
 }
 
 func (r *updateUserRequest) updatedUser(role interface{},
@@ -71,7 +86,7 @@ func (r *updateUserRequest) updatedUser(role interface{},
 		}
 	}
 
-	// Update the username making sure is NOT taken
+	// Update the username making sure it is NOT taken
 	var testUser User
 	if err := testUser.ByUsername(r.Username); err == nil {
 		return u, fmt.Errorf("Username is alreaday taken")
@@ -83,9 +98,14 @@ func (r *updateUserRequest) updatedUser(role interface{},
 
 	// If there is a new password then hash it and update it
 	if r.Password != "" {
-		err := u.setPassword(r.Password)
+		err := oldUser.validatePassword(r.OldPassword)
 		if err != nil {
-			return u, fmt.Errorf("Unable to encrypt new password")
+			return u, fmt.Errorf("previous password not correct, pw not changed")
+		}
+
+		err = u.setPassword(r.Password)
+		if err != nil {
+			return u, fmt.Errorf("unable to encrypt new password")
 		}
 	}
 
