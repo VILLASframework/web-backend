@@ -52,8 +52,7 @@ func (r *updateUserRequest) validate() error {
 	return nil
 }
 
-func (r *updateUserRequest) updatedUser(role interface{},
-	oldUser User) (User, error) {
+func (r *updateUserRequest) updatedUser(callerID interface{}, role interface{}, oldUser User) (User, error) {
 
 	// Use the old User as a basis for the updated User `u`
 	u := oldUser
@@ -88,11 +87,24 @@ func (r *updateUserRequest) updatedUser(role interface{},
 
 	// If there is a new password then hash it and update it
 	if r.Password != "" {
-		if role != "Admin" { // if requesting user is NOT admin, old password needs to be validated
 
-			if r.OldPassword == "" {
-				return u, fmt.Errorf("old password is missing in request")
+		if r.OldPassword == "" { // admin or old password has to be present for pw change
+			return u, fmt.Errorf("old or admin password is missing in request")
+		}
+
+		if role == "Admin" { // admin has to enter admin password
+			var adminUser User
+			err := adminUser.ByID(callerID.(uint))
+			if err != nil {
+				return u, err
 			}
+
+			err = adminUser.validatePassword(r.OldPassword)
+			if err != nil {
+				return u, fmt.Errorf("admin password not correct, pw not changed")
+			}
+
+		} else { //normal or guest user has to enter old password
 
 			err := oldUser.validatePassword(r.OldPassword)
 			if err != nil {

@@ -631,9 +631,20 @@ func TestModifyAddedUserAsAdmin(t *testing.T) {
 	err = helper.CompareResponse(resp, helper.KeyModels{"user": newUser})
 	assert.NoError(t, err)
 
-	// modify newUser's password, should work without old password
+	// modify newUser's password, should not work without admin password
 	modRequest = UserRequest{
 		Password: "4_g00d_pw!",
+	}
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
+		helper.KeyModels{"user": modRequest})
+	assert.NoError(t, err)
+	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
+
+	// modify newUser's password, requires admin password
+	modRequest = UserRequest{
+		Password:    "4_g00d_pw!",
+		OldPassword: database.StrPassword0,
 	}
 	code, resp, err = helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
