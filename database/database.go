@@ -11,6 +11,8 @@ import (
 var DB_HOST string    // host of the database system
 var DB_NAME string    // name of the production database
 var DB_TEST string    // name of the test database
+var DB_USER string    // name of the database user
+var DB_PASS string    // database password
 var DB_SSLMODE string // set to enable if database uses SSL
 var WITH_AMQP bool    // set to true if backend shall be used with AMQP client
 
