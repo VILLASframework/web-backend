@@ -1,9 +1,9 @@
 package simulationmodel
 
 import (
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/scenario"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulator"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/scenario"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/simulator"
 )
 
 type SimulationModel struct {

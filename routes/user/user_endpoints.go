@@ -2,14 +2,14 @@ package user
 
 import (
 	"fmt"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/helper"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 )
 
 // TODO: the signing secret must be environmental variable

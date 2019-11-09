@@ -1,8 +1,8 @@
 package signal
 
 import (
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulationmodel"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/simulationmodel"
 )
 
 type Signal struct {

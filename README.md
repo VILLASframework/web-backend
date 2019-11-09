@@ -1,7 +1,7 @@
 # <img src="doc/pictures/villas_web.png" width=40 /> VILLASweb-backend-go
 
-[![pipeline status](https://git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/badges/master/pipeline.svg)](https://git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/commits/master)
-[![coverage report](https://git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/badges/master/coverage.svg)](https://git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/commits/master)
+[![pipeline status](https://git.rwth-aachen.de/acs/public/villas/web-backend-go/badges/master/pipeline.svg)](https://git.rwth-aachen.de/acs/public/villas/web-backend-go/commits/master)
+[![coverage report](https://git.rwth-aachen.de/acs/public/villas/web-backend-go/badges/master/coverage.svg)](https://git.rwth-aachen.de/acs/public/villas/web-backend-go/commits/master)
 
 ## Description
 This is a rewrite of the backend for the VILLASweb

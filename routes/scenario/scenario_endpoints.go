@@ -1,13 +1,13 @@
 package scenario
 
 import (
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/helper"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/user"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/user"
 )
 
 func RegisterScenarioEndpoints(r *gin.RouterGroup) {

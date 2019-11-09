@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/helper"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -14,7 +14,7 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
 
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 )
 
 var router *gin.Engine
