@@ -3,6 +3,7 @@ variables:
   DEPLOY_HOST: acs-os-fein-website
   DEPLOY_PATH: /var/www/villas/api/web/
   TEST_FOLDER: database
+  DOCKER_IMAGE_DEV: ${CI_REGISTRY_IMAGE}/dev
 
 stages:
   - prepare
@@ -25,7 +26,7 @@ prepare:redoc:
 prepare:ubuntu:
   stage: prepare
   script:
-    - docker build -f Dockerfile.ubuntu -t villaswebbackendgo:ubuntu .
+    - docker build -f Dockerfile.dev -t ${DOCKER_IMAGE_DEV} .
   tags:
     - shell
     - linux
@@ -37,7 +38,7 @@ build:backend:
   stage: build
   tags:
     - docker
-  image: villaswebbackendgo:ubuntu
+  image: ${DOCKER_IMAGE_DEV}
   script:
     - go mod tidy
     - go get -u github.com/swaggo/swag/cmd/swag
@@ -73,7 +74,7 @@ test:all:
   stage: test
   tags:
     - docker
-  image: villaswebbackendgo:ubuntu
+  image: ${DOCKER_IMAGE_DEV}
   script:
     - /etc/init.d/postgresql start
     - go mod tidy
@@ -86,7 +87,7 @@ test:database:
   stage: test
   tags:
     - docker
-  image: villaswebbackendgo:ubuntu
+  image: ${DOCKER_IMAGE_DEV}
   script:
     - /etc/init.d/postgresql start
     - go mod tidy

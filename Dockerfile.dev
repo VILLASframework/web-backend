@@ -58,6 +58,6 @@ LABEL \
         org.label-schema.author.name="Sonja Happ" \
         org.label-schema.author.email="sonja.happ@eonerc.rwth-aachen.de" \
         org.label-schema.description="A image containing all build-time dependencies for VILLASweb-backend-go based on Fedora" \
-        org.label-schema.url="http://fein-aachen.org/projects/villas-framework/" \
-        org.label-schema.vcs-url="https://git.rwth-aachen.de/VILLASframework/VILLASweb-backend-go"
+        org.label-schema.url="http://fein-aachen.org/projects/villas-web/" \
+        org.label-schema.vcs-url="https://git.rwth-aachen.de/public/villas/web-backend-go"
 

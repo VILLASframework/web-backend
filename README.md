@@ -13,17 +13,17 @@ The backend is build upon [gin-gonic](https://github.com/gin-gonic/gin) and [GOR
 ## Quick start
 
 ### Docker 
-You can use the `Dockerfile.ubuntu` for development and testing.
+You can use the `Dockerfile.dev` for development and testing.
 To build an tag the image call the following in the top level of the repository:
 
 ```bash
-$ docker build -f Dockerfile.ubuntu -t villaswebbackendgo:ubuntu .
-```
+$ docker build -f Dockerfile.dev -t registry.git.rwth-aachen.de/acs/public/villas/web-backend-go/dev .
+```dev
 
 To run an interactive container based on the image call:
 
 ```bash
-$ docker run --rm -it villaswebbackendgo:ubuntu
+$ docker run --rm -it registry.git.rwth-aachen.de/acs/public/villas/web-backend-go/dev
 ```
 
 By using the `--rm` option of docker, the container will be removed upon exit.
