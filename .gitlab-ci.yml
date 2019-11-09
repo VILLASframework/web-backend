@@ -92,7 +92,7 @@ test:database:
   script:
     - go mod tidy
     - cd ${TEST_FOLDER}
-    - go test -v -args -dbhost postgresql
+    - go test -v -args -dbhost postgres
   dependencies:
     - build:backend
 
