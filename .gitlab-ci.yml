@@ -1,7 +1,13 @@
+services:
+  - postgres:latest
+
 variables:
   TEST_FOLDER: database
   DOCKER_IMAGE: ${CI_REGISTRY}/acs/public/villas/web-backend-go
   DOCKER_IMAGE_DEV: ${CI_REGISTRY}/acs/public/villas/web-backend-go/dev
+  POSTGRES_DB: testvillasdb
+  POSTGRES_USER: villasuser
+  POSTGRES_PASSWORD: villasuser
 
 stages:
   - prepare
@@ -21,14 +27,6 @@ prepare:redoc:
     - shell
     - linux
 
-prepare:docker-dev:
-  stage: prepare
-  script:
-    - docker build -f Dockerfile.dev -t $DOCKER_IMAGE_DEV .
-  tags:
-    - shell
-    - linux
-
 # Stage: build
 ##############################################################################
 
@@ -36,14 +34,12 @@ build:backend:
   stage: build
   tags:
     - docker
-  image: ${DOCKER_IMAGE_DEV}
+  image: golang:1.12.9-buster
   script:
     - go mod tidy
-    - go get -u github.com/swaggo/swag/cmd/swag
-    - ~/go/bin/swag init -p pascalcase -g "start.go" -o "./doc/api/"
+    - go install github.com/swaggo/swag/cmd/swag
+    - swag init -p pascalcase -g "start.go" -o "./doc/api/"
     - go build
-  dependencies:
-    - prepare:docker-dev
   artifacts:
     paths:
       - doc/api/swagger.json
@@ -80,9 +76,8 @@ test:all:
   stage: test
   tags:
     - docker
-  image: ${DOCKER_IMAGE_DEV}
+  image: golang:1.12.9-buster
   script:
-    - /etc/init.d/postgresql start
     - go mod tidy
     - go test $(go list ./... ) -p 1 -covermode=count -coverprofile ./testcover.txt
     - go tool cover -func=testcover.txt
@@ -93,12 +88,11 @@ test:database:
   stage: test
   tags:
     - docker
-  image: ${DOCKER_IMAGE_DEV}
+  image: golang:1.12.9-buster
   script:
-    - /etc/init.d/postgresql start
     - go mod tidy
     - cd ${TEST_FOLDER}
-    - go test -v
+    - go test -v -args -dbhost postgresql
   dependencies:
     - build:backend
 
@@ -151,9 +145,7 @@ deploy:docker:
   - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
   script:
     - docker push ${DOCKER_IMAGE}
-    - docker push ${DOCKER_IMAGE_DEV}
   dependencies:
-    - prepare:docker-dev
     - build:docker
   only:
     - master
