@@ -6,8 +6,9 @@ variables:
   DOCKER_IMAGE: ${CI_REGISTRY}/acs/public/villas/web-backend-go
   DOCKER_IMAGE_DEV: ${CI_REGISTRY}/acs/public/villas/web-backend-go/dev
   POSTGRES_DB: testvillasdb
-  POSTGRES_USER: villasuser
-  POSTGRES_PASSWORD: villasuser
+  POSTGRES_USER: villas
+  POSTGRES_PASSWORD: villas
+  POSTGRES_HOST: postgres
 
 stages:
   - prepare
@@ -92,7 +93,7 @@ test:database:
   script:
     - go mod tidy
     - cd ${TEST_FOLDER}
-    - go test -v -args -dbhost postgres
+    - go test -v -args -dbhost ${POSTGRES_HOST} -dbuser ${POSTGRES_USER} -dbpass ${POSTGRES_PASSWORD} 
   dependencies:
     - build:backend
 
