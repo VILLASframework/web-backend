@@ -93,7 +93,11 @@ test:database:
   script:
     - go mod tidy
     - cd ${TEST_FOLDER}
-    - go test -v -args -dbhost ${POSTGRES_HOST} -dbuser ${POSTGRES_USER} -dbpass ${POSTGRES_PASSWORD} 
+    - go test -v -args
+       -dbname ${POSTGRES_DB}
+       -dbhost ${POSTGRES_HOST}
+       -dbuser ${POSTGRES_USER}
+       -dbpass ${POSTGRES_PASSWORD} 
   dependencies:
     - build:backend
 
