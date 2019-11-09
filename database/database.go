@@ -20,11 +20,13 @@ var DBpool *gorm.DB // database used by backend
 func init() {
 	flag.StringVar(&DB_HOST, "dbhost", "/var/run/postgresql", "Host of the PostgreSQL database (default is /var/run/postgresql for localhost DB on Ubuntu systems)")
 	flag.StringVar(&DB_NAME, "dbname", "villasdb", "Name of the database to use (default is villasdb)")
-	flag.StringVar(&DB_TEST, "dbdummy", "testvillasdb", "Name of the test database to use (default is testvillasdb)")
+	flag.StringVar(&DB_USER, "dbuser", "villas", "Username of database connection (default is villas)")
+	flag.StringVar(&DB_PASS, "dbpass", "villas", "Password of database connection (default is villas)")
 	flag.StringVar(&DB_SSLMODE, "dbsslmode", "disable", "SSL mode of DB (default is disable)") // TODO: change default for production
 	flag.BoolVar(&WITH_AMQP, "amqp", false, "If AMQP client for simulators shall be enabled, set this option to true (default is false)")
 	flag.Parse()
 	fmt.Println("DB_HOST has value ", DB_HOST)
+	fmt.Println("DB_USER has value ", DB_USER)
 	fmt.Println("DB_NAME has value ", DB_NAME)
 	fmt.Println("DB_TEST has value ", DB_TEST)
 	fmt.Println("DB_SSLMODE has value ", DB_SSLMODE)
@@ -33,8 +35,8 @@ func init() {
 
 // Initialize connection to the database
 func InitDB(dbname string) *gorm.DB {
-	dbinfo := fmt.Sprintf("host=%s sslmode=%s dbname=%s",
-		DB_HOST, DB_SSLMODE, dbname)
+	dbinfo := fmt.Sprintf("host=%s sslmode=%s user=%s password=%s dbname=%s",
+		DB_HOST, DB_SSLMODE, DB_USER, DB_PASS, dbname)
 	db, err := gorm.Open("postgres", dbinfo)
 	if err != nil {
 		log.Fatal(err)
