@@ -64,15 +64,15 @@ func main() {
 	user.RegisterUserEndpoints(api.Group("/users"))
 	simulator.RegisterSimulatorEndpoints(api.Group("/simulators"))
 	// register simulator action endpoint only if AMQP client is used
-	if database.WITH_AMQP == true {
+	if len(database.AMQP_URL) != 0 {
 		amqp.RegisterAMQPEndpoint(api.Group("/simulators"))
 	}
 
 	r.GET("swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	if database.WITH_AMQP == true {
+	if len(database.AMQP_URL) != 0 {
 		fmt.Println("Starting AMQP client")
-		err := amqp.ConnectAMQP("amqp://localhost")
+		err := amqp.ConnectAMQP(database.AMQP_URL)
 		if err != nil {
 			panic(err)
 		}

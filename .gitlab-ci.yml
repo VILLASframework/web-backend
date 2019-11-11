@@ -1,5 +1,6 @@
 services:
   - postgres:latest
+  - rabbitmq:latest
 
 variables:
   TEST_FOLDER: database
@@ -9,6 +10,9 @@ variables:
   POSTGRES_USER: villas
   POSTGRES_PASSWORD: villas
   POSTGRES_HOST: postgres
+  RABBITMQ_DEFAULT_USER: villas
+  RABBITMQ_DEFAULT_PASS: villas
+  AMQP_URL: 'amqp://villas:villas@rabbitmq:5672'
 
 stages:
   - prepare
@@ -88,6 +92,7 @@ test:all:
        -dbhost ${POSTGRES_HOST}
        -dbuser ${POSTGRES_USER}
        -dbpass ${POSTGRES_PASSWORD}
+       -amqp ${AMQP_URL}
     - go tool cover -func=testcover.txt
   dependencies:
     - build:backend
@@ -104,7 +109,8 @@ test:database:
        -dbname ${POSTGRES_DB}
        -dbhost ${POSTGRES_HOST}
        -dbuser ${POSTGRES_USER}
-       -dbpass ${POSTGRES_PASSWORD} 
+       -dbpass ${POSTGRES_PASSWORD}
+       -amqp ${AMQP_URL}
   dependencies:
     - build:backend
 
