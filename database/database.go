@@ -10,7 +10,6 @@ import (
 
 var DB_HOST string    // host of the database system
 var DB_NAME string    // name of the production database
-var DB_TEST string    // name of the test database
 var DB_USER string    // name of the database user
 var DB_PASS string    // database password
 var DB_SSLMODE string // set to enable if database uses SSL
@@ -30,13 +29,12 @@ func init() {
 	fmt.Println("DB_HOST has value ", DB_HOST)
 	fmt.Println("DB_USER has value ", DB_USER)
 	fmt.Println("DB_NAME has value ", DB_NAME)
-	fmt.Println("DB_TEST has value ", DB_TEST)
 	fmt.Println("DB_SSLMODE has value ", DB_SSLMODE)
 	fmt.Println("WITH_AMQP has value ", WITH_AMQP)
 }
 
 // Initialize connection to the database
-func InitDB(dbname string) *gorm.DB {
+func InitDB(dbname string, isTest bool) *gorm.DB {
 	dbinfo := fmt.Sprintf("host=%s sslmode=%s user=%s password=%s dbname=%s",
 		DB_HOST, DB_SSLMODE, DB_USER, DB_PASS, dbname)
 	db, err := gorm.Open("postgres", dbinfo)
@@ -45,9 +43,8 @@ func InitDB(dbname string) *gorm.DB {
 	}
 	DBpool = db
 
-	if dbname == DB_TEST {
-		// if we are using the test DB
-		// drop tables from previous tests
+	if isTest {
+		// drop tables for testing case
 		DropTables(db)
 	}
 

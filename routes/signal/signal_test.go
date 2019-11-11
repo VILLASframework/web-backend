@@ -106,7 +106,7 @@ func addScenarioAndSimulatorAndSimulationModel() (scenarioID uint, simulatorID u
 
 func TestMain(m *testing.M) {
 
-	db = database.InitDB(database.DB_TEST)
+	db = database.InitDB(database.DB_NAME, true)
 	defer db.Close()
 
 	router = gin.Default()

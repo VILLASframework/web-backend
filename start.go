@@ -38,8 +38,7 @@ import (
 // @host localhost:4000
 // @BasePath /api/v2
 func main() {
-	// TODO DB_TEST is used for testing, should be DB_NAME in production
-	db := database.InitDB(database.DB_TEST)
+	db := database.InitDB(database.DB_NAME, true)
 	database.MigrateModels(db)
 	defer db.Close()
 
