@@ -1,6 +1,6 @@
 package docs
 
-import "git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
+import "git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 
 // This file defines the responses to any endpoint in the backend
 // The defined structures are only used for documentation purposes with swaggo and are NOT used in the code

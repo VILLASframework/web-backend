@@ -1,4 +1,4 @@
-module git.rwth-aachen.de/acs/public/villas/villasweb-backend-go
+module git.rwth-aachen.de/acs/public/villas/web-backend-go
 
 require (
 	github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc

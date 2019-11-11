@@ -2,10 +2,10 @@ package file
 
 import (
 	"fmt"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/helper"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulationmodel"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/widget"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/simulationmodel"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/widget"
 	"github.com/gin-gonic/gin"
 )
 

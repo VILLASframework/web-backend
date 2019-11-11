@@ -3,7 +3,7 @@ package amqp
 import (
 	"encoding/json"
 	"fmt"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"github.com/streadway/amqp"
 	"github.com/tidwall/gjson"
 	"strings"

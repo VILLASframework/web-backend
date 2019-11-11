@@ -1,11 +1,11 @@
 package simulator
 
 import (
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/helper"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"github.com/gin-gonic/gin"
 	"net/http"
 
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 )
 
 func RegisterSimulatorEndpoints(r *gin.RouterGroup) {
