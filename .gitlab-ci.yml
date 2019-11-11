@@ -80,7 +80,14 @@ test:all:
   image: golang:1.12.9-buster
   script:
     - go mod tidy
-    - go test $(go list ./... ) -p 1 -covermode=count -coverprofile ./testcover.txt
+    - go test $(go list ./... )
+       -p 1
+       -covermode=count
+       -coverprofile ./testcover.txt
+       -dbname ${POSTGRES_DB}
+       -dbhost ${POSTGRES_HOST}
+       -dbuser ${POSTGRES_USER}
+       -dbpass ${POSTGRES_PASSWORD}
     - go tool cover -func=testcover.txt
   dependencies:
     - build:backend
