@@ -163,3 +163,12 @@ func PingAMQP() error {
 	err := SendActionAMQP(a, "")
 	return err
 }
+
+func CheckConnection() error {
+
+	if client.connection.IsClosed() {
+		return fmt.Errorf("connection to broker is closed")
+	}
+
+	return nil
+}
