@@ -1,8 +1,18 @@
+services:
+  - postgres:latest
+  - rabbitmq:latest
+
 variables:
-  DEPLOY_USER: deploy
-  DEPLOY_HOST: acs-os-fein-website
-  DEPLOY_PATH: /var/www/villas/api/web/
   TEST_FOLDER: database
+  DOCKER_IMAGE: ${CI_REGISTRY}/acs/public/villas/web-backend-go
+  DOCKER_IMAGE_DEV: ${CI_REGISTRY}/acs/public/villas/web-backend-go/dev
+  POSTGRES_DB: testvillasdb
+  POSTGRES_USER: villas
+  POSTGRES_PASSWORD: villas
+  POSTGRES_HOST: postgres
+  RABBITMQ_DEFAULT_USER: villas
+  RABBITMQ_DEFAULT_PASS: villas
+  AMQP_URL: 'amqp://villas:villas@rabbitmq:5672'
 
 stages:
   - prepare
@@ -22,14 +32,6 @@ prepare:redoc:
     - shell
     - linux
 
-prepare:ubuntu:
-  stage: prepare
-  script:
-    - docker build -f Dockerfile.ubuntu -t villaswebbackendgo:ubuntu .
-  tags:
-    - shell
-    - linux
-
 # Stage: build
 ##############################################################################
 
@@ -37,18 +39,24 @@ build:backend:
   stage: build
   tags:
     - docker
-  image: villaswebbackendgo:ubuntu
+  image: golang:1.12.9-buster
   script:
     - go mod tidy
-    - go get -u github.com/swaggo/swag/cmd/swag
-    - ~/go/bin/swag init -p pascalcase -g "start.go" -o "./doc/api/"
+    - go install github.com/swaggo/swag/cmd/swag
+    - swag init -p pascalcase -g "start.go" -o "./doc/api/"
     - go build
-  dependencies:
-    - prepare:ubuntu
   artifacts:
     paths:
       - doc/api/swagger.json
       - doc/api/docs.go
+
+build:docker:
+  stage: build
+  tags:
+    - shell
+    - linux
+  script:
+    - docker build -t ${DOCKER_IMAGE} .
 
 
 # Stage: test
@@ -73,11 +81,18 @@ test:all:
   stage: test
   tags:
     - docker
-  image: villaswebbackendgo:ubuntu
+  image: golang:1.12.9-buster
   script:
-    - /etc/init.d/postgresql start
     - go mod tidy
-    - go test $(go list ./... ) -p 1 -covermode=count -coverprofile ./testcover.txt
+    - go test $(go list ./... )
+       -p 1
+       -covermode=count
+       -coverprofile ./testcover.txt
+       -dbname ${POSTGRES_DB}
+       -dbhost ${POSTGRES_HOST}
+       -dbuser ${POSTGRES_USER}
+       -dbpass ${POSTGRES_PASSWORD}
+       -amqp ${AMQP_URL}
     - go tool cover -func=testcover.txt
   dependencies:
     - build:backend
@@ -86,12 +101,16 @@ test:database:
   stage: test
   tags:
     - docker
-  image: villaswebbackendgo:ubuntu
+  image: golang:1.12.9-buster
   script:
-    - /etc/init.d/postgresql start
     - go mod tidy
     - cd ${TEST_FOLDER}
-    - go test -v
+    - go test -v -args
+       -dbname ${POSTGRES_DB}
+       -dbhost ${POSTGRES_HOST}
+       -dbuser ${POSTGRES_USER}
+       -dbpass ${POSTGRES_PASSWORD}
+       -amqp ${AMQP_URL}
   dependencies:
     - build:backend
 
@@ -138,14 +157,28 @@ test:user:
 # Stage: deploy
 ##############################################################################
 
-deploy:upload:
+deploy:docker:
   stage: deploy
+  before_script:
+  - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
   script:
-    - cd doc/api
-    - rsync --copy-links --chown ${DEPLOY_USER}:${DEPLOY_USER} index.html swagger.json ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}
+    - docker push ${DOCKER_IMAGE}
   dependencies:
-    - test:apidoc
+    - build:docker
   only:
     - master
   tags:
     - shell
+    - linux
+
+# deploy:upload:
+#   stage: deploy
+#   script:
+#     - cd doc/api
+#     - rsync --copy-links --chown ${DEPLOY_USER}:${DEPLOY_USER} index.html swagger.json ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}
+#   dependencies:
+#     - test:apidoc
+#   only:
+#     - master
+#   tags:
+#     - shell

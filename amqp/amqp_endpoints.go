@@ -1,9 +1,9 @@
 package amqp
 
 import (
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/helper"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulator"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/simulator"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"time"

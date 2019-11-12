@@ -2,7 +2,7 @@ package scenario
 
 import (
 	"fmt"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/helper"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	"github.com/jinzhu/gorm/dialects/postgres"
@@ -10,8 +10,8 @@ import (
 	"os"
 	"testing"
 
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/user"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/user"
 )
 
 var router *gin.Engine
@@ -33,7 +33,7 @@ type UserRequest struct {
 
 func TestMain(m *testing.M) {
 
-	db = database.InitDB(database.DB_TEST)
+	db = database.InitDB(database.DB_NAME, true)
 	defer db.Close()
 
 	router = gin.Default()

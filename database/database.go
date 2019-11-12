@@ -10,9 +10,10 @@ import (
 
 var DB_HOST string    // host of the database system
 var DB_NAME string    // name of the production database
-var DB_TEST string    // name of the test database
+var DB_USER string    // name of the database user
+var DB_PASS string    // database password
 var DB_SSLMODE string // set to enable if database uses SSL
-var WITH_AMQP bool    // set to true if backend shall be used with AMQP client
+var AMQP_URL string   // if set connect to AMQP broker using this URL
 
 var DBpool *gorm.DB // database used by backend
 
@@ -23,13 +24,13 @@ func init() {
 	flag.StringVar(&DB_USER, "dbuser", "", "Username of database connection (default is <empty>)")
 	flag.StringVar(&DB_PASS, "dbpass", "", "Password of database connection (default is <empty>)")
 	flag.StringVar(&DB_SSLMODE, "dbsslmode", "disable", "SSL mode of DB (default is disable)") // TODO: change default for production
-	flag.BoolVar(&WITH_AMQP, "amqp", false, "If AMQP client for simulators shall be enabled, set this option to true (default is false)")
+	flag.StringVar(&AMQP_URL, "amqp", "", "If set, use this url to connect to an AMQP broker (default is disabled)")
 	flag.Parse()
 	fmt.Println("DB_HOST has value ", DB_HOST)
+	fmt.Println("DB_USER has value ", DB_USER)
 	fmt.Println("DB_NAME has value ", DB_NAME)
-	fmt.Println("DB_TEST has value ", DB_TEST)
 	fmt.Println("DB_SSLMODE has value ", DB_SSLMODE)
-	fmt.Println("WITH_AMQP has value ", WITH_AMQP)
+	fmt.Println("AMQP_URL has value ", AMQP_URL)
 }
 
 // Initialize connection to the database
@@ -48,9 +49,8 @@ func InitDB(dbname string, isTest bool) *gorm.DB {
 	}
 	DBpool = db
 
-	if dbname == DB_TEST {
-		// if we are using the test DB
-		// drop tables from previous tests
+	if isTest {
+		// drop tables for testing case
 		DropTables(db)
 	}
 

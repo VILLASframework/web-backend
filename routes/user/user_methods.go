@@ -2,7 +2,7 @@ package user
 
 import (
 	"fmt"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"golang.org/x/crypto/bcrypt"
 )
 

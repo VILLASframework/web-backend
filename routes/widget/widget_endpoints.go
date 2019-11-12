@@ -1,13 +1,13 @@
 package widget
 
 import (
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/helper"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/dashboard"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/dashboard"
 )
 
 func RegisterWidgetEndpoints(r *gin.RouterGroup) {

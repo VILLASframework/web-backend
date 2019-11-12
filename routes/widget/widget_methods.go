@@ -1,8 +1,8 @@
 package widget
 
 import (
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/dashboard"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/dashboard"
 )
 
 type Widget struct {

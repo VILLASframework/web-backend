@@ -2,23 +2,23 @@ package main
 
 import (
 	"fmt"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/amqp"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/amqp"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
 
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/database"
-	_ "git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/doc/api" // doc/api folder is used by Swag CLI, you have to import it
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/dashboard"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/file"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/scenario"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/signal"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulationmodel"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/simulator"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/user"
-	"git.rwth-aachen.de/acs/public/villas/villasweb-backend-go/routes/widget"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
+	_ "git.rwth-aachen.de/acs/public/villas/web-backend-go/doc/api" // doc/api folder is used by Swag CLI, you have to import it
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/dashboard"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/file"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/scenario"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/signal"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/simulationmodel"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/simulator"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/user"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/widget"
 )
 
 // @title VILLASweb Backend API
@@ -38,8 +38,7 @@ import (
 // @host localhost:4000
 // @BasePath /api/v2
 func main() {
-	// TODO DB_TEST is used for testing, should be DB_NAME in production
-	db := database.InitDB(database.DB_TEST)
+	db := database.InitDB(database.DB_NAME, true)
 	database.MigrateModels(db)
 	defer db.Close()
 
@@ -65,15 +64,15 @@ func main() {
 	user.RegisterUserEndpoints(api.Group("/users"))
 	simulator.RegisterSimulatorEndpoints(api.Group("/simulators"))
 	// register simulator action endpoint only if AMQP client is used
-	if database.WITH_AMQP == true {
+	if len(database.AMQP_URL) != 0 {
 		amqp.RegisterAMQPEndpoint(api.Group("/simulators"))
 	}
 
 	r.GET("swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	if database.WITH_AMQP == true {
+	if len(database.AMQP_URL) != 0 {
 		fmt.Println("Starting AMQP client")
-		err := amqp.ConnectAMQP("amqp://localhost")
+		err := amqp.ConnectAMQP(database.AMQP_URL)
 		if err != nil {
 			panic(err)
 		}
