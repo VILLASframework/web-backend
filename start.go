@@ -22,6 +22,7 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/simulator"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/user"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/widget"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/metrics"
 )
 
 // @title VILLASweb Backend API
@@ -50,6 +51,8 @@ func main() {
 	docs.SwaggerInfo.Host = baseHost
 	docs.SwaggerInfo.BasePath = basePath
 
+	metrics.InitCounters(db)
+
 	r := gin.Default()
 
 	api := r.Group(basePath)
@@ -68,7 +71,8 @@ func main() {
 	file.RegisterFileEndpoints(api.Group("/files"))
 	user.RegisterUserEndpoints(api.Group("/users"))
 	simulator.RegisterSimulatorEndpoints(api.Group("/simulators"))
-	healthz.RegisterHealthzEndpoint(api.Group("/healthz"))
+	healthz.RegisterHealthzEndpoint(r.Group("/healthz"))
+	metrics.RegisterMetricsEndpoint(r.Group("/metrics"))
 
 	r.GET("swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
