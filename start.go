@@ -2,18 +2,21 @@ package main
 
 import (
 	"log"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/amqp"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/healthz"
 	"time"
 
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/amqp"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/healthz"
+
 	"github.com/gin-gonic/gin"
-	"github.com/swaggo/gin-swagger"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
 
+	c "git.rwth-aachen.de/acs/public/villas/web-backend-go/config"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
-	_ "git.rwth-aachen.de/acs/public/villas/web-backend-go/doc/api" // doc/api folder is used by Swag CLI, you have to import it
+	docs "git.rwth-aachen.de/acs/public/villas/web-backend-go/doc/api" // doc/api folder is used by Swag CLI, you have to import it
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/dashboard"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/file"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/metrics"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/scenario"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/signal"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/simulationmodel"
@@ -34,12 +37,16 @@ import (
 // @host villas-new.k8s.fein-aachen.org
 // @BasePath /api/v2
 func main() {
-	db := database.InitDB(database.DB_NAME, true)
-	database.MigrateModels(db)
+	log.Println("Starting VILLASweb-backend-go")
+
+	c.InitConfig()
+
+	db := database.InitDB(c.Config)
 	defer db.Close()
 
-	// TODO the following line should be removed in production, it adds test data to the DB
-	database.DBAddTestData(db)
+	if m, _ := c.Config.String("mode"); m == "release" {
+		gin.SetMode(gin.ReleaseMode)
+	}
 
 	r := gin.Default()
 
@@ -60,19 +67,20 @@ func main() {
 	user.RegisterUserEndpoints(api.Group("/users"))
 	simulator.RegisterSimulatorEndpoints(api.Group("/simulators"))
 	healthz.RegisterHealthzEndpoint(api.Group("/healthz"))
-	// register simulator action endpoint only if AMQP client is used
-	if len(database.AMQP_URL) != 0 {
-		amqp.RegisterAMQPEndpoint(api.Group("/simulators"))
-	}
 
 	r.GET("swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	if len(database.AMQP_URL) != 0 {
-		fmt.Println("Starting AMQP client")
-		err := amqp.ConnectAMQP(database.AMQP_URL)
+	amqpurl, _ := c.Config.String("amqp.url")
+	if amqpurl != "" {
+		log.Println("Starting AMQP client")
+
+		err := amqp.ConnectAMQP(amqpurl)
 		if err != nil {
 			log.Panic(err)
 		}
+
+		// register simulator action endpoint only if AMQP client is used
+		amqp.RegisterAMQPEndpoint(api.Group("/simulators"))
 
 		// Periodically call the Ping function to check which simulators are still there
 		ticker := time.NewTicker(10 * time.Second)
