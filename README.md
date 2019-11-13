@@ -4,38 +4,16 @@
 [![coverage report](https://git.rwth-aachen.de/acs/public/villas/web-backend-go/badges/master/coverage.svg)](https://git.rwth-aachen.de/acs/public/villas/web-backend-go/commits/master)
 
 ## Description
-This is a rewrite of the backend for the VILLASweb
-website in Go. 
+This is a rewrite of the backend for the VILLASweb website in Go.
+It is based  upon [gin-gonic](https://github.com/gin-gonic/gin) and [GORM](http://gorm.io) frameworks.
 
-## Frameworks
-The backend is build upon [gin-gonic](https://github.com/gin-gonic/gin) and [GORM](http://gorm.io).
+## Usage
 
-## Quick start
+### Requirements
+- Go (version 1.11 or higher)
+- PostgreSQL database (tested for version 11, instructions see below)
+- swag (https://github.com/swaggo/swag) for automated API documentation creation 
 
-### Docker 
-You can use the `Dockerfile.dev` for development and testing.
-To build an tag the image call the following in the top level of the repository:
-
-```bash
-$ docker build -f Dockerfile.dev -t registry.git.rwth-aachen.de/acs/public/villas/web-backend-go/dev .
-```dev
-
-To run an interactive container based on the image call:
-
-```bash
-$ docker run --rm -it registry.git.rwth-aachen.de/acs/public/villas/web-backend-go/dev
-```
-
-By using the `--rm` option of docker, the container will be removed upon exit.
-Omit this option if you want the container to persist on your system.
-
-Within the container you need to start the PostgreSQL server by invoking the following command:
-
-```bash
-$ /etc/init.d/postgresql start
-```
-
-Now you are ready to compile an test the code. 
 ### Compiling
 
 ```bash 
@@ -46,18 +24,25 @@ $ go build
 ### Testing
 ```bash 
 $ go mod tidy
-$ cd common
-$ go test -v -args -dbhost=/var/run/postgresql
+$ go test $(go list ./... ) -p 1
 ```
+
+### Running
+```bash
+go run start.go [params]
+```
+
+### Parameters
+You can type
+ ```bash
+go run start.go --help
+```
+to get a list of available parameters and default values
 
 
 ## PostgreSQL Database
-
-**The current repo is tested for PostgreSQL 11 and Go 1.11**
-
 Before running the application the user has to setup and configure
-[PostgreSQL](https://www.postgresql.org/).
-Alternatively the provided Dockerfile can be used (see above). 
+[PostgreSQL](https://www.postgresql.org/). 
 
 To create a new database login to user `postgres` and start `psql`
 ```bash
