@@ -3,7 +3,6 @@ services:
   - rabbitmq:latest
 
 variables:
-  TEST_FOLDER: database
   DOCKER_IMAGE: ${CI_REGISTRY}/acs/public/villas/web-backend-go
   DOCKER_IMAGE_DEV: ${CI_REGISTRY}/acs/public/villas/web-backend-go/dev
   POSTGRES_DB: testvillasdb
@@ -79,6 +78,11 @@ test:apidoc:
 
 test:all:
   stage: test
+  variables:
+    DB_NAME: ${POSTGRES_DB}
+    DB_HOST: ${POSTGRES_HOST}
+    DB_USER: ${POSTGRES_USER}
+    DB_PASS: ${POSTGRES_PASSWORD}
   tags:
     - docker
   image: golang:1.12.9-buster
@@ -88,29 +92,26 @@ test:all:
        -p 1
        -covermode=count
        -coverprofile ./testcover.txt
-       -dbname ${POSTGRES_DB}
-       -dbhost ${POSTGRES_HOST}
-       -dbuser ${POSTGRES_USER}
-       -dbpass ${POSTGRES_PASSWORD}
-       -amqp ${AMQP_URL}
     - go tool cover -func=testcover.txt
   dependencies:
     - build:backend
 
 test:database:
   stage: test
+  variables:
+    TEST_FOLDER: database
+    MODE: test
+    DB_NAME: ${POSTGRES_DB}
+    DB_HOST: ${POSTGRES_HOST}
+    DB_USER: ${POSTGRES_USER}
+    DB_PASS: ${POSTGRES_PASSWORD}
   tags:
     - docker
   image: golang:1.12.9-buster
   script:
     - go mod tidy
     - cd ${TEST_FOLDER}
-    - go test -v -args
-       -dbname ${POSTGRES_DB}
-       -dbhost ${POSTGRES_HOST}
-       -dbuser ${POSTGRES_USER}
-       -dbpass ${POSTGRES_PASSWORD}
-       -amqp ${AMQP_URL}
+    - go test -v
   dependencies:
     - build:backend
 
