@@ -22,6 +22,8 @@ func InitConfig() *config.Config {
 		amqpURL    = flag.String("amqp", "", "If set, use this url to connect to an AMQP broker (default is disabled)")
 		configFile = flag.String("configFile", "", "Path to YAML configuration file")
 		mode       = flag.String("mode", "release", "Select debug/release/test mode (default is release)")
+		baseHost   = flag.String("base-host", "localhost:4000", "The host:port at which the backend is hosted (default: localhost:4000)")
+		basePath   = flag.String("base-path", "/api/v2", "The path at which the API routes are located (default /api/v2)")
 	)
 	flag.Parse()
 
@@ -33,14 +35,16 @@ func InitConfig() *config.Config {
 	}
 
 	static := map[string]string{
-		"db.host":  *dbHost,
-		"db.name":  *dbName,
-		"db.user":  *dbUser,
-		"db.pass":  *dbPass,
-		"db.init":  dbInitStr,
-		"db.ssl":   *dbSSLMode,
-		"amqp.url": *amqpURL,
-		"mode":     *mode,
+		"db.host":   *dbHost,
+		"db.name":   *dbName,
+		"db.user":   *dbUser,
+		"db.pass":   *dbPass,
+		"db.init":   dbInitStr,
+		"db.ssl":    *dbSSLMode,
+		"amqp.url":  *amqpURL,
+		"mode":      *mode,
+		"base.host": *baseHost,
+		"base.path": *basePath,
 	}
 
 	mappings := map[string]string{
@@ -51,6 +55,8 @@ func InitConfig() *config.Config {
 		"DB_SSLMOE": "db.ssl",
 		"DB_INIT":   "db.init",
 		"AMQP_URL":  "amqp.url",
+		"BASE_HOST": "base.host",
+		"BASE_PATH": "base.path",
 	}
 
 	defaults := config.NewStatic(static)

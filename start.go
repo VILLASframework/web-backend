@@ -16,7 +16,6 @@ import (
 	docs "git.rwth-aachen.de/acs/public/villas/web-backend-go/doc/api" // doc/api folder is used by Swag CLI, you have to import it
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/dashboard"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/file"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/metrics"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/scenario"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/signal"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/simulationmodel"
@@ -34,7 +33,6 @@ import (
 // @contact.email sonja.happ@eonerc.rwth-aachen.de
 // @license.name GNU GPL 3.0
 // @license.url http://www.gnu.de/documents/gpl-3.0.en.html
-// @host villas-new.k8s.fein-aachen.org
 // @BasePath /api/v2
 func main() {
 	log.Println("Starting VILLASweb-backend-go")
@@ -48,9 +46,14 @@ func main() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
+	baseHost, _ := c.Config.String("base.host")
+	basePath, _ := c.Config.String("base.path")
+	docs.SwaggerInfo.Host = baseHost
+	docs.SwaggerInfo.BasePath = basePath
+
 	r := gin.Default()
 
-	api := r.Group("/api/v2")
+	api := r.Group(basePath)
 
 	// All endpoints require authentication except when someone wants to
 	// login (POST /authenticate)
