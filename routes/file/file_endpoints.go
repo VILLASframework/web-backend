@@ -30,6 +30,7 @@ func RegisterFileEndpoints(r *gin.RouterGroup) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Param Authorization header string true "Authorization token"
 // @Param objectType query string true "Set to model for files of model, set to widget for files of widget"
 // @Param objectID query int true "ID of either model or widget of which files are requested"
 // @Router /files [get]
@@ -94,6 +95,7 @@ func getFiles(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Param Authorization header string true "Authorization token"
 // @Param inputFile formData file true "File to be uploaded"
 // @Param objectType query string true "Set to model for files of model, set to widget for files of widget"
 // @Param objectID query int true "ID of either model or widget of which files are requested"
@@ -156,6 +158,7 @@ func addFile(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Param Authorization header string true "Authorization token"
 // @Param fileID path int true "ID of the file to download"
 // @Router /files/{fileID} [get]
 func getFile(c *gin.Context) {
@@ -186,6 +189,7 @@ func getFile(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Param Authorization header string true "Authorization token"
 // @Param inputFile formData file true "File to be uploaded"
 // @Param fileID path int true "ID of the file to update"
 // @Router /files/{fileID} [put]
@@ -220,6 +224,7 @@ func updateFile(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Param Authorization header string true "Authorization token"
 // @Param fileID path int true "ID of the file to update"
 // @Router /files/{fileID} [delete]
 func deleteFile(c *gin.Context) {

@@ -21,11 +21,11 @@ type validUpdatedSignal struct {
 }
 
 type addSignalRequest struct {
-	validNewSignal `json:"signal"`
+	Signal validNewSignal `json:"signal"`
 }
 
 type updateSignalRequest struct {
-	validUpdatedSignal `json:"signal"`
+	Signal validUpdatedSignal `json:"signal"`
 }
 
 func (r *addSignalRequest) validate() error {
@@ -43,11 +43,11 @@ func (r *validUpdatedSignal) validate() error {
 func (r *addSignalRequest) createSignal() Signal {
 	var s Signal
 
-	s.Name = r.Name
-	s.Unit = r.Unit
-	s.Index = r.Index
-	s.Direction = r.Direction
-	s.SimulationModelID = r.SimulationModelID
+	s.Name = r.Signal.Name
+	s.Unit = r.Signal.Unit
+	s.Index = r.Signal.Index
+	s.Direction = r.Signal.Direction
+	s.SimulationModelID = r.Signal.SimulationModelID
 
 	return s
 }
@@ -56,17 +56,17 @@ func (r *updateSignalRequest) updatedSignal(oldSignal Signal) Signal {
 	// Use the old Signal as a basis for the updated Signal `s`
 	s := oldSignal
 
-	if r.Name != "" {
-		s.Name = r.Name
+	if r.Signal.Name != "" {
+		s.Name = r.Signal.Name
 	}
 
-	if r.Index != 0 {
+	if r.Signal.Index != 0 {
 		// TODO this implies that we start indexing at 1
-		s.Index = r.Index
+		s.Index = r.Signal.Index
 	}
 
-	if r.Unit != "" {
-		s.Unit = r.Unit
+	if r.Signal.Unit != "" {
+		s.Unit = r.Signal.Unit
 	}
 
 	return s

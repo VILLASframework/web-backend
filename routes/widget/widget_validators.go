@@ -39,11 +39,11 @@ type validUpdatedWidget struct {
 }
 
 type addWidgetRequest struct {
-	validNewWidget `json:"widget"`
+	Widget validNewWidget `json:"widget"`
 }
 
 type updateWidgetRequest struct {
-	validUpdatedWidget `json:"widget"`
+	Widget validUpdatedWidget `json:"widget"`
 }
 
 func (r *addWidgetRequest) validate() error {
@@ -61,18 +61,18 @@ func (r *validUpdatedWidget) validate() error {
 func (r *addWidgetRequest) createWidget() Widget {
 	var s Widget
 
-	s.Name = r.Name
-	s.Type = r.Type
-	s.Width = r.Width
-	s.Height = r.Height
-	s.MinWidth = r.MinWidth
-	s.MinHeight = r.MinHeight
-	s.X = r.X
-	s.Y = r.Y
-	s.Z = r.Z
-	s.IsLocked = r.IsLocked
-	s.CustomProperties = r.CustomProperties
-	s.DashboardID = r.DashboardID
+	s.Name = r.Widget.Name
+	s.Type = r.Widget.Type
+	s.Width = r.Widget.Width
+	s.Height = r.Widget.Height
+	s.MinWidth = r.Widget.MinWidth
+	s.MinHeight = r.Widget.MinHeight
+	s.X = r.Widget.X
+	s.Y = r.Widget.Y
+	s.Z = r.Widget.Z
+	s.IsLocked = r.Widget.IsLocked
+	s.CustomProperties = r.Widget.CustomProperties
+	s.DashboardID = r.Widget.DashboardID
 	return s
 }
 
@@ -80,29 +80,29 @@ func (r *updateWidgetRequest) updatedWidget(oldWidget Widget) Widget {
 	// Use the old Widget as a basis for the updated Widget `s`
 	s := oldWidget
 
-	if r.Name != "" {
-		s.Name = r.Name
+	if r.Widget.Name != "" {
+		s.Name = r.Widget.Name
 	}
 
-	s.Type = r.Type
-	s.Width = r.Width
-	s.Height = r.Height
-	s.MinWidth = r.MinWidth
-	s.MinHeight = r.MinHeight
-	s.X = r.X
-	s.Y = r.Y
-	s.Z = r.Z
-	s.IsLocked = r.IsLocked
+	s.Type = r.Widget.Type
+	s.Width = r.Widget.Width
+	s.Height = r.Widget.Height
+	s.MinWidth = r.Widget.MinWidth
+	s.MinHeight = r.Widget.MinHeight
+	s.X = r.Widget.X
+	s.Y = r.Widget.Y
+	s.Z = r.Widget.Z
+	s.IsLocked = r.Widget.IsLocked
 
 	// only update custom props if not empty
 	var emptyJson postgres.Jsonb
 	// Serialize empty json and params
 	emptyJson_ser, _ := json.Marshal(emptyJson)
-	customprops_ser, _ := json.Marshal(r.CustomProperties)
+	customprops_ser, _ := json.Marshal(r.Widget.CustomProperties)
 	opts := jsondiff.DefaultConsoleOptions()
 	diff, _ := jsondiff.Compare(emptyJson_ser, customprops_ser, &opts)
 	if diff.String() != "FullMatch" {
-		s.CustomProperties = r.CustomProperties
+		s.CustomProperties = r.Widget.CustomProperties
 	}
 
 	return s

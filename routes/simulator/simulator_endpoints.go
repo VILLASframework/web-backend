@@ -26,6 +26,7 @@ func RegisterSimulatorEndpoints(r *gin.RouterGroup) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Param Authorization header string true "Authorization token"
 // @Router /simulators [get]
 func getSimulators(c *gin.Context) {
 
@@ -46,12 +47,13 @@ func getSimulators(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Tags simulators
-// @Param inputSimulator body simulator.validNewSimulator true "Simulator to be added"
 // @Success 200 {object} docs.ResponseSimulator "Simulator that was added"
 // @Failure 400 {object} docs.ResponseError "Bad request"
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Param Authorization header string true "Authorization token"
+// @Param inputSimulator body simulator.addSimulatorRequest true "Simulator to be added"
 // @Router /simulators [post]
 func addSimulator(c *gin.Context) {
 
@@ -90,12 +92,13 @@ func addSimulator(c *gin.Context) {
 // @Tags simulators
 // @Accept json
 // @Produce json
-// @Param inputSimulator body simulator.validUpdatedSimulator true "Simulator to be updated"
 // @Success 200 {object} docs.ResponseSimulator "Simulator that was updated"
 // @Failure 400 {object} docs.ResponseError "Bad request"
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Param Authorization header string true "Authorization token"
+// @Param inputSimulator body simulator.updateSimulatorRequest true "Simulator to be updated"
 // @Param simulatorID path int true "Simulator ID"
 // @Router /simulators/{simulatorID} [put]
 func updateSimulator(c *gin.Context) {
@@ -113,7 +116,7 @@ func updateSimulator(c *gin.Context) {
 	}
 
 	// Validate the request
-	if err = req.validate(); err != nil {
+	if err = req.Simulator.validate(); err != nil {
 		helper.UnprocessableEntityError(c, err.Error())
 		return
 	}
@@ -139,6 +142,7 @@ func updateSimulator(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Param Authorization header string true "Authorization token"
 // @Param simulatorID path int true "Simulator ID"
 // @Router /simulators/{simulatorID} [get]
 func getSimulator(c *gin.Context) {
@@ -161,6 +165,7 @@ func getSimulator(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Param Authorization header string true "Authorization token"
 // @Param simulatorID path int true "Simulator ID"
 // @Router /simulators/{simulatorID} [delete]
 func deleteSimulator(c *gin.Context) {
@@ -188,6 +193,7 @@ func deleteSimulator(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Param Authorization header string true "Authorization token"
 // @Param simulatorID path int true "Simulator ID"
 // @Router /simulators/{simulatorID}/models [get]
 func getModelsOfSimulator(c *gin.Context) {

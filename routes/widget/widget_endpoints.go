@@ -27,6 +27,7 @@ func RegisterWidgetEndpoints(r *gin.RouterGroup) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Param Authorization header string true "Authorization token"
 // @Param dashboardID query int true "Dashboard ID"
 // @Router /widgets [get]
 func getWidgets(c *gin.Context) {
@@ -51,12 +52,13 @@ func getWidgets(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Tags widgets
-// @Param inputWidget body widget.validNewWidget true "Widget to be added incl. ID of dashboard"
 // @Success 200 {object} docs.ResponseWidget "Widget that was added"
 // @Failure 400 {object} docs.ResponseError "Bad request"
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Param Authorization header string true "Authorization token"
+// @Param inputWidget body widget.addWidgetRequest true "Widget to be added incl. ID of dashboard"
 // @Router /widgets [post]
 func addWidget(c *gin.Context) {
 
@@ -94,12 +96,13 @@ func addWidget(c *gin.Context) {
 // @Tags widgets
 // @Accept json
 // @Produce json
-// @Param inputWidget body widget.validUpdatedWidget true "Widget to be updated"
 // @Success 200 {object} docs.ResponseWidget "Widget that was updated"
 // @Failure 400 {object} docs.ResponseError "Bad request"
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Param Authorization header string true "Authorization token"
+// @Param inputWidget body widget.updateWidgetRequest true "Widget to be updated"
 // @Param widgetID path int true "Widget ID"
 // @Router /widgets/{widgetID} [put]
 func updateWidget(c *gin.Context) {
@@ -116,7 +119,7 @@ func updateWidget(c *gin.Context) {
 	}
 
 	// Validate the request
-	if err := req.validate(); err != nil {
+	if err := req.Widget.validate(); err != nil {
 		helper.BadRequestError(c, err.Error())
 		return
 	}
@@ -142,6 +145,7 @@ func updateWidget(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Param Authorization header string true "Authorization token"
 // @Param widgetID path int true "Widget ID"
 // @Router /widgets/{widgetID} [get]
 func getWidget(c *gin.Context) {
@@ -164,6 +168,7 @@ func getWidget(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Param Authorization header string true "Authorization token"
 // @Param widgetID path int true "Widget ID"
 // @Router /widgets/{widgetID} [delete]
 func deleteWidget(c *gin.Context) {

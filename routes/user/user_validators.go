@@ -22,7 +22,7 @@ type validUpdatedRequest struct {
 }
 
 type updateUserRequest struct {
-	validUpdatedRequest `json:"user"`
+	User validUpdatedRequest `json:"user"`
 }
 
 type validNewUser struct {
@@ -33,7 +33,7 @@ type validNewUser struct {
 }
 
 type addUserRequest struct {
-	validNewUser `json:"user"`
+	User validNewUser `json:"user"`
 }
 
 func (r *loginRequest) validate() error {
@@ -58,16 +58,16 @@ func (r *updateUserRequest) updatedUser(callerID interface{}, role interface{}, 
 	u := oldUser
 
 	// Only the Admin must be able to update user's role
-	if role != "Admin" && r.Role != "" {
-		if r.Role != u.Role {
+	if role != "Admin" && r.User.Role != "" {
+		if r.User.Role != u.Role {
 			return u, fmt.Errorf("Only Admin can update user's Role")
 		}
-	} else if role == "Admin" && r.Role != "" {
-		u.Role = r.Role
+	} else if role == "Admin" && r.User.Role != "" {
+		u.Role = r.User.Role
 	}
 
 	// Only the Admin must be able to update users Active state
-	if (r.Active == "yes" && u.Active == false) || (r.Active == "no" && u.Active == true) {
+	if (r.User.Active == "yes" && u.Active == false) || (r.User.Active == "no" && u.Active == true) {
 		if role != "Admin" {
 			return u, fmt.Errorf("Only Admin can update user's Active state")
 		} else {
@@ -77,18 +77,18 @@ func (r *updateUserRequest) updatedUser(callerID interface{}, role interface{}, 
 
 	// Update the username making sure it is NOT taken
 	var testUser User
-	if err := testUser.ByUsername(r.Username); err == nil {
+	if err := testUser.ByUsername(r.User.Username); err == nil {
 		return u, fmt.Errorf("Username is alreaday taken")
 	}
 
-	if r.Username != "" {
-		u.Username = r.Username
+	if r.User.Username != "" {
+		u.Username = r.User.Username
 	}
 
 	// If there is a new password then hash it and update it
-	if r.Password != "" {
+	if r.User.Password != "" {
 
-		if r.OldPassword == "" { // admin or old password has to be present for pw change
+		if r.User.OldPassword == "" { // admin or old password has to be present for pw change
 			return u, fmt.Errorf("old or admin password is missing in request")
 		}
 
@@ -99,28 +99,28 @@ func (r *updateUserRequest) updatedUser(callerID interface{}, role interface{}, 
 				return u, err
 			}
 
-			err = adminUser.validatePassword(r.OldPassword)
+			err = adminUser.validatePassword(r.User.OldPassword)
 			if err != nil {
 				return u, fmt.Errorf("admin password not correct, pw not changed")
 			}
 
 		} else { //normal or guest user has to enter old password
 
-			err := oldUser.validatePassword(r.OldPassword)
+			err := oldUser.validatePassword(r.User.OldPassword)
 			if err != nil {
 				return u, fmt.Errorf("previous password not correct, pw not changed")
 			}
 		}
 
-		err := u.setPassword(r.Password)
+		err := u.setPassword(r.User.Password)
 		if err != nil {
 			return u, fmt.Errorf("unable to encrypt new password")
 		}
 	}
 
 	// Update mail
-	if r.Mail != "" {
-		u.Mail = r.Mail
+	if r.User.Mail != "" {
+		u.Mail = r.User.Mail
 	}
 
 	return u, nil
@@ -135,10 +135,10 @@ func (r *addUserRequest) validate() error {
 func (r *addUserRequest) createUser() User {
 	var u User
 
-	u.Username = r.Username
-	u.Password = r.Password
-	u.Mail = r.Mail
-	u.Role = r.Role
+	u.Username = r.User.Username
+	u.Password = r.User.Password
+	u.Mail = r.User.Mail
+	u.Role = r.User.Role
 	u.Active = true
 
 	return u

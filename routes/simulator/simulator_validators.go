@@ -26,11 +26,11 @@ type validUpdatedSimulator struct {
 }
 
 type addSimulatorRequest struct {
-	validNewSimulator `json:"simulator"`
+	Simulator validNewSimulator `json:"simulator"`
 }
 
 type updateSimulatorRequest struct {
-	validUpdatedSimulator `json:"simulator"`
+	Simulator validUpdatedSimulator `json:"simulator"`
 }
 
 func (r *addSimulatorRequest) validate() error {
@@ -48,12 +48,12 @@ func (r *validUpdatedSimulator) validate() error {
 func (r *addSimulatorRequest) createSimulator() Simulator {
 	var s Simulator
 
-	s.UUID = r.UUID
-	s.Host = r.Host
-	s.Modeltype = r.Modeltype
-	s.Properties = r.Properties
-	if r.State != "" {
-		s.State = r.State
+	s.UUID = r.Simulator.UUID
+	s.Host = r.Simulator.Host
+	s.Modeltype = r.Simulator.Modeltype
+	s.Properties = r.Simulator.Properties
+	if r.Simulator.State != "" {
+		s.State = r.Simulator.State
 	}
 	return s
 }
@@ -62,31 +62,31 @@ func (r *updateSimulatorRequest) updatedSimulator(oldSimulator Simulator) Simula
 	// Use the old Simulator as a basis for the updated Simulator `s`
 	s := oldSimulator
 
-	if r.UUID != "" {
-		s.UUID = r.UUID
+	if r.Simulator.UUID != "" {
+		s.UUID = r.Simulator.UUID
 	}
 
-	if r.Host != "" {
-		s.Host = r.Host
+	if r.Simulator.Host != "" {
+		s.Host = r.Simulator.Host
 	}
 
-	if r.Modeltype != "" {
-		s.Modeltype = r.Modeltype
+	if r.Simulator.Modeltype != "" {
+		s.Modeltype = r.Simulator.Modeltype
 	}
 
-	if r.State != "" {
-		s.State = r.State
+	if r.Simulator.State != "" {
+		s.State = r.Simulator.State
 	}
 
 	// only update props if not empty
 	var emptyJson postgres.Jsonb
 	// Serialize empty json and params
 	emptyJson_ser, _ := json.Marshal(emptyJson)
-	startParams_ser, _ := json.Marshal(r.Properties)
+	startParams_ser, _ := json.Marshal(r.Simulator.Properties)
 	opts := jsondiff.DefaultConsoleOptions()
 	diff, _ := jsondiff.Compare(emptyJson_ser, startParams_ser, &opts)
 	if diff.String() != "FullMatch" {
-		s.Properties = r.Properties
+		s.Properties = r.Simulator.Properties
 	}
 
 	return s

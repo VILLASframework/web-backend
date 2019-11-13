@@ -28,6 +28,7 @@ func RegisterDashboardEndpoints(r *gin.RouterGroup) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Param Authorization header string true "Authorization token"
 // @Param scenarioID query int true "Scenario ID"
 // @Router /dashboards [get]
 func getDashboards(c *gin.Context) {
@@ -52,12 +53,13 @@ func getDashboards(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Tags dashboards
-// @Param inputDab body dashboard.validNewDashboard true "Dashboard to be added incl. ID of Scenario"
 // @Success 200 {object} docs.ResponseDashboard "Dashboard that was added"
 // @Failure 400 {object} docs.ResponseError "Bad request"
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Param Authorization header string true "Authorization token"
+// @Param inputDab body dashboard.addDashboardRequest true "Dashboard to be added incl. ID of Scenario"
 // @Router /dashboards [post]
 func addDashboard(c *gin.Context) {
 
@@ -97,12 +99,13 @@ func addDashboard(c *gin.Context) {
 // @Tags dashboards
 // @Accept json
 // @Produce json
-// @Param inputDab body dashboard.validUpdatedDashboard true "Dashboard to be updated"
 // @Success 200 {object} docs.ResponseDashboard "Dashboard that was updated"
 // @Failure 400 {object} docs.ResponseError "Bad request"
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Param Authorization header string true "Authorization token"
+// @Param inputDab body dashboard.updateDashboardRequest true "Dashboard to be updated"
 // @Param dashboardID path int true "Dashboard ID"
 // @Router /dashboards/{dashboardID} [put]
 func updateDashboard(c *gin.Context) {
@@ -119,7 +122,7 @@ func updateDashboard(c *gin.Context) {
 	}
 
 	// Validate the request
-	if err := req.validate(); err != nil {
+	if err := req.Dashboard.validate(); err != nil {
 		helper.BadRequestError(c, err.Error())
 		return
 	}
@@ -144,6 +147,7 @@ func updateDashboard(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Param Authorization header string true "Authorization token"
 // @Param dashboardID path int true "Dashboard ID"
 // @Router /dashboards/{dashboardID} [get]
 func getDashboard(c *gin.Context) {
@@ -166,6 +170,7 @@ func getDashboard(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Param Authorization header string true "Authorization token"
 // @Param dashboardID path int true "Dashboard ID"
 // @Router /dashboards/{dashboardID} [delete]
 func deleteDashboard(c *gin.Context) {

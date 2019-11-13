@@ -13,16 +13,16 @@ type validNewDashboard struct {
 }
 
 type validUpdatedDashboard struct {
-	Name string `form:"Name" validate:"omitempty"`
-	Grid int    `form:"Grid" validate:"omitempty"`
+	Name string `form:"Name" validate:"omitempty" json:"name"`
+	Grid int    `form:"Grid" validate:"omitempty" json:"grid"`
 }
 
 type addDashboardRequest struct {
-	validNewDashboard `json:"dashboard"`
+	Dashboard validNewDashboard `json:"dashboard"`
 }
 
 type updateDashboardRequest struct {
-	validUpdatedDashboard `json:"dashboard"`
+	Dashboard validUpdatedDashboard `json:"dashboard"`
 }
 
 func (r *addDashboardRequest) validate() error {
@@ -40,9 +40,9 @@ func (r *validUpdatedDashboard) validate() error {
 func (r *addDashboardRequest) createDashboard() Dashboard {
 	var s Dashboard
 
-	s.Name = r.Name
-	s.Grid = r.Grid
-	s.ScenarioID = r.ScenarioID
+	s.Name = r.Dashboard.Name
+	s.Grid = r.Dashboard.Grid
+	s.ScenarioID = r.Dashboard.ScenarioID
 
 	return s
 }
@@ -51,12 +51,12 @@ func (r *updateDashboardRequest) updatedDashboard(oldDashboard Dashboard) Dashbo
 	// Use the old Dashboard as a basis for the updated Dashboard `s`
 	s := oldDashboard
 
-	if r.Name != "" {
-		s.Name = r.Name
+	if r.Dashboard.Name != "" {
+		s.Name = r.Dashboard.Name
 	}
 
-	if r.Grid != 0 {
-		s.Grid = r.Grid
+	if r.Dashboard.Grid != 0 {
+		s.Grid = r.Dashboard.Grid
 	}
 
 	return s

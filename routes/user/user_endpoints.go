@@ -33,6 +33,7 @@ func RegisterUserEndpoints(r *gin.RouterGroup) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Param Authorization header string true "Authorization token"
 // @Router /users [get]
 func getUsers(c *gin.Context) {
 
@@ -57,11 +58,12 @@ func getUsers(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Tags users
-// @Param inputUser body user.validNewUser true "User to be added"
+// @Param inputUser body user.addUserRequest true "User to be added"
 // @Success 200 {object} docs.ResponseUser "Contains added user object"
 // @Failure 400 {object} docs.ResponseError "Bad request"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Param Authorization header string true "Authorization token"
 // @Router /users [post]
 func addUser(c *gin.Context) {
 
@@ -115,13 +117,14 @@ func addUser(c *gin.Context) {
 // @Tags users
 // @Accept json
 // @Produce json
-// @Param inputUser body user.validUpdatedRequest true "User to be updated (anything except for ID can be changed, role can only be change by admin)"
 // @Success 200 {object} docs.ResponseUser "Contains updated user"
 // @Failure 400 {object} docs.ResponseError "Bad request."
 // @Failure 403 {object} docs.ResponseError "Access forbidden."
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Param Authorization header string true "Authorization token"
+// @Param inputUser body user.updateUserRequest true "User to be updated (anything except for ID can be changed, role can only be change by admin)"
 // @Param userID path int true "User ID"
 // @Router /users/{userID} [put]
 func updateUser(c *gin.Context) {
@@ -211,6 +214,7 @@ func updateUser(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Param Authorization header string true "Authorization token"
 // @Param userID path int true "User ID"
 // @Router /users/{userID} [get]
 func getUser(c *gin.Context) {
@@ -252,6 +256,7 @@ func getUser(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Param Authorization header string true "Authorization token"
 // @Param userID path int true "User ID"
 // @Router /users/{userID} [delete]
 func deleteUser(c *gin.Context) {

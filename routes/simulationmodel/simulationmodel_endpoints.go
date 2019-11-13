@@ -27,6 +27,7 @@ func RegisterSimulationModelEndpoints(r *gin.RouterGroup) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Param Authorization header string true "Authorization token"
 // @Param scenarioID query int true "Scenario ID"
 // @Router /models [get]
 func getSimulationModels(c *gin.Context) {
@@ -51,12 +52,13 @@ func getSimulationModels(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Tags models
-// @Param inputSimulationModel body simulationmodel.validNewSimulationModel true "Simulation model to be added incl. IDs of scenario and simulator"
 // @Success 200 {object} docs.ResponseSimulationModel "simulation model that was added"
 // @Failure 400 {object} docs.ResponseError "Bad request"
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Param Authorization header string true "Authorization token"
+// @Param inputSimulationModel body simulationmodel.addSimulationModelRequest true "Simulation model to be added incl. IDs of scenario and simulator"
 // @Router /models [post]
 func addSimulationModel(c *gin.Context) {
 
@@ -97,12 +99,13 @@ func addSimulationModel(c *gin.Context) {
 // @Tags models
 // @Accept json
 // @Produce json
-// @Param inputSimulationModel body simulationmodel.validUpdatedSimulationModel true "Simulation model to be updated"
 // @Success 200 {object} docs.ResponseSimulationModel "simulation model that was added"
 // @Failure 400 {object} docs.ResponseError "Bad request"
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Param Authorization header string true "Authorization token"
+// @Param inputSimulationModel body simulationmodel.updateSimulationModelRequest true "Simulation model to be updated"
 // @Param modelID path int true "Model ID"
 // @Router /models/{modelID} [put]
 func updateSimulationModel(c *gin.Context) {
@@ -120,7 +123,7 @@ func updateSimulationModel(c *gin.Context) {
 	}
 
 	// Validate the request
-	if err := req.validate(); err != nil {
+	if err := req.Model.validate(); err != nil {
 		helper.BadRequestError(c, err.Error())
 		return
 	}
@@ -146,6 +149,7 @@ func updateSimulationModel(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Param Authorization header string true "Authorization token"
 // @Param modelID path int true "Model ID"
 // @Router /models/{modelID} [get]
 func getSimulationModel(c *gin.Context) {
@@ -168,6 +172,7 @@ func getSimulationModel(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Param Authorization header string true "Authorization token"
 // @Param modelID path int true "Model ID"
 // @Router /models/{modelID} [delete]
 func deleteSimulationModel(c *gin.Context) {

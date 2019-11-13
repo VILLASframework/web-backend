@@ -22,11 +22,11 @@ type validUpdatedScenario struct {
 }
 
 type addScenarioRequest struct {
-	validNewScenario `json:"scenario"`
+	Scenario validNewScenario `json:"scenario"`
 }
 
 type updateScenarioRequest struct {
-	validUpdatedScenario `json:"scenario"`
+	Scenario validUpdatedScenario `json:"scenario"`
 }
 
 func (r *addScenarioRequest) validate() error {
@@ -44,9 +44,9 @@ func (r *validUpdatedScenario) validate() error {
 func (r *addScenarioRequest) createScenario() Scenario {
 	var s Scenario
 
-	s.Name = r.Name
-	s.Running = r.Running
-	s.StartParameters = r.StartParameters
+	s.Name = r.Scenario.Name
+	s.Running = r.Scenario.Running
+	s.StartParameters = r.Scenario.StartParameters
 
 	return s
 }
@@ -55,21 +55,21 @@ func (r *updateScenarioRequest) updatedScenario(oldScenario Scenario) Scenario {
 	// Use the old Scenario as a basis for the updated Scenario `s`
 	s := oldScenario
 
-	if r.Name != "" {
-		s.Name = r.Name
+	if r.Scenario.Name != "" {
+		s.Name = r.Scenario.Name
 	}
 
-	s.Running = r.Running
+	s.Running = r.Scenario.Running
 
 	// only update Params if not empty
 	var emptyJson postgres.Jsonb
 	// Serialize empty json and params
 	emptyJson_ser, _ := json.Marshal(emptyJson)
-	startParams_ser, _ := json.Marshal(r.StartParameters)
+	startParams_ser, _ := json.Marshal(r.Scenario.StartParameters)
 	opts := jsondiff.DefaultConsoleOptions()
 	diff, _ := jsondiff.Compare(emptyJson_ser, startParams_ser, &opts)
 	if diff.String() != "FullMatch" {
-		s.StartParameters = r.StartParameters
+		s.StartParameters = r.Scenario.StartParameters
 	}
 
 	return s

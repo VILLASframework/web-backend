@@ -20,6 +20,7 @@ func RegisterHealthzEndpoint(r *gin.RouterGroup) {
 // @Tags healthz
 // @Success 200 "Backend is healthy, database and AMQP broker connections are alive"
 // @Failure 500 {object} docs.ResponseError "Backend is NOT healthy"
+// @Param Authorization header string true "Authorization token"
 // @Router /healthz [get]
 func getHealth(c *gin.Context) {
 

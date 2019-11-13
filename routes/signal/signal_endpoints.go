@@ -29,6 +29,7 @@ func RegisterSignalEndpoints(r *gin.RouterGroup) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Param Authorization header string true "Authorization token"
 // @Router /signals [get]
 func getSignals(c *gin.Context) {
 
@@ -63,12 +64,13 @@ func getSignals(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Tags signals
-// @Param inputSignal body signal.validNewSignal true "A signal to be added to the model incl. direction and model ID to which signal shall be added"
 // @Success 200 {object} docs.ResponseSignal "Signal that was added"
 // @Failure 400 {object} docs.ResponseError "Bad request"
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Param Authorization header string true "Authorization token"
+// @Param inputSignal body signal.addSignalRequest true "A signal to be added to the model incl. direction and model ID to which signal shall be added"
 // @Router /signals [post]
 func addSignal(c *gin.Context) {
 
@@ -105,12 +107,13 @@ func addSignal(c *gin.Context) {
 // @ID updateSignal
 // @Tags signals
 // @Produce json
-// @Param inputSignal body signal.validUpdatedSignal true "A signal to be updated"
 // @Success 200 {object} docs.ResponseSignal "Signal that was updated"
 // @Failure 400 {object} docs.ResponseError "Bad request"
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Param Authorization header string true "Authorization token"
+// @Param inputSignal body signal.updateSignalRequest true "A signal to be updated"
 // @Param signalID path int true "ID of signal to be updated"
 // @Router /signals/{signalID} [put]
 func updateSignal(c *gin.Context) {
@@ -126,7 +129,7 @@ func updateSignal(c *gin.Context) {
 	}
 
 	// Validate the request
-	if err := req.validate(); err != nil {
+	if err := req.Signal.validate(); err != nil {
 		helper.BadRequestError(c, err.Error())
 		return
 	}
@@ -152,6 +155,7 @@ func updateSignal(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Param Authorization header string true "Authorization token"
 // @Param signalID path int true "ID of signal to be obtained"
 // @Router /signals/{signalID} [get]
 func getSignal(c *gin.Context) {
@@ -173,6 +177,7 @@ func getSignal(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Param Authorization header string true "Authorization token"
 // @Param signalID path int true "ID of signal to be deleted"
 // @Router /signals/{signalID} [delete]
 func deleteSignal(c *gin.Context) {

@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "This is the API of the VILLASweb Backend\nWORK IN PROGRESS! PLEASE BE PATIENT!\nThe tool https://github.com/swaggo/swag is used to auto-generate API docs for gin.",
+        "description": "This is the VILLASweb Backend API v2.0.\nParts of this API are still in development. Please check https://git.rwth-aachen.de/acs/public/villas/web-backend-go for more information.",
         "title": "VILLASweb Backend API",
         "contact": {
             "name": "Sonja Happ",
@@ -78,6 +78,13 @@
                 "operationId": "getDashboards",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Authorization token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "type": "integer",
                         "description": "Scenario ID",
                         "name": "scenarioID",
@@ -130,13 +137,20 @@
                 "operationId": "addDashboard",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Authorization token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "Dashboard to be added incl. ID of Scenario",
                         "name": "inputDab",
                         "in": "body",
                         "required": true,
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/dashboard.validNewDashboard"
+                            "$ref": "#/definitions/dashboard.addDashboardRequest"
                         }
                     }
                 ],
@@ -190,6 +204,13 @@
                 "summary": "Get a dashboard",
                 "operationId": "getDashboard",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authorization token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "Dashboard ID",
@@ -250,13 +271,20 @@
                 "operationId": "updateDashboard",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Authorization token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "Dashboard to be updated",
                         "name": "inputDab",
                         "in": "body",
                         "required": true,
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/dashboard.validUpdatedDashboard"
+                            "$ref": "#/definitions/dashboard.updateDashboardRequest"
                         }
                     },
                     {
@@ -316,6 +344,13 @@
                 "operationId": "deleteDashboard",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Authorization token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "type": "integer",
                         "description": "Dashboard ID",
                         "name": "dashboardID",
@@ -373,6 +408,13 @@
                 "summary": "Get all files of a specific model or widget",
                 "operationId": "getFiles",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authorization token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "Set to model for files of model, set to widget for files of widget",
@@ -437,6 +479,13 @@
                 "summary": "Add a file to a specific model or widget",
                 "operationId": "addFile",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authorization token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "file",
                         "description": "File to be uploaded",
@@ -515,6 +564,13 @@
                 "operationId": "getFile",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Authorization token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "type": "integer",
                         "description": "ID of the file to download",
                         "name": "fileID",
@@ -579,6 +635,13 @@
                 "operationId": "updateFile",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Authorization token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "type": "file",
                         "description": "File to be uploaded",
                         "name": "inputFile",
@@ -642,6 +705,13 @@
                 "operationId": "deleteFile",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Authorization token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "type": "integer",
                         "description": "ID of the file to update",
                         "name": "fileID",
@@ -688,6 +758,39 @@
                 }
             }
         },
+        "/healthz": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "healthz"
+                ],
+                "summary": "Get health status of backend",
+                "operationId": "getHealth",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authorization token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Backend is healthy, database and AMQP broker connections are alive"
+                    },
+                    "500": {
+                        "description": "Backend is NOT healthy",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
         "/models": {
             "get": {
                 "produces": [
@@ -699,6 +802,13 @@
                 "summary": "Get all simulation models of scenario",
                 "operationId": "getSimulationModels",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authorization token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "Scenario ID",
@@ -752,13 +862,20 @@
                 "operationId": "addSimulationModel",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Authorization token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "Simulation model to be added incl. IDs of scenario and simulator",
                         "name": "inputSimulationModel",
                         "in": "body",
                         "required": true,
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/simulationmodel.validNewSimulationModel"
+                            "$ref": "#/definitions/simulationmodel.addSimulationModelRequest"
                         }
                     }
                 ],
@@ -812,6 +929,13 @@
                 "summary": "Get a simulation model",
                 "operationId": "getSimulationModel",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authorization token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "Model ID",
@@ -872,13 +996,20 @@
                 "operationId": "updateSimulationModel",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Authorization token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "Simulation model to be updated",
                         "name": "inputSimulationModel",
                         "in": "body",
                         "required": true,
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/simulationmodel.validUpdatedSimulationModel"
+                            "$ref": "#/definitions/simulationmodel.updateSimulationModelRequest"
                         }
                     },
                     {
@@ -938,6 +1069,13 @@
                 "operationId": "deleteSimulationModel",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Authorization token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "type": "integer",
                         "description": "Model ID",
                         "name": "modelID",
@@ -994,6 +1132,15 @@
                 ],
                 "summary": "Get all scenarios of requesting user",
                 "operationId": "getScenarios",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authorization token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Scenarios to which user has access",
@@ -1039,13 +1186,20 @@
                 "operationId": "addScenario",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Authorization token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "Scenario to be added",
                         "name": "inputScenario",
                         "in": "body",
                         "required": true,
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/scenario.validNewScenario"
+                            "$ref": "#/definitions/scenario.addScenarioRequest"
                         }
                     }
                 ],
@@ -1100,6 +1254,13 @@
                 "operationId": "getScenario",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Authorization token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "type": "integer",
                         "description": "Scenario ID",
                         "name": "scenarioID",
@@ -1152,13 +1313,20 @@
                 "operationId": "updateScenario",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Authorization token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "Scenario to be updated",
                         "name": "inputScenario",
                         "in": "body",
                         "required": true,
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/scenario.validUpdatedScenario"
+                            "$ref": "#/definitions/scenario.updateScenarioRequest"
                         }
                     },
                     {
@@ -1218,6 +1386,13 @@
                 "operationId": "deleteScenario",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Authorization token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "type": "integer",
                         "description": "Scenario ID",
                         "name": "scenarioID",
@@ -1268,6 +1443,13 @@
                 "summary": "Add a user to a a scenario",
                 "operationId": "addUserToScenario",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authorization token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "Scenario ID",
@@ -1324,6 +1506,13 @@
                 "summary": "Delete a user from a scenario",
                 "operationId": "deleteUserFromScenario",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authorization token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "Scenario ID",
@@ -1382,6 +1571,13 @@
                 "summary": "Get users of a scenario",
                 "operationId": "getUsersOfScenario",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authorization token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "Scenario ID",
@@ -1446,6 +1642,13 @@
                         "name": "modelID",
                         "in": "query",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Authorization token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -1493,13 +1696,20 @@
                 "operationId": "AddSignal",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Authorization token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "A signal to be added to the model incl. direction and model ID to which signal shall be added",
                         "name": "inputSignal",
                         "in": "body",
                         "required": true,
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/signal.validNewSignal"
+                            "$ref": "#/definitions/signal.addSignalRequest"
                         }
                     }
                 ],
@@ -1553,6 +1763,13 @@
                 "summary": "Get a signal",
                 "operationId": "getSignal",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authorization token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "ID of signal to be obtained",
@@ -1610,13 +1827,20 @@
                 "operationId": "updateSignal",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Authorization token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "A signal to be updated",
                         "name": "inputSignal",
                         "in": "body",
                         "required": true,
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/signal.validUpdatedSignal"
+                            "$ref": "#/definitions/signal.updateSignalRequest"
                         }
                     },
                     {
@@ -1676,6 +1900,13 @@
                 "operationId": "deleteSignal",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Authorization token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "type": "integer",
                         "description": "ID of signal to be deleted",
                         "name": "signalID",
@@ -1732,6 +1963,15 @@
                 ],
                 "summary": "Get all simulators",
                 "operationId": "getSimulators",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authorization token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Simulators requested",
@@ -1777,13 +2017,20 @@
                 "operationId": "addSimulator",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Authorization token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "Simulator to be added",
                         "name": "inputSimulator",
                         "in": "body",
                         "required": true,
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/simulator.validNewSimulator"
+                            "$ref": "#/definitions/simulator.addSimulatorRequest"
                         }
                     }
                 ],
@@ -1837,6 +2084,13 @@
                 "summary": "Get simulator",
                 "operationId": "getSimulator",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authorization token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "Simulator ID",
@@ -1897,13 +2151,20 @@
                 "operationId": "updateSimulator",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Authorization token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "Simulator to be updated",
                         "name": "inputSimulator",
                         "in": "body",
                         "required": true,
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/simulator.validUpdatedSimulator"
+                            "$ref": "#/definitions/simulator.updateSimulatorRequest"
                         }
                     },
                     {
@@ -1962,6 +2223,13 @@
                 "summary": "Delete a simulator",
                 "operationId": "deleteSimulator",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authorization token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "Simulator ID",
@@ -2086,6 +2354,13 @@
                 "operationId": "getModelsOfSimulator",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Authorization token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "type": "integer",
                         "description": "Simulator ID",
                         "name": "simulatorID",
@@ -2142,6 +2417,15 @@
                 ],
                 "summary": "Get all users",
                 "operationId": "GetUsers",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authorization token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Array of users",
@@ -2193,8 +2477,15 @@
                         "required": true,
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/user.validNewUser"
+                            "$ref": "#/definitions/user.addUserRequest"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Authorization token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -2240,6 +2531,13 @@
                 "summary": "Get user",
                 "operationId": "GetUser",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authorization token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "User ID",
@@ -2300,13 +2598,20 @@
                 "operationId": "UpdateUser",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Authorization token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "User to be updated (anything except for ID can be changed, role can only be change by admin)",
                         "name": "inputUser",
                         "in": "body",
                         "required": true,
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/user.validUpdatedRequest"
+                            "$ref": "#/definitions/user.updateUserRequest"
                         }
                     },
                     {
@@ -2373,6 +2678,13 @@
                 "operationId": "DeleteUser",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Authorization token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "type": "integer",
                         "description": "User ID",
                         "name": "userID",
@@ -2423,6 +2735,13 @@
                 "summary": "Get all widgets of dashboard",
                 "operationId": "getWidgets",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authorization token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "Dashboard ID",
@@ -2476,13 +2795,20 @@
                 "operationId": "addWidget",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Authorization token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "Widget to be added incl. ID of dashboard",
                         "name": "inputWidget",
                         "in": "body",
                         "required": true,
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/widget.validNewWidget"
+                            "$ref": "#/definitions/widget.addWidgetRequest"
                         }
                     }
                 ],
@@ -2536,6 +2862,13 @@
                 "summary": "Get a widget",
                 "operationId": "getWidget",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authorization token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "Widget ID",
@@ -2596,13 +2929,20 @@
                 "operationId": "updateWidget",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Authorization token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "description": "Widget to be updated",
                         "name": "inputWidget",
                         "in": "body",
                         "required": true,
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/widget.validUpdatedWidget"
+                            "$ref": "#/definitions/widget.updateWidgetRequest"
                         }
                     },
                     {
@@ -2662,6 +3002,13 @@
                 "operationId": "deleteWidget",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Authorization token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "type": "integer",
                         "description": "Widget ID",
                         "name": "widgetID",
@@ -2710,6 +3057,24 @@
         }
     },
     "definitions": {
+        "dashboard.addDashboardRequest": {
+            "type": "object",
+            "properties": {
+                "dashboard": {
+                    "type": "object",
+                    "$ref": "#/definitions/dashboard.validNewDashboard"
+                }
+            }
+        },
+        "dashboard.updateDashboardRequest": {
+            "type": "object",
+            "properties": {
+                "dashboard": {
+                    "type": "object",
+                    "$ref": "#/definitions/dashboard.validUpdatedDashboard"
+                }
+            }
+        },
         "dashboard.validNewDashboard": {
             "type": "object",
             "required": [
@@ -2732,10 +3097,10 @@
         "dashboard.validUpdatedDashboard": {
             "type": "object",
             "properties": {
-                "Grid": {
+                "grid": {
                     "type": "integer"
                 },
-                "Name": {
+                "name": {
                     "type": "string"
                 }
             }
@@ -2923,6 +3288,10 @@
         "database.User": {
             "type": "object",
             "properties": {
+                "active": {
+                    "description": "Indicating status of user (false means user is inactive and should not be able to login)",
+                    "type": "boolean"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -3185,6 +3554,24 @@
                 }
             }
         },
+        "scenario.addScenarioRequest": {
+            "type": "object",
+            "properties": {
+                "scenario": {
+                    "type": "object",
+                    "$ref": "#/definitions/scenario.validNewScenario"
+                }
+            }
+        },
+        "scenario.updateScenarioRequest": {
+            "type": "object",
+            "properties": {
+                "scenario": {
+                    "type": "object",
+                    "$ref": "#/definitions/scenario.validUpdatedScenario"
+                }
+            }
+        },
         "scenario.validNewScenario": {
             "type": "object",
             "required": [
@@ -3214,6 +3601,24 @@
                 },
                 "StartParameters": {
                     "type": "string"
+                }
+            }
+        },
+        "signal.addSignalRequest": {
+            "type": "object",
+            "properties": {
+                "signal": {
+                    "type": "object",
+                    "$ref": "#/definitions/signal.validNewSignal"
+                }
+            }
+        },
+        "signal.updateSignalRequest": {
+            "type": "object",
+            "properties": {
+                "signal": {
+                    "type": "object",
+                    "$ref": "#/definitions/signal.validUpdatedSignal"
                 }
             }
         },
@@ -3257,6 +3662,24 @@
                 }
             }
         },
+        "simulationmodel.addSimulationModelRequest": {
+            "type": "object",
+            "properties": {
+                "model": {
+                    "type": "object",
+                    "$ref": "#/definitions/simulationmodel.validNewSimulationModel"
+                }
+            }
+        },
+        "simulationmodel.updateSimulationModelRequest": {
+            "type": "object",
+            "properties": {
+                "model": {
+                    "type": "object",
+                    "$ref": "#/definitions/simulationmodel.validUpdatedSimulationModel"
+                }
+            }
+        },
         "simulationmodel.validNewSimulationModel": {
             "type": "object",
             "required": [
@@ -3291,6 +3714,24 @@
                 },
                 "StartParameters": {
                     "type": "string"
+                }
+            }
+        },
+        "simulator.addSimulatorRequest": {
+            "type": "object",
+            "properties": {
+                "simulator": {
+                    "type": "object",
+                    "$ref": "#/definitions/simulator.validNewSimulator"
+                }
+            }
+        },
+        "simulator.updateSimulatorRequest": {
+            "type": "object",
+            "properties": {
+                "simulator": {
+                    "type": "object",
+                    "$ref": "#/definitions/simulator.validUpdatedSimulator"
                 }
             }
         },
@@ -3340,6 +3781,15 @@
                 }
             }
         },
+        "user.addUserRequest": {
+            "type": "object",
+            "properties": {
+                "user": {
+                    "type": "object",
+                    "$ref": "#/definitions/user.validNewUser"
+                }
+            }
+        },
         "user.loginRequest": {
             "type": "object",
             "required": [
@@ -3352,6 +3802,15 @@
                 },
                 "Username": {
                     "type": "string"
+                }
+            }
+        },
+        "user.updateUserRequest": {
+            "type": "object",
+            "properties": {
+                "user": {
+                    "type": "object",
+                    "$ref": "#/definitions/user.validUpdatedRequest"
                 }
             }
         },
@@ -3381,7 +3840,13 @@
         "user.validUpdatedRequest": {
             "type": "object",
             "properties": {
+                "Active": {
+                    "type": "string"
+                },
                 "Mail": {
+                    "type": "string"
+                },
+                "OldPassword": {
                     "type": "string"
                 },
                 "Password": {
@@ -3392,6 +3857,24 @@
                 },
                 "Username": {
                     "type": "string"
+                }
+            }
+        },
+        "widget.addWidgetRequest": {
+            "type": "object",
+            "properties": {
+                "widget": {
+                    "type": "object",
+                    "$ref": "#/definitions/widget.validNewWidget"
+                }
+            }
+        },
+        "widget.updateWidgetRequest": {
+            "type": "object",
+            "properties": {
+                "widget": {
+                    "type": "object",
+                    "$ref": "#/definitions/widget.validUpdatedWidget"
                 }
             }
         },

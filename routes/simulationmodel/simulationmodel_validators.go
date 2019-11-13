@@ -23,11 +23,11 @@ type validUpdatedSimulationModel struct {
 }
 
 type addSimulationModelRequest struct {
-	validNewSimulationModel `json:"model"`
+	Model validNewSimulationModel `json:"model"`
 }
 
 type updateSimulationModelRequest struct {
-	validUpdatedSimulationModel `json:"model"`
+	Model validUpdatedSimulationModel `json:"model"`
 }
 
 func (r *addSimulationModelRequest) validate() error {
@@ -45,10 +45,10 @@ func (r *validUpdatedSimulationModel) validate() error {
 func (r *addSimulationModelRequest) createSimulationModel() SimulationModel {
 	var s SimulationModel
 
-	s.Name = r.Name
-	s.ScenarioID = r.ScenarioID
-	s.SimulatorID = r.SimulatorID
-	s.StartParameters = r.StartParameters
+	s.Name = r.Model.Name
+	s.ScenarioID = r.Model.ScenarioID
+	s.SimulatorID = r.Model.SimulatorID
+	s.StartParameters = r.Model.StartParameters
 
 	return s
 }
@@ -57,23 +57,23 @@ func (r *updateSimulationModelRequest) updatedSimulationModel(oldSimulationModel
 	// Use the old SimulationModel as a basis for the updated Simulation model
 	s := oldSimulationModel
 
-	if r.Name != "" {
-		s.Name = r.Name
+	if r.Model.Name != "" {
+		s.Name = r.Model.Name
 	}
 
-	if r.SimulatorID != 0 {
-		s.SimulatorID = r.SimulatorID
+	if r.Model.SimulatorID != 0 {
+		s.SimulatorID = r.Model.SimulatorID
 	}
 
 	// only update Params if not empty
 	var emptyJson postgres.Jsonb
 	// Serialize empty json and params
 	emptyJson_ser, _ := json.Marshal(emptyJson)
-	startParams_ser, _ := json.Marshal(r.StartParameters)
+	startParams_ser, _ := json.Marshal(r.Model.StartParameters)
 	opts := jsondiff.DefaultConsoleOptions()
 	diff, _ := jsondiff.Compare(emptyJson_ser, startParams_ser, &opts)
 	if diff.String() != "FullMatch" {
-		s.StartParameters = r.StartParameters
+		s.StartParameters = r.Model.StartParameters
 	}
 
 	return s

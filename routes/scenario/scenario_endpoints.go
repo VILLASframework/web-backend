@@ -30,6 +30,7 @@ func RegisterScenarioEndpoints(r *gin.RouterGroup) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Param Authorization header string true "Authorization token"
 // @Router /scenarios [get]
 func getScenarios(c *gin.Context) {
 
@@ -70,12 +71,13 @@ func getScenarios(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Tags scenarios
-// @Param inputScenario body scenario.validNewScenario true "Scenario to be added"
 // @Success 200 {object} docs.ResponseScenario "scenario that was added"
 // @Failure 400 {object} docs.ResponseError "Bad request"
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Param Authorization header string true "Authorization token"
+// @Param inputScenario body scenario.addScenarioRequest true "Scenario to be added"
 // @Router /scenarios [post]
 func addScenario(c *gin.Context) {
 
@@ -128,12 +130,13 @@ func addScenario(c *gin.Context) {
 // @Tags scenarios
 // @Accept json
 // @Produce json
-// @Param inputScenario body scenario.validUpdatedScenario true "Scenario to be updated"
 // @Success 200 {object} docs.ResponseScenario "Updated scenario."
 // @Failure 400 {object} docs.ResponseError "Bad request"
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Param Authorization header string true "Authorization token"
+// @Param inputScenario body scenario.updateScenarioRequest true "Scenario to be updated"
 // @Param scenarioID path int true "Scenario ID"
 // @Router /scenarios/{scenarioID} [put]
 func updateScenario(c *gin.Context) {
@@ -151,7 +154,7 @@ func updateScenario(c *gin.Context) {
 	}
 
 	// Validate the request based on struct updateScenarioRequest json tags
-	if err := req.validate(); err != nil {
+	if err := req.Scenario.validate(); err != nil {
 		helper.BadRequestError(c, err.Error())
 		return
 	}
@@ -177,6 +180,7 @@ func updateScenario(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Param Authorization header string true "Authorization token"
 // @Param scenarioID path int true "Scenario ID"
 // @Router /scenarios/{scenarioID} [get]
 func getScenario(c *gin.Context) {
@@ -199,6 +203,7 @@ func getScenario(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Param Authorization header string true "Authorization token"
 // @Param scenarioID path int true "Scenario ID"
 // @Router /scenarios/{scenarioID} [delete]
 func deleteScenario(c *gin.Context) {
@@ -225,6 +230,7 @@ func deleteScenario(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Param Authorization header string true "Authorization token"
 // @Param scenarioID path int true "Scenario ID"
 // @Router /scenarios/{scenarioID}/users/ [get]
 func getUsersOfScenario(c *gin.Context) {
@@ -252,6 +258,7 @@ func getUsersOfScenario(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Param Authorization header string true "Authorization token"
 // @Param scenarioID path int true "Scenario ID"
 // @Param username query string true "User name"
 // @Router /scenarios/{scenarioID}/user [put]
@@ -292,6 +299,7 @@ func addUserToScenario(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Param Authorization header string true "Authorization token"
 // @Param scenarioID path int true "Scenario ID"
 // @Param username query string true "User name"
 // @Router /scenarios/{scenarioID}/user [delete]

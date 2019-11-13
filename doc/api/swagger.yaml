@@ -1,5 +1,17 @@
 basePath: /api/v2
 definitions:
+  dashboard.addDashboardRequest:
+    properties:
+      dashboard:
+        $ref: '#/definitions/dashboard.validNewDashboard'
+        type: object
+    type: object
+  dashboard.updateDashboardRequest:
+    properties:
+      dashboard:
+        $ref: '#/definitions/dashboard.validUpdatedDashboard'
+        type: object
+    type: object
   dashboard.validNewDashboard:
     properties:
       Grid:
@@ -15,9 +27,9 @@ definitions:
     type: object
   dashboard.validUpdatedDashboard:
     properties:
-      Grid:
+      grid:
         type: integer
-      Name:
+      name:
         type: string
     type: object
   database.Dashboard:
@@ -151,6 +163,10 @@ definitions:
     type: object
   database.User:
     properties:
+      active:
+        description: Indicating status of user (false means user is inactive and should
+          not be able to login)
+        type: boolean
       id:
         type: integer
       mail:
@@ -327,6 +343,18 @@ definitions:
           $ref: '#/definitions/database.Widget'
         type: array
     type: object
+  scenario.addScenarioRequest:
+    properties:
+      scenario:
+        $ref: '#/definitions/scenario.validNewScenario'
+        type: object
+    type: object
+  scenario.updateScenarioRequest:
+    properties:
+      scenario:
+        $ref: '#/definitions/scenario.validUpdatedScenario'
+        type: object
+    type: object
   scenario.validNewScenario:
     properties:
       Name:
@@ -347,6 +375,18 @@ definitions:
         type: boolean
       StartParameters:
         type: string
+    type: object
+  signal.addSignalRequest:
+    properties:
+      signal:
+        $ref: '#/definitions/signal.validNewSignal'
+        type: object
+    type: object
+  signal.updateSignalRequest:
+    properties:
+      signal:
+        $ref: '#/definitions/signal.validUpdatedSignal'
+        type: object
     type: object
   signal.validNewSignal:
     properties:
@@ -375,6 +415,18 @@ definitions:
       Unit:
         type: string
     type: object
+  simulationmodel.addSimulationModelRequest:
+    properties:
+      model:
+        $ref: '#/definitions/simulationmodel.validNewSimulationModel'
+        type: object
+    type: object
+  simulationmodel.updateSimulationModelRequest:
+    properties:
+      model:
+        $ref: '#/definitions/simulationmodel.validUpdatedSimulationModel'
+        type: object
+    type: object
   simulationmodel.validNewSimulationModel:
     properties:
       Name:
@@ -399,6 +451,18 @@ definitions:
         type: integer
       StartParameters:
         type: string
+    type: object
+  simulator.addSimulatorRequest:
+    properties:
+      simulator:
+        $ref: '#/definitions/simulator.validNewSimulator'
+        type: object
+    type: object
+  simulator.updateSimulatorRequest:
+    properties:
+      simulator:
+        $ref: '#/definitions/simulator.validUpdatedSimulator'
+        type: object
     type: object
   simulator.validNewSimulator:
     properties:
@@ -431,6 +495,12 @@ definitions:
       UUID:
         type: string
     type: object
+  user.addUserRequest:
+    properties:
+      user:
+        $ref: '#/definitions/user.validNewUser'
+        type: object
+    type: object
   user.loginRequest:
     properties:
       Password:
@@ -440,6 +510,12 @@ definitions:
     required:
     - Password
     - Username
+    type: object
+  user.updateUserRequest:
+    properties:
+      user:
+        $ref: '#/definitions/user.validUpdatedRequest'
+        type: object
     type: object
   user.validNewUser:
     properties:
@@ -459,7 +535,11 @@ definitions:
     type: object
   user.validUpdatedRequest:
     properties:
+      Active:
+        type: string
       Mail:
+        type: string
+      OldPassword:
         type: string
       Password:
         type: string
@@ -467,6 +547,18 @@ definitions:
         type: string
       Username:
         type: string
+    type: object
+  widget.addWidgetRequest:
+    properties:
+      widget:
+        $ref: '#/definitions/widget.validNewWidget'
+        type: object
+    type: object
+  widget.updateWidgetRequest:
+    properties:
+      widget:
+        $ref: '#/definitions/widget.validUpdatedWidget'
+        type: object
     type: object
   widget.validNewWidget:
     properties:
@@ -532,9 +624,8 @@ info:
     email: sonja.happ@eonerc.rwth-aachen.de
     name: Sonja Happ
   description: |-
-    This is the API of the VILLASweb Backend
-    WORK IN PROGRESS! PLEASE BE PATIENT!
-    The tool https://github.com/swaggo/swag is used to auto-generate API docs for gin.
+    This is the VILLASweb Backend API v2.0.
+    Parts of this API are still in development. Please check https://git.rwth-aachen.de/acs/public/villas/web-backend-go for more information.
   license:
     name: GNU GPL 3.0
     url: http://www.gnu.de/documents/gpl-3.0.en.html
@@ -580,6 +671,11 @@ paths:
     get:
       operationId: getDashboards
       parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Scenario ID
         in: query
         name: scenarioID
@@ -616,12 +712,17 @@ paths:
       - application/json
       operationId: addDashboard
       parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Dashboard to be added incl. ID of Scenario
         in: body
         name: inputDab
         required: true
         schema:
-          $ref: '#/definitions/dashboard.validNewDashboard'
+          $ref: '#/definitions/dashboard.addDashboardRequest'
           type: object
       produces:
       - application/json
@@ -658,6 +759,11 @@ paths:
     delete:
       operationId: deleteDashboard
       parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Dashboard ID
         in: path
         name: dashboardID
@@ -697,6 +803,11 @@ paths:
     get:
       operationId: getDashboard
       parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Dashboard ID
         in: path
         name: dashboardID
@@ -738,12 +849,17 @@ paths:
       - application/json
       operationId: updateDashboard
       parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Dashboard to be updated
         in: body
         name: inputDab
         required: true
         schema:
-          $ref: '#/definitions/dashboard.validUpdatedDashboard'
+          $ref: '#/definitions/dashboard.updateDashboardRequest'
           type: object
       - description: Dashboard ID
         in: path
@@ -785,6 +901,11 @@ paths:
     get:
       operationId: getFiles
       parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Set to model for files of model, set to widget for files of widget
         in: query
         name: objectType
@@ -831,6 +952,11 @@ paths:
       - model/x-cim.zip
       operationId: addFile
       parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: File to be uploaded
         in: formData
         name: inputFile
@@ -881,6 +1007,11 @@ paths:
     delete:
       operationId: deleteFile
       parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: ID of the file to update
         in: path
         name: fileID
@@ -920,6 +1051,11 @@ paths:
     get:
       operationId: getFile
       parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: ID of the file to download
         in: path
         name: fileID
@@ -971,6 +1107,11 @@ paths:
       - model/x-cim.zip
       operationId: updateFile
       parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: File to be uploaded
         in: formData
         name: inputFile
@@ -1012,10 +1153,38 @@ paths:
       summary: Update a file
       tags:
       - files
+  /healthz:
+    get:
+      operationId: getHealth
+      parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Backend is healthy, database and AMQP broker connections are
+            alive
+        "500":
+          description: Backend is NOT healthy
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Get health status of backend
+      tags:
+      - healthz
   /models:
     get:
       operationId: getSimulationModels
       parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Scenario ID
         in: query
         name: scenarioID
@@ -1052,12 +1221,17 @@ paths:
       - application/json
       operationId: addSimulationModel
       parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Simulation model to be added incl. IDs of scenario and simulator
         in: body
         name: inputSimulationModel
         required: true
         schema:
-          $ref: '#/definitions/simulationmodel.validNewSimulationModel'
+          $ref: '#/definitions/simulationmodel.addSimulationModelRequest'
           type: object
       produces:
       - application/json
@@ -1094,6 +1268,11 @@ paths:
     delete:
       operationId: deleteSimulationModel
       parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Model ID
         in: path
         name: modelID
@@ -1133,6 +1312,11 @@ paths:
     get:
       operationId: getSimulationModel
       parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Model ID
         in: path
         name: modelID
@@ -1174,12 +1358,17 @@ paths:
       - application/json
       operationId: updateSimulationModel
       parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Simulation model to be updated
         in: body
         name: inputSimulationModel
         required: true
         schema:
-          $ref: '#/definitions/simulationmodel.validUpdatedSimulationModel'
+          $ref: '#/definitions/simulationmodel.updateSimulationModelRequest'
           type: object
       - description: Model ID
         in: path
@@ -1220,6 +1409,12 @@ paths:
   /scenarios:
     get:
       operationId: getScenarios
+      parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -1251,12 +1446,17 @@ paths:
       - application/json
       operationId: addScenario
       parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Scenario to be added
         in: body
         name: inputScenario
         required: true
         schema:
-          $ref: '#/definitions/scenario.validNewScenario'
+          $ref: '#/definitions/scenario.addScenarioRequest'
           type: object
       produces:
       - application/json
@@ -1293,6 +1493,11 @@ paths:
     delete:
       operationId: deleteScenario
       parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Scenario ID
         in: path
         name: scenarioID
@@ -1327,6 +1532,11 @@ paths:
     get:
       operationId: getScenario
       parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Scenario ID
         in: path
         name: scenarioID
@@ -1363,12 +1573,17 @@ paths:
       - application/json
       operationId: updateScenario
       parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Scenario to be updated
         in: body
         name: inputScenario
         required: true
         schema:
-          $ref: '#/definitions/scenario.validUpdatedScenario'
+          $ref: '#/definitions/scenario.updateScenarioRequest'
           type: object
       - description: Scenario ID
         in: path
@@ -1410,6 +1625,11 @@ paths:
     delete:
       operationId: deleteUserFromScenario
       parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Scenario ID
         in: path
         name: scenarioID
@@ -1449,6 +1669,11 @@ paths:
     put:
       operationId: addUserToScenario
       parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Scenario ID
         in: path
         name: scenarioID
@@ -1489,6 +1714,11 @@ paths:
     get:
       operationId: getUsersOfScenario
       parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Scenario ID
         in: path
         name: scenarioID
@@ -1534,6 +1764,11 @@ paths:
         name: modelID
         required: true
         type: string
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -1565,13 +1800,18 @@ paths:
       - application/json
       operationId: AddSignal
       parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: A signal to be added to the model incl. direction and model ID
           to which signal shall be added
         in: body
         name: inputSignal
         required: true
         schema:
-          $ref: '#/definitions/signal.validNewSignal'
+          $ref: '#/definitions/signal.addSignalRequest'
           type: object
       produces:
       - application/json
@@ -1608,6 +1848,11 @@ paths:
     delete:
       operationId: deleteSignal
       parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: ID of signal to be deleted
         in: path
         name: signalID
@@ -1647,6 +1892,11 @@ paths:
     get:
       operationId: getSignal
       parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: ID of signal to be obtained
         in: path
         name: signalID
@@ -1686,12 +1936,17 @@ paths:
     put:
       operationId: updateSignal
       parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: A signal to be updated
         in: body
         name: inputSignal
         required: true
         schema:
-          $ref: '#/definitions/signal.validUpdatedSignal'
+          $ref: '#/definitions/signal.updateSignalRequest'
           type: object
       - description: ID of signal to be updated
         in: path
@@ -1732,6 +1987,12 @@ paths:
   /simulators:
     get:
       operationId: getSimulators
+      parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -1763,12 +2024,17 @@ paths:
       - application/json
       operationId: addSimulator
       parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Simulator to be added
         in: body
         name: inputSimulator
         required: true
         schema:
-          $ref: '#/definitions/simulator.validNewSimulator'
+          $ref: '#/definitions/simulator.addSimulatorRequest'
           type: object
       produces:
       - application/json
@@ -1805,6 +2071,11 @@ paths:
     delete:
       operationId: deleteSimulator
       parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Simulator ID
         in: path
         name: simulatorID
@@ -1844,6 +2115,11 @@ paths:
     get:
       operationId: getSimulator
       parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Simulator ID
         in: path
         name: simulatorID
@@ -1885,12 +2161,17 @@ paths:
       - application/json
       operationId: updateSimulator
       parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Simulator to be updated
         in: body
         name: inputSimulator
         required: true
         schema:
-          $ref: '#/definitions/simulator.validUpdatedSimulator'
+          $ref: '#/definitions/simulator.updateSimulatorRequest'
           type: object
       - description: Simulator ID
         in: path
@@ -1978,6 +2259,11 @@ paths:
     get:
       operationId: getModelsOfSimulator
       parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Simulator ID
         in: path
         name: simulatorID
@@ -2017,6 +2303,12 @@ paths:
   /users:
     get:
       operationId: GetUsers
+      parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -2053,8 +2345,13 @@ paths:
         name: inputUser
         required: true
         schema:
-          $ref: '#/definitions/user.validNewUser'
+          $ref: '#/definitions/user.addUserRequest'
           type: object
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -2085,6 +2382,11 @@ paths:
     delete:
       operationId: DeleteUser
       parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: User ID
         in: path
         name: userID
@@ -2119,6 +2421,11 @@ paths:
     get:
       operationId: GetUser
       parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: User ID
         in: path
         name: userID
@@ -2160,13 +2467,18 @@ paths:
       - application/json
       operationId: UpdateUser
       parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: User to be updated (anything except for ID can be changed, role
           can only be change by admin)
         in: body
         name: inputUser
         required: true
         schema:
-          $ref: '#/definitions/user.validUpdatedRequest'
+          $ref: '#/definitions/user.updateUserRequest'
           type: object
       - description: User ID
         in: path
@@ -2213,6 +2525,11 @@ paths:
     get:
       operationId: getWidgets
       parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Dashboard ID
         in: query
         name: dashboardID
@@ -2249,12 +2566,17 @@ paths:
       - application/json
       operationId: addWidget
       parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Widget to be added incl. ID of dashboard
         in: body
         name: inputWidget
         required: true
         schema:
-          $ref: '#/definitions/widget.validNewWidget'
+          $ref: '#/definitions/widget.addWidgetRequest'
           type: object
       produces:
       - application/json
@@ -2291,6 +2613,11 @@ paths:
     delete:
       operationId: deleteWidget
       parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Widget ID
         in: path
         name: widgetID
@@ -2330,6 +2657,11 @@ paths:
     get:
       operationId: getWidget
       parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Widget ID
         in: path
         name: widgetID
@@ -2371,12 +2703,17 @@ paths:
       - application/json
       operationId: updateWidget
       parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Widget to be updated
         in: body
         name: inputWidget
         required: true
         schema:
-          $ref: '#/definitions/widget.validUpdatedWidget'
+          $ref: '#/definitions/widget.updateWidgetRequest'
           type: object
       - description: Widget ID
         in: path
