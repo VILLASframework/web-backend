@@ -25,16 +25,12 @@ import (
 // @title VILLASweb Backend API
 // @version 2.0
 // @description This is the VILLASweb Backend API v2.0.
-// @description Parts of this API are still in development. Please check https://git.rwth-aachen.de/acs/public/villas/web-backend-go for more information.
-
-// @description This documentation is auto-generated based on the API documentation in the code. The tool https://github.com/swaggo/swag is used to auto-generate API docs for gin.
-
+// @description Parts of this API are still in development. Please check the [VILLASweb-backend-go repository](https://git.rwth-aachen.de/acs/public/villas/web-backend-go) for more information.
+// @description This documentation is auto-generated based on the API documentation in the code. The tool [swag](https://github.com/swaggo/swag) is used to auto-generate API docs for the [gin-gonic](https://github.com/gin-gonic/gin) framework.
 // @contact.name Sonja Happ
 // @contact.email sonja.happ@eonerc.rwth-aachen.de
-
 // @license.name GNU GPL 3.0
 // @license.url http://www.gnu.de/documents/gpl-3.0.en.html
-
 // @host localhost:4000
 // @BasePath /api/v2
 func main() {
