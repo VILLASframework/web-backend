@@ -62,7 +62,7 @@ func main() {
 	file.RegisterFileEndpoints(api.Group("/files"))
 	user.RegisterUserEndpoints(api.Group("/users"))
 	simulator.RegisterSimulatorEndpoints(api.Group("/simulators"))
-	healthz.RegisterHealthzEndpoint(api.Group("/healthz"))
+	healthz.RegisterHealthzEndpoint(r.Group("/healthz"))
 	metrics.RegisterMetricsEndpoint(r.Group("/metrics"))
 	// register simulator action endpoint only if AMQP client is used
 	if len(database.AMQP_URL) != 0 {
