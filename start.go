@@ -31,7 +31,7 @@ import (
 // @contact.email sonja.happ@eonerc.rwth-aachen.de
 // @license.name GNU GPL 3.0
 // @license.url http://www.gnu.de/documents/gpl-3.0.en.html
-// @host localhost:4000
+// @host villas-new.k8s.fein-aachen.org
 // @BasePath /api/v2
 func main() {
 	db := database.InitDB(database.DB_NAME, true)
