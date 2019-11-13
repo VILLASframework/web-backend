@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/amqp"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/healthz"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -23,11 +24,10 @@ import (
 
 // @title VILLASweb Backend API
 // @version 2.0
-// @description This is the API of the VILLASweb Backend
-// @description WORK IN PROGRESS! PLEASE BE PATIENT!
+// @description This is the VILLASweb Backend API v2.0.
+// @description Parts of this API are still in development. Please check https://git.rwth-aachen.de/acs/public/villas/web-backend-go for more information.
 
-// @description This documentation is auto-generated based on the API documentation in the code.
-// @description The tool https://github.com/swaggo/swag is used to auto-generate API docs for gin.
+// @description This documentation is auto-generated based on the API documentation in the code. The tool https://github.com/swaggo/swag is used to auto-generate API docs for gin.
 
 // @contact.name Sonja Happ
 // @contact.email sonja.happ@eonerc.rwth-aachen.de
@@ -63,6 +63,7 @@ func main() {
 	file.RegisterFileEndpoints(api.Group("/files"))
 	user.RegisterUserEndpoints(api.Group("/users"))
 	simulator.RegisterSimulatorEndpoints(api.Group("/simulators"))
+	healthz.RegisterHealthzEndpoint(api.Group("/healthz"))
 	// register simulator action endpoint only if AMQP client is used
 	if len(database.AMQP_URL) != 0 {
 		amqp.RegisterAMQPEndpoint(api.Group("/simulators"))
