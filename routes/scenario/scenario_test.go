@@ -3,6 +3,7 @@ package scenario
 import (
 	"fmt"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/config"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	"github.com/jinzhu/gorm/dialects/postgres"
@@ -32,8 +33,8 @@ type UserRequest struct {
 }
 
 func TestMain(m *testing.M) {
-
-	db = database.InitDB(database.DB_NAME, true)
+	c := config.InitConfig()
+	db = database.InitDB(c)
 	defer db.Close()
 
 	router = gin.Default()

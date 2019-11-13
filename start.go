@@ -37,17 +37,16 @@ import (
 func main() {
 	log.Println("Starting VILLASweb-backend-go")
 
-	c.InitConfig()
-
-	db := database.InitDB(c.Config)
+	c := c.InitConfig()
+	db := database.InitDB(c)
 	defer db.Close()
 
-	if m, _ := c.Config.String("mode"); m == "release" {
+	if m, _ := c.String("mode"); m == "release" {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	baseHost, _ := c.Config.String("base.host")
-	basePath, _ := c.Config.String("base.path")
+	baseHost, _ := c.String("base.host")
+	basePath, _ := c.String("base.path")
 	docs.SwaggerInfo.Host = baseHost
 	docs.SwaggerInfo.BasePath = basePath
 
@@ -73,7 +72,7 @@ func main() {
 
 	r.GET("swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	amqpurl, _ := c.Config.String("amqp.url")
+	amqpurl, _ := c.String("amqp.url")
 	if amqpurl != "" {
 		log.Println("Starting AMQP client")
 

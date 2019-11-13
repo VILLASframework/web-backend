@@ -12,6 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/config"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/user"
 )
 
@@ -27,8 +28,8 @@ type SimulatorRequest struct {
 }
 
 func TestMain(m *testing.M) {
-
-	db = database.InitDB(database.DB_NAME, true)
+	c := config.InitConfig()
+	db = database.InitDB(c)
 	defer db.Close()
 
 	router = gin.Default()

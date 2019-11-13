@@ -15,6 +15,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/config"
 )
 
 var router *gin.Engine
@@ -30,8 +31,8 @@ type UserRequest struct {
 }
 
 func TestMain(m *testing.M) {
-
-	db = database.InitDB(database.DB_NAME, true)
+	c := config.InitConfig()
+	db = database.InitDB(c)
 	defer db.Close()
 
 	router = gin.Default()

@@ -37,9 +37,7 @@ func InitDB(cfg *config.Config) *gorm.DB {
 	if mode == "test" || init {
 		DropTables(db)
 		log.Println("Database tables dropped")
-	}
 
-	if init {
 		DBAddTestData(db)
 		log.Println("Database initialized with test data")
 	}

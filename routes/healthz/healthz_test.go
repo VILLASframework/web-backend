@@ -2,7 +2,7 @@ package healthz
 
 import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/amqp"
-	//"git.rwth-aachen.de/acs/public/villas/web-backend-go/amqp"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/config"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/user"
@@ -11,7 +11,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"net/http"
 
-	//"net/http"
 	"testing"
 )
 
@@ -20,7 +19,8 @@ var db *gorm.DB
 
 func TestHealthz(t *testing.T) {
 	// connect DB
-	db = database.InitDB(database.DB_NAME, true)
+	c := config.InitConfig()
+	db = database.InitDB(c)
 	defer db.Close()
 
 	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
@@ -47,7 +47,7 @@ func TestHealthz(t *testing.T) {
 	assert.Equalf(t, 500, code, "Response body: \n%v\n", resp)
 
 	// reconnect DB
-	db = database.InitDB(database.DB_NAME, false)
+	db = database.InitDB(c)
 	defer db.Close()
 
 	// test healthz endpoint for connected DB and unconnected AMQP client
@@ -56,7 +56,8 @@ func TestHealthz(t *testing.T) {
 	assert.Equalf(t, 500, code, "Response body: \n%v\n", resp)
 
 	// connect AMQP client (make sure that AMQP_URL is set via command line parameter -amqp)
-	err = amqp.ConnectAMQP(database.AMQP_URL)
+	url, _ := c.String("amqp.url")
+	err = amqp.ConnectAMQP(url)
 	assert.NoError(t, err)
 
 	// test healthz endpoint for connected DB and AMQP client

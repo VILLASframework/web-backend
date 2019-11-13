@@ -7,12 +7,14 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/config"
 )
 
 var db *gorm.DB
 
 func TestMain(m *testing.M) {
-	db = InitDB(DB_NAME, true)
+	c := config.InitConfig()
+	db = InitDB(c)
 
 	// Verify that you can connect to the database
 	err := db.DB().Ping()

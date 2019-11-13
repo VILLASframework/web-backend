@@ -75,11 +75,12 @@ func InitConfig() *config.Config {
 		log.Fatal("failed to parse config")
 	}
 
-	settings, _ := c.Settings()
-
-	log.Print("All settings:")
-	for key, val := range settings {
-		log.Printf("   %s = %s \n", key, val)
+	if m, _ := c.String("mode"); m != "test" {
+		settings, _ := c.Settings()
+		log.Print("All settings:")
+		for key, val := range settings {
+			log.Printf("   %s = %s \n", key, val)
+		}
 	}
 
 	// Save pointer to global variable
