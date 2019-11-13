@@ -20,6 +20,7 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/simulator"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/user"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/widget"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/metrics"
 )
 
 // @title VILLASweb Backend API
@@ -41,6 +42,8 @@ func main() {
 	// TODO the following line should be removed in production, it adds test data to the DB
 	database.DBAddTestData(db)
 
+	metrics.InitCounters(db)
+
 	r := gin.Default()
 
 	api := r.Group("/api/v2")
@@ -59,7 +62,8 @@ func main() {
 	file.RegisterFileEndpoints(api.Group("/files"))
 	user.RegisterUserEndpoints(api.Group("/users"))
 	simulator.RegisterSimulatorEndpoints(api.Group("/simulators"))
-	healthz.RegisterHealthzEndpoint(api.Group("/healthz"))
+	healthz.RegisterHealthzEndpoint(r.Group("/healthz"))
+	metrics.RegisterMetricsEndpoint(r.Group("/metrics"))
 	// register simulator action endpoint only if AMQP client is used
 	if len(database.AMQP_URL) != 0 {
 		amqp.RegisterAMQPEndpoint(api.Group("/simulators"))
