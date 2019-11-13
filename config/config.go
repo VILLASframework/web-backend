@@ -9,9 +9,13 @@ import (
 )
 
 // Global configuration
-var Config *config.Config
+var Config *config.Config = nil
 
 func InitConfig() *config.Config {
+	if Config != nil {
+		return Config
+	}
+
 	var (
 		dbHost     = flag.String("dbhost", "/var/run/postgresql", "Host of the PostgreSQL database (default is /var/run/postgresql for localhost DB on Ubuntu systems)")
 		dbName     = flag.String("dbname", "villas", "Name of the database to use (default is villasdb)")
@@ -48,15 +52,16 @@ func InitConfig() *config.Config {
 	}
 
 	mappings := map[string]string{
-		"DB_HOST":   "db.host",
-		"DB_NAME":   "db.name",
-		"DB_USER":   "db.user",
-		"DB_PASS":   "db.pass",
-		"DB_SSLMOE": "db.ssl",
-		"DB_INIT":   "db.init",
-		"AMQP_URL":  "amqp.url",
-		"BASE_HOST": "base.host",
-		"BASE_PATH": "base.path",
+		"DB_HOST":    "db.host",
+		"DB_NAME":    "db.name",
+		"DB_USER":    "db.user",
+		"DB_PASS":    "db.pass",
+		"DB_SSLMODE": "db.ssl",
+		"DB_INIT":    "db.init",
+		"AMQP_URL":   "amqp.url",
+		"BASE_HOST":  "base.host",
+		"BASE_PATH":  "base.path",
+		"MODE":       "mode",
 	}
 
 	defaults := config.NewStatic(static)

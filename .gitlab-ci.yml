@@ -76,13 +76,14 @@ test:apidoc:
       - doc/api/index.html
       - doc/api/swagger.json
 
-test:all:
+test:gotest:
   stage: test
   variables:
     DB_NAME: ${POSTGRES_DB}
     DB_HOST: ${POSTGRES_HOST}
     DB_USER: ${POSTGRES_USER}
     DB_PASS: ${POSTGRES_PASSWORD}
+    MODE: test
   tags:
     - docker
   image: golang:1.12.9-buster
@@ -179,9 +180,13 @@ deploy:docker:
 
 # deploy:upload:
 #   stage: deploy
+#   image:
+#     name: rclone/rclone:1.50
+#     entrypoint: [""]
+#   before_script:
+#     - rclone config create fein webdav url ${DEPLOY_PATH} vendor other user ${DEPLOY_USER} pass ${DEPLOY_PASS}
 #   script:
-#     - cd doc/api
-#     - rsync --copy-links --chown ${DEPLOY_USER}:${DEPLOY_USER} index.html swagger.json ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}
+#     - rclone copy --include=index.html --include=swagger.json doc/api fein:villas/api/web
 #   dependencies:
 #     - test:apidoc
 #   only:

@@ -30,6 +30,7 @@ func InitDB(cfg *config.Config) *gorm.DB {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	DBpool = db
 
 	MigrateModels(db)
