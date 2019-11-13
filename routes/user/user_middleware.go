@@ -14,8 +14,7 @@ func userToContext(ctx *gin.Context, user_id uint) {
 	var user User
 
 	err := user.ByID(user_id)
-	if err != nil {
-		helper.UnauthorizedAbort(ctx, "Authentication failed (user not found)")
+	if helper.DBError(ctx, err) {
 		return
 	}
 
