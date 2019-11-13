@@ -154,6 +154,11 @@ test:user:
   variables:
     TEST_FOLDER: routes/user
 
+test:healthz:
+  extends: test:database
+  variables:
+    TEST_FOLDER: routes/healthz
+
 # Stage: deploy
 ##############################################################################
 

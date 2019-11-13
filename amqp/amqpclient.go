@@ -35,7 +35,7 @@ func ConnectAMQP(uri string) error {
 	// connect to broker
 	client.connection, err = amqp.Dial(uri)
 	if err != nil {
-		return fmt.Errorf("AMQP: failed to connect to RabbitMQ broker")
+		return fmt.Errorf("AMQP: failed to connect to RabbitMQ broker %v", uri)
 	}
 
 	// create channel
@@ -162,4 +162,17 @@ func PingAMQP() error {
 
 	err := SendActionAMQP(a, "")
 	return err
+}
+
+func CheckConnection() error {
+
+	if client.connection != nil {
+		if client.connection.IsClosed() {
+			return fmt.Errorf("connection to broker is closed")
+		}
+	} else {
+		return fmt.Errorf("connection is nil")
+	}
+
+	return nil
 }
