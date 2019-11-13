@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/amqp"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/healthz"
 	"time"
@@ -71,7 +71,7 @@ func main() {
 		fmt.Println("Starting AMQP client")
 		err := amqp.ConnectAMQP(database.AMQP_URL)
 		if err != nil {
-			panic(err)
+			log.Panic(err)
 		}
 
 		// Periodically call the Ping function to check which simulators are still there
@@ -83,12 +83,14 @@ func main() {
 				case <-ticker.C:
 					err = amqp.PingAMQP()
 					if err != nil {
-						fmt.Println("AMQP Error: ", err.Error())
+						log.Println("AMQP Error: ", err.Error())
 					}
 				}
 			}
 
 		}()
+
+		log.Printf("Connected AMQP client to %s", amqpurl)
 	}
 	// server at port 4000 to match frontend's redirect path
 	r.Run(":4000")

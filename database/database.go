@@ -1,8 +1,9 @@
 package database
 
 import (
-	"flag"
 	"fmt"
+	"log"
+
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"log"
@@ -53,6 +54,8 @@ func InitDB(dbname string, isTest bool) *gorm.DB {
 		// drop tables for testing case
 		DropTables(db)
 	}
+
+	log.Println("Database connection established")
 
 	return db
 }

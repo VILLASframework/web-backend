@@ -1,10 +1,10 @@
 package healthz
 
 import (
-	"fmt"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/amqp"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
 )
 
@@ -35,7 +35,7 @@ func getHealth(c *gin.Context) {
 	if len(database.AMQP_URL) != 0 {
 		err = amqp.CheckConnection()
 		if err != nil {
-			fmt.Println(err.Error())
+			log.Println(err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"success:": false,
 				"message":  err.Error(),
