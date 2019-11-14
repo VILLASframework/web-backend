@@ -1,12 +1,12 @@
 package metrics
 
 import (
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"github.com/chenjiandongx/ginprom"
+	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/gin-gonic/gin"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
-	"github.com/jinzhu/gorm"
 )
 
 var (
