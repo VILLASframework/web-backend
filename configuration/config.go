@@ -1,4 +1,4 @@
-package config
+package configuration
 
 import (
 	"flag"
@@ -9,16 +9,16 @@ import (
 )
 
 // Global configuration
-var Config *config.Config = nil
+var GolbalConfig *config.Config = nil
 
-func InitConfig() *config.Config {
-	if Config != nil {
-		return Config
+func InitConfig() error {
+	if GolbalConfig != nil {
+		return nil
 	}
 
 	var (
 		dbHost     = flag.String("dbhost", "/var/run/postgresql", "Host of the PostgreSQL database (default is /var/run/postgresql for localhost DB on Ubuntu systems)")
-		dbName     = flag.String("dbname", "villas", "Name of the database to use (default is villasdb)")
+		dbName     = flag.String("dbname", "villasdb", "Name of the database to use (default is villasdb)")
 		dbUser     = flag.String("dbuser", "", "Username of database connection (default is <empty>)")
 		dbPass     = flag.String("dbpass", "", "Password of database connection (default is <empty>)")
 		dbInit     = flag.Bool("dbinit", false, "Initialize database with test data (default is off)")
@@ -67,29 +67,31 @@ func InitConfig() *config.Config {
 	defaults := config.NewStatic(static)
 	env := config.NewEnvironment(mappings)
 
-	var c *config.Config
 	if _, err := os.Stat(*configFile); os.IsExist(err) {
 		yamlFile := config.NewYAMLFile(*configFile)
-		c = config.NewConfig([]config.Provider{defaults, yamlFile, env})
+		GolbalConfig = config.NewConfig([]config.Provider{defaults, yamlFile, env})
 	} else {
-		c = config.NewConfig([]config.Provider{defaults, env})
+		GolbalConfig = config.NewConfig([]config.Provider{defaults, env})
 	}
 
-	err := c.Load()
+	err := GolbalConfig.Load()
 	if err != nil {
 		log.Fatal("failed to parse config")
+		return err
 	}
 
-	if m, _ := c.String("mode"); m != "test" {
-		settings, _ := c.Settings()
+	m, err := GolbalConfig.String("mode")
+	if err != nil {
+		return err
+	}
+
+	if m != "test" {
+		settings, _ := GolbalConfig.Settings()
 		log.Print("All settings:")
 		for key, val := range settings {
 			log.Printf("   %s = %s \n", key, val)
 		}
 	}
 
-	// Save pointer to global variable
-	Config = c
-
-	return c
+	return nil
 }

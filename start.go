@@ -11,18 +11,18 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
 
-	c "git.rwth-aachen.de/acs/public/villas/web-backend-go/config"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	docs "git.rwth-aachen.de/acs/public/villas/web-backend-go/doc/api" // doc/api folder is used by Swag CLI, you have to import it
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/dashboard"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/file"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/metrics"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/scenario"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/signal"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/simulationmodel"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/simulator"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/user"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/widget"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/metrics"
 )
 
 // @title VILLASweb Backend API
@@ -38,16 +38,35 @@ import (
 func main() {
 	log.Println("Starting VILLASweb-backend-go")
 
-	c := c.InitConfig()
-	db := database.InitDB(c)
+	err := configuration.InitConfig()
+	if err != nil {
+		log.Printf("Error during initialization of global configuration: %v, aborting.", err.Error())
+		return
+	}
+	db := database.InitDB(configuration.GolbalConfig)
 	defer db.Close()
 
-	if m, _ := c.String("mode"); m == "release" {
+	m, err := configuration.GolbalConfig.String("mode")
+	if err != nil {
+		log.Printf("Error reading mode from global configuration: %v, aborting.", err.Error())
+		return
+	}
+
+	if m == "release" {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	baseHost, _ := c.String("base.host")
-	basePath, _ := c.String("base.path")
+	baseHost, err := configuration.GolbalConfig.String("base.host")
+	if err != nil {
+		log.Printf("Error reading base.host from global configuration: %v, aborting.", err.Error())
+		return
+	}
+	basePath, err := configuration.GolbalConfig.String("base.path")
+	if err != nil {
+		log.Printf("Error reading base.path from global configuration: %v, aborting.", err.Error())
+		return
+	}
+
 	docs.SwaggerInfo.Host = baseHost
 	docs.SwaggerInfo.BasePath = basePath
 
@@ -76,7 +95,7 @@ func main() {
 
 	r.GET("swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	amqpurl, _ := c.String("amqp.url")
+	amqpurl, _ := configuration.GolbalConfig.String("amqp.url")
 	if amqpurl != "" {
 		log.Println("Starting AMQP client")
 

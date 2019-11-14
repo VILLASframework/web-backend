@@ -2,7 +2,7 @@ package simulationmodel
 
 import (
 	"fmt"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/config"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/scenario"
@@ -95,8 +95,11 @@ func addScenarioAndSimulator() (scenarioID uint, simulatorID uint) {
 }
 
 func TestMain(m *testing.M) {
-	c := config.InitConfig()
-	db = database.InitDB(c)
+	err := configuration.InitConfig()
+	if err != nil {
+		panic(m)
+	}
+	db = database.InitDB(configuration.GolbalConfig)
 	defer db.Close()
 
 	router = gin.Default()

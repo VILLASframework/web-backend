@@ -11,8 +11,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/config"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/user"
 )
 
@@ -28,8 +28,11 @@ type SimulatorRequest struct {
 }
 
 func TestMain(m *testing.M) {
-	c := config.InitConfig()
-	db = database.InitDB(c)
+	err := configuration.InitConfig()
+	if err != nil {
+		panic(m)
+	}
+	db = database.InitDB(configuration.GolbalConfig)
 	defer db.Close()
 
 	router = gin.Default()

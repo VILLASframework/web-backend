@@ -2,7 +2,7 @@ package healthz
 
 import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/amqp"
-	d "git.rwth-aachen.de/acs/public/villas/web-backend-go/config"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"github.com/gin-gonic/gin"
 	"log"
@@ -33,7 +33,14 @@ func getHealth(c *gin.Context) {
 	}
 
 	// check if connection to AMQP broker is alive if backend was started with AMQP client
-	url, _ := d.Config.String("amqp.url")
+	url, err := configuration.GolbalConfig.String("amqp.url")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success:": false,
+			"message":  err.Error(),
+		})
+	}
+
 	if len(url) != 0 {
 		err = amqp.CheckConnection()
 		if err != nil {
