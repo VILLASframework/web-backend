@@ -13,7 +13,7 @@ import (
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
-	docs "git.rwth-aachen.de/acs/public/villas/web-backend-go/doc/api" // doc/api folder is used by Swag CLI, you have to import it
+	apidocs "git.rwth-aachen.de/acs/public/villas/web-backend-go/doc/api" // doc/api folder is used by Swag CLI, you have to import it
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/dashboard"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/file"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/metrics"
@@ -67,8 +67,8 @@ func main() {
 		return
 	}
 
-	docs.SwaggerInfo.Host = baseHost
-	docs.SwaggerInfo.BasePath = basePath
+	apidocs.SwaggerInfo.Host = baseHost
+	apidocs.SwaggerInfo.BasePath = basePath
 
 	metrics.InitCounters(db)
 
