@@ -83,6 +83,7 @@ test:gotest:
     DB_HOST: ${POSTGRES_HOST}
     DB_USER: ${POSTGRES_USER}
     DB_PASS: ${POSTGRES_PASSWORD}
+    AMQP_URL: ${AMQP_URL}
     MODE: test
   tags:
     - docker
@@ -160,6 +161,7 @@ test:healthz:
   extends: test:database
   variables:
     TEST_FOLDER: routes/healthz
+    AMQP_URL: ${AMQP_URL}
 
 # Stage: deploy
 ##############################################################################
