@@ -1,60 +1,75 @@
 package database
 
 import (
-	"flag"
 	"fmt"
+	"log"
+	"strings"
+
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
-	"log"
+	"github.com/zpatrick/go-config"
 )
-
-var DB_HOST string    // host of the database system
-var DB_NAME string    // name of the production database
-var DB_USER string    // name of the database user
-var DB_PASS string    // database password
-var DB_SSLMODE string // set to enable if database uses SSL
-var AMQP_URL string   // if set connect to AMQP broker using this URL
 
 var DBpool *gorm.DB // database used by backend
 
-// Initialize input command line flags
-func init() {
-	flag.StringVar(&DB_HOST, "dbhost", "/var/run/postgresql", "Host of the PostgreSQL database (default is /var/run/postgresql for localhost DB on Ubuntu systems)")
-	flag.StringVar(&DB_NAME, "dbname", "villasdb", "Name of the database to use (default is villasdb)")
-	flag.StringVar(&DB_USER, "dbuser", "", "Username of database connection (default is <empty>)")
-	flag.StringVar(&DB_PASS, "dbpass", "", "Password of database connection (default is <empty>)")
-	flag.StringVar(&DB_SSLMODE, "dbsslmode", "disable", "SSL mode of DB (default is disable)") // TODO: change default for production
-	flag.StringVar(&AMQP_URL, "amqp", "", "If set, use this url to connect to an AMQP broker (default is disabled)")
-	flag.Parse()
-	fmt.Println("DB_HOST has value ", DB_HOST)
-	fmt.Println("DB_USER has value ", DB_USER)
-	fmt.Println("DB_NAME has value ", DB_NAME)
-	fmt.Println("DB_SSLMODE has value ", DB_SSLMODE)
-	fmt.Println("AMQP_URL has value ", AMQP_URL)
-}
-
 // Initialize connection to the database
-func InitDB(dbname string, isTest bool) *gorm.DB {
+func InitDB(cfg *config.Config) (*gorm.DB, error) {
+	name, err := cfg.String("db.name")
+	if err != nil {
+		return nil, err
+	}
+	host, err := cfg.String("db.host")
+	if err != nil {
+		return nil, err
+	}
+	user, err := cfg.String("db.user")
+	if err != nil && !strings.Contains(err.Error(), "Required setting 'db.user' not set") {
+		return nil, err
+	}
+	pass := ""
+	if user != "" {
+		pass, err = cfg.String("db.pass")
+		if err != nil {
+			return nil, err
+		}
+	}
+	sslmode, err := cfg.String("db.ssl")
+	if err != nil {
+		return nil, err
+	}
+	mode, err := cfg.String("mode")
+	if err != nil {
+		return nil, err
+	}
 
-	dbinfo := fmt.Sprintf("host=%s sslmode=%s dbname=%s",
-		DB_HOST, DB_SSLMODE, dbname)
-	if DB_USER != "" && DB_PASS != "" {
-		dbinfo = fmt.Sprintf("host=%s sslmode=%s user=%s password=%s dbname=%s",
-			DB_HOST, DB_SSLMODE, DB_USER, DB_PASS, dbname)
+	dbinfo := fmt.Sprintf("host=%s sslmode=%s dbname=%s", host, sslmode, name)
+	if user != "" && pass != "" {
+		dbinfo += fmt.Sprintf(" user=%s password=%s", user, pass)
 	}
 
 	db, err := gorm.Open("postgres", dbinfo)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
+
 	DBpool = db
 
-	if isTest {
-		// drop tables for testing case
+	MigrateModels(db)
+
+	if mode == "test" {
 		DropTables(db)
+		log.Println("Database tables dropped")
+
+		err = DBAddTestData(db)
+		if err != nil {
+			return nil, err
+		}
+		log.Println("Database initialized with test data")
 	}
 
-	return db
+	log.Println("Database connection established")
+
+	return db, nil
 }
 
 // Connection pool to already opened DB

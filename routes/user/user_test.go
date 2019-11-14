@@ -14,6 +14,7 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
 
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 )
 
@@ -30,8 +31,15 @@ type UserRequest struct {
 }
 
 func TestMain(m *testing.M) {
+	err := configuration.InitConfig()
+	if err != nil {
+		panic(m)
+	}
 
-	db = database.InitDB(database.DB_NAME, true)
+	db, err = database.InitDB(configuration.GolbalConfig)
+	if err != nil {
+		panic(m)
+	}
 	defer db.Close()
 
 	router = gin.Default()

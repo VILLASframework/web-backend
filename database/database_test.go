@@ -6,16 +6,25 @@ import (
 	"os"
 	"testing"
 
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
 	"github.com/stretchr/testify/assert"
 )
 
 var db *gorm.DB
 
 func TestMain(m *testing.M) {
-	db = InitDB(DB_NAME, true)
+	err := configuration.InitConfig()
+	if err != nil {
+		panic(m)
+	}
+
+	db, err = InitDB(configuration.GolbalConfig)
+	if err != nil {
+		panic(m)
+	}
 
 	// Verify that you can connect to the database
-	err := db.DB().Ping()
+	err = db.DB().Ping()
 	if err != nil {
 		fmt.Println("Error: DB must ping to run tests")
 		return

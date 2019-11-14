@@ -3,6 +3,7 @@ package file
 import (
 	"bytes"
 	"fmt"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/dashboard"
@@ -159,8 +160,14 @@ func addScenarioAndSimulatorAndSimulationModelAndDashboardAndWidget() (scenarioI
 }
 
 func TestMain(m *testing.M) {
-
-	db = database.InitDB(database.DB_NAME, true)
+	err := configuration.InitConfig()
+	if err != nil {
+		panic(m)
+	}
+	db, err = database.InitDB(configuration.GolbalConfig)
+	if err != nil {
+		panic(m)
+	}
 	defer db.Close()
 
 	router = gin.Default()
