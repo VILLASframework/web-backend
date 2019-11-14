@@ -1,12 +1,11 @@
 package main
 
 import (
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/healthz"
 	"log"
 	"time"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/amqp"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/healthz"
-
 	"github.com/gin-gonic/gin"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
@@ -80,7 +79,9 @@ func main() {
 
 	api := r.Group(basePath)
 
-	// All endpoints require authentication except when someone wants to
+	healthz.RegisterHealthzEndpoint(api.Group("/healthz"))
+	metrics.RegisterMetricsEndpoint(api.Group("/metrics"))
+	// All endpoints (except for /healthz and /metrics) require authentication except when someone wants to
 	// login (POST /authenticate)
 	user.RegisterAuthenticate(api.Group("/authenticate"))
 
@@ -94,8 +95,6 @@ func main() {
 	file.RegisterFileEndpoints(api.Group("/files"))
 	user.RegisterUserEndpoints(api.Group("/users"))
 	simulator.RegisterSimulatorEndpoints(api.Group("/simulators"))
-	healthz.RegisterHealthzEndpoint(r.Group("/healthz"))
-	metrics.RegisterMetricsEndpoint(r.Group("/metrics"))
 
 	r.GET("swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 

@@ -1,7 +1,6 @@
 package metrics
 
 import (
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"github.com/chenjiandongx/ginprom"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -53,13 +52,20 @@ var (
 	)
 )
 
+// RegisterMetricsEndpoint godoc
+// @Summary Prometheus metrics endpoint
+// @ID getMetrics
+// @Produce  json
+// @Tags metrics
+// @Success 200 "Returns Prometheus metrics"
+// @Router /metrics [get]
 func RegisterMetricsEndpoint(rg *gin.RouterGroup) {
 	// use prometheus metrics exporter middleware.
 	//
 	// ginprom.PromMiddleware() expects a ginprom.PromOpts{} poniter.
 	// It was used for filtering labels with regex. `nil` will pass every requests.
 	//
-	// ginprom promethues-labels: 
+	// ginprom promethues-labels:
 	//   `status`, `endpoint`, `method`
 	//
 	// for example:
@@ -85,14 +91,14 @@ func RegisterMetricsEndpoint(rg *gin.RouterGroup) {
 }
 
 func InitCounters(db *gorm.DB) {
-	var simulators, simulation_models, files, scenarios, users, dashboards float64;
+	var simulators, simulation_models, files, scenarios, users, dashboards float64
 
-	db.Model(&database.Simulator{}).Count(&simulators)
-	db.Model(&database.SimulationModel{}).Count(&simulation_models)
-	db.Model(&database.File{}).Count(&files)
-	db.Model(&database.Scenario{}).Count(&scenarios)
-	db.Model(&database.User{}).Count(&users)
-	db.Model(&database.Dashboard{}).Count(&dashboards)
+	db.Table("simulators").Count(&simulators)
+	db.Table("simulation_models").Count(&simulation_models)
+	db.Table("files").Count(&files)
+	db.Table("scenarios").Count(&scenarios)
+	db.Table("users").Count(&users)
+	db.Table("dashboards").Count(&dashboards)
 
 	SimulatorCounter.Add(simulators)
 	SimulationModelCounter.Add(simulation_models)

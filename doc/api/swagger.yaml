@@ -618,6 +618,7 @@ definitions:
       Z:
         type: integer
     type: object
+host: '{{.Host}}'
 info:
   contact:
     email: sonja.happ@eonerc.rwth-aachen.de
@@ -653,14 +654,17 @@ paths:
             object
           schema:
             $ref: '#/definitions/docs.ResponseAuthenticate'
+            type: object
         "401":
           description: Unauthorized
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "500":
           description: Internal server error.
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
       summary: Authentication for user
       tags:
       - authentication
@@ -685,18 +689,22 @@ paths:
           description: Dashboards which belong to scenario
           schema:
             $ref: '#/definitions/docs.ResponseDashboards'
+            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "422":
           description: Unprocessable entity
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
       summary: Get all dashboards of scenario
       tags:
       - dashboards
@@ -724,22 +732,27 @@ paths:
           description: Dashboard that was added
           schema:
             $ref: '#/definitions/docs.ResponseDashboard'
+            type: object
         "400":
           description: Bad request
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "422":
           description: Unprocessable entity
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
       summary: Add a dashboard to a scenario
       tags:
       - dashboards
@@ -764,22 +777,27 @@ paths:
           description: Dashboard that was deleted
           schema:
             $ref: '#/definitions/docs.ResponseDashboard'
+            type: object
         "400":
           description: Bad request
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "422":
           description: Unprocessable entity
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
       summary: Delete a dashboard
       tags:
       - dashboards
@@ -803,22 +821,27 @@ paths:
           description: Dashboard that was requested
           schema:
             $ref: '#/definitions/docs.ResponseDashboard'
+            type: object
         "400":
           description: Bad request
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "422":
           description: Unprocessable entity
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
       summary: Get a dashboard
       tags:
       - dashboards
@@ -851,22 +874,27 @@ paths:
           description: Dashboard that was updated
           schema:
             $ref: '#/definitions/docs.ResponseDashboard'
+            type: object
         "400":
           description: Bad request
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "422":
           description: Unprocessable entity
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
       summary: Update a dashboard
       tags:
       - dashboards
@@ -896,18 +924,22 @@ paths:
           description: Files which belong to simulation model or widget
           schema:
             $ref: '#/definitions/docs.ResponseFiles'
+            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "422":
           description: Unprocessable entity
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
       summary: Get all files of a specific model or widget
       tags:
       - files
@@ -948,22 +980,27 @@ paths:
           description: File that was added
           schema:
             $ref: '#/definitions/docs.ResponseFile'
+            type: object
         "400":
           description: Bad request
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "422":
           description: Unprocessable entity
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
       summary: Add a file to a specific model or widget
       tags:
       - files
@@ -988,22 +1025,27 @@ paths:
           description: File that was deleted
           schema:
             $ref: '#/definitions/docs.ResponseFile'
+            type: object
         "400":
           description: Bad request
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "422":
           description: Unprocessable entity
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
       summary: Delete a file
       tags:
       - files
@@ -1032,22 +1074,27 @@ paths:
           description: File that was requested
           schema:
             $ref: '#/definitions/docs.ResponseFile'
+            type: object
         "400":
           description: Bad request
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "422":
           description: Unprocessable entity
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
       summary: Download a file
       tags:
       - files
@@ -1083,34 +1130,33 @@ paths:
           description: File that was updated
           schema:
             $ref: '#/definitions/docs.ResponseFile'
+            type: object
         "400":
           description: Bad request
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "422":
           description: Unprocessable entity
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
       summary: Update a file
       tags:
       - files
   /healthz:
     get:
       operationId: getHealth
-      parameters:
-      - description: Authorization token
-        in: header
-        name: Authorization
-        required: true
-        type: string
       produces:
       - application/json
       responses:
@@ -1121,9 +1167,21 @@ paths:
           description: Backend is NOT healthy
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
       summary: Get health status of backend
       tags:
       - healthz
+  /metrics:
+    get:
+      operationId: getMetrics
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns Prometheus metrics
+      summary: Prometheus metrics endpoint
+      tags:
+      - metrics
   /models:
     get:
       operationId: getSimulationModels
@@ -1145,18 +1203,22 @@ paths:
           description: Simulation models which belong to scenario
           schema:
             $ref: '#/definitions/docs.ResponseSimulationModels'
+            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "422":
           description: Unprocessable entity
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
       summary: Get all simulation models of scenario
       tags:
       - models
@@ -1184,22 +1246,27 @@ paths:
           description: simulation model that was added
           schema:
             $ref: '#/definitions/docs.ResponseSimulationModel'
+            type: object
         "400":
           description: Bad request
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "422":
           description: Unprocessable entity
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
       summary: Add a simulation model to a scenario
       tags:
       - models
@@ -1224,22 +1291,27 @@ paths:
           description: simulation model that was deleted
           schema:
             $ref: '#/definitions/docs.ResponseSimulationModel'
+            type: object
         "400":
           description: Bad request
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "422":
           description: Unprocessable entity
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
       summary: Delete a simulation model
       tags:
       - models
@@ -1263,22 +1335,27 @@ paths:
           description: simulation model that was requested
           schema:
             $ref: '#/definitions/docs.ResponseSimulationModel'
+            type: object
         "400":
           description: Bad request
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "422":
           description: Unprocessable entity
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
       summary: Get a simulation model
       tags:
       - models
@@ -1311,22 +1388,27 @@ paths:
           description: simulation model that was added
           schema:
             $ref: '#/definitions/docs.ResponseSimulationModel'
+            type: object
         "400":
           description: Bad request
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "422":
           description: Unprocessable entity
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
       summary: Update a simulation model
       tags:
       - models
@@ -1346,18 +1428,22 @@ paths:
           description: Scenarios to which user has access
           schema:
             $ref: '#/definitions/docs.ResponseScenarios'
+            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "422":
           description: Unprocessable entity
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
       summary: Get all scenarios of requesting user
       tags:
       - scenarios
@@ -1385,22 +1471,27 @@ paths:
           description: scenario that was added
           schema:
             $ref: '#/definitions/docs.ResponseScenario'
+            type: object
         "400":
           description: Bad request
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "422":
           description: Unprocessable entity
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
       summary: Add a scenario
       tags:
       - scenarios
@@ -1425,18 +1516,22 @@ paths:
           description: Deleted scenario
           schema:
             $ref: '#/definitions/docs.ResponseScenario'
+            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "422":
           description: Unprocessable entity
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
       summary: Delete a scenario
       tags:
       - scenarios
@@ -1460,18 +1555,22 @@ paths:
           description: Scenario requested by user
           schema:
             $ref: '#/definitions/docs.ResponseScenario'
+            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "422":
           description: Unprocessable entity
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
       summary: Get scenario
       tags:
       - scenarios
@@ -1504,22 +1603,27 @@ paths:
           description: Updated scenario.
           schema:
             $ref: '#/definitions/docs.ResponseScenario'
+            type: object
         "400":
           description: Bad request
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "422":
           description: Unprocessable entity
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
       summary: Update a scenario
       tags:
       - scenarios
@@ -1549,18 +1653,22 @@ paths:
           description: User that was deleted from scenario
           schema:
             $ref: '#/definitions/docs.ResponseUser'
+            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "422":
           description: Unprocessable entity
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
       summary: Delete a user from a scenario
       tags:
       - scenarios
@@ -1589,18 +1697,22 @@ paths:
           description: User that was added to scenario
           schema:
             $ref: '#/definitions/docs.ResponseUser'
+            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "422":
           description: Unprocessable entity
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
       summary: Add a user to a a scenario
       tags:
       - scenarios
@@ -1625,18 +1737,22 @@ paths:
           description: Array of users that have access to the scenario
           schema:
             $ref: '#/definitions/docs.ResponseUsers'
+            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "422":
           description: Unprocessable entity
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
       summary: Get users of a scenario
       tags:
       - scenarios
@@ -1666,18 +1782,22 @@ paths:
           description: Signals which belong to simulation model
           schema:
             $ref: '#/definitions/docs.ResponseSignals'
+            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "422":
           description: Unprocessable entity
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
       summary: Get all signals of one direction
       tags:
       - signals
@@ -1706,22 +1826,27 @@ paths:
           description: Signal that was added
           schema:
             $ref: '#/definitions/docs.ResponseSignal'
+            type: object
         "400":
           description: Bad request
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "422":
           description: Unprocessable entity
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
       summary: Add a signal to a signal mapping of a model
       tags:
       - signals
@@ -1746,22 +1871,27 @@ paths:
           description: Signal that was deleted
           schema:
             $ref: '#/definitions/docs.ResponseSignal'
+            type: object
         "400":
           description: Bad request
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "422":
           description: Unprocessable entity
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
       summary: Delete a signal
       tags:
       - signals
@@ -1785,22 +1915,27 @@ paths:
           description: Signal that was requested
           schema:
             $ref: '#/definitions/docs.ResponseSignal'
+            type: object
         "400":
           description: Bad request
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "422":
           description: Unprocessable entity
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
       summary: Get a signal
       tags:
       - signals
@@ -1831,22 +1966,27 @@ paths:
           description: Signal that was updated
           schema:
             $ref: '#/definitions/docs.ResponseSignal'
+            type: object
         "400":
           description: Bad request
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "422":
           description: Unprocessable entity
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
       summary: Update a signal
       tags:
       - signals
@@ -1866,18 +2006,22 @@ paths:
           description: Simulators requested
           schema:
             $ref: '#/definitions/docs.ResponseSimulators'
+            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "422":
           description: Unprocessable entity
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
       summary: Get all simulators
       tags:
       - simulators
@@ -1905,22 +2049,27 @@ paths:
           description: Simulator that was added
           schema:
             $ref: '#/definitions/docs.ResponseSimulator'
+            type: object
         "400":
           description: Bad request
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "422":
           description: Unprocessable entity
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
       summary: Add a simulator
       tags:
       - simulators
@@ -1945,22 +2094,27 @@ paths:
           description: Simulator that was deleted
           schema:
             $ref: '#/definitions/docs.ResponseSimulator'
+            type: object
         "400":
           description: Bad request
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "422":
           description: Unprocessable entity
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
       summary: Delete a simulator
       tags:
       - simulators
@@ -1984,22 +2138,27 @@ paths:
           description: Simulator that was requested
           schema:
             $ref: '#/definitions/docs.ResponseSimulator'
+            type: object
         "400":
           description: Bad request
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "422":
           description: Unprocessable entity
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
       summary: Get simulator
       tags:
       - simulators
@@ -2032,22 +2191,27 @@ paths:
           description: Simulator that was updated
           schema:
             $ref: '#/definitions/docs.ResponseSimulator'
+            type: object
         "400":
           description: Bad request
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "422":
           description: Unprocessable entity
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
       summary: Update a simulator
       tags:
       - simulators
@@ -2072,22 +2236,27 @@ paths:
           description: Action sent successfully
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "400":
           description: Bad request
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "422":
           description: Unprocessable entity
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
       summary: Send an action to simulator (only available if backend server is started
         with -amqp parameter)
       tags:
@@ -2113,22 +2282,27 @@ paths:
           description: Simulation models requested by user
           schema:
             $ref: '#/definitions/docs.ResponseSimulationModels'
+            type: object
         "400":
           description: Bad request
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "422":
           description: Unprocessable entity
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
       summary: Get all simulation models in which the simulator is used
       tags:
       - simulators
@@ -2148,18 +2322,22 @@ paths:
           description: Array of users
           schema:
             $ref: '#/definitions/docs.ResponseUsers'
+            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "422":
           description: Unprocessable entity
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
       summary: Get all users
       tags:
       - users
@@ -2187,18 +2365,22 @@ paths:
           description: Contains added user object
           schema:
             $ref: '#/definitions/docs.ResponseUser'
+            type: object
         "400":
           description: Bad request
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "422":
           description: Unprocessable entity
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
       summary: Add a user
       tags:
       - users
@@ -2223,18 +2405,22 @@ paths:
           description: deleted user
           schema:
             $ref: '#/definitions/docs.ResponseUser'
+            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "422":
           description: Unprocessable entity
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
       summary: Delete a user
       tags:
       - users
@@ -2258,22 +2444,27 @@ paths:
           description: requested user
           schema:
             $ref: '#/definitions/docs.ResponseUser'
+            type: object
         "403":
           description: Access forbidden.
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "422":
           description: Unprocessable entity
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
       summary: Get user
       tags:
       - users
@@ -2307,26 +2498,32 @@ paths:
           description: Contains updated user
           schema:
             $ref: '#/definitions/docs.ResponseUser'
+            type: object
         "400":
           description: Bad request.
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "403":
           description: Access forbidden.
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "422":
           description: Unprocessable entity
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
       summary: Update a user
       tags:
       - users
@@ -2351,18 +2548,22 @@ paths:
           description: Widgets to which belong to dashboard
           schema:
             $ref: '#/definitions/docs.ResponseWidgets'
+            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "422":
           description: Unprocessable entity
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
       summary: Get all widgets of dashboard
       tags:
       - widgets
@@ -2390,22 +2591,27 @@ paths:
           description: Widget that was added
           schema:
             $ref: '#/definitions/docs.ResponseWidget'
+            type: object
         "400":
           description: Bad request
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "422":
           description: Unprocessable entity
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
       summary: Add a widget to a dashboard
       tags:
       - widgets
@@ -2430,22 +2636,27 @@ paths:
           description: Widget that was deleted
           schema:
             $ref: '#/definitions/docs.ResponseWidget'
+            type: object
         "400":
           description: Bad request
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "422":
           description: Unprocessable entity
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
       summary: Delete a widget
       tags:
       - widgets
@@ -2469,22 +2680,27 @@ paths:
           description: Widget that was requested
           schema:
             $ref: '#/definitions/docs.ResponseWidget'
+            type: object
         "400":
           description: Bad request
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "422":
           description: Unprocessable entity
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
       summary: Get a widget
       tags:
       - widgets
@@ -2517,22 +2733,27 @@ paths:
           description: Widget that was updated
           schema:
             $ref: '#/definitions/docs.ResponseWidget'
+            type: object
         "400":
           description: Bad request
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "422":
           description: Unprocessable entity
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/docs.ResponseError'
+            type: object
       summary: Update a widget
       tags:
       - widgets
