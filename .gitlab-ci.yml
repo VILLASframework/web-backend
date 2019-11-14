@@ -11,7 +11,7 @@ variables:
   POSTGRES_HOST: postgres
   RABBITMQ_DEFAULT_USER: villas
   RABBITMQ_DEFAULT_PASS: villas
-  AMQP_URL: 'amqp://villas:villas@rabbitmq:5672'
+  AMQPURL: 'amqp://villas:villas@rabbitmq:5672'
 
 stages:
   - prepare
@@ -83,7 +83,7 @@ test:gotest:
     DB_HOST: ${POSTGRES_HOST}
     DB_USER: ${POSTGRES_USER}
     DB_PASS: ${POSTGRES_PASSWORD}
-    AMQP_URL: ${AMQP_URL}
+    AMQP_URL: ${AMQPURL}
     MODE: test
   tags:
     - docker
@@ -161,7 +161,7 @@ test:healthz:
   extends: test:database
   variables:
     TEST_FOLDER: routes/healthz
-    AMQP_URL: ${AMQP_URL}
+    AMQP_URL: ${AMQPURL}
 
 # Stage: deploy
 ##############################################################################
