@@ -59,7 +59,10 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		panic(m)
 	}
-	db = database.InitDB(configuration.GolbalConfig)
+	db, err = database.InitDB(configuration.GolbalConfig)
+	if err != nil {
+		panic(m)
+	}
 	defer db.Close()
 
 	router = gin.Default()

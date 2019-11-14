@@ -43,7 +43,11 @@ func main() {
 		log.Printf("Error during initialization of global configuration: %v, aborting.", err.Error())
 		return
 	}
-	db := database.InitDB(configuration.GolbalConfig)
+	db, err := database.InitDB(configuration.GolbalConfig)
+	if err != nil {
+		log.Printf("Error during initialization of database: %v, aborting.", err.Error())
+		return
+	}
 	defer db.Close()
 
 	m, err := configuration.GolbalConfig.String("mode")

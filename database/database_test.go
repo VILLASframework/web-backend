@@ -17,7 +17,11 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		panic(m)
 	}
-	db = InitDB(configuration.GolbalConfig)
+
+	db, err = InitDB(configuration.GolbalConfig)
+	if err != nil {
+		panic(m)
+	}
 
 	// Verify that you can connect to the database
 	err = db.DB().Ping()

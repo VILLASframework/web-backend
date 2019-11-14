@@ -21,7 +21,6 @@ func InitConfig() error {
 		dbName     = flag.String("dbname", "villasdb", "Name of the database to use (default is villasdb)")
 		dbUser     = flag.String("dbuser", "", "Username of database connection (default is <empty>)")
 		dbPass     = flag.String("dbpass", "", "Password of database connection (default is <empty>)")
-		dbInit     = flag.Bool("dbinit", false, "Initialize database with test data (default is off)")
 		dbSSLMode  = flag.String("dbsslmode", "disable", "SSL mode of DB (default is disable)") // TODO: change default for production
 		amqpURL    = flag.String("amqp", "", "If set, use this url to connect to an AMQP broker (default is disabled)")
 		configFile = flag.String("configFile", "", "Path to YAML configuration file")
@@ -31,19 +30,11 @@ func InitConfig() error {
 	)
 	flag.Parse()
 
-	var dbInitStr string
-	if *dbInit {
-		dbInitStr = "true"
-	} else {
-		dbInitStr = "false"
-	}
-
 	static := map[string]string{
 		"db.host":   *dbHost,
 		"db.name":   *dbName,
 		"db.user":   *dbUser,
 		"db.pass":   *dbPass,
-		"db.init":   dbInitStr,
 		"db.ssl":    *dbSSLMode,
 		"amqp.url":  *amqpURL,
 		"mode":      *mode,
@@ -57,7 +48,6 @@ func InitConfig() error {
 		"DB_USER":    "db.user",
 		"DB_PASS":    "db.pass",
 		"DB_SSLMODE": "db.ssl",
-		"DB_INIT":    "db.init",
 		"AMQP_URL":   "amqp.url",
 		"BASE_HOST":  "base.host",
 		"BASE_PATH":  "base.path",

@@ -3,6 +3,7 @@ package database
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
@@ -12,14 +13,34 @@ import (
 var DBpool *gorm.DB // database used by backend
 
 // Initialize connection to the database
-func InitDB(cfg *config.Config) *gorm.DB {
+func InitDB(cfg *config.Config) (*gorm.DB, error) {
 	name, err := cfg.String("db.name")
+	if err != nil {
+		return nil, err
+	}
 	host, err := cfg.String("db.host")
+	if err != nil {
+		return nil, err
+	}
 	user, err := cfg.String("db.user")
-	pass, err := cfg.String("db.pass")
+	if err != nil && !strings.Contains(err.Error(), "Required setting 'db.user' not set") {
+		return nil, err
+	}
+	pass := ""
+	if user != "" {
+		pass, err = cfg.String("db.pass")
+		if err != nil {
+			return nil, err
+		}
+	}
 	sslmode, err := cfg.String("db.ssl")
-	init, err := cfg.Bool("db.init")
+	if err != nil {
+		return nil, err
+	}
 	mode, err := cfg.String("mode")
+	if err != nil {
+		return nil, err
+	}
 
 	dbinfo := fmt.Sprintf("host=%s sslmode=%s dbname=%s", host, sslmode, name)
 	if user != "" && pass != "" {
@@ -28,24 +49,27 @@ func InitDB(cfg *config.Config) *gorm.DB {
 
 	db, err := gorm.Open("postgres", dbinfo)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	DBpool = db
 
 	MigrateModels(db)
 
-	if mode == "test" || init {
+	if mode == "test" {
 		DropTables(db)
 		log.Println("Database tables dropped")
 
-		DBAddTestData(db)
+		err = DBAddTestData(db)
+		if err != nil {
+			return nil, err
+		}
 		log.Println("Database initialized with test data")
 	}
 
 	log.Println("Database connection established")
 
-	return db
+	return db, nil
 }
 
 // Connection pool to already opened DB

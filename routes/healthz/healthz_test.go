@@ -21,7 +21,9 @@ func TestHealthz(t *testing.T) {
 	assert.NoError(t, err)
 
 	// connect DB
-	db = database.InitDB(configuration.GolbalConfig)
+	db, err = database.InitDB(configuration.GolbalConfig)
+	assert.NoError(t, err)
+	defer db.Close()
 
 	router = gin.Default()
 
@@ -37,7 +39,8 @@ func TestHealthz(t *testing.T) {
 	assert.Equalf(t, 500, code, "Response body: \n%v\n", resp)
 
 	// reconnect DB
-	db = database.InitDB(configuration.GolbalConfig)
+	db, err = database.InitDB(configuration.GolbalConfig)
+	assert.NoError(t, err)
 	defer db.Close()
 
 	// test healthz endpoint for connected DB and unconnected AMQP client
