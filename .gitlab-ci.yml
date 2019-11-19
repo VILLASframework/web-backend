@@ -15,22 +15,9 @@ variables:
   PORT: 4000
 
 stages:
-  - prepare
   - build
   - test
   - deploy
-
-# Stage: prepare
-##############################################################################
-
-# Build docker images
-prepare:redoc:
-  stage: prepare
-  script:
-    - docker build -f doc/api/Dockerfile -t redoc .
-  tags:
-    - shell
-    - linux
 
 # Stage: build
 ##############################################################################
@@ -58,24 +45,8 @@ build:docker:
   script:
     - docker build -t ${DOCKER_IMAGE} .
 
-
 # Stage: test
 ##############################################################################
-
-test:apidoc:
-  stage: test
-  tags:
-    - docker
-  image: redoc
-  script:
-    - cd doc/api
-    - redoc-cli bundle --cdn --title "VILLASweb Backend API Documentation" --output index.html swagger.json
-  dependencies:
-    - build:backend
-  artifacts:
-    paths:
-      - doc/api/index.html
-      - doc/api/swagger.json
 
 test:gotest:
   stage: test
@@ -180,19 +151,3 @@ deploy:docker:
   tags:
     - shell
     - linux
-
-# deploy:upload:
-#   stage: deploy
-#   image:
-#     name: rclone/rclone:1.50
-#     entrypoint: [""]
-#   before_script:
-#     - rclone config create fein webdav url ${DEPLOY_PATH} vendor other user ${DEPLOY_USER} pass ${DEPLOY_PASS}
-#   script:
-#     - rclone copy --include=index.html --include=swagger.json doc/api fein:villas/api/web
-#   dependencies:
-#     - test:apidoc
-#   only:
-#     - master
-#   tags:
-#     - shell
