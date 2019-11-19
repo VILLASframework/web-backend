@@ -12,6 +12,7 @@ variables:
   RABBITMQ_DEFAULT_USER: villas
   RABBITMQ_DEFAULT_PASS: villas
   AMQPURL: 'amqp://villas:villas@rabbitmq:5672'
+  PORT: 4000
 
 stages:
   - prepare

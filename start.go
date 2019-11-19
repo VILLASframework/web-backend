@@ -69,8 +69,13 @@ func main() {
 		log.Printf("Error reading base.path from global configuration: %v, aborting.", err.Error())
 		return
 	}
+	port, err := configuration.GolbalConfig.String("port")
+	if err != nil {
+		log.Printf("Error reading port from global configuration: %v, aborting.", err.Error())
+		return
+	}
 
-	apidocs.SwaggerInfo.Host = baseHost
+	apidocs.SwaggerInfo.Host = baseHost + ":" + port
 	apidocs.SwaggerInfo.BasePath = basePath
 
 	metrics.InitCounters(db)
@@ -129,5 +134,5 @@ func main() {
 		log.Printf("Connected AMQP client to %s", amqpurl)
 	}
 	// server at port 4000 to match frontend's redirect path
-	r.Run(":4000")
+	r.Run(":" + port)
 }

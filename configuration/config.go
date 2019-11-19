@@ -25,7 +25,8 @@ func InitConfig() error {
 		amqpURL    = flag.String("amqp", "", "If set, use this url to connect to an AMQP broker (default is disabled)")
 		configFile = flag.String("configFile", "", "Path to YAML configuration file")
 		mode       = flag.String("mode", "release", "Select debug/release/test mode (default is release)")
-		baseHost   = flag.String("base-host", "localhost:4000", "The host:port at which the backend is hosted (default: localhost:4000)")
+		port       = flag.String("port", "4000", "Port of the backend (default is 4000)")
+		baseHost   = flag.String("base-host", "localhost", "The host at which the backend is hosted (default: localhost)")
 		basePath   = flag.String("base-path", "/api/v2", "The path at which the API routes are located (default /api/v2)")
 	)
 	flag.Parse()
@@ -38,6 +39,7 @@ func InitConfig() error {
 		"db.ssl":    *dbSSLMode,
 		"amqp.url":  *amqpURL,
 		"mode":      *mode,
+		"port":      *port,
 		"base.host": *baseHost,
 		"base.path": *basePath,
 	}
@@ -52,6 +54,7 @@ func InitConfig() error {
 		"BASE_HOST":  "base.host",
 		"BASE_PATH":  "base.path",
 		"MODE":       "mode",
+		"PORT":       "port",
 	}
 
 	defaults := config.NewStatic(static)
