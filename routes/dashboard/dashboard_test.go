@@ -11,6 +11,7 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/stretchr/testify/assert"
+	"log"
 	"os"
 	"testing"
 )
@@ -41,7 +42,7 @@ func addScenario(token string) (scenarioID uint) {
 	_, resp, err := helper.TestEndpoint(router, token,
 		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenario})
 	if err != nil {
-		panic(fmt.Sprint("The following error happend on POSTing a scenario: ", err.Error()))
+		log.Panic("The following error happend on POSTing a scenario: ", err.Error())
 	}
 
 	// Read newScenario's ID from the response

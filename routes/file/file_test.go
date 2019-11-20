@@ -286,7 +286,6 @@ func TestAddFile(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equalf(t, 200, w.Code, "Response body: \n%v\n", w.Body)
-	//fmt.Println(w.Body)
 
 	newFileID, err := helper.GetResponseID(w.Body)
 	assert.NoError(t, err)
@@ -360,7 +359,6 @@ func TestUpdateFile(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equalf(t, 200, w.Code, "Response body: \n%v\n", w.Body)
-	//fmt.Println(w.Body)
 
 	newFileID, err := helper.GetResponseID(w.Body)
 	assert.NoError(t, err)
@@ -435,8 +433,6 @@ func TestUpdateFile(t *testing.T) {
 	req.Header.Add("Authorization", "Bearer "+token)
 	router.ServeHTTP(w_updated, req)
 	assert.Equalf(t, 200, w_updated.Code, "Response body: \n%v\n", w_updated.Body)
-	//fmt.Println(w_updated.Body)
-	//assert.Equal(t, c2, w_updated.Header().Get("file"))
 
 	newFileIDUpdated, err := helper.GetResponseID(w_updated.Body)
 
@@ -484,7 +480,6 @@ func TestDeleteFile(t *testing.T) {
 	assert.NoError(t, err, "IO copy")
 	contentType := bodyWriter.FormDataContentType()
 	bodyWriter.Close()
-	//req, err := http.NewRequest("POST", "/api/files?objectID=1&objectType=widget", bodyBuf)
 
 	// Create the request
 	w := httptest.NewRecorder()
