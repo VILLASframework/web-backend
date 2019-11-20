@@ -10,7 +10,7 @@ It is based  upon [gin-gonic](https://github.com/gin-gonic/gin) and [GORM](http:
 ## Usage
 
 ### Requirements
-- Go (version 1.11 or higher)
+- Go (version 1.11 or higher), Go Modules are used for dependency management
 - PostgreSQL database (tested for version 11, instructions see below)
 - swag (https://github.com/swaggo/swag) for automated API documentation creation 
 
