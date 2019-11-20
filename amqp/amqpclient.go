@@ -6,6 +6,7 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"github.com/streadway/amqp"
 	"github.com/tidwall/gjson"
+	"log"
 	"strings"
 	"time"
 )
@@ -102,7 +103,7 @@ func ConnectAMQP(uri string) error {
 			db := database.GetDB()
 			err = db.Where("UUID = ?", gjson.Get(content, "properties.uuid")).Find(sToBeUpdated).Error
 			if err != nil {
-				fmt.Println("AMQP: Unable to find simulator with UUID: ", gjson.Get(content, "properties.uuid"), " DB error message: ", err)
+				log.Println("AMQP: Unable to find simulator with UUID: ", gjson.Get(content, "properties.uuid"), " DB error message: ", err)
 			}
 
 			err = db.Model(&sToBeUpdated).Updates(map[string]interface{}{
@@ -114,10 +115,10 @@ func ConnectAMQP(uri string) error {
 				"RawProperties": gjson.Get(content, "properties"),
 			}).Error
 			if err != nil {
-				fmt.Println("AMQP: Unable to update simulator in DB: ", err)
+				log.Println("AMQP: Unable to update simulator in DB: ", err)
 			}
 
-			fmt.Println("AMQP: Updated simulator with UUID ", gjson.Get(content, "properties.uuid"))
+			log.Println("AMQP: Updated simulator with UUID ", gjson.Get(content, "properties.uuid"))
 		}
 	}()
 
@@ -155,7 +156,7 @@ func SendActionAMQP(action Action, uuid string) error {
 }
 
 func PingAMQP() error {
-	fmt.Println("AMQP: sending ping command to all simulators")
+	log.Println("AMQP: sending ping command to all simulators")
 
 	var a Action
 	a.Act = "ping"

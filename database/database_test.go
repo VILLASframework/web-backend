@@ -3,6 +3,7 @@ package database
 import (
 	"fmt"
 	"github.com/jinzhu/gorm"
+	"log"
 	"os"
 	"testing"
 
@@ -26,8 +27,7 @@ func TestMain(m *testing.M) {
 	// Verify that you can connect to the database
 	err = db.DB().Ping()
 	if err != nil {
-		fmt.Println("Error: DB must ping to run tests")
-		return
+		log.Panic("Error: DB must ping to run tests")
 	}
 
 	defer db.Close()
