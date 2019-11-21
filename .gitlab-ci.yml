@@ -13,6 +13,7 @@ variables:
   RABBITMQ_DEFAULT_PASS: villas
   AMQPURL: 'amqp://villas:villas@rabbitmq:5672'
   PORT: 4000
+  GO_IMAGE: golang:1.13-buster
 
 stages:
   - build
@@ -26,7 +27,7 @@ build:backend:
   stage: build
   tags:
     - docker
-  image: golang:1.12.9-buster
+  image: ${GO_IMAGE}
   script:
     - go mod tidy
     - go install github.com/swaggo/swag/cmd/swag
@@ -59,7 +60,7 @@ test:gotest:
     MODE: test
   tags:
     - docker
-  image: golang:1.12.9-buster
+  image: ${GO_IMAGE}
   script:
     - go mod tidy
     - go test $(go list ./... )
@@ -81,7 +82,7 @@ test:database:
     DB_PASS: ${POSTGRES_PASSWORD}
   tags:
     - docker
-  image: golang:1.12.9-buster
+  image: ${GO_IMAGE}
   script:
     - go mod tidy
     - cd ${TEST_FOLDER}
