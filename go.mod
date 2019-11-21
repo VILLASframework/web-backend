@@ -22,3 +22,5 @@ require (
 	gopkg.in/go-playground/validator.v9 v9.30.0
 	gopkg.in/ini.v1 v1.51.0 // indirect
 )
+
+go 1.13
