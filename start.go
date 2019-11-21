@@ -96,7 +96,7 @@ func main() {
 		return
 	}
 
-	apidocs.SwaggerInfo.Host = baseHost + ":" + port
+	apidocs.SwaggerInfo.Host = baseHost
 	apidocs.SwaggerInfo.BasePath = basePath
 
 	metrics.InitCounters(db)
