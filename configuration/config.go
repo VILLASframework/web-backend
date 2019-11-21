@@ -47,7 +47,7 @@ func InitConfig() error {
 		configFile = flag.String("configFile", "", "Path to YAML configuration file")
 		mode       = flag.String("mode", "release", "Select debug/release/test mode (default is release)")
 		port       = flag.String("port", "4000", "Port of the backend (default is 4000)")
-		baseHost   = flag.String("base-host", "localhost", "The host at which the backend is hosted (default: localhost)")
+		baseHost   = flag.String("base-host", "localhost:4000", "The host at which the backend is hosted (default: localhost)")
 		basePath   = flag.String("base-path", "/api/v2", "The path at which the API routes are located (default /api/v2)")
 	)
 	flag.Parse()
