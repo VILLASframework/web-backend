@@ -122,24 +122,29 @@ func ConnectAMQP(uri string) error {
 
 			var sToBeUpdated database.Simulator
 			db := database.GetDB()
-			err = db.Where("UUID = ?", gjson.Get(content, "properties.uuid")).Find(sToBeUpdated).Error
-			if err != nil {
-				log.Println("AMQP: Unable to find simulator with UUID: ", gjson.Get(content, "properties.uuid"), " DB error message: ", err)
-			}
+			simulatorUUID := gjson.Get(content, "properties.uuid").String()
+			if simulatorUUID == "" {
+				log.Println("AMQP: Could not extract UUID of simulator from content of received message, SIMULATOR NOT UPDATED")
+			} else {
+				err = db.Where("UUID = ?", simulatorUUID).Find(sToBeUpdated).Error
+				if err != nil {
+					log.Println("AMQP: Unable to find simulator with UUID: ", gjson.Get(content, "properties.uuid"), " DB error message: ", err)
+				}
 
-			err = db.Model(&sToBeUpdated).Updates(map[string]interface{}{
-				"Host":          gjson.Get(content, "host"),
-				"Modeltype":     gjson.Get(content, "model"),
-				"Uptime":        gjson.Get(content, "uptime"),
-				"State":         gjson.Get(content, "state"),
-				"StateUpdateAt": time.Now().String(),
-				"RawProperties": gjson.Get(content, "properties"),
-			}).Error
-			if err != nil {
-				log.Println("AMQP: Unable to update simulator in DB: ", err)
-			}
+				err = db.Model(&sToBeUpdated).Updates(map[string]interface{}{
+					"Host":          gjson.Get(content, "host"),
+					"Modeltype":     gjson.Get(content, "model"),
+					"Uptime":        gjson.Get(content, "uptime"),
+					"State":         gjson.Get(content, "state"),
+					"StateUpdateAt": time.Now().String(),
+					"RawProperties": gjson.Get(content, "properties"),
+				}).Error
+				if err != nil {
+					log.Println("AMQP: Unable to update simulator in DB: ", err)
+				}
 
-			log.Println("AMQP: Updated simulator with UUID ", gjson.Get(content, "properties.uuid"))
+				log.Println("AMQP: Updated simulator with UUID ", gjson.Get(content, "properties.uuid"))
+			}
 		}
 	}()
 
