@@ -168,7 +168,7 @@ func TestAddSimulationModel(t *testing.T) {
 	// try to POST with no access
 	// should result in unprocessable entity
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/models", "POST", helper.KeyModels{"model": newSimulationModel})
+		"/api/models", "POST", helper.KeyModels{"simulationModel": newSimulationModel})
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
@@ -190,12 +190,12 @@ func TestAddSimulationModel(t *testing.T) {
 
 	// test POST models/ $newSimulationModel
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/models", "POST", helper.KeyModels{"model": newSimulationModel})
+		"/api/models", "POST", helper.KeyModels{"simulationModel": newSimulationModel})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// Compare POST's response with the newSimulationModel
-	err = helper.CompareResponse(resp, helper.KeyModels{"model": newSimulationModel})
+	err = helper.CompareResponse(resp, helper.KeyModels{"simulationModel": newSimulationModel})
 	assert.NoError(t, err)
 
 	// Read newSimulationModel's ID from the response
@@ -209,7 +209,7 @@ func TestAddSimulationModel(t *testing.T) {
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// Compare GET's response with the newSimulationModel
-	err = helper.CompareResponse(resp, helper.KeyModels{"model": newSimulationModel})
+	err = helper.CompareResponse(resp, helper.KeyModels{"simulationModel": newSimulationModel})
 	assert.NoError(t, err)
 
 	// try to POST a malformed simulation model
@@ -219,7 +219,7 @@ func TestAddSimulationModel(t *testing.T) {
 	}
 	// this should NOT work and return a unprocessable entity 442 status code
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/models", "POST", helper.KeyModels{"model": malformedNewSimulationModel})
+		"/api/models", "POST", helper.KeyModels{"simulationModel": malformedNewSimulationModel})
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
@@ -261,7 +261,7 @@ func TestUpdateSimulationModel(t *testing.T) {
 		StartParameters: database.SimulationModelA.StartParameters,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/models", "POST", helper.KeyModels{"model": newSimulationModel})
+		"/api/models", "POST", helper.KeyModels{"simulationModel": newSimulationModel})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -282,7 +282,7 @@ func TestUpdateSimulationModel(t *testing.T) {
 	// try to PUT with no access
 	// should result in unprocessable entity
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/models/%v", newSimulationModelID), "PUT", helper.KeyModels{"model": updatedSimulationModel})
+		fmt.Sprintf("/api/models/%v", newSimulationModelID), "PUT", helper.KeyModels{"simulationModel": updatedSimulationModel})
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
@@ -294,7 +294,7 @@ func TestUpdateSimulationModel(t *testing.T) {
 	// try to PUT as guest
 	// should NOT work and result in unprocessable entity
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/models/%v", newSimulationModelID), "PUT", helper.KeyModels{"model": updatedSimulationModel})
+		fmt.Sprintf("/api/models/%v", newSimulationModelID), "PUT", helper.KeyModels{"simulationModel": updatedSimulationModel})
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
@@ -312,24 +312,24 @@ func TestUpdateSimulationModel(t *testing.T) {
 
 	// test PUT
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/models/%v", newSimulationModelID), "PUT", helper.KeyModels{"model": updatedSimulationModel})
+		fmt.Sprintf("/api/models/%v", newSimulationModelID), "PUT", helper.KeyModels{"simulationModel": updatedSimulationModel})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// Compare PUT's response with the updatedSimulationModel
-	err = helper.CompareResponse(resp, helper.KeyModels{"model": updatedSimulationModel})
+	err = helper.CompareResponse(resp, helper.KeyModels{"simulationModel": updatedSimulationModel})
 	assert.NoError(t, err)
 
 	//Change simulator ID to use second simulator available in DB
 	updatedSimulationModel.SimulatorID = simulatorID + 1
 	// test PUT again
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/models/%v", newSimulationModelID), "PUT", helper.KeyModels{"model": updatedSimulationModel})
+		fmt.Sprintf("/api/models/%v", newSimulationModelID), "PUT", helper.KeyModels{"simulationModel": updatedSimulationModel})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// Compare PUT's response with the updatedSimulationModel
-	err = helper.CompareResponse(resp, helper.KeyModels{"model": updatedSimulationModel})
+	err = helper.CompareResponse(resp, helper.KeyModels{"simulationModel": updatedSimulationModel})
 	assert.NoError(t, err)
 
 	// Get the updatedSimulationModel
@@ -339,12 +339,12 @@ func TestUpdateSimulationModel(t *testing.T) {
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// Compare GET's response with the updatedSimulationModel
-	err = helper.CompareResponse(resp, helper.KeyModels{"model": updatedSimulationModel})
+	err = helper.CompareResponse(resp, helper.KeyModels{"simulationModel": updatedSimulationModel})
 	assert.NoError(t, err)
 
 	// try to update a simulation model that does not exist (should return not found 404 status code)
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/models/%v", newSimulationModelID+1), "PUT", helper.KeyModels{"model": updatedSimulationModel})
+		fmt.Sprintf("/api/models/%v", newSimulationModelID+1), "PUT", helper.KeyModels{"simulationModel": updatedSimulationModel})
 	assert.NoError(t, err)
 	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
 }
@@ -373,7 +373,7 @@ func TestDeleteSimulationModel(t *testing.T) {
 
 	// test POST models/ $newSimulationModel
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/models", "POST", helper.KeyModels{"model": newSimulationModel})
+		"/api/models", "POST", helper.KeyModels{"simulationModel": newSimulationModel})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -410,7 +410,7 @@ func TestDeleteSimulationModel(t *testing.T) {
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// Compare DELETE's response with the newSimulationModel
-	err = helper.CompareResponse(resp, helper.KeyModels{"model": newSimulationModel})
+	err = helper.CompareResponse(resp, helper.KeyModels{"simulationModel": newSimulationModel})
 	assert.NoError(t, err)
 
 	// Again count the number of all the simulation models returned
@@ -444,7 +444,7 @@ func TestGetAllSimulationModelsOfScenario(t *testing.T) {
 		StartParameters: database.SimulationModelA.StartParameters,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/models", "POST", helper.KeyModels{"model": newSimulationModel})
+		"/api/models", "POST", helper.KeyModels{"simulationModel": newSimulationModel})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 

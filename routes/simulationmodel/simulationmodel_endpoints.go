@@ -43,7 +43,7 @@ func RegisterSimulationModelEndpoints(r *gin.RouterGroup) {
 // @Summary Get all simulation models of scenario
 // @ID getSimulationModels
 // @Produce  json
-// @Tags models
+// @Tags simulationModels
 // @Success 200 {object} docs.ResponseSimulationModels "Simulation models which belong to scenario"
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
@@ -62,7 +62,7 @@ func getSimulationModels(c *gin.Context) {
 	var models []database.SimulationModel
 	err := db.Order("ID asc").Model(so).Related(&models, "Models").Error
 	if !helper.DBError(c, err) {
-		c.JSON(http.StatusOK, gin.H{"models": models})
+		c.JSON(http.StatusOK, gin.H{"simulationModels": models})
 	}
 
 }
@@ -72,7 +72,7 @@ func getSimulationModels(c *gin.Context) {
 // @ID addSimulationModel
 // @Accept json
 // @Produce json
-// @Tags models
+// @Tags simulationModels
 // @Success 200 {object} docs.ResponseSimulationModel "simulation model that was added"
 // @Failure 400 {object} docs.ResponseError "Bad request"
 // @Failure 404 {object} docs.ResponseError "Not found"
@@ -109,7 +109,7 @@ func addSimulationModel(c *gin.Context) {
 	// add the new simulation model to the scenario
 	err = newSimulationModel.addToScenario()
 	if !helper.DBError(c, err) {
-		c.JSON(http.StatusOK, gin.H{"model": newSimulationModel.SimulationModel})
+		c.JSON(http.StatusOK, gin.H{"simulationModel": newSimulationModel.SimulationModel})
 	}
 
 }
@@ -117,7 +117,7 @@ func addSimulationModel(c *gin.Context) {
 // updateSimulationModel godoc
 // @Summary Update a simulation model
 // @ID updateSimulationModel
-// @Tags models
+// @Tags simulationModels
 // @Accept json
 // @Produce json
 // @Success 200 {object} docs.ResponseSimulationModel "simulation model that was added"
@@ -144,7 +144,7 @@ func updateSimulationModel(c *gin.Context) {
 	}
 
 	// Validate the request
-	if err := req.Model.validate(); err != nil {
+	if err := req.SimulationModel.validate(); err != nil {
 		helper.BadRequestError(c, err.Error())
 		return
 	}
@@ -155,7 +155,7 @@ func updateSimulationModel(c *gin.Context) {
 	// Finally, update the simulation model
 	err = oldSimulationModel.Update(updatedSimulationModel)
 	if !helper.DBError(c, err) {
-		c.JSON(http.StatusOK, gin.H{"model": updatedSimulationModel.SimulationModel})
+		c.JSON(http.StatusOK, gin.H{"simulationModel": updatedSimulationModel.SimulationModel})
 	}
 
 }
@@ -163,7 +163,7 @@ func updateSimulationModel(c *gin.Context) {
 // getSimulationModel godoc
 // @Summary Get a simulation model
 // @ID getSimulationModel
-// @Tags models
+// @Tags simulationModels
 // @Produce json
 // @Success 200 {object} docs.ResponseSimulationModel "simulation model that was requested"
 // @Failure 400 {object} docs.ResponseError "Bad request"
@@ -180,13 +180,13 @@ func getSimulationModel(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"model": m.SimulationModel})
+	c.JSON(http.StatusOK, gin.H{"simulationModel": m.SimulationModel})
 }
 
 // deleteSimulationModel godoc
 // @Summary Delete a simulation model
 // @ID deleteSimulationModel
-// @Tags models
+// @Tags simulationModels
 // @Produce json
 // @Success 200 {object} docs.ResponseSimulationModel "simulation model that was deleted"
 // @Failure 400 {object} docs.ResponseError "Bad request"
@@ -205,6 +205,6 @@ func deleteSimulationModel(c *gin.Context) {
 
 	err := m.delete()
 	if !helper.DBError(c, err) {
-		c.JSON(http.StatusOK, gin.H{"model": m.SimulationModel})
+		c.JSON(http.StatusOK, gin.H{"simulationModel": m.SimulationModel})
 	}
 }

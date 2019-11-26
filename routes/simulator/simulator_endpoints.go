@@ -227,7 +227,7 @@ func getModelsOfSimulator(c *gin.Context) {
 	// get all associated simulation models
 	allModels, _, err := s.getModels()
 	if !helper.DBError(c, err) {
-		c.JSON(http.StatusOK, gin.H{"models": allModels})
+		c.JSON(http.StatusOK, gin.H{"simulationModels": allModels})
 	}
 
 }

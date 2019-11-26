@@ -63,11 +63,11 @@ type ResponseScenario struct {
 }
 
 type ResponseSimulationModels struct {
-	models []database.SimulationModel
+	simulationModels []database.SimulationModel
 }
 
 type ResponseSimulationModel struct {
-	model database.SimulationModel
+	simulationModel database.SimulationModel
 }
 
 type ResponseDashboards struct {

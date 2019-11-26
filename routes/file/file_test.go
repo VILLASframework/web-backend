@@ -135,7 +135,7 @@ func addScenarioAndSimulatorAndSimulationModelAndDashboardAndWidget() (scenarioI
 		StartParameters: database.SimulationModelA.StartParameters,
 	}
 	_, resp, _ = helper.TestEndpoint(router, token,
-		"/api/models", "POST", helper.KeyModels{"model": newSimulationModel})
+		"/api/models", "POST", helper.KeyModels{"simulationModel": newSimulationModel})
 
 	// Read newSimulationModel's ID from the response
 	newSimulationModelID, _ := helper.GetResponseID(resp)

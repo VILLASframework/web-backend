@@ -114,7 +114,7 @@ func addScenarioAndSimulatorAndSimulationModel() (scenarioID uint, simulatorID u
 		StartParameters: database.SimulationModelA.StartParameters,
 	}
 	_, resp, _ = helper.TestEndpoint(router, token,
-		"/api/models", "POST", helper.KeyModels{"model": newSimulationModel})
+		"/api/models", "POST", helper.KeyModels{"simulationModel": newSimulationModel})
 
 	// Read newSimulationModel's ID from the response
 	newSimulationModelID, _ := helper.GetResponseID(resp)
@@ -235,7 +235,7 @@ func TestAddSignal(t *testing.T) {
 	}
 	// this should NOT work and return a unprocessable entity 442 status code
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/signals", "POST", helper.KeyModels{"model": malformedNewSignal})
+		"/api/signals", "POST", helper.KeyModels{"signal": malformedNewSignal})
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 

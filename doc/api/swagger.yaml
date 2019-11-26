@@ -293,13 +293,13 @@ definitions:
     type: object
   docs.ResponseSimulationModel:
     properties:
-      model:
+      simulationModel:
         $ref: '#/definitions/database.SimulationModel'
         type: object
     type: object
   docs.ResponseSimulationModels:
     properties:
-      models:
+      simulationModels:
         items:
           $ref: '#/definitions/database.SimulationModel'
         type: array
@@ -417,13 +417,13 @@ definitions:
     type: object
   simulationmodel.addSimulationModelRequest:
     properties:
-      model:
+      simulationModel:
         $ref: '#/definitions/simulationmodel.validNewSimulationModel'
         type: object
     type: object
   simulationmodel.updateSimulationModelRequest:
     properties:
-      model:
+      simulationModel:
         $ref: '#/definitions/simulationmodel.validUpdatedSimulationModel'
         type: object
     type: object
@@ -1221,7 +1221,7 @@ paths:
             type: object
       summary: Get all simulation models of scenario
       tags:
-      - models
+      - simulationModels
     post:
       consumes:
       - application/json
@@ -1269,7 +1269,7 @@ paths:
             type: object
       summary: Add a simulation model to a scenario
       tags:
-      - models
+      - simulationModels
   /models/{modelID}:
     delete:
       operationId: deleteSimulationModel
@@ -1314,7 +1314,7 @@ paths:
             type: object
       summary: Delete a simulation model
       tags:
-      - models
+      - simulationModels
     get:
       operationId: getSimulationModel
       parameters:
@@ -1358,7 +1358,7 @@ paths:
             type: object
       summary: Get a simulation model
       tags:
-      - models
+      - simulationModels
     put:
       consumes:
       - application/json
@@ -1411,7 +1411,7 @@ paths:
             type: object
       summary: Update a simulation model
       tags:
-      - models
+      - simulationModels
   /scenarios:
     get:
       operationId: getScenarios

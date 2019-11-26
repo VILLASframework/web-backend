@@ -805,7 +805,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "models"
+                    "simulationModels"
                 ],
                 "summary": "Get all simulation models of scenario",
                 "operationId": "getSimulationModels",
@@ -864,7 +864,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "models"
+                    "simulationModels"
                 ],
                 "summary": "Add a simulation model to a scenario",
                 "operationId": "addSimulationModel",
@@ -932,7 +932,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "models"
+                    "simulationModels"
                 ],
                 "summary": "Get a simulation model",
                 "operationId": "getSimulationModel",
@@ -998,7 +998,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "models"
+                    "simulationModels"
                 ],
                 "summary": "Update a simulation model",
                 "operationId": "updateSimulationModel",
@@ -1071,7 +1071,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "models"
+                    "simulationModels"
                 ],
                 "summary": "Delete a simulation model",
                 "operationId": "deleteSimulationModel",
@@ -3485,7 +3485,7 @@
         "docs.ResponseSimulationModel": {
             "type": "object",
             "properties": {
-                "model": {
+                "simulationModel": {
                     "type": "object",
                     "$ref": "#/definitions/database.SimulationModel"
                 }
@@ -3494,7 +3494,7 @@
         "docs.ResponseSimulationModels": {
             "type": "object",
             "properties": {
-                "models": {
+                "simulationModels": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/database.SimulationModel"
@@ -3673,7 +3673,7 @@
         "simulationmodel.addSimulationModelRequest": {
             "type": "object",
             "properties": {
-                "model": {
+                "simulationModel": {
                     "type": "object",
                     "$ref": "#/definitions/simulationmodel.validNewSimulationModel"
                 }
@@ -3682,7 +3682,7 @@
         "simulationmodel.updateSimulationModelRequest": {
             "type": "object",
             "properties": {
-                "model": {
+                "simulationModel": {
                     "type": "object",
                     "$ref": "#/definitions/simulationmodel.validUpdatedSimulationModel"
                 }
