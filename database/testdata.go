@@ -190,11 +190,16 @@ var FileD = File{
 
 // Widgets
 var customPropertiesA = json.RawMessage(`{"property1" : "testValue1A", "property2" : "testValue2A", "property3" : 42}`)
-var customPropertiesB = json.RawMessage(`{"property1" : "testValue1B", "property2" : "testValue2B", "property3" : 43}`)
+var customPropertiesBox = json.RawMessage(`{"border_color" : "#FF0000", "background_color" : "yellow", "background_color_opacity" : 43}`)
+var customPropertiesSlider = json.RawMessage(`{"default_value" : 10, "orientation" : 0, "rangeMin" : 0, "rangeMax": 500, "step" : 1}`)
+var customPropertiesLabel = json.RawMessage(`{"textSize" : "20", "fontColor" : "black"}`)
+var customPropertiesButton = json.RawMessage(`{"toggle" : "Value1", "on_value" : "Value2", "off_value" : Value3}`)
+var customPropertiesCustomActions = json.RawMessage(`{"actions" : "Value1", "icon" : "Value2"}`)
+var customPropertiesGauge = json.RawMessage(`{"property1" : "testValue1A", "property2" : "testValue2A", "property3" : 42}`)
 
 var WidgetA = Widget{
-	Name:             "Widget_A",
-	Type:             "graph",
+	Name:             "Label",
+	Type:             "Label",
 	Width:            100,
 	Height:           50,
 	MinHeight:        40,
@@ -203,22 +208,65 @@ var WidgetA = Widget{
 	Y:                10,
 	Z:                10,
 	IsLocked:         false,
-	CustomProperties: postgres.Jsonb{customPropertiesA},
+	CustomProperties: postgres.Jsonb{customPropertiesLabel},
 }
 
 var WidgetB = Widget{
-	Name:             "Widget_B",
-	Type:             "slider",
+	Name:             "Slider",
+	Type:             "Slider",
 	Width:            200,
 	Height:           20,
 	MinHeight:        10,
 	MinWidth:         50,
-	X:                100,
-	Y:                -40,
-	Z:                -1,
+	X:                70,
+	Y:                10,
+	Z:                50,
 	IsLocked:         false,
-	CustomProperties: postgres.Jsonb{customPropertiesB},
+	CustomProperties: postgres.Jsonb{customPropertiesSlider},
 }
+
+var WidgetC = Widget{
+	Name:             "Box",
+	Type:             "Box",
+	Width:            200,
+	Height:           200,
+	MinHeight:        10,
+	MinWidth:         50,
+	X:                300,
+	Y:                10,
+	Z:                50,
+	IsLocked:         false,
+	CustomProperties: postgres.Jsonb{customPropertiesBox},
+}
+
+var WidgetD = Widget{
+	Name:             "Action",
+	Type:             "Action",
+	Width:            20,
+	Height:           20,
+	MinHeight:        10,
+	MinWidth:         50,
+	X:                10,
+	Y:                50,
+	Z:                50,
+	IsLocked:         false,
+	CustomProperties: postgres.Jsonb{customPropertiesBox},
+}
+
+var WidgetE = Widget{
+	Name:             "Gauge",
+	Type:             "Gauge",
+	Width:            200,
+	Height:           200,
+	MinHeight:        10,
+	MinWidth:         50,
+	X:                50,
+	Y:                300,
+	Z:                50,
+	IsLocked:         false,
+	CustomProperties: postgres.Jsonb{customPropertiesBox},
+}
+
 
 func DBAddAdminUser(db *gorm.DB) error {
 	db.AutoMigrate(&User{})
@@ -285,6 +333,10 @@ func DBAddTestData(db *gorm.DB) error {
 
 	widgetA := WidgetA
 	widgetB := WidgetB
+	widgetC := WidgetC
+	widgetD := WidgetD
+	widgetE := WidgetE
+
 
 	// Users
 	err := db.Create(&user0).Error
@@ -327,6 +379,9 @@ func DBAddTestData(db *gorm.DB) error {
 	// Widgets
 	err = db.Create(&widgetA).Error
 	err = db.Create(&widgetB).Error
+	err = db.Create(&widgetC).Error
+	err = db.Create(&widgetD).Error
+	err = db.Create(&widgetE).Error
 
 	// Associations between models
 	// For `belongs to` use the model with id=1
@@ -349,6 +404,11 @@ func DBAddTestData(db *gorm.DB) error {
 	// Dashboard HM Widget
 	err = db.Model(&dashboardA).Association("Widgets").Append(&widgetA).Error
 	err = db.Model(&dashboardA).Association("Widgets").Append(&widgetB).Error
+	err = db.Model(&dashboardA).Association("Widgets").Append(&widgetC).Error
+	err = db.Model(&dashboardA).Association("Widgets").Append(&widgetD).Error
+	err = db.Model(&dashboardA).Association("Widgets").Append(&widgetE).Error
+
+
 
 	// SimulationModel HM Signals
 	err = db.Model(&modelA).Association("InputMapping").Append(&inSignalA).Error

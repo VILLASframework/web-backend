@@ -353,7 +353,7 @@ func TestWidgetAssociations(t *testing.T) {
 
 	var widget1 Widget
 	assert.NoError(t, db.Find(&widget1, 1).Error, fmt.Sprintf("Find Widget with ID=1"))
-	assert.EqualValues(t, "Widget_A", widget1.Name)
+	assert.EqualValues(t, WidgetA.Name, widget1.Name)
 
 	// Get files of widget
 	var files []File
