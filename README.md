@@ -91,7 +91,7 @@ $ sudo vim /var/lib/pgsql/11/data/pg_hba.conf
 
 ## Copyright
 
-2019, Institute for Automation of Complex Power Systems, EONERC  
+2020, Institute for Automation of Complex Power Systems, EONERC  
 
 ## License
 
