@@ -103,13 +103,13 @@ var ScenarioB = Scenario{
 var SimulationModelA = SimulationModel{
 	Name:                "SimulationModel_A",
 	StartParameters:     postgres.Jsonb{startParametersA},
-	SelectedModelFileID: 1,
+	SelectedModelFileID: 3,
 }
 
 var SimulationModelB = SimulationModel{
 	Name:                "SimulationModel_B",
 	StartParameters:     postgres.Jsonb{startParametersB},
-	SelectedModelFileID: 2,
+	SelectedModelFileID: 4,
 }
 
 // Signals
