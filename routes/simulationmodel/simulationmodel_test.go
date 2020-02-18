@@ -41,10 +41,11 @@ var router *gin.Engine
 var db *gorm.DB
 
 type SimulationModelRequest struct {
-	Name            string         `json:"name,omitempty"`
-	ScenarioID      uint           `json:"scenarioID,omitempty"`
-	SimulatorID     uint           `json:"simulatorID,omitempty"`
-	StartParameters postgres.Jsonb `json:"startParameters,omitempty"`
+	Name                string         `json:"name,omitempty"`
+	ScenarioID          uint           `json:"scenarioID,omitempty"`
+	SimulatorID         uint           `json:"simulatorID,omitempty"`
+	StartParameters     postgres.Jsonb `json:"startParameters,omitempty"`
+	SelectedModelFileID uint           `json:"selectedModelFileID,omitempty"`
 }
 
 type SimulatorRequest struct {
@@ -154,10 +155,11 @@ func TestAddSimulationModel(t *testing.T) {
 	scenarioID, simulatorID := addScenarioAndSimulator()
 
 	newSimulationModel := SimulationModelRequest{
-		Name:            database.SimulationModelA.Name,
-		ScenarioID:      scenarioID,
-		SimulatorID:     simulatorID,
-		StartParameters: database.SimulationModelA.StartParameters,
+		Name:                database.SimulationModelA.Name,
+		ScenarioID:          scenarioID,
+		SimulatorID:         simulatorID,
+		StartParameters:     database.SimulationModelA.StartParameters,
+		SelectedModelFileID: database.SimulationModelA.SelectedModelFileID,
 	}
 
 	// authenticate as normal userB who has no access to new scenario
@@ -255,10 +257,11 @@ func TestUpdateSimulationModel(t *testing.T) {
 
 	// test POST models/ $newSimulationModel
 	newSimulationModel := SimulationModelRequest{
-		Name:            database.SimulationModelA.Name,
-		ScenarioID:      scenarioID,
-		SimulatorID:     simulatorID,
-		StartParameters: database.SimulationModelA.StartParameters,
+		Name:                database.SimulationModelA.Name,
+		ScenarioID:          scenarioID,
+		SimulatorID:         simulatorID,
+		StartParameters:     database.SimulationModelA.StartParameters,
+		SelectedModelFileID: database.SimulationModelA.SelectedModelFileID,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
 		"/api/models", "POST", helper.KeyModels{"simulationModel": newSimulationModel})
@@ -360,10 +363,11 @@ func TestDeleteSimulationModel(t *testing.T) {
 	scenarioID, simulatorID := addScenarioAndSimulator()
 
 	newSimulationModel := SimulationModelRequest{
-		Name:            database.SimulationModelA.Name,
-		ScenarioID:      scenarioID,
-		SimulatorID:     simulatorID,
-		StartParameters: database.SimulationModelA.StartParameters,
+		Name:                database.SimulationModelA.Name,
+		ScenarioID:          scenarioID,
+		SimulatorID:         simulatorID,
+		StartParameters:     database.SimulationModelA.StartParameters,
+		SelectedModelFileID: database.SimulationModelA.SelectedModelFileID,
 	}
 
 	// authenticate as normal user
@@ -438,10 +442,11 @@ func TestGetAllSimulationModelsOfScenario(t *testing.T) {
 
 	// test POST models/ $newSimulationModel
 	newSimulationModel := SimulationModelRequest{
-		Name:            database.SimulationModelA.Name,
-		ScenarioID:      scenarioID,
-		SimulatorID:     simulatorID,
-		StartParameters: database.SimulationModelA.StartParameters,
+		Name:                database.SimulationModelA.Name,
+		ScenarioID:          scenarioID,
+		SimulatorID:         simulatorID,
+		StartParameters:     database.SimulationModelA.StartParameters,
+		SelectedModelFileID: database.SimulationModelA.SelectedModelFileID,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
 		"/api/models", "POST", helper.KeyModels{"simulationModel": newSimulationModel})

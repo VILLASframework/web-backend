@@ -101,13 +101,15 @@ var ScenarioB = Scenario{
 // Simulation Models
 
 var SimulationModelA = SimulationModel{
-	Name:            "SimulationModel_A",
-	StartParameters: postgres.Jsonb{startParametersA},
+	Name:                "SimulationModel_A",
+	StartParameters:     postgres.Jsonb{startParametersA},
+	SelectedModelFileID: 1,
 }
 
 var SimulationModelB = SimulationModel{
-	Name:            "SimulationModel_B",
-	StartParameters: postgres.Jsonb{startParametersB},
+	Name:                "SimulationModel_B",
+	StartParameters:     postgres.Jsonb{startParametersB},
+	SelectedModelFileID: 2,
 }
 
 // Signals
@@ -268,7 +270,6 @@ var WidgetE = Widget{
 	CustomProperties: postgres.Jsonb{customPropertiesLamp},
 }
 
-
 func DBAddAdminUser(db *gorm.DB) error {
 	db.AutoMigrate(&User{})
 
@@ -337,7 +338,6 @@ func DBAddTestData(db *gorm.DB) error {
 	widgetC := WidgetC
 	widgetD := WidgetD
 	widgetE := WidgetE
-
 
 	// Users
 	err := db.Create(&user0).Error
@@ -409,8 +409,6 @@ func DBAddTestData(db *gorm.DB) error {
 	err = db.Model(&dashboardA).Association("Widgets").Append(&widgetC).Error
 	err = db.Model(&dashboardA).Association("Widgets").Append(&widgetD).Error
 	err = db.Model(&dashboardA).Association("Widgets").Append(&widgetE).Error
-
-
 
 	// SimulationModel HM Signals
 	err = db.Model(&modelA).Association("InputMapping").Append(&inSignalA).Error

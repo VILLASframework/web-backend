@@ -103,9 +103,10 @@ func (m *SimulationModel) Update(modifiedSimulationModel SimulationModel) error 
 	}
 
 	err := db.Model(m).Updates(map[string]interface{}{
-		"Name":            modifiedSimulationModel.Name,
-		"StartParameters": modifiedSimulationModel.StartParameters,
-		"SimulatorID":     modifiedSimulationModel.SimulatorID,
+		"Name":                modifiedSimulationModel.Name,
+		"StartParameters":     modifiedSimulationModel.StartParameters,
+		"SimulatorID":         modifiedSimulationModel.SimulatorID,
+		"SelectedModelFileID": modifiedSimulationModel.SelectedModelFileID,
 	}).Error
 
 	return err

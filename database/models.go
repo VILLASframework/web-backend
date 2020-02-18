@@ -91,6 +91,8 @@ type SimulationModel struct {
 	InputMapping []Signal `json:"-" gorm:"foreignkey:SimulationModelID"`
 	// Files of simulation model (can be CIM and other simulation model file formats)
 	Files []File `json:"-" gorm:"foreignkey:SimulationModelID"`
+	// Currently selected simulation model FileID
+	SelectedModelFileID uint `json:"selectedModelFileID" gorm:"default:0"`
 }
 
 // Signal data model

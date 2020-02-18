@@ -31,16 +31,18 @@ import (
 var validate *validator.Validate
 
 type validNewSimulationModel struct {
-	Name            string         `form:"Name" validate:"required"`
-	ScenarioID      uint           `form:"ScenarioID" validate:"required"`
-	SimulatorID     uint           `form:"SimulatorID" validate:"required"`
-	StartParameters postgres.Jsonb `form:"StartParameters" validate:"required"`
+	Name                string         `form:"Name" validate:"required"`
+	ScenarioID          uint           `form:"ScenarioID" validate:"required"`
+	SimulatorID         uint           `form:"SimulatorID" validate:"required"`
+	StartParameters     postgres.Jsonb `form:"StartParameters" validate:"required"`
+	SelectedModelFileID uint           `form:"SelectedModelFilID" validate:"omitempty"`
 }
 
 type validUpdatedSimulationModel struct {
-	Name            string         `form:"Name" validate:"omitempty"`
-	SimulatorID     uint           `form:"SimulatorID" validate:"omitempty"`
-	StartParameters postgres.Jsonb `form:"StartParameters" validate:"omitempty"`
+	Name                string         `form:"Name" validate:"omitempty"`
+	SimulatorID         uint           `form:"SimulatorID" validate:"omitempty"`
+	StartParameters     postgres.Jsonb `form:"StartParameters" validate:"omitempty"`
+	SelectedModelFileID uint           `form:"SelectedModelFileID" validate:"omitempty"`
 }
 
 type addSimulationModelRequest struct {
@@ -70,6 +72,7 @@ func (r *addSimulationModelRequest) createSimulationModel() SimulationModel {
 	s.ScenarioID = r.SimulationModel.ScenarioID
 	s.SimulatorID = r.SimulationModel.SimulatorID
 	s.StartParameters = r.SimulationModel.StartParameters
+	s.SelectedModelFileID = r.SimulationModel.SelectedModelFileID
 
 	return s
 }
@@ -84,6 +87,10 @@ func (r *updateSimulationModelRequest) updatedSimulationModel(oldSimulationModel
 
 	if r.SimulationModel.SimulatorID != 0 {
 		s.SimulatorID = r.SimulationModel.SimulatorID
+	}
+
+	if r.SimulationModel.SelectedModelFileID != 0 {
+		s.SelectedModelFileID = r.SimulationModel.SelectedModelFileID
 	}
 
 	// only update Params if not empty
