@@ -43,6 +43,7 @@ type validNewWidget struct {
 	DashboardID      uint           `form:"dashboardID" validate:"required"`
 	IsLocked         bool           `form:"isLocked" validate:"omitempty"`
 	CustomProperties postgres.Jsonb `form:"customProperties" validate:"omitempty"`
+	SignalIDs        []int64        `form:"signalIDs" validate:"omitempty"`
 }
 
 type validUpdatedWidget struct {
@@ -57,6 +58,7 @@ type validUpdatedWidget struct {
 	Z                int            `form:"z" validate:"omitempty"`
 	IsLocked         bool           `form:"isLocked" validate:"omitempty"`
 	CustomProperties postgres.Jsonb `form:"customProperties" validate:"omitempty"`
+	SignalIDs        []int64        `form:"signalIDs" validate:"omitempty"`
 }
 
 type addWidgetRequest struct {
@@ -94,6 +96,7 @@ func (r *addWidgetRequest) createWidget() Widget {
 	s.IsLocked = r.Widget.IsLocked
 	s.CustomProperties = r.Widget.CustomProperties
 	s.DashboardID = r.Widget.DashboardID
+	s.SignalIDs = r.Widget.SignalIDs
 	return s
 }
 
@@ -114,6 +117,7 @@ func (r *updateWidgetRequest) updatedWidget(oldWidget Widget) Widget {
 	s.Y = r.Widget.Y
 	s.Z = r.Widget.Z
 	s.IsLocked = r.Widget.IsLocked
+	s.SignalIDs = r.Widget.SignalIDs
 
 	// only update custom props if not empty
 	var emptyJson postgres.Jsonb

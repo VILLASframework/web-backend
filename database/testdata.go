@@ -212,6 +212,7 @@ var WidgetA = Widget{
 	Z:                200,
 	IsLocked:         false,
 	CustomProperties: postgres.Jsonb{customPropertiesLabel},
+	SignalIDs:        []int64{1},
 }
 
 var WidgetB = Widget{
@@ -226,6 +227,7 @@ var WidgetB = Widget{
 	Z:                0,
 	IsLocked:         false,
 	CustomProperties: postgres.Jsonb{customPropertiesSlider},
+	SignalIDs:        []int64{1},
 }
 
 var WidgetC = Widget{
@@ -240,6 +242,7 @@ var WidgetC = Widget{
 	Z:                0,
 	IsLocked:         false,
 	CustomProperties: postgres.Jsonb{customPropertiesBox},
+	SignalIDs:        []int64{3},
 }
 
 var WidgetD = Widget{
@@ -253,7 +256,8 @@ var WidgetD = Widget{
 	Y:                50,
 	Z:                0,
 	IsLocked:         false,
-	CustomProperties: postgres.Jsonb{customPropertiesBox},
+	CustomProperties: postgres.Jsonb{customPropertiesCustomActions},
+	SignalIDs:        []int64{2},
 }
 
 var WidgetE = Widget{
@@ -268,6 +272,7 @@ var WidgetE = Widget{
 	Z:                0,
 	IsLocked:         false,
 	CustomProperties: postgres.Jsonb{customPropertiesLamp},
+	SignalIDs:        []int64{4},
 }
 
 func DBAddAdminUser(db *gorm.DB) error {

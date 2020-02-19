@@ -9,6 +9,7 @@ require (
 	github.com/go-playground/universal-translator v0.17.0 // indirect
 	github.com/jinzhu/gorm v1.9.11
 	github.com/leodido/go-urn v1.2.0 // indirect
+	github.com/lib/pq v1.1.1
 	github.com/nsf/jsondiff v0.0.0-20190712045011-8443391ee9b6
 	github.com/prometheus/client_golang v1.2.1
 	github.com/smartystreets/goconvey v1.6.4 // indirect

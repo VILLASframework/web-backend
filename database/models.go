@@ -22,6 +22,7 @@
 package database
 
 import (
+	"github.com/lib/pq"
 	"time"
 
 	"github.com/jinzhu/gorm/dialects/postgres"
@@ -175,6 +176,8 @@ type Widget struct {
 	DashboardID uint `json:"dashboardID"`
 	// Files that belong to widget (for example images)
 	Files []File `json:"-" gorm:"foreignkey:WidgetID"`
+	// IDs of signals that widget uses
+	SignalIDs pq.Int64Array `json:"signalIDs" gorm:"type:integer[]"`
 }
 
 // File data model

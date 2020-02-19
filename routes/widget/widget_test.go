@@ -53,6 +53,7 @@ type WidgetRequest struct {
 	DashboardID      uint           `json:"dashboardID,omitempty"`
 	IsLocked         bool           `json:"isLocked,omitempty"`
 	CustomProperties postgres.Jsonb `json:"customProperties,omitempty"`
+	SignalIDs        []int64        `json:"signalIDs,omitempty"`
 }
 
 type DashboardRequest struct {
@@ -153,6 +154,7 @@ func TestAddWidget(t *testing.T) {
 		IsLocked:         database.WidgetA.IsLocked,
 		CustomProperties: database.WidgetA.CustomProperties,
 		DashboardID:      dashboardID,
+		SignalIDs:        database.WidgetA.SignalIDs,
 	}
 
 	// authenticate as userB who has no access to scenario
@@ -253,6 +255,7 @@ func TestUpdateWidget(t *testing.T) {
 		IsLocked:         database.WidgetA.IsLocked,
 		CustomProperties: database.WidgetA.CustomProperties,
 		DashboardID:      dashboardID,
+		SignalIDs:        database.WidgetA.SignalIDs,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
 		"/api/widgets", "POST", helper.KeyModels{"widget": newWidget})
@@ -271,6 +274,7 @@ func TestUpdateWidget(t *testing.T) {
 		MinWidth:         database.WidgetB.MinWidth,
 		MinHeight:        database.WidgetB.MinHeight,
 		CustomProperties: database.WidgetA.CustomProperties,
+		SignalIDs:        database.WidgetB.SignalIDs,
 	}
 
 	// authenticate as userB who has no access to scenario
@@ -363,6 +367,7 @@ func TestDeleteWidget(t *testing.T) {
 		IsLocked:         database.WidgetA.IsLocked,
 		CustomProperties: database.WidgetA.CustomProperties,
 		DashboardID:      dashboardID,
+		SignalIDs:        database.WidgetA.SignalIDs,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
 		"/api/widgets", "POST", helper.KeyModels{"widget": newWidget})
@@ -461,6 +466,7 @@ func TestGetAllWidgetsOfDashboard(t *testing.T) {
 		IsLocked:         database.WidgetA.IsLocked,
 		CustomProperties: database.WidgetA.CustomProperties,
 		DashboardID:      dashboardID,
+		SignalIDs:        database.WidgetA.SignalIDs,
 	}
 	code, resp, err = helper.TestEndpoint(router, token,
 		"/api/widgets", "POST", helper.KeyModels{"widget": newWidgetA})
@@ -480,6 +486,7 @@ func TestGetAllWidgetsOfDashboard(t *testing.T) {
 		IsLocked:         database.WidgetB.IsLocked,
 		CustomProperties: database.WidgetB.CustomProperties,
 		DashboardID:      dashboardID,
+		SignalIDs:        database.WidgetB.SignalIDs,
 	}
 	code, resp, err = helper.TestEndpoint(router, token,
 		"/api/widgets", "POST", helper.KeyModels{"widget": newWidgetB})

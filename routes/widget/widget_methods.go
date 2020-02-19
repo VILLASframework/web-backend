@@ -80,6 +80,7 @@ func (w *Widget) update(modifiedWidget Widget) error {
 		"Z":                modifiedWidget.Z,
 		"IsLocked":         modifiedWidget.IsLocked,
 		"CustomProperties": modifiedWidget.CustomProperties,
+		"SignalIDs":        modifiedWidget.SignalIDs,
 	}).Error
 
 	return err
