@@ -54,10 +54,10 @@ func (s *InfrastructureComponent) update(updatedIC InfrastructureComponent) erro
 func (s *InfrastructureComponent) delete() error {
 	db := database.GetDB()
 
-	no_simulationmodels := db.Model(s).Association("SimulationModels").Count()
+	no_configs := db.Model(s).Association("SimulationModels").Count()
 
-	if no_simulationmodels > 0 {
-		return fmt.Errorf("InfrastructureComponent cannot be deleted as it is still used in SimulationModels (active or dangling)")
+	if no_configs > 0 {
+		return fmt.Errorf("InfrastructureComponent cannot be deleted as it is still used in configurations (active or dangling)")
 	}
 
 	// delete InfrastructureComponent from DB (does NOT remain as dangling)
@@ -65,9 +65,9 @@ func (s *InfrastructureComponent) delete() error {
 	return err
 }
 
-func (s *InfrastructureComponent) getModels() ([]database.SimulationModel, int, error) {
+func (s *InfrastructureComponent) getConfigs() ([]database.SimulationModel, int, error) {
 	db := database.GetDB()
-	var models []database.SimulationModel
-	err := db.Order("ID asc").Model(s).Related(&models, "SimulationModels").Error
-	return models, len(models), err
+	var configs []database.SimulationModel
+	err := db.Order("ID asc").Model(s).Related(&configs, "SimulationModels").Error
+	return configs, len(configs), err
 }

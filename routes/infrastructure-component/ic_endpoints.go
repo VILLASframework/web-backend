@@ -35,7 +35,7 @@ func RegisterICEndpoints(r *gin.RouterGroup) {
 	r.PUT("/:ICID", updateIC)
 	r.GET("/:ICID", getIC)
 	r.DELETE("/:ICID", deleteIC)
-	r.GET("/:ICID/models", getConfigsOfIC)
+	r.GET("/:ICID/configs", getConfigsOfIC)
 }
 
 // getICs godoc
@@ -216,7 +216,7 @@ func deleteIC(c *gin.Context) {
 // @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param Authorization header string true "Authorization token"
 // @Param ICID path int true "Infrastructure Component ID"
-// @Router /ic/{ICID}/models [get]
+// @Router /ic/{ICID}/configs [get]
 func getConfigsOfIC(c *gin.Context) {
 
 	ok, s := CheckPermissions(c, database.ModelInfrastructureComponent, database.Read, true)
@@ -224,10 +224,10 @@ func getConfigsOfIC(c *gin.Context) {
 		return
 	}
 
-	// get all associated simulation models
-	allModels, _, err := s.getModels()
+	// get all associated configurations
+	allConfigs, _, err := s.getConfigs()
 	if !helper.DBError(c, err) {
-		c.JSON(http.StatusOK, gin.H{"simulationModels": allModels})
+		c.JSON(http.StatusOK, gin.H{"configs": allConfigs})
 	}
 
 }
