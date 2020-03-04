@@ -26,9 +26,9 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/infrastructure-component"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/scenario"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/simulationmodel"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/simulator"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/user"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -52,11 +52,11 @@ type SignalRequest struct {
 type SimulationModelRequest struct {
 	Name            string         `json:"name,omitempty"`
 	ScenarioID      uint           `json:"scenarioID,omitempty"`
-	SimulatorID     uint           `json:"simulatorID,omitempty"`
+	ICID            uint           `json:"icID,omitempty"`
 	StartParameters postgres.Jsonb `json:"startParameters,omitempty"`
 }
 
-type SimulatorRequest struct {
+type ICRequest struct {
 	UUID       string         `json:"uuid,omitempty"`
 	Host       string         `json:"host,omitempty"`
 	Modeltype  string         `json:"modelType,omitempty"`
@@ -70,25 +70,25 @@ type ScenarioRequest struct {
 	StartParameters postgres.Jsonb `json:"startParameters,omitempty"`
 }
 
-func addScenarioAndSimulatorAndSimulationModel() (scenarioID uint, simulatorID uint, simulationModelID uint) {
+func addScenarioAndICAndSimulationModel() (scenarioID uint, ICID uint, simulationModelID uint) {
 
 	// authenticate as admin
 	token, _ := helper.AuthenticateForTest(router,
 		"/api/authenticate", "POST", helper.AdminCredentials)
 
-	// POST $newSimulatorA
-	newSimulatorA := SimulatorRequest{
-		UUID:       database.SimulatorA.UUID,
-		Host:       database.SimulatorA.Host,
-		Modeltype:  database.SimulatorA.Modeltype,
-		State:      database.SimulatorA.State,
-		Properties: database.SimulatorA.Properties,
+	// POST $newICA
+	newICA := ICRequest{
+		UUID:       database.ICA.UUID,
+		Host:       database.ICA.Host,
+		Modeltype:  database.ICA.Modeltype,
+		State:      database.ICA.State,
+		Properties: database.ICA.Properties,
 	}
 	_, resp, _ := helper.TestEndpoint(router, token,
-		"/api/simulators", "POST", helper.KeyModels{"simulator": newSimulatorA})
+		"/api/ic", "POST", helper.KeyModels{"ic": newICA})
 
-	// Read newSimulator's ID from the response
-	newSimulatorID, _ := helper.GetResponseID(resp)
+	// Read newIC's ID from the response
+	newICID, _ := helper.GetResponseID(resp)
 
 	// authenticate as normal user
 	token, _ = helper.AuthenticateForTest(router,
@@ -110,7 +110,7 @@ func addScenarioAndSimulatorAndSimulationModel() (scenarioID uint, simulatorID u
 	newSimulationModel := SimulationModelRequest{
 		Name:            database.SimulationModelA.Name,
 		ScenarioID:      uint(newScenarioID),
-		SimulatorID:     uint(newSimulatorID),
+		ICID:            uint(newICID),
 		StartParameters: database.SimulationModelA.StartParameters,
 	}
 	_, resp, _ = helper.TestEndpoint(router, token,
@@ -123,7 +123,7 @@ func addScenarioAndSimulatorAndSimulationModel() (scenarioID uint, simulatorID u
 	_, resp, _ = helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/scenarios/%v/user?username=User_C", newScenarioID), "PUT", nil)
 
-	return uint(newScenarioID), uint(newSimulatorID), uint(newSimulationModelID)
+	return uint(newScenarioID), uint(newICID), uint(newSimulationModelID)
 }
 
 func TestMain(m *testing.M) {
@@ -149,9 +149,9 @@ func TestMain(m *testing.M) {
 	// scenario endpoints required here to first add a scenario to the DB
 	// that can be associated with a new simulation model
 	scenario.RegisterScenarioEndpoints(api.Group("/scenarios"))
-	// simulator endpoints required here to first add a simulator to the DB
+	// IC endpoints required here to first add a IC to the DB
 	// that can be associated with a new simulation model
-	simulator.RegisterSimulatorEndpoints(api.Group("/simulators"))
+	infrastructure_component.RegisterICEndpoints(api.Group("/ic"))
 	RegisterSignalEndpoints(api.Group("/signals"))
 
 	os.Exit(m.Run())
@@ -163,9 +163,9 @@ func TestAddSignal(t *testing.T) {
 	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
 
 	// prepare the content of the DB for testing
-	// by adding a scenario and a simulator to the DB
+	// by adding a scenario and a IC to the DB
 	// using the respective endpoints of the API
-	_, _, simulationModelID := addScenarioAndSimulatorAndSimulationModel()
+	_, _, simulationModelID := addScenarioAndICAndSimulationModel()
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
@@ -258,9 +258,9 @@ func TestUpdateSignal(t *testing.T) {
 	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
 
 	// prepare the content of the DB for testing
-	// by adding a scenario and a simulator to the DB
+	// by adding a scenario and a IC to the DB
 	// using the respective endpoints of the API
-	_, _, simulationModelID := addScenarioAndSimulatorAndSimulationModel()
+	_, _, simulationModelID := addScenarioAndICAndSimulationModel()
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
@@ -360,9 +360,9 @@ func TestDeleteSignal(t *testing.T) {
 	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
 
 	// prepare the content of the DB for testing
-	// by adding a scenario and a simulator to the DB
+	// by adding a scenario and a IC to the DB
 	// using the respective endpoints of the API
-	_, _, simulationModelID := addScenarioAndSimulatorAndSimulationModel()
+	_, _, simulationModelID := addScenarioAndICAndSimulationModel()
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
@@ -455,9 +455,9 @@ func TestGetAllInputSignalsOfSimulationModel(t *testing.T) {
 	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
 
 	// prepare the content of the DB for testing
-	// by adding a scenario and a simulator to the DB
+	// by adding a scenario and a IC to the DB
 	// using the respective endpoints of the API
-	_, _, simulationModelID := addScenarioAndSimulatorAndSimulationModel()
+	_, _, simulationModelID := addScenarioAndICAndSimulationModel()
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,

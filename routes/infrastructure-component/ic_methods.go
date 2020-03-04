@@ -1,4 +1,4 @@
-/** Simulator package, methods.
+/** InfrastructureComponent package, methods.
 *
 * @author Sonja Happ <sonja.happ@eonerc.rwth-aachen.de>
 * @copyright 2014-2019, Institute for Automation of Complex Power Systems, EONERC
@@ -19,7 +19,7 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
-package simulator
+package infrastructure_component
 
 import (
 	"fmt"
@@ -27,45 +27,45 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 )
 
-type Simulator struct {
-	database.Simulator
+type InfrastructureComponent struct {
+	database.InfrastructureComponent
 }
 
-func (s *Simulator) save() error {
+func (s *InfrastructureComponent) save() error {
 	db := database.GetDB()
 	err := db.Create(s).Error
 	return err
 }
 
-func (s *Simulator) ByID(id uint) error {
+func (s *InfrastructureComponent) ByID(id uint) error {
 	db := database.GetDB()
 	err := db.Find(s, id).Error
 	return err
 }
 
-func (s *Simulator) update(updatedSimulator Simulator) error {
+func (s *InfrastructureComponent) update(updatedIC InfrastructureComponent) error {
 
 	db := database.GetDB()
-	err := db.Model(s).Updates(updatedSimulator).Error
+	err := db.Model(s).Updates(updatedIC).Error
 
 	return err
 }
 
-func (s *Simulator) delete() error {
+func (s *InfrastructureComponent) delete() error {
 	db := database.GetDB()
 
 	no_simulationmodels := db.Model(s).Association("SimulationModels").Count()
 
 	if no_simulationmodels > 0 {
-		return fmt.Errorf("Simulator cannot be deleted as it is still used in SimulationModels (active or dangling)")
+		return fmt.Errorf("InfrastructureComponent cannot be deleted as it is still used in SimulationModels (active or dangling)")
 	}
 
-	// delete Simulator from DB (does NOT remain as dangling)
+	// delete InfrastructureComponent from DB (does NOT remain as dangling)
 	err := db.Delete(s).Error
 	return err
 }
 
-func (s *Simulator) getModels() ([]database.SimulationModel, int, error) {
+func (s *InfrastructureComponent) getModels() ([]database.SimulationModel, int, error) {
 	db := database.GetDB()
 	var models []database.SimulationModel
 	err := db.Order("ID asc").Model(s).Related(&models, "SimulationModels").Error

@@ -26,8 +26,8 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/infrastructure-component"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/scenario"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/simulator"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/user"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -43,12 +43,12 @@ var db *gorm.DB
 type SimulationModelRequest struct {
 	Name                string         `json:"name,omitempty"`
 	ScenarioID          uint           `json:"scenarioID,omitempty"`
-	SimulatorID         uint           `json:"simulatorID,omitempty"`
+	ICID                uint           `json:"icID,omitempty"`
 	StartParameters     postgres.Jsonb `json:"startParameters,omitempty"`
 	SelectedModelFileID uint           `json:"selectedModelFileID,omitempty"`
 }
 
-type SimulatorRequest struct {
+type ICRequest struct {
 	UUID       string         `json:"uuid,omitempty"`
 	Host       string         `json:"host,omitempty"`
 	Modeltype  string         `json:"modelType,omitempty"`
@@ -62,36 +62,36 @@ type ScenarioRequest struct {
 	StartParameters postgres.Jsonb `json:"startParameters,omitempty"`
 }
 
-func addScenarioAndSimulator() (scenarioID uint, simulatorID uint) {
+func addScenarioAndIC() (scenarioID uint, ICID uint) {
 
 	// authenticate as admin
 	token, _ := helper.AuthenticateForTest(router,
 		"/api/authenticate", "POST", helper.AdminCredentials)
 
-	// POST $newSimulatorA
-	newSimulatorA := SimulatorRequest{
-		UUID:       database.SimulatorA.UUID,
-		Host:       database.SimulatorA.Host,
-		Modeltype:  database.SimulatorA.Modeltype,
-		State:      database.SimulatorA.State,
-		Properties: database.SimulatorA.Properties,
+	// POST $newICA
+	newICA := ICRequest{
+		UUID:       database.ICA.UUID,
+		Host:       database.ICA.Host,
+		Modeltype:  database.ICA.Modeltype,
+		State:      database.ICA.State,
+		Properties: database.ICA.Properties,
 	}
 	_, resp, _ := helper.TestEndpoint(router, token,
-		"/api/simulators", "POST", helper.KeyModels{"simulator": newSimulatorA})
+		"/api/ic", "POST", helper.KeyModels{"ic": newICA})
 
-	// Read newSimulator's ID from the response
-	newSimulatorID, _ := helper.GetResponseID(resp)
+	// Read newIC's ID from the response
+	newICID, _ := helper.GetResponseID(resp)
 
-	// POST a second simulator to change to that simulator during testing
-	newSimulatorB := SimulatorRequest{
-		UUID:       database.SimulatorB.UUID,
-		Host:       database.SimulatorB.Host,
-		Modeltype:  database.SimulatorB.Modeltype,
-		State:      database.SimulatorB.State,
-		Properties: database.SimulatorB.Properties,
+	// POST a second IC to change to that IC during testing
+	newICB := ICRequest{
+		UUID:       database.ICB.UUID,
+		Host:       database.ICB.Host,
+		Modeltype:  database.ICB.Modeltype,
+		State:      database.ICB.State,
+		Properties: database.ICB.Properties,
 	}
 	_, resp, _ = helper.TestEndpoint(router, token,
-		"/api/simulators", "POST", helper.KeyModels{"simulator": newSimulatorB})
+		"/api/ic", "POST", helper.KeyModels{"ic": newICB})
 
 	// authenticate as normal user
 	token, _ = helper.AuthenticateForTest(router,
@@ -113,7 +113,7 @@ func addScenarioAndSimulator() (scenarioID uint, simulatorID uint) {
 	_, resp, _ = helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/scenarios/%v/user?username=User_C", newScenarioID), "PUT", nil)
 
-	return uint(newScenarioID), uint(newSimulatorID)
+	return uint(newScenarioID), uint(newICID)
 }
 
 func TestMain(m *testing.M) {
@@ -137,9 +137,9 @@ func TestMain(m *testing.M) {
 	// scenario endpoints required here to first add a scenario to the DB
 	// that can be associated with a new simulation model
 	scenario.RegisterScenarioEndpoints(api.Group("/scenarios"))
-	// simulator endpoints required here to first add a simulator to the DB
+	// IC endpoints required here to first add a IC to the DB
 	// that can be associated with a new simulation model
-	simulator.RegisterSimulatorEndpoints(api.Group("/simulators"))
+	infrastructure_component.RegisterICEndpoints(api.Group("/ic"))
 
 	os.Exit(m.Run())
 }
@@ -150,14 +150,14 @@ func TestAddSimulationModel(t *testing.T) {
 	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
 
 	// prepare the content of the DB for testing
-	// by adding a scenario and a simulator to the DB
+	// by adding a scenario and a IC to the DB
 	// using the respective endpoints of the API
-	scenarioID, simulatorID := addScenarioAndSimulator()
+	scenarioID, ICID := addScenarioAndIC()
 
 	newSimulationModel := SimulationModelRequest{
 		Name:                database.SimulationModelA.Name,
 		ScenarioID:          scenarioID,
-		SimulatorID:         simulatorID,
+		ICID:                ICID,
 		StartParameters:     database.SimulationModelA.StartParameters,
 		SelectedModelFileID: database.SimulationModelA.SelectedModelFileID,
 	}
@@ -246,9 +246,9 @@ func TestUpdateSimulationModel(t *testing.T) {
 	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
 
 	// prepare the content of the DB for testing
-	// by adding a scenario and a simulator to the DB
+	// by adding a scenario and a IC to the DB
 	// using the respective endpoints of the API
-	scenarioID, simulatorID := addScenarioAndSimulator()
+	scenarioID, ICID := addScenarioAndIC()
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
@@ -259,7 +259,7 @@ func TestUpdateSimulationModel(t *testing.T) {
 	newSimulationModel := SimulationModelRequest{
 		Name:                database.SimulationModelA.Name,
 		ScenarioID:          scenarioID,
-		SimulatorID:         simulatorID,
+		ICID:                ICID,
 		StartParameters:     database.SimulationModelA.StartParameters,
 		SelectedModelFileID: database.SimulationModelA.SelectedModelFileID,
 	}
@@ -323,8 +323,8 @@ func TestUpdateSimulationModel(t *testing.T) {
 	err = helper.CompareResponse(resp, helper.KeyModels{"simulationModel": updatedSimulationModel})
 	assert.NoError(t, err)
 
-	//Change simulator ID to use second simulator available in DB
-	updatedSimulationModel.SimulatorID = simulatorID + 1
+	//Change IC ID to use second IC available in DB
+	updatedSimulationModel.ICID = ICID + 1
 	// test PUT again
 	code, resp, err = helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/models/%v", newSimulationModelID), "PUT", helper.KeyModels{"simulationModel": updatedSimulationModel})
@@ -358,14 +358,14 @@ func TestDeleteSimulationModel(t *testing.T) {
 	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
 
 	// prepare the content of the DB for testing
-	// by adding a scenario and a simulator to the DB
+	// by adding a scenario and a IC to the DB
 	// using the respective endpoints of the API
-	scenarioID, simulatorID := addScenarioAndSimulator()
+	scenarioID, ICID := addScenarioAndIC()
 
 	newSimulationModel := SimulationModelRequest{
 		Name:                database.SimulationModelA.Name,
 		ScenarioID:          scenarioID,
-		SimulatorID:         simulatorID,
+		ICID:                ICID,
 		StartParameters:     database.SimulationModelA.StartParameters,
 		SelectedModelFileID: database.SimulationModelA.SelectedModelFileID,
 	}
@@ -431,9 +431,9 @@ func TestGetAllSimulationModelsOfScenario(t *testing.T) {
 	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
 
 	// prepare the content of the DB for testing
-	// by adding a scenario and a simulator to the DB
+	// by adding a scenario and a IC to the DB
 	// using the respective endpoints of the API
-	scenarioID, simulatorID := addScenarioAndSimulator()
+	scenarioID, ICID := addScenarioAndIC()
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
@@ -444,7 +444,7 @@ func TestGetAllSimulationModelsOfScenario(t *testing.T) {
 	newSimulationModel := SimulationModelRequest{
 		Name:                database.SimulationModelA.Name,
 		ScenarioID:          scenarioID,
-		SimulatorID:         simulatorID,
+		ICID:                ICID,
 		StartParameters:     database.SimulationModelA.StartParameters,
 		SelectedModelFileID: database.SimulationModelA.SelectedModelFileID,
 	}

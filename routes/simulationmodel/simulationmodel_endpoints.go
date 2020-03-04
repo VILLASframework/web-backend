@@ -79,7 +79,7 @@ func getSimulationModels(c *gin.Context) {
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param Authorization header string true "Authorization token"
-// @Param inputSimulationModel body simulationmodel.addSimulationModelRequest true "Simulation model to be added incl. IDs of scenario and simulator"
+// @Param inputSimulationModel body simulationmodel.addSimulationModelRequest true "Simulation model to be added incl. IDs of scenario and IC"
 // @Router /models [post]
 func addSimulationModel(c *gin.Context) {
 

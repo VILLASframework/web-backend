@@ -1,4 +1,4 @@
-/** Simulator package, validators.
+/** InfrastructureComponent package, validators.
 *
 * @author Sonja Happ <sonja.happ@eonerc.rwth-aachen.de>
 * @copyright 2014-2019, Institute for Automation of Complex Power Systems, EONERC
@@ -19,7 +19,7 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
-package simulator
+package infrastructure_component
 
 import (
 	"encoding/json"
@@ -30,7 +30,7 @@ import (
 
 var validate *validator.Validate
 
-type validNewSimulator struct {
+type validNewIC struct {
 	UUID       string         `form:"UUID" validate:"required"`
 	Host       string         `form:"Host" validate:"required"`
 	Modeltype  string         `form:"Modeltype" validate:"required"`
@@ -38,7 +38,7 @@ type validNewSimulator struct {
 	State      string         `form:"State"`
 }
 
-type validUpdatedSimulator struct {
+type validUpdatedIC struct {
 	UUID       string         `form:"UUID" validate:"omitempty"`
 	Host       string         `form:"Host" validate:"omitempty"`
 	Modeltype  string         `form:"Modeltype" validate:"omitempty"`
@@ -46,68 +46,68 @@ type validUpdatedSimulator struct {
 	State      string         `form:"State" validate:"omitempty"`
 }
 
-type addSimulatorRequest struct {
-	Simulator validNewSimulator `json:"simulator"`
+type addICRequest struct {
+	InfrastructureComponent validNewIC `json:"ic"`
 }
 
-type updateSimulatorRequest struct {
-	Simulator validUpdatedSimulator `json:"simulator"`
+type updateICRequest struct {
+	InfrastructureComponent validUpdatedIC `json:"ic"`
 }
 
-func (r *addSimulatorRequest) validate() error {
+func (r *addICRequest) validate() error {
 	validate = validator.New()
 	errs := validate.Struct(r)
 	return errs
 }
 
-func (r *validUpdatedSimulator) validate() error {
+func (r *validUpdatedIC) validate() error {
 	validate = validator.New()
 	errs := validate.Struct(r)
 	return errs
 }
 
-func (r *addSimulatorRequest) createSimulator() Simulator {
-	var s Simulator
+func (r *addICRequest) createIC() InfrastructureComponent {
+	var s InfrastructureComponent
 
-	s.UUID = r.Simulator.UUID
-	s.Host = r.Simulator.Host
-	s.Modeltype = r.Simulator.Modeltype
-	s.Properties = r.Simulator.Properties
-	if r.Simulator.State != "" {
-		s.State = r.Simulator.State
+	s.UUID = r.InfrastructureComponent.UUID
+	s.Host = r.InfrastructureComponent.Host
+	s.Modeltype = r.InfrastructureComponent.Modeltype
+	s.Properties = r.InfrastructureComponent.Properties
+	if r.InfrastructureComponent.State != "" {
+		s.State = r.InfrastructureComponent.State
 	}
 	return s
 }
 
-func (r *updateSimulatorRequest) updatedSimulator(oldSimulator Simulator) Simulator {
-	// Use the old Simulator as a basis for the updated Simulator `s`
-	s := oldSimulator
+func (r *updateICRequest) updatedIC(oldIC InfrastructureComponent) InfrastructureComponent {
+	// Use the old InfrastructureComponent as a basis for the updated InfrastructureComponent `s`
+	s := oldIC
 
-	if r.Simulator.UUID != "" {
-		s.UUID = r.Simulator.UUID
+	if r.InfrastructureComponent.UUID != "" {
+		s.UUID = r.InfrastructureComponent.UUID
 	}
 
-	if r.Simulator.Host != "" {
-		s.Host = r.Simulator.Host
+	if r.InfrastructureComponent.Host != "" {
+		s.Host = r.InfrastructureComponent.Host
 	}
 
-	if r.Simulator.Modeltype != "" {
-		s.Modeltype = r.Simulator.Modeltype
+	if r.InfrastructureComponent.Modeltype != "" {
+		s.Modeltype = r.InfrastructureComponent.Modeltype
 	}
 
-	if r.Simulator.State != "" {
-		s.State = r.Simulator.State
+	if r.InfrastructureComponent.State != "" {
+		s.State = r.InfrastructureComponent.State
 	}
 
 	// only update props if not empty
 	var emptyJson postgres.Jsonb
 	// Serialize empty json and params
 	emptyJson_ser, _ := json.Marshal(emptyJson)
-	startParams_ser, _ := json.Marshal(r.Simulator.Properties)
+	startParams_ser, _ := json.Marshal(r.InfrastructureComponent.Properties)
 	opts := jsondiff.DefaultConsoleOptions()
 	diff, _ := jsondiff.Compare(emptyJson_ser, startParams_ser, &opts)
 	if diff.String() != "FullMatch" {
-		s.Properties = r.Simulator.Properties
+		s.Properties = r.InfrastructureComponent.Properties
 	}
 
 	return s

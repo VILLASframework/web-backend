@@ -1,4 +1,4 @@
-/** Simulator package, endpoints.
+/** InfrastructureComponent package, endpoints.
 *
 * @author Sonja Happ <sonja.happ@eonerc.rwth-aachen.de>
 * @copyright 2014-2019, Institute for Automation of Complex Power Systems, EONERC
@@ -19,7 +19,7 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
-package simulator
+package infrastructure_component
 
 import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
@@ -29,61 +29,61 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 )
 
-func RegisterSimulatorEndpoints(r *gin.RouterGroup) {
-	r.GET("", getSimulators)
-	r.POST("", addSimulator)
-	r.PUT("/:simulatorID", updateSimulator)
-	r.GET("/:simulatorID", getSimulator)
-	r.DELETE("/:simulatorID", deleteSimulator)
-	r.GET("/:simulatorID/models", getModelsOfSimulator)
+func RegisterICEndpoints(r *gin.RouterGroup) {
+	r.GET("", getICs)
+	r.POST("", addIC)
+	r.PUT("/:ICID", updateIC)
+	r.GET("/:ICID", getIC)
+	r.DELETE("/:ICID", deleteIC)
+	r.GET("/:ICID/models", getConfigsOfIC)
 }
 
-// getSimulators godoc
-// @Summary Get all simulators
-// @ID getSimulators
-// @Tags simulators
+// getICs godoc
+// @Summary Get all infrastructure components
+// @ID getICs
+// @Tags infrastructure-components
 // @Produce json
-// @Success 200 {object} docs.ResponseSimulators "Simulators requested"
+// @Success 200 {object} docs.ResponseICs "ICs requested"
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param Authorization header string true "Authorization token"
-// @Router /simulators [get]
-func getSimulators(c *gin.Context) {
+// @Router /ic [get]
+func getICs(c *gin.Context) {
 
 	// Checking permission is not required here since READ access is independent of user's role
 
 	db := database.GetDB()
-	var simulators []database.Simulator
-	err := db.Order("ID asc").Find(&simulators).Error
+	var ics []database.InfrastructureComponent
+	err := db.Order("ID asc").Find(&ics).Error
 	if !helper.DBError(c, err) {
-		c.JSON(http.StatusOK, gin.H{"simulators": simulators})
+		c.JSON(http.StatusOK, gin.H{"ics": ics})
 	}
 
 }
 
-// addSimulator godoc
-// @Summary Add a simulator
-// @ID addSimulator
+// addIC godoc
+// @Summary Add an infrastructure component
+// @ID addIC
 // @Accept json
 // @Produce json
-// @Tags simulators
-// @Success 200 {object} docs.ResponseSimulator "Simulator that was added"
+// @Tags infrastructure-components
+// @Success 200 {object} docs.ResponseIC "Infrastructure Component that was added"
 // @Failure 400 {object} docs.ResponseError "Bad request"
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param Authorization header string true "Authorization token"
-// @Param inputSimulator body simulator.addSimulatorRequest true "Simulator to be added"
-// @Router /simulators [post]
-func addSimulator(c *gin.Context) {
+// @Param inputIC body infrastructure_component.addICRequest true "Infrastructure Component to be added"
+// @Router /ic [post]
+func addIC(c *gin.Context) {
 
-	ok, _ := CheckPermissions(c, database.ModelSimulator, database.Create, false)
+	ok, _ := CheckPermissions(c, database.ModelInfrastructureComponent, database.Create, false)
 	if !ok {
 		return
 	}
 
-	var req addSimulatorRequest
+	var req addICRequest
 	err := c.BindJSON(&req)
 	if err != nil {
 		helper.BadRequestError(c, "Error binding form data to JSON: "+err.Error())
@@ -96,40 +96,40 @@ func addSimulator(c *gin.Context) {
 		return
 	}
 
-	// Create the new simulator from the request
-	newSimulator := req.createSimulator()
+	// Create the new IC from the request
+	newIC := req.createIC()
 
-	// Save new simulator to DB
-	err = newSimulator.save()
+	// Save new IC to DB
+	err = newIC.save()
 	if !helper.DBError(c, err) {
-		c.JSON(http.StatusOK, gin.H{"simulator": newSimulator.Simulator})
+		c.JSON(http.StatusOK, gin.H{"ic": newIC.InfrastructureComponent})
 	}
 
 }
 
-// updateSimulator godoc
-// @Summary Update a simulator
-// @ID updateSimulator
-// @Tags simulators
+// updateIC godoc
+// @Summary Update an infrastructure component
+// @ID updateIC
+// @Tags infrastructure-components
 // @Accept json
 // @Produce json
-// @Success 200 {object} docs.ResponseSimulator "Simulator that was updated"
+// @Success 200 {object} docs.ResponseIC "Infrastructure Component that was updated"
 // @Failure 400 {object} docs.ResponseError "Bad request"
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param Authorization header string true "Authorization token"
-// @Param inputSimulator body simulator.updateSimulatorRequest true "Simulator to be updated"
-// @Param simulatorID path int true "Simulator ID"
-// @Router /simulators/{simulatorID} [put]
-func updateSimulator(c *gin.Context) {
+// @Param inputIC body infrastructure_component.updateICRequest true "InfrastructureComponent to be updated"
+// @Param ICID path int true "InfrastructureComponent ID"
+// @Router /ic/{ICID} [put]
+func updateIC(c *gin.Context) {
 
-	ok, oldSimulator := CheckPermissions(c, database.ModelSimulator, database.Update, true)
+	ok, oldIC := CheckPermissions(c, database.ModelInfrastructureComponent, database.Update, true)
 	if !ok {
 		return
 	}
 
-	var req updateSimulatorRequest
+	var req updateICRequest
 	err := c.BindJSON(&req)
 	if err != nil {
 		helper.BadRequestError(c, "Error binding form data to JSON: "+err.Error())
@@ -137,89 +137,89 @@ func updateSimulator(c *gin.Context) {
 	}
 
 	// Validate the request
-	if err = req.Simulator.validate(); err != nil {
+	if err = req.InfrastructureComponent.validate(); err != nil {
 		helper.UnprocessableEntityError(c, err.Error())
 		return
 	}
 
-	// Create the updatedSimulator from oldSimulator
-	updatedSimulator := req.updatedSimulator(oldSimulator)
+	// Create the updatedIC from oldIC
+	updatedIC := req.updatedIC(oldIC)
 
-	// Finally update the simulator in the DB
-	err = oldSimulator.update(updatedSimulator)
+	// Finally update the IC in the DB
+	err = oldIC.update(updatedIC)
 	if !helper.DBError(c, err) {
-		c.JSON(http.StatusOK, gin.H{"simulator": updatedSimulator.Simulator})
+		c.JSON(http.StatusOK, gin.H{"ic": updatedIC.InfrastructureComponent})
 	}
 
 }
 
-// getSimulator godoc
-// @Summary Get simulator
-// @ID getSimulator
+// getIC godoc
+// @Summary Get infrastructure component
+// @ID getIC
 // @Produce  json
-// @Tags simulators
-// @Success 200 {object} docs.ResponseSimulator "Simulator that was requested"
+// @Tags infrastructure-components
+// @Success 200 {object} docs.ResponseIC "Infrastructure Component that was requested"
 // @Failure 400 {object} docs.ResponseError "Bad request"
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param Authorization header string true "Authorization token"
-// @Param simulatorID path int true "Simulator ID"
-// @Router /simulators/{simulatorID} [get]
-func getSimulator(c *gin.Context) {
+// @Param ICID path int true "Infrastructure Component ID"
+// @Router /ic/{ICID} [get]
+func getIC(c *gin.Context) {
 
-	ok, s := CheckPermissions(c, database.ModelSimulator, database.Read, true)
+	ok, s := CheckPermissions(c, database.ModelInfrastructureComponent, database.Read, true)
 	if !ok {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"simulator": s.Simulator})
+	c.JSON(http.StatusOK, gin.H{"ic": s.InfrastructureComponent})
 }
 
-// deleteSimulator godoc
-// @Summary Delete a simulator
-// @ID deleteSimulator
-// @Tags simulators
+// deleteIC godoc
+// @Summary Delete an infrastructure component
+// @ID deleteIC
+// @Tags infrastructure-components
 // @Produce json
-// @Success 200 {object} docs.ResponseSimulator "Simulator that was deleted"
+// @Success 200 {object} docs.ResponseIC "Infrastructure Component that was deleted"
 // @Failure 400 {object} docs.ResponseError "Bad request"
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param Authorization header string true "Authorization token"
-// @Param simulatorID path int true "Simulator ID"
-// @Router /simulators/{simulatorID} [delete]
-func deleteSimulator(c *gin.Context) {
+// @Param ICID path int true "Infrastructure Component ID"
+// @Router /ic/{ICID} [delete]
+func deleteIC(c *gin.Context) {
 
-	ok, s := CheckPermissions(c, database.ModelSimulator, database.Delete, true)
+	ok, s := CheckPermissions(c, database.ModelInfrastructureComponent, database.Delete, true)
 	if !ok {
 		return
 	}
 
-	// Delete the simulator
+	// Delete the IC
 	err := s.delete()
 	if !helper.DBError(c, err) {
-		c.JSON(http.StatusOK, gin.H{"simulator": s.Simulator})
+		c.JSON(http.StatusOK, gin.H{"ic": s.InfrastructureComponent})
 	}
 
 }
 
-// getModelsOfSimulator godoc
-// @Summary Get all simulation models in which the simulator is used
-// @ID getModelsOfSimulator
-// @Tags simulators
+// getConfigsOfIC godoc
+// @Summary Get all configurations of the infrastructure component
+// @ID getConfigsOfIC
+// @Tags infrastructure-components
 // @Produce json
-// @Success 200 {object} docs.ResponseSimulationModels "Simulation models requested by user"
+// @Success 200 {object} docs.ResponseSimulationModels "Configs requested by user"
 // @Failure 400 {object} docs.ResponseError "Bad request"
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param Authorization header string true "Authorization token"
-// @Param simulatorID path int true "Simulator ID"
-// @Router /simulators/{simulatorID}/models [get]
-func getModelsOfSimulator(c *gin.Context) {
+// @Param ICID path int true "Infrastructure Component ID"
+// @Router /ic/{ICID}/models [get]
+func getConfigsOfIC(c *gin.Context) {
 
-	ok, s := CheckPermissions(c, database.ModelSimulator, database.Read, true)
+	ok, s := CheckPermissions(c, database.ModelInfrastructureComponent, database.Read, true)
 	if !ok {
 		return
 	}

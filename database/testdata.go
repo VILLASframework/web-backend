@@ -55,12 +55,12 @@ var UserB = User{Username: "User_B", Password: string(pwB),
 var UserC = User{Username: "User_C", Password: string(pwC),
 	Role: "Guest", Mail: "User_C@example.com", Active: true}
 
-// Simulators
+// Infrastructure components
 
-var propertiesA = json.RawMessage(`{"name" : "TestNameA", "category" : "CategoryA", "location" : "anywhere on earth", "type": "dummy"}`)
-var propertiesB = json.RawMessage(`{"name" : "TestNameB", "category" : "CategoryB", "location" : "where ever you want", "type": "generic"}`)
+var propertiesA = json.RawMessage(`{"name" : "DPsim simulator", "category" : "Simulator", "location" : "ACSlab", "type": "DPsim"}`)
+var propertiesB = json.RawMessage(`{"name" : "VILLASnode gateway", "category" : "Gateway", "location" : "ACSlab", "type": "VILLASnode"}`)
 
-var SimulatorA = Simulator{
+var ICA = InfrastructureComponent{
 	UUID:          "4854af30-325f-44a5-ad59-b67b2597de68",
 	Host:          "Host_A",
 	Modeltype:     "ModelTypeA",
@@ -71,7 +71,7 @@ var SimulatorA = Simulator{
 	RawProperties: postgres.Jsonb{propertiesA},
 }
 
-var SimulatorB = Simulator{
+var ICB = InfrastructureComponent{
 	UUID:          "7be0322d-354e-431e-84bd-ae4c9633138b",
 	Host:          "Host_B",
 	Modeltype:     "ModelTypeB",
@@ -316,8 +316,8 @@ func DBAddTestData(db *gorm.DB) error {
 	userB := UserB
 	userC := UserC
 
-	simulatorA := SimulatorA
-	simulatorB := SimulatorB
+	ICA := ICA
+	ICB := ICB
 
 	scenarioA := ScenarioA
 	scenarioB := ScenarioB
@@ -354,9 +354,9 @@ func DBAddTestData(db *gorm.DB) error {
 	// add Guest user to DB
 	err = db.Create(&userC).Error
 
-	// Simulators
-	err = db.Create(&simulatorA).Error
-	err = db.Create(&simulatorB).Error
+	// ICs
+	err = db.Create(&ICA).Error
+	err = db.Create(&ICB).Error
 
 	// Scenarios
 	err = db.Create(&scenarioA).Error
@@ -425,9 +425,9 @@ func DBAddTestData(db *gorm.DB) error {
 	err = db.Model(&modelA).Association("Files").Append(&fileC).Error
 	err = db.Model(&modelA).Association("Files").Append(&fileD).Error
 
-	// Simulator HM SimulationModels
-	err = db.Model(&simulatorA).Association("SimulationModels").Append(&modelA).Error
-	err = db.Model(&simulatorA).Association("SimulationModels").Append(&modelB).Error
+	// InfrastructureComponent HM SimulationModels
+	err = db.Model(&ICA).Association("SimulationModels").Append(&modelA).Error
+	err = db.Model(&ICA).Association("SimulationModels").Append(&modelB).Error
 
 	// Widget HM Files
 	err = db.Model(&widgetA).Association("Files").Append(&fileA).Error

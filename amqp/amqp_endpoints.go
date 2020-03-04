@@ -24,32 +24,32 @@ package amqp
 import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/simulator"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/infrastructure-component"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"time"
 )
 
 func RegisterAMQPEndpoint(r *gin.RouterGroup) {
-	r.POST("/:simulatorID/action", sendActionToSimulator)
+	r.POST("/ICID/action", sendActionToIC)
 }
 
-// sendActionToSimulator godoc
-// @Summary Send an action to simulator (only available if backend server is started with -amqp parameter)
-// @ID sendActionToSimulator
+// sendActionToIC godoc
+// @Summary Send an action to IC (only available if backend server is started with -amqp parameter)
+// @ID sendActionToIC
 // @Tags AMQP
 // @Produce json
-// @Param inputAction query string true "Action for simulator"
+// @Param inputAction query string true "Action for IC"
 // @Success 200 {object} docs.ResponseError "Action sent successfully"
 // @Failure 400 {object} docs.ResponseError "Bad request"
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
-// @Param simulatorID path int true "Simulator ID"
-// @Router /simulators/{simulatorID}/action [post]
-func sendActionToSimulator(c *gin.Context) {
+// @Param ICID path int true "InfrastructureComponent ID"
+// @Router /ic/{ICID}/action [post]
+func sendActionToIC(c *gin.Context) {
 
-	ok, s := simulator.CheckPermissions(c, database.ModelSimulatorAction, database.Update, true)
+	ok, s := infrastructure_component.CheckPermissions(c, database.ModelInfrastructureComponentAction, database.Update, true)
 	if !ok {
 		return
 	}
@@ -70,7 +70,7 @@ func sendActionToSimulator(c *gin.Context) {
 
 		err = SendActionAMQP(action, s.UUID)
 		if err != nil {
-			helper.InternalServerError(c, "Unable to send actions to simulator: "+err.Error())
+			helper.InternalServerError(c, "Unable to send actions to IC: "+err.Error())
 			return
 		}
 	}

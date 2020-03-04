@@ -173,38 +173,38 @@ func TestScenarioAssociations(t *testing.T) {
 	}
 }
 
-func TestSimulatorAssociations(t *testing.T) {
+func TestICAssociations(t *testing.T) {
 
 	DropTables(db)
 	MigrateModels(db)
 
 	// create copies of global test data
-	simulatorA := SimulatorA
-	simulatorB := SimulatorB
+	icA := ICA
+	icB := ICB
 	modelA := SimulationModelA
 	modelB := SimulationModelB
 
-	// add simulators to DB
-	assert.NoError(t, db.Create(&simulatorA).Error)
-	assert.NoError(t, db.Create(&simulatorB).Error)
+	// add ICs to DB
+	assert.NoError(t, db.Create(&icA).Error)
+	assert.NoError(t, db.Create(&icB).Error)
 
 	// add simulation models to DB
 	assert.NoError(t, db.Create(&modelA).Error)
 	assert.NoError(t, db.Create(&modelB).Error)
 
-	// add simulator has many simulation models association to DB
-	assert.NoError(t, db.Model(&simulatorA).Association("SimulationModels").Append(&modelA).Error)
-	assert.NoError(t, db.Model(&simulatorA).Association("SimulationModels").Append(&modelB).Error)
+	// add IC has many simulation models association to DB
+	assert.NoError(t, db.Model(&icA).Association("SimulationModels").Append(&modelA).Error)
+	assert.NoError(t, db.Model(&icA).Association("SimulationModels").Append(&modelB).Error)
 
-	var simulator1 Simulator
-	assert.NoError(t, db.Find(&simulator1, 1).Error, fmt.Sprintf("Find Simulator with ID=1"))
-	assert.EqualValues(t, "Host_A", simulator1.Host)
+	var ic1 InfrastructureComponent
+	assert.NoError(t, db.Find(&ic1, 1).Error, fmt.Sprintf("Find InfrastructureComponent with ID=1"))
+	assert.EqualValues(t, "Host_A", ic1.Host)
 
-	// Get simulation models of simulator1
+	// Get simulation models of ic1
 	var models []SimulationModel
-	assert.NoError(t, db.Model(&simulator1).Association("SimulationModels").Find(&models).Error)
+	assert.NoError(t, db.Model(&ic1).Association("SimulationModels").Find(&models).Error)
 	if len(models) != 2 {
-		assert.Fail(t, "Simulator Associations",
+		assert.Fail(t, "InfrastructureComponent Associations",
 			"Expected to have %v SimulationModels. Has %v.", 2, len(models))
 	}
 }
@@ -225,8 +225,8 @@ func TestSimulationModelAssociations(t *testing.T) {
 	fileB := FileB
 	fileC := FileC
 	fileD := FileD
-	simulatorA := SimulatorA
-	simulatorB := SimulatorB
+	icA := ICA
+	icB := ICB
 
 	// add simulation models to DB
 	assert.NoError(t, db.Create(&modelA).Error)
@@ -244,9 +244,9 @@ func TestSimulationModelAssociations(t *testing.T) {
 	assert.NoError(t, db.Create(&fileC).Error)
 	assert.NoError(t, db.Create(&fileD).Error)
 
-	// add simulators to DB
-	assert.NoError(t, db.Create(&simulatorA).Error)
-	assert.NoError(t, db.Create(&simulatorB).Error)
+	// add ICs to DB
+	assert.NoError(t, db.Create(&icA).Error)
+	assert.NoError(t, db.Create(&icB).Error)
 
 	// add simulation model has many signals associations
 	assert.NoError(t, db.Model(&modelA).Association("InputMapping").Append(&inSignalA).Error)
@@ -258,17 +258,17 @@ func TestSimulationModelAssociations(t *testing.T) {
 	assert.NoError(t, db.Model(&modelA).Association("Files").Append(&fileC).Error)
 	assert.NoError(t, db.Model(&modelA).Association("Files").Append(&fileD).Error)
 
-	// associate simulation models with simulators
-	assert.NoError(t, db.Model(&simulatorA).Association("SimulationModels").Append(&modelA).Error)
-	assert.NoError(t, db.Model(&simulatorA).Association("SimulationModels").Append(&modelB).Error)
+	// associate simulation models with IC
+	assert.NoError(t, db.Model(&icA).Association("SimulationModels").Append(&modelA).Error)
+	assert.NoError(t, db.Model(&icA).Association("SimulationModels").Append(&modelB).Error)
 
 	var model1 SimulationModel
 	assert.NoError(t, db.Find(&model1, 1).Error, fmt.Sprintf("Find SimulationModel with ID=1"))
 	assert.EqualValues(t, "SimulationModel_A", model1.Name)
 
-	// Check simulator ID
-	if model1.SimulatorID != 1 {
-		assert.Fail(t, "Simulation Model expected to have Simulator ID 1, but is %v", model1.SimulatorID)
+	// Check IC ID
+	if model1.ICID != 1 {
+		assert.Fail(t, "Simulation Model expected to have InfrastructureComponent ID 1, but is %v", model1.ICID)
 	}
 
 	// Get OutputMapping signals of model1

@@ -46,12 +46,12 @@ type ResponseUser struct {
 	user database.User
 }
 
-type ResponseSimulators struct {
-	simulators []database.Simulator
+type ResponseICs struct {
+	ics []database.InfrastructureComponent
 }
 
-type ResponseSimulator struct {
-	simulator database.Simulator
+type ResponseIC struct {
+	ic database.InfrastructureComponent
 }
 
 type ResponseScenarios struct {

@@ -36,11 +36,11 @@ import (
 	apidocs "git.rwth-aachen.de/acs/public/villas/web-backend-go/doc/api" // doc/api folder is used by Swag CLI, you have to import it
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/dashboard"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/file"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/infrastructure-component"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/metrics"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/scenario"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/signal"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/simulationmodel"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/simulator"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/user"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/widget"
 )
@@ -120,7 +120,7 @@ func main() {
 	widget.RegisterWidgetEndpoints(api.Group("/widgets"))
 	file.RegisterFileEndpoints(api.Group("/files"))
 	user.RegisterUserEndpoints(api.Group("/users"))
-	simulator.RegisterSimulatorEndpoints(api.Group("/simulators"))
+	infrastructure_component.RegisterICEndpoints(api.Group("/ic"))
 
 	r.GET("swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
@@ -133,10 +133,10 @@ func main() {
 			log.Panic(err)
 		}
 
-		// register simulator action endpoint only if AMQP client is used
-		amqp.RegisterAMQPEndpoint(api.Group("/simulators"))
+		// register IC action endpoint only if AMQP client is used
+		amqp.RegisterAMQPEndpoint(api.Group("/ic"))
 
-		// Periodically call the Ping function to check which simulators are still there
+		// Periodically call the Ping function to check which ICs are still there
 		ticker := time.NewTicker(10 * time.Second)
 		go func() {
 

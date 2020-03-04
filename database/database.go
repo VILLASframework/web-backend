@@ -102,7 +102,7 @@ func GetDB() *gorm.DB {
 // TODO: Remove that function from the codebase and substitute the body
 // to the Dummy*() where it is called
 func DropTables(db *gorm.DB) {
-	db.DropTableIfExists(&Simulator{})
+	db.DropTableIfExists(&InfrastructureComponent{})
 	db.DropTableIfExists(&Signal{})
 	db.DropTableIfExists(&SimulationModel{})
 	db.DropTableIfExists(&File{})
@@ -116,7 +116,7 @@ func DropTables(db *gorm.DB) {
 
 // AutoMigrate the models
 func MigrateModels(db *gorm.DB) {
-	db.AutoMigrate(&Simulator{})
+	db.AutoMigrate(&InfrastructureComponent{})
 	db.AutoMigrate(&Signal{})
 	db.AutoMigrate(&SimulationModel{})
 	db.AutoMigrate(&File{})

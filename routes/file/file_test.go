@@ -28,9 +28,9 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/dashboard"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/infrastructure-component"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/scenario"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/simulationmodel"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/simulator"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/user"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/widget"
 	"github.com/gin-gonic/gin"
@@ -52,11 +52,11 @@ var db *gorm.DB
 type SimulationModelRequest struct {
 	Name            string         `json:"name,omitempty"`
 	ScenarioID      uint           `json:"scenarioID,omitempty"`
-	SimulatorID     uint           `json:"simulatorID,omitempty"`
+	ICID            uint           `json:"icID,omitempty"`
 	StartParameters postgres.Jsonb `json:"startParameters,omitempty"`
 }
 
-type SimulatorRequest struct {
+type ICRequest struct {
 	UUID       string         `json:"uuid,omitempty"`
 	Host       string         `json:"host,omitempty"`
 	Modeltype  string         `json:"modelType,omitempty"`
@@ -91,25 +91,25 @@ type WidgetRequest struct {
 	CustomProperties postgres.Jsonb `json:"customProperties,omitempty"`
 }
 
-func addScenarioAndSimulatorAndSimulationModelAndDashboardAndWidget() (scenarioID uint, simulatorID uint, simulationModelID uint, dashboardID uint, widgetID uint) {
+func addScenarioAndICAndSimulationModelAndDashboardAndWidget() (scenarioID uint, ICID uint, simulationModelID uint, dashboardID uint, widgetID uint) {
 
 	// authenticate as admin
 	token, _ := helper.AuthenticateForTest(router,
 		"/api/authenticate", "POST", helper.AdminCredentials)
 
-	// POST $newSimulatorA
-	newSimulatorA := SimulatorRequest{
-		UUID:       database.SimulatorA.UUID,
-		Host:       database.SimulatorA.Host,
-		Modeltype:  database.SimulatorA.Modeltype,
-		State:      database.SimulatorA.State,
-		Properties: database.SimulatorA.Properties,
+	// POST $newICA
+	newICA := ICRequest{
+		UUID:       database.ICA.UUID,
+		Host:       database.ICA.Host,
+		Modeltype:  database.ICA.Modeltype,
+		State:      database.ICA.State,
+		Properties: database.ICA.Properties,
 	}
 	_, resp, _ := helper.TestEndpoint(router, token,
-		"/api/simulators", "POST", helper.KeyModels{"simulator": newSimulatorA})
+		"/api/ic", "POST", helper.KeyModels{"ic": newICA})
 
-	// Read newSimulator's ID from the response
-	newSimulatorID, _ := helper.GetResponseID(resp)
+	// Read newIC's ID from the response
+	newICID, _ := helper.GetResponseID(resp)
 
 	// authenticate as normal user
 	token, _ = helper.AuthenticateForTest(router,
@@ -131,7 +131,7 @@ func addScenarioAndSimulatorAndSimulationModelAndDashboardAndWidget() (scenarioI
 	newSimulationModel := SimulationModelRequest{
 		Name:            database.SimulationModelA.Name,
 		ScenarioID:      uint(newScenarioID),
-		SimulatorID:     uint(newSimulatorID),
+		ICID:            uint(newICID),
 		StartParameters: database.SimulationModelA.StartParameters,
 	}
 	_, resp, _ = helper.TestEndpoint(router, token,
@@ -177,7 +177,7 @@ func addScenarioAndSimulatorAndSimulationModelAndDashboardAndWidget() (scenarioI
 	_, resp, _ = helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/scenarios/%v/user?username=User_C", newScenarioID), "PUT", nil)
 
-	return uint(newScenarioID), uint(newSimulatorID), uint(newSimulationModelID), uint(newDashboardID), uint(newWidgetID)
+	return uint(newScenarioID), uint(newICID), uint(newSimulationModelID), uint(newDashboardID), uint(newWidgetID)
 }
 
 func TestMain(m *testing.M) {
@@ -202,9 +202,9 @@ func TestMain(m *testing.M) {
 	// scenario endpoints required here to first add a scenario to the DB
 	// that can be associated with a new simulation model
 	scenario.RegisterScenarioEndpoints(api.Group("/scenarios"))
-	// simulator endpoints required here to first add a simulator to the DB
+	// IC endpoints required here to first add a IC to the DB
 	// that can be associated with a new simulation model
-	simulator.RegisterSimulatorEndpoints(api.Group("/simulators"))
+	infrastructure_component.RegisterICEndpoints(api.Group("/ic"))
 	// dashboard endpoints required here to first add a dashboard to the DB
 	// that can be associated with a new widget
 	dashboard.RegisterDashboardEndpoints(api.Group("/dashboards"))
@@ -224,7 +224,7 @@ func TestAddFile(t *testing.T) {
 
 	// prepare the content of the DB for testing
 	// using the respective endpoints of the API
-	_, _, simulationModelID, _, widgetID := addScenarioAndSimulatorAndSimulationModelAndDashboardAndWidget()
+	_, _, simulationModelID, _, widgetID := addScenarioAndICAndSimulationModelAndDashboardAndWidget()
 
 	// authenticate as userB who has no access to the elements in the DB
 	token, err := helper.AuthenticateForTest(router,
@@ -340,7 +340,7 @@ func TestUpdateFile(t *testing.T) {
 
 	// prepare the content of the DB for testing
 	// using the respective endpoints of the API
-	_, _, simulationModelID, _, _ := addScenarioAndSimulatorAndSimulationModelAndDashboardAndWidget()
+	_, _, simulationModelID, _, _ := addScenarioAndICAndSimulationModelAndDashboardAndWidget()
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
@@ -474,7 +474,7 @@ func TestDeleteFile(t *testing.T) {
 
 	// prepare the content of the DB for testing
 	// using the respective endpoints of the API
-	_, _, simulationModelID, _, widgetID := addScenarioAndSimulatorAndSimulationModelAndDashboardAndWidget()
+	_, _, simulationModelID, _, widgetID := addScenarioAndICAndSimulationModelAndDashboardAndWidget()
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
@@ -625,7 +625,7 @@ func TestGetAllFilesOfSimulationModel(t *testing.T) {
 
 	// prepare the content of the DB for testing
 	// using the respective endpoints of the API
-	_, _, simulationModelID, _, widgetID := addScenarioAndSimulatorAndSimulationModelAndDashboardAndWidget()
+	_, _, simulationModelID, _, widgetID := addScenarioAndICAndSimulationModelAndDashboardAndWidget()
 
 	// authenticate as userB who has no access to the elements in the DB
 	token, err := helper.AuthenticateForTest(router,

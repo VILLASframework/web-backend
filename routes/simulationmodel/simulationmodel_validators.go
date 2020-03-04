@@ -33,14 +33,14 @@ var validate *validator.Validate
 type validNewSimulationModel struct {
 	Name                string         `form:"Name" validate:"required"`
 	ScenarioID          uint           `form:"ScenarioID" validate:"required"`
-	SimulatorID         uint           `form:"SimulatorID" validate:"required"`
+	ICID                uint           `form:"ICID" validate:"required"`
 	StartParameters     postgres.Jsonb `form:"StartParameters" validate:"required"`
 	SelectedModelFileID uint           `form:"SelectedModelFilID" validate:"omitempty"`
 }
 
 type validUpdatedSimulationModel struct {
 	Name                string         `form:"Name" validate:"omitempty"`
-	SimulatorID         uint           `form:"SimulatorID" validate:"omitempty"`
+	ICID                uint           `form:"ICID" validate:"omitempty"`
 	StartParameters     postgres.Jsonb `form:"StartParameters" validate:"omitempty"`
 	SelectedModelFileID uint           `form:"SelectedModelFileID" validate:"omitempty"`
 }
@@ -70,7 +70,7 @@ func (r *addSimulationModelRequest) createSimulationModel() SimulationModel {
 
 	s.Name = r.SimulationModel.Name
 	s.ScenarioID = r.SimulationModel.ScenarioID
-	s.SimulatorID = r.SimulationModel.SimulatorID
+	s.ICID = r.SimulationModel.ICID
 	s.StartParameters = r.SimulationModel.StartParameters
 	s.SelectedModelFileID = r.SimulationModel.SelectedModelFileID
 
@@ -85,8 +85,8 @@ func (r *updateSimulationModelRequest) updatedSimulationModel(oldSimulationModel
 		s.Name = r.SimulationModel.Name
 	}
 
-	if r.SimulationModel.SimulatorID != 0 {
-		s.SimulatorID = r.SimulationModel.SimulatorID
+	if r.SimulationModel.ICID != 0 {
+		s.ICID = r.SimulationModel.ICID
 	}
 
 	if r.SimulationModel.SelectedModelFileID != 0 {

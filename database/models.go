@@ -84,8 +84,8 @@ type SimulationModel struct {
 	StartParameters postgres.Jsonb `json:"startParameters"`
 	// ID of Scenario to which simulation model belongs
 	ScenarioID uint `json:"scenarioID"`
-	// ID of simulator associated with simulation model
-	SimulatorID uint `json:"simulatorID"`
+	// ID of IC associated with simulation model
+	ICID uint `json:"icID"`
 	// Mapping of output signals of the simulation model, order of signals is important
 	OutputMapping []Signal `json:"-" gorm:"foreignkey:SimulationModelID"`
 	// Mapping of input signals of the simulation model, order of signals is important
@@ -111,27 +111,27 @@ type Signal struct {
 	SimulationModelID uint `json:"simulationModelID"`
 }
 
-// Simulator data model
-type Simulator struct {
+// InfrastructureComponent data model
+type InfrastructureComponent struct {
 	Model
-	// UUID of the simulator
+	// UUID of the IC
 	UUID string `json:"uuid" gorm:"not null"`
-	// Host if the simulator
+	// Host if the IC
 	Host string `json:"host" gorm:"default:''"`
-	// Model type supported by the simulator
+	// Model type supported by the IC
 	Modeltype string `json:"modelType" gorm:"default:''"`
-	// Uptime of the simulator
+	// Uptime of the IC
 	Uptime int `json:"uptime" gorm:"default:0"`
-	// State of the simulator
+	// State of the IC
 	State string `json:"state" gorm:"default:''"`
 	// Time of last state update
 	StateUpdateAt string `json:"stateUpdateAt" gorm:"default:''"`
-	// Properties of simulator as JSON string
+	// Properties of IC as JSON string
 	Properties postgres.Jsonb `json:"properties"`
-	// Raw properties of simulator as JSON string
+	// Raw properties of IC as JSON string
 	RawProperties postgres.Jsonb `json:"rawProperties"`
-	// SimulationModels in which the simulator is used
-	SimulationModels []SimulationModel `json:"-" gorm:"foreignkey:SimulatorID"`
+	// SimulationModels in which the IC is used
+	SimulationModels []SimulationModel `json:"-" gorm:"foreignkey:ICID"`
 }
 
 // Dashboard data model

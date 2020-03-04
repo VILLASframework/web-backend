@@ -115,10 +115,10 @@ test:widget:
   variables:
     TEST_FOLDER: routes/widget
 
-test:simulator:
+test:infrastructure-component:
   extends: test:database
   variables:
-    TEST_FOLDER: routes/simulator
+    TEST_FOLDER: routes/infrastructure-component
 
 test:file:
   extends: test:database

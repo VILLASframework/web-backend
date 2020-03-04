@@ -23,8 +23,8 @@ package simulationmodel
 
 import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/infrastructure-component"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/scenario"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/simulator"
 )
 
 type SimulationModel struct {
@@ -60,10 +60,10 @@ func (m *SimulationModel) addToScenario() error {
 		return err
 	}
 
-	// associate simulator with simulation model
-	var simltr simulator.Simulator
-	err = simltr.ByID(m.SimulatorID)
-	err = db.Model(&simltr).Association("SimulationModels").Append(m).Error
+	// associate IC with simulation model
+	var ic infrastructure_component.InfrastructureComponent
+	err = ic.ByID(m.ICID)
+	err = db.Model(&ic).Association("SimulationModels").Append(m).Error
 	if err != nil {
 		return err
 	}
@@ -77,25 +77,25 @@ func (m *SimulationModel) addToScenario() error {
 func (m *SimulationModel) Update(modifiedSimulationModel SimulationModel) error {
 	db := database.GetDB()
 
-	// check if simulator has been updated
-	if m.SimulatorID != modifiedSimulationModel.SimulatorID {
-		// update simulator
-		var s simulator.Simulator
-		var s_old simulator.Simulator
-		err := s.ByID(modifiedSimulationModel.SimulatorID)
+	// check if IC has been updated
+	if m.ICID != modifiedSimulationModel.ICID {
+		// update IC
+		var s infrastructure_component.InfrastructureComponent
+		var s_old infrastructure_component.InfrastructureComponent
+		err := s.ByID(modifiedSimulationModel.ICID)
 		if err != nil {
 			return err
 		}
-		err = s_old.ByID(m.SimulatorID)
+		err = s_old.ByID(m.ICID)
 		if err != nil {
 			return err
 		}
-		// remove simulation model from old simulator
+		// remove simulation model from old IC
 		err = db.Model(&s_old).Association("SimulationModels").Delete(m).Error
 		if err != nil {
 			return err
 		}
-		// add simulation model to new simulator
+		// add simulation model to new IC
 		err = db.Model(&s).Association("SimulationModels").Append(m).Error
 		if err != nil {
 			return err
@@ -105,7 +105,7 @@ func (m *SimulationModel) Update(modifiedSimulationModel SimulationModel) error 
 	err := db.Model(m).Updates(map[string]interface{}{
 		"Name":                modifiedSimulationModel.Name,
 		"StartParameters":     modifiedSimulationModel.StartParameters,
-		"SimulatorID":         modifiedSimulationModel.SimulatorID,
+		"ICID":                modifiedSimulationModel.ICID,
 		"SelectedModelFileID": modifiedSimulationModel.SelectedModelFileID,
 	}).Error
 
