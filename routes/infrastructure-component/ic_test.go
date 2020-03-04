@@ -447,33 +447,33 @@ func TestGetConfigsOfIC(t *testing.T) {
 	newICID, err := helper.GetResponseID(resp)
 	assert.NoError(t, err)
 
-	// test GET ic/ID/models
+	// test GET ic/ID/confis
 	// TODO how to properly test this without using simulation model endpoints?
-	numberOfModels, err := helper.LengthOfResponse(router, token,
-		fmt.Sprintf("/api/ic/%v/models", newICID), "GET", nil)
+	numberOfConfigs, err := helper.LengthOfResponse(router, token,
+		fmt.Sprintf("/api/ic/%v/configs", newICID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
-	assert.Equal(t, 0, numberOfModels)
+	assert.Equal(t, 0, numberOfConfigs)
 
 	// authenticate as normal user
 	token, err = helper.AuthenticateForTest(router,
 		"/api/authenticate", "POST", helper.UserACredentials)
 	assert.NoError(t, err)
 
-	// test GET ic/ID/models
+	// test GET ic/ID/configs
 	// TODO how to properly test this without using simulation model endpoints?
-	numberOfModels, err = helper.LengthOfResponse(router, token,
-		fmt.Sprintf("/api/ic/%v/models", newICID), "GET", nil)
+	numberOfConfigs, err = helper.LengthOfResponse(router, token,
+		fmt.Sprintf("/api/ic/%v/configs", newICID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
-	assert.Equal(t, 0, numberOfModels)
+	assert.Equal(t, 0, numberOfConfigs)
 
-	// Try to get models of IC that does not exist
+	// Try to get configs of IC that does not exist
 	// should result in not found
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/ic/%v/models", newICID+1), "GET", nil)
+		fmt.Sprintf("/api/ic/%v/configs", newICID+1), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
 }
