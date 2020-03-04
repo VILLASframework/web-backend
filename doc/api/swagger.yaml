@@ -1460,7 +1460,7 @@ paths:
         -amqp parameter)
       tags:
       - AMQP
-  /ic/{ICID}/models:
+  /ic/{ICID}/configs:
     get:
       operationId: getConfigsOfIC
       parameters:

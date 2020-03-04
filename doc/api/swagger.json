@@ -1171,7 +1171,7 @@
                 }
             }
         },
-        "/ic/{ICID}/models": {
+        "/ic/{ICID}/configs": {
             "get": {
                 "produces": [
                     "application/json"
