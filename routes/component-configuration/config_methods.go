@@ -1,4 +1,4 @@
-/** Simulationmodel package, methods.
+/** component_configuration package, methods.
 *
 * @author Sonja Happ <sonja.happ@eonerc.rwth-aachen.de>
 * @copyright 2014-2019, Institute for Automation of Complex Power Systems, EONERC
@@ -19,7 +19,7 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
-package simulationmodel
+package component_configuration
 
 import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
@@ -27,17 +27,17 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/scenario"
 )
 
-type SimulationModel struct {
-	database.SimulationModel
+type ComponentConfiguration struct {
+	database.ComponentConfiguration
 }
 
-func (m *SimulationModel) save() error {
+func (m *ComponentConfiguration) save() error {
 	db := database.GetDB()
 	err := db.Create(m).Error
 	return err
 }
 
-func (m *SimulationModel) ByID(id uint) error {
+func (m *ComponentConfiguration) ByID(id uint) error {
 	db := database.GetDB()
 	err := db.Find(m, id).Error
 	if err != nil {
@@ -46,7 +46,7 @@ func (m *SimulationModel) ByID(id uint) error {
 	return nil
 }
 
-func (m *SimulationModel) addToScenario() error {
+func (m *ComponentConfiguration) addToScenario() error {
 	db := database.GetDB()
 	var so scenario.Scenario
 	err := so.ByID(m.ScenarioID)
@@ -54,35 +54,35 @@ func (m *SimulationModel) addToScenario() error {
 		return err
 	}
 
-	// save simulation model to DB
+	// save component configuration to DB
 	err = m.save()
 	if err != nil {
 		return err
 	}
 
-	// associate IC with simulation model
+	// associate IC with component configuration
 	var ic infrastructure_component.InfrastructureComponent
 	err = ic.ByID(m.ICID)
-	err = db.Model(&ic).Association("SimulationModels").Append(m).Error
+	err = db.Model(&ic).Association("ComponentConfigurations").Append(m).Error
 	if err != nil {
 		return err
 	}
 
-	// associate simulation model with scenario
-	err = db.Model(&so).Association("SimulationModels").Append(m).Error
+	// associate component configuration with scenario
+	err = db.Model(&so).Association("ComponentConfigurations").Append(m).Error
 
 	return err
 }
 
-func (m *SimulationModel) Update(modifiedSimulationModel SimulationModel) error {
+func (m *ComponentConfiguration) Update(modifiedConfig ComponentConfiguration) error {
 	db := database.GetDB()
 
 	// check if IC has been updated
-	if m.ICID != modifiedSimulationModel.ICID {
+	if m.ICID != modifiedConfig.ICID {
 		// update IC
 		var s infrastructure_component.InfrastructureComponent
 		var s_old infrastructure_component.InfrastructureComponent
-		err := s.ByID(modifiedSimulationModel.ICID)
+		err := s.ByID(modifiedConfig.ICID)
 		if err != nil {
 			return err
 		}
@@ -90,29 +90,29 @@ func (m *SimulationModel) Update(modifiedSimulationModel SimulationModel) error 
 		if err != nil {
 			return err
 		}
-		// remove simulation model from old IC
-		err = db.Model(&s_old).Association("SimulationModels").Delete(m).Error
+		// remove component configuration from old IC
+		err = db.Model(&s_old).Association("ComponentConfigurations").Delete(m).Error
 		if err != nil {
 			return err
 		}
-		// add simulation model to new IC
-		err = db.Model(&s).Association("SimulationModels").Append(m).Error
+		// add component configuration to new IC
+		err = db.Model(&s).Association("ComponentConfigurations").Append(m).Error
 		if err != nil {
 			return err
 		}
 	}
 
 	err := db.Model(m).Updates(map[string]interface{}{
-		"Name":                modifiedSimulationModel.Name,
-		"StartParameters":     modifiedSimulationModel.StartParameters,
-		"ICID":                modifiedSimulationModel.ICID,
-		"SelectedModelFileID": modifiedSimulationModel.SelectedModelFileID,
+		"Name":            modifiedConfig.Name,
+		"StartParameters": modifiedConfig.StartParameters,
+		"ICID":            modifiedConfig.ICID,
+		"SelectedFileID":  modifiedConfig.SelectedFileID,
 	}).Error
 
 	return err
 }
 
-func (m *SimulationModel) delete() error {
+func (m *ComponentConfiguration) delete() error {
 
 	db := database.GetDB()
 	var so scenario.Scenario
@@ -121,9 +121,9 @@ func (m *SimulationModel) delete() error {
 		return err
 	}
 
-	// remove association between SimulationModel and Scenario
-	// SimulationModel itself is not deleted from DB, it remains as "dangling"
-	err = db.Model(&so).Association("SimulationModels").Delete(m).Error
+	// remove association between ComponentConfiguration and Scenario
+	// ComponentConfiguration itself is not deleted from DB, it remains as "dangling"
+	err = db.Model(&so).Association("ComponentConfigurations").Delete(m).Error
 
 	return err
 }

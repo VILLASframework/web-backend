@@ -62,12 +62,12 @@ type ResponseScenario struct {
 	scenario database.Scenario
 }
 
-type ResponseSimulationModels struct {
-	simulationModels []database.SimulationModel
+type ResponseConfigs struct {
+	configs []database.ComponentConfiguration
 }
 
-type ResponseSimulationModel struct {
-	simulationModel database.SimulationModel
+type ResponseConfig struct {
+	config database.ComponentConfiguration
 }
 
 type ResponseDashboards struct {

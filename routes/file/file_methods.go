@@ -31,7 +31,7 @@ import (
 	"time"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/simulationmodel"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/component-configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/widget"
 )
 
@@ -84,14 +84,14 @@ func (f *File) register(fileHeader *multipart.FileHeader, objectType string, obj
 	f.ImageWidth = 0  // TODO: do we need this?
 	f.ImageHeight = 0 // TODO: do we need this?
 
-	var m simulationmodel.SimulationModel
+	var m component_configuration.ComponentConfiguration
 	var w widget.Widget
 	var err error
-	if objectType == "model" {
-		// check if model exists
+	if objectType == "config" {
+		// check if config exists
 		err = m.ByID(objectID)
 		f.WidgetID = 0
-		f.SimulationModelID = objectID
+		f.ConfigID = objectID
 		if err != nil {
 			return err
 		}
@@ -99,7 +99,7 @@ func (f *File) register(fileHeader *multipart.FileHeader, objectType string, obj
 	} else {
 		// check if widget exists
 		f.WidgetID = objectID
-		f.SimulationModelID = 0
+		f.ConfigID = 0
 		err = w.ByID(uint(objectID))
 		if err != nil {
 			return err
@@ -122,8 +122,8 @@ func (f *File) register(fileHeader *multipart.FileHeader, objectType string, obj
 		return err
 	}
 
-	// Create association to model or widget
-	if objectType == "model" {
+	// Create association to config or widget
+	if objectType == "config" {
 		db := database.GetDB()
 		err := db.Model(&m).Association("Files").Append(f).Error
 		if err != nil {
@@ -174,9 +174,9 @@ func (f *File) delete() error {
 			return err
 		}
 	} else {
-		// remove association between file and simulation model
-		var m simulationmodel.SimulationModel
-		err := m.ByID(f.SimulationModelID)
+		// remove association between file and config
+		var m component_configuration.ComponentConfiguration
+		err := m.ByID(f.ConfigID)
 		if err != nil {
 			return err
 		}

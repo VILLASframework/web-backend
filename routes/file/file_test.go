@@ -27,10 +27,10 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/component-configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/dashboard"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/infrastructure-component"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/scenario"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/simulationmodel"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/user"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/widget"
 	"github.com/gin-gonic/gin"
@@ -49,7 +49,7 @@ import (
 var router *gin.Engine
 var db *gorm.DB
 
-type SimulationModelRequest struct {
+type ConfigRequest struct {
 	Name            string         `json:"name,omitempty"`
 	ScenarioID      uint           `json:"scenarioID,omitempty"`
 	ICID            uint           `json:"icID,omitempty"`
@@ -91,7 +91,7 @@ type WidgetRequest struct {
 	CustomProperties postgres.Jsonb `json:"customProperties,omitempty"`
 }
 
-func addScenarioAndICAndSimulationModelAndDashboardAndWidget() (scenarioID uint, ICID uint, simulationModelID uint, dashboardID uint, widgetID uint) {
+func addScenarioAndICAndConfigAndDashboardAndWidget() (scenarioID uint, ICID uint, configID uint, dashboardID uint, widgetID uint) {
 
 	// authenticate as admin
 	token, _ := helper.AuthenticateForTest(router,
@@ -127,18 +127,18 @@ func addScenarioAndICAndSimulationModelAndDashboardAndWidget() (scenarioID uint,
 	// Read newScenario's ID from the response
 	newScenarioID, _ := helper.GetResponseID(resp)
 
-	// POST new simulation model
-	newSimulationModel := SimulationModelRequest{
-		Name:            database.SimulationModelA.Name,
+	// POST new component config
+	newConfig := ConfigRequest{
+		Name:            database.ConfigA.Name,
 		ScenarioID:      uint(newScenarioID),
 		ICID:            uint(newICID),
-		StartParameters: database.SimulationModelA.StartParameters,
+		StartParameters: database.ConfigA.StartParameters,
 	}
 	_, resp, _ = helper.TestEndpoint(router, token,
-		"/api/models", "POST", helper.KeyModels{"simulationModel": newSimulationModel})
+		"/api/configs", "POST", helper.KeyModels{"config": newConfig})
 
-	// Read newSimulationModel's ID from the response
-	newSimulationModelID, _ := helper.GetResponseID(resp)
+	// Read newConfig's ID from the response
+	newConfigID, _ := helper.GetResponseID(resp)
 
 	// POST new dashboard
 	newDashboard := DashboardRequest{
@@ -177,7 +177,7 @@ func addScenarioAndICAndSimulationModelAndDashboardAndWidget() (scenarioID uint,
 	_, resp, _ = helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/scenarios/%v/user?username=User_C", newScenarioID), "PUT", nil)
 
-	return uint(newScenarioID), uint(newICID), uint(newSimulationModelID), uint(newDashboardID), uint(newWidgetID)
+	return uint(newScenarioID), uint(newICID), uint(newConfigID), uint(newDashboardID), uint(newWidgetID)
 }
 
 func TestMain(m *testing.M) {
@@ -196,14 +196,14 @@ func TestMain(m *testing.M) {
 
 	user.RegisterAuthenticate(api.Group("/authenticate"))
 	api.Use(user.Authentication(true))
-	// simulationmodel endpoints required here to first add a simulation to the DB
+	// component-configuration endpoints required here to first add a config to the DB
 	// that can be associated with a new file
-	simulationmodel.RegisterSimulationModelEndpoints(api.Group("/models"))
+	component_configuration.RegisterComponentConfigurationEndpoints(api.Group("/configs"))
 	// scenario endpoints required here to first add a scenario to the DB
-	// that can be associated with a new simulation model
+	// that can be associated with a new component config
 	scenario.RegisterScenarioEndpoints(api.Group("/scenarios"))
 	// IC endpoints required here to first add a IC to the DB
-	// that can be associated with a new simulation model
+	// that can be associated with a new component config
 	infrastructure_component.RegisterICEndpoints(api.Group("/ic"))
 	// dashboard endpoints required here to first add a dashboard to the DB
 	// that can be associated with a new widget
@@ -224,7 +224,7 @@ func TestAddFile(t *testing.T) {
 
 	// prepare the content of the DB for testing
 	// using the respective endpoints of the API
-	_, _, simulationModelID, _, widgetID := addScenarioAndICAndSimulationModelAndDashboardAndWidget()
+	_, _, configID, _, widgetID := addScenarioAndICAndConfigAndDashboardAndWidget()
 
 	// authenticate as userB who has no access to the elements in the DB
 	token, err := helper.AuthenticateForTest(router,
@@ -233,10 +233,10 @@ func TestAddFile(t *testing.T) {
 
 	emptyBuf := &bytes.Buffer{}
 
-	// try to POST to a simulation model to which UserB has no access
+	// try to POST to a component config to which UserB has no access
 	// should return a 422 unprocessable entity error
 	code, resp, err := helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/files?objectID=%v&objectType=model", simulationModelID), "POST", emptyBuf)
+		fmt.Sprintf("/api/files?objectID=%v&objectType=config", configID), "POST", emptyBuf)
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
@@ -262,14 +262,14 @@ func TestAddFile(t *testing.T) {
 	// try to POST without an object ID
 	// should return a bad request error
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/files?objectType=model"), "POST", emptyBuf)
+		fmt.Sprintf("/api/files?objectType=config"), "POST", emptyBuf)
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 
 	// try to POST an invalid file
 	// should return a bad request
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/files?objectID=%v&objectType=model", simulationModelID), "POST", emptyBuf)
+		fmt.Sprintf("/api/files?objectID=%v&objectType=config", configID), "POST", emptyBuf)
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 
@@ -299,7 +299,7 @@ func TestAddFile(t *testing.T) {
 
 	// Create the request
 	w := httptest.NewRecorder()
-	req, err := http.NewRequest("POST", fmt.Sprintf("/api/files?objectID=%v&objectType=model", simulationModelID), bodyBuf)
+	req, err := http.NewRequest("POST", fmt.Sprintf("/api/files?objectID=%v&objectType=config", configID), bodyBuf)
 	assert.NoError(t, err, "create request")
 
 	req.Header.Set("Content-Type", contentType)
@@ -340,7 +340,7 @@ func TestUpdateFile(t *testing.T) {
 
 	// prepare the content of the DB for testing
 	// using the respective endpoints of the API
-	_, _, simulationModelID, _, _ := addScenarioAndICAndSimulationModelAndDashboardAndWidget()
+	_, _, configID, _, _ := addScenarioAndICAndConfigAndDashboardAndWidget()
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
@@ -372,7 +372,7 @@ func TestUpdateFile(t *testing.T) {
 
 	// Create the POST request
 	w := httptest.NewRecorder()
-	req, err := http.NewRequest("POST", fmt.Sprintf("/api/files?objectID=%v&objectType=model", simulationModelID), bodyBuf)
+	req, err := http.NewRequest("POST", fmt.Sprintf("/api/files?objectID=%v&objectType=config", configID), bodyBuf)
 	assert.NoError(t, err, "create request")
 
 	req.Header.Set("Content-Type", contentType)
@@ -474,7 +474,7 @@ func TestDeleteFile(t *testing.T) {
 
 	// prepare the content of the DB for testing
 	// using the respective endpoints of the API
-	_, _, simulationModelID, _, widgetID := addScenarioAndICAndSimulationModelAndDashboardAndWidget()
+	_, _, configID, _, widgetID := addScenarioAndICAndConfigAndDashboardAndWidget()
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
@@ -504,7 +504,7 @@ func TestDeleteFile(t *testing.T) {
 
 	// Create the request
 	w := httptest.NewRecorder()
-	req, err := http.NewRequest("POST", fmt.Sprintf("/api/files?objectID=%v&objectType=model", simulationModelID), bodyBuf)
+	req, err := http.NewRequest("POST", fmt.Sprintf("/api/files?objectID=%v&objectType=config", configID), bodyBuf)
 	assert.NoError(t, err, "create request")
 	req.Header.Set("Content-Type", contentType)
 	req.Header.Add("Authorization", "Bearer "+token)
@@ -542,7 +542,7 @@ func TestDeleteFile(t *testing.T) {
 		"/api/authenticate", "POST", helper.UserBCredentials)
 	assert.NoError(t, err)
 
-	// try to DELETE file of simulation model to which userB has no access
+	// try to DELETE file of component config to which userB has no access
 	// should return an unprocessable entity error
 	code, resp, err := helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/files/%v", newFileID), "DELETE", nil)
@@ -561,9 +561,9 @@ func TestDeleteFile(t *testing.T) {
 		"/api/authenticate", "POST", helper.UserACredentials)
 	assert.NoError(t, err)
 
-	// Count the number of all files returned for simulation model
+	// Count the number of all files returned for component config
 	initialNumber, err := helper.LengthOfResponse(router, token,
-		fmt.Sprintf("/api/files?objectID=%v&objectType=model", simulationModelID), "GET", nil)
+		fmt.Sprintf("/api/files?objectID=%v&objectType=config", configID), "GET", nil)
 	assert.NoError(t, err)
 
 	// try to DELETE non-existing fileID
@@ -578,7 +578,7 @@ func TestDeleteFile(t *testing.T) {
 		"/api/authenticate", "POST", helper.GuestCredentials)
 	assert.NoError(t, err)
 
-	// try to DELETE file of simulation model as guest
+	// try to DELETE file of component config as guest
 	// should return an unprocessable entity error
 	code, resp, err = helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/files/%v", newFileID), "DELETE", nil)
@@ -609,15 +609,15 @@ func TestDeleteFile(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
-	// Again count the number of all the files returned for simulation model
+	// Again count the number of all the files returned for component config
 	finalNumber, err := helper.LengthOfResponse(router, token,
-		fmt.Sprintf("/api/files?objectID=%v&objectType=model", simulationModelID), "GET", nil)
+		fmt.Sprintf("/api/files?objectID=%v&objectType=config", configID), "GET", nil)
 	assert.NoError(t, err)
 
 	assert.Equal(t, initialNumber-1, finalNumber)
 }
 
-func TestGetAllFilesOfSimulationModel(t *testing.T) {
+func TestGetAllFilesOfConfig(t *testing.T) {
 
 	database.DropTables(db)
 	database.MigrateModels(db)
@@ -625,17 +625,17 @@ func TestGetAllFilesOfSimulationModel(t *testing.T) {
 
 	// prepare the content of the DB for testing
 	// using the respective endpoints of the API
-	_, _, simulationModelID, _, widgetID := addScenarioAndICAndSimulationModelAndDashboardAndWidget()
+	_, _, ConfigID, _, widgetID := addScenarioAndICAndConfigAndDashboardAndWidget()
 
 	// authenticate as userB who has no access to the elements in the DB
 	token, err := helper.AuthenticateForTest(router,
 		"/api/authenticate", "POST", helper.UserBCredentials)
 	assert.NoError(t, err)
 
-	// try to get all files for simulation model to which userB has not access
+	// try to get all files for component config to which userB has not access
 	// should return unprocessable entity error
 	code, resp, err := helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/files?objectID=%v&objectType=model", simulationModelID), "GET", nil)
+		fmt.Sprintf("/api/files?objectID=%v&objectType=config", ConfigID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
@@ -653,19 +653,19 @@ func TestGetAllFilesOfSimulationModel(t *testing.T) {
 
 	//try to get all files for unsupported object type; should return a bad request error
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/files?objectID=%v&objectType=wrongtype", simulationModelID), "GET", nil)
+		fmt.Sprintf("/api/files?objectID=%v&objectType=wrongtype", ConfigID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 
 	//try to get all files with missing object ID; should return a bad request error
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/files?objectType=model"), "GET", nil)
+		fmt.Sprintf("/api/files?objectType=config"), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 
-	// Count the number of all files returned for simulation model
-	initialNumberModel, err := helper.LengthOfResponse(router, token,
-		fmt.Sprintf("/api/files?objectID=%v&objectType=model", simulationModelID), "GET", nil)
+	// Count the number of all files returned for component config
+	initialNumberConfig, err := helper.LengthOfResponse(router, token,
+		fmt.Sprintf("/api/files?objectID=%v&objectType=config", ConfigID), "GET", nil)
 	assert.NoError(t, err)
 
 	// Count the number of all files returned for widget
@@ -683,30 +683,30 @@ func TestGetAllFilesOfSimulationModel(t *testing.T) {
 	assert.NoError(t, err, "opening file")
 	defer fh.Close()
 
-	// test POST a file to simulation model and widget
-	bodyBufModel1 := &bytes.Buffer{}
+	// test POST a file to component config and widget
+	bodyBufConfig1 := &bytes.Buffer{}
 	bodyBufWidget1 := &bytes.Buffer{}
-	bodyWriterModel1 := multipart.NewWriter(bodyBufModel1)
+	bodyWriterConfig1 := multipart.NewWriter(bodyBufConfig1)
 	bodyWriterWidget1 := multipart.NewWriter(bodyBufWidget1)
-	fileWriterModel1, err := bodyWriterModel1.CreateFormFile("file", "testuploadfile.txt")
+	fileWriterConfig1, err := bodyWriterConfig1.CreateFormFile("file", "testuploadfile.txt")
 	assert.NoError(t, err, "writing to buffer")
 	fileWriterWidget1, err := bodyWriterWidget1.CreateFormFile("file", "testuploadfile.txt")
 	assert.NoError(t, err, "writing to buffer")
 	// io copy
-	_, err = io.Copy(fileWriterModel1, fh)
+	_, err = io.Copy(fileWriterConfig1, fh)
 	assert.NoError(t, err, "IO copy")
 	_, err = io.Copy(fileWriterWidget1, fh)
 	assert.NoError(t, err, "IO copy")
-	contentTypeModel1 := bodyWriterModel1.FormDataContentType()
+	contentTypeConfig1 := bodyWriterConfig1.FormDataContentType()
 	contentTypeWidget1 := bodyWriterWidget1.FormDataContentType()
-	bodyWriterModel1.Close()
+	bodyWriterConfig1.Close()
 	bodyWriterWidget1.Close()
 
-	// Create the request for simulation model
+	// Create the request for component config
 	w := httptest.NewRecorder()
-	req, err := http.NewRequest("POST", fmt.Sprintf("/api/files?objectID=%v&objectType=model", simulationModelID), bodyBufModel1)
+	req, err := http.NewRequest("POST", fmt.Sprintf("/api/files?objectID=%v&objectType=config", ConfigID), bodyBufConfig1)
 	assert.NoError(t, err, "create request")
-	req.Header.Set("Content-Type", contentTypeModel1)
+	req.Header.Set("Content-Type", contentTypeConfig1)
 	req.Header.Add("Authorization", "Bearer "+token)
 	router.ServeHTTP(w, req)
 	assert.Equalf(t, 200, w.Code, "Response body: \n%v\n", w.Body)
@@ -720,36 +720,36 @@ func TestGetAllFilesOfSimulationModel(t *testing.T) {
 	router.ServeHTTP(w2, req2)
 	assert.Equalf(t, 200, w2.Code, "Response body: \n%v\n", w2.Body)
 
-	// POST a second file to simulation model and widget
+	// POST a second file to component config and widget
 
 	// open a second file handle
 	fh2, err := os.Open("testfile.txt")
 	assert.NoError(t, err, "opening file")
 	defer fh2.Close()
 
-	bodyBufModel2 := &bytes.Buffer{}
+	bodyBufConfig2 := &bytes.Buffer{}
 	bodyBufWidget2 := &bytes.Buffer{}
-	bodyWriterModel2 := multipart.NewWriter(bodyBufModel2)
+	bodyWriterConfig2 := multipart.NewWriter(bodyBufConfig2)
 	bodyWriterWidget2 := multipart.NewWriter(bodyBufWidget2)
-	fileWriterModel2, err := bodyWriterModel2.CreateFormFile("file", "testuploadfile2.txt")
+	fileWriterConfig2, err := bodyWriterConfig2.CreateFormFile("file", "testuploadfile2.txt")
 	assert.NoError(t, err, "writing to buffer")
 	fileWriterWidget2, err := bodyWriterWidget2.CreateFormFile("file", "testuploadfile2.txt")
 	assert.NoError(t, err, "writing to buffer")
 
 	// io copy
-	_, err = io.Copy(fileWriterModel2, fh2)
+	_, err = io.Copy(fileWriterConfig2, fh2)
 	assert.NoError(t, err, "IO copy")
 	_, err = io.Copy(fileWriterWidget2, fh2)
 	assert.NoError(t, err, "IO copy")
-	contentTypeModel2 := bodyWriterModel2.FormDataContentType()
+	contentTypeConfig2 := bodyWriterConfig2.FormDataContentType()
 	contentTypeWidget2 := bodyWriterWidget2.FormDataContentType()
-	bodyWriterModel2.Close()
+	bodyWriterConfig2.Close()
 	bodyWriterWidget2.Close()
 
 	w3 := httptest.NewRecorder()
-	req3, err := http.NewRequest("POST", fmt.Sprintf("/api/files?objectID=%v&objectType=model", simulationModelID), bodyBufModel2)
+	req3, err := http.NewRequest("POST", fmt.Sprintf("/api/files?objectID=%v&objectType=config", ConfigID), bodyBufConfig2)
 	assert.NoError(t, err, "create request")
-	req3.Header.Set("Content-Type", contentTypeModel2)
+	req3.Header.Set("Content-Type", contentTypeConfig2)
 	req3.Header.Add("Authorization", "Bearer "+token)
 	router.ServeHTTP(w3, req3)
 	assert.Equalf(t, 200, w3.Code, "Response body: \n%v\n", w3.Body)
@@ -762,11 +762,11 @@ func TestGetAllFilesOfSimulationModel(t *testing.T) {
 	router.ServeHTTP(w4, req4)
 	assert.Equalf(t, 200, w4.Code, "Response body: \n%v\n", w4.Body)
 
-	// Again count the number of all the files returned for simulation model
-	finalNumberModel, err := helper.LengthOfResponse(router, token,
-		fmt.Sprintf("/api/files?objectID=%v&objectType=model", simulationModelID), "GET", nil)
+	// Again count the number of all the files returned for component config
+	finalNumberConfig, err := helper.LengthOfResponse(router, token,
+		fmt.Sprintf("/api/files?objectID=%v&objectType=config", ConfigID), "GET", nil)
 	assert.NoError(t, err)
-	assert.Equal(t, initialNumberModel+2, finalNumberModel)
+	assert.Equal(t, initialNumberConfig+2, finalNumberConfig)
 
 	// Again count the number of all the files returned for widget
 	finalNumberWidget, err := helper.LengthOfResponse(router, token,

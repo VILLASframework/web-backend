@@ -209,7 +209,7 @@ func deleteIC(c *gin.Context) {
 // @ID getConfigsOfIC
 // @Tags infrastructure-components
 // @Produce json
-// @Success 200 {object} docs.ResponseSimulationModels "Configs requested by user"
+// @Success 200 {object} docs.ResponseConfigs "Configs requested by user"
 // @Failure 400 {object} docs.ResponseError "Bad request"
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"

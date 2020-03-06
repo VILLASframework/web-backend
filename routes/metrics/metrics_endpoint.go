@@ -37,10 +37,10 @@ var (
 		},
 	)
 
-	SimulationModelCounter = prometheus.NewCounter(
+	ComponentConfigurationCounter = prometheus.NewCounter(
 		prometheus.CounterOpts{
-			Name: "simulation_models",
-			Help: "A counter for the total number of simulation models",
+			Name: "component_configurations",
+			Help: "A counter for the total number of component configurations",
 		},
 	)
 
@@ -103,7 +103,7 @@ func RegisterMetricsEndpoint(rg *gin.RouterGroup) {
 	// Register metrics
 	prometheus.MustRegister(
 		ICCounter,
-		SimulationModelCounter,
+		ComponentConfigurationCounter,
 		FileCounter,
 		ScenarioCounter,
 		UserCounter,
@@ -112,17 +112,17 @@ func RegisterMetricsEndpoint(rg *gin.RouterGroup) {
 }
 
 func InitCounters(db *gorm.DB) {
-	var infrastructure_components, simulation_models, files, scenarios, users, dashboards float64
+	var infrastructure_components, component_configurations, files, scenarios, users, dashboards float64
 
 	db.Table("infrastructure_components").Count(&infrastructure_components)
-	db.Table("simulation_models").Count(&simulation_models)
+	db.Table("component_configurations").Count(&component_configurations)
 	db.Table("files").Count(&files)
 	db.Table("scenarios").Count(&scenarios)
 	db.Table("users").Count(&users)
 	db.Table("dashboards").Count(&dashboards)
 
 	ICCounter.Add(infrastructure_components)
-	SimulationModelCounter.Add(simulation_models)
+	ComponentConfigurationCounter.Add(component_configurations)
 	FileCounter.Add(files)
 	ScenarioCounter.Add(scenarios)
 	UserCounter.Add(users)

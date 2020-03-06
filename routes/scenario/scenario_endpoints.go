@@ -82,7 +82,7 @@ func getScenarios(c *gin.Context) {
 			return
 		}
 	}
-	// TODO return list of simulationModelIDs, dashboardIDs and userIDs per scenario
+	// TODO return list of configIDs, dashboardIDs and userIDs per scenario
 	c.JSON(http.StatusOK, gin.H{"scenarios": scenarios})
 }
 
@@ -211,7 +211,7 @@ func getScenario(c *gin.Context) {
 		return
 	}
 
-	// TODO return list of simulationModelIDs, dashboardIDs and userIDs per scenario
+	// TODO return list of configIDs, dashboardIDs and userIDs per scenario
 	c.JSON(http.StatusOK, gin.H{"scenario": so.Scenario})
 }
 

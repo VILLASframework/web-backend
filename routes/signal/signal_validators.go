@@ -28,11 +28,11 @@ import (
 var validate *validator.Validate
 
 type validNewSignal struct {
-	Name              string `form:"Name" validate:"required"`
-	Unit              string `form:"unit" validate:"omitempty"`
-	Index             uint   `form:"index" validate:"required"`
-	Direction         string `form:"direction" validate:"required,oneof=in out"`
-	SimulationModelID uint   `form:"simulationModelID" validate:"required"`
+	Name      string `form:"Name" validate:"required"`
+	Unit      string `form:"unit" validate:"omitempty"`
+	Index     uint   `form:"index" validate:"required"`
+	Direction string `form:"direction" validate:"required,oneof=in out"`
+	ConfigID  uint   `form:"configID" validate:"required"`
 }
 
 type validUpdatedSignal struct {
@@ -68,7 +68,7 @@ func (r *addSignalRequest) createSignal() Signal {
 	s.Unit = r.Signal.Unit
 	s.Index = r.Signal.Index
 	s.Direction = r.Signal.Direction
-	s.SimulationModelID = r.Signal.SimulationModelID
+	s.ConfigID = r.Signal.ConfigID
 
 	return s
 }

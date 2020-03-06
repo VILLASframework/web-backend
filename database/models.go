@@ -65,35 +65,35 @@ type Scenario struct {
 	StartParameters postgres.Jsonb `json:"startParameters"`
 	// Users that have access to the scenario
 	Users []*User `json:"-" gorm:"many2many:user_scenarios;"`
-	// SimulationModels that belong to the scenario
-	SimulationModels []SimulationModel `json:"-" gorm:"foreignkey:ScenarioID" `
+	// ComponentConfigurations that belong to the scenario
+	ComponentConfigurations []ComponentConfiguration `json:"-" gorm:"foreignkey:ScenarioID" `
 	// Dashboards that belong to the Scenario
 	Dashboards []Dashboard `json:"-" gorm:"foreignkey:ScenarioID" `
 }
 
-// SimulationModel data model
-type SimulationModel struct {
+// ComponentConfiguration data model
+type ComponentConfiguration struct {
 	Model
-	// Name of simulation model
+	// Name of Component Configuration
 	Name string `json:"name" gorm:"not null"`
 	// Number of output signals
 	OutputLength int `json:"outputLength" gorm:"default:0"`
 	// Number of input signals
 	InputLength int `json:"inputLength" gorm:"default:0"`
-	// Start parameters of simulation model as JSON
+	// Start parameters of Component Configuration as JSON
 	StartParameters postgres.Jsonb `json:"startParameters"`
-	// ID of Scenario to which simulation model belongs
+	// ID of Scenario to which Component Configuration belongs
 	ScenarioID uint `json:"scenarioID"`
-	// ID of IC associated with simulation model
+	// ID of IC associated with Component Configuration
 	ICID uint `json:"icID"`
-	// Mapping of output signals of the simulation model, order of signals is important
-	OutputMapping []Signal `json:"-" gorm:"foreignkey:SimulationModelID"`
-	// Mapping of input signals of the simulation model, order of signals is important
-	InputMapping []Signal `json:"-" gorm:"foreignkey:SimulationModelID"`
-	// Files of simulation model (can be CIM and other simulation model file formats)
-	Files []File `json:"-" gorm:"foreignkey:SimulationModelID"`
-	// Currently selected simulation model FileID
-	SelectedModelFileID uint `json:"selectedModelFileID" gorm:"default:0"`
+	// Mapping of output signals of the ComponentConfiguration, order of signals is important
+	OutputMapping []Signal `json:"-" gorm:"foreignkey:ConfigID"`
+	// Mapping of input signals of the Component Configuration, order of signals is important
+	InputMapping []Signal `json:"-" gorm:"foreignkey:ConfigID"`
+	// Files of Component Configuration (can be CIM and other ComponentConfiguration file formats)
+	Files []File `json:"-" gorm:"foreignkey:ConfigID"`
+	// Currently selected FileID
+	SelectedFileID uint `json:"selectedFileID" gorm:"default:0"`
 }
 
 // Signal data model
@@ -107,8 +107,8 @@ type Signal struct {
 	Index uint `json:"index"`
 	// Direction of the signal (in or out)
 	Direction string `json:"direction"`
-	// ID of simulation model
-	SimulationModelID uint `json:"simulationModelID"`
+	// ID of Component Configuration
+	ConfigID uint `json:"configID"`
 }
 
 // InfrastructureComponent data model
@@ -130,8 +130,8 @@ type InfrastructureComponent struct {
 	Properties postgres.Jsonb `json:"properties"`
 	// Raw properties of IC as JSON string
 	RawProperties postgres.Jsonb `json:"rawProperties"`
-	// SimulationModels in which the IC is used
-	SimulationModels []SimulationModel `json:"-" gorm:"foreignkey:ICID"`
+	// ComponentConfigurations in which the IC is used
+	ComponentConfigurations []ComponentConfiguration `json:"-" gorm:"foreignkey:ICID"`
 }
 
 // Dashboard data model
@@ -195,8 +195,8 @@ type File struct {
 	ImageWidth uint `json:"imageWidth"`
 	// Last modification time of file
 	Date string `json:"date"`
-	// ID of model to which file belongs
-	SimulationModelID uint `json:"simulationModelID"`
+	// ID of Component Configuration to which file belongs
+	ConfigID uint `json:"configID"`
 	// ID of widget to which file belongs
 	WidgetID uint `json:"widgetID"`
 	// File itself

@@ -42,7 +42,7 @@ const ModelInfrastructureComponent = ModelName("ic")
 const ModelInfrastructureComponentAction = ModelName("icaction")
 const ModelDashboard = ModelName("dashboard")
 const ModelWidget = ModelName("widget")
-const ModelSimulationModel = ModelName("simulationmodel")
+const ModelComponentConfiguration = ModelName("component-configuration")
 const ModelSignal = ModelName("signal")
 const ModelFile = ModelName("file")
 
@@ -76,7 +76,7 @@ var Roles = RoleActions{
 		ModelUser:                          crud,
 		ModelUsers:                         crud,
 		ModelScenario:                      crud,
-		ModelSimulationModel:               crud,
+		ModelComponentConfiguration:        crud,
 		ModelInfrastructureComponent:       crud,
 		ModelInfrastructureComponentAction: crud,
 		ModelWidget:                        crud,
@@ -88,7 +88,7 @@ var Roles = RoleActions{
 		ModelUser:                          _ru_,
 		ModelUsers:                         none,
 		ModelScenario:                      crud,
-		ModelSimulationModel:               crud,
+		ModelComponentConfiguration:        crud,
 		ModelInfrastructureComponent:       _r__,
 		ModelInfrastructureComponentAction: _ru_,
 		ModelWidget:                        crud,
@@ -98,7 +98,7 @@ var Roles = RoleActions{
 	},
 	"Guest": {
 		ModelScenario:                      _r__,
-		ModelSimulationModel:               _r__,
+		ModelComponentConfiguration:        _r__,
 		ModelDashboard:                     _r__,
 		ModelWidget:                        _r__,
 		ModelInfrastructureComponent:       _r__,

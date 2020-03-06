@@ -448,7 +448,7 @@ func TestGetConfigsOfIC(t *testing.T) {
 	assert.NoError(t, err)
 
 	// test GET ic/ID/confis
-	// TODO how to properly test this without using simulation model endpoints?
+	// TODO how to properly test this without using component configuration endpoints?
 	numberOfConfigs, err := helper.LengthOfResponse(router, token,
 		fmt.Sprintf("/api/ic/%v/configs", newICID), "GET", nil)
 	assert.NoError(t, err)
@@ -462,7 +462,7 @@ func TestGetConfigsOfIC(t *testing.T) {
 	assert.NoError(t, err)
 
 	// test GET ic/ID/configs
-	// TODO how to properly test this without using simulation model endpoints?
+	// TODO how to properly test this without using component configuration endpoints?
 	numberOfConfigs, err = helper.LengthOfResponse(router, token,
 		fmt.Sprintf("/api/ic/%v/configs", newICID), "GET", nil)
 	assert.NoError(t, err)

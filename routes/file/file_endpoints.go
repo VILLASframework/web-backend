@@ -30,7 +30,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/simulationmodel"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/component-configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/widget"
 )
 
@@ -43,23 +43,23 @@ func RegisterFileEndpoints(r *gin.RouterGroup) {
 }
 
 // getFiles godoc
-// @Summary Get all files of a specific model or widget
+// @Summary Get all files of a specific component configuration or widget
 // @ID getFiles
 // @Tags files
 // @Produce json
-// @Success 200 {object} docs.ResponseFiles "Files which belong to simulation model or widget"
+// @Success 200 {object} docs.ResponseFiles "Files which belong to config or widget"
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param Authorization header string true "Authorization token"
-// @Param objectType query string true "Set to model for files of model, set to widget for files of widget"
-// @Param objectID query int true "ID of either model or widget of which files are requested"
+// @Param objectType query string true "Set to config for files of component configuration, set to widget for files of widget"
+// @Param objectID query int true "ID of either config or widget of which files are requested"
 // @Router /files [get]
 func getFiles(c *gin.Context) {
 
 	var err error
 	objectType := c.Request.URL.Query().Get("objectType")
-	if objectType != "model" && objectType != "widget" {
+	if objectType != "config" && objectType != "widget" {
 		helper.BadRequestError(c, fmt.Sprintf("Object type not supported for files: %s", objectType))
 		return
 	}
@@ -72,10 +72,10 @@ func getFiles(c *gin.Context) {
 
 	//Check access
 	var ok bool
-	var m simulationmodel.SimulationModel
+	var m component_configuration.ComponentConfiguration
 	var w widget.Widget
-	if objectType == "model" {
-		ok, m = simulationmodel.CheckPermissions(c, database.Read, "body", objectID)
+	if objectType == "config" {
+		ok, m = component_configuration.CheckPermissions(c, database.Read, "body", objectID)
 	} else {
 		ok, w = widget.CheckPermissions(c, database.Read, objectID)
 	}
@@ -88,7 +88,7 @@ func getFiles(c *gin.Context) {
 
 	var files []database.File
 
-	if objectType == "model" {
+	if objectType == "config" {
 		err = db.Order("ID asc").Model(&m).Related(&files, "Files").Error
 	} else {
 		err = db.Order("ID asc").Model(&w).Related(&files, "Files").Error
@@ -101,7 +101,7 @@ func getFiles(c *gin.Context) {
 }
 
 // addFile godoc
-// @Summary Add a file to a specific model or widget
+// @Summary Add a file to a specific component config or widget
 // @ID addFile
 // @Tags files
 // @Produce json
@@ -118,13 +118,13 @@ func getFiles(c *gin.Context) {
 // @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param Authorization header string true "Authorization token"
 // @Param inputFile formData file true "File to be uploaded"
-// @Param objectType query string true "Set to model for files of model, set to widget for files of widget"
-// @Param objectID query int true "ID of either model or widget of which files are requested"
+// @Param objectType query string true "Set to config for files of component config, set to widget for files of widget"
+// @Param objectID query int true "ID of either config or widget of which files are requested"
 // @Router /files [post]
 func addFile(c *gin.Context) {
 
 	objectType := c.Request.URL.Query().Get("objectType")
-	if objectType != "model" && objectType != "widget" {
+	if objectType != "config" && objectType != "widget" {
 		helper.BadRequestError(c, fmt.Sprintf("Object type not supported for files: %s", objectType))
 		return
 	}
@@ -137,8 +137,8 @@ func addFile(c *gin.Context) {
 
 	// Check access
 	var ok bool
-	if objectType == "model" {
-		ok, _ = simulationmodel.CheckPermissions(c, database.Update, "body", objectID)
+	if objectType == "config" {
+		ok, _ = component_configuration.CheckPermissions(c, database.Update, "body", objectID)
 		if !ok {
 			return
 		}

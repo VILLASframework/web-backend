@@ -1,5 +1,46 @@
 basePath: /api/v2
 definitions:
+  component_configuration.addConfigRequest:
+    properties:
+      config:
+        $ref: '#/definitions/component_configuration.validNewConfig'
+        type: object
+    type: object
+  component_configuration.updateConfigRequest:
+    properties:
+      config:
+        $ref: '#/definitions/component_configuration.validUpdatedConfig'
+        type: object
+    type: object
+  component_configuration.validNewConfig:
+    properties:
+      ICID:
+        type: integer
+      Name:
+        type: string
+      ScenarioID:
+        type: integer
+      SelectedFileID:
+        type: integer
+      StartParameters:
+        type: string
+    required:
+    - ICID
+    - Name
+    - ScenarioID
+    - StartParameters
+    type: object
+  component_configuration.validUpdatedConfig:
+    properties:
+      ICID:
+        type: integer
+      Name:
+        type: string
+      SelectedFileID:
+        type: integer
+      StartParameters:
+        type: string
+    type: object
   dashboard.addDashboardRequest:
     properties:
       dashboard:
@@ -32,6 +73,32 @@ definitions:
       name:
         type: string
     type: object
+  database.ComponentConfiguration:
+    properties:
+      icID:
+        description: ID of IC associated with Component Configuration
+        type: integer
+      id:
+        type: integer
+      inputLength:
+        description: Number of input signals
+        type: integer
+      name:
+        description: Name of Component Configuration
+        type: string
+      outputLength:
+        description: Number of output signals
+        type: integer
+      scenarioID:
+        description: ID of Scenario to which Component Configuration belongs
+        type: integer
+      selectedFileID:
+        description: Currently selected FileID
+        type: integer
+      startParameters:
+        description: Start parameters of Component Configuration as JSON
+        type: string
+    type: object
   database.Dashboard:
     properties:
       grid:
@@ -48,6 +115,9 @@ definitions:
     type: object
   database.File:
     properties:
+      configID:
+        description: ID of Component Configuration to which file belongs
+        type: integer
       date:
         description: Last modification time of file
         type: string
@@ -62,9 +132,6 @@ definitions:
       name:
         description: Name of file
         type: string
-      simulationModelID:
-        description: ID of model to which file belongs
-        type: integer
       size:
         description: Size of file (in byte)
         type: integer
@@ -120,6 +187,9 @@ definitions:
     type: object
   database.Signal:
     properties:
+      configID:
+        description: ID of Component Configuration
+        type: integer
       direction:
         description: Direction of the signal (in or out)
         type: string
@@ -131,37 +201,8 @@ definitions:
       name:
         description: Name of Signal
         type: string
-      simulationModelID:
-        description: ID of simulation model
-        type: integer
       unit:
         description: Unit of Signal
-        type: string
-    type: object
-  database.SimulationModel:
-    properties:
-      icID:
-        description: ID of IC associated with simulation model
-        type: integer
-      id:
-        type: integer
-      inputLength:
-        description: Number of input signals
-        type: integer
-      name:
-        description: Name of simulation model
-        type: string
-      outputLength:
-        description: Number of output signals
-        type: integer
-      scenarioID:
-        description: ID of Scenario to which simulation model belongs
-        type: integer
-      selectedModelFileID:
-        description: Currently selected simulation model FileID
-        type: integer
-      startParameters:
-        description: Start parameters of simulation model as JSON
         type: string
     type: object
   database.User:
@@ -238,6 +279,19 @@ definitions:
         $ref: '#/definitions/database.User'
         type: object
     type: object
+  docs.ResponseConfig:
+    properties:
+      config:
+        $ref: '#/definitions/database.ComponentConfiguration'
+        type: object
+    type: object
+  docs.ResponseConfigs:
+    properties:
+      configs:
+        items:
+          $ref: '#/definitions/database.ComponentConfiguration'
+        type: array
+    type: object
   docs.ResponseDashboard:
     properties:
       dashboard:
@@ -308,19 +362,6 @@ definitions:
       signals:
         items:
           $ref: '#/definitions/database.Signal'
-        type: array
-    type: object
-  docs.ResponseSimulationModel:
-    properties:
-      simulationModel:
-        $ref: '#/definitions/database.SimulationModel'
-        type: object
-    type: object
-  docs.ResponseSimulationModels:
-    properties:
-      simulationModels:
-        items:
-          $ref: '#/definitions/database.SimulationModel'
         type: array
     type: object
   docs.ResponseUser:
@@ -439,21 +480,21 @@ definitions:
     type: object
   signal.validNewSignal:
     properties:
+      ConfigID:
+        type: integer
       Direction:
         type: string
       Index:
         type: integer
       Name:
         type: string
-      SimulationModelID:
-        type: integer
       Unit:
         type: string
     required:
+    - ConfigID
     - Direction
     - Index
     - Name
-    - SimulationModelID
     type: object
   signal.validUpdatedSignal:
     properties:
@@ -462,47 +503,6 @@ definitions:
       Name:
         type: string
       Unit:
-        type: string
-    type: object
-  simulationmodel.addSimulationModelRequest:
-    properties:
-      simulationModel:
-        $ref: '#/definitions/simulationmodel.validNewSimulationModel'
-        type: object
-    type: object
-  simulationmodel.updateSimulationModelRequest:
-    properties:
-      simulationModel:
-        $ref: '#/definitions/simulationmodel.validUpdatedSimulationModel'
-        type: object
-    type: object
-  simulationmodel.validNewSimulationModel:
-    properties:
-      ICID:
-        type: integer
-      Name:
-        type: string
-      ScenarioID:
-        type: integer
-      SelectedModelFileID:
-        type: integer
-      StartParameters:
-        type: string
-    required:
-    - ICID
-    - Name
-    - ScenarioID
-    - StartParameters
-    type: object
-  simulationmodel.validUpdatedSimulationModel:
-    properties:
-      ICID:
-        type: integer
-      Name:
-        type: string
-      SelectedModelFileID:
-        type: integer
-      StartParameters:
         type: string
     type: object
   user.addUserRequest:
@@ -686,6 +686,237 @@ paths:
       summary: Authentication for user
       tags:
       - authentication
+  /configs:
+    get:
+      operationId: getConfigs
+      parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Scenario ID
+        in: query
+        name: scenarioID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Component configurations which belong to scenario
+          schema:
+            $ref: '#/definitions/docs.ResponseConfigs'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Get all component configurations of scenario
+      tags:
+      - component-configurations
+    post:
+      consumes:
+      - application/json
+      operationId: addConfig
+      parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: component configuration to be added incl. IDs of scenario and
+          IC
+        in: body
+        name: inputConfig
+        required: true
+        schema:
+          $ref: '#/definitions/component_configuration.addConfigRequest'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Component configuration that was added
+          schema:
+            $ref: '#/definitions/docs.ResponseConfig'
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Add a component configuration to a scenario
+      tags:
+      - component-configurations
+  /configs/{configID}:
+    delete:
+      operationId: deleteConfig
+      parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Config ID
+        in: path
+        name: configID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: component configuration that was deleted
+          schema:
+            $ref: '#/definitions/docs.ResponseConfig'
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Delete a component configuration
+      tags:
+      - component-configurations
+    get:
+      operationId: getConfig
+      parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Config ID
+        in: path
+        name: configID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: component configuration that was requested
+          schema:
+            $ref: '#/definitions/docs.ResponseConfig'
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Get a component configuration
+      tags:
+      - component-configurations
+    put:
+      consumes:
+      - application/json
+      operationId: updateConfig
+      parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: component configuration to be updated
+        in: body
+        name: inputConfig
+        required: true
+        schema:
+          $ref: '#/definitions/component_configuration.updateConfigRequest'
+          type: object
+      - description: Config ID
+        in: path
+        name: configID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Component configuration that was added
+          schema:
+            $ref: '#/definitions/docs.ResponseConfig'
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/docs.ResponseError'
+            type: object
+      summary: Update a component configuration
+      tags:
+      - component-configurations
   /dashboards:
     get:
       operationId: getDashboards
@@ -925,12 +1156,13 @@ paths:
         name: Authorization
         required: true
         type: string
-      - description: Set to model for files of model, set to widget for files of widget
+      - description: Set to config for files of component configuration, set to widget
+          for files of widget
         in: query
         name: objectType
         required: true
         type: string
-      - description: ID of either model or widget of which files are requested
+      - description: ID of either config or widget of which files are requested
         in: query
         name: objectID
         required: true
@@ -939,7 +1171,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: Files which belong to simulation model or widget
+          description: Files which belong to config or widget
           schema:
             $ref: '#/definitions/docs.ResponseFiles'
             type: object
@@ -958,7 +1190,7 @@ paths:
           schema:
             $ref: '#/definitions/docs.ResponseError'
             type: object
-      summary: Get all files of a specific model or widget
+      summary: Get all files of a specific component configuration or widget
       tags:
       - files
     post:
@@ -981,12 +1213,13 @@ paths:
         name: inputFile
         required: true
         type: file
-      - description: Set to model for files of model, set to widget for files of widget
+      - description: Set to config for files of component config, set to widget for
+          files of widget
         in: query
         name: objectType
         required: true
         type: string
-      - description: ID of either model or widget of which files are requested
+      - description: ID of either config or widget of which files are requested
         in: query
         name: objectID
         required: true
@@ -1019,7 +1252,7 @@ paths:
           schema:
             $ref: '#/definitions/docs.ResponseError'
             type: object
-      summary: Add a file to a specific model or widget
+      summary: Add a file to a specific component config or widget
       tags:
       - files
   /files/{fileID}:
@@ -1480,7 +1713,7 @@ paths:
         "200":
           description: Configs requested by user
           schema:
-            $ref: '#/definitions/docs.ResponseSimulationModels'
+            $ref: '#/definitions/docs.ResponseConfigs'
             type: object
         "400":
           description: Bad request
@@ -1516,236 +1749,6 @@ paths:
       summary: Prometheus metrics endpoint
       tags:
       - metrics
-  /models:
-    get:
-      operationId: getSimulationModels
-      parameters:
-      - description: Authorization token
-        in: header
-        name: Authorization
-        required: true
-        type: string
-      - description: Scenario ID
-        in: query
-        name: scenarioID
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Simulation models which belong to scenario
-          schema:
-            $ref: '#/definitions/docs.ResponseSimulationModels'
-            type: object
-        "404":
-          description: Not found
-          schema:
-            $ref: '#/definitions/docs.ResponseError'
-            type: object
-        "422":
-          description: Unprocessable entity
-          schema:
-            $ref: '#/definitions/docs.ResponseError'
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/docs.ResponseError'
-            type: object
-      summary: Get all simulation models of scenario
-      tags:
-      - simulationModels
-    post:
-      consumes:
-      - application/json
-      operationId: addSimulationModel
-      parameters:
-      - description: Authorization token
-        in: header
-        name: Authorization
-        required: true
-        type: string
-      - description: Simulation model to be added incl. IDs of scenario and IC
-        in: body
-        name: inputSimulationModel
-        required: true
-        schema:
-          $ref: '#/definitions/simulationmodel.addSimulationModelRequest'
-          type: object
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: simulation model that was added
-          schema:
-            $ref: '#/definitions/docs.ResponseSimulationModel'
-            type: object
-        "400":
-          description: Bad request
-          schema:
-            $ref: '#/definitions/docs.ResponseError'
-            type: object
-        "404":
-          description: Not found
-          schema:
-            $ref: '#/definitions/docs.ResponseError'
-            type: object
-        "422":
-          description: Unprocessable entity
-          schema:
-            $ref: '#/definitions/docs.ResponseError'
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/docs.ResponseError'
-            type: object
-      summary: Add a simulation model to a scenario
-      tags:
-      - simulationModels
-  /models/{modelID}:
-    delete:
-      operationId: deleteSimulationModel
-      parameters:
-      - description: Authorization token
-        in: header
-        name: Authorization
-        required: true
-        type: string
-      - description: Model ID
-        in: path
-        name: modelID
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: simulation model that was deleted
-          schema:
-            $ref: '#/definitions/docs.ResponseSimulationModel'
-            type: object
-        "400":
-          description: Bad request
-          schema:
-            $ref: '#/definitions/docs.ResponseError'
-            type: object
-        "404":
-          description: Not found
-          schema:
-            $ref: '#/definitions/docs.ResponseError'
-            type: object
-        "422":
-          description: Unprocessable entity
-          schema:
-            $ref: '#/definitions/docs.ResponseError'
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/docs.ResponseError'
-            type: object
-      summary: Delete a simulation model
-      tags:
-      - simulationModels
-    get:
-      operationId: getSimulationModel
-      parameters:
-      - description: Authorization token
-        in: header
-        name: Authorization
-        required: true
-        type: string
-      - description: Model ID
-        in: path
-        name: modelID
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: simulation model that was requested
-          schema:
-            $ref: '#/definitions/docs.ResponseSimulationModel'
-            type: object
-        "400":
-          description: Bad request
-          schema:
-            $ref: '#/definitions/docs.ResponseError'
-            type: object
-        "404":
-          description: Not found
-          schema:
-            $ref: '#/definitions/docs.ResponseError'
-            type: object
-        "422":
-          description: Unprocessable entity
-          schema:
-            $ref: '#/definitions/docs.ResponseError'
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/docs.ResponseError'
-            type: object
-      summary: Get a simulation model
-      tags:
-      - simulationModels
-    put:
-      consumes:
-      - application/json
-      operationId: updateSimulationModel
-      parameters:
-      - description: Authorization token
-        in: header
-        name: Authorization
-        required: true
-        type: string
-      - description: Simulation model to be updated
-        in: body
-        name: inputSimulationModel
-        required: true
-        schema:
-          $ref: '#/definitions/simulationmodel.updateSimulationModelRequest'
-          type: object
-      - description: Model ID
-        in: path
-        name: modelID
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: simulation model that was added
-          schema:
-            $ref: '#/definitions/docs.ResponseSimulationModel'
-            type: object
-        "400":
-          description: Bad request
-          schema:
-            $ref: '#/definitions/docs.ResponseError'
-            type: object
-        "404":
-          description: Not found
-          schema:
-            $ref: '#/definitions/docs.ResponseError'
-            type: object
-        "422":
-          description: Unprocessable entity
-          schema:
-            $ref: '#/definitions/docs.ResponseError'
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/docs.ResponseError'
-            type: object
-      summary: Update a simulation model
-      tags:
-      - simulationModels
   /scenarios:
     get:
       operationId: getScenarios
@@ -2099,9 +2102,9 @@ paths:
         name: direction
         required: true
         type: string
-      - description: Model ID of signals to be obtained
+      - description: Config ID of signals to be obtained
         in: query
-        name: modelID
+        name: configID
         required: true
         type: string
       - description: Authorization token
@@ -2113,7 +2116,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: Signals which belong to simulation model
+          description: Signals which belong to component configuration
           schema:
             $ref: '#/definitions/docs.ResponseSignals'
             type: object
@@ -2145,8 +2148,8 @@ paths:
         name: Authorization
         required: true
         type: string
-      - description: A signal to be added to the model incl. direction and model ID
-          to which signal shall be added
+      - description: A signal to be added to the component configuration incl. direction
+          and config ID to which signal shall be added
         in: body
         name: inputSignal
         required: true
@@ -2181,7 +2184,7 @@ paths:
           schema:
             $ref: '#/definitions/docs.ResponseError'
             type: object
-      summary: Add a signal to a signal mapping of a model
+      summary: Add a signal to a signal mapping of a component configuration
       tags:
       - signals
   /signals/{signalID}:
