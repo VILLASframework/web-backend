@@ -289,7 +289,7 @@ func TestUpdateWidget(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
-	// authenticate as guest user who has access to simulation model
+	// authenticate as guest user who has access to scenario
 	token, err = helper.AuthenticateForTest(router,
 		"/api/authenticate", "POST", helper.GuestCredentials)
 	assert.NoError(t, err)

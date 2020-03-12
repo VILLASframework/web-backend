@@ -95,10 +95,10 @@ test:scenario:
   variables:
     TEST_FOLDER: routes/scenario
 
-test:simulationmodel:
-  extends: test:scenario
+test:component-configuration:
+  extends: test:database
   variables:
-    TEST_FOLDER: routes/simulationmodel
+    TEST_FOLDER: routes/component-configuration
 
 test:signal:
   extends: test:database
@@ -115,10 +115,10 @@ test:widget:
   variables:
     TEST_FOLDER: routes/widget
 
-test:simulator:
+test:infrastructure-component:
   extends: test:database
   variables:
-    TEST_FOLDER: routes/simulator
+    TEST_FOLDER: routes/infrastructure-component
 
 test:file:
   extends: test:database

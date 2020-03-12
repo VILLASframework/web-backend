@@ -23,7 +23,7 @@ package signal
 
 import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/simulationmodel"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/component-configuration"
 )
 
 type Signal struct {
@@ -45,10 +45,10 @@ func (s *Signal) byID(id uint) error {
 	return nil
 }
 
-func (s *Signal) addToSimulationModel() error {
+func (s *Signal) addToConfig() error {
 	db := database.GetDB()
-	var m simulationmodel.SimulationModel
-	err := m.ByID(s.SimulationModelID)
+	var m component_configuration.ComponentConfiguration
+	err := m.ByID(s.ConfigID)
 	if err != nil {
 		return err
 	}
@@ -59,7 +59,7 @@ func (s *Signal) addToSimulationModel() error {
 		return err
 	}
 
-	// associate signal with simulation model in correct direction
+	// associate signal with component configuration in correct direction
 	if s.Direction == "in" {
 		err = db.Model(&m).Association("InputMapping").Append(s).Error
 		if err != nil {
@@ -99,13 +99,13 @@ func (s *Signal) update(modifiedSignal Signal) error {
 func (s *Signal) delete() error {
 
 	db := database.GetDB()
-	var m simulationmodel.SimulationModel
-	err := m.ByID(s.SimulationModelID)
+	var m component_configuration.ComponentConfiguration
+	err := m.ByID(s.ConfigID)
 	if err != nil {
 		return err
 	}
 
-	// remove association between Signal and SimulationModel
+	// remove association between Signal and ComponentConfiguration
 	// Signal itself is not deleted from DB, it remains as "dangling"
 	if s.Direction == "in" {
 		err = db.Model(&m).Association("InputMapping").Delete(s).Error

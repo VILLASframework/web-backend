@@ -27,7 +27,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/simulationmodel"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/component-configuration"
 )
 
 func checkPermissions(c *gin.Context, operation database.CRUD) (bool, Signal) {
@@ -50,7 +50,7 @@ func checkPermissions(c *gin.Context, operation database.CRUD) (bool, Signal) {
 		return false, sig
 	}
 
-	ok, _ := simulationmodel.CheckPermissions(c, operation, "body", int(sig.SimulationModelID))
+	ok, _ := component_configuration.CheckPermissions(c, operation, "body", int(sig.ConfigID))
 	if !ok {
 		return false, sig
 	}

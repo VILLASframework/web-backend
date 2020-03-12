@@ -77,8 +77,8 @@ func ConnectAMQP(uri string) error {
 		return fmt.Errorf("AMQP: failed to declare the exchange")
 	}
 
-	// add a queue for the simulators
-	simulatorQueue, err := client.channel.QueueDeclare("simulators",
+	// add a queue for the ICs
+	ICQueue, err := client.channel.QueueDeclare("infrastructure_components",
 		true,
 		false,
 		false,
@@ -88,13 +88,13 @@ func ConnectAMQP(uri string) error {
 		return fmt.Errorf("AMQP: failed to declare the queue")
 	}
 
-	err = client.channel.QueueBind(simulatorQueue.Name, "", VILLAS_EXCHANGE, false, nil)
+	err = client.channel.QueueBind(ICQueue.Name, "", VILLAS_EXCHANGE, false, nil)
 	if err != nil {
 		return fmt.Errorf("AMQP: failed to bind the queue")
 	}
 
 	// consume deliveries
-	client.replies, err = client.channel.Consume(simulatorQueue.Name,
+	client.replies, err = client.channel.Consume(ICQueue.Name,
 		"",
 		false,
 		false,
@@ -120,15 +120,15 @@ func ConnectAMQP(uri string) error {
 				continue
 			}
 
-			var sToBeUpdated database.Simulator
+			var sToBeUpdated database.InfrastructureComponent
 			db := database.GetDB()
-			simulatorUUID := gjson.Get(content, "properties.uuid").String()
-			if simulatorUUID == "" {
-				log.Println("AMQP: Could not extract UUID of simulator from content of received message, SIMULATOR NOT UPDATED")
+			ICUUID := gjson.Get(content, "properties.uuid").String()
+			if ICUUID == "" {
+				log.Println("AMQP: Could not extract UUID of IC from content of received message, COMPONENT NOT UPDATED")
 			} else {
-				err = db.Where("UUID = ?", simulatorUUID).Find(sToBeUpdated).Error
+				err = db.Where("UUID = ?", ICUUID).Find(sToBeUpdated).Error
 				if err != nil {
-					log.Println("AMQP: Unable to find simulator with UUID: ", gjson.Get(content, "properties.uuid"), " DB error message: ", err)
+					log.Println("AMQP: Unable to find IC with UUID: ", gjson.Get(content, "properties.uuid"), " DB error message: ", err)
 				}
 
 				err = db.Model(&sToBeUpdated).Updates(map[string]interface{}{
@@ -140,10 +140,10 @@ func ConnectAMQP(uri string) error {
 					"RawProperties": gjson.Get(content, "properties"),
 				}).Error
 				if err != nil {
-					log.Println("AMQP: Unable to update simulator in DB: ", err)
+					log.Println("AMQP: Unable to update IC in DB: ", err)
 				}
 
-				log.Println("AMQP: Updated simulator with UUID ", gjson.Get(content, "properties.uuid"))
+				log.Println("AMQP: Updated IC with UUID ", gjson.Get(content, "properties.uuid"))
 			}
 		}
 	}()
@@ -182,7 +182,7 @@ func SendActionAMQP(action Action, uuid string) error {
 }
 
 func PingAMQP() error {
-	log.Println("AMQP: sending ping command to all simulators")
+	log.Println("AMQP: sending ping command to all ICs")
 
 	var a Action
 	a.Act = "ping"

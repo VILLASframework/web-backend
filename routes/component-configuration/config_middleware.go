@@ -1,4 +1,4 @@
-/** Simulationmodel package, middleware.
+/** component_configuration package, middleware.
 *
 * @author Sonja Happ <sonja.happ@eonerc.rwth-aachen.de>
 * @copyright 2014-2019, Institute for Automation of Complex Power Systems, EONERC
@@ -19,7 +19,7 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
-package simulationmodel
+package component_configuration
 
 import (
 	"fmt"
@@ -30,22 +30,22 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/scenario"
 )
 
-func CheckPermissions(c *gin.Context, operation database.CRUD, modelIDSource string, modelIDBody int) (bool, SimulationModel) {
+func CheckPermissions(c *gin.Context, operation database.CRUD, configIDSource string, configIDBody int) (bool, ComponentConfiguration) {
 
-	var m SimulationModel
+	var m ComponentConfiguration
 
-	err := database.ValidateRole(c, database.ModelSimulationModel, operation)
+	err := database.ValidateRole(c, database.ModelComponentConfiguration, operation)
 	if err != nil {
-		helper.UnprocessableEntityError(c, fmt.Sprintf("Access denied (role validation of simulation model failed): %v", err.Error()))
+		helper.UnprocessableEntityError(c, fmt.Sprintf("Access denied (role validation of Component Configuration failed): %v", err.Error()))
 		return false, m
 	}
 
-	modelID, err := helper.GetIDOfElement(c, "modelID", modelIDSource, modelIDBody)
+	configID, err := helper.GetIDOfElement(c, "configID", configIDSource, configIDBody)
 	if err != nil {
 		return false, m
 	}
 
-	err = m.ByID(uint(modelID))
+	err = m.ByID(uint(configID))
 	if helper.DBError(c, err) {
 		return false, m
 	}

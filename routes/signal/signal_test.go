@@ -26,9 +26,9 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/component-configuration"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/infrastructure-component"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/scenario"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/simulationmodel"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/simulator"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/user"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -42,21 +42,21 @@ var router *gin.Engine
 var db *gorm.DB
 
 type SignalRequest struct {
-	Name              string `json:"name,omitempty"`
-	Unit              string `json:"unit,omitempty"`
-	Index             uint   `json:"index,omitempty"`
-	Direction         string `json:"direction,omitempty"`
-	SimulationModelID uint   `json:"simulationModelID,omitempty"`
+	Name      string `json:"name,omitempty"`
+	Unit      string `json:"unit,omitempty"`
+	Index     uint   `json:"index,omitempty"`
+	Direction string `json:"direction,omitempty"`
+	ConfigID  uint   `json:"configID,omitempty"`
 }
 
-type SimulationModelRequest struct {
+type ConfigRequest struct {
 	Name            string         `json:"name,omitempty"`
 	ScenarioID      uint           `json:"scenarioID,omitempty"`
-	SimulatorID     uint           `json:"simulatorID,omitempty"`
+	ICID            uint           `json:"icID,omitempty"`
 	StartParameters postgres.Jsonb `json:"startParameters,omitempty"`
 }
 
-type SimulatorRequest struct {
+type ICRequest struct {
 	UUID       string         `json:"uuid,omitempty"`
 	Host       string         `json:"host,omitempty"`
 	Modeltype  string         `json:"modelType,omitempty"`
@@ -70,25 +70,25 @@ type ScenarioRequest struct {
 	StartParameters postgres.Jsonb `json:"startParameters,omitempty"`
 }
 
-func addScenarioAndSimulatorAndSimulationModel() (scenarioID uint, simulatorID uint, simulationModelID uint) {
+func addScenarioAndICAndConfig() (scenarioID uint, ICID uint, configID uint) {
 
 	// authenticate as admin
 	token, _ := helper.AuthenticateForTest(router,
 		"/api/authenticate", "POST", helper.AdminCredentials)
 
-	// POST $newSimulatorA
-	newSimulatorA := SimulatorRequest{
-		UUID:       database.SimulatorA.UUID,
-		Host:       database.SimulatorA.Host,
-		Modeltype:  database.SimulatorA.Modeltype,
-		State:      database.SimulatorA.State,
-		Properties: database.SimulatorA.Properties,
+	// POST $newICA
+	newICA := ICRequest{
+		UUID:       database.ICA.UUID,
+		Host:       database.ICA.Host,
+		Modeltype:  database.ICA.Modeltype,
+		State:      database.ICA.State,
+		Properties: database.ICA.Properties,
 	}
 	_, resp, _ := helper.TestEndpoint(router, token,
-		"/api/simulators", "POST", helper.KeyModels{"simulator": newSimulatorA})
+		"/api/ic", "POST", helper.KeyModels{"ic": newICA})
 
-	// Read newSimulator's ID from the response
-	newSimulatorID, _ := helper.GetResponseID(resp)
+	// Read newIC's ID from the response
+	newICID, _ := helper.GetResponseID(resp)
 
 	// authenticate as normal user
 	token, _ = helper.AuthenticateForTest(router,
@@ -106,24 +106,24 @@ func addScenarioAndSimulatorAndSimulationModel() (scenarioID uint, simulatorID u
 	// Read newScenario's ID from the response
 	newScenarioID, _ := helper.GetResponseID(resp)
 
-	// test POST models/ $newSimulationModel
-	newSimulationModel := SimulationModelRequest{
-		Name:            database.SimulationModelA.Name,
+	// test POST newConfig
+	newConfig := ConfigRequest{
+		Name:            database.ConfigA.Name,
 		ScenarioID:      uint(newScenarioID),
-		SimulatorID:     uint(newSimulatorID),
-		StartParameters: database.SimulationModelA.StartParameters,
+		ICID:            uint(newICID),
+		StartParameters: database.ConfigA.StartParameters,
 	}
 	_, resp, _ = helper.TestEndpoint(router, token,
-		"/api/models", "POST", helper.KeyModels{"simulationModel": newSimulationModel})
+		"/api/configs", "POST", helper.KeyModels{"config": newConfig})
 
-	// Read newSimulationModel's ID from the response
-	newSimulationModelID, _ := helper.GetResponseID(resp)
+	// Read newConfig's ID from the response
+	newConfigID, _ := helper.GetResponseID(resp)
 
 	// add the guest user to the new scenario
 	_, resp, _ = helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/scenarios/%v/user?username=User_C", newScenarioID), "PUT", nil)
 
-	return uint(newScenarioID), uint(newSimulatorID), uint(newSimulationModelID)
+	return uint(newScenarioID), uint(newICID), uint(newConfigID)
 }
 
 func TestMain(m *testing.M) {
@@ -143,15 +143,15 @@ func TestMain(m *testing.M) {
 
 	user.RegisterAuthenticate(api.Group("/authenticate"))
 	api.Use(user.Authentication(true))
-	// simulationmodel endpoints required here to first add a simulation to the DB
-	// that can be associated with a new signal model
-	simulationmodel.RegisterSimulationModelEndpoints(api.Group("/models"))
+	// component-configuration endpoints required here to first add a component config to the DB
+	// that can be associated with a new signal
+	component_configuration.RegisterComponentConfigurationEndpoints(api.Group("/configs"))
 	// scenario endpoints required here to first add a scenario to the DB
-	// that can be associated with a new simulation model
+	// that can be associated with a new component config
 	scenario.RegisterScenarioEndpoints(api.Group("/scenarios"))
-	// simulator endpoints required here to first add a simulator to the DB
-	// that can be associated with a new simulation model
-	simulator.RegisterSimulatorEndpoints(api.Group("/simulators"))
+	// IC endpoints required here to first add a IC to the DB
+	// that can be associated with a new component config
+	infrastructure_component.RegisterICEndpoints(api.Group("/ic"))
 	RegisterSignalEndpoints(api.Group("/signals"))
 
 	os.Exit(m.Run())
@@ -163,9 +163,9 @@ func TestAddSignal(t *testing.T) {
 	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
 
 	// prepare the content of the DB for testing
-	// by adding a scenario and a simulator to the DB
+	// by adding a scenario and a IC to the DB
 	// using the respective endpoints of the API
-	_, _, simulationModelID := addScenarioAndSimulatorAndSimulationModel()
+	_, _, configID := addScenarioAndICAndConfig()
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
@@ -173,11 +173,11 @@ func TestAddSignal(t *testing.T) {
 	assert.NoError(t, err)
 
 	newSignal := SignalRequest{
-		Name:              database.InSignalA.Name,
-		Unit:              database.InSignalA.Unit,
-		Direction:         database.InSignalA.Direction,
-		Index:             1,
-		SimulationModelID: simulationModelID,
+		Name:      database.InSignalA.Name,
+		Unit:      database.InSignalA.Unit,
+		Direction: database.InSignalA.Direction,
+		Index:     1,
+		ConfigID:  configID,
 	}
 
 	// authenticate as normal userB who has no access to new scenario
@@ -185,7 +185,7 @@ func TestAddSignal(t *testing.T) {
 		"/api/authenticate", "POST", helper.UserBCredentials)
 	assert.NoError(t, err)
 
-	// try to POST to simulation model without access
+	// try to POST to component config without access
 	// should result in unprocessable entity
 	code, resp, err := helper.TestEndpoint(router, token,
 		"/api/signals", "POST", helper.KeyModels{"signal": newSignal})
@@ -258,9 +258,9 @@ func TestUpdateSignal(t *testing.T) {
 	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
 
 	// prepare the content of the DB for testing
-	// by adding a scenario and a simulator to the DB
+	// by adding a scenario and a IC to the DB
 	// using the respective endpoints of the API
-	_, _, simulationModelID := addScenarioAndSimulatorAndSimulationModel()
+	_, _, configID := addScenarioAndICAndConfig()
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
@@ -269,11 +269,11 @@ func TestUpdateSignal(t *testing.T) {
 
 	// test POST signals/ $newSignal
 	newSignal := SignalRequest{
-		Name:              database.InSignalA.Name,
-		Unit:              database.InSignalA.Unit,
-		Direction:         database.InSignalA.Direction,
-		Index:             1,
-		SimulationModelID: simulationModelID,
+		Name:      database.InSignalA.Name,
+		Unit:      database.InSignalA.Unit,
+		Direction: database.InSignalA.Direction,
+		Index:     1,
+		ConfigID:  configID,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
 		"/api/signals", "POST", helper.KeyModels{"signal": newSignal})
@@ -360,9 +360,9 @@ func TestDeleteSignal(t *testing.T) {
 	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
 
 	// prepare the content of the DB for testing
-	// by adding a scenario and a simulator to the DB
+	// by adding a scenario and a IC to the DB
 	// using the respective endpoints of the API
-	_, _, simulationModelID := addScenarioAndSimulatorAndSimulationModel()
+	_, _, configID := addScenarioAndICAndConfig()
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
@@ -371,11 +371,11 @@ func TestDeleteSignal(t *testing.T) {
 
 	// test POST signals/ $newSignal
 	newSignal := SignalRequest{
-		Name:              database.InSignalA.Name,
-		Unit:              database.InSignalA.Unit,
-		Direction:         database.InSignalA.Direction,
-		Index:             1,
-		SimulationModelID: simulationModelID,
+		Name:      database.InSignalA.Name,
+		Unit:      database.InSignalA.Unit,
+		Direction: database.InSignalA.Direction,
+		Index:     1,
+		ConfigID:  configID,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
 		"/api/signals", "POST", helper.KeyModels{"signal": newSignal})
@@ -403,18 +403,18 @@ func TestDeleteSignal(t *testing.T) {
 		"/api/authenticate", "POST", helper.UserACredentials)
 	assert.NoError(t, err)
 
-	// Count the number of all the input signals returned for simulation model
+	// Count the number of all the input signals returned for component config
 	initialNumber, err := helper.LengthOfResponse(router, token,
-		fmt.Sprintf("/api/signals?modelID=%v&direction=in", simulationModelID), "GET", nil)
+		fmt.Sprintf("/api/signals?configID=%v&direction=in", configID), "GET", nil)
 	assert.NoError(t, err)
 
 	// add an output signal to make sure that counting of input signals works
 	newSignalout := SignalRequest{
-		Name:              database.OutSignalA.Name,
-		Unit:              database.OutSignalA.Unit,
-		Direction:         database.OutSignalA.Direction,
-		Index:             1,
-		SimulationModelID: simulationModelID,
+		Name:      database.OutSignalA.Name,
+		Unit:      database.OutSignalA.Unit,
+		Direction: database.OutSignalA.Direction,
+		Index:     1,
+		ConfigID:  configID,
 	}
 	code, resp, err = helper.TestEndpoint(router, token,
 		"/api/signals", "POST", helper.KeyModels{"signal": newSignalout})
@@ -435,9 +435,9 @@ func TestDeleteSignal(t *testing.T) {
 	err = helper.CompareResponse(resp, helper.KeyModels{"signal": newSignal})
 	assert.NoError(t, err)
 
-	// Again count the number of all the input signals returned for simulation model
+	// Again count the number of all the input signals returned for component config
 	finalNumber, err := helper.LengthOfResponse(router, token,
-		fmt.Sprintf("/api/signals?modelID=%v&direction=in", simulationModelID), "GET", nil)
+		fmt.Sprintf("/api/signals?configID=%v&direction=in", configID), "GET", nil)
 	assert.NoError(t, err)
 
 	assert.Equal(t, initialNumber-1, finalNumber)
@@ -449,33 +449,33 @@ func TestDeleteSignal(t *testing.T) {
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 }
 
-func TestGetAllInputSignalsOfSimulationModel(t *testing.T) {
+func TestGetAllInputSignalsOfConfig(t *testing.T) {
 	database.DropTables(db)
 	database.MigrateModels(db)
 	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
 
 	// prepare the content of the DB for testing
-	// by adding a scenario and a simulator to the DB
+	// by adding a scenario and a IC to the DB
 	// using the respective endpoints of the API
-	_, _, simulationModelID := addScenarioAndSimulatorAndSimulationModel()
+	_, _, configID := addScenarioAndICAndConfig()
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
 		"/api/authenticate", "POST", helper.UserACredentials)
 	assert.NoError(t, err)
 
-	// Count the number of all the input signals returned for simulation model
+	// Count the number of all the input signals returned for component config
 	initialNumber, err := helper.LengthOfResponse(router, token,
-		fmt.Sprintf("/api/signals?modelID=%v&direction=in", simulationModelID), "GET", nil)
+		fmt.Sprintf("/api/signals?configID=%v&direction=in", configID), "GET", nil)
 	assert.NoError(t, err)
 
 	// test POST signals/ $newSignal
 	newSignalA := SignalRequest{
-		Name:              database.InSignalA.Name,
-		Unit:              database.InSignalA.Unit,
-		Direction:         database.InSignalA.Direction,
-		Index:             1,
-		SimulationModelID: simulationModelID,
+		Name:      database.InSignalA.Name,
+		Unit:      database.InSignalA.Unit,
+		Direction: database.InSignalA.Direction,
+		Index:     1,
+		ConfigID:  configID,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
 		"/api/signals", "POST", helper.KeyModels{"signal": newSignalA})
@@ -484,11 +484,11 @@ func TestGetAllInputSignalsOfSimulationModel(t *testing.T) {
 
 	// add a second input signal
 	newSignalB := SignalRequest{
-		Name:              database.InSignalB.Name,
-		Unit:              database.InSignalB.Unit,
-		Direction:         database.InSignalB.Direction,
-		Index:             2,
-		SimulationModelID: simulationModelID,
+		Name:      database.InSignalB.Name,
+		Unit:      database.InSignalB.Unit,
+		Direction: database.InSignalB.Direction,
+		Index:     2,
+		ConfigID:  configID,
 	}
 	code, resp, err = helper.TestEndpoint(router, token,
 		"/api/signals", "POST", helper.KeyModels{"signal": newSignalB})
@@ -497,11 +497,11 @@ func TestGetAllInputSignalsOfSimulationModel(t *testing.T) {
 
 	// add an output signal
 	newSignalAout := SignalRequest{
-		Name:              database.OutSignalA.Name,
-		Unit:              database.OutSignalA.Unit,
-		Direction:         database.OutSignalA.Direction,
-		Index:             1,
-		SimulationModelID: simulationModelID,
+		Name:      database.OutSignalA.Name,
+		Unit:      database.OutSignalA.Unit,
+		Direction: database.OutSignalA.Direction,
+		Index:     1,
+		ConfigID:  configID,
 	}
 	code, resp, err = helper.TestEndpoint(router, token,
 		"/api/signals", "POST", helper.KeyModels{"signal": newSignalAout})
@@ -510,34 +510,34 @@ func TestGetAllInputSignalsOfSimulationModel(t *testing.T) {
 
 	// add a second output signal
 	newSignalBout := SignalRequest{
-		Name:              database.OutSignalB.Name,
-		Unit:              database.OutSignalB.Unit,
-		Direction:         database.OutSignalB.Direction,
-		Index:             1,
-		SimulationModelID: simulationModelID,
+		Name:      database.OutSignalB.Name,
+		Unit:      database.OutSignalB.Unit,
+		Direction: database.OutSignalB.Direction,
+		Index:     1,
+		ConfigID:  configID,
 	}
 	code, resp, err = helper.TestEndpoint(router, token,
 		"/api/signals", "POST", helper.KeyModels{"signal": newSignalBout})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
-	// Again count the number of all the input signals returned for simulation model
+	// Again count the number of all the input signals returned for component config
 	finalNumber, err := helper.LengthOfResponse(router, token,
-		fmt.Sprintf("/api/signals?modelID=%v&direction=in", simulationModelID), "GET", nil)
+		fmt.Sprintf("/api/signals?configID=%v&direction=in", configID), "GET", nil)
 	assert.NoError(t, err)
 
 	assert.Equal(t, initialNumber+2, finalNumber)
 
 	// Get the number of output signals
 	outputNumber, err := helper.LengthOfResponse(router, token,
-		fmt.Sprintf("/api/signals?modelID=%v&direction=out", simulationModelID), "GET", nil)
+		fmt.Sprintf("/api/signals?configID=%v&direction=out", configID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equal(t, initialNumber+2, outputNumber)
 
 	// Try to get all signals for non-existing direction
 	// should result in bad request
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/signals?modelID=%v&direction=thisiswrong", simulationModelID), "GET", nil)
+		fmt.Sprintf("/api/signals?configID=%v&direction=thisiswrong", configID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 
@@ -549,7 +549,7 @@ func TestGetAllInputSignalsOfSimulationModel(t *testing.T) {
 	// try to get all input signals
 	// should result in unprocessable entity
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/signals?modelID=%v&direction=in", simulationModelID), "GET", nil)
+		fmt.Sprintf("/api/signals?configID=%v&direction=in", configID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 

@@ -1,4 +1,4 @@
-/** Simulator package, testing.
+/** InfrastructureComponent package, testing.
 *
 * @author Sonja Happ <sonja.happ@eonerc.rwth-aachen.de>
 * @copyright 2014-2019, Institute for Automation of Complex Power Systems, EONERC
@@ -19,7 +19,7 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
-package simulator
+package infrastructure_component
 
 import (
 	"fmt"
@@ -40,7 +40,7 @@ import (
 var router *gin.Engine
 var db *gorm.DB
 
-type SimulatorRequest struct {
+type ICRequest struct {
 	UUID       string         `json:"uuid,omitempty"`
 	Host       string         `json:"host,omitempty"`
 	Modeltype  string         `json:"modelType,omitempty"`
@@ -65,12 +65,12 @@ func TestMain(m *testing.M) {
 
 	user.RegisterAuthenticate(api.Group("/authenticate"))
 	api.Use(user.Authentication(true))
-	RegisterSimulatorEndpoints(api.Group("/simulators"))
+	RegisterICEndpoints(api.Group("/ic"))
 
 	os.Exit(m.Run())
 }
 
-func TestAddSimulatorAsAdmin(t *testing.T) {
+func TestAddICAsAdmin(t *testing.T) {
 	database.DropTables(db)
 	database.MigrateModels(db)
 	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
@@ -83,61 +83,61 @@ func TestAddSimulatorAsAdmin(t *testing.T) {
 	// try to POST with non JSON body
 	// should result in bad request
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/simulators", "POST", "This is no JSON")
+		"/api/ic", "POST", "This is no JSON")
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 
-	// try to POST malformed simulator (required fields missing, validation should fail)
+	// try to POST malformed IC (required fields missing, validation should fail)
 	// should result in an unprocessable entity
-	newMalformedSimulator := SimulatorRequest{
-		UUID: database.SimulatorB.UUID,
+	newMalformedIC := ICRequest{
+		UUID: database.ICB.UUID,
 	}
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/simulators", "POST", helper.KeyModels{"simulator": newMalformedSimulator})
+		"/api/ic", "POST", helper.KeyModels{"ic": newMalformedIC})
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
-	// test POST simulators/ $newSimulator
-	newSimulator := SimulatorRequest{
-		UUID:       database.SimulatorA.UUID,
-		Host:       database.SimulatorA.Host,
-		Modeltype:  database.SimulatorA.Modeltype,
-		State:      database.SimulatorA.State,
-		Properties: database.SimulatorA.Properties,
+	// test POST ic/ $newIC
+	newIC := ICRequest{
+		UUID:       database.ICA.UUID,
+		Host:       database.ICA.Host,
+		Modeltype:  database.ICA.Modeltype,
+		State:      database.ICA.State,
+		Properties: database.ICA.Properties,
 	}
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/simulators", "POST", helper.KeyModels{"simulator": newSimulator})
+		"/api/ic", "POST", helper.KeyModels{"ic": newIC})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
-	// Compare POST's response with the newSimulator
-	err = helper.CompareResponse(resp, helper.KeyModels{"simulator": newSimulator})
+	// Compare POST's response with the newIC
+	err = helper.CompareResponse(resp, helper.KeyModels{"ic": newIC})
 	assert.NoError(t, err)
 
-	// Read newSimulator's ID from the response
-	newSimulatorID, err := helper.GetResponseID(resp)
+	// Read newIC's ID from the response
+	newICID, err := helper.GetResponseID(resp)
 	assert.NoError(t, err)
 
-	// Get the newSimulator
+	// Get the newIC
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/simulators/%v", newSimulatorID), "GET", nil)
+		fmt.Sprintf("/api/ic/%v", newICID), "GET", nil)
 	assert.NoError(t, err)
 
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
-	// Compare GET's response with the newSimulator
-	err = helper.CompareResponse(resp, helper.KeyModels{"simulator": newSimulator})
+	// Compare GET's response with the newIC
+	err = helper.CompareResponse(resp, helper.KeyModels{"ic": newIC})
 	assert.NoError(t, err)
 
-	// Try to GET a simulator that does not exist
+	// Try to GET a IC that does not exist
 	// should result in not found
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/simulators/%v", newSimulatorID+1), "GET", nil)
+		fmt.Sprintf("/api/ic/%v", newICID+1), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
 }
 
-func TestAddSimulatorAsUser(t *testing.T) {
+func TestAddICAsUser(t *testing.T) {
 	database.DropTables(db)
 	database.MigrateModels(db)
 	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
@@ -147,24 +147,24 @@ func TestAddSimulatorAsUser(t *testing.T) {
 		"/api/authenticate", "POST", helper.UserACredentials)
 	assert.NoError(t, err)
 
-	// test POST simulators/ $newSimulator
-	newSimulator := SimulatorRequest{
-		UUID:       database.SimulatorA.UUID,
-		Host:       database.SimulatorA.Host,
-		Modeltype:  database.SimulatorA.Modeltype,
-		State:      database.SimulatorA.State,
-		Properties: database.SimulatorA.Properties,
+	// test POST ic/ $newIC
+	newIC := ICRequest{
+		UUID:       database.ICA.UUID,
+		Host:       database.ICA.Host,
+		Modeltype:  database.ICA.Modeltype,
+		State:      database.ICA.State,
+		Properties: database.ICA.Properties,
 	}
 
 	// This should fail with unprocessable entity 422 error code
-	// Normal users are not allowed to add simulators
+	// Normal users are not allowed to add ICs
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/simulators", "POST", helper.KeyModels{"simulator": newSimulator})
+		"/api/ic", "POST", helper.KeyModels{"ic": newIC})
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 }
 
-func TestUpdateSimulatorAsAdmin(t *testing.T) {
+func TestUpdateICAsAdmin(t *testing.T) {
 	database.DropTables(db)
 	database.MigrateModels(db)
 	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
@@ -174,59 +174,59 @@ func TestUpdateSimulatorAsAdmin(t *testing.T) {
 		"/api/authenticate", "POST", helper.AdminCredentials)
 	assert.NoError(t, err)
 
-	// test POST simulators/ $newSimulator
-	newSimulator := SimulatorRequest{
-		UUID:       database.SimulatorA.UUID,
-		Host:       database.SimulatorA.Host,
-		Modeltype:  database.SimulatorA.Modeltype,
-		State:      database.SimulatorA.State,
-		Properties: database.SimulatorA.Properties,
+	// test POST ic/ $newIC
+	newIC := ICRequest{
+		UUID:       database.ICA.UUID,
+		Host:       database.ICA.Host,
+		Modeltype:  database.ICA.Modeltype,
+		State:      database.ICA.State,
+		Properties: database.ICA.Properties,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/simulators", "POST", helper.KeyModels{"simulator": newSimulator})
+		"/api/ic", "POST", helper.KeyModels{"ic": newIC})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
-	// Compare POST's response with the newSimulator
-	err = helper.CompareResponse(resp, helper.KeyModels{"simulator": newSimulator})
+	// Compare POST's response with the newIC
+	err = helper.CompareResponse(resp, helper.KeyModels{"ic": newIC})
 	assert.NoError(t, err)
 
-	// Read newSimulator's ID from the response
-	newSimulatorID, err := helper.GetResponseID(resp)
+	// Read newIC's ID from the response
+	newICID, err := helper.GetResponseID(resp)
 	assert.NoError(t, err)
 
 	// try to PUT with non JSON body
 	// should result in bad request
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/simulators/%v", newSimulatorID), "PUT", "This is no JSON")
+		fmt.Sprintf("/api/ic/%v", newICID), "PUT", "This is no JSON")
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 
-	// Test PUT simulators
-	newSimulator.Host = "ThisIsMyNewHost"
+	// Test PUT IC
+	newIC.Host = "ThisIsMyNewHost"
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/simulators/%v", newSimulatorID), "PUT", helper.KeyModels{"simulator": newSimulator})
+		fmt.Sprintf("/api/ic/%v", newICID), "PUT", helper.KeyModels{"ic": newIC})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
-	// Compare PUT's response with the updated newSimulator
-	err = helper.CompareResponse(resp, helper.KeyModels{"simulator": newSimulator})
+	// Compare PUT's response with the updated newIC
+	err = helper.CompareResponse(resp, helper.KeyModels{"ic": newIC})
 	assert.NoError(t, err)
 
-	// Get the updated newSimulator
+	// Get the updated newIC
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/simulators/%v", newSimulatorID), "GET", nil)
+		fmt.Sprintf("/api/ic/%v", newICID), "GET", nil)
 	assert.NoError(t, err)
 
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
-	// Compare GET's response with the updated newSimulator
-	err = helper.CompareResponse(resp, helper.KeyModels{"simulator": newSimulator})
+	// Compare GET's response with the updated newIC
+	err = helper.CompareResponse(resp, helper.KeyModels{"ic": newIC})
 	assert.NoError(t, err)
 
 }
 
-func TestUpdateSimulatorAsUser(t *testing.T) {
+func TestUpdateICAsUser(t *testing.T) {
 	database.DropTables(db)
 	database.MigrateModels(db)
 	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
@@ -236,21 +236,21 @@ func TestUpdateSimulatorAsUser(t *testing.T) {
 		"/api/authenticate", "POST", helper.AdminCredentials)
 	assert.NoError(t, err)
 
-	// test POST simulators/ $newSimulator
-	newSimulator := SimulatorRequest{
-		UUID:       database.SimulatorA.UUID,
-		Host:       database.SimulatorA.Host,
-		Modeltype:  database.SimulatorA.Modeltype,
-		State:      database.SimulatorA.State,
-		Properties: database.SimulatorA.Properties,
+	// test POST ic/ $newIC
+	newIC := ICRequest{
+		UUID:       database.ICA.UUID,
+		Host:       database.ICA.Host,
+		Modeltype:  database.ICA.Modeltype,
+		State:      database.ICA.State,
+		Properties: database.ICA.Properties,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/simulators", "POST", helper.KeyModels{"simulator": newSimulator})
+		"/api/ic", "POST", helper.KeyModels{"ic": newIC})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
-	// Read newSimulator's ID from the response
-	newSimulatorID, err := helper.GetResponseID(resp)
+	// Read newIC's ID from the response
+	newICID, err := helper.GetResponseID(resp)
 	assert.NoError(t, err)
 
 	// authenticate as user
@@ -258,17 +258,17 @@ func TestUpdateSimulatorAsUser(t *testing.T) {
 		"/api/authenticate", "POST", helper.UserACredentials)
 	assert.NoError(t, err)
 
-	// Test PUT simulators
+	// Test PUT IC
 	// This should fail with unprocessable entity status code 422
-	newSimulator.Host = "ThisIsMyNewHost"
+	newIC.Host = "ThisIsMyNewHost"
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/simulators/%v", newSimulatorID), "PUT", helper.KeyModels{"simulator": newSimulator})
+		fmt.Sprintf("/api/ic/%v", newICID), "PUT", helper.KeyModels{"ic": newIC})
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 }
 
-func TestDeleteSimulatorAsAdmin(t *testing.T) {
+func TestDeleteICAsAdmin(t *testing.T) {
 	database.DropTables(db)
 	database.MigrateModels(db)
 	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
@@ -278,47 +278,47 @@ func TestDeleteSimulatorAsAdmin(t *testing.T) {
 		"/api/authenticate", "POST", helper.AdminCredentials)
 	assert.NoError(t, err)
 
-	// test POST simulators/ $newSimulator
-	newSimulator := SimulatorRequest{
-		UUID:       database.SimulatorA.UUID,
-		Host:       database.SimulatorA.Host,
-		Modeltype:  database.SimulatorA.Modeltype,
-		State:      database.SimulatorA.State,
-		Properties: database.SimulatorA.Properties,
+	// test POST ic/ $newIC
+	newIC := ICRequest{
+		UUID:       database.ICA.UUID,
+		Host:       database.ICA.Host,
+		Modeltype:  database.ICA.Modeltype,
+		State:      database.ICA.State,
+		Properties: database.ICA.Properties,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/simulators", "POST", helper.KeyModels{"simulator": newSimulator})
+		"/api/ic", "POST", helper.KeyModels{"ic": newIC})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
-	// Read newSimulator's ID from the response
-	newSimulatorID, err := helper.GetResponseID(resp)
+	// Read newIC's ID from the response
+	newICID, err := helper.GetResponseID(resp)
 	assert.NoError(t, err)
 
-	// Count the number of all the simulators returned for admin
+	// Count the number of all the ICs returned for admin
 	initialNumber, err := helper.LengthOfResponse(router, token,
-		"/api/simulators", "GET", nil)
+		"/api/ic", "GET", nil)
 	assert.NoError(t, err)
 
-	// Delete the added newSimulator
+	// Delete the added newIC
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/simulators/%v", newSimulatorID), "DELETE", nil)
+		fmt.Sprintf("/api/ic/%v", newICID), "DELETE", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
-	// Compare DELETE's response with the newSimulator
-	err = helper.CompareResponse(resp, helper.KeyModels{"simulator": newSimulator})
+	// Compare DELETE's response with the newIC
+	err = helper.CompareResponse(resp, helper.KeyModels{"ic": newIC})
 	assert.NoError(t, err)
 
-	// Again count the number of all the simulators returned
+	// Again count the number of all the ICs returned
 	finalNumber, err := helper.LengthOfResponse(router, token,
-		"/api/simulators", "GET", nil)
+		"/api/ic", "GET", nil)
 	assert.NoError(t, err)
 
 	assert.Equal(t, finalNumber, initialNumber-1)
 }
 
-func TestDeleteSimulatorAsUser(t *testing.T) {
+func TestDeleteICAsUser(t *testing.T) {
 	database.DropTables(db)
 	database.MigrateModels(db)
 	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
@@ -328,21 +328,21 @@ func TestDeleteSimulatorAsUser(t *testing.T) {
 		"/api/authenticate", "POST", helper.AdminCredentials)
 	assert.NoError(t, err)
 
-	// test POST simulators/ $newSimulator
-	newSimulator := SimulatorRequest{
-		UUID:       database.SimulatorA.UUID,
-		Host:       database.SimulatorA.Host,
-		Modeltype:  database.SimulatorA.Modeltype,
-		State:      database.SimulatorA.State,
-		Properties: database.SimulatorA.Properties,
+	// test POST ic/ $newIC
+	newIC := ICRequest{
+		UUID:       database.ICA.UUID,
+		Host:       database.ICA.Host,
+		Modeltype:  database.ICA.Modeltype,
+		State:      database.ICA.State,
+		Properties: database.ICA.Properties,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/simulators", "POST", helper.KeyModels{"simulator": newSimulator})
+		"/api/ic", "POST", helper.KeyModels{"ic": newIC})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
-	// Read newSimulator's ID from the response
-	newSimulatorID, err := helper.GetResponseID(resp)
+	// Read newIC's ID from the response
+	newICID, err := helper.GetResponseID(resp)
 	assert.NoError(t, err)
 
 	// authenticate as user
@@ -350,16 +350,16 @@ func TestDeleteSimulatorAsUser(t *testing.T) {
 		"/api/authenticate", "POST", helper.UserACredentials)
 	assert.NoError(t, err)
 
-	// Test DELETE simulators
+	// Test DELETE ICs
 	// This should fail with unprocessable entity status code 422
-	newSimulator.Host = "ThisIsMyNewHost"
+	newIC.Host = "ThisIsMyNewHost"
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/simulators/%v", newSimulatorID), "DELETE", nil)
+		fmt.Sprintf("/api/ic/%v", newICID), "DELETE", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 }
 
-func TestGetAllSimulators(t *testing.T) {
+func TestGetAllICs(t *testing.T) {
 	database.DropTables(db)
 	database.MigrateModels(db)
 	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
@@ -369,40 +369,40 @@ func TestGetAllSimulators(t *testing.T) {
 		"/api/authenticate", "POST", helper.AdminCredentials)
 	assert.NoError(t, err)
 
-	// get the length of the GET all simulators response for user
+	// get the length of the GET all ICs response for user
 	initialNumber, err := helper.LengthOfResponse(router, token,
-		"/api/simulators", "GET", nil)
+		"/api/ic", "GET", nil)
 	assert.NoError(t, err)
 
-	// test POST simulators/ $newSimulatorA
-	newSimulatorA := SimulatorRequest{
-		UUID:       database.SimulatorA.UUID,
-		Host:       database.SimulatorA.Host,
-		Modeltype:  database.SimulatorA.Modeltype,
-		State:      database.SimulatorA.State,
-		Properties: database.SimulatorA.Properties,
+	// test POST ic/ $newICA
+	newICA := ICRequest{
+		UUID:       database.ICA.UUID,
+		Host:       database.ICA.Host,
+		Modeltype:  database.ICA.Modeltype,
+		State:      database.ICA.State,
+		Properties: database.ICA.Properties,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/simulators", "POST", helper.KeyModels{"simulator": newSimulatorA})
+		"/api/ic", "POST", helper.KeyModels{"ic": newICA})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
-	// test POST simulators/ $newSimulatorB
-	newSimulatorB := SimulatorRequest{
-		UUID:       database.SimulatorB.UUID,
-		Host:       database.SimulatorB.Host,
-		Modeltype:  database.SimulatorB.Modeltype,
-		State:      database.SimulatorB.State,
-		Properties: database.SimulatorB.Properties,
+	// test POST ic/ $newICB
+	newICB := ICRequest{
+		UUID:       database.ICB.UUID,
+		Host:       database.ICB.Host,
+		Modeltype:  database.ICB.Modeltype,
+		State:      database.ICB.State,
+		Properties: database.ICB.Properties,
 	}
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/simulators", "POST", helper.KeyModels{"simulator": newSimulatorB})
+		"/api/ic", "POST", helper.KeyModels{"ic": newICB})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
-	// get the length of the GET all simulators response again
+	// get the length of the GET all ICs response again
 	finalNumber, err := helper.LengthOfResponse(router, token,
-		"/api/simulators", "GET", nil)
+		"/api/ic", "GET", nil)
 	assert.NoError(t, err)
 
 	assert.Equal(t, finalNumber, initialNumber+2)
@@ -412,15 +412,15 @@ func TestGetAllSimulators(t *testing.T) {
 		"/api/authenticate", "POST", helper.UserACredentials)
 	assert.NoError(t, err)
 
-	// get the length of the GET all simulators response again
+	// get the length of the GET all ICs response again
 	finalNumber2, err := helper.LengthOfResponse(router, token,
-		"/api/simulators", "GET", nil)
+		"/api/ic", "GET", nil)
 	assert.NoError(t, err)
 
 	assert.Equal(t, finalNumber2, initialNumber+2)
 }
 
-func TestGetSimulationModelsOfSimulator(t *testing.T) {
+func TestGetConfigsOfIC(t *testing.T) {
 	database.DropTables(db)
 	database.MigrateModels(db)
 	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
@@ -430,50 +430,50 @@ func TestGetSimulationModelsOfSimulator(t *testing.T) {
 		"/api/authenticate", "POST", helper.AdminCredentials)
 	assert.NoError(t, err)
 
-	// test POST simulators/ $newSimulatorA
-	newSimulatorA := SimulatorRequest{
-		UUID:       database.SimulatorA.UUID,
-		Host:       database.SimulatorA.Host,
-		Modeltype:  database.SimulatorA.Modeltype,
-		State:      database.SimulatorA.State,
-		Properties: database.SimulatorA.Properties,
+	// test POST ic/ $newICA
+	newICA := ICRequest{
+		UUID:       database.ICA.UUID,
+		Host:       database.ICA.Host,
+		Modeltype:  database.ICA.Modeltype,
+		State:      database.ICA.State,
+		Properties: database.ICA.Properties,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/simulators", "POST", helper.KeyModels{"simulator": newSimulatorA})
+		"/api/ic", "POST", helper.KeyModels{"ic": newICA})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
-	// Read newSimulator's ID from the response
-	newSimulatorID, err := helper.GetResponseID(resp)
+	// Read newIC's ID from the response
+	newICID, err := helper.GetResponseID(resp)
 	assert.NoError(t, err)
 
-	// test GET simulators/ID/models
-	// TODO how to properly test this without using simulation model endpoints?
-	numberOfModels, err := helper.LengthOfResponse(router, token,
-		fmt.Sprintf("/api/simulators/%v/models", newSimulatorID), "GET", nil)
+	// test GET ic/ID/confis
+	// TODO how to properly test this without using component configuration endpoints?
+	numberOfConfigs, err := helper.LengthOfResponse(router, token,
+		fmt.Sprintf("/api/ic/%v/configs", newICID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
-	assert.Equal(t, 0, numberOfModels)
+	assert.Equal(t, 0, numberOfConfigs)
 
 	// authenticate as normal user
 	token, err = helper.AuthenticateForTest(router,
 		"/api/authenticate", "POST", helper.UserACredentials)
 	assert.NoError(t, err)
 
-	// test GET simulators/ID/models
-	// TODO how to properly test this without using simulation model endpoints?
-	numberOfModels, err = helper.LengthOfResponse(router, token,
-		fmt.Sprintf("/api/simulators/%v/models", newSimulatorID), "GET", nil)
+	// test GET ic/ID/configs
+	// TODO how to properly test this without using component configuration endpoints?
+	numberOfConfigs, err = helper.LengthOfResponse(router, token,
+		fmt.Sprintf("/api/ic/%v/configs", newICID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
-	assert.Equal(t, 0, numberOfModels)
+	assert.Equal(t, 0, numberOfConfigs)
 
-	// Try to get models of simulator that does not exist
+	// Try to get configs of IC that does not exist
 	// should result in not found
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/simulators/%v/models", newSimulatorID+1), "GET", nil)
+		fmt.Sprintf("/api/ic/%v/configs", newICID+1), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
 }

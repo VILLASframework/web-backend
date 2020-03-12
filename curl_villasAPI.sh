@@ -55,9 +55,9 @@ read_users () {
         -X GET | jq '.' && printf '\n'
 }
 
-read_simulators () {
-    printf "> GET "$apiBase"/simulators\n"
-    curl "$apiBase"/simulators -s \
+read_infrastructure_components () {
+    printf "> GET "$apiBase"/ic\n"
+    curl "$apiBase"/ic -s \
         -H "Contet-Type: application/json" \
         -H "Authorization: Bearer $(< auth.jwt)" \
         -X GET | jq '.' && printf '\n'
@@ -114,7 +114,7 @@ login "$admin"
 #create_user "$userC"
 #read_users
 #read_user 1
-#read_simulators
+#read_infrastructure_components
 create_user "$newUserW"
 #read_users
 read_user 4

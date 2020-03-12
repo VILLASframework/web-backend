@@ -107,8 +107,8 @@ func TestScenarioAssociations(t *testing.T) {
 	user0 := User0
 	userA := UserA
 	userB := UserB
-	modelA := SimulationModelA
-	modelB := SimulationModelB
+	configA := ConfigA
+	configB := ConfigB
 	dashboardA := DashboardA
 	dashboardB := DashboardB
 
@@ -121,9 +121,9 @@ func TestScenarioAssociations(t *testing.T) {
 	assert.NoError(t, db.Create(&userA).Error) // Normal User
 	assert.NoError(t, db.Create(&userB).Error) // Normal User
 
-	// add simulation models to DB
-	assert.NoError(t, db.Create(&modelA).Error)
-	assert.NoError(t, db.Create(&modelB).Error)
+	// add component configurations to DB
+	assert.NoError(t, db.Create(&configA).Error)
+	assert.NoError(t, db.Create(&configB).Error)
 
 	// add dashboards to DB
 	assert.NoError(t, db.Create(&dashboardA).Error)
@@ -136,9 +136,9 @@ func TestScenarioAssociations(t *testing.T) {
 	assert.NoError(t, db.Model(&scenarioB).Association("Users").Append(&userA).Error)
 	assert.NoError(t, db.Model(&scenarioB).Association("Users").Append(&userB).Error)
 
-	// add scenario has many simulation models associations
-	assert.NoError(t, db.Model(&scenarioA).Association("SimulationModels").Append(&modelA).Error)
-	assert.NoError(t, db.Model(&scenarioA).Association("SimulationModels").Append(&modelB).Error)
+	// add scenario has many component configurations associations
+	assert.NoError(t, db.Model(&scenarioA).Association("ComponentConfigurations").Append(&configA).Error)
+	assert.NoError(t, db.Model(&scenarioA).Association("ComponentConfigurations").Append(&configB).Error)
 
 	// Scenario HM Dashboards
 	assert.NoError(t, db.Model(&scenarioA).Association("Dashboards").Append(&dashboardA).Error)
@@ -156,12 +156,12 @@ func TestScenarioAssociations(t *testing.T) {
 			"Expected to have %v Users. Has %v.", 2, len(users))
 	}
 
-	// Get simulation models of scenario1
-	var models []SimulationModel
-	assert.NoError(t, db.Model(&scenario1).Related(&models, "SimulationModels").Error)
-	if len(models) != 2 {
+	// Get component configurations of scenario1
+	var configs []ComponentConfiguration
+	assert.NoError(t, db.Model(&scenario1).Related(&configs, "ComponentConfigurations").Error)
+	if len(configs) != 2 {
 		assert.Fail(t, "Scenario Associations",
-			"Expected to have %v simulation models. Has %v.", 2, len(models))
+			"Expected to have %v component configs. Has %v.", 2, len(configs))
 	}
 
 	// Get dashboards of scenario1
@@ -173,50 +173,50 @@ func TestScenarioAssociations(t *testing.T) {
 	}
 }
 
-func TestSimulatorAssociations(t *testing.T) {
+func TestICAssociations(t *testing.T) {
 
 	DropTables(db)
 	MigrateModels(db)
 
 	// create copies of global test data
-	simulatorA := SimulatorA
-	simulatorB := SimulatorB
-	modelA := SimulationModelA
-	modelB := SimulationModelB
+	icA := ICA
+	icB := ICB
+	configA := ConfigA
+	configB := ConfigB
 
-	// add simulators to DB
-	assert.NoError(t, db.Create(&simulatorA).Error)
-	assert.NoError(t, db.Create(&simulatorB).Error)
+	// add ICs to DB
+	assert.NoError(t, db.Create(&icA).Error)
+	assert.NoError(t, db.Create(&icB).Error)
 
-	// add simulation models to DB
-	assert.NoError(t, db.Create(&modelA).Error)
-	assert.NoError(t, db.Create(&modelB).Error)
+	// add component configurations to DB
+	assert.NoError(t, db.Create(&configA).Error)
+	assert.NoError(t, db.Create(&configB).Error)
 
-	// add simulator has many simulation models association to DB
-	assert.NoError(t, db.Model(&simulatorA).Association("SimulationModels").Append(&modelA).Error)
-	assert.NoError(t, db.Model(&simulatorA).Association("SimulationModels").Append(&modelB).Error)
+	// add IC has many component configurations association to DB
+	assert.NoError(t, db.Model(&icA).Association("ComponentConfigurations").Append(&configA).Error)
+	assert.NoError(t, db.Model(&icA).Association("ComponentConfigurations").Append(&configB).Error)
 
-	var simulator1 Simulator
-	assert.NoError(t, db.Find(&simulator1, 1).Error, fmt.Sprintf("Find Simulator with ID=1"))
-	assert.EqualValues(t, "Host_A", simulator1.Host)
+	var ic1 InfrastructureComponent
+	assert.NoError(t, db.Find(&ic1, 1).Error, fmt.Sprintf("Find InfrastructureComponent with ID=1"))
+	assert.EqualValues(t, "Host_A", ic1.Host)
 
-	// Get simulation models of simulator1
-	var models []SimulationModel
-	assert.NoError(t, db.Model(&simulator1).Association("SimulationModels").Find(&models).Error)
-	if len(models) != 2 {
-		assert.Fail(t, "Simulator Associations",
-			"Expected to have %v SimulationModels. Has %v.", 2, len(models))
+	// Get Component Configurations of ic1
+	var configs []ComponentConfiguration
+	assert.NoError(t, db.Model(&ic1).Association("ComponentConfigurations").Find(&configs).Error)
+	if len(configs) != 2 {
+		assert.Fail(t, "InfrastructureComponent Associations",
+			"Expected to have %v Component Configurations. Has %v.", 2, len(configs))
 	}
 }
 
-func TestSimulationModelAssociations(t *testing.T) {
+func TestComponentConfigurationAssociations(t *testing.T) {
 
 	DropTables(db)
 	MigrateModels(db)
 
 	// create copies of global test data
-	modelA := SimulationModelA
-	modelB := SimulationModelB
+	configA := ConfigA
+	configB := ConfigB
 	outSignalA := OutSignalA
 	outSignalB := OutSignalB
 	inSignalA := InSignalA
@@ -225,12 +225,12 @@ func TestSimulationModelAssociations(t *testing.T) {
 	fileB := FileB
 	fileC := FileC
 	fileD := FileD
-	simulatorA := SimulatorA
-	simulatorB := SimulatorB
+	icA := ICA
+	icB := ICB
 
-	// add simulation models to DB
-	assert.NoError(t, db.Create(&modelA).Error)
-	assert.NoError(t, db.Create(&modelB).Error)
+	// add Component Configurations to DB
+	assert.NoError(t, db.Create(&configA).Error)
+	assert.NoError(t, db.Create(&configB).Error)
 
 	// add signals to DB
 	assert.NoError(t, db.Create(&outSignalA).Error)
@@ -244,46 +244,46 @@ func TestSimulationModelAssociations(t *testing.T) {
 	assert.NoError(t, db.Create(&fileC).Error)
 	assert.NoError(t, db.Create(&fileD).Error)
 
-	// add simulators to DB
-	assert.NoError(t, db.Create(&simulatorA).Error)
-	assert.NoError(t, db.Create(&simulatorB).Error)
+	// add ICs to DB
+	assert.NoError(t, db.Create(&icA).Error)
+	assert.NoError(t, db.Create(&icB).Error)
 
-	// add simulation model has many signals associations
-	assert.NoError(t, db.Model(&modelA).Association("InputMapping").Append(&inSignalA).Error)
-	assert.NoError(t, db.Model(&modelA).Association("InputMapping").Append(&inSignalB).Error)
-	assert.NoError(t, db.Model(&modelA).Association("OutputMapping").Append(&outSignalA).Error)
-	assert.NoError(t, db.Model(&modelA).Association("OutputMapping").Append(&outSignalB).Error)
+	// add Component Configuration has many signals associations
+	assert.NoError(t, db.Model(&configA).Association("InputMapping").Append(&inSignalA).Error)
+	assert.NoError(t, db.Model(&configA).Association("InputMapping").Append(&inSignalB).Error)
+	assert.NoError(t, db.Model(&configA).Association("OutputMapping").Append(&outSignalA).Error)
+	assert.NoError(t, db.Model(&configA).Association("OutputMapping").Append(&outSignalB).Error)
 
-	// add simulation model has many files associations
-	assert.NoError(t, db.Model(&modelA).Association("Files").Append(&fileC).Error)
-	assert.NoError(t, db.Model(&modelA).Association("Files").Append(&fileD).Error)
+	// add Component Configuration has many files associations
+	assert.NoError(t, db.Model(&configA).Association("Files").Append(&fileC).Error)
+	assert.NoError(t, db.Model(&configA).Association("Files").Append(&fileD).Error)
 
-	// associate simulation models with simulators
-	assert.NoError(t, db.Model(&simulatorA).Association("SimulationModels").Append(&modelA).Error)
-	assert.NoError(t, db.Model(&simulatorA).Association("SimulationModels").Append(&modelB).Error)
+	// associate Component Configurations with IC
+	assert.NoError(t, db.Model(&icA).Association("ComponentConfigurations").Append(&configA).Error)
+	assert.NoError(t, db.Model(&icA).Association("ComponentConfigurations").Append(&configB).Error)
 
-	var model1 SimulationModel
-	assert.NoError(t, db.Find(&model1, 1).Error, fmt.Sprintf("Find SimulationModel with ID=1"))
-	assert.EqualValues(t, "SimulationModel_A", model1.Name)
+	var config1 ComponentConfiguration
+	assert.NoError(t, db.Find(&config1, 1).Error, fmt.Sprintf("Find ComponentConfiguration with ID=1"))
+	assert.EqualValues(t, ConfigA.Name, config1.Name)
 
-	// Check simulator ID
-	if model1.SimulatorID != 1 {
-		assert.Fail(t, "Simulation Model expected to have Simulator ID 1, but is %v", model1.SimulatorID)
+	// Check IC ID
+	if config1.ICID != 1 {
+		assert.Fail(t, "Component Configurations expected to have Infrastructure Component ID 1, but is %v", config1.ICID)
 	}
 
-	// Get OutputMapping signals of model1
+	// Get OutputMapping signals of config1
 	var signals []Signal
-	assert.NoError(t, db.Model(&model1).Where("Direction = ?", "out").Related(&signals, "OutputMapping").Error)
+	assert.NoError(t, db.Model(&config1).Where("Direction = ?", "out").Related(&signals, "OutputMapping").Error)
 	if len(signals) != 2 {
-		assert.Fail(t, "SimulationModel Associations",
+		assert.Fail(t, "ComponentConfiguration Associations",
 			"Expected to have %v Output Signals. Has %v.", 2, len(signals))
 	}
 
-	// Get files of model1
+	// Get files of config1
 	var files []File
-	assert.NoError(t, db.Model(&model1).Related(&files, "Files").Error)
+	assert.NoError(t, db.Model(&config1).Related(&files, "Files").Error)
 	if len(files) != 2 {
-		assert.Fail(t, "SimulationModel Associations",
+		assert.Fail(t, "ComponentConfiguration Associations",
 			"Expected to have %v Files. Has %v.", 2, len(files))
 	}
 }

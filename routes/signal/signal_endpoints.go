@@ -28,7 +28,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/simulationmodel"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/component-configuration"
 )
 
 func RegisterSignalEndpoints(r *gin.RouterGroup) {
@@ -45,8 +45,8 @@ func RegisterSignalEndpoints(r *gin.RouterGroup) {
 // @Produce json
 // @Tags signals
 // @Param direction query string true "Direction of signal (in or out)"
-// @Param modelID query string true "Model ID of signals to be obtained"
-// @Success 200 {object} docs.ResponseSignals "Signals which belong to simulation model"
+// @Param configID query string true "Config ID of signals to be obtained"
+// @Success 200 {object} docs.ResponseSignals "Signals which belong to component configuration"
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
@@ -54,7 +54,7 @@ func RegisterSignalEndpoints(r *gin.RouterGroup) {
 // @Router /signals [get]
 func getSignals(c *gin.Context) {
 
-	ok, m := simulationmodel.CheckPermissions(c, database.Read, "query", -1)
+	ok, m := component_configuration.CheckPermissions(c, database.Read, "query", -1)
 	if !ok {
 		return
 	}
@@ -80,7 +80,7 @@ func getSignals(c *gin.Context) {
 }
 
 // AddSignal godoc
-// @Summary Add a signal to a signal mapping of a model
+// @Summary Add a signal to a signal mapping of a component configuration
 // @ID AddSignal
 // @Accept json
 // @Produce json
@@ -91,7 +91,7 @@ func getSignals(c *gin.Context) {
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param Authorization header string true "Authorization token"
-// @Param inputSignal body signal.addSignalRequest true "A signal to be added to the model incl. direction and model ID to which signal shall be added"
+// @Param inputSignal body signal.addSignalRequest true "A signal to be added to the component configuration incl. direction and config ID to which signal shall be added"
 // @Router /signals [post]
 func addSignal(c *gin.Context) {
 
@@ -110,13 +110,13 @@ func addSignal(c *gin.Context) {
 	// Create the new signal from the request
 	newSignal := req.createSignal()
 
-	ok, _ := simulationmodel.CheckPermissions(c, database.Update, "body", int(newSignal.SimulationModelID))
+	ok, _ := component_configuration.CheckPermissions(c, database.Update, "body", int(newSignal.ConfigID))
 	if !ok {
 		return
 	}
 
-	// Add signal to model
-	err := newSignal.addToSimulationModel()
+	// Add signal to component configuration
+	err := newSignal.addToConfig()
 	if !helper.DBError(c, err) {
 		c.JSON(http.StatusOK, gin.H{"signal": newSignal.Signal})
 	}

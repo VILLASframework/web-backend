@@ -38,11 +38,11 @@ type ModelName string
 const ModelUser = ModelName("user")
 const ModelUsers = ModelName("users")
 const ModelScenario = ModelName("scenario")
-const ModelSimulator = ModelName("simulator")
-const ModelSimulatorAction = ModelName("simulatoraction")
+const ModelInfrastructureComponent = ModelName("ic")
+const ModelInfrastructureComponentAction = ModelName("icaction")
 const ModelDashboard = ModelName("dashboard")
 const ModelWidget = ModelName("widget")
-const ModelSimulationModel = ModelName("simulationmodel")
+const ModelComponentConfiguration = ModelName("component-configuration")
 const ModelSignal = ModelName("signal")
 const ModelFile = ModelName("file")
 
@@ -73,40 +73,40 @@ var none = Permission{Create: false, Read: false, Update: false, Delete: false}
 // allowed to do a certain action on a given model based on his role
 var Roles = RoleActions{
 	"Admin": {
-		ModelUser:            crud,
-		ModelUsers:           crud,
-		ModelScenario:        crud,
-		ModelSimulationModel: crud,
-		ModelSimulator:       crud,
-		ModelSimulatorAction: crud,
-		ModelWidget:          crud,
-		ModelDashboard:       crud,
-		ModelSignal:          crud,
-		ModelFile:            crud,
+		ModelUser:                          crud,
+		ModelUsers:                         crud,
+		ModelScenario:                      crud,
+		ModelComponentConfiguration:        crud,
+		ModelInfrastructureComponent:       crud,
+		ModelInfrastructureComponentAction: crud,
+		ModelWidget:                        crud,
+		ModelDashboard:                     crud,
+		ModelSignal:                        crud,
+		ModelFile:                          crud,
 	},
 	"User": {
-		ModelUser:            _ru_,
-		ModelUsers:           none,
-		ModelScenario:        crud,
-		ModelSimulationModel: crud,
-		ModelSimulator:       _r__,
-		ModelSimulatorAction: _ru_,
-		ModelWidget:          crud,
-		ModelDashboard:       crud,
-		ModelSignal:          crud,
-		ModelFile:            crud,
+		ModelUser:                          _ru_,
+		ModelUsers:                         none,
+		ModelScenario:                      crud,
+		ModelComponentConfiguration:        crud,
+		ModelInfrastructureComponent:       _r__,
+		ModelInfrastructureComponentAction: _ru_,
+		ModelWidget:                        crud,
+		ModelDashboard:                     crud,
+		ModelSignal:                        crud,
+		ModelFile:                          crud,
 	},
 	"Guest": {
-		ModelScenario:        _r__,
-		ModelSimulationModel: _r__,
-		ModelDashboard:       _r__,
-		ModelWidget:          _r__,
-		ModelSimulator:       _r__,
-		ModelSimulatorAction: _r__,
-		ModelUser:            _ru_,
-		ModelUsers:           none,
-		ModelSignal:          _r__,
-		ModelFile:            _r__,
+		ModelScenario:                      _r__,
+		ModelComponentConfiguration:        _r__,
+		ModelDashboard:                     _r__,
+		ModelWidget:                        _r__,
+		ModelInfrastructureComponent:       _r__,
+		ModelInfrastructureComponentAction: _r__,
+		ModelUser:                          _ru_,
+		ModelUsers:                         none,
+		ModelSignal:                        _r__,
+		ModelFile:                          _r__,
 	},
 }
 

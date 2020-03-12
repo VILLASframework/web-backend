@@ -1,4 +1,4 @@
-/** Simulator package, middleware.
+/** InfrastructureComponent package, middleware.
 *
 * @author Sonja Happ <sonja.happ@eonerc.rwth-aachen.de>
 * @copyright 2014-2019, Institute for Automation of Complex Power Systems, EONERC
@@ -19,7 +19,7 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
-package simulator
+package infrastructure_component
 
 import (
 	"fmt"
@@ -28,24 +28,24 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func CheckPermissions(c *gin.Context, modeltype database.ModelName, operation database.CRUD, hasID bool) (bool, Simulator) {
+func CheckPermissions(c *gin.Context, modeltype database.ModelName, operation database.CRUD, hasID bool) (bool, InfrastructureComponent) {
 
-	var s Simulator
+	var s InfrastructureComponent
 
 	err := database.ValidateRole(c, modeltype, operation)
 	if err != nil {
-		helper.UnprocessableEntityError(c, fmt.Sprintf("Access denied (role validation of simulator failed): %v", err.Error()))
+		helper.UnprocessableEntityError(c, fmt.Sprintf("Access denied (role validation of infrastructure component failed): %v", err.Error()))
 		return false, s
 	}
 
 	if hasID {
-		// Get the ID of the simulator from the context
-		simulatorID, err := helper.GetIDOfElement(c, "simulatorID", "path", -1)
+		// Get the ID of the infrastructure component from the context
+		ICID, err := helper.GetIDOfElement(c, "ICID", "path", -1)
 		if err != nil {
 			return false, s
 		}
 
-		err = s.ByID(uint(simulatorID))
+		err = s.ByID(uint(ICID))
 		if helper.DBError(c, err) {
 			return false, s
 		}

@@ -55,12 +55,12 @@ var UserB = User{Username: "User_B", Password: string(pwB),
 var UserC = User{Username: "User_C", Password: string(pwC),
 	Role: "Guest", Mail: "User_C@example.com", Active: true}
 
-// Simulators
+// Infrastructure components
 
-var propertiesA = json.RawMessage(`{"name" : "TestNameA", "category" : "CategoryA", "location" : "anywhere on earth", "type": "dummy"}`)
-var propertiesB = json.RawMessage(`{"name" : "TestNameB", "category" : "CategoryB", "location" : "where ever you want", "type": "generic"}`)
+var propertiesA = json.RawMessage(`{"name" : "DPsim simulator", "category" : "Simulator", "location" : "ACSlab", "type": "DPsim"}`)
+var propertiesB = json.RawMessage(`{"name" : "VILLASnode gateway", "category" : "Gateway", "location" : "ACSlab", "type": "VILLASnode"}`)
 
-var SimulatorA = Simulator{
+var ICA = InfrastructureComponent{
 	UUID:          "4854af30-325f-44a5-ad59-b67b2597de68",
 	Host:          "Host_A",
 	Modeltype:     "ModelTypeA",
@@ -71,7 +71,7 @@ var SimulatorA = Simulator{
 	RawProperties: postgres.Jsonb{propertiesA},
 }
 
-var SimulatorB = Simulator{
+var ICB = InfrastructureComponent{
 	UUID:          "7be0322d-354e-431e-84bd-ae4c9633138b",
 	Host:          "Host_B",
 	Modeltype:     "ModelTypeB",
@@ -98,18 +98,18 @@ var ScenarioB = Scenario{
 	StartParameters: postgres.Jsonb{startParametersB},
 }
 
-// Simulation Models
+// Component Configuration
 
-var SimulationModelA = SimulationModel{
-	Name:                "SimulationModel_A",
-	StartParameters:     postgres.Jsonb{startParametersA},
-	SelectedModelFileID: 3,
+var ConfigA = ComponentConfiguration{
+	Name:            "Example simulation",
+	StartParameters: postgres.Jsonb{startParametersA},
+	SelectedFileID:  3,
 }
 
-var SimulationModelB = SimulationModel{
-	Name:                "SimulationModel_B",
-	StartParameters:     postgres.Jsonb{startParametersB},
-	SelectedModelFileID: 4,
+var ConfigB = ComponentConfiguration{
+	Name:            "VILLASnode gateway X",
+	StartParameters: postgres.Jsonb{startParametersB},
+	SelectedFileID:  4,
 }
 
 // Signals
@@ -198,7 +198,7 @@ var customPropertiesLabel = json.RawMessage(`{"textSize" : "20", "fontColor" : 5
 var customPropertiesButton = json.RawMessage(`{"toggle" : "Value1", "on_value" : "Value2", "off_value" : Value3}`)
 var customPropertiesCustomActions = json.RawMessage(`{"actions" : "Value1", "icon" : "Value2"}`)
 var customPropertiesGauge = json.RawMessage(`{ "valueMin": 0, "valueMax": 1}`)
-var customPropertiesLamp = json.RawMessage(`{"simulationModel" : "null", "signal" : 0, "on_color" : 4, "off_color": 2 , "threshold" : 0.5}`)
+var customPropertiesLamp = json.RawMessage(`{"signal" : 0, "on_color" : 4, "off_color": 2 , "threshold" : 0.5}`)
 
 var WidgetA = Widget{
 	Name:             "Label",
@@ -316,8 +316,8 @@ func DBAddTestData(db *gorm.DB) error {
 	userB := UserB
 	userC := UserC
 
-	simulatorA := SimulatorA
-	simulatorB := SimulatorB
+	ICA := ICA
+	ICB := ICB
 
 	scenarioA := ScenarioA
 	scenarioB := ScenarioB
@@ -327,8 +327,8 @@ func DBAddTestData(db *gorm.DB) error {
 	inSignalA := InSignalA
 	inSignalB := InSignalB
 
-	modelA := SimulationModelA
-	modelB := SimulationModelB
+	configA := ConfigA
+	configB := ConfigB
 
 	dashboardA := DashboardA
 	dashboardB := DashboardB
@@ -354,9 +354,9 @@ func DBAddTestData(db *gorm.DB) error {
 	// add Guest user to DB
 	err = db.Create(&userC).Error
 
-	// Simulators
-	err = db.Create(&simulatorA).Error
-	err = db.Create(&simulatorB).Error
+	// ICs
+	err = db.Create(&ICA).Error
+	err = db.Create(&ICB).Error
 
 	// Scenarios
 	err = db.Create(&scenarioA).Error
@@ -368,9 +368,9 @@ func DBAddTestData(db *gorm.DB) error {
 	err = db.Create(&outSignalA).Error
 	err = db.Create(&outSignalB).Error
 
-	// Simulation Models
-	err = db.Create(&modelA).Error
-	err = db.Create(&modelB).Error
+	// Component Configuration
+	err = db.Create(&configA).Error
+	err = db.Create(&configB).Error
 
 	// Dashboards
 	err = db.Create(&dashboardA).Error
@@ -400,9 +400,9 @@ func DBAddTestData(db *gorm.DB) error {
 	err = db.Model(&scenarioA).Association("Users").Append(&userC).Error
 	err = db.Model(&scenarioA).Association("Users").Append(&user0).Error
 
-	// Scenario HM SimulationModels
-	err = db.Model(&scenarioA).Association("SimulationModels").Append(&modelA).Error
-	err = db.Model(&scenarioA).Association("SimulationModels").Append(&modelB).Error
+	// Scenario HM Component Configurations
+	err = db.Model(&scenarioA).Association("ComponentConfigurations").Append(&configA).Error
+	err = db.Model(&scenarioA).Association("ComponentConfigurations").Append(&configB).Error
 
 	// Scenario HM Dashboards
 	err = db.Model(&scenarioA).Association("Dashboards").Append(&dashboardA).Error
@@ -415,19 +415,19 @@ func DBAddTestData(db *gorm.DB) error {
 	err = db.Model(&dashboardA).Association("Widgets").Append(&widgetD).Error
 	err = db.Model(&dashboardA).Association("Widgets").Append(&widgetE).Error
 
-	// SimulationModel HM Signals
-	err = db.Model(&modelA).Association("InputMapping").Append(&inSignalA).Error
-	err = db.Model(&modelA).Association("InputMapping").Append(&inSignalB).Error
-	err = db.Model(&modelA).Association("InputMapping").Append(&outSignalA).Error
-	err = db.Model(&modelA).Association("InputMapping").Append(&outSignalB).Error
+	// ComponentConfiguration HM Signals
+	err = db.Model(&configA).Association("InputMapping").Append(&inSignalA).Error
+	err = db.Model(&configA).Association("InputMapping").Append(&inSignalB).Error
+	err = db.Model(&configA).Association("InputMapping").Append(&outSignalA).Error
+	err = db.Model(&configA).Association("InputMapping").Append(&outSignalB).Error
 
-	// SimulationModel HM Files
-	err = db.Model(&modelA).Association("Files").Append(&fileC).Error
-	err = db.Model(&modelA).Association("Files").Append(&fileD).Error
+	// ComponentConfiguration HM Files
+	err = db.Model(&configA).Association("Files").Append(&fileC).Error
+	err = db.Model(&configA).Association("Files").Append(&fileD).Error
 
-	// Simulator HM SimulationModels
-	err = db.Model(&simulatorA).Association("SimulationModels").Append(&modelA).Error
-	err = db.Model(&simulatorA).Association("SimulationModels").Append(&modelB).Error
+	// InfrastructureComponent HM ComponentConfigurations
+	err = db.Model(&ICA).Association("ComponentConfigurations").Append(&configA).Error
+	err = db.Model(&ICA).Association("ComponentConfigurations").Append(&configB).Error
 
 	// Widget HM Files
 	err = db.Model(&widgetA).Association("Files").Append(&fileA).Error

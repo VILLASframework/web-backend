@@ -25,7 +25,7 @@ import (
 	"fmt"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/simulationmodel"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/component-configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/widget"
 	"github.com/gin-gonic/gin"
 )
@@ -50,8 +50,8 @@ func checkPermissions(c *gin.Context, operation database.CRUD) (bool, File) {
 		return false, f
 	}
 
-	if f.SimulationModelID > 0 {
-		ok, _ := simulationmodel.CheckPermissions(c, operation, "body", int(f.SimulationModelID))
+	if f.ConfigID > 0 {
+		ok, _ := component_configuration.CheckPermissions(c, operation, "body", int(f.ConfigID))
 		if !ok {
 			return false, f
 		}
