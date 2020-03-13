@@ -134,15 +134,7 @@ func main() {
 	}
 	if mode == "test" {
 		database.DropTables(db)
-		log.Println("Database tables dropped")
-
-		basePath, err := configuration.GolbalConfig.String("base.path")
-		if err != nil {
-			fmt.Println(err.Error())
-			fmt.Println("error: base.path parameter missing in global configuration, aborting")
-			return
-		}
-		log.Println("Adding test data to DB")
+		log.Println("Database tables dropped, adding test data to DB")
 		err = database.DBAddTestData(db, basePath, r)
 		if err != nil {
 			fmt.Println(err.Error())
