@@ -189,10 +189,6 @@ type File struct {
 	Type string `json:"type"`
 	// Size of file (in byte)
 	Size uint `json:"size"`
-	// Height of image (only needed in case of image)
-	ImageHeight uint `json:"imageHeight"`
-	// Width of image (only needed in case of image)
-	ImageWidth uint `json:"imageWidth"`
 	// Last modification time of file
 	Date string `json:"date"`
 	// ID of Component Configuration to which file belongs

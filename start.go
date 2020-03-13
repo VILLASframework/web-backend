@@ -22,6 +22,7 @@
 package main
 
 import (
+	"fmt"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/healthz"
 	"log"
 	"time"
@@ -123,6 +124,33 @@ func main() {
 	infrastructure_component.RegisterICEndpoints(api.Group("/ic"))
 
 	r.GET("swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	// add test data to DB if test mode is activated
+	mode, err := configuration.GolbalConfig.String("mode")
+	if err != nil {
+		fmt.Println(err.Error())
+		fmt.Println("error: mode parameter missing in global configuration, aborting")
+		return
+	}
+	if mode == "test" {
+		database.DropTables(db)
+		log.Println("Database tables dropped")
+
+		basePath, err := configuration.GolbalConfig.String("base.path")
+		if err != nil {
+			fmt.Println(err.Error())
+			fmt.Println("error: base.path parameter missing in global configuration, aborting")
+			return
+		}
+		log.Println("Adding test data to DB")
+		err = database.DBAddTestData(db, basePath, r)
+		if err != nil {
+			fmt.Println(err.Error())
+			fmt.Println("error: testdata could not be added to DB, aborting")
+			panic(err)
+		}
+		log.Println("Database initialized with test data")
+	}
 
 	amqpurl, _ := configuration.GolbalConfig.String("amqp.url")
 	if amqpurl != "" {

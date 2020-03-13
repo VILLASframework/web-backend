@@ -58,10 +58,6 @@ func InitDB(cfg *config.Config) (*gorm.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	mode, err := cfg.String("mode")
-	if err != nil {
-		return nil, err
-	}
 
 	dbinfo := fmt.Sprintf("host=%s sslmode=%s dbname=%s", host, sslmode, name)
 	if user != "" && pass != "" {
@@ -74,20 +70,7 @@ func InitDB(cfg *config.Config) (*gorm.DB, error) {
 	}
 
 	DBpool = db
-
 	MigrateModels(db)
-
-	if mode == "test" {
-		DropTables(db)
-		log.Println("Database tables dropped")
-
-		err = DBAddTestData(db)
-		if err != nil {
-			return nil, err
-		}
-		log.Println("Database initialized with test data")
-	}
-
 	log.Println("Database connection established")
 
 	return db, nil

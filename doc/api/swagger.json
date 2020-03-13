@@ -3244,14 +3244,6 @@
                 "id": {
                     "type": "integer"
                 },
-                "imageHeight": {
-                    "description": "Height of image (only needed in case of image)",
-                    "type": "integer"
-                },
-                "imageWidth": {
-                    "description": "Width of image (only needed in case of image)",
-                    "type": "integer"
-                },
                 "name": {
                     "description": "Name of file",
                     "type": "string"

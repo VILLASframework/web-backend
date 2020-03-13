@@ -213,7 +213,7 @@ func AuthenticateForTest(router *gin.Engine, url string,
 
 	req, err := http.NewRequest(method, url, bytes.NewBuffer(body))
 	if err != nil {
-		return "", fmt.Errorf("Faile to create new request: %v", err)
+		return "", fmt.Errorf("Failed to create new request: %v", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
 	router.ServeHTTP(w, req)

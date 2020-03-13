@@ -81,8 +81,6 @@ func (f *File) register(fileHeader *multipart.FileHeader, objectType string, obj
 	//f.Path = filepath.Join(getFolderName(objectType, objectID), f.Name)
 	f.Size = uint(fileHeader.Size)
 	f.Date = time.Now().String()
-	f.ImageWidth = 0  // TODO: do we need this?
-	f.ImageHeight = 0 // TODO: do we need this?
 
 	var m component_configuration.ComponentConfiguration
 	var w widget.Widget

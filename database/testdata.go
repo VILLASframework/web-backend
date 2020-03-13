@@ -22,10 +22,19 @@
 package database
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
+	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	"github.com/jinzhu/gorm/dialects/postgres"
 	"golang.org/x/crypto/bcrypt"
+	"io"
+	"mime/multipart"
+	"net/http"
+	"net/http/httptest"
+	"os"
 	"time"
 )
 
@@ -54,6 +63,36 @@ var UserB = User{Username: "User_B", Password: string(pwB),
 	Role: "User", Mail: "User_B@example.com", Active: true}
 var UserC = User{Username: "User_C", Password: string(pwC),
 	Role: "Guest", Mail: "User_C@example.com", Active: true}
+
+type UserRequest struct {
+	Username    string `json:"username,omitempty"`
+	Password    string `json:"password,omitempty"`
+	OldPassword string `json:"oldPassword,omitempty"`
+	Mail        string `json:"mail,omitempty"`
+	Role        string `json:"role,omitempty"`
+	Active      string `json:"active,omitempty"`
+}
+
+var newUserA = UserRequest{
+	Username: UserA.Username,
+	Password: StrPasswordA,
+	Role:     UserA.Role,
+	Mail:     UserA.Mail,
+}
+
+var newUserB = UserRequest{
+	Username: UserB.Username,
+	Password: StrPasswordB,
+	Role:     UserB.Role,
+	Mail:     UserB.Mail,
+}
+
+var newUserC = UserRequest{
+	Username: UserC.Username,
+	Password: StrPasswordC,
+	Role:     UserC.Role,
+	Mail:     UserC.Mail,
+}
 
 // Infrastructure components
 
@@ -117,28 +156,28 @@ var ConfigB = ComponentConfiguration{
 var OutSignalA = Signal{
 	Name:      "outSignal_A",
 	Direction: "out",
-	Index:     0,
+	Index:     1,
 	Unit:      "V",
 }
 
 var OutSignalB = Signal{
 	Name:      "outSignal_B",
 	Direction: "out",
-	Index:     1,
+	Index:     2,
 	Unit:      "V",
 }
 
 var InSignalA = Signal{
 	Name:      "inSignal_A",
 	Direction: "in",
-	Index:     0,
+	Index:     1,
 	Unit:      "A",
 }
 
 var InSignalB = Signal{
 	Name:      "inSignal_B",
 	Direction: "in",
-	Index:     1,
+	Index:     2,
 	Unit:      "A",
 }
 
@@ -156,38 +195,30 @@ var DashboardB = Dashboard{
 // Files
 
 var FileA = File{
-	Name:        "File_A",
-	Type:        "text/plain",
-	Size:        42,
-	ImageHeight: 333,
-	ImageWidth:  111,
-	Date:        time.Now().String(),
+	Name: "File_A",
+	Type: "text/plain",
+	Size: 42,
+	Date: time.Now().String(),
 }
 
 var FileB = File{
-	Name:        "File_B",
-	Type:        "text/plain",
-	Size:        1234,
-	ImageHeight: 55,
-	ImageWidth:  22,
-	Date:        time.Now().String(),
+	Name: "File_B",
+	Type: "text/plain",
+	Size: 1234,
+	Date: time.Now().String(),
 }
 
 var FileC = File{
-	Name:        "File_C",
-	Type:        "text/plain",
-	Size:        32,
-	ImageHeight: 10,
-	ImageWidth:  10,
-	Date:        time.Now().String(),
+	Name: "File_C",
+	Type: "text/plain",
+	Size: 32,
+	Date: time.Now().String(),
 }
 var FileD = File{
-	Name:        "File_D",
-	Type:        "text/plain",
-	Size:        5000,
-	ImageHeight: 400,
-	ImageWidth:  800,
-	Date:        time.Now().String(),
+	Name: "File_D",
+	Type: "text/plain",
+	Size: 5000,
+	Date: time.Now().String(),
 }
 
 // Widgets
@@ -305,133 +336,202 @@ func DBAddAdminAndUserAndGuest(db *gorm.DB) error {
 }
 
 // Populates DB with test data
-func DBAddTestData(db *gorm.DB) error {
+func DBAddTestData(db *gorm.DB, basePath string, router *gin.Engine) error {
 
 	MigrateModels(db)
 	// Create entries of each model (data defined in testdata.go)
+	// add Admin user
+	err := DBAddAdminUser(db)
+	if err != nil {
+		return err
+	}
 
-	//create a copy of global test data
-	user0 := User0
-	userA := UserA
-	userB := UserB
-	userC := UserC
+	// authenticate as admin
+	token, err := helper.AuthenticateForTest(router, basePath+"/authenticate", "POST", helper.AdminCredentials)
+	if err != nil {
+		return err
+	}
 
-	ICA := ICA
-	ICB := ICB
+	// add 2 normal and 1 guest user
+	code, _, err := helper.TestEndpoint(router, token, basePath+"/users", "POST", helper.KeyModels{"user": newUserA})
+	if code != http.StatusOK {
+		return fmt.Errorf("error adding User_A")
+	}
+	code, _, err = helper.TestEndpoint(router, token, basePath+"/users", "POST", helper.KeyModels{"user": newUserB})
+	if code != http.StatusOK {
+		return fmt.Errorf("error adding User_B")
+	}
+	code, _, err = helper.TestEndpoint(router, token, basePath+"/users", "POST", helper.KeyModels{"user": newUserC})
+	if code != http.StatusOK {
+		return fmt.Errorf("error adding User_C")
+	}
 
-	scenarioA := ScenarioA
-	scenarioB := ScenarioB
+	// add infrastructure components
+	code, _, err = helper.TestEndpoint(router, token, basePath+"/ic", "POST", helper.KeyModels{"ic": ICA})
+	if code != http.StatusOK {
+		return fmt.Errorf("error adding IC A")
+	}
+	code, _, err = helper.TestEndpoint(router, token, basePath+"/ic", "POST", helper.KeyModels{"ic": ICB})
+	if code != http.StatusOK {
+		return fmt.Errorf("error adding IC B")
+	}
 
-	outSignalA := OutSignalA
-	outSignalB := OutSignalB
-	inSignalA := InSignalA
-	inSignalB := InSignalB
+	// add scenarios
+	code, _, err = helper.TestEndpoint(router, token, basePath+"/scenarios", "POST", helper.KeyModels{"scenario": ScenarioA})
+	if code != http.StatusOK {
+		return fmt.Errorf("error adding Scenario A")
+	}
+	code, _, err = helper.TestEndpoint(router, token, basePath+"/scenarios", "POST", helper.KeyModels{"scenario": ScenarioB})
+	if code != http.StatusOK {
+		return fmt.Errorf("error adding Scenario B")
+	}
 
+	// add users to scenario
+	code, _, err = helper.TestEndpoint(router, token, fmt.Sprintf("%v/scenarios/1/user?username=User_A", basePath), "PUT", nil)
+	if code != http.StatusOK {
+		return fmt.Errorf("error adding User_A to Scenario A")
+	}
+	code, _, err = helper.TestEndpoint(router, token, fmt.Sprintf("%v/scenarios/2/user?username=User_A", basePath), "PUT", nil)
+	if code != http.StatusOK {
+		return fmt.Errorf("error adding User_A to Scenario B")
+	}
+	code, _, err = helper.TestEndpoint(router, token, fmt.Sprintf("%v/scenarios/2/user?username=User_B", basePath), "PUT", nil)
+	if code != http.StatusOK {
+		return fmt.Errorf("error adding User_B to Scenario B")
+	}
+	code, _, err = helper.TestEndpoint(router, token, fmt.Sprintf("%v/scenarios/1/user?username=User_C", basePath), "PUT", nil)
+	if code != http.StatusOK {
+		return fmt.Errorf("error adding User_C to Scenario A")
+	}
+
+	// add component configurations
 	configA := ConfigA
 	configB := ConfigB
+	configA.ScenarioID = 1
+	configB.ScenarioID = 1
+	configA.ICID = 1
+	configB.ICID = 2
+	code, _, err = helper.TestEndpoint(router, token, basePath+"/configs", "POST", helper.KeyModels{"config": configA})
+	if code != http.StatusOK {
+		return fmt.Errorf("error adding Config A")
+	}
+	code, _, err = helper.TestEndpoint(router, token, basePath+"/configs", "POST", helper.KeyModels{"config": configB})
+	if code != http.StatusOK {
+		return fmt.Errorf("error adding Config B")
+	}
 
+	// add dashboards
 	dashboardA := DashboardA
 	dashboardB := DashboardB
+	dashboardA.ScenarioID = 1
+	dashboardB.ScenarioID = 1
+	code, _, err = helper.TestEndpoint(router, token, basePath+"/dashboards", "POST", helper.KeyModels{"dashboard": dashboardA})
+	if code != http.StatusOK {
+		return fmt.Errorf("error adding Dashboard B")
+	}
+	code, _, err = helper.TestEndpoint(router, token, basePath+"/dashboards", "POST", helper.KeyModels{"dashboard": dashboardB})
+	if code != http.StatusOK {
+		return fmt.Errorf("error adding Dashboard B")
+	}
 
-	fileA := FileA
-	fileB := FileB
-	fileC := FileC
-	fileD := FileD
-
+	// add widgets
 	widgetA := WidgetA
 	widgetB := WidgetB
 	widgetC := WidgetC
 	widgetD := WidgetD
 	widgetE := WidgetE
+	widgetA.DashboardID = 1
+	widgetB.DashboardID = 1
+	widgetC.DashboardID = 1
+	widgetD.DashboardID = 1
+	widgetE.DashboardID = 1
+	code, _, err = helper.TestEndpoint(router, token, basePath+"/widgets", "POST", helper.KeyModels{"widget": widgetA})
+	if code != http.StatusOK {
+		return fmt.Errorf("error adding Widget A")
+	}
+	code, _, err = helper.TestEndpoint(router, token, basePath+"/widgets", "POST", helper.KeyModels{"widget": widgetB})
+	if code != http.StatusOK {
+		return fmt.Errorf("error adding Widget B")
+	}
+	code, _, err = helper.TestEndpoint(router, token, basePath+"/widgets", "POST", helper.KeyModels{"widget": widgetC})
+	if code != http.StatusOK {
+		return fmt.Errorf("error adding Widget C")
+	}
+	code, _, err = helper.TestEndpoint(router, token, basePath+"/widgets", "POST", helper.KeyModels{"widget": widgetD})
+	if code != http.StatusOK {
+		return fmt.Errorf("error adding Widget D")
+	}
+	code, _, err = helper.TestEndpoint(router, token, basePath+"/widgets", "POST", helper.KeyModels{"widget": widgetE})
+	if code != http.StatusOK {
+		return fmt.Errorf("error adding Widget E")
+	}
 
-	// Users
-	err := db.Create(&user0).Error
+	// add signals
+	outSignalA := OutSignalA
+	outSignalB := OutSignalB
+	inSignalA := InSignalA
+	inSignalB := InSignalB
+	outSignalA.ConfigID = 1
+	outSignalB.ConfigID = 1
+	inSignalA.ConfigID = 1
+	inSignalB.ConfigID = 1
+	code, _, err = helper.TestEndpoint(router, token, basePath+"/signals", "POST", helper.KeyModels{"signal": outSignalB})
+	if code != http.StatusOK {
+		return fmt.Errorf("error adding outSignalB")
+	}
+	code, _, err = helper.TestEndpoint(router, token, basePath+"/signals", "POST", helper.KeyModels{"signal": outSignalA})
+	if code != http.StatusOK {
+		return fmt.Errorf("error adding outSignalA")
+	}
 
-	// add normal users to DB
-	err = db.Create(&userA).Error
-	err = db.Create(&userB).Error
+	code, _, err = helper.TestEndpoint(router, token, basePath+"/signals", "POST", helper.KeyModels{"signal": inSignalA})
+	if code != http.StatusOK {
+		return fmt.Errorf("error adding inSignalA")
+	}
+	code, _, err = helper.TestEndpoint(router, token, basePath+"/signals", "POST", helper.KeyModels{"signal": inSignalB})
+	if code != http.StatusOK {
+		return fmt.Errorf("error adding inSignalB")
+	}
 
-	// add Guest user to DB
-	err = db.Create(&userC).Error
+	// upload files
 
-	// ICs
-	err = db.Create(&ICA).Error
-	err = db.Create(&ICB).Error
+	// upload readme file
+	bodyBuf := &bytes.Buffer{}
+	bodyWriter := multipart.NewWriter(bodyBuf)
+	fileWriter, _ := bodyWriter.CreateFormFile("file", "Readme.md")
+	fh, _ := os.Open("README.md")
+	defer fh.Close()
 
-	// Scenarios
-	err = db.Create(&scenarioA).Error
-	err = db.Create(&scenarioB).Error
+	// io copy
+	_, err = io.Copy(fileWriter, fh)
+	contentType := bodyWriter.FormDataContentType()
+	bodyWriter.Close()
 
-	// Signals
-	err = db.Create(&inSignalA).Error
-	err = db.Create(&inSignalB).Error
-	err = db.Create(&outSignalA).Error
-	err = db.Create(&outSignalB).Error
+	// Create the request and add file to component config
+	w1 := httptest.NewRecorder()
+	req1, _ := http.NewRequest("POST", basePath+"/files?objectID=1&objectType=config", bodyBuf)
+	req1.Header.Set("Content-Type", contentType)
+	req1.Header.Add("Authorization", "Bearer "+token)
+	router.ServeHTTP(w1, req1)
 
-	// Component Configuration
-	err = db.Create(&configA).Error
-	err = db.Create(&configB).Error
+	// upload image file
+	bodyBuf = &bytes.Buffer{}
+	bodyWriter = multipart.NewWriter(bodyBuf)
+	fileWriter, _ = bodyWriter.CreateFormFile("file", "logo.png")
+	fh, _ = os.Open("doc/pictures/villas_web.png")
+	defer fh.Close()
 
-	// Dashboards
-	err = db.Create(&dashboardA).Error
-	err = db.Create(&dashboardB).Error
+	// io copy
+	_, err = io.Copy(fileWriter, fh)
+	contentType = bodyWriter.FormDataContentType()
+	bodyWriter.Close()
 
-	// Files
-	err = db.Create(&fileA).Error
-	err = db.Create(&fileB).Error
-	err = db.Create(&fileC).Error
-	err = db.Create(&fileD).Error
+	// Create the request and add file to widget
+	w2 := httptest.NewRecorder()
+	req2, _ := http.NewRequest("POST", basePath+"/files?objectID=1&objectType=widget", bodyBuf)
+	req2.Header.Set("Content-Type", contentType)
+	req2.Header.Add("Authorization", "Bearer "+token)
+	router.ServeHTTP(w2, req2)
 
-	// Widgets
-	err = db.Create(&widgetA).Error
-	err = db.Create(&widgetB).Error
-	err = db.Create(&widgetC).Error
-	err = db.Create(&widgetD).Error
-	err = db.Create(&widgetE).Error
-
-	// Associations between models
-	// For `belongs to` use the model with id=1
-	// For `has many` use the models with id=1 and id=2
-
-	// User HM Scenarios, Scenario HM Users (Many-to-Many)
-	err = db.Model(&scenarioA).Association("Users").Append(&userA).Error
-	err = db.Model(&scenarioB).Association("Users").Append(&userA).Error
-	err = db.Model(&scenarioB).Association("Users").Append(&userB).Error
-	err = db.Model(&scenarioA).Association("Users").Append(&userC).Error
-	err = db.Model(&scenarioA).Association("Users").Append(&user0).Error
-
-	// Scenario HM Component Configurations
-	err = db.Model(&scenarioA).Association("ComponentConfigurations").Append(&configA).Error
-	err = db.Model(&scenarioA).Association("ComponentConfigurations").Append(&configB).Error
-
-	// Scenario HM Dashboards
-	err = db.Model(&scenarioA).Association("Dashboards").Append(&dashboardA).Error
-	err = db.Model(&scenarioA).Association("Dashboards").Append(&dashboardB).Error
-
-	// Dashboard HM Widget
-	err = db.Model(&dashboardA).Association("Widgets").Append(&widgetA).Error
-	err = db.Model(&dashboardA).Association("Widgets").Append(&widgetB).Error
-	err = db.Model(&dashboardA).Association("Widgets").Append(&widgetC).Error
-	err = db.Model(&dashboardA).Association("Widgets").Append(&widgetD).Error
-	err = db.Model(&dashboardA).Association("Widgets").Append(&widgetE).Error
-
-	// ComponentConfiguration HM Signals
-	err = db.Model(&configA).Association("InputMapping").Append(&inSignalA).Error
-	err = db.Model(&configA).Association("InputMapping").Append(&inSignalB).Error
-	err = db.Model(&configA).Association("InputMapping").Append(&outSignalA).Error
-	err = db.Model(&configA).Association("InputMapping").Append(&outSignalB).Error
-
-	// ComponentConfiguration HM Files
-	err = db.Model(&configA).Association("Files").Append(&fileC).Error
-	err = db.Model(&configA).Association("Files").Append(&fileD).Error
-
-	// InfrastructureComponent HM ComponentConfigurations
-	err = db.Model(&ICA).Association("ComponentConfigurations").Append(&configA).Error
-	err = db.Model(&ICA).Association("ComponentConfigurations").Append(&configB).Error
-
-	// Widget HM Files
-	err = db.Model(&widgetA).Association("Files").Append(&fileA).Error
-	err = db.Model(&widgetA).Association("Files").Append(&fileB).Error
-
-	return err
+	return nil
 }
