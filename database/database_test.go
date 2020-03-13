@@ -399,10 +399,3 @@ func TestAddAdminAndUsers(t *testing.T) {
 
 	assert.NoError(t, DBAddAdminAndUserAndGuest(db))
 }
-
-func TestAddData(t *testing.T) {
-	DropTables(db)
-	MigrateModels(db)
-
-	assert.NoError(t, DBAddTestData(db))
-}
