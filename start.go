@@ -133,6 +133,7 @@ func main() {
 		return
 	}
 	if mode == "test" {
+		// test mode: drop all tables and add test data to DB
 		database.DropTables(db)
 		log.Println("Database tables dropped, adding test data to DB")
 		err = database.DBAddTestData(db, basePath, r)
@@ -142,6 +143,14 @@ func main() {
 			panic(err)
 		}
 		log.Println("Database initialized with test data")
+	} else {
+		// release mode: make sure that at least one admin user exists in DB
+		err = database.DBAddAdminUser(db)
+		if err != nil {
+			fmt.Println(err.Error())
+			fmt.Println("error: adding admin user failed, aborting")
+			panic(err)
+		}
 	}
 
 	amqpurl, _ := configuration.GolbalConfig.String("amqp.url")

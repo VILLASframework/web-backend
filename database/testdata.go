@@ -309,10 +309,18 @@ var WidgetE = Widget{
 func DBAddAdminUser(db *gorm.DB) error {
 	db.AutoMigrate(&User{})
 
-	//create a copy of global test data
-	user0 := User0
-	// add admin user to DB
-	err := db.Create(&user0).Error
+	// Check if admin user exists in DB
+	var users []User
+	err := db.Where("Role = ?", "Admin").Find(&users).Error
+
+	if len(users) == 0 {
+		fmt.Println("No admin user found in DB, adding default admin user.")
+		//create a copy of global test data
+		user0 := User0
+		// add admin user to DB
+		err = db.Create(&user0).Error
+	}
+
 	return err
 }
 
