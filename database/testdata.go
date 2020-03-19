@@ -27,7 +27,6 @@ import (
 	"fmt"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 	"github.com/jinzhu/gorm/dialects/postgres"
 	"golang.org/x/crypto/bcrypt"
 	"io"
@@ -306,26 +305,26 @@ var WidgetE = Widget{
 	SignalIDs:        []int64{4},
 }
 
-func DBAddAdminUser(db *gorm.DB) error {
-	db.AutoMigrate(&User{})
+func DBAddAdminUser() error {
+	DBpool.AutoMigrate(&User{})
 
 	// Check if admin user exists in DB
 	var users []User
-	err := db.Where("Role = ?", "Admin").Find(&users).Error
+	err := DBpool.Where("Role = ?", "Admin").Find(&users).Error
 
 	if len(users) == 0 {
 		fmt.Println("No admin user found in DB, adding default admin user.")
 		//create a copy of global test data
 		user0 := User0
 		// add admin user to DB
-		err = db.Create(&user0).Error
+		err = DBpool.Create(&user0).Error
 	}
 
 	return err
 }
 
-func DBAddAdminAndUserAndGuest(db *gorm.DB) error {
-	db.AutoMigrate(&User{})
+func DBAddAdminAndUserAndGuest() error {
+	DBpool.AutoMigrate(&User{})
 
 	//create a copy of global test data
 	user0 := User0
@@ -334,22 +333,22 @@ func DBAddAdminAndUserAndGuest(db *gorm.DB) error {
 	userC := UserC
 
 	// add admin user to DB
-	err := db.Create(&user0).Error
+	err := DBpool.Create(&user0).Error
 	// add normal users to DB
-	err = db.Create(&userA).Error
-	err = db.Create(&userB).Error
+	err = DBpool.Create(&userA).Error
+	err = DBpool.Create(&userB).Error
 	// add guest user to DB
-	err = db.Create(&userC).Error
+	err = DBpool.Create(&userC).Error
 	return err
 }
 
 // Populates DB with test data
-func DBAddTestData(db *gorm.DB, basePath string, router *gin.Engine) error {
+func DBAddTestData(basePath string, router *gin.Engine) error {
 
-	MigrateModels(db)
+	MigrateModels()
 	// Create entries of each model (data defined in testdata.go)
 	// add Admin user
-	err := DBAddAdminUser(db)
+	err := DBAddAdminUser()
 	if err != nil {
 		return err
 	}

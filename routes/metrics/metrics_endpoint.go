@@ -22,9 +22,9 @@
 package metrics
 
 import (
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"github.com/chenjiandongx/ginprom"
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -111,8 +111,10 @@ func RegisterMetricsEndpoint(rg *gin.RouterGroup) {
 	)
 }
 
-func InitCounters(db *gorm.DB) {
+func InitCounters() {
 	var infrastructure_components, component_configurations, files, scenarios, users, dashboards float64
+
+	db := database.GetDB()
 
 	db.Table("infrastructure_components").Count(&infrastructure_components)
 	db.Table("component_configurations").Count(&component_configurations)

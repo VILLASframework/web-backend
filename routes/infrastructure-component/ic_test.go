@@ -24,7 +24,6 @@ package infrastructure_component
 import (
 	"fmt"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
-	"github.com/jinzhu/gorm"
 	"github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/stretchr/testify/assert"
 	"os"
@@ -38,7 +37,6 @@ import (
 )
 
 var router *gin.Engine
-var db *gorm.DB
 
 type ICRequest struct {
 	UUID       string         `json:"uuid,omitempty"`
@@ -54,11 +52,11 @@ func TestMain(m *testing.M) {
 		panic(m)
 	}
 
-	db, err = database.InitDB(configuration.GolbalConfig)
+	err = database.InitDB(configuration.GolbalConfig)
 	if err != nil {
 		panic(m)
 	}
-	defer db.Close()
+	defer database.DBpool.Close()
 
 	router = gin.Default()
 	api := router.Group("/api")
@@ -71,9 +69,9 @@ func TestMain(m *testing.M) {
 }
 
 func TestAddICAsAdmin(t *testing.T) {
-	database.DropTables(db)
-	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
+	database.DropTables()
+	database.MigrateModels()
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -138,9 +136,9 @@ func TestAddICAsAdmin(t *testing.T) {
 }
 
 func TestAddICAsUser(t *testing.T) {
-	database.DropTables(db)
-	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
+	database.DropTables()
+	database.MigrateModels()
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
 
 	// authenticate as user
 	token, err := helper.AuthenticateForTest(router,
@@ -165,9 +163,9 @@ func TestAddICAsUser(t *testing.T) {
 }
 
 func TestUpdateICAsAdmin(t *testing.T) {
-	database.DropTables(db)
-	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
+	database.DropTables()
+	database.MigrateModels()
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -227,9 +225,9 @@ func TestUpdateICAsAdmin(t *testing.T) {
 }
 
 func TestUpdateICAsUser(t *testing.T) {
-	database.DropTables(db)
-	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
+	database.DropTables()
+	database.MigrateModels()
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -269,9 +267,9 @@ func TestUpdateICAsUser(t *testing.T) {
 }
 
 func TestDeleteICAsAdmin(t *testing.T) {
-	database.DropTables(db)
-	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
+	database.DropTables()
+	database.MigrateModels()
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -319,9 +317,9 @@ func TestDeleteICAsAdmin(t *testing.T) {
 }
 
 func TestDeleteICAsUser(t *testing.T) {
-	database.DropTables(db)
-	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
+	database.DropTables()
+	database.MigrateModels()
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -360,9 +358,9 @@ func TestDeleteICAsUser(t *testing.T) {
 }
 
 func TestGetAllICs(t *testing.T) {
-	database.DropTables(db)
-	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
+	database.DropTables()
+	database.MigrateModels()
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -421,9 +419,9 @@ func TestGetAllICs(t *testing.T) {
 }
 
 func TestGetConfigsOfIC(t *testing.T) {
-	database.DropTables(db)
-	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
+	database.DropTables()
+	database.MigrateModels()
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,

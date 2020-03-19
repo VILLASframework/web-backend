@@ -27,7 +27,6 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 
@@ -35,23 +34,22 @@ import (
 )
 
 var router *gin.Engine
-var db *gorm.DB
 
 func TestHealthz(t *testing.T) {
 	err := configuration.InitConfig()
 	assert.NoError(t, err)
 
 	// connect DB
-	db, err = database.InitDB(configuration.GolbalConfig)
+	err = database.InitDB(configuration.GolbalConfig)
 	assert.NoError(t, err)
-	defer db.Close()
+	defer database.DBpool.Close()
 
 	router = gin.Default()
 
 	RegisterHealthzEndpoint(router.Group("/healthz"))
 
 	// close db connection
-	err = db.Close()
+	err = database.DBpool.Close()
 	assert.NoError(t, err)
 
 	// test healthz endpoint for unconnected DB and AMQP client
@@ -60,9 +58,9 @@ func TestHealthz(t *testing.T) {
 	assert.Equalf(t, 500, code, "Response body: \n%v\n", resp)
 
 	// reconnect DB
-	db, err = database.InitDB(configuration.GolbalConfig)
+	err = database.InitDB(configuration.GolbalConfig)
 	assert.NoError(t, err)
-	defer db.Close()
+	defer database.DBpool.Close()
 
 	// test healthz endpoint for connected DB and unconnected AMQP client
 	code, resp, err = helper.TestEndpoint(router, "", "healthz", http.MethodGet, nil)

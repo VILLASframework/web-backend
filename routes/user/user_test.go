@@ -32,7 +32,6 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
@@ -40,7 +39,6 @@ import (
 )
 
 var router *gin.Engine
-var db *gorm.DB
 
 type UserRequest struct {
 	Username    string `json:"username,omitempty"`
@@ -57,11 +55,11 @@ func TestMain(m *testing.M) {
 		panic(m)
 	}
 
-	db, err = database.InitDB(configuration.GolbalConfig)
+	err = database.InitDB(configuration.GolbalConfig)
 	if err != nil {
 		panic(m)
 	}
-	defer db.Close()
+	defer database.DBpool.Close()
 
 	router = gin.Default()
 	api := router.Group("/api")
@@ -74,9 +72,9 @@ func TestMain(m *testing.M) {
 }
 
 func TestAuthenticate(t *testing.T) {
-	database.DropTables(db)
-	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
+	database.DropTables()
+	database.MigrateModels()
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
 
 	// try to authenticate with non JSON body
 	// should result in unauthorized
@@ -134,9 +132,9 @@ func TestAuthenticate(t *testing.T) {
 
 func TestAddGetUser(t *testing.T) {
 
-	database.DropTables(db)
-	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
+	database.DropTables()
+	database.MigrateModels()
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -258,9 +256,9 @@ func TestAddGetUser(t *testing.T) {
 
 func TestUsersNotAllowedActions(t *testing.T) {
 
-	database.DropTables(db)
-	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
+	database.DropTables()
+	database.MigrateModels()
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -318,9 +316,9 @@ func TestUsersNotAllowedActions(t *testing.T) {
 
 func TestGetAllUsers(t *testing.T) {
 
-	database.DropTables(db)
-	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
+	database.DropTables()
+	database.MigrateModels()
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -367,9 +365,9 @@ func TestGetAllUsers(t *testing.T) {
 
 func TestModifyAddedUserAsUser(t *testing.T) {
 
-	database.DropTables(db)
-	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
+	database.DropTables()
+	database.MigrateModels()
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -524,9 +522,9 @@ func TestModifyAddedUserAsUser(t *testing.T) {
 
 func TestInvalidUserUpdate(t *testing.T) {
 
-	database.DropTables(db)
-	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
+	database.DropTables()
+	database.MigrateModels()
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -597,9 +595,9 @@ func TestInvalidUserUpdate(t *testing.T) {
 
 func TestModifyAddedUserAsAdmin(t *testing.T) {
 
-	database.DropTables(db)
-	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
+	database.DropTables()
+	database.MigrateModels()
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -716,9 +714,9 @@ func TestModifyAddedUserAsAdmin(t *testing.T) {
 
 func TestDeleteUser(t *testing.T) {
 
-	database.DropTables(db)
-	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
+	database.DropTables()
+	database.MigrateModels()
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,

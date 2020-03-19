@@ -34,7 +34,6 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/user"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/widget"
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 	"github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/stretchr/testify/assert"
 	"io"
@@ -47,7 +46,6 @@ import (
 )
 
 var router *gin.Engine
-var db *gorm.DB
 
 type ConfigRequest struct {
 	Name            string         `json:"name,omitempty"`
@@ -185,11 +183,11 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		panic(m)
 	}
-	db, err = database.InitDB(configuration.GolbalConfig)
+	err = database.InitDB(configuration.GolbalConfig)
 	if err != nil {
 		panic(m)
 	}
-	defer db.Close()
+	defer database.DBpool.Close()
 
 	router = gin.Default()
 	api := router.Group("/api")
@@ -218,9 +216,9 @@ func TestMain(m *testing.M) {
 }
 
 func TestAddFile(t *testing.T) {
-	database.DropTables(db)
-	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
+	database.DropTables()
+	database.MigrateModels()
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
 
 	// prepare the content of the DB for testing
 	// using the respective endpoints of the API
@@ -334,9 +332,9 @@ func TestAddFile(t *testing.T) {
 
 func TestUpdateFile(t *testing.T) {
 
-	database.DropTables(db)
-	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
+	database.DropTables()
+	database.MigrateModels()
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
 
 	// prepare the content of the DB for testing
 	// using the respective endpoints of the API
@@ -468,9 +466,9 @@ func TestUpdateFile(t *testing.T) {
 }
 
 func TestDeleteFile(t *testing.T) {
-	database.DropTables(db)
-	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
+	database.DropTables()
+	database.MigrateModels()
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
 
 	// prepare the content of the DB for testing
 	// using the respective endpoints of the API
@@ -619,9 +617,9 @@ func TestDeleteFile(t *testing.T) {
 
 func TestGetAllFilesOfConfig(t *testing.T) {
 
-	database.DropTables(db)
-	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
+	database.DropTables()
+	database.MigrateModels()
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
 
 	// prepare the content of the DB for testing
 	// using the respective endpoints of the API

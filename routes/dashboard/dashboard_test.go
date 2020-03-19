@@ -29,7 +29,6 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/scenario"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/user"
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 	"github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/stretchr/testify/assert"
 	"log"
@@ -38,7 +37,6 @@ import (
 )
 
 var router *gin.Engine
-var db *gorm.DB
 
 type DashboardRequest struct {
 	Name       string `json:"name,omitempty"`
@@ -81,11 +79,11 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		panic(m)
 	}
-	db, err = database.InitDB(configuration.GolbalConfig)
+	err = database.InitDB(configuration.GolbalConfig)
 	if err != nil {
 		panic(m)
 	}
-	defer db.Close()
+	defer database.DBpool.Close()
 
 	router = gin.Default()
 	api := router.Group("/api")
@@ -101,9 +99,9 @@ func TestMain(m *testing.M) {
 }
 
 func TestAddDashboard(t *testing.T) {
-	database.DropTables(db)
-	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
+	database.DropTables()
+	database.MigrateModels()
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
@@ -187,9 +185,9 @@ func TestAddDashboard(t *testing.T) {
 }
 
 func TestUpdateDashboard(t *testing.T) {
-	database.DropTables(db)
-	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
+	database.DropTables()
+	database.MigrateModels()
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
@@ -268,9 +266,9 @@ func TestUpdateDashboard(t *testing.T) {
 }
 
 func TestDeleteDashboard(t *testing.T) {
-	database.DropTables(db)
-	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
+	database.DropTables()
+	database.MigrateModels()
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
@@ -341,9 +339,9 @@ func TestDeleteDashboard(t *testing.T) {
 }
 
 func TestGetAllDashboardsOfScenario(t *testing.T) {
-	database.DropTables(db)
-	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
+	database.DropTables()
+	database.MigrateModels()
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,

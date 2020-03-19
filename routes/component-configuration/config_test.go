@@ -30,7 +30,6 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/scenario"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/user"
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 	"github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/stretchr/testify/assert"
 	"os"
@@ -38,7 +37,6 @@ import (
 )
 
 var router *gin.Engine
-var db *gorm.DB
 var base_api_configs = "/api/configs"
 var base_api_auth = "/api/authenticate"
 
@@ -124,11 +122,11 @@ func TestMain(m *testing.M) {
 		panic(m)
 	}
 
-	db, err = database.InitDB(configuration.GolbalConfig)
+	err = database.InitDB(configuration.GolbalConfig)
 	if err != nil {
 		panic(m)
 	}
-	defer db.Close()
+	defer database.DBpool.Close()
 
 	router = gin.Default()
 	api := router.Group("/api")
@@ -147,9 +145,9 @@ func TestMain(m *testing.M) {
 }
 
 func TestAddConfig(t *testing.T) {
-	database.DropTables(db)
-	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
+	database.DropTables()
+	database.MigrateModels()
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
 
 	// prepare the content of the DB for testing
 	// by adding a scenario and a IC to the DB
@@ -243,9 +241,9 @@ func TestAddConfig(t *testing.T) {
 
 func TestUpdateConfig(t *testing.T) {
 
-	database.DropTables(db)
-	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
+	database.DropTables()
+	database.MigrateModels()
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
 
 	// prepare the content of the DB for testing
 	// by adding a scenario and a IC to the DB
@@ -355,9 +353,9 @@ func TestUpdateConfig(t *testing.T) {
 }
 
 func TestDeleteConfig(t *testing.T) {
-	database.DropTables(db)
-	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
+	database.DropTables()
+	database.MigrateModels()
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
 
 	// prepare the content of the DB for testing
 	// by adding a scenario and a IC to the DB
@@ -428,9 +426,9 @@ func TestDeleteConfig(t *testing.T) {
 }
 
 func TestGetAllConfigsOfScenario(t *testing.T) {
-	database.DropTables(db)
-	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
+	database.DropTables()
+	database.MigrateModels()
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
 
 	// prepare the content of the DB for testing
 	// by adding a scenario and a IC to the DB

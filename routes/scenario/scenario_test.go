@@ -28,7 +28,6 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/user"
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 	"github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/stretchr/testify/assert"
 	"os"
@@ -36,7 +35,6 @@ import (
 )
 
 var router *gin.Engine
-var db *gorm.DB
 
 type ScenarioRequest struct {
 	Name            string         `json:"name,omitempty"`
@@ -58,11 +56,11 @@ func TestMain(m *testing.M) {
 		panic(m)
 	}
 
-	db, err = database.InitDB(configuration.GolbalConfig)
+	err = database.InitDB(configuration.GolbalConfig)
 	if err != nil {
 		panic(m)
 	}
-	defer db.Close()
+	defer database.DBpool.Close()
 
 	router = gin.Default()
 	api := router.Group("/api")
@@ -79,9 +77,9 @@ func TestMain(m *testing.M) {
 
 func TestAddScenario(t *testing.T) {
 
-	database.DropTables(db)
-	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
+	database.DropTables()
+	database.MigrateModels()
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
 
 	newScenario := ScenarioRequest{
 		Name:            database.ScenarioA.Name,
@@ -181,9 +179,9 @@ func TestAddScenario(t *testing.T) {
 
 func TestUpdateScenario(t *testing.T) {
 
-	database.DropTables(db)
-	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
+	database.DropTables()
+	database.MigrateModels()
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
@@ -251,9 +249,9 @@ func TestUpdateScenario(t *testing.T) {
 
 func TestGetAllScenariosAsAdmin(t *testing.T) {
 
-	database.DropTables(db)
-	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
+	database.DropTables()
+	database.MigrateModels()
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -312,9 +310,9 @@ func TestGetAllScenariosAsAdmin(t *testing.T) {
 
 func TestGetAllScenariosAsUser(t *testing.T) {
 
-	database.DropTables(db)
-	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
+	database.DropTables()
+	database.MigrateModels()
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
 
 	// authenticate as normal userB
 	token, err := helper.AuthenticateForTest(router,
@@ -369,9 +367,9 @@ func TestGetAllScenariosAsUser(t *testing.T) {
 
 func TestDeleteScenario(t *testing.T) {
 
-	database.DropTables(db)
-	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
+	database.DropTables()
+	database.MigrateModels()
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
@@ -441,9 +439,9 @@ func TestDeleteScenario(t *testing.T) {
 
 func TestAddUserToScenario(t *testing.T) {
 
-	database.DropTables(db)
-	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
+	database.DropTables()
+	database.MigrateModels()
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
@@ -521,9 +519,9 @@ func TestAddUserToScenario(t *testing.T) {
 
 func TestGetAllUsersOfScenario(t *testing.T) {
 
-	database.DropTables(db)
-	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
+	database.DropTables()
+	database.MigrateModels()
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
@@ -606,9 +604,9 @@ func TestGetAllUsersOfScenario(t *testing.T) {
 
 func TestRemoveUserFromScenario(t *testing.T) {
 
-	database.DropTables(db)
-	database.MigrateModels(db)
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest(db))
+	database.DropTables()
+	database.MigrateModels()
+	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,

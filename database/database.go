@@ -34,29 +34,29 @@ import (
 var DBpool *gorm.DB // database used by backend
 
 // Initialize connection to the database
-func InitDB(cfg *config.Config) (*gorm.DB, error) {
+func InitDB(cfg *config.Config) error {
 	name, err := cfg.String("db.name")
 	if err != nil {
-		return nil, err
+		return err
 	}
 	host, err := cfg.String("db.host")
 	if err != nil {
-		return nil, err
+		return err
 	}
 	user, err := cfg.String("db.user")
 	if err != nil && !strings.Contains(err.Error(), "Required setting 'db.user' not set") {
-		return nil, err
+		return err
 	}
 	pass := ""
 	if user != "" {
 		pass, err = cfg.String("db.pass")
 		if err != nil {
-			return nil, err
+			return err
 		}
 	}
 	sslmode, err := cfg.String("db.ssl")
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	dbinfo := fmt.Sprintf("host=%s sslmode=%s dbname=%s", host, sslmode, name)
@@ -66,14 +66,14 @@ func InitDB(cfg *config.Config) (*gorm.DB, error) {
 
 	db, err := gorm.Open("postgres", dbinfo)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	DBpool = db
-	MigrateModels(db)
+	MigrateModels()
 	log.Println("Database connection established")
 
-	return db, nil
+	return nil
 }
 
 // Connection pool to already opened DB
@@ -84,27 +84,27 @@ func GetDB() *gorm.DB {
 // Drop all the tables of the database
 // TODO: Remove that function from the codebase and substitute the body
 // to the Dummy*() where it is called
-func DropTables(db *gorm.DB) {
-	db.DropTableIfExists(&InfrastructureComponent{})
-	db.DropTableIfExists(&Signal{})
-	db.DropTableIfExists(&ComponentConfiguration{})
-	db.DropTableIfExists(&File{})
-	db.DropTableIfExists(&Scenario{})
-	db.DropTableIfExists(&User{})
-	db.DropTableIfExists(&Dashboard{})
-	db.DropTableIfExists(&Widget{})
+func DropTables() {
+	DBpool.DropTableIfExists(&InfrastructureComponent{})
+	DBpool.DropTableIfExists(&Signal{})
+	DBpool.DropTableIfExists(&ComponentConfiguration{})
+	DBpool.DropTableIfExists(&File{})
+	DBpool.DropTableIfExists(&Scenario{})
+	DBpool.DropTableIfExists(&User{})
+	DBpool.DropTableIfExists(&Dashboard{})
+	DBpool.DropTableIfExists(&Widget{})
 	// The following statement deletes the many to many relationship between users and scenarios
-	db.DropTableIfExists("user_scenarios")
+	DBpool.DropTableIfExists("user_scenarios")
 }
 
 // AutoMigrate the models
-func MigrateModels(db *gorm.DB) {
-	db.AutoMigrate(&InfrastructureComponent{})
-	db.AutoMigrate(&Signal{})
-	db.AutoMigrate(&ComponentConfiguration{})
-	db.AutoMigrate(&File{})
-	db.AutoMigrate(&Scenario{})
-	db.AutoMigrate(&User{})
-	db.AutoMigrate(&Dashboard{})
-	db.AutoMigrate(&Widget{})
+func MigrateModels() {
+	DBpool.AutoMigrate(&InfrastructureComponent{})
+	DBpool.AutoMigrate(&Signal{})
+	DBpool.AutoMigrate(&ComponentConfiguration{})
+	DBpool.AutoMigrate(&File{})
+	DBpool.AutoMigrate(&Scenario{})
+	DBpool.AutoMigrate(&User{})
+	DBpool.AutoMigrate(&Dashboard{})
+	DBpool.AutoMigrate(&Widget{})
 }

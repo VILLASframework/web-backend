@@ -23,88 +23,80 @@ package main
 
 import (
 	"fmt"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/healthz"
-	"log"
-	"time"
-
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/amqp"
-	"github.com/gin-gonic/gin"
-	ginSwagger "github.com/swaggo/gin-swagger"
-	"github.com/swaggo/gin-swagger/swaggerFiles"
-
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
-	apidocs "git.rwth-aachen.de/acs/public/villas/web-backend-go/doc/api" // doc/api folder is used by Swag CLI, you have to import it
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/component-configuration"
+	component_configuration "git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/component-configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/dashboard"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/file"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/infrastructure-component"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/metrics"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/healthz"
+	infrastructure_component "git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/infrastructure-component"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/scenario"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/signal"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/user"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/widget"
+	ginSwagger "github.com/swaggo/gin-swagger"
+	"github.com/swaggo/gin-swagger/swaggerFiles"
+	"log"
+	"time"
+
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/amqp"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
+	apidocs "git.rwth-aachen.de/acs/public/villas/web-backend-go/doc/api" // doc/api folder is used by Swag CLI, you have to import it
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/metrics"
+	"github.com/gin-gonic/gin"
 )
 
-// @title VILLASweb Backend API
-// @version 2.0
-// @description This is the VILLASweb Backend API v2.0.
-// @description Parts of this API are still in development. Please check the [VILLASweb-backend-go repository](https://git.rwth-aachen.de/acs/public/villas/web-backend-go) for more information.
-// @description This documentation is auto-generated based on the API documentation in the code. The tool [swag](https://github.com/swaggo/swag) is used to auto-generate API docs for the [gin-gonic](https://github.com/gin-gonic/gin) framework.
-// @contact.name Sonja Happ
-// @contact.email sonja.happ@eonerc.rwth-aachen.de
-// @license.name GNU GPL 3.0
-// @license.url http://www.gnu.de/documents/gpl-3.0.en.html
-// @BasePath /api/v2
-func main() {
-	log.Println("Starting VILLASweb-backend-go")
+func configureBackend() (string, string, string, string, string, error) {
 
 	err := configuration.InitConfig()
 	if err != nil {
 		log.Printf("Error during initialization of global configuration: %v, aborting.", err.Error())
-		return
+		return "", "", "", "", "", err
 	}
-	db, err := database.InitDB(configuration.GolbalConfig)
+
+	err = database.InitDB(configuration.GolbalConfig)
 	if err != nil {
 		log.Printf("Error during initialization of database: %v, aborting.", err.Error())
-		return
+		return "", "", "", "", "", err
 	}
-	defer db.Close()
 
-	m, err := configuration.GolbalConfig.String("mode")
+	mode, err := configuration.GolbalConfig.String("mode")
 	if err != nil {
 		log.Printf("Error reading mode from global configuration: %v, aborting.", err.Error())
-		return
+		return "", "", "", "", "", err
 	}
 
-	if m == "release" {
+	if mode == "release" {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
 	baseHost, err := configuration.GolbalConfig.String("base.host")
 	if err != nil {
 		log.Printf("Error reading base.host from global configuration: %v, aborting.", err.Error())
-		return
+		return "", "", "", "", "", err
 	}
 	basePath, err := configuration.GolbalConfig.String("base.path")
 	if err != nil {
 		log.Printf("Error reading base.path from global configuration: %v, aborting.", err.Error())
-		return
+		return "", "", "", "", "", err
 	}
 	port, err := configuration.GolbalConfig.String("port")
 	if err != nil {
 		log.Printf("Error reading port from global configuration: %v, aborting.", err.Error())
-		return
+		return "", "", "", "", "", err
 	}
 
 	apidocs.SwaggerInfo.Host = baseHost
 	apidocs.SwaggerInfo.BasePath = basePath
 
-	metrics.InitCounters(db)
+	metrics.InitCounters()
 
-	r := gin.Default()
+	AMQPurl, _ := configuration.GolbalConfig.String("amqp.url")
 
-	api := r.Group(basePath)
+	return mode, baseHost, basePath, port, AMQPurl, nil
+
+}
+
+func registerEndpoints(router *gin.Engine, api *gin.RouterGroup) {
 
 	healthz.RegisterHealthzEndpoint(api.Group("/healthz"))
 	metrics.RegisterMetricsEndpoint(api.Group("/metrics"))
@@ -123,43 +115,42 @@ func main() {
 	user.RegisterUserEndpoints(api.Group("/users"))
 	infrastructure_component.RegisterICEndpoints(api.Group("/ic"))
 
-	r.GET("swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	router.GET("swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	// add test data to DB if test mode is activated
-	mode, err := configuration.GolbalConfig.String("mode")
-	if err != nil {
-		fmt.Println(err.Error())
-		fmt.Println("error: mode parameter missing in global configuration, aborting")
-		return
-	}
+}
+
+func addData(router *gin.Engine, mode string, basePath string) error {
+
 	if mode == "test" {
 		// test mode: drop all tables and add test data to DB
-		database.DropTables(db)
+		database.DropTables()
 		log.Println("Database tables dropped, adding test data to DB")
-		err = database.DBAddTestData(db, basePath, r)
+		err := database.DBAddTestData(basePath, router)
 		if err != nil {
 			fmt.Println(err.Error())
 			fmt.Println("error: testdata could not be added to DB, aborting")
-			panic(err)
+			return err
 		}
 		log.Println("Database initialized with test data")
 	} else {
 		// release mode: make sure that at least one admin user exists in DB
-		err = database.DBAddAdminUser(db)
+		err := database.DBAddAdminUser()
 		if err != nil {
 			fmt.Println(err.Error())
 			fmt.Println("error: adding admin user failed, aborting")
-			panic(err)
+			return err
 		}
 	}
+	return nil
+}
 
-	amqpurl, _ := configuration.GolbalConfig.String("amqp.url")
-	if amqpurl != "" {
+func connectAMQP(AMQPurl string, api *gin.RouterGroup) error {
+	if AMQPurl != "" {
 		log.Println("Starting AMQP client")
 
-		err := amqp.ConnectAMQP(amqpurl)
+		err := amqp.ConnectAMQP(AMQPurl)
 		if err != nil {
-			log.Panic(err)
+			return err
 		}
 
 		// register IC action endpoint only if AMQP client is used
@@ -181,8 +172,45 @@ func main() {
 
 		}()
 
-		log.Printf("Connected AMQP client to %s", amqpurl)
+		log.Printf("Connected AMQP client to %s", AMQPurl)
 	}
+
+	return nil
+}
+
+// @title VILLASweb Backend API
+// @version 2.0
+// @description This is the VILLASweb Backend API v2.0.
+// @description Parts of this API are still in development. Please check the [VILLASweb-backend-go repository](https://git.rwth-aachen.de/acs/public/villas/web-backend-go) for more information.
+// @description This documentation is auto-generated based on the API documentation in the code. The tool [swag](https://github.com/swaggo/swag) is used to auto-generate API docs for the [gin-gonic](https://github.com/gin-gonic/gin) framework.
+// @contact.name Sonja Happ
+// @contact.email sonja.happ@eonerc.rwth-aachen.de
+// @license.name GNU GPL 3.0
+// @license.url http://www.gnu.de/documents/gpl-3.0.en.html
+// @BasePath /api/v2
+func main() {
+	log.Println("Starting VILLASweb-backend-go")
+
+	mode, _, basePath, port, amqpurl, err := configureBackend()
+	if err != nil {
+		panic(err)
+	}
+	defer database.DBpool.Close()
+
+	r := gin.Default()
+	api := r.Group(basePath)
+	registerEndpoints(r, api)
+
+	err = addData(r, mode, basePath)
+	if err != nil {
+		panic(err)
+	}
+
+	err = connectAMQP(amqpurl, api)
+	if err != nil {
+		panic(err)
+	}
+
 	// server at port 4000 to match frontend's redirect path
 	r.Run(":" + port)
 }
