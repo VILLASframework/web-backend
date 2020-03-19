@@ -44,7 +44,7 @@ build:docker:
     - shell
     - linux
   script:
-    - docker build -t ${DOCKER_IMAGE} .
+    - docker build -t ${DOCKER_IMAGE}:${CI_COMMIT_SHORT_SHA} .
 
 # Stage: test
 ##############################################################################
@@ -144,7 +144,7 @@ deploy:docker:
   before_script:
     - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
   script:
-    - docker push ${DOCKER_IMAGE}
+    - docker push ${DOCKER_IMAGE}:${CI_COMMIT_SHORT_SHA}
   dependencies:
     - build:docker
   only:
