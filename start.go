@@ -208,11 +208,13 @@ func main() {
 		panic(err)
 	}
 
-	// create amqp URL based on username, password and host
-	amqpurl := "amqp://" + amqpuser + ":" + amqppass + "@" + amqphost
-	err = connectAMQP(amqpurl, api)
-	if err != nil {
-		panic(err)
+	if amqphost != "" {
+		// create amqp URL based on username, password and host
+		amqpurl := "amqp://" + amqpuser + ":" + amqppass + "@" + amqphost
+		err = connectAMQP(amqpurl, api)
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	// server at port 4000 to match frontend's redirect path
