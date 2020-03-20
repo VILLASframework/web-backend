@@ -195,7 +195,7 @@ func TestICAssociations(t *testing.T) {
 
 	var ic1 InfrastructureComponent
 	assert.NoError(t, DBpool.Find(&ic1, 1).Error, fmt.Sprintf("Find InfrastructureComponent with ID=1"))
-	assert.EqualValues(t, "Host_A", ic1.Host)
+	assert.EqualValues(t, "xxx.yyy.zzz.aaa", ic1.Host)
 
 	// Get Component Configurations of ic1
 	var configs []ComponentConfiguration

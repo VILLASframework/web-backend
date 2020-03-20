@@ -33,15 +33,19 @@ var validate *validator.Validate
 type validNewIC struct {
 	UUID       string         `form:"UUID" validate:"required"`
 	Host       string         `form:"Host" validate:"required"`
-	Modeltype  string         `form:"Modeltype" validate:"required"`
-	Properties postgres.Jsonb `form:"Properties" validate:"required"`
-	State      string         `form:"State"`
+	Type       string         `form:"Type" validate:"required"`
+	Name       string         `form:"Name" validate:"required"`
+	Category   string         `form:"Category" validate:"required"`
+	Properties postgres.Jsonb `form:"Properties" validate:"omitempty"`
+	State      string         `form:"State" validate:"omitempty"`
 }
 
 type validUpdatedIC struct {
 	UUID       string         `form:"UUID" validate:"omitempty"`
 	Host       string         `form:"Host" validate:"omitempty"`
-	Modeltype  string         `form:"Modeltype" validate:"omitempty"`
+	Type       string         `form:"Type" validate:"omitempty"`
+	Name       string         `form:"Name" validate:"omitempty"`
+	Category   string         `form:"Category" validate:"omitempty"`
 	Properties postgres.Jsonb `form:"Properties" validate:"omitempty"`
 	State      string         `form:"State" validate:"omitempty"`
 }
@@ -71,7 +75,9 @@ func (r *addICRequest) createIC() InfrastructureComponent {
 
 	s.UUID = r.InfrastructureComponent.UUID
 	s.Host = r.InfrastructureComponent.Host
-	s.Modeltype = r.InfrastructureComponent.Modeltype
+	s.Type = r.InfrastructureComponent.Type
+	s.Name = r.InfrastructureComponent.Name
+	s.Category = r.InfrastructureComponent.Category
 	s.Properties = r.InfrastructureComponent.Properties
 	if r.InfrastructureComponent.State != "" {
 		s.State = r.InfrastructureComponent.State
@@ -91,8 +97,16 @@ func (r *updateICRequest) updatedIC(oldIC InfrastructureComponent) Infrastructur
 		s.Host = r.InfrastructureComponent.Host
 	}
 
-	if r.InfrastructureComponent.Modeltype != "" {
-		s.Modeltype = r.InfrastructureComponent.Modeltype
+	if r.InfrastructureComponent.Type != "" {
+		s.Type = r.InfrastructureComponent.Type
+	}
+
+	if r.InfrastructureComponent.Name != "" {
+		s.Name = r.InfrastructureComponent.Name
+	}
+
+	if r.InfrastructureComponent.Category != "" {
+		s.Category = r.InfrastructureComponent.Category
 	}
 
 	if r.InfrastructureComponent.State != "" {

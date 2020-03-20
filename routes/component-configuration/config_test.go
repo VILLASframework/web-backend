@@ -51,7 +51,9 @@ type ConfigRequest struct {
 type ICRequest struct {
 	UUID       string         `json:"uuid,omitempty"`
 	Host       string         `json:"host,omitempty"`
-	Modeltype  string         `json:"modelType,omitempty"`
+	Type       string         `json:"type,omitempty"`
+	Name       string         `json:"name,omitempty"`
+	Category   string         `json:"category,omitempty"`
 	State      string         `json:"state,omitempty"`
 	Properties postgres.Jsonb `json:"properties,omitempty"`
 }
@@ -72,7 +74,9 @@ func addScenarioAndIC() (scenarioID uint, ICID uint) {
 	newICA := ICRequest{
 		UUID:       database.ICA.UUID,
 		Host:       database.ICA.Host,
-		Modeltype:  database.ICA.Modeltype,
+		Type:       database.ICA.Type,
+		Name:       database.ICA.Name,
+		Category:   database.ICA.Category,
 		State:      database.ICA.State,
 		Properties: database.ICA.Properties,
 	}
@@ -86,7 +90,9 @@ func addScenarioAndIC() (scenarioID uint, ICID uint) {
 	newICB := ICRequest{
 		UUID:       database.ICB.UUID,
 		Host:       database.ICB.Host,
-		Modeltype:  database.ICB.Modeltype,
+		Type:       database.ICB.Type,
+		Name:       database.ICB.Name,
+		Category:   database.ICB.Category,
 		State:      database.ICB.State,
 		Properties: database.ICB.Properties,
 	}

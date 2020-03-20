@@ -133,7 +133,7 @@ func ConnectAMQP(uri string) error {
 
 				err = db.Model(&sToBeUpdated).Updates(map[string]interface{}{
 					"Host":          gjson.Get(content, "host"),
-					"Modeltype":     gjson.Get(content, "model"),
+					"Type":          gjson.Get(content, "model"),
 					"Uptime":        gjson.Get(content, "uptime"),
 					"State":         gjson.Get(content, "state"),
 					"StateUpdateAt": time.Now().String(),

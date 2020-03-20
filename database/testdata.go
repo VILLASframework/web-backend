@@ -95,13 +95,15 @@ var newUserC = UserRequest{
 
 // Infrastructure components
 
-var propertiesA = json.RawMessage(`{"name" : "DPsim simulator", "category" : "Simulator", "location" : "ACSlab", "type": "DPsim"}`)
-var propertiesB = json.RawMessage(`{"name" : "VILLASnode gateway", "category" : "Gateway", "location" : "ACSlab", "type": "VILLASnode"}`)
+var propertiesA = json.RawMessage(`{"location" : "ACSlab"}`)
+var propertiesB = json.RawMessage(`{"location" : "ACSlab"}`)
 
 var ICA = InfrastructureComponent{
 	UUID:          "4854af30-325f-44a5-ad59-b67b2597de68",
-	Host:          "Host_A",
-	Modeltype:     "ModelTypeA",
+	Host:          "xxx.yyy.zzz.aaa",
+	Type:          "DPsim",
+	Category:      "Simulator",
+	Name:          "Test DPsim Simulator",
 	Uptime:        0,
 	State:         "running",
 	StateUpdateAt: time.Now().String(),
@@ -111,8 +113,10 @@ var ICA = InfrastructureComponent{
 
 var ICB = InfrastructureComponent{
 	UUID:          "7be0322d-354e-431e-84bd-ae4c9633138b",
-	Host:          "Host_B",
-	Modeltype:     "ModelTypeB",
+	Host:          "xxx.yyy.zzz.bbb",
+	Type:          "VILLASnode",
+	Category:      "Gateway",
+	Name:          "Test VILLASnode Gateway",
 	Uptime:        0,
 	State:         "idle",
 	StateUpdateAt: time.Now().String(),

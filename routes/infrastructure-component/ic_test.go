@@ -41,7 +41,9 @@ var router *gin.Engine
 type ICRequest struct {
 	UUID       string         `json:"uuid,omitempty"`
 	Host       string         `json:"host,omitempty"`
-	Modeltype  string         `json:"modelType,omitempty"`
+	Type       string         `json:"type,omitempty"`
+	Name       string         `json:"name,omitempty"`
+	Category   string         `json:"category,omitempty"`
 	State      string         `json:"state,omitempty"`
 	Properties postgres.Jsonb `json:"properties,omitempty"`
 }
@@ -99,7 +101,9 @@ func TestAddICAsAdmin(t *testing.T) {
 	newIC := ICRequest{
 		UUID:       database.ICA.UUID,
 		Host:       database.ICA.Host,
-		Modeltype:  database.ICA.Modeltype,
+		Type:       database.ICA.Type,
+		Name:       database.ICA.Name,
+		Category:   database.ICA.Category,
 		State:      database.ICA.State,
 		Properties: database.ICA.Properties,
 	}
@@ -149,7 +153,9 @@ func TestAddICAsUser(t *testing.T) {
 	newIC := ICRequest{
 		UUID:       database.ICA.UUID,
 		Host:       database.ICA.Host,
-		Modeltype:  database.ICA.Modeltype,
+		Type:       database.ICA.Type,
+		Name:       database.ICA.Name,
+		Category:   database.ICA.Category,
 		State:      database.ICA.State,
 		Properties: database.ICA.Properties,
 	}
@@ -176,7 +182,9 @@ func TestUpdateICAsAdmin(t *testing.T) {
 	newIC := ICRequest{
 		UUID:       database.ICA.UUID,
 		Host:       database.ICA.Host,
-		Modeltype:  database.ICA.Modeltype,
+		Type:       database.ICA.Type,
+		Name:       database.ICA.Name,
+		Category:   database.ICA.Category,
 		State:      database.ICA.State,
 		Properties: database.ICA.Properties,
 	}
@@ -238,7 +246,9 @@ func TestUpdateICAsUser(t *testing.T) {
 	newIC := ICRequest{
 		UUID:       database.ICA.UUID,
 		Host:       database.ICA.Host,
-		Modeltype:  database.ICA.Modeltype,
+		Type:       database.ICA.Type,
+		Name:       database.ICA.Name,
+		Category:   database.ICA.Category,
 		State:      database.ICA.State,
 		Properties: database.ICA.Properties,
 	}
@@ -280,7 +290,9 @@ func TestDeleteICAsAdmin(t *testing.T) {
 	newIC := ICRequest{
 		UUID:       database.ICA.UUID,
 		Host:       database.ICA.Host,
-		Modeltype:  database.ICA.Modeltype,
+		Type:       database.ICA.Type,
+		Name:       database.ICA.Name,
+		Category:   database.ICA.Category,
 		State:      database.ICA.State,
 		Properties: database.ICA.Properties,
 	}
@@ -330,7 +342,9 @@ func TestDeleteICAsUser(t *testing.T) {
 	newIC := ICRequest{
 		UUID:       database.ICA.UUID,
 		Host:       database.ICA.Host,
-		Modeltype:  database.ICA.Modeltype,
+		Type:       database.ICA.Type,
+		Name:       database.ICA.Name,
+		Category:   database.ICA.Category,
 		State:      database.ICA.State,
 		Properties: database.ICA.Properties,
 	}
@@ -376,7 +390,9 @@ func TestGetAllICs(t *testing.T) {
 	newICA := ICRequest{
 		UUID:       database.ICA.UUID,
 		Host:       database.ICA.Host,
-		Modeltype:  database.ICA.Modeltype,
+		Type:       database.ICA.Type,
+		Name:       database.ICA.Name,
+		Category:   database.ICA.Category,
 		State:      database.ICA.State,
 		Properties: database.ICA.Properties,
 	}
@@ -389,7 +405,9 @@ func TestGetAllICs(t *testing.T) {
 	newICB := ICRequest{
 		UUID:       database.ICB.UUID,
 		Host:       database.ICB.Host,
-		Modeltype:  database.ICB.Modeltype,
+		Type:       database.ICB.Type,
+		Name:       database.ICB.Name,
+		Category:   database.ICB.Category,
 		State:      database.ICB.State,
 		Properties: database.ICB.Properties,
 	}
@@ -432,7 +450,9 @@ func TestGetConfigsOfIC(t *testing.T) {
 	newICA := ICRequest{
 		UUID:       database.ICA.UUID,
 		Host:       database.ICA.Host,
-		Modeltype:  database.ICA.Modeltype,
+		Type:       database.ICA.Type,
+		Name:       database.ICA.Name,
+		Category:   database.ICA.Category,
 		State:      database.ICA.State,
 		Properties: database.ICA.Properties,
 	}

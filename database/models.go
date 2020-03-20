@@ -116,10 +116,14 @@ type InfrastructureComponent struct {
 	Model
 	// UUID of the IC
 	UUID string `json:"uuid" gorm:"not null"`
+	// Name of the IC
+	Name string `json:"name" gorm:"default:''"`
 	// Host if the IC
 	Host string `json:"host" gorm:"default:''"`
-	// Model type supported by the IC
-	Modeltype string `json:"modelType" gorm:"default:''"`
+	// Category of IC (simulator, gateway, database, etc.)
+	Category string `json:"category" gorm:"default:''"`
+	// Type of IC (RTDS, VILLASnode, RTDS, etc.)
+	Type string `json:"type" gorm:"default:''"`
 	// Uptime of the IC
 	Uptime int `json:"uptime" gorm:"default:0"`
 	// State of the IC

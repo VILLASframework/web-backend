@@ -3660,7 +3660,7 @@ var doc = `{
             "type": "object",
             "required": [
                 "Host",
-                "Modeltype",
+                "Type",
                 "Properties",
                 "UUID"
             ],
@@ -3668,7 +3668,7 @@ var doc = `{
                 "Host": {
                     "type": "string"
                 },
-                "Modeltype": {
+                "Type": {
                     "type": "string"
                 },
                 "Properties": {
@@ -3688,7 +3688,7 @@ var doc = `{
                 "Host": {
                     "type": "string"
                 },
-                "Modeltype": {
+                "Type": {
                     "type": "string"
                 },
                 "Properties": {
