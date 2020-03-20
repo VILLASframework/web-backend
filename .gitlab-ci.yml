@@ -11,7 +11,9 @@ variables:
   POSTGRES_HOST: postgres
   RABBITMQ_DEFAULT_USER: villas
   RABBITMQ_DEFAULT_PASS: villas
-  AMQPURL: 'amqp://villas:villas@rabbitmq:5672'
+  AMQP_HOST: rabbitmq:5672
+  AMQP_USER: villas
+  AMQP_PASS: villas
   PORT: 4000
   GO_IMAGE: golang:1.13-buster
 
@@ -56,7 +58,6 @@ test:gotest:
     DB_HOST: ${POSTGRES_HOST}
     DB_USER: ${POSTGRES_USER}
     DB_PASS: ${POSTGRES_PASSWORD}
-    AMQP_URL: ${AMQPURL}
     MODE: test
   tags:
     - docker
@@ -134,7 +135,6 @@ test:healthz:
   extends: test:database
   variables:
     TEST_FOLDER: routes/healthz
-    AMQP_URL: ${AMQPURL}
 
 # Stage: deploy
 ##############################################################################
