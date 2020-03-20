@@ -70,7 +70,12 @@ func TestHealthz(t *testing.T) {
 	// connect AMQP client (make sure that AMQP_HOST, AMQP_USER, AMQP_PASS are set via command line parameters)
 	host, err := configuration.GolbalConfig.String("amqp.host")
 	assert.NoError(t, err)
-	err = amqp.ConnectAMQP(host)
+	user, err := configuration.GolbalConfig.String("amqp.user")
+	assert.NoError(t, err)
+	pass, err := configuration.GolbalConfig.String("amqp.pass")
+	assert.NoError(t, err)
+	amqpURI := "amqp://" + user + ":" + pass + "@" + host
+	err = amqp.ConnectAMQP(amqpURI)
 	assert.NoError(t, err)
 
 	// test healthz endpoint for connected DB and AMQP client
