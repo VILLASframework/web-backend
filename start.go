@@ -45,24 +45,24 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func configureBackend() (string, string, string, string, string, error) {
+func configureBackend() (string, string, string, string, string, string, string, error) {
 
 	err := configuration.InitConfig()
 	if err != nil {
 		log.Printf("Error during initialization of global configuration: %v, aborting.", err.Error())
-		return "", "", "", "", "", err
+		return "", "", "", "", "", "", "", err
 	}
 
 	err = database.InitDB(configuration.GolbalConfig)
 	if err != nil {
 		log.Printf("Error during initialization of database: %v, aborting.", err.Error())
-		return "", "", "", "", "", err
+		return "", "", "", "", "", "", "", err
 	}
 
 	mode, err := configuration.GolbalConfig.String("mode")
 	if err != nil {
 		log.Printf("Error reading mode from global configuration: %v, aborting.", err.Error())
-		return "", "", "", "", "", err
+		return "", "", "", "", "", "", "", err
 	}
 
 	if mode == "release" {
@@ -72,17 +72,17 @@ func configureBackend() (string, string, string, string, string, error) {
 	baseHost, err := configuration.GolbalConfig.String("base.host")
 	if err != nil {
 		log.Printf("Error reading base.host from global configuration: %v, aborting.", err.Error())
-		return "", "", "", "", "", err
+		return "", "", "", "", "", "", "", err
 	}
 	basePath, err := configuration.GolbalConfig.String("base.path")
 	if err != nil {
 		log.Printf("Error reading base.path from global configuration: %v, aborting.", err.Error())
-		return "", "", "", "", "", err
+		return "", "", "", "", "", "", "", err
 	}
 	port, err := configuration.GolbalConfig.String("port")
 	if err != nil {
 		log.Printf("Error reading port from global configuration: %v, aborting.", err.Error())
-		return "", "", "", "", "", err
+		return "", "", "", "", "", "", "", err
 	}
 
 	apidocs.SwaggerInfo.Host = baseHost
@@ -90,9 +90,11 @@ func configureBackend() (string, string, string, string, string, error) {
 
 	metrics.InitCounters()
 
-	AMQPurl, _ := configuration.GolbalConfig.String("amqp.url")
+	AMQPhost, _ := configuration.GolbalConfig.String("amqp.host")
+	AMQPuser, _ := configuration.GolbalConfig.String("amqp.user")
+	AMQPpass, _ := configuration.GolbalConfig.String("amqp.pass")
 
-	return mode, baseHost, basePath, port, AMQPurl, nil
+	return mode, baseHost, basePath, port, AMQPhost, AMQPuser, AMQPpass, nil
 
 }
 
@@ -191,7 +193,7 @@ func connectAMQP(AMQPurl string, api *gin.RouterGroup) error {
 func main() {
 	log.Println("Starting VILLASweb-backend-go")
 
-	mode, _, basePath, port, amqpurl, err := configureBackend()
+	mode, _, basePath, port, amqphost, amqpuser, amqppass, err := configureBackend()
 	if err != nil {
 		panic(err)
 	}
@@ -206,6 +208,8 @@ func main() {
 		panic(err)
 	}
 
+	// create amqp URL based on username, password and host
+	amqpurl := amqpuser + ":" + amqppass + "@" + amqphost
 	err = connectAMQP(amqpurl, api)
 	if err != nil {
 		panic(err)

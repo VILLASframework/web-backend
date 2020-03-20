@@ -43,7 +43,9 @@ func InitConfig() error {
 		dbUser     = flag.String("dbuser", "", "Username of database connection (default is <empty>)")
 		dbPass     = flag.String("dbpass", "", "Password of database connection (default is <empty>)")
 		dbSSLMode  = flag.String("dbsslmode", "disable", "SSL mode of DB (default is disable)") // TODO: change default for production
-		amqpURL    = flag.String("amqp", "", "If set, use this url to connect to an AMQP broker (default is disabled)")
+		amqpHost   = flag.String("amqphost", "", "If set, use this as host for AMQP broker (default is disabled)")
+		amqpUser   = flag.String("amqpuser", "", "Username for AMQP broker")
+		amqpPass   = flag.String("amqppass", "", "Password for AMQP broker")
 		configFile = flag.String("configFile", "", "Path to YAML configuration file")
 		mode       = flag.String("mode", "release", "Select debug/release/test mode (default is release)")
 		port       = flag.String("port", "4000", "Port of the backend (default is 4000)")
@@ -58,7 +60,9 @@ func InitConfig() error {
 		"db.user":   *dbUser,
 		"db.pass":   *dbPass,
 		"db.ssl":    *dbSSLMode,
-		"amqp.url":  *amqpURL,
+		"amqp.host": *amqpHost,
+		"amqp.user": *amqpUser,
+		"amqp.pass": *amqpPass,
 		"mode":      *mode,
 		"port":      *port,
 		"base.host": *baseHost,
@@ -71,7 +75,9 @@ func InitConfig() error {
 		"DB_USER":    "db.user",
 		"DB_PASS":    "db.pass",
 		"DB_SSLMODE": "db.ssl",
-		"AMQP_URL":   "amqp.url",
+		"AMQP_HOST":  "amqp.host",
+		"AMQP_USER":  "amqp.user",
+		"AMQP_PASS":  "amqp.pass",
 		"BASE_HOST":  "base.host",
 		"BASE_PATH":  "base.path",
 		"MODE":       "mode",
