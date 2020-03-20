@@ -209,7 +209,7 @@ func main() {
 	}
 
 	// create amqp URL based on username, password and host
-	amqpurl := amqpuser + ":" + amqppass + "@" + amqphost
+	amqpurl := "amqp://" + amqpuser + ":" + amqppass + "@" + amqphost
 	err = connectAMQP(amqpurl, api)
 	if err != nil {
 		panic(err)
