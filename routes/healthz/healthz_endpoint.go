@@ -55,8 +55,8 @@ func getHealth(c *gin.Context) {
 	}
 
 	// check if connection to AMQP broker is alive if backend was started with AMQP client
-	url, err := configuration.GolbalConfig.String("amqp.url")
-	if err != nil && strings.Contains(err.Error(), "Required setting 'amqp.url' not set") {
+	url, err := configuration.GolbalConfig.String("amqp.host")
+	if err != nil && strings.Contains(err.Error(), "Required setting 'amqp.host' not set") {
 		c.JSON(http.StatusOK, gin.H{})
 		return
 	} else if err != nil {

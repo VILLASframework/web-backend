@@ -67,10 +67,10 @@ func TestHealthz(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equalf(t, 500, code, "Response body: \n%v\n", resp)
 
-	// connect AMQP client (make sure that AMQP_URL is set via command line parameter -amqp)
-	url, err := configuration.GolbalConfig.String("amqp.url")
+	// connect AMQP client (make sure that AMQP_HOST, AMQP_USER, AMQP_PASS are set via command line parameters)
+	host, err := configuration.GolbalConfig.String("amqp.host")
 	assert.NoError(t, err)
-	err = amqp.ConnectAMQP(url)
+	err = amqp.ConnectAMQP(host)
 	assert.NoError(t, err)
 
 	// test healthz endpoint for connected DB and AMQP client
