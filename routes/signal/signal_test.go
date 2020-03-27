@@ -78,13 +78,13 @@ func addScenarioAndICAndConfig() (scenarioID uint, ICID uint, configID uint) {
 
 	// POST $newICA
 	newICA := ICRequest{
-		UUID:       database.ICA.UUID,
-		Host:       database.ICA.Host,
-		Type:       database.ICA.Type,
-		Name:       database.ICA.Name,
-		Category:   database.ICA.Category,
-		State:      database.ICA.State,
-		Properties: database.ICA.Properties,
+		UUID:       helper.ICA.UUID,
+		Host:       helper.ICA.Host,
+		Type:       helper.ICA.Type,
+		Name:       helper.ICA.Name,
+		Category:   helper.ICA.Category,
+		State:      helper.ICA.State,
+		Properties: helper.ICA.Properties,
 	}
 	_, resp, _ := helper.TestEndpoint(router, token,
 		"/api/ic", "POST", helper.KeyModels{"ic": newICA})
@@ -98,9 +98,9 @@ func addScenarioAndICAndConfig() (scenarioID uint, ICID uint, configID uint) {
 
 	// POST $newScenario
 	newScenario := ScenarioRequest{
-		Name:            database.ScenarioA.Name,
-		Running:         database.ScenarioA.Running,
-		StartParameters: database.ScenarioA.StartParameters,
+		Name:            helper.ScenarioA.Name,
+		Running:         helper.ScenarioA.Running,
+		StartParameters: helper.ScenarioA.StartParameters,
 	}
 	_, resp, _ = helper.TestEndpoint(router, token,
 		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenario})
@@ -110,10 +110,10 @@ func addScenarioAndICAndConfig() (scenarioID uint, ICID uint, configID uint) {
 
 	// test POST newConfig
 	newConfig := ConfigRequest{
-		Name:            database.ConfigA.Name,
+		Name:            helper.ConfigA.Name,
 		ScenarioID:      uint(newScenarioID),
 		ICID:            uint(newICID),
-		StartParameters: database.ConfigA.StartParameters,
+		StartParameters: helper.ConfigA.StartParameters,
 	}
 	_, resp, _ = helper.TestEndpoint(router, token,
 		"/api/configs", "POST", helper.KeyModels{"config": newConfig})
@@ -162,7 +162,7 @@ func TestMain(m *testing.M) {
 func TestAddSignal(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
 
 	// prepare the content of the DB for testing
 	// by adding a scenario and a IC to the DB
@@ -175,9 +175,9 @@ func TestAddSignal(t *testing.T) {
 	assert.NoError(t, err)
 
 	newSignal := SignalRequest{
-		Name:      database.InSignalA.Name,
-		Unit:      database.InSignalA.Unit,
-		Direction: database.InSignalA.Direction,
+		Name:      helper.InSignalA.Name,
+		Unit:      helper.InSignalA.Unit,
+		Direction: helper.InSignalA.Direction,
 		Index:     1,
 		ConfigID:  configID,
 	}
@@ -257,7 +257,7 @@ func TestAddSignal(t *testing.T) {
 func TestUpdateSignal(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
 
 	// prepare the content of the DB for testing
 	// by adding a scenario and a IC to the DB
@@ -271,9 +271,9 @@ func TestUpdateSignal(t *testing.T) {
 
 	// test POST signals/ $newSignal
 	newSignal := SignalRequest{
-		Name:      database.InSignalA.Name,
-		Unit:      database.InSignalA.Unit,
-		Direction: database.InSignalA.Direction,
+		Name:      helper.InSignalA.Name,
+		Unit:      helper.InSignalA.Unit,
+		Direction: helper.InSignalA.Direction,
 		Index:     1,
 		ConfigID:  configID,
 	}
@@ -287,8 +287,8 @@ func TestUpdateSignal(t *testing.T) {
 	assert.NoError(t, err)
 
 	updatedSignal := SignalRequest{
-		Name:  database.InSignalB.Name,
-		Unit:  database.InSignalB.Unit,
+		Name:  helper.InSignalB.Name,
+		Unit:  helper.InSignalB.Unit,
 		Index: 1,
 	}
 
@@ -359,7 +359,7 @@ func TestUpdateSignal(t *testing.T) {
 func TestDeleteSignal(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
 
 	// prepare the content of the DB for testing
 	// by adding a scenario and a IC to the DB
@@ -373,9 +373,9 @@ func TestDeleteSignal(t *testing.T) {
 
 	// test POST signals/ $newSignal
 	newSignal := SignalRequest{
-		Name:      database.InSignalA.Name,
-		Unit:      database.InSignalA.Unit,
-		Direction: database.InSignalA.Direction,
+		Name:      helper.InSignalA.Name,
+		Unit:      helper.InSignalA.Unit,
+		Direction: helper.InSignalA.Direction,
 		Index:     1,
 		ConfigID:  configID,
 	}
@@ -412,9 +412,9 @@ func TestDeleteSignal(t *testing.T) {
 
 	// add an output signal to make sure that counting of input signals works
 	newSignalout := SignalRequest{
-		Name:      database.OutSignalA.Name,
-		Unit:      database.OutSignalA.Unit,
-		Direction: database.OutSignalA.Direction,
+		Name:      helper.OutSignalA.Name,
+		Unit:      helper.OutSignalA.Unit,
+		Direction: helper.OutSignalA.Direction,
 		Index:     1,
 		ConfigID:  configID,
 	}
@@ -454,7 +454,7 @@ func TestDeleteSignal(t *testing.T) {
 func TestGetAllInputSignalsOfConfig(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
 
 	// prepare the content of the DB for testing
 	// by adding a scenario and a IC to the DB
@@ -473,9 +473,9 @@ func TestGetAllInputSignalsOfConfig(t *testing.T) {
 
 	// test POST signals/ $newSignal
 	newSignalA := SignalRequest{
-		Name:      database.InSignalA.Name,
-		Unit:      database.InSignalA.Unit,
-		Direction: database.InSignalA.Direction,
+		Name:      helper.InSignalA.Name,
+		Unit:      helper.InSignalA.Unit,
+		Direction: helper.InSignalA.Direction,
 		Index:     1,
 		ConfigID:  configID,
 	}
@@ -486,9 +486,9 @@ func TestGetAllInputSignalsOfConfig(t *testing.T) {
 
 	// add a second input signal
 	newSignalB := SignalRequest{
-		Name:      database.InSignalB.Name,
-		Unit:      database.InSignalB.Unit,
-		Direction: database.InSignalB.Direction,
+		Name:      helper.InSignalB.Name,
+		Unit:      helper.InSignalB.Unit,
+		Direction: helper.InSignalB.Direction,
 		Index:     2,
 		ConfigID:  configID,
 	}
@@ -499,9 +499,9 @@ func TestGetAllInputSignalsOfConfig(t *testing.T) {
 
 	// add an output signal
 	newSignalAout := SignalRequest{
-		Name:      database.OutSignalA.Name,
-		Unit:      database.OutSignalA.Unit,
-		Direction: database.OutSignalA.Direction,
+		Name:      helper.OutSignalA.Name,
+		Unit:      helper.OutSignalA.Unit,
+		Direction: helper.OutSignalA.Direction,
 		Index:     1,
 		ConfigID:  configID,
 	}
@@ -512,9 +512,9 @@ func TestGetAllInputSignalsOfConfig(t *testing.T) {
 
 	// add a second output signal
 	newSignalBout := SignalRequest{
-		Name:      database.OutSignalB.Name,
-		Unit:      database.OutSignalB.Unit,
-		Direction: database.OutSignalB.Direction,
+		Name:      helper.OutSignalB.Name,
+		Unit:      helper.OutSignalB.Unit,
+		Direction: helper.OutSignalB.Direction,
 		Index:     1,
 		ConfigID:  configID,
 	}

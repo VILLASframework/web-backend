@@ -39,12 +39,6 @@ type KeyModels map[string]interface{}
 // #################### User data used for testing #######################
 // #######################################################################
 
-// Credentials
-var StrPassword0 = "xyz789"
-var StrPasswordA = "abc123"
-var StrPasswordB = "bcd234"
-var StrPasswordC = "guestpw"
-
 type Credentials struct {
 	Username string
 	Password string

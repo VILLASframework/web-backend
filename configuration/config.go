@@ -23,10 +23,9 @@ package configuration
 
 import (
 	"flag"
+	"github.com/zpatrick/go-config"
 	"log"
 	"os"
-
-	"github.com/zpatrick/go-config"
 )
 
 // Global configuration
@@ -109,9 +108,48 @@ func InitConfig() error {
 		settings, _ := GolbalConfig.Settings()
 		log.Print("All settings:")
 		for key, val := range settings {
+			// TODO password settings should be excluded!
 			log.Printf("   %s = %s \n", key, val)
 		}
 	}
 
 	return nil
+}
+
+func ConfigureBackend() (string, string, string, string, string, string, string, error) {
+
+	err := InitConfig()
+	if err != nil {
+		log.Printf("Error during initialization of global configuration: %v, aborting.", err.Error())
+		return "", "", "", "", "", "", "", err
+	}
+
+	mode, err := GolbalConfig.String("mode")
+	if err != nil {
+		log.Printf("Error reading mode from global configuration: %v, aborting.", err.Error())
+		return "", "", "", "", "", "", "", err
+	}
+
+	baseHost, err := GolbalConfig.String("base.host")
+	if err != nil {
+		log.Printf("Error reading base.host from global configuration: %v, aborting.", err.Error())
+		return "", "", "", "", "", "", "", err
+	}
+	basePath, err := GolbalConfig.String("base.path")
+	if err != nil {
+		log.Printf("Error reading base.path from global configuration: %v, aborting.", err.Error())
+		return "", "", "", "", "", "", "", err
+	}
+	port, err := GolbalConfig.String("port")
+	if err != nil {
+		log.Printf("Error reading port from global configuration: %v, aborting.", err.Error())
+		return "", "", "", "", "", "", "", err
+	}
+
+	AMQPhost, _ := GolbalConfig.String("amqp.host")
+	AMQPuser, _ := GolbalConfig.String("amqp.user")
+	AMQPpass, _ := GolbalConfig.String("amqp.pass")
+
+	return mode, baseHost, basePath, port, AMQPhost, AMQPuser, AMQPpass, nil
+
 }

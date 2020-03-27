@@ -72,13 +72,13 @@ func addScenarioAndIC() (scenarioID uint, ICID uint) {
 
 	// POST $newICA
 	newICA := ICRequest{
-		UUID:       database.ICA.UUID,
-		Host:       database.ICA.Host,
-		Type:       database.ICA.Type,
-		Name:       database.ICA.Name,
-		Category:   database.ICA.Category,
-		State:      database.ICA.State,
-		Properties: database.ICA.Properties,
+		UUID:       helper.ICA.UUID,
+		Host:       helper.ICA.Host,
+		Type:       helper.ICA.Type,
+		Name:       helper.ICA.Name,
+		Category:   helper.ICA.Category,
+		State:      helper.ICA.State,
+		Properties: helper.ICA.Properties,
 	}
 	_, resp, _ := helper.TestEndpoint(router, token,
 		"/api/ic", "POST", helper.KeyModels{"ic": newICA})
@@ -88,13 +88,13 @@ func addScenarioAndIC() (scenarioID uint, ICID uint) {
 
 	// POST a second IC to change to that IC during testing
 	newICB := ICRequest{
-		UUID:       database.ICB.UUID,
-		Host:       database.ICB.Host,
-		Type:       database.ICB.Type,
-		Name:       database.ICB.Name,
-		Category:   database.ICB.Category,
-		State:      database.ICB.State,
-		Properties: database.ICB.Properties,
+		UUID:       helper.ICB.UUID,
+		Host:       helper.ICB.Host,
+		Type:       helper.ICB.Type,
+		Name:       helper.ICB.Name,
+		Category:   helper.ICB.Category,
+		State:      helper.ICB.State,
+		Properties: helper.ICB.Properties,
 	}
 	_, resp, _ = helper.TestEndpoint(router, token,
 		"/api/ic", "POST", helper.KeyModels{"ic": newICB})
@@ -105,9 +105,9 @@ func addScenarioAndIC() (scenarioID uint, ICID uint) {
 
 	// POST $newScenario
 	newScenario := ScenarioRequest{
-		Name:            database.ScenarioA.Name,
-		Running:         database.ScenarioA.Running,
-		StartParameters: database.ScenarioA.StartParameters,
+		Name:            helper.ScenarioA.Name,
+		Running:         helper.ScenarioA.Running,
+		StartParameters: helper.ScenarioA.StartParameters,
 	}
 	_, resp, _ = helper.TestEndpoint(router, token,
 		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenario})
@@ -153,7 +153,7 @@ func TestMain(m *testing.M) {
 func TestAddConfig(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
 
 	// prepare the content of the DB for testing
 	// by adding a scenario and a IC to the DB
@@ -161,11 +161,11 @@ func TestAddConfig(t *testing.T) {
 	scenarioID, ICID := addScenarioAndIC()
 
 	newConfig := ConfigRequest{
-		Name:            database.ConfigA.Name,
+		Name:            helper.ConfigA.Name,
 		ScenarioID:      scenarioID,
 		ICID:            ICID,
-		StartParameters: database.ConfigA.StartParameters,
-		SelectedFileID:  database.ConfigA.SelectedFileID,
+		StartParameters: helper.ConfigA.StartParameters,
+		SelectedFileID:  helper.ConfigA.SelectedFileID,
 	}
 
 	// authenticate as normal userB who has no access to new scenario
@@ -249,7 +249,7 @@ func TestUpdateConfig(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
 
 	// prepare the content of the DB for testing
 	// by adding a scenario and a IC to the DB
@@ -263,11 +263,11 @@ func TestUpdateConfig(t *testing.T) {
 
 	// test POST newConfig
 	newConfig := ConfigRequest{
-		Name:            database.ConfigA.Name,
+		Name:            helper.ConfigA.Name,
 		ScenarioID:      scenarioID,
 		ICID:            ICID,
-		StartParameters: database.ConfigA.StartParameters,
-		SelectedFileID:  database.ConfigA.SelectedFileID,
+		StartParameters: helper.ConfigA.StartParameters,
+		SelectedFileID:  helper.ConfigA.SelectedFileID,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
 		base_api_configs, "POST", helper.KeyModels{"config": newConfig})
@@ -279,8 +279,8 @@ func TestUpdateConfig(t *testing.T) {
 	assert.NoError(t, err)
 
 	updatedConfig := ConfigRequest{
-		Name:            database.ConfigB.Name,
-		StartParameters: database.ConfigB.StartParameters,
+		Name:            helper.ConfigB.Name,
+		StartParameters: helper.ConfigB.StartParameters,
 	}
 
 	// authenticate as normal userB who has no access to new scenario
@@ -361,7 +361,7 @@ func TestUpdateConfig(t *testing.T) {
 func TestDeleteConfig(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
 
 	// prepare the content of the DB for testing
 	// by adding a scenario and a IC to the DB
@@ -369,11 +369,11 @@ func TestDeleteConfig(t *testing.T) {
 	scenarioID, ICID := addScenarioAndIC()
 
 	newConfig := ConfigRequest{
-		Name:            database.ConfigA.Name,
+		Name:            helper.ConfigA.Name,
 		ScenarioID:      scenarioID,
 		ICID:            ICID,
-		StartParameters: database.ConfigA.StartParameters,
-		SelectedFileID:  database.ConfigA.SelectedFileID,
+		StartParameters: helper.ConfigA.StartParameters,
+		SelectedFileID:  helper.ConfigA.SelectedFileID,
 	}
 
 	// authenticate as normal user
@@ -434,7 +434,7 @@ func TestDeleteConfig(t *testing.T) {
 func TestGetAllConfigsOfScenario(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
 
 	// prepare the content of the DB for testing
 	// by adding a scenario and a IC to the DB
@@ -448,11 +448,11 @@ func TestGetAllConfigsOfScenario(t *testing.T) {
 
 	// test POST newConfig
 	newConfig := ConfigRequest{
-		Name:            database.ConfigA.Name,
+		Name:            helper.ConfigA.Name,
 		ScenarioID:      scenarioID,
 		ICID:            ICID,
-		StartParameters: database.ConfigA.StartParameters,
-		SelectedFileID:  database.ConfigA.SelectedFileID,
+		StartParameters: helper.ConfigA.StartParameters,
+		SelectedFileID:  helper.ConfigA.SelectedFileID,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
 		base_api_configs, "POST", helper.KeyModels{"config": newConfig})

@@ -79,12 +79,12 @@ func TestAddScenario(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
 
 	newScenario := ScenarioRequest{
-		Name:            database.ScenarioA.Name,
-		Running:         database.ScenarioA.Running,
-		StartParameters: database.ScenarioA.StartParameters,
+		Name:            helper.ScenarioA.Name,
+		Running:         helper.ScenarioA.Running,
+		StartParameters: helper.ScenarioA.StartParameters,
 	}
 
 	// authenticate as normal user
@@ -181,7 +181,7 @@ func TestUpdateScenario(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
@@ -190,9 +190,9 @@ func TestUpdateScenario(t *testing.T) {
 
 	// test POST scenarios/ $newScenario
 	newScenario := ScenarioRequest{
-		Name:            database.ScenarioA.Name,
-		Running:         database.ScenarioA.Running,
-		StartParameters: database.ScenarioA.StartParameters,
+		Name:            helper.ScenarioA.Name,
+		Running:         helper.ScenarioA.Running,
+		StartParameters: helper.ScenarioA.StartParameters,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
 		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenario})
@@ -209,8 +209,8 @@ func TestUpdateScenario(t *testing.T) {
 
 	updatedScenario := ScenarioRequest{
 		Name:            "Updated name",
-		Running:         !database.ScenarioA.Running,
-		StartParameters: database.ScenarioA.StartParameters,
+		Running:         !helper.ScenarioA.Running,
+		StartParameters: helper.ScenarioA.StartParameters,
 	}
 
 	// try to update with non JSON body
@@ -251,7 +251,7 @@ func TestGetAllScenariosAsAdmin(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -270,9 +270,9 @@ func TestGetAllScenariosAsAdmin(t *testing.T) {
 
 	// test POST scenarios/ $newScenarioB
 	newScenarioB := ScenarioRequest{
-		Name:            database.ScenarioB.Name,
-		Running:         database.ScenarioB.Running,
-		StartParameters: database.ScenarioB.StartParameters,
+		Name:            helper.ScenarioB.Name,
+		Running:         helper.ScenarioB.Running,
+		StartParameters: helper.ScenarioB.StartParameters,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
 		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenarioB})
@@ -286,9 +286,9 @@ func TestGetAllScenariosAsAdmin(t *testing.T) {
 
 	// test POST scenarios/ $newScenarioA
 	newScenarioA := ScenarioRequest{
-		Name:            database.ScenarioA.Name,
-		Running:         database.ScenarioA.Running,
-		StartParameters: database.ScenarioA.StartParameters,
+		Name:            helper.ScenarioA.Name,
+		Running:         helper.ScenarioA.Running,
+		StartParameters: helper.ScenarioA.StartParameters,
 	}
 	code, resp, err = helper.TestEndpoint(router, token,
 		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenarioA})
@@ -312,7 +312,7 @@ func TestGetAllScenariosAsUser(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
 
 	// authenticate as normal userB
 	token, err := helper.AuthenticateForTest(router,
@@ -326,9 +326,9 @@ func TestGetAllScenariosAsUser(t *testing.T) {
 
 	// test POST scenarios/ $newScenarioB
 	newScenarioB := ScenarioRequest{
-		Name:            database.ScenarioB.Name,
-		Running:         database.ScenarioB.Running,
-		StartParameters: database.ScenarioB.StartParameters,
+		Name:            helper.ScenarioB.Name,
+		Running:         helper.ScenarioB.Running,
+		StartParameters: helper.ScenarioB.StartParameters,
 	}
 
 	code, resp, err := helper.TestEndpoint(router, token,
@@ -343,9 +343,9 @@ func TestGetAllScenariosAsUser(t *testing.T) {
 
 	// test POST scenarios/ $newScenarioA
 	newScenarioA := ScenarioRequest{
-		Name:            database.ScenarioA.Name,
-		Running:         database.ScenarioA.Running,
-		StartParameters: database.ScenarioA.StartParameters,
+		Name:            helper.ScenarioA.Name,
+		Running:         helper.ScenarioA.Running,
+		StartParameters: helper.ScenarioA.StartParameters,
 	}
 	code, resp, err = helper.TestEndpoint(router, token,
 		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenarioA})
@@ -369,7 +369,7 @@ func TestDeleteScenario(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
@@ -378,9 +378,9 @@ func TestDeleteScenario(t *testing.T) {
 
 	// test POST scenarios/ $newScenario
 	newScenario := ScenarioRequest{
-		Name:            database.ScenarioA.Name,
-		Running:         database.ScenarioA.Running,
-		StartParameters: database.ScenarioA.StartParameters,
+		Name:            helper.ScenarioA.Name,
+		Running:         helper.ScenarioA.Running,
+		StartParameters: helper.ScenarioA.StartParameters,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
 		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenario})
@@ -441,7 +441,7 @@ func TestAddUserToScenario(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
@@ -450,9 +450,9 @@ func TestAddUserToScenario(t *testing.T) {
 
 	// test POST scenarios/ $newScenario
 	newScenario := ScenarioRequest{
-		Name:            database.ScenarioA.Name,
-		Running:         database.ScenarioA.Running,
-		StartParameters: database.ScenarioA.StartParameters,
+		Name:            helper.ScenarioA.Name,
+		Running:         helper.ScenarioA.Running,
+		StartParameters: helper.ScenarioA.StartParameters,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
 		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenario})
@@ -500,7 +500,7 @@ func TestAddUserToScenario(t *testing.T) {
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// Compare resp to userB
-	err = helper.CompareResponse(resp, helper.KeyModels{"user": database.UserB})
+	err = helper.CompareResponse(resp, helper.KeyModels{"user": helper.UserB})
 	assert.NoError(t, err)
 
 	// Count AGAIN the number of all the users returned for newScenario
@@ -521,7 +521,7 @@ func TestGetAllUsersOfScenario(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
@@ -530,9 +530,9 @@ func TestGetAllUsersOfScenario(t *testing.T) {
 
 	// test POST scenarios/ $newScenario
 	newScenario := ScenarioRequest{
-		Name:            database.ScenarioA.Name,
-		Running:         database.ScenarioA.Running,
-		StartParameters: database.ScenarioA.StartParameters,
+		Name:            helper.ScenarioA.Name,
+		Running:         helper.ScenarioA.Running,
+		StartParameters: helper.ScenarioA.StartParameters,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
 		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenario})
@@ -606,7 +606,7 @@ func TestRemoveUserFromScenario(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
@@ -615,9 +615,9 @@ func TestRemoveUserFromScenario(t *testing.T) {
 
 	// test POST scenarios/ $newScenario
 	newScenario := ScenarioRequest{
-		Name:            database.ScenarioA.Name,
-		Running:         database.ScenarioA.Running,
-		StartParameters: database.ScenarioA.StartParameters,
+		Name:            helper.ScenarioA.Name,
+		Running:         helper.ScenarioA.Running,
+		StartParameters: helper.ScenarioA.StartParameters,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
 		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenario})
@@ -664,7 +664,7 @@ func TestRemoveUserFromScenario(t *testing.T) {
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// Compare DELETE's response with UserB
-	err = helper.CompareResponse(resp, helper.KeyModels{"user": database.UserC})
+	err = helper.CompareResponse(resp, helper.KeyModels{"user": helper.UserC})
 	assert.NoError(t, err)
 
 	// Count AGAIN the number of all the users returned for newScenario

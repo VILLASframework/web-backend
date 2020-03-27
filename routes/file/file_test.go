@@ -99,13 +99,13 @@ func addScenarioAndICAndConfigAndDashboardAndWidget() (scenarioID uint, ICID uin
 
 	// POST $newICA
 	newICA := ICRequest{
-		UUID:       database.ICA.UUID,
-		Host:       database.ICA.Host,
-		Type:       database.ICA.Type,
-		Name:       database.ICA.Name,
-		Category:   database.ICA.Category,
-		State:      database.ICA.State,
-		Properties: database.ICA.Properties,
+		UUID:       helper.ICA.UUID,
+		Host:       helper.ICA.Host,
+		Type:       helper.ICA.Type,
+		Name:       helper.ICA.Name,
+		Category:   helper.ICA.Category,
+		State:      helper.ICA.State,
+		Properties: helper.ICA.Properties,
 	}
 	_, resp, _ := helper.TestEndpoint(router, token,
 		"/api/ic", "POST", helper.KeyModels{"ic": newICA})
@@ -119,9 +119,9 @@ func addScenarioAndICAndConfigAndDashboardAndWidget() (scenarioID uint, ICID uin
 
 	// POST $newScenario
 	newScenario := ScenarioRequest{
-		Name:            database.ScenarioA.Name,
-		Running:         database.ScenarioA.Running,
-		StartParameters: database.ScenarioA.StartParameters,
+		Name:            helper.ScenarioA.Name,
+		Running:         helper.ScenarioA.Running,
+		StartParameters: helper.ScenarioA.StartParameters,
 	}
 	_, resp, _ = helper.TestEndpoint(router, token,
 		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenario})
@@ -131,10 +131,10 @@ func addScenarioAndICAndConfigAndDashboardAndWidget() (scenarioID uint, ICID uin
 
 	// POST new component config
 	newConfig := ConfigRequest{
-		Name:            database.ConfigA.Name,
+		Name:            helper.ConfigA.Name,
 		ScenarioID:      uint(newScenarioID),
 		ICID:            uint(newICID),
-		StartParameters: database.ConfigA.StartParameters,
+		StartParameters: helper.ConfigA.StartParameters,
 	}
 	_, resp, _ = helper.TestEndpoint(router, token,
 		"/api/configs", "POST", helper.KeyModels{"config": newConfig})
@@ -144,8 +144,8 @@ func addScenarioAndICAndConfigAndDashboardAndWidget() (scenarioID uint, ICID uin
 
 	// POST new dashboard
 	newDashboard := DashboardRequest{
-		Name:       database.DashboardA.Name,
-		Grid:       database.DashboardA.Grid,
+		Name:       helper.DashboardA.Name,
+		Grid:       helper.DashboardA.Grid,
 		ScenarioID: uint(newScenarioID),
 	}
 	_, resp, _ = helper.TestEndpoint(router, token,
@@ -156,17 +156,17 @@ func addScenarioAndICAndConfigAndDashboardAndWidget() (scenarioID uint, ICID uin
 
 	// POST new widget
 	newWidget := WidgetRequest{
-		Name:             database.WidgetA.Name,
-		Type:             database.WidgetA.Type,
-		Width:            database.WidgetA.Width,
-		Height:           database.WidgetA.Height,
-		MinWidth:         database.WidgetA.MinWidth,
-		MinHeight:        database.WidgetA.MinHeight,
-		X:                database.WidgetA.X,
-		Y:                database.WidgetA.Y,
-		Z:                database.WidgetA.Z,
-		IsLocked:         database.WidgetA.IsLocked,
-		CustomProperties: database.WidgetA.CustomProperties,
+		Name:             helper.WidgetA.Name,
+		Type:             helper.WidgetA.Type,
+		Width:            helper.WidgetA.Width,
+		Height:           helper.WidgetA.Height,
+		MinWidth:         helper.WidgetA.MinWidth,
+		MinHeight:        helper.WidgetA.MinHeight,
+		X:                helper.WidgetA.X,
+		Y:                helper.WidgetA.Y,
+		Z:                helper.WidgetA.Z,
+		IsLocked:         helper.WidgetA.IsLocked,
+		CustomProperties: helper.WidgetA.CustomProperties,
 		DashboardID:      uint(newDashboardID),
 	}
 	_, resp, _ = helper.TestEndpoint(router, token,
@@ -222,7 +222,7 @@ func TestMain(m *testing.M) {
 func TestAddFile(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
 
 	// prepare the content of the DB for testing
 	// using the respective endpoints of the API
@@ -338,7 +338,7 @@ func TestUpdateFile(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
 
 	// prepare the content of the DB for testing
 	// using the respective endpoints of the API
@@ -472,7 +472,7 @@ func TestUpdateFile(t *testing.T) {
 func TestDeleteFile(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
 
 	// prepare the content of the DB for testing
 	// using the respective endpoints of the API
@@ -623,7 +623,7 @@ func TestGetAllFilesOfConfig(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
 
 	// prepare the content of the DB for testing
 	// using the respective endpoints of the API

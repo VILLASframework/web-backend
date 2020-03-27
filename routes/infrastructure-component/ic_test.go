@@ -73,7 +73,7 @@ func TestMain(m *testing.M) {
 func TestAddICAsAdmin(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -90,7 +90,7 @@ func TestAddICAsAdmin(t *testing.T) {
 	// try to POST malformed IC (required fields missing, validation should fail)
 	// should result in an unprocessable entity
 	newMalformedIC := ICRequest{
-		UUID: database.ICB.UUID,
+		UUID: helper.ICB.UUID,
 	}
 	code, resp, err = helper.TestEndpoint(router, token,
 		"/api/ic", "POST", helper.KeyModels{"ic": newMalformedIC})
@@ -99,13 +99,13 @@ func TestAddICAsAdmin(t *testing.T) {
 
 	// test POST ic/ $newIC
 	newIC := ICRequest{
-		UUID:       database.ICA.UUID,
-		Host:       database.ICA.Host,
-		Type:       database.ICA.Type,
-		Name:       database.ICA.Name,
-		Category:   database.ICA.Category,
-		State:      database.ICA.State,
-		Properties: database.ICA.Properties,
+		UUID:       helper.ICA.UUID,
+		Host:       helper.ICA.Host,
+		Type:       helper.ICA.Type,
+		Name:       helper.ICA.Name,
+		Category:   helper.ICA.Category,
+		State:      helper.ICA.State,
+		Properties: helper.ICA.Properties,
 	}
 	code, resp, err = helper.TestEndpoint(router, token,
 		"/api/ic", "POST", helper.KeyModels{"ic": newIC})
@@ -142,7 +142,7 @@ func TestAddICAsAdmin(t *testing.T) {
 func TestAddICAsUser(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
 
 	// authenticate as user
 	token, err := helper.AuthenticateForTest(router,
@@ -151,13 +151,13 @@ func TestAddICAsUser(t *testing.T) {
 
 	// test POST ic/ $newIC
 	newIC := ICRequest{
-		UUID:       database.ICA.UUID,
-		Host:       database.ICA.Host,
-		Type:       database.ICA.Type,
-		Name:       database.ICA.Name,
-		Category:   database.ICA.Category,
-		State:      database.ICA.State,
-		Properties: database.ICA.Properties,
+		UUID:       helper.ICA.UUID,
+		Host:       helper.ICA.Host,
+		Type:       helper.ICA.Type,
+		Name:       helper.ICA.Name,
+		Category:   helper.ICA.Category,
+		State:      helper.ICA.State,
+		Properties: helper.ICA.Properties,
 	}
 
 	// This should fail with unprocessable entity 422 error code
@@ -171,7 +171,7 @@ func TestAddICAsUser(t *testing.T) {
 func TestUpdateICAsAdmin(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -180,13 +180,13 @@ func TestUpdateICAsAdmin(t *testing.T) {
 
 	// test POST ic/ $newIC
 	newIC := ICRequest{
-		UUID:       database.ICA.UUID,
-		Host:       database.ICA.Host,
-		Type:       database.ICA.Type,
-		Name:       database.ICA.Name,
-		Category:   database.ICA.Category,
-		State:      database.ICA.State,
-		Properties: database.ICA.Properties,
+		UUID:       helper.ICA.UUID,
+		Host:       helper.ICA.Host,
+		Type:       helper.ICA.Type,
+		Name:       helper.ICA.Name,
+		Category:   helper.ICA.Category,
+		State:      helper.ICA.State,
+		Properties: helper.ICA.Properties,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
 		"/api/ic", "POST", helper.KeyModels{"ic": newIC})
@@ -235,7 +235,7 @@ func TestUpdateICAsAdmin(t *testing.T) {
 func TestUpdateICAsUser(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -244,13 +244,13 @@ func TestUpdateICAsUser(t *testing.T) {
 
 	// test POST ic/ $newIC
 	newIC := ICRequest{
-		UUID:       database.ICA.UUID,
-		Host:       database.ICA.Host,
-		Type:       database.ICA.Type,
-		Name:       database.ICA.Name,
-		Category:   database.ICA.Category,
-		State:      database.ICA.State,
-		Properties: database.ICA.Properties,
+		UUID:       helper.ICA.UUID,
+		Host:       helper.ICA.Host,
+		Type:       helper.ICA.Type,
+		Name:       helper.ICA.Name,
+		Category:   helper.ICA.Category,
+		State:      helper.ICA.State,
+		Properties: helper.ICA.Properties,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
 		"/api/ic", "POST", helper.KeyModels{"ic": newIC})
@@ -279,7 +279,7 @@ func TestUpdateICAsUser(t *testing.T) {
 func TestDeleteICAsAdmin(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -288,13 +288,13 @@ func TestDeleteICAsAdmin(t *testing.T) {
 
 	// test POST ic/ $newIC
 	newIC := ICRequest{
-		UUID:       database.ICA.UUID,
-		Host:       database.ICA.Host,
-		Type:       database.ICA.Type,
-		Name:       database.ICA.Name,
-		Category:   database.ICA.Category,
-		State:      database.ICA.State,
-		Properties: database.ICA.Properties,
+		UUID:       helper.ICA.UUID,
+		Host:       helper.ICA.Host,
+		Type:       helper.ICA.Type,
+		Name:       helper.ICA.Name,
+		Category:   helper.ICA.Category,
+		State:      helper.ICA.State,
+		Properties: helper.ICA.Properties,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
 		"/api/ic", "POST", helper.KeyModels{"ic": newIC})
@@ -331,7 +331,7 @@ func TestDeleteICAsAdmin(t *testing.T) {
 func TestDeleteICAsUser(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -340,13 +340,13 @@ func TestDeleteICAsUser(t *testing.T) {
 
 	// test POST ic/ $newIC
 	newIC := ICRequest{
-		UUID:       database.ICA.UUID,
-		Host:       database.ICA.Host,
-		Type:       database.ICA.Type,
-		Name:       database.ICA.Name,
-		Category:   database.ICA.Category,
-		State:      database.ICA.State,
-		Properties: database.ICA.Properties,
+		UUID:       helper.ICA.UUID,
+		Host:       helper.ICA.Host,
+		Type:       helper.ICA.Type,
+		Name:       helper.ICA.Name,
+		Category:   helper.ICA.Category,
+		State:      helper.ICA.State,
+		Properties: helper.ICA.Properties,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
 		"/api/ic", "POST", helper.KeyModels{"ic": newIC})
@@ -374,7 +374,7 @@ func TestDeleteICAsUser(t *testing.T) {
 func TestGetAllICs(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -388,13 +388,13 @@ func TestGetAllICs(t *testing.T) {
 
 	// test POST ic/ $newICA
 	newICA := ICRequest{
-		UUID:       database.ICA.UUID,
-		Host:       database.ICA.Host,
-		Type:       database.ICA.Type,
-		Name:       database.ICA.Name,
-		Category:   database.ICA.Category,
-		State:      database.ICA.State,
-		Properties: database.ICA.Properties,
+		UUID:       helper.ICA.UUID,
+		Host:       helper.ICA.Host,
+		Type:       helper.ICA.Type,
+		Name:       helper.ICA.Name,
+		Category:   helper.ICA.Category,
+		State:      helper.ICA.State,
+		Properties: helper.ICA.Properties,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
 		"/api/ic", "POST", helper.KeyModels{"ic": newICA})
@@ -403,13 +403,13 @@ func TestGetAllICs(t *testing.T) {
 
 	// test POST ic/ $newICB
 	newICB := ICRequest{
-		UUID:       database.ICB.UUID,
-		Host:       database.ICB.Host,
-		Type:       database.ICB.Type,
-		Name:       database.ICB.Name,
-		Category:   database.ICB.Category,
-		State:      database.ICB.State,
-		Properties: database.ICB.Properties,
+		UUID:       helper.ICB.UUID,
+		Host:       helper.ICB.Host,
+		Type:       helper.ICB.Type,
+		Name:       helper.ICB.Name,
+		Category:   helper.ICB.Category,
+		State:      helper.ICB.State,
+		Properties: helper.ICB.Properties,
 	}
 	code, resp, err = helper.TestEndpoint(router, token,
 		"/api/ic", "POST", helper.KeyModels{"ic": newICB})
@@ -439,7 +439,7 @@ func TestGetAllICs(t *testing.T) {
 func TestGetConfigsOfIC(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -448,13 +448,13 @@ func TestGetConfigsOfIC(t *testing.T) {
 
 	// test POST ic/ $newICA
 	newICA := ICRequest{
-		UUID:       database.ICA.UUID,
-		Host:       database.ICA.Host,
-		Type:       database.ICA.Type,
-		Name:       database.ICA.Name,
-		Category:   database.ICA.Category,
-		State:      database.ICA.State,
-		Properties: database.ICA.Properties,
+		UUID:       helper.ICA.UUID,
+		Host:       helper.ICA.Host,
+		Type:       helper.ICA.Type,
+		Name:       helper.ICA.Name,
+		Category:   helper.ICA.Category,
+		State:      helper.ICA.State,
+		Properties: helper.ICA.Properties,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
 		"/api/ic", "POST", helper.KeyModels{"ic": newICA})

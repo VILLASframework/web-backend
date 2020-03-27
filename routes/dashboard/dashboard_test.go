@@ -54,9 +54,9 @@ func addScenario(token string) (scenarioID uint) {
 
 	// POST $newScenario
 	newScenario := ScenarioRequest{
-		Name:            database.ScenarioA.Name,
-		Running:         database.ScenarioA.Running,
-		StartParameters: database.ScenarioA.StartParameters,
+		Name:            helper.ScenarioA.Name,
+		Running:         helper.ScenarioA.Running,
+		StartParameters: helper.ScenarioA.StartParameters,
 	}
 	_, resp, err := helper.TestEndpoint(router, token,
 		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenario})
@@ -101,7 +101,7 @@ func TestMain(m *testing.M) {
 func TestAddDashboard(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
@@ -112,8 +112,8 @@ func TestAddDashboard(t *testing.T) {
 
 	// test POST dashboards/ $newDashboard
 	newDashboard := DashboardRequest{
-		Name:       database.DashboardA.Name,
-		Grid:       database.DashboardA.Grid,
+		Name:       helper.DashboardA.Name,
+		Grid:       helper.DashboardA.Grid,
 		ScenarioID: scenarioID,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
@@ -187,7 +187,7 @@ func TestAddDashboard(t *testing.T) {
 func TestUpdateDashboard(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
@@ -198,8 +198,8 @@ func TestUpdateDashboard(t *testing.T) {
 
 	// test POST dashboards/ $newDashboard
 	newDashboard := DashboardRequest{
-		Name:       database.DashboardA.Name,
-		Grid:       database.DashboardA.Grid,
+		Name:       helper.DashboardA.Name,
+		Grid:       helper.DashboardA.Grid,
 		ScenarioID: scenarioID,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
@@ -212,8 +212,8 @@ func TestUpdateDashboard(t *testing.T) {
 	assert.NoError(t, err)
 
 	updatedDashboard := DashboardRequest{
-		Name: database.DashboardB.Name,
-		Grid: database.DashboardB.Grid,
+		Name: helper.DashboardB.Name,
+		Grid: helper.DashboardB.Grid,
 	}
 
 	// authenticate as guest user
@@ -268,7 +268,7 @@ func TestUpdateDashboard(t *testing.T) {
 func TestDeleteDashboard(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
@@ -279,8 +279,8 @@ func TestDeleteDashboard(t *testing.T) {
 
 	// test POST dashboards/ $newDashboard
 	newDashboard := DashboardRequest{
-		Name:       database.DashboardA.Name,
-		Grid:       database.DashboardA.Grid,
+		Name:       helper.DashboardA.Name,
+		Grid:       helper.DashboardA.Grid,
 		ScenarioID: scenarioID,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
@@ -341,7 +341,7 @@ func TestDeleteDashboard(t *testing.T) {
 func TestGetAllDashboardsOfScenario(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, database.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
@@ -357,8 +357,8 @@ func TestGetAllDashboardsOfScenario(t *testing.T) {
 
 	// test POST dashboards/ $newDashboard
 	newDashboardA := DashboardRequest{
-		Name:       database.DashboardA.Name,
-		Grid:       database.DashboardA.Grid,
+		Name:       helper.DashboardA.Name,
+		Grid:       helper.DashboardA.Grid,
 		ScenarioID: scenarioID,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
@@ -368,8 +368,8 @@ func TestGetAllDashboardsOfScenario(t *testing.T) {
 
 	// POST a second dashboard for the same scenario
 	newDashboardB := DashboardRequest{
-		Name:       database.DashboardB.Name,
-		Grid:       database.DashboardB.Grid,
+		Name:       helper.DashboardB.Name,
+		Grid:       helper.DashboardB.Grid,
 		ScenarioID: scenarioID,
 	}
 	code, resp, err = helper.TestEndpoint(router, token,

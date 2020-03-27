@@ -25,6 +25,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
+	"github.com/gin-gonic/gin"
 	"github.com/streadway/amqp"
 	"github.com/tidwall/gjson"
 	"log"
@@ -199,6 +200,40 @@ func CheckConnection() error {
 		}
 	} else {
 		return fmt.Errorf("connection is nil")
+	}
+
+	return nil
+}
+
+func StartAMQP(AMQPurl string, api *gin.RouterGroup) error {
+	if AMQPurl != "" {
+		log.Println("Starting AMQP client")
+
+		err := ConnectAMQP(AMQPurl)
+		if err != nil {
+			return err
+		}
+
+		// register IC action endpoint only if AMQP client is used
+		RegisterAMQPEndpoint(api.Group("/ic"))
+
+		// Periodically call the Ping function to check which ICs are still there
+		ticker := time.NewTicker(10 * time.Second)
+		go func() {
+
+			for {
+				select {
+				case <-ticker.C:
+					err = PingAMQP()
+					if err != nil {
+						log.Println("AMQP Error: ", err.Error())
+					}
+				}
+			}
+
+		}()
+
+		log.Printf("Connected AMQP client to %s", AMQPurl)
 	}
 
 	return nil

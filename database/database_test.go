@@ -23,7 +23,7 @@ package database
 
 import (
 	"fmt"
-	"log"
+	"github.com/zpatrick/go-config"
 	"os"
 	"testing"
 
@@ -32,24 +32,63 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	err := configuration.InitConfig()
-	if err != nil {
-		panic(m)
-	}
-
-	err = InitDB(configuration.GolbalConfig)
-	if err != nil {
-		panic(m)
-	}
-
-	// Verify that you can connect to the database
-	err = DBpool.DB().Ping()
-	if err != nil {
-		log.Panic("Error: DB must ping to run tests")
-	}
 
 	defer DBpool.Close()
 	os.Exit(m.Run())
+}
+
+func TestInitDB(t *testing.T) {
+
+	err := configuration.InitConfig()
+	assert.NoError(t, err)
+
+	static := map[string]string{}
+	mappings := map[string]string{}
+
+	defaults := config.NewStatic(static)
+	env := config.NewEnvironment(mappings)
+
+	ownconfig := config.NewConfig([]config.Provider{defaults, env})
+
+	err = InitDB(ownconfig)
+	assert.Error(t, err)
+	dbname, err := configuration.GolbalConfig.String("db.name")
+	assert.NoError(t, err)
+	static["db.name"] = dbname
+	ownconfig = config.NewConfig([]config.Provider{defaults, env})
+	err = InitDB(ownconfig)
+	assert.Error(t, err)
+
+	dbhost, err := configuration.GolbalConfig.String("db.host")
+	assert.NoError(t, err)
+	static["db.host"] = dbhost
+	ownconfig = config.NewConfig([]config.Provider{defaults, env})
+	err = InitDB(ownconfig)
+	assert.Error(t, err)
+
+	dbuser, err := configuration.GolbalConfig.String("db.user")
+	static["db.user"] = dbuser
+	ownconfig = config.NewConfig([]config.Provider{defaults, env})
+	err = InitDB(ownconfig)
+	assert.Error(t, err)
+
+	dbpass, err := configuration.GolbalConfig.String("db.pass")
+	static["db.pass"] = dbpass
+	ownconfig = config.NewConfig([]config.Provider{defaults, env})
+	err = InitDB(ownconfig)
+	assert.Error(t, err)
+
+	dbssl, err := configuration.GolbalConfig.String("db.ssl")
+	assert.NoError(t, err)
+	static["db.ssl"] = dbssl
+	ownconfig = config.NewConfig([]config.Provider{defaults, env})
+	err = InitDB(ownconfig)
+	assert.NoError(t, err)
+
+	// Verify that you can connect to the database
+	db := GetDB()
+	err = db.DB().Ping()
+	assert.NoError(t, err)
 }
 
 func TestUserAssociations(t *testing.T) {
@@ -58,14 +97,12 @@ func TestUserAssociations(t *testing.T) {
 	MigrateModels()
 
 	// create copies of global test data
-	scenarioA := ScenarioA
-	scenarioB := ScenarioB
-	user0 := User0
-	userA := UserA
-	userB := UserB
+	scenarioA := Scenario{}
+	scenarioB := Scenario{}
+	userA := User{Username: "abcdef"}
+	userB := User{Username: "ghijkl"}
 
-	// add three users to DB
-	assert.NoError(t, DBpool.Create(&user0).Error) // Admin
+	// add users to DB
 	assert.NoError(t, DBpool.Create(&userA).Error) // Normal User
 	assert.NoError(t, DBpool.Create(&userB).Error) // Normal User
 
@@ -78,11 +115,9 @@ func TestUserAssociations(t *testing.T) {
 	assert.NoError(t, DBpool.Model(&userA).Association("Scenarios").Append(&scenarioA).Error)
 	assert.NoError(t, DBpool.Model(&userA).Association("Scenarios").Append(&scenarioB).Error)
 	assert.NoError(t, DBpool.Model(&userB).Association("Scenarios").Append(&scenarioA).Error)
-	assert.NoError(t, DBpool.Model(&userB).Association("Scenarios").Append(&scenarioB).Error)
 
 	var usr1 User
-	assert.NoError(t, DBpool.Find(&usr1, "ID = ?", 2).Error, fmt.Sprintf("Find User with ID=2"))
-	assert.EqualValues(t, "User_A", usr1.Username)
+	assert.NoError(t, DBpool.Find(&usr1, "ID = ?", 1).Error, fmt.Sprintf("Find User with ID=1"))
 
 	// Get scenarios of usr1
 	var scenarios []Scenario
@@ -99,22 +134,20 @@ func TestScenarioAssociations(t *testing.T) {
 	MigrateModels()
 
 	// create copies of global test data
-	scenarioA := ScenarioA
-	scenarioB := ScenarioB
-	user0 := User0
-	userA := UserA
-	userB := UserB
-	configA := ConfigA
-	configB := ConfigB
-	dashboardA := DashboardA
-	dashboardB := DashboardB
+	scenarioA := Scenario{}
+	scenarioB := Scenario{}
+	userA := User{Username: "abcdef"}
+	userB := User{Username: "ghijkl"}
+	configA := ComponentConfiguration{}
+	configB := ComponentConfiguration{}
+	dashboardA := Dashboard{}
+	dashboardB := Dashboard{}
 
 	// add scenarios to DB
 	assert.NoError(t, DBpool.Create(&scenarioA).Error)
 	assert.NoError(t, DBpool.Create(&scenarioB).Error)
 
 	// add users to DB
-	assert.NoError(t, DBpool.Create(&user0).Error) // Admin
 	assert.NoError(t, DBpool.Create(&userA).Error) // Normal User
 	assert.NoError(t, DBpool.Create(&userB).Error) // Normal User
 
@@ -143,7 +176,6 @@ func TestScenarioAssociations(t *testing.T) {
 
 	var scenario1 Scenario
 	assert.NoError(t, DBpool.Find(&scenario1, 1).Error, fmt.Sprintf("Find Scenario with ID=1"))
-	assert.EqualValues(t, "Scenario_A", scenario1.Name)
 
 	// Get users of scenario1
 	var users []User
@@ -176,10 +208,10 @@ func TestICAssociations(t *testing.T) {
 	MigrateModels()
 
 	// create copies of global test data
-	icA := ICA
-	icB := ICB
-	configA := ConfigA
-	configB := ConfigB
+	icA := InfrastructureComponent{}
+	icB := InfrastructureComponent{}
+	configA := ComponentConfiguration{}
+	configB := ComponentConfiguration{}
 
 	// add ICs to DB
 	assert.NoError(t, DBpool.Create(&icA).Error)
@@ -195,7 +227,6 @@ func TestICAssociations(t *testing.T) {
 
 	var ic1 InfrastructureComponent
 	assert.NoError(t, DBpool.Find(&ic1, 1).Error, fmt.Sprintf("Find InfrastructureComponent with ID=1"))
-	assert.EqualValues(t, "xxx.yyy.zzz.aaa", ic1.Host)
 
 	// Get Component Configurations of ic1
 	var configs []ComponentConfiguration
@@ -212,18 +243,18 @@ func TestComponentConfigurationAssociations(t *testing.T) {
 	MigrateModels()
 
 	// create copies of global test data
-	configA := ConfigA
-	configB := ConfigB
-	outSignalA := OutSignalA
-	outSignalB := OutSignalB
-	inSignalA := InSignalA
-	inSignalB := InSignalB
-	fileA := FileA
-	fileB := FileB
-	fileC := FileC
-	fileD := FileD
-	icA := ICA
-	icB := ICB
+	configA := ComponentConfiguration{}
+	configB := ComponentConfiguration{}
+	outSignalA := Signal{Direction: "out"}
+	outSignalB := Signal{Direction: "out"}
+	inSignalA := Signal{Direction: "in"}
+	inSignalB := Signal{Direction: "in"}
+	fileA := File{}
+	fileB := File{}
+	fileC := File{}
+	fileD := File{}
+	icA := InfrastructureComponent{}
+	icB := InfrastructureComponent{}
 
 	// add Component Configurations to DB
 	assert.NoError(t, DBpool.Create(&configA).Error)
@@ -261,7 +292,6 @@ func TestComponentConfigurationAssociations(t *testing.T) {
 
 	var config1 ComponentConfiguration
 	assert.NoError(t, DBpool.Find(&config1, 1).Error, fmt.Sprintf("Find ComponentConfiguration with ID=1"))
-	assert.EqualValues(t, ConfigA.Name, config1.Name)
 
 	// Check IC ID
 	if config1.ICID != 1 {
@@ -291,10 +321,10 @@ func TestDashboardAssociations(t *testing.T) {
 	MigrateModels()
 
 	// create copies of global test data
-	dashboardA := DashboardA
-	dashboardB := DashboardB
-	widgetA := WidgetA
-	widgetB := WidgetB
+	dashboardA := Dashboard{}
+	dashboardB := Dashboard{}
+	widgetA := Widget{}
+	widgetB := Widget{}
 
 	// add dashboards to DB
 	assert.NoError(t, DBpool.Create(&dashboardA).Error)
@@ -310,7 +340,6 @@ func TestDashboardAssociations(t *testing.T) {
 
 	var dashboard1 Dashboard
 	assert.NoError(t, DBpool.Find(&dashboard1, 1).Error, fmt.Sprintf("Find Dashboard with ID=1"))
-	assert.EqualValues(t, "Dashboard_A", dashboard1.Name)
 
 	//Get widgets of dashboard1
 	var widgets []Widget
@@ -327,12 +356,12 @@ func TestWidgetAssociations(t *testing.T) {
 	MigrateModels()
 
 	// create copies of global test data
-	widgetA := WidgetA
-	widgetB := WidgetB
-	fileA := FileA
-	fileB := FileB
-	fileC := FileC
-	fileD := FileD
+	widgetA := Widget{}
+	widgetB := Widget{}
+	fileA := File{}
+	fileB := File{}
+	fileC := File{}
+	fileD := File{}
 
 	// add widgets to DB
 	assert.NoError(t, DBpool.Create(&widgetA).Error)
@@ -350,7 +379,6 @@ func TestWidgetAssociations(t *testing.T) {
 
 	var widget1 Widget
 	assert.NoError(t, DBpool.Find(&widget1, 1).Error, fmt.Sprintf("Find Widget with ID=1"))
-	assert.EqualValues(t, widgetA.Name, widget1.Name)
 
 	// Get files of widget
 	var files []File
@@ -367,10 +395,10 @@ func TestFileAssociations(t *testing.T) {
 	MigrateModels()
 
 	// create copies of global test data
-	fileA := FileA
-	fileB := FileB
-	fileC := FileC
-	fileD := FileD
+	fileA := File{}
+	fileB := File{}
+	fileC := File{}
+	fileD := File{}
 
 	// add files to DB
 	assert.NoError(t, DBpool.Create(&fileA).Error)
@@ -380,19 +408,4 @@ func TestFileAssociations(t *testing.T) {
 
 	var file1 File
 	assert.NoError(t, DBpool.Find(&file1, 1).Error, fmt.Sprintf("Find File with ID=1"))
-	assert.EqualValues(t, "File_A", file1.Name)
-}
-
-func TestAddAdmin(t *testing.T) {
-	DropTables()
-	MigrateModels()
-
-	assert.NoError(t, DBAddAdminUser())
-}
-
-func TestAddAdminAndUsers(t *testing.T) {
-	DropTables()
-	MigrateModels()
-
-	assert.NoError(t, DBAddAdminAndUserAndGuest())
 }
