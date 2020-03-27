@@ -220,7 +220,7 @@ var FileD = database.File{
 // Widgets
 var customPropertiesA = json.RawMessage(`{"property1" : "testValue1A", "property2" : "testValue2A", "property3" : 42}`)
 var customPropertiesBox = json.RawMessage(`{"border_color" : "18", "background_color" : "2", "background_color_opacity" : 0.3}`)
-var customPropertiesSlider = json.RawMessage(`{"default_value" : 10, "orientation" : 0, "rangeMin" : 0, "rangeMax": 500, "step" : 1}`)
+var customPropertiesSlider = json.RawMessage(`{"default_value" : 10, "orientation" : 0, "rangeUseMinMax": false, "rangeMin" : 0, "rangeMax": 500, "step" : 1}`)
 var customPropertiesLabel = json.RawMessage(`{"textSize" : "20", "fontColor" : 5}`)
 var customPropertiesButton = json.RawMessage(`{"toggle" : "Value1", "on_value" : "Value2", "off_value" : Value3}`)
 var customPropertiesCustomActions = json.RawMessage(`{"actions" : "Value1", "icon" : "Value2"}`)
