@@ -147,8 +147,8 @@ func AddTestData(basePath string, router *gin.Engine) (*bytes.Buffer, error) {
 	configB := helper.ConfigB
 	configA.ScenarioID = 1
 	configB.ScenarioID = 1
-	configA.ICID = 1
-	configB.ICID = 2
+	configA.ICID = 2
+	configB.ICID = 1
 	code, resp, err = helper.TestEndpoint(router, token, basePath+"/configs", "POST", helper.KeyModels{"config": configA})
 	if code != http.StatusOK {
 		return resp, fmt.Errorf("error adding Config A")
@@ -209,10 +209,17 @@ func AddTestData(basePath string, router *gin.Engine) (*bytes.Buffer, error) {
 	outSignalB := helper.OutSignalB
 	inSignalA := helper.InSignalA
 	inSignalB := helper.InSignalB
+	outSignalC := helper.OutSignalC
+	outSignalD := helper.OutSignalD
+	outSignalE := helper.OutSignalE
 	outSignalA.ConfigID = 1
 	outSignalB.ConfigID = 1
+	outSignalC.ConfigID = 1
+	outSignalD.ConfigID = 1
+	outSignalE.ConfigID = 1
 	inSignalA.ConfigID = 1
-	inSignalB.ConfigID = 1
+	inSignalB.ConfigID = 2
+
 	code, resp, err = helper.TestEndpoint(router, token, basePath+"/signals", "POST", helper.KeyModels{"signal": outSignalB})
 	if code != http.StatusOK {
 		return resp, fmt.Errorf("error adding outSignalB")
@@ -220,6 +227,18 @@ func AddTestData(basePath string, router *gin.Engine) (*bytes.Buffer, error) {
 	code, resp, err = helper.TestEndpoint(router, token, basePath+"/signals", "POST", helper.KeyModels{"signal": outSignalA})
 	if code != http.StatusOK {
 		return resp, fmt.Errorf("error adding outSignalA")
+	}
+	code, resp, err = helper.TestEndpoint(router, token, basePath+"/signals", "POST", helper.KeyModels{"signal": outSignalC})
+	if code != http.StatusOK {
+		return resp, fmt.Errorf("error adding outSignalC")
+	}
+	code, resp, err = helper.TestEndpoint(router, token, basePath+"/signals", "POST", helper.KeyModels{"signal": outSignalD})
+	if code != http.StatusOK {
+		return resp, fmt.Errorf("error adding outSignalD")
+	}
+	code, resp, err = helper.TestEndpoint(router, token, basePath+"/signals", "POST", helper.KeyModels{"signal": outSignalE})
+	if code != http.StatusOK {
+		return resp, fmt.Errorf("error adding outSignalE")
 	}
 
 	code, resp, err = helper.TestEndpoint(router, token, basePath+"/signals", "POST", helper.KeyModels{"signal": inSignalA})

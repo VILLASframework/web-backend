@@ -136,7 +136,7 @@ var ScenarioB = database.Scenario{
 // Component Configuration
 
 var ConfigA = database.ComponentConfiguration{
-	Name:            "Example simulation",
+	Name:            "Example for Signal generator",
 	StartParameters: postgres.Jsonb{startParametersA},
 	SelectedFileID:  3,
 }
@@ -163,18 +163,39 @@ var OutSignalB = database.Signal{
 	Unit:      "V",
 }
 
+var OutSignalC = database.Signal{
+	Name:      "outSignal_C",
+	Direction: "out",
+	Index:     3,
+	Unit:      "---",
+}
+
+var OutSignalD = database.Signal{
+	Name:      "outSignal_D",
+	Direction: "out",
+	Index:     4,
+	Unit:      "---",
+}
+
+var OutSignalE = database.Signal{
+	Name:      "outSignal_E",
+	Direction: "out",
+	Index:     5,
+	Unit:      "---",
+}
+
 var InSignalA = database.Signal{
 	Name:      "inSignal_A",
 	Direction: "in",
 	Index:     1,
-	Unit:      "A",
+	Unit:      "---",
 }
 
 var InSignalB = database.Signal{
 	Name:      "inSignal_B",
 	Direction: "in",
 	Index:     2,
-	Unit:      "A",
+	Unit:      "---",
 }
 
 // Dashboards
