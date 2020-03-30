@@ -106,10 +106,10 @@ var ICA = database.InfrastructureComponent{
 
 var ICB = database.InfrastructureComponent{
 	UUID:          "7be0322d-354e-431e-84bd-ae4c9633138b",
-	Host:          "xxx.yyy.zzz.bbb",
-	Type:          "VILLASnode",
-	Category:      "Gateway",
-	Name:          "Test VILLASnode Gateway",
+	Host:          "https://villas.k8s.eonerc.rwth-aachen.de/ws/ws_sig",
+	Type:          "VILLASnode Signal Generator",
+	Category:      "Signal Generator",
+	Name:          "ACS Demo Signals",
 	Uptime:        0,
 	State:         "idle",
 	StateUpdateAt: time.Now().String(),
