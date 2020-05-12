@@ -22,12 +22,12 @@
 package file
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"io/ioutil"
 	"mime/multipart"
-	"os"
+	"net/http"
 	"path/filepath"
+	"strconv"
 	"time"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
@@ -57,20 +57,16 @@ func (f *File) save() error {
 
 func (f *File) download(c *gin.Context) error {
 
-	err := ioutil.WriteFile(f.Name, f.FileData, 0644)
-	if err != nil {
-		return fmt.Errorf("file could not be temporarily created on server disk: %s", err.Error())
-	}
-	defer os.Remove(f.Name)
+	// create unique file name
+	filename := "file_" + strconv.FormatUint(uint64(f.ID), 10) + "_" + f.Name
+	// detect the content type of the file
+	contentType := http.DetectContentType(f.FileData)
 	//Seems this headers needed for some browsers (for example without this headers Chrome will download files as txt)
 	c.Header("Content-Description", "File Transfer")
-	c.Header("Content-Transfer-Encoding", "binary")
-	c.Header("Content-Disposition", "attachment; filename="+f.Name)
-	//c.Header("Content-Type", contentType)
-	c.File(f.Name)
+	c.Header("Content-Disposition", "attachment; filename="+filename)
+	c.Data(http.StatusOK, contentType, f.FileData)
 
 	return nil
-
 }
 
 func (f *File) register(fileHeader *multipart.FileHeader, objectType string, objectID uint) error {
