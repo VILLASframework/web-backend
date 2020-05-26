@@ -115,9 +115,6 @@ definitions:
     type: object
   database.File:
     properties:
-      configID:
-        description: ID of Component Configuration to which file belongs
-        type: integer
       date:
         description: Last modification time of file
         type: string
@@ -126,25 +123,28 @@ definitions:
       name:
         description: Name of file
         type: string
+      scenarioID:
+        description: ID of Scenario to which file belongs
+        type: integer
       size:
         description: Size of file (in byte)
         type: integer
       type:
         description: Type of file (MIME type)
         type: string
-      widgetID:
-        description: ID of widget to which file belongs
-        type: integer
     type: object
   database.InfrastructureComponent:
     properties:
+      category:
+        description: Category of IC (simulator, gateway, database, etc.)
+        type: string
       host:
         description: Host if the IC
         type: string
       id:
         type: integer
-      modelType:
-        description: Model type supported by the IC
+      name:
+        description: Name of the IC
         type: string
       properties:
         description: Properties of IC as JSON string
@@ -157,6 +157,9 @@ definitions:
         type: string
       stateUpdateAt:
         description: Time of last state update
+        type: string
+      type:
+        description: Type of IC (RTDS, VILLASnode, RTDS, etc.)
         type: string
       uptime:
         description: Uptime of the IC
@@ -398,31 +401,40 @@ definitions:
     type: object
   infrastructure_component.validNewIC:
     properties:
+      Category:
+        type: string
       Host:
         type: string
-      Modeltype:
+      Name:
         type: string
       Properties:
         type: string
       State:
+        type: string
+      Type:
         type: string
       UUID:
         type: string
     required:
+    - Category
     - Host
-    - Modeltype
-    - Properties
+    - Name
+    - Type
     - UUID
     type: object
   infrastructure_component.validUpdatedIC:
     properties:
+      Category:
+        type: string
       Host:
         type: string
-      Modeltype:
+      Name:
         type: string
       Properties:
         type: string
       State:
+        type: string
+      Type:
         type: string
       UUID:
         type: string
@@ -1150,22 +1162,16 @@ paths:
         name: Authorization
         required: true
         type: string
-      - description: Set to config for files of component configuration, set to widget
-          for files of widget
+      - description: Scenario ID
         in: query
-        name: objectType
-        required: true
-        type: string
-      - description: ID of either config or widget of which files are requested
-        in: query
-        name: objectID
+        name: scenarioID
         required: true
         type: integer
       produces:
       - application/json
       responses:
         "200":
-          description: Files which belong to config or widget
+          description: Files which belong to scenario
           schema:
             $ref: '#/definitions/docs.ResponseFiles'
             type: object
@@ -1184,7 +1190,7 @@ paths:
           schema:
             $ref: '#/definitions/docs.ResponseError'
             type: object
-      summary: Get all files of a specific component configuration or widget
+      summary: Get all files of a specific scenario
       tags:
       - files
     post:
@@ -1207,15 +1213,9 @@ paths:
         name: inputFile
         required: true
         type: file
-      - description: Set to config for files of component config, set to widget for
-          files of widget
+      - description: ID of scenario to which file shall be added
         in: query
-        name: objectType
-        required: true
-        type: string
-      - description: ID of either config or widget of which files are requested
-        in: query
-        name: objectID
+        name: scenarioID
         required: true
         type: integer
       produces:
@@ -1246,7 +1246,7 @@ paths:
           schema:
             $ref: '#/definitions/docs.ResponseError'
             type: object
-      summary: Add a file to a specific component config or widget
+      summary: Add a file to a specific scenario
       tags:
       - files
   /files/{fileID}:

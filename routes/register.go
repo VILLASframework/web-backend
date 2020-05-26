@@ -264,9 +264,9 @@ func AddTestData(basePath string, router *gin.Engine) (*bytes.Buffer, error) {
 	contentType := bodyWriter.FormDataContentType()
 	bodyWriter.Close()
 
-	// Create the request and add file to component config
+	// Create the request and add file to scenario
 	w1 := httptest.NewRecorder()
-	req1, _ := http.NewRequest("POST", basePath+"/files?objectID=1&objectType=config", bodyBuf)
+	req1, _ := http.NewRequest("POST", basePath+"/files?scenarioID=1", bodyBuf)
 	req1.Header.Set("Content-Type", contentType)
 	req1.Header.Add("Authorization", "Bearer "+token)
 	router.ServeHTTP(w1, req1)
@@ -283,9 +283,9 @@ func AddTestData(basePath string, router *gin.Engine) (*bytes.Buffer, error) {
 	contentType = bodyWriter.FormDataContentType()
 	bodyWriter.Close()
 
-	// Create the request and add file to widget
+	// Create the request and add a second file to scenario
 	w2 := httptest.NewRecorder()
-	req2, _ := http.NewRequest("POST", basePath+"/files?objectID=1&objectType=widget", bodyBuf)
+	req2, _ := http.NewRequest("POST", basePath+"/files?scenarioID=1", bodyBuf)
 	req2.Header.Set("Content-Type", contentType)
 	req2.Header.Add("Authorization", "Bearer "+token)
 	router.ServeHTTP(w2, req2)

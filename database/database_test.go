@@ -142,6 +142,8 @@ func TestScenarioAssociations(t *testing.T) {
 	configB := ComponentConfiguration{}
 	dashboardA := Dashboard{}
 	dashboardB := Dashboard{}
+	fileA := File{}
+	fileB := File{}
 
 	// add scenarios to DB
 	assert.NoError(t, DBpool.Create(&scenarioA).Error)
@@ -159,12 +161,20 @@ func TestScenarioAssociations(t *testing.T) {
 	assert.NoError(t, DBpool.Create(&dashboardA).Error)
 	assert.NoError(t, DBpool.Create(&dashboardB).Error)
 
+	// add files to DB
+	assert.NoError(t, DBpool.Create(&fileA).Error)
+	assert.NoError(t, DBpool.Create(&fileB).Error)
+
 	// add many-to-many associations between users and scenarios
 	// User HM Scenarios, Scenario HM Users (Many-to-Many)
 	assert.NoError(t, DBpool.Model(&scenarioA).Association("Users").Append(&userA).Error)
 	assert.NoError(t, DBpool.Model(&scenarioA).Association("Users").Append(&userB).Error)
 	assert.NoError(t, DBpool.Model(&scenarioB).Association("Users").Append(&userA).Error)
 	assert.NoError(t, DBpool.Model(&scenarioB).Association("Users").Append(&userB).Error)
+
+	// add Component Configuration has many files associations
+	assert.NoError(t, DBpool.Model(&scenarioA).Association("Files").Append(&fileA).Error)
+	assert.NoError(t, DBpool.Model(&scenarioA).Association("Files").Append(&fileB).Error)
 
 	// add scenario has many component configurations associations
 	assert.NoError(t, DBpool.Model(&scenarioA).Association("ComponentConfigurations").Append(&configA).Error)
@@ -199,6 +209,14 @@ func TestScenarioAssociations(t *testing.T) {
 	if len(dashboards) != 2 {
 		assert.Fail(t, "Scenario Associations",
 			"Expected to have %v Dashboards. Has %v.", 2, len(dashboards))
+	}
+
+	// Get files of scenario1
+	var files []File
+	assert.NoError(t, DBpool.Model(&scenario1).Related(&files, "Files").Error)
+	if len(files) != 2 {
+		assert.Fail(t, "Scenario Associations",
+			"Expected to have %v Files. Has %v.", 2, len(files))
 	}
 }
 
@@ -249,10 +267,6 @@ func TestComponentConfigurationAssociations(t *testing.T) {
 	outSignalB := Signal{Direction: "out"}
 	inSignalA := Signal{Direction: "in"}
 	inSignalB := Signal{Direction: "in"}
-	fileA := File{}
-	fileB := File{}
-	fileC := File{}
-	fileD := File{}
 	icA := InfrastructureComponent{}
 	icB := InfrastructureComponent{}
 
@@ -266,12 +280,6 @@ func TestComponentConfigurationAssociations(t *testing.T) {
 	assert.NoError(t, DBpool.Create(&inSignalA).Error)
 	assert.NoError(t, DBpool.Create(&inSignalB).Error)
 
-	// add files to DB
-	assert.NoError(t, DBpool.Create(&fileA).Error)
-	assert.NoError(t, DBpool.Create(&fileB).Error)
-	assert.NoError(t, DBpool.Create(&fileC).Error)
-	assert.NoError(t, DBpool.Create(&fileD).Error)
-
 	// add ICs to DB
 	assert.NoError(t, DBpool.Create(&icA).Error)
 	assert.NoError(t, DBpool.Create(&icB).Error)
@@ -281,10 +289,6 @@ func TestComponentConfigurationAssociations(t *testing.T) {
 	assert.NoError(t, DBpool.Model(&configA).Association("InputMapping").Append(&inSignalB).Error)
 	assert.NoError(t, DBpool.Model(&configA).Association("OutputMapping").Append(&outSignalA).Error)
 	assert.NoError(t, DBpool.Model(&configA).Association("OutputMapping").Append(&outSignalB).Error)
-
-	// add Component Configuration has many files associations
-	assert.NoError(t, DBpool.Model(&configA).Association("Files").Append(&fileC).Error)
-	assert.NoError(t, DBpool.Model(&configA).Association("Files").Append(&fileD).Error)
 
 	// associate Component Configurations with IC
 	assert.NoError(t, DBpool.Model(&icA).Association("ComponentConfigurations").Append(&configA).Error)
@@ -306,13 +310,6 @@ func TestComponentConfigurationAssociations(t *testing.T) {
 			"Expected to have %v Output Signals. Has %v.", 2, len(signals))
 	}
 
-	// Get files of config1
-	var files []File
-	assert.NoError(t, DBpool.Model(&config1).Related(&files, "Files").Error)
-	if len(files) != 2 {
-		assert.Fail(t, "ComponentConfiguration Associations",
-			"Expected to have %v Files. Has %v.", 2, len(files))
-	}
 }
 
 func TestDashboardAssociations(t *testing.T) {
@@ -358,35 +355,13 @@ func TestWidgetAssociations(t *testing.T) {
 	// create copies of global test data
 	widgetA := Widget{}
 	widgetB := Widget{}
-	fileA := File{}
-	fileB := File{}
-	fileC := File{}
-	fileD := File{}
 
 	// add widgets to DB
 	assert.NoError(t, DBpool.Create(&widgetA).Error)
 	assert.NoError(t, DBpool.Create(&widgetB).Error)
 
-	// add files to DB
-	assert.NoError(t, DBpool.Create(&fileA).Error)
-	assert.NoError(t, DBpool.Create(&fileB).Error)
-	assert.NoError(t, DBpool.Create(&fileC).Error)
-	assert.NoError(t, DBpool.Create(&fileD).Error)
-
-	// add widget has many files associations to DB
-	assert.NoError(t, DBpool.Model(&widgetA).Association("Files").Append(&fileA).Error)
-	assert.NoError(t, DBpool.Model(&widgetA).Association("Files").Append(&fileB).Error)
-
 	var widget1 Widget
 	assert.NoError(t, DBpool.Find(&widget1, 1).Error, fmt.Sprintf("Find Widget with ID=1"))
-
-	// Get files of widget
-	var files []File
-	assert.NoError(t, DBpool.Model(&widget1).Related(&files, "Files").Error)
-	if len(files) != 2 {
-		assert.Fail(t, "Widget Associations",
-			"Expected to have %v Files. Has %v.", 2, len(files))
-	}
 }
 
 func TestFileAssociations(t *testing.T) {

@@ -24,14 +24,11 @@ package file
 import (
 	"fmt"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
-	"net/http"
-	"strconv"
-
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/scenario"
 	"github.com/gin-gonic/gin"
+	"net/http"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/component-configuration"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/widget"
 )
 
 func RegisterFileEndpoints(r *gin.RouterGroup) {
@@ -43,57 +40,28 @@ func RegisterFileEndpoints(r *gin.RouterGroup) {
 }
 
 // getFiles godoc
-// @Summary Get all files of a specific component configuration or widget
+// @Summary Get all files of a specific scenario
 // @ID getFiles
 // @Tags files
 // @Produce json
-// @Success 200 {object} docs.ResponseFiles "Files which belong to config or widget"
+// @Success 200 {object} docs.ResponseFiles "Files which belong to scenario"
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param Authorization header string true "Authorization token"
-// @Param objectType query string true "Set to config for files of component configuration, set to widget for files of widget"
-// @Param objectID query int true "ID of either config or widget of which files are requested"
+// @Param scenarioID query int true "Scenario ID"
 // @Router /files [get]
 func getFiles(c *gin.Context) {
 
-	var err error
-	objectType := c.Request.URL.Query().Get("objectType")
-	if objectType != "config" && objectType != "widget" {
-		helper.BadRequestError(c, fmt.Sprintf("Object type not supported for files: %s", objectType))
-		return
-	}
-	objectID_s := c.Request.URL.Query().Get("objectID")
-	objectID, err := strconv.Atoi(objectID_s)
-	if err != nil {
-		helper.BadRequestError(c, fmt.Sprintf("Error on ID conversion: %s", err.Error()))
-		return
-	}
-
-	//Check access
-	var ok bool
-	var m component_configuration.ComponentConfiguration
-	var w widget.Widget
-	if objectType == "config" {
-		ok, m = component_configuration.CheckPermissions(c, database.Read, "body", objectID)
-	} else {
-		ok, w = widget.CheckPermissions(c, database.Read, objectID)
-	}
+	ok, so := scenario.CheckPermissions(c, database.Read, "query", -1)
 	if !ok {
 		return
 	}
 
 	// get meta data of files
 	db := database.GetDB()
-
 	var files []database.File
-
-	if objectType == "config" {
-		err = db.Order("ID asc").Model(&m).Related(&files, "Files").Error
-	} else {
-		err = db.Order("ID asc").Model(&w).Related(&files, "Files").Error
-	}
-
+	err := db.Order("ID asc").Model(so).Related(&files, "Files").Error
 	if !helper.DBError(c, err) {
 		c.JSON(http.StatusOK, gin.H{"files": files})
 	}
@@ -101,7 +69,7 @@ func getFiles(c *gin.Context) {
 }
 
 // addFile godoc
-// @Summary Add a file to a specific component config or widget
+// @Summary Add a file to a specific scenario
 // @ID addFile
 // @Tags files
 // @Produce json
@@ -118,35 +86,13 @@ func getFiles(c *gin.Context) {
 // @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param Authorization header string true "Authorization token"
 // @Param inputFile formData file true "File to be uploaded"
-// @Param objectType query string true "Set to config for files of component config, set to widget for files of widget"
-// @Param objectID query int true "ID of either config or widget of which files are requested"
+// @Param scenarioID query int true "ID of scenario to which file shall be added"
 // @Router /files [post]
 func addFile(c *gin.Context) {
 
-	objectType := c.Request.URL.Query().Get("objectType")
-	if objectType != "config" && objectType != "widget" {
-		helper.BadRequestError(c, fmt.Sprintf("Object type not supported for files: %s", objectType))
+	ok, so := scenario.CheckPermissions(c, database.Read, "query", -1)
+	if !ok {
 		return
-	}
-	objectID_s := c.Request.URL.Query().Get("objectID")
-	objectID, err := strconv.Atoi(objectID_s)
-	if err != nil {
-		helper.BadRequestError(c, fmt.Sprintf("Error on ID conversion: %s", err.Error()))
-		return
-	}
-
-	// Check access
-	var ok bool
-	if objectType == "config" {
-		ok, _ = component_configuration.CheckPermissions(c, database.Update, "body", objectID)
-		if !ok {
-			return
-		}
-	} else {
-		ok, _ = widget.CheckPermissions(c, database.Update, objectID)
-		if !ok {
-			return
-		}
 	}
 
 	// Extract file from POST request form
@@ -157,7 +103,7 @@ func addFile(c *gin.Context) {
 	}
 
 	var newFile File
-	err = newFile.register(file_header, objectType, uint(objectID))
+	err = newFile.register(file_header, so.ID)
 	if !helper.DBError(c, err) {
 		c.JSON(http.StatusOK, gin.H{"file": newFile.File})
 	}

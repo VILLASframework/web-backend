@@ -736,7 +736,7 @@
                 "tags": [
                     "files"
                 ],
-                "summary": "Get all files of a specific component configuration or widget",
+                "summary": "Get all files of a specific scenario",
                 "operationId": "getFiles",
                 "parameters": [
                     {
@@ -747,23 +747,16 @@
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "Set to config for files of component configuration, set to widget for files of widget",
-                        "name": "objectType",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
                         "type": "integer",
-                        "description": "ID of either config or widget of which files are requested",
-                        "name": "objectID",
+                        "description": "Scenario ID",
+                        "name": "scenarioID",
                         "in": "query",
                         "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Files which belong to config or widget",
+                        "description": "Files which belong to scenario",
                         "schema": {
                             "type": "object",
                             "$ref": "#/definitions/docs.ResponseFiles"
@@ -807,7 +800,7 @@
                 "tags": [
                     "files"
                 ],
-                "summary": "Add a file to a specific component config or widget",
+                "summary": "Add a file to a specific scenario",
                 "operationId": "addFile",
                 "parameters": [
                     {
@@ -825,16 +818,9 @@
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "Set to config for files of component config, set to widget for files of widget",
-                        "name": "objectType",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
                         "type": "integer",
-                        "description": "ID of either config or widget of which files are requested",
-                        "name": "objectID",
+                        "description": "ID of scenario to which file shall be added",
+                        "name": "scenarioID",
                         "in": "query",
                         "required": true
                     }
@@ -3233,10 +3219,6 @@
         "database.File": {
             "type": "object",
             "properties": {
-                "configID": {
-                    "description": "ID of Component Configuration to which file belongs",
-                    "type": "integer"
-                },
                 "date": {
                     "description": "Last modification time of file",
                     "type": "string"
@@ -3248,6 +3230,10 @@
                     "description": "Name of file",
                     "type": "string"
                 },
+                "scenarioID": {
+                    "description": "ID of Scenario to which file belongs",
+                    "type": "integer"
+                },
                 "size": {
                     "description": "Size of file (in byte)",
                     "type": "integer"
@@ -3255,16 +3241,16 @@
                 "type": {
                     "description": "Type of file (MIME type)",
                     "type": "string"
-                },
-                "widgetID": {
-                    "description": "ID of widget to which file belongs",
-                    "type": "integer"
                 }
             }
         },
         "database.InfrastructureComponent": {
             "type": "object",
             "properties": {
+                "category": {
+                    "description": "Category of IC (simulator, gateway, database, etc.)",
+                    "type": "string"
+                },
                 "host": {
                     "description": "Host if the IC",
                     "type": "string"
@@ -3272,8 +3258,8 @@
                 "id": {
                     "type": "integer"
                 },
-                "modelType": {
-                    "description": "Model type supported by the IC",
+                "name": {
+                    "description": "Name of the IC",
                     "type": "string"
                 },
                 "properties": {
@@ -3290,6 +3276,10 @@
                 },
                 "stateUpdateAt": {
                     "description": "Time of last state update",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "Type of IC (RTDS, VILLASnode, RTDS, etc.)",
                     "type": "string"
                 },
                 "uptime": {
@@ -3644,22 +3634,29 @@
         "infrastructure_component.validNewIC": {
             "type": "object",
             "required": [
+                "Category",
                 "Host",
-                "Modeltype",
-                "Properties",
+                "Name",
+                "Type",
                 "UUID"
             ],
             "properties": {
+                "Category": {
+                    "type": "string"
+                },
                 "Host": {
                     "type": "string"
                 },
-                "Modeltype": {
+                "Name": {
                     "type": "string"
                 },
                 "Properties": {
                     "type": "string"
                 },
                 "State": {
+                    "type": "string"
+                },
+                "Type": {
                     "type": "string"
                 },
                 "UUID": {
@@ -3670,16 +3667,22 @@
         "infrastructure_component.validUpdatedIC": {
             "type": "object",
             "properties": {
+                "Category": {
+                    "type": "string"
+                },
                 "Host": {
                     "type": "string"
                 },
-                "Modeltype": {
+                "Name": {
                     "type": "string"
                 },
                 "Properties": {
                     "type": "string"
                 },
                 "State": {
+                    "type": "string"
+                },
+                "Type": {
                     "type": "string"
                 },
                 "UUID": {
