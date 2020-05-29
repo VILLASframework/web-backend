@@ -45,7 +45,7 @@ type ConfigRequest struct {
 	ScenarioID      uint           `json:"scenarioID,omitempty"`
 	ICID            uint           `json:"icID,omitempty"`
 	StartParameters postgres.Jsonb `json:"startParameters,omitempty"`
-	SelectedFileID  uint           `json:"selectedFileID,omitempty"`
+	SelectedFileID  int            `json:"selectedFileID,omitempty"`
 }
 
 type ICRequest struct {
