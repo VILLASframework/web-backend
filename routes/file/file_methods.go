@@ -22,6 +22,7 @@
 package file
 
 import (
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/scenario"
 	"github.com/gin-gonic/gin"
 	"io/ioutil"
 	"mime/multipart"
@@ -31,8 +32,6 @@ import (
 	"time"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/component-configuration"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/widget"
 )
 
 type File struct {
@@ -69,37 +68,14 @@ func (f *File) download(c *gin.Context) error {
 	return nil
 }
 
-func (f *File) register(fileHeader *multipart.FileHeader, objectType string, objectID uint) error {
+func (f *File) register(fileHeader *multipart.FileHeader, scenarioID uint) error {
 
 	// Obtain properties of file
 	f.Type = fileHeader.Header.Get("Content-Type")
 	f.Name = filepath.Base(fileHeader.Filename)
-	//f.Path = filepath.Join(getFolderName(objectType, objectID), f.Name)
 	f.Size = uint(fileHeader.Size)
 	f.Date = time.Now().String()
-
-	var m component_configuration.ComponentConfiguration
-	var w widget.Widget
-	var err error
-	if objectType == "config" {
-		// check if config exists
-		err = m.ByID(objectID)
-		f.WidgetID = 0
-		f.ConfigID = objectID
-		if err != nil {
-			return err
-		}
-
-	} else {
-		// check if widget exists
-		f.WidgetID = objectID
-		f.ConfigID = 0
-		err = w.ByID(uint(objectID))
-		if err != nil {
-			return err
-		}
-
-	}
+	f.ScenarioID = scenarioID
 
 	// set file data
 	fileContent, err := fileHeader.Open()
@@ -116,22 +92,18 @@ func (f *File) register(fileHeader *multipart.FileHeader, objectType string, obj
 		return err
 	}
 
-	// Create association to config or widget
-	if objectType == "config" {
-		db := database.GetDB()
-		err := db.Model(&m).Association("Files").Append(f).Error
-		if err != nil {
-			return err
-		}
-	} else {
-		db := database.GetDB()
-		err := db.Model(&w).Association("Files").Append(f).Error
-		if err != nil {
-			return err
-		}
+	// Create association to scenario
+	db := database.GetDB()
+
+	var so scenario.Scenario
+	err = so.ByID(scenarioID)
+	if err != nil {
+		return err
 	}
 
-	return nil
+	err = db.Model(&so).Association("Files").Append(f).Error
+
+	return err
 }
 
 func (f *File) update(fileHeader *multipart.FileHeader) error {
@@ -156,32 +128,19 @@ func (f *File) delete() error {
 
 	db := database.GetDB()
 
-	if f.WidgetID > 0 {
-		// remove association between file and widget
-		var w widget.Widget
-		err := w.ByID(f.WidgetID)
-		if err != nil {
-			return err
-		}
-		err = db.Model(&w).Association("Files").Delete(f).Error
-		if err != nil {
-			return err
-		}
-	} else {
-		// remove association between file and config
-		var m component_configuration.ComponentConfiguration
-		err := m.ByID(f.ConfigID)
-		if err != nil {
-			return err
-		}
-		err = db.Model(&m).Association("Files").Delete(f).Error
-		if err != nil {
-			return err
-		}
+	// remove association between file and scenario
+	var so scenario.Scenario
+	err := so.ByID(f.ScenarioID)
+	if err != nil {
+		return err
+	}
+	err = db.Model(&so).Association("Files").Delete(f).Error
+	if err != nil {
+		return err
 	}
 
 	// delete file from DB
-	err := db.Delete(f).Error
+	err = db.Delete(f).Error
 
 	return err
 }

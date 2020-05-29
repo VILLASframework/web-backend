@@ -69,6 +69,8 @@ type Scenario struct {
 	ComponentConfigurations []ComponentConfiguration `json:"-" gorm:"foreignkey:ScenarioID" `
 	// Dashboards that belong to the Scenario
 	Dashboards []Dashboard `json:"-" gorm:"foreignkey:ScenarioID" `
+	// Files that belong to the Scenario (for example images, models, etc.)
+	Files []File `json:"-" gorm:"foreignkey:ScenarioID"`
 }
 
 // ComponentConfiguration data model
@@ -90,8 +92,6 @@ type ComponentConfiguration struct {
 	OutputMapping []Signal `json:"-" gorm:"foreignkey:ConfigID"`
 	// Mapping of input signals of the Component Configuration, order of signals is important
 	InputMapping []Signal `json:"-" gorm:"foreignkey:ConfigID"`
-	// Files of Component Configuration (can be CIM and other ComponentConfiguration file formats)
-	Files []File `json:"-" gorm:"foreignkey:ConfigID"`
 	// Currently selected FileID
 	SelectedFileID uint `json:"selectedFileID" gorm:"default:0"`
 }
@@ -178,8 +178,6 @@ type Widget struct {
 	CustomProperties postgres.Jsonb `json:"customProperties"`
 	// ID of dashboard to which widget belongs
 	DashboardID uint `json:"dashboardID"`
-	// Files that belong to widget (for example images)
-	Files []File `json:"-" gorm:"foreignkey:WidgetID"`
 	// IDs of signals that widget uses
 	SignalIDs pq.Int64Array `json:"signalIDs" gorm:"type:integer[]"`
 }
@@ -195,10 +193,8 @@ type File struct {
 	Size uint `json:"size"`
 	// Last modification time of file
 	Date string `json:"date"`
-	// ID of Component Configuration to which file belongs
-	ConfigID uint `json:"configID"`
-	// ID of widget to which file belongs
-	WidgetID uint `json:"widgetID"`
+	// ID of Scenario to which file belongs
+	ScenarioID uint `json:"scenarioID"`
 	// File itself
 	FileData []byte `json:"-" gorm:"column:FileData"`
 }
