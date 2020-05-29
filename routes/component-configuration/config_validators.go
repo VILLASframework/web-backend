@@ -35,14 +35,14 @@ type validNewConfig struct {
 	ScenarioID      uint           `form:"ScenarioID" validate:"required"`
 	ICID            uint           `form:"ICID" validate:"required"`
 	StartParameters postgres.Jsonb `form:"StartParameters" validate:"required"`
-	SelectedFileID  uint           `form:"SelectedFileID" validate:"omitempty"`
+	SelectedFileID  int            `form:"SelectedFileID" validate:"omitempty"`
 }
 
 type validUpdatedConfig struct {
 	Name            string         `form:"Name" validate:"omitempty"`
 	ICID            uint           `form:"ICID" validate:"omitempty"`
 	StartParameters postgres.Jsonb `form:"StartParameters" validate:"omitempty"`
-	SelectedFileID  uint           `form:"SelectedFileID" validate:"omitempty"`
+	SelectedFileID  int            `form:"SelectedFileID" validate:"omitempty"`
 }
 
 type addConfigRequest struct {
