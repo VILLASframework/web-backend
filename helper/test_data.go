@@ -107,6 +107,7 @@ var ICA = database.InfrastructureComponent{
 var ICB = database.InfrastructureComponent{
 	UUID:          "7be0322d-354e-431e-84bd-ae4c9633138b",
 	Host:          "https://villas.k8s.eonerc.rwth-aachen.de/ws/ws_sig",
+	APIHost:       "https://villas.k8s.eonerc.rwth-aachen.de/ws/api/v1",
 	Type:          "VILLASnode Signal Generator",
 	Category:      "Signal Generator",
 	Name:          "ACS Demo Signals",
