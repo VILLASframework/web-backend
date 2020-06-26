@@ -41,6 +41,7 @@ var router *gin.Engine
 type ICRequest struct {
 	UUID       string         `json:"uuid,omitempty"`
 	Host       string         `json:"host,omitempty"`
+	APIHost    string         `json:"apihost,omitempty"`
 	Type       string         `json:"type,omitempty"`
 	Name       string         `json:"name,omitempty"`
 	Category   string         `json:"category,omitempty"`

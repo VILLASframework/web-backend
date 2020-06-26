@@ -142,6 +142,9 @@ definitions:
     type: object
   database.InfrastructureComponent:
     properties:
+      apihost:
+        description: Host of API for IC
+        type: string
       category:
         description: Category of IC (simulator, gateway, database, etc.)
         type: string
@@ -408,6 +411,8 @@ definitions:
     type: object
   infrastructure_component.validNewIC:
     properties:
+      APIHost:
+        type: string
       Category:
         type: string
       Host:
@@ -431,6 +436,8 @@ definitions:
     type: object
   infrastructure_component.validUpdatedIC:
     properties:
+      APIHost:
+        type: string
       Category:
         type: string
       Host:

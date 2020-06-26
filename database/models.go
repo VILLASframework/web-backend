@@ -120,6 +120,8 @@ type InfrastructureComponent struct {
 	Name string `json:"name" gorm:"default:''"`
 	// Host if the IC
 	Host string `json:"host" gorm:"default:''"`
+	// Host of API for IC
+	APIHost string `json:"apihost" gorm:"default:''"`
 	// Category of IC (simulator, gateway, database, etc.)
 	Category string `json:"category" gorm:"default:''"`
 	// Type of IC (RTDS, VILLASnode, RTDS, etc.)

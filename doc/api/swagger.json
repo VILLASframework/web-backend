@@ -3041,6 +3041,10 @@
         "database.InfrastructureComponent": {
             "type": "object",
             "properties": {
+                "apihost": {
+                    "description": "Host of API for IC",
+                    "type": "string"
+                },
                 "category": {
                     "description": "Category of IC (simulator, gateway, database, etc.)",
                     "type": "string"
@@ -3435,6 +3439,9 @@
                 "UUID"
             ],
             "properties": {
+                "APIHost": {
+                    "type": "string"
+                },
                 "Category": {
                     "type": "string"
                 },
@@ -3461,6 +3468,9 @@
         "infrastructure_component.validUpdatedIC": {
             "type": "object",
             "properties": {
+                "APIHost": {
+                    "type": "string"
+                },
                 "Category": {
                     "type": "string"
                 },

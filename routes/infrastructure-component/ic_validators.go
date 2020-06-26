@@ -33,6 +33,7 @@ var validate *validator.Validate
 type validNewIC struct {
 	UUID       string         `form:"UUID" validate:"required"`
 	Host       string         `form:"Host" validate:"required"`
+	APIHost    string         `form:"APIHost" validate:"omitempty"`
 	Type       string         `form:"Type" validate:"required"`
 	Name       string         `form:"Name" validate:"required"`
 	Category   string         `form:"Category" validate:"required"`
@@ -43,6 +44,7 @@ type validNewIC struct {
 type validUpdatedIC struct {
 	UUID       string         `form:"UUID" validate:"omitempty"`
 	Host       string         `form:"Host" validate:"omitempty"`
+	APIHost    string         `form:"APIHost" validate:"omitempty"`
 	Type       string         `form:"Type" validate:"omitempty"`
 	Name       string         `form:"Name" validate:"omitempty"`
 	Category   string         `form:"Category" validate:"omitempty"`
@@ -75,6 +77,7 @@ func (r *addICRequest) createIC() InfrastructureComponent {
 
 	s.UUID = r.InfrastructureComponent.UUID
 	s.Host = r.InfrastructureComponent.Host
+	s.APIHost = r.InfrastructureComponent.APIHost
 	s.Type = r.InfrastructureComponent.Type
 	s.Name = r.InfrastructureComponent.Name
 	s.Category = r.InfrastructureComponent.Category
@@ -95,6 +98,10 @@ func (r *updateICRequest) updatedIC(oldIC InfrastructureComponent) Infrastructur
 
 	if r.InfrastructureComponent.Host != "" {
 		s.Host = r.InfrastructureComponent.Host
+	}
+
+	if r.InfrastructureComponent.APIHost != "" {
+		s.APIHost = r.InfrastructureComponent.APIHost
 	}
 
 	if r.InfrastructureComponent.Type != "" {
