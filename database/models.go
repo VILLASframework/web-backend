@@ -145,6 +145,8 @@ type Dashboard struct {
 	Name string `json:"name" gorm:"not null"`
 	// Grid of dashboard
 	Grid int `json:"grid" gorm:"default:15"`
+	// Height of dashboard
+	Height int `json:"height"`
 	// ID of scenario to which dashboard belongs
 	ScenarioID uint `json:"scenarioID"`
 	// Widgets that belong to dashboard

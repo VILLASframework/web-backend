@@ -13,7 +13,6 @@
         },
         "version": "2.0"
     },
-    "host": "{{.Host}}",
     "basePath": "/api/v2",
     "paths": {
         "/authenticate": {
@@ -45,21 +44,18 @@
                     "200": {
                         "description": "JSON web token, success status, message and authenticated user object",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseAuthenticate"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error.",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     }
@@ -96,28 +92,24 @@
                     "200": {
                         "description": "Component configurations which belong to scenario",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseConfigs"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     }
@@ -158,35 +150,30 @@
                     "200": {
                         "description": "Component configuration that was added",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseConfig"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     }
@@ -223,35 +210,30 @@
                     "200": {
                         "description": "component configuration that was requested",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseConfig"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     }
@@ -299,35 +281,30 @@
                     "200": {
                         "description": "Component configuration that was added",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseConfig"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     }
@@ -362,35 +339,30 @@
                     "200": {
                         "description": "component configuration that was deleted",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseConfig"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     }
@@ -427,28 +399,24 @@
                     "200": {
                         "description": "Dashboards which belong to scenario",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseDashboards"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     }
@@ -489,35 +457,30 @@
                     "200": {
                         "description": "Dashboard that was added",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseDashboard"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     }
@@ -554,35 +517,30 @@
                     "200": {
                         "description": "Dashboard that was requested",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseDashboard"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     }
@@ -630,35 +588,30 @@
                     "200": {
                         "description": "Dashboard that was updated",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseDashboard"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     }
@@ -693,35 +646,30 @@
                     "200": {
                         "description": "Dashboard that was deleted",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseDashboard"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     }
@@ -758,28 +706,24 @@
                     "200": {
                         "description": "Files which belong to scenario",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseFiles"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     }
@@ -829,35 +773,30 @@
                     "200": {
                         "description": "File that was added",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseFile"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     }
@@ -899,35 +838,30 @@
                     "200": {
                         "description": "File that was requested",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseFile"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     }
@@ -977,35 +911,30 @@
                     "200": {
                         "description": "File that was updated",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseFile"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     }
@@ -1040,35 +969,30 @@
                     "200": {
                         "description": "File that was deleted",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseFile"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     }
@@ -1092,7 +1016,6 @@
                     "500": {
                         "description": "Backend is NOT healthy",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     }
@@ -1122,28 +1045,24 @@
                     "200": {
                         "description": "ICs requested",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseICs"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     }
@@ -1184,35 +1103,30 @@
                     "200": {
                         "description": "Infrastructure Component that was added",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseIC"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     }
@@ -1249,35 +1163,30 @@
                     "200": {
                         "description": "Infrastructure Component that was requested",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseIC"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     }
@@ -1325,35 +1234,30 @@
                     "200": {
                         "description": "Infrastructure Component that was updated",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseIC"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     }
@@ -1388,35 +1292,30 @@
                     "200": {
                         "description": "Infrastructure Component that was deleted",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseIC"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     }
@@ -1453,35 +1352,30 @@
                     "200": {
                         "description": "Action sent successfully",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     }
@@ -1518,35 +1412,30 @@
                     "200": {
                         "description": "Configs requested by user",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseConfigs"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     }
@@ -1593,28 +1482,24 @@
                     "200": {
                         "description": "Scenarios to which user has access",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseScenarios"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     }
@@ -1655,35 +1540,30 @@
                     "200": {
                         "description": "scenario that was added",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseScenario"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     }
@@ -1720,28 +1600,24 @@
                     "200": {
                         "description": "Scenario requested by user",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseScenario"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     }
@@ -1789,35 +1665,30 @@
                     "200": {
                         "description": "Updated scenario.",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseScenario"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     }
@@ -1852,28 +1723,24 @@
                     "200": {
                         "description": "Deleted scenario",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseScenario"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     }
@@ -1917,28 +1784,24 @@
                     "200": {
                         "description": "User that was added to scenario",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseUser"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     }
@@ -1980,28 +1843,24 @@
                     "200": {
                         "description": "User that was deleted from scenario",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseUser"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     }
@@ -2038,28 +1897,24 @@
                     "200": {
                         "description": "Array of users that have access to the scenario",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseUsers"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     }
@@ -2103,28 +1958,24 @@
                     "200": {
                         "description": "Signals which belong to component configuration",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseSignals"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     }
@@ -2165,35 +2016,30 @@
                     "200": {
                         "description": "Signal that was added",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseSignal"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     }
@@ -2230,35 +2076,30 @@
                     "200": {
                         "description": "Signal that was requested",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseSignal"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     }
@@ -2303,35 +2144,30 @@
                     "200": {
                         "description": "Signal that was updated",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseSignal"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     }
@@ -2366,35 +2202,30 @@
                     "200": {
                         "description": "Signal that was deleted",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseSignal"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     }
@@ -2424,28 +2255,24 @@
                     "200": {
                         "description": "Array of users",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseUsers"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     }
@@ -2486,28 +2313,24 @@
                     "200": {
                         "description": "Contains added user object",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseUser"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     }
@@ -2544,35 +2367,30 @@
                     "200": {
                         "description": "requested user",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseUser"
                         }
                     },
                     "403": {
                         "description": "Access forbidden.",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     }
@@ -2620,42 +2438,36 @@
                     "200": {
                         "description": "Contains updated user",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseUser"
                         }
                     },
                     "400": {
                         "description": "Bad request.",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "403": {
                         "description": "Access forbidden.",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     }
@@ -2690,28 +2502,24 @@
                     "200": {
                         "description": "deleted user",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseUser"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     }
@@ -2748,28 +2556,24 @@
                     "200": {
                         "description": "Widgets to which belong to dashboard",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseWidgets"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     }
@@ -2810,35 +2614,30 @@
                     "200": {
                         "description": "Widget that was added",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseWidget"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     }
@@ -2875,35 +2674,30 @@
                     "200": {
                         "description": "Widget that was requested",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseWidget"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     }
@@ -2951,35 +2745,30 @@
                     "200": {
                         "description": "Widget that was updated",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseWidget"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     }
@@ -3014,35 +2803,30 @@
                     "200": {
                         "description": "Widget that was deleted",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseWidget"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/docs.ResponseError"
                         }
                     }
@@ -3141,6 +2925,9 @@
                 "Grid": {
                     "type": "integer"
                 },
+                "Height": {
+                    "type": "integer"
+                },
                 "Name": {
                     "type": "string"
                 },
@@ -3153,6 +2940,9 @@
             "type": "object",
             "properties": {
                 "grid": {
+                    "type": "integer"
+                },
+                "height": {
                     "type": "integer"
                 },
                 "name": {
@@ -3201,6 +2991,10 @@
             "properties": {
                 "grid": {
                     "description": "Grid of dashboard",
+                    "type": "integer"
+                },
+                "height": {
+                    "description": "Height of dashboard",
                     "type": "integer"
                 },
                 "id": {

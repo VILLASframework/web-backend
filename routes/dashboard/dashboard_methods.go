@@ -70,8 +70,9 @@ func (d *Dashboard) update(modifiedDab Dashboard) error {
 	db := database.GetDB()
 
 	err := db.Model(d).Updates(map[string]interface{}{
-		"Name": modifiedDab.Name,
-		"Grid": modifiedDab.Grid,
+		"Name":   modifiedDab.Name,
+		"Grid":   modifiedDab.Grid,
+		"Height": modifiedDab.Height,
 	}).Error
 
 	return err

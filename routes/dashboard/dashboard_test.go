@@ -41,6 +41,7 @@ var router *gin.Engine
 type DashboardRequest struct {
 	Name       string `json:"name,omitempty"`
 	Grid       int    `json:"grid,omitempty"`
+	Height     int    `json:"height,omitempty"`
 	ScenarioID uint   `json:"scenarioID,omitempty"`
 }
 

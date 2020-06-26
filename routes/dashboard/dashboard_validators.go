@@ -30,12 +30,14 @@ var validate *validator.Validate
 type validNewDashboard struct {
 	Name       string `form:"Name" validate:"required"`
 	Grid       int    `form:"Grid" validate:"required"`
+	Height     int    `form:"Height" validate:"omitempty"`
 	ScenarioID uint   `form:"ScenarioID" validate:"required"`
 }
 
 type validUpdatedDashboard struct {
-	Name string `form:"Name" validate:"omitempty" json:"name"`
-	Grid int    `form:"Grid" validate:"omitempty" json:"grid"`
+	Name   string `form:"Name" validate:"omitempty" json:"name"`
+	Height int    `form:"Height" validate:"omitempty" json:"height"`
+	Grid   int    `form:"Grid" validate:"omitempty" json:"grid"`
 }
 
 type addDashboardRequest struct {
@@ -63,6 +65,7 @@ func (r *addDashboardRequest) createDashboard() Dashboard {
 
 	s.Name = r.Dashboard.Name
 	s.Grid = r.Dashboard.Grid
+	s.Height = r.Dashboard.Height
 	s.ScenarioID = r.Dashboard.ScenarioID
 
 	return s
@@ -78,6 +81,10 @@ func (r *updateDashboardRequest) updatedDashboard(oldDashboard Dashboard) Dashbo
 
 	if r.Dashboard.Grid != 0 {
 		s.Grid = r.Dashboard.Grid
+	}
+
+	if r.Dashboard.Height > 0 {
+		s.Height = r.Dashboard.Height
 	}
 
 	return s
