@@ -3132,6 +3132,10 @@
                     "description": "Name of Signal",
                     "type": "string"
                 },
+                "scalingFactor": {
+                    "description": "Scaling factor for the signal raw value (defaults to 1.0)",
+                    "type": "number"
+                },
                 "unit": {
                     "description": "Unit of Signal",
                     "type": "string"
@@ -3583,6 +3587,9 @@
                 "Name": {
                     "type": "string"
                 },
+                "ScalingFactor": {
+                    "type": "number"
+                },
                 "Unit": {
                     "type": "string"
                 }
@@ -3596,6 +3603,9 @@
                 },
                 "Name": {
                     "type": "string"
+                },
+                "ScalingFactor": {
+                    "type": "number"
                 },
                 "Unit": {
                     "type": "string"

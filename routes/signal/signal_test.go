@@ -40,11 +40,12 @@ import (
 var router *gin.Engine
 
 type SignalRequest struct {
-	Name      string `json:"name,omitempty"`
-	Unit      string `json:"unit,omitempty"`
-	Index     uint   `json:"index,omitempty"`
-	Direction string `json:"direction,omitempty"`
-	ConfigID  uint   `json:"configID,omitempty"`
+	Name          string  `json:"name,omitempty"`
+	Unit          string  `json:"unit,omitempty"`
+	Index         uint    `json:"index,omitempty"`
+	Direction     string  `json:"direction,omitempty"`
+	ScalingFactor float32 `json:"scalingFactor,omitempty"`
+	ConfigID      uint    `json:"configID,omitempty"`
 }
 
 type ConfigRequest struct {

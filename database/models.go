@@ -107,6 +107,8 @@ type Signal struct {
 	Index uint `json:"index"`
 	// Direction of the signal (in or out)
 	Direction string `json:"direction"`
+	// Scaling factor for the signal raw value (defaults to 1.0)
+	ScalingFactor float32 `json:"scalingFactor" gorm:"default:1"`
 	// ID of Component Configuration
 	ConfigID uint `json:"configID"`
 }

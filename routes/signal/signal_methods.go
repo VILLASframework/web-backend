@@ -87,9 +87,10 @@ func (s *Signal) update(modifiedSignal Signal) error {
 	db := database.GetDB()
 
 	err := db.Model(s).Updates(map[string]interface{}{
-		"Name":  modifiedSignal.Name,
-		"Unit":  modifiedSignal.Unit,
-		"Index": modifiedSignal.Index,
+		"Name":          modifiedSignal.Name,
+		"Unit":          modifiedSignal.Unit,
+		"Index":         modifiedSignal.Index,
+		"ScalingFactor": modifiedSignal.ScalingFactor,
 	}).Error
 
 	return err

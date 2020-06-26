@@ -28,17 +28,19 @@ import (
 var validate *validator.Validate
 
 type validNewSignal struct {
-	Name      string `form:"Name" validate:"required"`
-	Unit      string `form:"unit" validate:"omitempty"`
-	Index     uint   `form:"index" validate:"required"`
-	Direction string `form:"direction" validate:"required,oneof=in out"`
-	ConfigID  uint   `form:"configID" validate:"required"`
+	Name          string  `form:"Name" validate:"required"`
+	Unit          string  `form:"unit" validate:"omitempty"`
+	Index         uint    `form:"index" validate:"required"`
+	Direction     string  `form:"direction" validate:"required,oneof=in out"`
+	ScalingFactor float32 `form:"scalingFactor" validate:"omitempty"`
+	ConfigID      uint    `form:"configID" validate:"required"`
 }
 
 type validUpdatedSignal struct {
-	Name  string `form:"Name" validate:"omitempty"`
-	Unit  string `form:"unit" validate:"omitempty"`
-	Index uint   `form:"index" validate:"omitempty"`
+	Name          string  `form:"Name" validate:"omitempty"`
+	Unit          string  `form:"unit" validate:"omitempty"`
+	Index         uint    `form:"index" validate:"omitempty"`
+	ScalingFactor float32 `form:"scalingFactor" validate:"omitempty"`
 }
 
 type addSignalRequest struct {
@@ -68,6 +70,7 @@ func (r *addSignalRequest) createSignal() Signal {
 	s.Unit = r.Signal.Unit
 	s.Index = r.Signal.Index
 	s.Direction = r.Signal.Direction
+	s.ScalingFactor = r.Signal.ScalingFactor
 	s.ConfigID = r.Signal.ConfigID
 
 	return s
@@ -88,6 +91,11 @@ func (r *updateSignalRequest) updatedSignal(oldSignal Signal) Signal {
 
 	if r.Signal.Unit != "" {
 		s.Unit = r.Signal.Unit
+	}
+
+	if r.Signal.ScalingFactor != 0 {
+		// scaling factor of 0 is not allowed
+		s.ScalingFactor = r.Signal.ScalingFactor
 	}
 
 	return s
