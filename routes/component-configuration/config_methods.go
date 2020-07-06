@@ -106,7 +106,7 @@ func (m *ComponentConfiguration) Update(modifiedConfig ComponentConfiguration) e
 		"Name":            modifiedConfig.Name,
 		"StartParameters": modifiedConfig.StartParameters,
 		"ICID":            modifiedConfig.ICID,
-		"SelectedFileID":  modifiedConfig.SelectedFileID,
+		"FileIDs":         modifiedConfig.FileIDs,
 	}).Error
 
 	return err

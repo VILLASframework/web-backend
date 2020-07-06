@@ -2862,6 +2862,12 @@
                 "StartParameters"
             ],
             "properties": {
+                "FileIDs": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
                 "ICID": {
                     "type": "integer"
                 },
@@ -2869,9 +2875,6 @@
                     "type": "string"
                 },
                 "ScenarioID": {
-                    "type": "integer"
-                },
-                "SelectedFileID": {
                     "type": "integer"
                 },
                 "StartParameters": {
@@ -2882,14 +2885,17 @@
         "component_configuration.validUpdatedConfig": {
             "type": "object",
             "properties": {
+                "FileIDs": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
                 "ICID": {
                     "type": "integer"
                 },
                 "Name": {
                     "type": "string"
-                },
-                "SelectedFileID": {
-                    "type": "integer"
                 },
                 "StartParameters": {
                     "type": "string"
@@ -2953,6 +2959,10 @@
         "database.ComponentConfiguration": {
             "type": "object",
             "properties": {
+                "fileIDs": {
+                    "description": "Array of file IDs used by the component configuration",
+                    "type": "string"
+                },
                 "icID": {
                     "description": "ID of IC associated with Component Configuration",
                     "type": "integer"
@@ -2974,10 +2984,6 @@
                 },
                 "scenarioID": {
                     "description": "ID of Scenario to which Component Configuration belongs",
-                    "type": "integer"
-                },
-                "selectedFileID": {
-                    "description": "Currently selected FileID",
                     "type": "integer"
                 },
                 "startParameters": {

@@ -92,8 +92,8 @@ type ComponentConfiguration struct {
 	OutputMapping []Signal `json:"-" gorm:"foreignkey:ConfigID"`
 	// Mapping of input signals of the Component Configuration, order of signals is important
 	InputMapping []Signal `json:"-" gorm:"foreignkey:ConfigID"`
-	// Currently selected FileID
-	SelectedFileID int `json:"selectedFileID" gorm:"default:0"`
+	// Array of file IDs used by the component configuration
+	FileIDs pq.Int64Array `json:"fileIDs" gorm:"type:integer[]"`
 }
 
 // Signal data model

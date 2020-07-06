@@ -14,13 +14,15 @@ definitions:
     type: object
   component_configuration.validNewConfig:
     properties:
+      FileIDs:
+        items:
+          type: integer
+        type: array
       ICID:
         type: integer
       Name:
         type: string
       ScenarioID:
-        type: integer
-      SelectedFileID:
         type: integer
       StartParameters:
         type: string
@@ -32,12 +34,14 @@ definitions:
     type: object
   component_configuration.validUpdatedConfig:
     properties:
+      FileIDs:
+        items:
+          type: integer
+        type: array
       ICID:
         type: integer
       Name:
         type: string
-      SelectedFileID:
-        type: integer
       StartParameters:
         type: string
     type: object
@@ -79,6 +83,9 @@ definitions:
     type: object
   database.ComponentConfiguration:
     properties:
+      fileIDs:
+        description: Array of file IDs used by the component configuration
+        type: string
       icID:
         description: ID of IC associated with Component Configuration
         type: integer
@@ -95,9 +102,6 @@ definitions:
         type: integer
       scenarioID:
         description: ID of Scenario to which Component Configuration belongs
-        type: integer
-      selectedFileID:
-        description: Currently selected FileID
         type: integer
       startParameters:
         description: Start parameters of Component Configuration as JSON
