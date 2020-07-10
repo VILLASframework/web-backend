@@ -35,14 +35,14 @@ type validNewConfig struct {
 	ScenarioID      uint           `form:"ScenarioID" validate:"required"`
 	ICID            uint           `form:"ICID" validate:"required"`
 	StartParameters postgres.Jsonb `form:"StartParameters" validate:"required"`
-	SelectedFileID  int            `form:"SelectedFileID" validate:"omitempty"`
+	FileIDs         []int64        `form:"FileIDs" validate:"omitempty"`
 }
 
 type validUpdatedConfig struct {
 	Name            string         `form:"Name" validate:"omitempty"`
 	ICID            uint           `form:"ICID" validate:"omitempty"`
 	StartParameters postgres.Jsonb `form:"StartParameters" validate:"omitempty"`
-	SelectedFileID  int            `form:"SelectedFileID" validate:"omitempty"`
+	FileIDs         []int64        `form:"FileIDs" validate:"omitempty"`
 }
 
 type addConfigRequest struct {
@@ -72,7 +72,7 @@ func (r *addConfigRequest) createConfig() ComponentConfiguration {
 	s.ScenarioID = r.Config.ScenarioID
 	s.ICID = r.Config.ICID
 	s.StartParameters = r.Config.StartParameters
-	s.SelectedFileID = r.Config.SelectedFileID
+	s.FileIDs = r.Config.FileIDs
 
 	return s
 }
@@ -89,9 +89,7 @@ func (r *updateConfigRequest) updateConfig(oldConfig ComponentConfiguration) Com
 		s.ICID = r.Config.ICID
 	}
 
-	if r.Config.SelectedFileID != 0 {
-		s.SelectedFileID = r.Config.SelectedFileID
-	}
+	s.FileIDs = r.Config.FileIDs
 
 	// only update Params if not empty
 	var emptyJson postgres.Jsonb

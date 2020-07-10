@@ -139,13 +139,13 @@ var ScenarioB = database.Scenario{
 var ConfigA = database.ComponentConfiguration{
 	Name:            "Example for Signal generator",
 	StartParameters: postgres.Jsonb{startParametersA},
-	SelectedFileID:  -1,
+	FileIDs:         []int64{},
 }
 
 var ConfigB = database.ComponentConfiguration{
 	Name:            "VILLASnode gateway X",
 	StartParameters: postgres.Jsonb{startParametersB},
-	SelectedFileID:  -1,
+	FileIDs:         []int64{},
 }
 
 // Signals

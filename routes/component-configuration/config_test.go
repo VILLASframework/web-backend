@@ -45,7 +45,7 @@ type ConfigRequest struct {
 	ScenarioID      uint           `json:"scenarioID,omitempty"`
 	ICID            uint           `json:"icID,omitempty"`
 	StartParameters postgres.Jsonb `json:"startParameters,omitempty"`
-	SelectedFileID  int            `json:"selectedFileID,omitempty"`
+	FileIDs         []int64        `json:"fileIDs,omitempty"`
 }
 
 type ICRequest struct {
@@ -165,7 +165,7 @@ func TestAddConfig(t *testing.T) {
 		ScenarioID:      scenarioID,
 		ICID:            ICID,
 		StartParameters: helper.ConfigA.StartParameters,
-		SelectedFileID:  helper.ConfigA.SelectedFileID,
+		FileIDs:         helper.ConfigA.FileIDs,
 	}
 
 	// authenticate as normal userB who has no access to new scenario
@@ -267,7 +267,7 @@ func TestUpdateConfig(t *testing.T) {
 		ScenarioID:      scenarioID,
 		ICID:            ICID,
 		StartParameters: helper.ConfigA.StartParameters,
-		SelectedFileID:  helper.ConfigA.SelectedFileID,
+		FileIDs:         helper.ConfigA.FileIDs,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
 		base_api_configs, "POST", helper.KeyModels{"config": newConfig})
@@ -373,7 +373,7 @@ func TestDeleteConfig(t *testing.T) {
 		ScenarioID:      scenarioID,
 		ICID:            ICID,
 		StartParameters: helper.ConfigA.StartParameters,
-		SelectedFileID:  helper.ConfigA.SelectedFileID,
+		FileIDs:         helper.ConfigA.FileIDs,
 	}
 
 	// authenticate as normal user
@@ -452,7 +452,7 @@ func TestGetAllConfigsOfScenario(t *testing.T) {
 		ScenarioID:      scenarioID,
 		ICID:            ICID,
 		StartParameters: helper.ConfigA.StartParameters,
-		SelectedFileID:  helper.ConfigA.SelectedFileID,
+		FileIDs:         helper.ConfigA.FileIDs,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
 		base_api_configs, "POST", helper.KeyModels{"config": newConfig})
