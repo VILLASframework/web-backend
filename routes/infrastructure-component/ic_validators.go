@@ -26,13 +26,14 @@ import (
 	"github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/nsf/jsondiff"
 	"gopkg.in/go-playground/validator.v9"
+	"time"
 )
 
 var validate *validator.Validate
 
 type validNewIC struct {
 	UUID       string         `form:"UUID" validate:"required"`
-	Host       string         `form:"Host" validate:"required"`
+	Host       string         `form:"Host" validate:"omitempty"`
 	APIHost    string         `form:"APIHost" validate:"omitempty"`
 	Type       string         `form:"Type" validate:"required"`
 	Name       string         `form:"Name" validate:"required"`
@@ -84,7 +85,12 @@ func (r *addICRequest) createIC() InfrastructureComponent {
 	s.Properties = r.InfrastructureComponent.Properties
 	if r.InfrastructureComponent.State != "" {
 		s.State = r.InfrastructureComponent.State
+	} else {
+		s.State = "unknown"
 	}
+	// set last update to creation time of IC
+	s.StateUpdateAt = time.Now().Format(time.RFC1123)
+
 	return s
 }
 

@@ -99,7 +99,7 @@ var ICA = database.InfrastructureComponent{
 	Name:          "Test DPsim Simulator",
 	Uptime:        0,
 	State:         "running",
-	StateUpdateAt: time.Now().String(),
+	StateUpdateAt: time.Now().Format(time.RFC1123),
 	Properties:    postgres.Jsonb{propertiesA},
 	RawProperties: postgres.Jsonb{propertiesA},
 }
@@ -113,7 +113,7 @@ var ICB = database.InfrastructureComponent{
 	Name:          "ACS Demo Signals",
 	Uptime:        0,
 	State:         "idle",
-	StateUpdateAt: time.Now().String(),
+	StateUpdateAt: time.Now().Format(time.RFC1123),
 	Properties:    postgres.Jsonb{propertiesB},
 	RawProperties: postgres.Jsonb{propertiesB},
 }

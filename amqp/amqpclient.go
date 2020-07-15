@@ -137,7 +137,7 @@ func ConnectAMQP(uri string) error {
 					"Type":          gjson.Get(content, "model"),
 					"Uptime":        gjson.Get(content, "uptime"),
 					"State":         gjson.Get(content, "state"),
-					"StateUpdateAt": time.Now().String(),
+					"StateUpdateAt": time.Now().Format(time.RFC1123),
 					"RawProperties": gjson.Get(content, "properties"),
 				}).Error
 				if err != nil {
