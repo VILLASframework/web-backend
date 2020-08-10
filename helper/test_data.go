@@ -240,14 +240,11 @@ var FileD = database.File{
 }
 
 // Widgets
-var customPropertiesA = json.RawMessage(`{"property1" : "testValue1A", "property2" : "testValue2A", "property3" : 42}`)
-var customPropertiesBox = json.RawMessage(`{"border_color" : "18", "background_color" : "2", "background_color_opacity" : 0.3}`)
-var customPropertiesSlider = json.RawMessage(`{"default_value" : 10, "orientation" : 0, "rangeUseMinMax": false, "rangeMin" : 0, "rangeMax": 500, "step" : 1}`)
-var customPropertiesLabel = json.RawMessage(`{"textSize" : "20", "fontColor" : 5}`)
-var customPropertiesButton = json.RawMessage(`{"toggle" : "Value1", "on_value" : "Value2", "off_value" : Value3}`)
-var customPropertiesCustomActions = json.RawMessage(`{"actions" : "Value1", "icon" : "Value2"}`)
-var customPropertiesGauge = json.RawMessage(`{ "valueMin": 0, "valueMax": 1}`)
-var customPropertiesLamp = json.RawMessage(`{"signal" : 0, "on_color" : 4, "off_color": 2 , "threshold" : 0.5}`)
+var customPropertiesBox = json.RawMessage(`{"border_color" : "#4287f5", "border_color_opacity": 1, "background_color" : "#961520", "background_color_opacity" : 1}`)
+var customPropertiesSlider = json.RawMessage(`{"default_value" : 0, "orientation" : 0, "rangeUseMinMax": false, "rangeMin" : 0, "rangeMax": 200, "rangeUseMinMax" : true, "showUnit": true, "continous_update": false, "value": "", "resizeLeftRightLock": false, "resizeTopBottomLock": true, "step": 0.1 }`)
+var customPropertiesLabel = json.RawMessage(`{"textSize" : "20", "fontColor" : "#4287f5", "fontColor_opacity": 1}`)
+var customPropertiesButton = json.RawMessage(`{"pressed": false, "toggle" : false, "on_value" : 1, "off_value" : 0, "background_color": "#961520", "font_color": "#4287f5"}`)
+var customPropertiesLamp = json.RawMessage(`{"signal" : 0, "on_color" : "#4287f5", "off_color": "#961520", "threshold" : 0.5, "on_color_opacity": 1, "off_color_opacity": 1}`)
 
 var WidgetA = database.Widget{
 	Name:             "Label",
@@ -261,22 +258,22 @@ var WidgetA = database.Widget{
 	Z:                200,
 	IsLocked:         false,
 	CustomProperties: postgres.Jsonb{customPropertiesLabel},
-	SignalIDs:        []int64{1},
+	SignalIDs:        []int64{},
 }
 
 var WidgetB = database.Widget{
 	Name:             "Slider",
 	Type:             "Slider",
-	Width:            200,
-	Height:           20,
-	MinHeight:        10,
-	MinWidth:         50,
+	Width:            400,
+	Height:           50,
+	MinHeight:        30,
+	MinWidth:         380,
 	X:                70,
-	Y:                10,
+	Y:                400,
 	Z:                0,
 	IsLocked:         false,
 	CustomProperties: postgres.Jsonb{customPropertiesSlider},
-	SignalIDs:        []int64{1},
+	SignalIDs:        []int64{},
 }
 
 var WidgetC = database.Widget{
@@ -291,22 +288,22 @@ var WidgetC = database.Widget{
 	Z:                0,
 	IsLocked:         false,
 	CustomProperties: postgres.Jsonb{customPropertiesBox},
-	SignalIDs:        []int64{3},
+	SignalIDs:        []int64{},
 }
 
 var WidgetD = database.Widget{
-	Name:             "Action",
-	Type:             "Action",
-	Width:            20,
-	Height:           20,
-	MinHeight:        10,
-	MinWidth:         50,
+	Name:             "Button",
+	Type:             "Button",
+	Width:            100,
+	Height:           100,
+	MinHeight:        50,
+	MinWidth:         100,
 	X:                10,
 	Y:                50,
 	Z:                0,
 	IsLocked:         false,
-	CustomProperties: postgres.Jsonb{customPropertiesCustomActions},
-	SignalIDs:        []int64{2},
+	CustomProperties: postgres.Jsonb{customPropertiesButton},
+	SignalIDs:        []int64{},
 }
 
 var WidgetE = database.Widget{
@@ -321,7 +318,7 @@ var WidgetE = database.Widget{
 	Z:                0,
 	IsLocked:         false,
 	CustomProperties: postgres.Jsonb{customPropertiesLamp},
-	SignalIDs:        []int64{4},
+	SignalIDs:        []int64{},
 }
 
 // add a default admin user to the DB
