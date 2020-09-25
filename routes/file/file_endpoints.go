@@ -48,9 +48,9 @@ func RegisterFileEndpoints(r *gin.RouterGroup) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
-// @Param Authorization header string true "Authorization token"
 // @Param scenarioID query int true "Scenario ID"
 // @Router /files [get]
+// @Security Bearer
 func getFiles(c *gin.Context) {
 
 	ok, so := scenario.CheckPermissions(c, database.Read, "query", -1)
@@ -79,15 +79,16 @@ func getFiles(c *gin.Context) {
 // @Accept gif
 // @Accept model/x-cim
 // @Accept model/x-cim.zip
+// @Accept multipart/form-data
 // @Success 200 {object} docs.ResponseFile "File that was added"
 // @Failure 400 {object} docs.ResponseError "Bad request"
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
-// @Param Authorization header string true "Authorization token"
 // @Param inputFile formData file true "File to be uploaded"
 // @Param scenarioID query int true "ID of scenario to which file shall be added"
 // @Router /files [post]
+// @Security Bearer
 func addFile(c *gin.Context) {
 
 	ok, so := scenario.CheckPermissions(c, database.Read, "query", -1)
@@ -125,9 +126,9 @@ func addFile(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
-// @Param Authorization header string true "Authorization token"
 // @Param fileID path int true "ID of the file to download"
 // @Router /files/{fileID} [get]
+// @Security Bearer
 func getFile(c *gin.Context) {
 
 	// check access
@@ -151,15 +152,16 @@ func getFile(c *gin.Context) {
 // @Accept gif
 // @Accept model/x-cim
 // @Accept model/x-cim.zip
+// @Accept multipart/form-data
 // @Success 200 {object} docs.ResponseFile "File that was updated"
 // @Failure 400 {object} docs.ResponseError "Bad request"
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
-// @Param Authorization header string true "Authorization token"
 // @Param inputFile formData file true "File to be uploaded"
 // @Param fileID path int true "ID of the file to update"
 // @Router /files/{fileID} [put]
+// @Security Bearer
 func updateFile(c *gin.Context) {
 
 	// check access
@@ -191,9 +193,9 @@ func updateFile(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
-// @Param Authorization header string true "Authorization token"
 // @Param fileID path int true "ID of the file to update"
 // @Router /files/{fileID} [delete]
+// @Security Bearer
 func deleteFile(c *gin.Context) {
 
 	// check access

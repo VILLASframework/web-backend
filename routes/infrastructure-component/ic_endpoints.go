@@ -47,8 +47,8 @@ func RegisterICEndpoints(r *gin.RouterGroup) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
-// @Param Authorization header string true "Authorization token"
 // @Router /ic [get]
+// @Security Bearer
 func getICs(c *gin.Context) {
 
 	// Checking permission is not required here since READ access is independent of user's role
@@ -73,9 +73,9 @@ func getICs(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
-// @Param Authorization header string true "Authorization token"
 // @Param inputIC body infrastructure_component.addICRequest true "Infrastructure Component to be added"
 // @Router /ic [post]
+// @Security Bearer
 func addIC(c *gin.Context) {
 
 	ok, _ := CheckPermissions(c, database.ModelInfrastructureComponent, database.Create, false)
@@ -118,10 +118,10 @@ func addIC(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
-// @Param Authorization header string true "Authorization token"
 // @Param inputIC body infrastructure_component.updateICRequest true "InfrastructureComponent to be updated"
 // @Param ICID path int true "InfrastructureComponent ID"
 // @Router /ic/{ICID} [put]
+// @Security Bearer
 func updateIC(c *gin.Context) {
 
 	ok, oldIC := CheckPermissions(c, database.ModelInfrastructureComponent, database.Update, true)
@@ -163,9 +163,9 @@ func updateIC(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
-// @Param Authorization header string true "Authorization token"
 // @Param ICID path int true "Infrastructure Component ID"
 // @Router /ic/{ICID} [get]
+// @Security Bearer
 func getIC(c *gin.Context) {
 
 	ok, s := CheckPermissions(c, database.ModelInfrastructureComponent, database.Read, true)
@@ -186,9 +186,9 @@ func getIC(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
-// @Param Authorization header string true "Authorization token"
 // @Param ICID path int true "Infrastructure Component ID"
 // @Router /ic/{ICID} [delete]
+// @Security Bearer
 func deleteIC(c *gin.Context) {
 
 	ok, s := CheckPermissions(c, database.ModelInfrastructureComponent, database.Delete, true)
@@ -214,9 +214,9 @@ func deleteIC(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
-// @Param Authorization header string true "Authorization token"
 // @Param ICID path int true "Infrastructure Component ID"
 // @Router /ic/{ICID}/configs [get]
+// @Security Bearer
 func getConfigsOfIC(c *gin.Context) {
 
 	ok, s := CheckPermissions(c, database.ModelInfrastructureComponent, database.Read, true)

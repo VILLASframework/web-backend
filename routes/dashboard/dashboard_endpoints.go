@@ -49,9 +49,9 @@ func RegisterDashboardEndpoints(r *gin.RouterGroup) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
-// @Param Authorization header string true "Authorization token"
 // @Param scenarioID query int true "Scenario ID"
 // @Router /dashboards [get]
+// @Security Bearer
 func getDashboards(c *gin.Context) {
 
 	ok, sim := scenario.CheckPermissions(c, database.Read, "query", -1)
@@ -79,9 +79,9 @@ func getDashboards(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
-// @Param Authorization header string true "Authorization token"
 // @Param inputDab body dashboard.addDashboardRequest true "Dashboard to be added incl. ID of Scenario"
 // @Router /dashboards [post]
+// @Security Bearer
 func addDashboard(c *gin.Context) {
 
 	// bind request to JSON
@@ -125,10 +125,10 @@ func addDashboard(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
-// @Param Authorization header string true "Authorization token"
 // @Param inputDab body dashboard.updateDashboardRequest true "Dashboard to be updated"
 // @Param dashboardID path int true "Dashboard ID"
 // @Router /dashboards/{dashboardID} [put]
+// @Security Bearer
 func updateDashboard(c *gin.Context) {
 
 	ok, oldDashboard := CheckPermissions(c, database.Update, "path", -1)
@@ -168,9 +168,9 @@ func updateDashboard(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
-// @Param Authorization header string true "Authorization token"
 // @Param dashboardID path int true "Dashboard ID"
 // @Router /dashboards/{dashboardID} [get]
+// @Security Bearer
 func getDashboard(c *gin.Context) {
 
 	ok, dab := CheckPermissions(c, database.Read, "path", -1)
@@ -191,9 +191,9 @@ func getDashboard(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
-// @Param Authorization header string true "Authorization token"
 // @Param dashboardID path int true "Dashboard ID"
 // @Router /dashboards/{dashboardID} [delete]
+// @Security Bearer
 func deleteDashboard(c *gin.Context) {
 	ok, dab := CheckPermissions(c, database.Delete, "path", -1)
 	if !ok {

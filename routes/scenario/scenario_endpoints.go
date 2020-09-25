@@ -51,8 +51,8 @@ func RegisterScenarioEndpoints(r *gin.RouterGroup) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
-// @Param Authorization header string true "Authorization token"
 // @Router /scenarios [get]
+// @Security Bearer
 func getScenarios(c *gin.Context) {
 
 	// Checking permissions is not required here as read access is independent of user's role
@@ -97,9 +97,9 @@ func getScenarios(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
-// @Param Authorization header string true "Authorization token"
 // @Param inputScenario body scenario.addScenarioRequest true "Scenario to be added"
 // @Router /scenarios [post]
+// @Security Bearer
 func addScenario(c *gin.Context) {
 
 	ok, _ := CheckPermissions(c, database.Create, "none", -1)
@@ -156,10 +156,10 @@ func addScenario(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
-// @Param Authorization header string true "Authorization token"
 // @Param inputScenario body scenario.updateScenarioRequest true "Scenario to be updated"
 // @Param scenarioID path int true "Scenario ID"
 // @Router /scenarios/{scenarioID} [put]
+// @Security Bearer
 func updateScenario(c *gin.Context) {
 
 	ok, oldScenario := CheckPermissions(c, database.Update, "path", -1)
@@ -201,9 +201,9 @@ func updateScenario(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
-// @Param Authorization header string true "Authorization token"
 // @Param scenarioID path int true "Scenario ID"
 // @Router /scenarios/{scenarioID} [get]
+// @Security Bearer
 func getScenario(c *gin.Context) {
 
 	ok, so := CheckPermissions(c, database.Read, "path", -1)
@@ -224,9 +224,9 @@ func getScenario(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
-// @Param Authorization header string true "Authorization token"
 // @Param scenarioID path int true "Scenario ID"
 // @Router /scenarios/{scenarioID} [delete]
+// @Security Bearer
 func deleteScenario(c *gin.Context) {
 
 	ok, so := CheckPermissions(c, database.Delete, "path", -1)
@@ -251,9 +251,9 @@ func deleteScenario(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
-// @Param Authorization header string true "Authorization token"
 // @Param scenarioID path int true "Scenario ID"
 // @Router /scenarios/{scenarioID}/users/ [get]
+// @Security Bearer
 func getUsersOfScenario(c *gin.Context) {
 
 	ok, so := CheckPermissions(c, database.Read, "path", -1)
@@ -279,10 +279,10 @@ func getUsersOfScenario(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
-// @Param Authorization header string true "Authorization token"
 // @Param scenarioID path int true "Scenario ID"
 // @Param username query string true "User name"
 // @Router /scenarios/{scenarioID}/user [put]
+// @Security Bearer
 func addUserToScenario(c *gin.Context) {
 
 	ok, so := CheckPermissions(c, database.Update, "path", -1)
@@ -320,10 +320,10 @@ func addUserToScenario(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
-// @Param Authorization header string true "Authorization token"
 // @Param scenarioID path int true "Scenario ID"
 // @Param username query string true "User name"
 // @Router /scenarios/{scenarioID}/user [delete]
+// @Security Bearer
 func deleteUserFromScenario(c *gin.Context) {
 
 	ok, so := CheckPermissions(c, database.Update, "path", -1)

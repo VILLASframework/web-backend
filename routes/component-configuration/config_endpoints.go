@@ -48,9 +48,9 @@ func RegisterComponentConfigurationEndpoints(r *gin.RouterGroup) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
-// @Param Authorization header string true "Authorization token"
 // @Param scenarioID query int true "Scenario ID"
 // @Router /configs [get]
+// @Security Bearer
 func getConfigs(c *gin.Context) {
 
 	ok, so := scenario.CheckPermissions(c, database.Read, "query", -1)
@@ -78,9 +78,9 @@ func getConfigs(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
-// @Param Authorization header string true "Authorization token"
 // @Param inputConfig body component_configuration.addConfigRequest true "component configuration to be added incl. IDs of scenario and IC"
 // @Router /configs [post]
+// @Security Bearer
 func addConfig(c *gin.Context) {
 
 	// Bind the request to JSON
@@ -125,10 +125,10 @@ func addConfig(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
-// @Param Authorization header string true "Authorization token"
 // @Param inputConfig body component_configuration.updateConfigRequest true "component configuration to be updated"
 // @Param configID path int true "Config ID"
 // @Router /configs/{configID} [put]
+// @Security Bearer
 func updateConfig(c *gin.Context) {
 
 	ok, oldConfig := CheckPermissions(c, database.Update, "path", -1)
@@ -170,9 +170,9 @@ func updateConfig(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
-// @Param Authorization header string true "Authorization token"
 // @Param configID path int true "Config ID"
 // @Router /configs/{configID} [get]
+// @Security Bearer
 func getConfig(c *gin.Context) {
 
 	ok, m := CheckPermissions(c, database.Read, "path", -1)
@@ -193,9 +193,9 @@ func getConfig(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
-// @Param Authorization header string true "Authorization token"
 // @Param configID path int true "Config ID"
 // @Router /configs/{configID} [delete]
+// @Security Bearer
 func deleteConfig(c *gin.Context) {
 
 	ok, m := CheckPermissions(c, database.Delete, "path", -1)

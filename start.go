@@ -57,14 +57,17 @@ func addData(router *gin.Engine, mode string, basePath string) error {
 
 // @title VILLASweb Backend API
 // @version 2.0
-// @description This is the VILLASweb Backend API v2.0.
-// @description Parts of this API are still in development. Please check the [VILLASweb-backend-go repository](https://git.rwth-aachen.de/acs/public/villas/web-backend-go) for more information.
+// @description This is the [VILLASweb Backend](https://git.rwth-aachen.de/acs/public/villas/web-backend-go) API v2.0.
 // @description This documentation is auto-generated based on the API documentation in the code. The tool [swag](https://github.com/swaggo/swag) is used to auto-generate API docs for the [gin-gonic](https://github.com/gin-gonic/gin) framework.
+// @description Authentication: Use the authenticate endpoint below to obtain a token for your user account, copy the token into to the value field of the dialog showing up for the green Authorize button below and confirm with Done.
 // @contact.name Sonja Happ
 // @contact.email sonja.happ@eonerc.rwth-aachen.de
 // @license.name GNU GPL 3.0
 // @license.url http://www.gnu.de/documents/gpl-3.0.en.html
 // @BasePath /api/v2
+// @securityDefinitions.apikey Bearer
+// @in header
+// @name Authorization
 func main() {
 	log.Println("Starting VILLASweb-backend-go")
 

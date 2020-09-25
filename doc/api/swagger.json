@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "This is the VILLASweb Backend API v2.0.\nParts of this API are still in development. Please check the [VILLASweb-backend-go repository](https://git.rwth-aachen.de/acs/public/villas/web-backend-go) for more information.\nThis documentation is auto-generated based on the API documentation in the code. The tool [swag](https://github.com/swaggo/swag) is used to auto-generate API docs for the [gin-gonic](https://github.com/gin-gonic/gin) framework.",
+        "description": "This is the [VILLASweb Backend](https://git.rwth-aachen.de/acs/public/villas/web-backend-go) API v2.0.\nThis documentation is auto-generated based on the API documentation in the code. The tool [swag](https://github.com/swaggo/swag) is used to auto-generate API docs for the [gin-gonic](https://github.com/gin-gonic/gin) framework.\nAuthentication: Use the authenticate endpoint below to obtain a token for your user account, copy the token into to the value field of the dialog showing up for the green Authorize button below and confirm with Done.",
         "title": "VILLASweb Backend API",
         "contact": {
             "name": "Sonja Happ",
@@ -13,7 +13,7 @@
         },
         "version": "2.0"
     },
-    "basePath": "/api/v2",
+    "basePath": "http://localhost:4000/api/v2/",
     "paths": {
         "/authenticate": {
             "post": {
@@ -64,6 +64,11 @@
         },
         "/configs": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -73,13 +78,6 @@
                 "summary": "Get all component configurations of scenario",
                 "operationId": "getConfigs",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Authorization token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "type": "integer",
                         "description": "Scenario ID",
@@ -116,6 +114,11 @@
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -128,13 +131,6 @@
                 "summary": "Add a component configuration to a scenario",
                 "operationId": "addConfig",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Authorization token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "description": "component configuration to be added incl. IDs of scenario and IC",
                         "name": "inputConfig",
@@ -182,6 +178,11 @@
         },
         "/configs/{configID}": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -191,13 +192,6 @@
                 "summary": "Get a component configuration",
                 "operationId": "getConfig",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Authorization token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "type": "integer",
                         "description": "Config ID",
@@ -240,6 +234,11 @@
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -252,13 +251,6 @@
                 "summary": "Update a component configuration",
                 "operationId": "updateConfig",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Authorization token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "description": "component configuration to be updated",
                         "name": "inputConfig",
@@ -311,6 +303,11 @@
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -320,13 +317,6 @@
                 "summary": "Delete a component configuration",
                 "operationId": "deleteConfig",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Authorization token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "type": "integer",
                         "description": "Config ID",
@@ -371,6 +361,11 @@
         },
         "/dashboards": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -380,13 +375,6 @@
                 "summary": "Get all dashboards of scenario",
                 "operationId": "getDashboards",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Authorization token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "type": "integer",
                         "description": "Scenario ID",
@@ -423,6 +411,11 @@
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -435,13 +428,6 @@
                 "summary": "Add a dashboard to a scenario",
                 "operationId": "addDashboard",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Authorization token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "description": "Dashboard to be added incl. ID of Scenario",
                         "name": "inputDab",
@@ -489,6 +475,11 @@
         },
         "/dashboards/{dashboardID}": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -498,13 +489,6 @@
                 "summary": "Get a dashboard",
                 "operationId": "getDashboard",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Authorization token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "type": "integer",
                         "description": "Dashboard ID",
@@ -547,6 +531,11 @@
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -559,13 +548,6 @@
                 "summary": "Update a dashboard",
                 "operationId": "updateDashboard",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Authorization token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "description": "Dashboard to be updated",
                         "name": "inputDab",
@@ -618,6 +600,11 @@
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -627,13 +614,6 @@
                 "summary": "Delete a dashboard",
                 "operationId": "deleteDashboard",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Authorization token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "type": "integer",
                         "description": "Dashboard ID",
@@ -678,6 +658,11 @@
         },
         "/files": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -687,13 +672,6 @@
                 "summary": "Get all files of a specific scenario",
                 "operationId": "getFiles",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Authorization token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "type": "integer",
                         "description": "Scenario ID",
@@ -730,13 +708,19 @@
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "consumes": [
                     "text/plain",
                     "image/png",
                     "image/jpeg",
                     "image/gif",
                     "model/x-cim",
-                    "model/x-cim.zip"
+                    "model/x-cim.zip",
+                    "multipart/form-data"
                 ],
                 "produces": [
                     "application/json"
@@ -747,13 +731,6 @@
                 "summary": "Add a file to a specific scenario",
                 "operationId": "addFile",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Authorization token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "type": "file",
                         "description": "File to be uploaded",
@@ -805,6 +782,11 @@
         },
         "/files/{fileID}": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "text/plain",
                     "image/png",
@@ -819,13 +801,6 @@
                 "summary": "Download a file",
                 "operationId": "getFile",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Authorization token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "type": "integer",
                         "description": "ID of the file to download",
@@ -868,13 +843,19 @@
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "consumes": [
                     "text/plain",
                     "image/png",
                     "image/jpeg",
                     "image/gif",
                     "model/x-cim",
-                    "model/x-cim.zip"
+                    "model/x-cim.zip",
+                    "multipart/form-data"
                 ],
                 "produces": [
                     "application/json"
@@ -885,13 +866,6 @@
                 "summary": "Update a file",
                 "operationId": "updateFile",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Authorization token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "type": "file",
                         "description": "File to be uploaded",
@@ -941,6 +915,11 @@
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -950,13 +929,6 @@
                 "summary": "Delete a file",
                 "operationId": "deleteFile",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Authorization token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "type": "integer",
                         "description": "ID of the file to update",
@@ -1024,6 +996,11 @@
         },
         "/ic": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -1032,15 +1009,6 @@
                 ],
                 "summary": "Get all infrastructure components",
                 "operationId": "getICs",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Authorization token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "ICs requested",
@@ -1069,6 +1037,11 @@
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -1081,13 +1054,6 @@
                 "summary": "Add an infrastructure component",
                 "operationId": "addIC",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Authorization token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "description": "Infrastructure Component to be added",
                         "name": "inputIC",
@@ -1135,6 +1101,11 @@
         },
         "/ic/{ICID}": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -1144,13 +1115,6 @@
                 "summary": "Get infrastructure component",
                 "operationId": "getIC",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Authorization token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "type": "integer",
                         "description": "Infrastructure Component ID",
@@ -1193,6 +1157,11 @@
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -1205,13 +1174,6 @@
                 "summary": "Update an infrastructure component",
                 "operationId": "updateIC",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Authorization token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "description": "InfrastructureComponent to be updated",
                         "name": "inputIC",
@@ -1264,6 +1226,11 @@
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -1273,13 +1240,6 @@
                 "summary": "Delete an infrastructure component",
                 "operationId": "deleteIC",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Authorization token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "type": "integer",
                         "description": "Infrastructure Component ID",
@@ -1324,6 +1284,11 @@
         },
         "/ic/{ICID}/action": {
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -1384,6 +1349,11 @@
         },
         "/ic/{ICID}/configs": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -1393,13 +1363,6 @@
                 "summary": "Get all configurations of the infrastructure component",
                 "operationId": "getConfigsOfIC",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Authorization token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "type": "integer",
                         "description": "Infrastructure Component ID",
@@ -1461,6 +1424,11 @@
         },
         "/scenarios": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -1469,15 +1437,6 @@
                 ],
                 "summary": "Get all scenarios of requesting user",
                 "operationId": "getScenarios",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Authorization token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "Scenarios to which user has access",
@@ -1506,6 +1465,11 @@
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -1518,13 +1482,6 @@
                 "summary": "Add a scenario",
                 "operationId": "addScenario",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Authorization token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "description": "Scenario to be added",
                         "name": "inputScenario",
@@ -1572,6 +1529,11 @@
         },
         "/scenarios/{scenarioID}": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -1581,13 +1543,6 @@
                 "summary": "Get scenario",
                 "operationId": "getScenario",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Authorization token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "type": "integer",
                         "description": "Scenario ID",
@@ -1624,6 +1579,11 @@
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -1636,13 +1596,6 @@
                 "summary": "Update a scenario",
                 "operationId": "updateScenario",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Authorization token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "description": "Scenario to be updated",
                         "name": "inputScenario",
@@ -1695,6 +1648,11 @@
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -1704,13 +1662,6 @@
                 "summary": "Delete a scenario",
                 "operationId": "deleteScenario",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Authorization token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "type": "integer",
                         "description": "Scenario ID",
@@ -1749,6 +1700,11 @@
         },
         "/scenarios/{scenarioID}/user": {
             "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -1758,13 +1714,6 @@
                 "summary": "Add a user to a a scenario",
                 "operationId": "addUserToScenario",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Authorization token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "type": "integer",
                         "description": "Scenario ID",
@@ -1808,6 +1757,11 @@
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -1817,13 +1771,6 @@
                 "summary": "Delete a user from a scenario",
                 "operationId": "deleteUserFromScenario",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Authorization token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "type": "integer",
                         "description": "Scenario ID",
@@ -1869,6 +1816,11 @@
         },
         "/scenarios/{scenarioID}/users/": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -1878,13 +1830,6 @@
                 "summary": "Get users of a scenario",
                 "operationId": "getUsersOfScenario",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Authorization token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "type": "integer",
                         "description": "Scenario ID",
@@ -1923,6 +1868,11 @@
         },
         "/signals": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -1944,13 +1894,6 @@
                         "description": "Config ID of signals to be obtained",
                         "name": "configID",
                         "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Authorization token",
-                        "name": "Authorization",
-                        "in": "header",
                         "required": true
                     }
                 ],
@@ -1982,6 +1925,11 @@
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -1994,13 +1942,6 @@
                 "summary": "Add a signal to a signal mapping of a component configuration",
                 "operationId": "AddSignal",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Authorization token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "description": "A signal to be added to the component configuration incl. direction and config ID to which signal shall be added",
                         "name": "inputSignal",
@@ -2048,6 +1989,11 @@
         },
         "/signals/{signalID}": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -2057,13 +2003,6 @@
                 "summary": "Get a signal",
                 "operationId": "getSignal",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Authorization token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "type": "integer",
                         "description": "ID of signal to be obtained",
@@ -2106,6 +2045,11 @@
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -2115,13 +2059,6 @@
                 "summary": "Update a signal",
                 "operationId": "updateSignal",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Authorization token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "description": "A signal to be updated",
                         "name": "inputSignal",
@@ -2174,6 +2111,11 @@
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -2183,13 +2125,6 @@
                 "summary": "Delete a signal",
                 "operationId": "deleteSignal",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Authorization token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "type": "integer",
                         "description": "ID of signal to be deleted",
@@ -2234,6 +2169,11 @@
         },
         "/users": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -2242,15 +2182,6 @@
                 ],
                 "summary": "Get all users",
                 "operationId": "GetUsers",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Authorization token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "Array of users",
@@ -2279,6 +2210,11 @@
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -2300,13 +2236,6 @@
                             "type": "object",
                             "$ref": "#/definitions/user.addUserRequest"
                         }
-                    },
-                    {
-                        "type": "string",
-                        "description": "Authorization token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
                     }
                 ],
                 "responses": {
@@ -2339,6 +2268,11 @@
         },
         "/users/{userID}": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -2348,13 +2282,6 @@
                 "summary": "Get user",
                 "operationId": "GetUser",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Authorization token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "type": "integer",
                         "description": "User ID",
@@ -2397,6 +2324,11 @@
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -2409,13 +2341,6 @@
                 "summary": "Update a user",
                 "operationId": "UpdateUser",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Authorization token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "description": "User to be updated (anything except for ID can be changed, role can only be change by admin)",
                         "name": "inputUser",
@@ -2474,6 +2399,11 @@
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -2483,13 +2413,6 @@
                 "summary": "Delete a user",
                 "operationId": "DeleteUser",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Authorization token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "type": "integer",
                         "description": "User ID",
@@ -2528,6 +2451,11 @@
         },
         "/widgets": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -2537,13 +2465,6 @@
                 "summary": "Get all widgets of dashboard",
                 "operationId": "getWidgets",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Authorization token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "type": "integer",
                         "description": "Dashboard ID",
@@ -2580,6 +2501,11 @@
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -2592,13 +2518,6 @@
                 "summary": "Add a widget to a dashboard",
                 "operationId": "addWidget",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Authorization token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "description": "Widget to be added incl. ID of dashboard",
                         "name": "inputWidget",
@@ -2646,6 +2565,11 @@
         },
         "/widgets/{widgetID}": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -2655,13 +2579,6 @@
                 "summary": "Get a widget",
                 "operationId": "getWidget",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Authorization token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "type": "integer",
                         "description": "Widget ID",
@@ -2704,6 +2621,11 @@
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -2716,13 +2638,6 @@
                 "summary": "Update a widget",
                 "operationId": "updateWidget",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Authorization token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "description": "Widget to be updated",
                         "name": "inputWidget",
@@ -2775,6 +2690,11 @@
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -2784,13 +2704,6 @@
                 "summary": "Delete a widget",
                 "operationId": "deleteWidget",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Authorization token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "type": "integer",
                         "description": "Widget ID",
@@ -3443,7 +3356,6 @@
             "type": "object",
             "required": [
                 "Category",
-                "Host",
                 "Name",
                 "Type",
                 "UUID"
@@ -3812,6 +3724,13 @@
                     "type": "integer"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "Bearer": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }

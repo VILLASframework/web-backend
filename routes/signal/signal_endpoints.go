@@ -50,8 +50,8 @@ func RegisterSignalEndpoints(r *gin.RouterGroup) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
-// @Param Authorization header string true "Authorization token"
 // @Router /signals [get]
+// @Security Bearer
 func getSignals(c *gin.Context) {
 
 	ok, m := component_configuration.CheckPermissions(c, database.Read, "query", -1)
@@ -90,9 +90,9 @@ func getSignals(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
-// @Param Authorization header string true "Authorization token"
 // @Param inputSignal body signal.addSignalRequest true "A signal to be added to the component configuration incl. direction and config ID to which signal shall be added"
 // @Router /signals [post]
+// @Security Bearer
 func addSignal(c *gin.Context) {
 
 	var req addSignalRequest
@@ -133,10 +133,10 @@ func addSignal(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
-// @Param Authorization header string true "Authorization token"
 // @Param inputSignal body signal.updateSignalRequest true "A signal to be updated"
 // @Param signalID path int true "ID of signal to be updated"
 // @Router /signals/{signalID} [put]
+// @Security Bearer
 func updateSignal(c *gin.Context) {
 	ok, oldSignal := checkPermissions(c, database.Delete)
 	if !ok {
@@ -176,9 +176,9 @@ func updateSignal(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
-// @Param Authorization header string true "Authorization token"
 // @Param signalID path int true "ID of signal to be obtained"
 // @Router /signals/{signalID} [get]
+// @Security Bearer
 func getSignal(c *gin.Context) {
 	ok, sig := checkPermissions(c, database.Delete)
 	if !ok {
@@ -198,9 +198,9 @@ func getSignal(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
-// @Param Authorization header string true "Authorization token"
 // @Param signalID path int true "ID of signal to be deleted"
 // @Router /signals/{signalID} [delete]
+// @Security Bearer
 func deleteSignal(c *gin.Context) {
 
 	ok, sig := checkPermissions(c, database.Delete)

@@ -47,6 +47,7 @@ func RegisterAMQPEndpoint(r *gin.RouterGroup) {
 // @Failure 500 {object} docs.ResponseError "Internal server error"
 // @Param ICID path int true "InfrastructureComponent ID"
 // @Router /ic/{ICID}/action [post]
+// @Security Bearer
 func sendActionToIC(c *gin.Context) {
 
 	ok, s := infrastructure_component.CheckPermissions(c, database.ModelInfrastructureComponentAction, database.Update, true)

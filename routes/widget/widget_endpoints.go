@@ -48,9 +48,9 @@ func RegisterWidgetEndpoints(r *gin.RouterGroup) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
-// @Param Authorization header string true "Authorization token"
 // @Param dashboardID query int true "Dashboard ID"
 // @Router /widgets [get]
+// @Security Bearer
 func getWidgets(c *gin.Context) {
 
 	ok, dab := dashboard.CheckPermissions(c, database.Read, "query", -1)
@@ -78,9 +78,9 @@ func getWidgets(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
-// @Param Authorization header string true "Authorization token"
 // @Param inputWidget body widget.addWidgetRequest true "Widget to be added incl. ID of dashboard"
 // @Router /widgets [post]
+// @Security Bearer
 func addWidget(c *gin.Context) {
 
 	var req addWidgetRequest
@@ -122,10 +122,10 @@ func addWidget(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
-// @Param Authorization header string true "Authorization token"
 // @Param inputWidget body widget.updateWidgetRequest true "Widget to be updated"
 // @Param widgetID path int true "Widget ID"
 // @Router /widgets/{widgetID} [put]
+// @Security Bearer
 func updateWidget(c *gin.Context) {
 
 	ok, oldWidget := CheckPermissions(c, database.Update, -1)
@@ -166,9 +166,9 @@ func updateWidget(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
-// @Param Authorization header string true "Authorization token"
 // @Param widgetID path int true "Widget ID"
 // @Router /widgets/{widgetID} [get]
+// @Security Bearer
 func getWidget(c *gin.Context) {
 
 	ok, w := CheckPermissions(c, database.Read, -1)
@@ -189,9 +189,9 @@ func getWidget(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
-// @Param Authorization header string true "Authorization token"
 // @Param widgetID path int true "Widget ID"
 // @Router /widgets/{widgetID} [delete]
+// @Security Bearer
 func deleteWidget(c *gin.Context) {
 
 	ok, w := CheckPermissions(c, database.Delete, -1)

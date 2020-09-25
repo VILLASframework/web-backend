@@ -54,8 +54,8 @@ func RegisterUserEndpoints(r *gin.RouterGroup) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
-// @Param Authorization header string true "Authorization token"
 // @Router /users [get]
+// @Security Bearer
 func getUsers(c *gin.Context) {
 
 	err := database.ValidateRole(c, database.ModelUsers, database.Read)
@@ -84,8 +84,8 @@ func getUsers(c *gin.Context) {
 // @Failure 400 {object} docs.ResponseError "Bad request"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
-// @Param Authorization header string true "Authorization token"
 // @Router /users [post]
+// @Security Bearer
 func addUser(c *gin.Context) {
 
 	err := database.ValidateRole(c, database.ModelUser, database.Create)
@@ -144,10 +144,10 @@ func addUser(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
-// @Param Authorization header string true "Authorization token"
 // @Param inputUser body user.updateUserRequest true "User to be updated (anything except for ID can be changed, role can only be change by admin)"
 // @Param userID path int true "User ID"
 // @Router /users/{userID} [put]
+// @Security Bearer
 func updateUser(c *gin.Context) {
 
 	// no need to validate the role since updating a single user is role independent
@@ -235,9 +235,9 @@ func updateUser(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
-// @Param Authorization header string true "Authorization token"
 // @Param userID path int true "User ID"
 // @Router /users/{userID} [get]
+// @Security Bearer
 func getUser(c *gin.Context) {
 
 	// role validation not needed because updating a single user is role-independent
@@ -277,9 +277,9 @@ func getUser(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
-// @Param Authorization header string true "Authorization token"
 // @Param userID path int true "User ID"
 // @Router /users/{userID} [delete]
+// @Security Bearer
 func deleteUser(c *gin.Context) {
 
 	err := database.ValidateRole(c, database.ModelUser, database.Delete)
