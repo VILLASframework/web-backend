@@ -118,9 +118,14 @@ func (f *File) update(fileHeader *multipart.FileHeader) error {
 	defer fileContent.Close()
 
 	db := database.GetDB()
-	err = db.Model(f).Updates(map[string]interface{}{"Size": fileHeader.Size,
+	err = db.Model(f).Updates(map[string]interface{}{
+		"Size":     uint(fileHeader.Size),
 		"FileData": fileData,
-		"Date":     time.Now().String()}).Error
+		"Date":     time.Now().String(),
+		"Name":     filepath.Base(fileHeader.Filename),
+		"Type":     fileHeader.Header.Get("Content-Type"),
+	}).Error
+
 	return err
 }
 
