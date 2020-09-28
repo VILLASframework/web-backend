@@ -137,14 +137,11 @@ func (s *Scenario) delete() error {
 		}
 	}
 
-	// Scenario is not deleted from DB, only associations with users are removed
-	// Scenario remains "dangling" in DB
-
 	// Delete scenario
-	//err = db.Delete(s).Error
-	//if err != nil {
-	//	return err
-	//}
+	err = db.Delete(s).Error
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
