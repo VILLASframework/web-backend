@@ -31,7 +31,7 @@ import (
 )
 
 func RegisterAMQPEndpoint(r *gin.RouterGroup) {
-	r.POST("/ICID/action", sendActionToIC)
+	r.POST("/:ICID/action", sendActionToIC)
 }
 
 // sendActionToIC godoc
