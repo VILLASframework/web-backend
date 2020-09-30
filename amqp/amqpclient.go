@@ -130,6 +130,7 @@ func ConnectAMQP(uri string) error {
 				err = db.Where("UUID = ?", ICUUID).Find(sToBeUpdated).Error
 				if err != nil {
 					log.Println("AMQP: Unable to find IC with UUID: ", gjson.Get(content, "properties.uuid"), " DB error message: ", err)
+					continue
 				}
 
 				err = db.Model(&sToBeUpdated).Updates(map[string]interface{}{
