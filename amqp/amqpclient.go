@@ -27,8 +27,8 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"github.com/gin-gonic/gin"
 	"github.com/streadway/amqp"
-	"github.com/tidwall/gjson"
 	"log"
+	"strconv"
 	"time"
 )
 
@@ -113,8 +113,12 @@ func ConnectAMQP(uri string) error {
 			//	fmt.Println("AMQP: Unable to ack message:", err)
 			//}
 
-			content := string(message.Body)
-			fmt.Println("APQM: message", message)
+			var payload map[string]interface{}
+			if err := json.Unmarshal(message.Body, &payload); err != nil {
+				panic(err)
+			}
+			//content := string(message.Body)
+			fmt.Println("APQM: message payload", message.Body)
 			// any action message sent by the VILLAScontroller should be ignored by the web backend
 			/*if strings.Contains(content, "action") {
 				continue
@@ -122,23 +126,25 @@ func ConnectAMQP(uri string) error {
 
 			var sToBeUpdated database.InfrastructureComponent
 			db := database.GetDB()
-			ICUUID := gjson.Get(content, "properties.uuid").String()
+			ICUUID := fmt.Sprintf("%v", payload["properties.uuid"])
+			uptime := fmt.Sprintf("%v", payload["uptime"])
+			state := fmt.Sprintf("%v", payload["state"])
+			var stateUpdateAt = message.Timestamp.UTC()
+
 			if ICUUID == "" {
 				log.Println("AMQP: Could not extract UUID of IC from content of received message, COMPONENT NOT UPDATED")
 			} else {
 				err = db.Where("UUID = ?", ICUUID).Find(sToBeUpdated).Error
 				if err != nil {
-					log.Println("AMQP: Unable to find IC with UUID: ", gjson.Get(content, "properties.uuid").String(), " DB error message: ", err)
+					log.Println("AMQP: Unable to find IC with UUID: ", ICUUID, " DB error message: ", err)
 					continue
 				}
-
-				var stateUpdateAt = message.Timestamp.UTC()
 
 				err = db.Model(&sToBeUpdated).Updates(map[string]interface{}{
 					//"Host":          gjson.Get(content, "host"),
 					//"Type":          gjson.Get(content, "model"),
-					"Uptime":        gjson.Get(content, "uptime").Float(),
-					"State":         gjson.Get(content, "state").String(),
+					"Uptime":        strconv.ParseFloat(uptime, 64),
+					"State":         state,
 					"StateUpdateAt": stateUpdateAt.Format(time.RFC1123),
 					//"RawProperties": gjson.Get(content, "properties"),
 				}).Error
@@ -146,7 +152,7 @@ func ConnectAMQP(uri string) error {
 					log.Println("AMQP: Unable to update IC in DB: ", err)
 				}
 
-				log.Println("AMQP: Updated IC with UUID ", gjson.Get(content, "properties.uuid"))
+				log.Println("AMQP: Updated IC with UUID ", ICUUID)
 			}
 		}
 	}()
