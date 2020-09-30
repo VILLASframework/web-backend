@@ -29,7 +29,6 @@ import (
 	"github.com/streadway/amqp"
 	"github.com/tidwall/gjson"
 	"log"
-	"strings"
 	"time"
 )
 
@@ -115,33 +114,31 @@ func ConnectAMQP(uri string) error {
 			//}
 
 			content := string(message.Body)
-			fmt.Println("Received AMQP message: ", content)
+			fmt.Println("APQM: message", message)
 			// any action message sent by the VILLAScontroller should be ignored by the web backend
-			if strings.Contains(content, "action") {
+			/*if strings.Contains(content, "action") {
 				continue
-			}
+			}*/
 
 			var sToBeUpdated database.InfrastructureComponent
 			db := database.GetDB()
-			ICUUID := gjson.Get(content, "payload.properties.uuid").String()
+			ICUUID := gjson.Get(content, "properties.uuid").String()
 			if ICUUID == "" {
 				log.Println("AMQP: Could not extract UUID of IC from content of received message, COMPONENT NOT UPDATED")
 			} else {
 				err = db.Where("UUID = ?", ICUUID).Find(sToBeUpdated).Error
 				if err != nil {
-					log.Println("AMQP: Unable to find IC with UUID: ", gjson.Get(content, "properties.uuid"), " DB error message: ", err)
+					log.Println("AMQP: Unable to find IC with UUID: ", gjson.Get(content, "properties.uuid").String(), " DB error message: ", err)
 					continue
 				}
 
-				var timeSec = gjson.Get(content, "time").Float()
-
-				var stateUpdateAt = time.Unix(0, int64(timeSec*1000000000)).UTC()
+				var stateUpdateAt = message.Timestamp.UTC()
 
 				err = db.Model(&sToBeUpdated).Updates(map[string]interface{}{
 					//"Host":          gjson.Get(content, "host"),
 					//"Type":          gjson.Get(content, "model"),
-					"Uptime":        gjson.Get(content, "payload.uptime").Float(),
-					"State":         gjson.Get(content, "payload.state").String(),
+					"Uptime":        gjson.Get(content, "uptime").Float(),
+					"State":         gjson.Get(content, "state").String(),
 					"StateUpdateAt": stateUpdateAt.Format(time.RFC1123),
 					//"RawProperties": gjson.Get(content, "properties"),
 				}).Error
