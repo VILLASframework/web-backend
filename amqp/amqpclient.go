@@ -29,7 +29,6 @@ import (
 	"github.com/streadway/amqp"
 	"log"
 	"math"
-	"strconv"
 	"time"
 )
 
@@ -47,6 +46,14 @@ type Action struct {
 	Parameters struct{} `json:"parameters"`
 	Model      struct{} `json:"model"`
 	Results    struct{} `json:"results"`
+}
+
+type Update struct {
+	State      string  `json:"state"`
+	Uptime     float64 `json:"uptime"`
+	Properties struct {
+		UUID string `json:"uuid"`
+	} `json:"properties"`
 }
 
 var client AMQPclient
@@ -114,40 +121,37 @@ func ConnectAMQP(uri string) error {
 			//	fmt.Println("AMQP: Unable to ack message:", err)
 			//}
 
-			var payload map[string]interface{}
+			var payload Update
 			if err := json.Unmarshal(message.Body, &payload); err != nil {
 				panic(err)
 			}
 			//content := string(message.Body)
-			fmt.Println("APQM: message payload", message.Body)
+			fmt.Println("APQM: message payload", string(message.Body))
 			// any action message sent by the VILLAScontroller should be ignored by the web backend
 			/*if strings.Contains(content, "action") {
 				continue
 			}*/
 
-			var sToBeUpdated database.InfrastructureComponent
-			db := database.GetDB()
-			ICUUID := fmt.Sprintf("%v", payload["properties.uuid"])
-			uptime_s := fmt.Sprintf("%v", payload["uptime"])
-			uptime, _ := strconv.ParseFloat(uptime_s, 64)
-			uptime = math.Round(uptime)
-			state := fmt.Sprintf("%v", payload["state"])
-			var stateUpdateAt = message.Timestamp.UTC()
+			ICUUID := payload.Properties.UUID
 
 			if ICUUID == "" {
 				log.Println("AMQP: Could not extract UUID of IC from content of received message, COMPONENT NOT UPDATED")
 			} else {
+
+				var sToBeUpdated database.InfrastructureComponent
+				db := database.GetDB()
+
 				err = db.Where("UUID = ?", ICUUID).Find(sToBeUpdated).Error
 				if err != nil {
 					log.Println("AMQP: Unable to find IC with UUID: ", ICUUID, " DB error message: ", err)
 					continue
 				}
-
+				var stateUpdateAt = message.Timestamp.UTC()
 				err = db.Model(&sToBeUpdated).Updates(map[string]interface{}{
 					//"Host":          gjson.Get(content, "host"),
 					//"Type":          gjson.Get(content, "model"),
-					"Uptime":        uptime,
-					"State":         state,
+					"Uptime":        math.Round(payload.Uptime),
+					"State":         payload.State,
 					"StateUpdateAt": stateUpdateAt.Format(time.RFC1123),
 					//"RawProperties": gjson.Get(content, "properties"),
 				}).Error
