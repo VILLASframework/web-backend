@@ -28,6 +28,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/streadway/amqp"
 	"log"
+	"math"
 	"strconv"
 	"time"
 )
@@ -127,7 +128,9 @@ func ConnectAMQP(uri string) error {
 			var sToBeUpdated database.InfrastructureComponent
 			db := database.GetDB()
 			ICUUID := fmt.Sprintf("%v", payload["properties.uuid"])
-			uptime := fmt.Sprintf("%v", payload["uptime"])
+			uptime_s := fmt.Sprintf("%v", payload["uptime"])
+			uptime, _ := strconv.ParseFloat(uptime_s, 64)
+			uptime = math.Round(uptime)
 			state := fmt.Sprintf("%v", payload["state"])
 			var stateUpdateAt = message.Timestamp.UTC()
 
@@ -143,7 +146,7 @@ func ConnectAMQP(uri string) error {
 				err = db.Model(&sToBeUpdated).Updates(map[string]interface{}{
 					//"Host":          gjson.Get(content, "host"),
 					//"Type":          gjson.Get(content, "model"),
-					"Uptime":        strconv.ParseFloat(uptime, 64),
+					"Uptime":        uptime,
 					"State":         state,
 					"StateUpdateAt": stateUpdateAt.Format(time.RFC1123),
 					//"RawProperties": gjson.Get(content, "properties"),
