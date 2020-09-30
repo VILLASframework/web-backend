@@ -123,7 +123,7 @@ func ConnectAMQP(uri string) error {
 
 			var sToBeUpdated database.InfrastructureComponent
 			db := database.GetDB()
-			ICUUID := gjson.Get(content, "properties.uuid").String()
+			ICUUID := gjson.Get(content, "payload.properties.uuid").String()
 			if ICUUID == "" {
 				log.Println("AMQP: Could not extract UUID of IC from content of received message, COMPONENT NOT UPDATED")
 			} else {
@@ -133,12 +133,16 @@ func ConnectAMQP(uri string) error {
 					continue
 				}
 
+				var timeSec = gjson.Get(content, "time").Float()
+
+				var stateUpdateAt = time.Unix(0, int64(timeSec*1000000000)).UTC()
+
 				err = db.Model(&sToBeUpdated).Updates(map[string]interface{}{
 					//"Host":          gjson.Get(content, "host"),
 					//"Type":          gjson.Get(content, "model"),
-					"Uptime":        gjson.Get(content, "status.uptime"),
-					"State":         gjson.Get(content, "status.state"),
-					"StateUpdateAt": time.Now().Format(time.RFC1123), // TODO should use the "when" of the status update
+					"Uptime":        gjson.Get(content, "payload.uptime"),
+					"State":         gjson.Get(content, "payload.state"),
+					"StateUpdateAt": stateUpdateAt.Format(time.RFC1123),
 					//"RawProperties": gjson.Get(content, "properties"),
 				}).Error
 				if err != nil {
