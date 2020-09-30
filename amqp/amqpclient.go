@@ -134,12 +134,12 @@ func ConnectAMQP(uri string) error {
 				}
 
 				err = db.Model(&sToBeUpdated).Updates(map[string]interface{}{
-					"Host":          gjson.Get(content, "host"),
-					"Type":          gjson.Get(content, "model"),
-					"Uptime":        gjson.Get(content, "uptime"),
-					"State":         gjson.Get(content, "state"),
-					"StateUpdateAt": time.Now().Format(time.RFC1123),
-					"RawProperties": gjson.Get(content, "properties"),
+					//"Host":          gjson.Get(content, "host"),
+					//"Type":          gjson.Get(content, "model"),
+					"Uptime":        gjson.Get(content, "status.uptime"),
+					"State":         gjson.Get(content, "status.state"),
+					"StateUpdateAt": time.Now().Format(time.RFC1123), // TODO should use the "when" of the status update
+					//"RawProperties": gjson.Get(content, "properties"),
 				}).Error
 				if err != nil {
 					log.Println("AMQP: Unable to update IC in DB: ", err)
