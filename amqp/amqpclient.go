@@ -115,7 +115,7 @@ func ConnectAMQP(uri string) error {
 			//}
 
 			content := string(message.Body)
-
+			fmt.Println("Received AMQP message: ", content)
 			// any action message sent by the VILLAScontroller should be ignored by the web backend
 			if strings.Contains(content, "action") {
 				continue
@@ -140,8 +140,8 @@ func ConnectAMQP(uri string) error {
 				err = db.Model(&sToBeUpdated).Updates(map[string]interface{}{
 					//"Host":          gjson.Get(content, "host"),
 					//"Type":          gjson.Get(content, "model"),
-					"Uptime":        gjson.Get(content, "payload.uptime"),
-					"State":         gjson.Get(content, "payload.state"),
+					"Uptime":        gjson.Get(content, "payload.uptime").Float(),
+					"State":         gjson.Get(content, "payload.state").String(),
 					"StateUpdateAt": stateUpdateAt.Format(time.RFC1123),
 					//"RawProperties": gjson.Get(content, "properties"),
 				}).Error
