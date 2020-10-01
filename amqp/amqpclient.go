@@ -26,9 +26,9 @@ import (
 	"fmt"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/streadway/amqp"
 	"log"
-	"math"
 	"time"
 )
 
@@ -49,8 +49,8 @@ type Action struct {
 }
 
 type Update struct {
-	State      string  `json:"state"`
-	Uptime     float64 `json:"uptime"`
+	State string `json:"state"`
+	//Uptime     float64 `json:"uptime"`
 	Properties struct {
 		UUID string `json:"uuid"`
 	} `json:"properties"`
@@ -115,6 +115,8 @@ func ConnectAMQP(uri string) error {
 
 	// consuming queue
 	go func() {
+
+		db := database.GetDB()
 		for message := range client.replies {
 			//err = message.Ack(false)
 			//if err != nil {
@@ -122,44 +124,39 @@ func ConnectAMQP(uri string) error {
 			//}
 
 			var payload Update
-			if err := json.Unmarshal(message.Body, &payload); err != nil {
-				panic(err)
-			}
-			//content := string(message.Body)
-			fmt.Println("APQM: message payload", string(message.Body))
-			// any action message sent by the VILLAScontroller should be ignored by the web backend
-			/*if strings.Contains(content, "action") {
+			err := json.Unmarshal(message.Body, &payload)
+			if err != nil {
+				log.Println("AMQP: Could not unmarshal message to JSON:", string(message.Body), "err: ", err)
 				continue
-			}*/
+			}
 
 			ICUUID := payload.Properties.UUID
+			_, err = uuid.Parse(ICUUID)
 
-			if ICUUID == "" {
-				log.Println("AMQP: Could not extract UUID of IC from content of received message, COMPONENT NOT UPDATED")
+			if err != nil {
+				log.Printf("AMQP: UUID not valid: %v, message ignored: %v \n", ICUUID, string(message.Body))
 			} else {
 
 				var sToBeUpdated database.InfrastructureComponent
-				db := database.GetDB()
-
-				err = db.Where("UUID = ?", ICUUID).Find(sToBeUpdated).Error
+				err = db.Find(&sToBeUpdated, "UUID = ?", ICUUID).Error
 				if err != nil {
 					log.Println("AMQP: Unable to find IC with UUID: ", ICUUID, " DB error message: ", err)
 					continue
 				}
-				var stateUpdateAt = message.Timestamp.UTC()
+				//var stateUpdateAt = message.Timestamp.UTC()
 				err = db.Model(&sToBeUpdated).Updates(map[string]interface{}{
 					//"Host":          gjson.Get(content, "host"),
 					//"Type":          gjson.Get(content, "model"),
-					"Uptime":        math.Round(payload.Uptime),
-					"State":         payload.State,
-					"StateUpdateAt": stateUpdateAt.Format(time.RFC1123),
+					//"Uptime":        math.Round(payload.Uptime),
+					"State": payload.State,
+					//"StateUpdateAt": stateUpdateAt.Format(time.RFC1123),
 					//"RawProperties": gjson.Get(content, "properties"),
 				}).Error
 				if err != nil {
-					log.Println("AMQP: Unable to update IC in DB: ", err)
+					log.Println("AMQP: Unable to update IC", sToBeUpdated.Name, "in DB: ", err)
 				}
 
-				log.Println("AMQP: Updated IC with UUID ", ICUUID)
+				log.Println("AMQP: Updated IC ", sToBeUpdated.Name)
 			}
 		}
 	}()
