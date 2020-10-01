@@ -236,10 +236,13 @@ func StartAMQP(AMQPurl string, api *gin.RouterGroup) error {
 			for {
 				select {
 				case <-ticker.C:
-					err = PingAMQP()
-					if err != nil {
-						log.Println("AMQP Error: ", err.Error())
-					}
+					//TODO Add a useful regular event here
+					/*
+						err = PingAMQP()
+						if err != nil {
+							log.Println("AMQP Error: ", err.Error())
+						}
+					*/
 				}
 			}
 
