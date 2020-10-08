@@ -159,7 +159,7 @@ func ConnectAMQP(uri string) error {
 					}
 					newICReq.InfrastructureComponent.Name = *payload.Properties.Name
 					newICReq.InfrastructureComponent.Category = *payload.Properties.Category
-					newICReq.InfrastructureComponent.Category = *payload.Properties.Type
+					newICReq.InfrastructureComponent.Type = *payload.Properties.Type
 
 					// add optional params
 					if payload.State != nil {
