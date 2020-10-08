@@ -53,7 +53,7 @@ type validUpdatedIC struct {
 	State      string         `form:"State" validate:"omitempty"`
 }
 
-type addICRequest struct {
+type AddICRequest struct {
 	InfrastructureComponent validNewIC `json:"ic"`
 }
 
@@ -61,7 +61,7 @@ type updateICRequest struct {
 	InfrastructureComponent validUpdatedIC `json:"ic"`
 }
 
-func (r *addICRequest) validate() error {
+func (r *AddICRequest) Validate() error {
 	validate = validator.New()
 	errs := validate.Struct(r)
 	return errs
@@ -73,7 +73,7 @@ func (r *validUpdatedIC) validate() error {
 	return errs
 }
 
-func (r *addICRequest) createIC() InfrastructureComponent {
+func (r *AddICRequest) CreateIC() InfrastructureComponent {
 	var s InfrastructureComponent
 
 	s.UUID = r.InfrastructureComponent.UUID

@@ -25,8 +25,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
+	infrastructure_component "git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/infrastructure-component"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/jinzhu/gorm"
+	"github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/streadway/amqp"
 	"log"
 	"time"
@@ -48,11 +51,15 @@ type Action struct {
 	Results    struct{} `json:"results"`
 }
 
-type Update struct {
-	State string `json:"state"`
+type ICUpdate struct {
+	State *string `json:"state"`
 	//Uptime     float64 `json:"uptime"`
 	Properties struct {
-		UUID string `json:"uuid"`
+		UUID     string  `json:"uuid"`
+		Name     *string `json:"name"`
+		Category *string `json:"category"`
+		Type     *string `json:"type"`
+		Location *string `json:"location"`
 	} `json:"properties"`
 }
 
@@ -123,7 +130,7 @@ func ConnectAMQP(uri string) error {
 			//	fmt.Println("AMQP: Unable to ack message:", err)
 			//}
 
-			var payload Update
+			var payload ICUpdate
 			err := json.Unmarshal(message.Body, &payload)
 			if err != nil {
 				log.Println("AMQP: Could not unmarshal message to JSON:", string(message.Body), "err: ", err)
@@ -139,24 +146,69 @@ func ConnectAMQP(uri string) error {
 
 				var sToBeUpdated database.InfrastructureComponent
 				err = db.Find(&sToBeUpdated, "UUID = ?", ICUUID).Error
-				if err != nil {
-					log.Println("AMQP: Unable to find IC with UUID: ", ICUUID, " DB error message: ", err)
+				if err == gorm.ErrRecordNotFound {
+					// create new record
+					var newICReq infrastructure_component.AddICRequest
+					newICReq.InfrastructureComponent.UUID = payload.Properties.UUID
+					if payload.Properties.Name == nil ||
+						payload.Properties.Category == nil ||
+						payload.Properties.Type == nil {
+						// cannot create new IC because required information (name, type, and/or category missing)
+						log.Println("AMQP: Cannot create new IC, required field(s) is/are missing: name, type, category")
+						continue
+					}
+					newICReq.InfrastructureComponent.Name = *payload.Properties.Name
+					newICReq.InfrastructureComponent.Category = *payload.Properties.Category
+					newICReq.InfrastructureComponent.Category = *payload.Properties.Type
+
+					// add optional params
+					if payload.State != nil {
+						newICReq.InfrastructureComponent.State = *payload.State
+					} else {
+						newICReq.InfrastructureComponent.State = "unknown"
+					}
+					if payload.Properties.Location != nil {
+						newICReq.InfrastructureComponent.Properties = postgres.Jsonb{json.RawMessage(`{"location" : " ` + *payload.Properties.Location + `"}`)}
+					}
+
+					// Validate the new IC
+					if err = newICReq.Validate(); err != nil {
+						log.Println("AMQP: Validation of new IC failed:", err)
+						continue
+					}
+
+					// Create the new IC
+					newIC := newICReq.CreateIC()
+
+					// save IC
+					err = newIC.Save()
+					if err != nil {
+						log.Println("AMQP: Saving new IC to DB failed:", err)
+						continue
+					}
+
+					log.Println("AMQP: Created IC ", newIC.Name)
+
+				} else if err != nil {
+					log.Println("AMQP: Database error for IC", ICUUID, " DB error message: ", err)
 					continue
-				}
-				//var stateUpdateAt = message.Timestamp.UTC()
-				err = db.Model(&sToBeUpdated).Updates(map[string]interface{}{
-					//"Host":          gjson.Get(content, "host"),
-					//"Type":          gjson.Get(content, "model"),
-					//"Uptime":        math.Round(payload.Uptime),
-					"State": payload.State,
-					//"StateUpdateAt": stateUpdateAt.Format(time.RFC1123),
-					//"RawProperties": gjson.Get(content, "properties"),
-				}).Error
-				if err != nil {
-					log.Println("AMQP: Unable to update IC", sToBeUpdated.Name, "in DB: ", err)
+				} else {
+					//var stateUpdateAt = message.Timestamp.UTC()
+					err = db.Model(&sToBeUpdated).Updates(map[string]interface{}{
+						//"Host":          gjson.Get(content, "host"),
+						//"Type":          gjson.Get(content, "model"),
+						//"Uptime":        math.Round(payload.Uptime),
+						"State": *payload.State,
+						//"StateUpdateAt": stateUpdateAt.Format(time.RFC1123),
+						//"RawProperties": gjson.Get(content, "properties"),
+					}).Error
+					if err != nil {
+						log.Println("AMQP: Unable to update IC", sToBeUpdated.Name, "in DB: ", err)
+					}
+
+					log.Println("AMQP: Updated IC ", sToBeUpdated.Name)
 				}
 
-				log.Println("AMQP: Updated IC ", sToBeUpdated.Name)
 			}
 		}
 	}()

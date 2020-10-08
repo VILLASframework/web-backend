@@ -31,7 +31,7 @@ type InfrastructureComponent struct {
 	database.InfrastructureComponent
 }
 
-func (s *InfrastructureComponent) save() error {
+func (s *InfrastructureComponent) Save() error {
 	db := database.GetDB()
 	err := db.Create(s).Error
 	return err
