@@ -43,7 +43,13 @@ func (s *InfrastructureComponent) ByID(id uint) error {
 	return err
 }
 
-func (s *InfrastructureComponent) update(updatedIC InfrastructureComponent) error {
+func (s *InfrastructureComponent) ByUUID(uuid string) error {
+	db := database.GetDB()
+	err := db.Find(s, "UUID = ?", uuid).Error
+	return err
+}
+
+func (s *InfrastructureComponent) Update(updatedIC InfrastructureComponent) error {
 
 	db := database.GetDB()
 	err := db.Model(s).Updates(updatedIC).Error

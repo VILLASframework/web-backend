@@ -118,7 +118,7 @@ func addIC(c *gin.Context) {
 // @Failure 404 {object} docs.ResponseError "Not found"
 // @Failure 422 {object} docs.ResponseError "Unprocessable entity"
 // @Failure 500 {object} docs.ResponseError "Internal server error"
-// @Param inputIC body infrastructure_component.updateICRequest true "InfrastructureComponent to be updated"
+// @Param inputIC body infrastructure_component.UpdateICRequest true "InfrastructureComponent to be updated"
 // @Param ICID path int true "InfrastructureComponent ID"
 // @Router /ic/{ICID} [put]
 // @Security Bearer
@@ -129,7 +129,7 @@ func updateIC(c *gin.Context) {
 		return
 	}
 
-	var req updateICRequest
+	var req UpdateICRequest
 	err := c.BindJSON(&req)
 	if err != nil {
 		helper.BadRequestError(c, "Error binding form data to JSON: "+err.Error())
@@ -137,16 +137,16 @@ func updateIC(c *gin.Context) {
 	}
 
 	// Validate the request
-	if err = req.InfrastructureComponent.validate(); err != nil {
+	if err = req.Validate(); err != nil {
 		helper.UnprocessableEntityError(c, err.Error())
 		return
 	}
 
 	// Create the updatedIC from oldIC
-	updatedIC := req.updatedIC(oldIC)
+	updatedIC := req.UpdatedIC(oldIC)
 
 	// Finally update the IC in the DB
-	err = oldIC.update(updatedIC)
+	err = oldIC.Update(updatedIC)
 	if !helper.DBError(c, err) {
 		c.JSON(http.StatusOK, gin.H{"ic": updatedIC.InfrastructureComponent})
 	}

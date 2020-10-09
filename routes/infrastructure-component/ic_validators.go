@@ -57,7 +57,7 @@ type AddICRequest struct {
 	InfrastructureComponent validNewIC `json:"ic"`
 }
 
-type updateICRequest struct {
+type UpdateICRequest struct {
 	InfrastructureComponent validUpdatedIC `json:"ic"`
 }
 
@@ -67,7 +67,7 @@ func (r *AddICRequest) Validate() error {
 	return errs
 }
 
-func (r *validUpdatedIC) validate() error {
+func (r *UpdateICRequest) Validate() error {
 	validate = validator.New()
 	errs := validate.Struct(r)
 	return errs
@@ -94,7 +94,7 @@ func (r *AddICRequest) CreateIC() InfrastructureComponent {
 	return s
 }
 
-func (r *updateICRequest) updatedIC(oldIC InfrastructureComponent) InfrastructureComponent {
+func (r *UpdateICRequest) UpdatedIC(oldIC InfrastructureComponent) InfrastructureComponent {
 	// Use the old InfrastructureComponent as a basis for the updated InfrastructureComponent `s`
 	s := oldIC
 
@@ -125,6 +125,9 @@ func (r *updateICRequest) updatedIC(oldIC InfrastructureComponent) Infrastructur
 	if r.InfrastructureComponent.State != "" {
 		s.State = r.InfrastructureComponent.State
 	}
+
+	// set last update time
+	s.StateUpdateAt = time.Now().Format(time.RFC1123)
 
 	// only update props if not empty
 	var emptyJson postgres.Jsonb
