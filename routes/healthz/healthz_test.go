@@ -29,6 +29,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"net/http"
+	"os"
+	"time"
 
 	"testing"
 )
@@ -82,4 +84,8 @@ func TestHealthz(t *testing.T) {
 	code, resp, err = helper.TestEndpoint(router, "", "healthz", http.MethodGet, nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
+
+	// exit after 5 seconds
+	time.Sleep(5)
+	os.Exit(0)
 }
