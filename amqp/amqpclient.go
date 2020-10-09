@@ -170,7 +170,8 @@ func ConnectAMQP(uri string) error {
 					}
 
 					// Validate the new IC
-					if err = newICReq.Validate(); err != nil {
+					err = newICReq.Validate()
+					if err != nil {
 						log.Println("AMQP: Validation of new IC failed:", err)
 						continue
 					}
@@ -225,7 +226,7 @@ func ConnectAMQP(uri string) error {
 						continue
 					}
 
-					//log.Println("AMQP: Updated IC ", sToBeUpdated.Name)
+					log.Println("AMQP: Updated IC ", sToBeUpdated.Name)
 				}
 
 			}
