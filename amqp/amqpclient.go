@@ -137,7 +137,7 @@ func ConnectAMQP(uri string) error {
 			_, err = uuid.Parse(ICUUID)
 
 			if err != nil {
-				log.Printf("AMQP: UUID not valid: %v, message ignored: %v \n", ICUUID, string(message.Body))
+				//log.Printf("AMQP: UUID not valid: %v, message ignored: %v \n", ICUUID, string(message.Body))
 				continue
 			} else {
 
