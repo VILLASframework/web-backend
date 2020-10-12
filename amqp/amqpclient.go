@@ -73,8 +73,6 @@ func ConnectAMQP(uri string) error {
 		return fmt.Errorf("AMQP: failed to connect to RabbitMQ broker %v, error: %v", uri, err)
 	}
 
-	defer client.connection.Close()
-
 	// create channel
 	client.channel, err = client.connection.Channel()
 	if err != nil {
