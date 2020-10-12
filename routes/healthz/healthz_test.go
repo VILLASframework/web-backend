@@ -22,6 +22,7 @@
 package healthz
 
 import (
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/amqp"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
@@ -77,12 +78,11 @@ func TestHealthz(t *testing.T) {
 	amqpURI := "amqp://" + user + ":" + pass + "@" + host
 	log.Println("AMQP URI is", amqpURI)
 
-	//TODO find a solution how testing can work here if receive loop of AMQP channel never exits
-	//err = amqp.ConnectAMQP(amqpURI)
-	//assert.NoError(t, err)
+	err = amqp.ConnectAMQP(amqpURI)
+	assert.NoError(t, err)
 
 	// test healthz endpoint for connected DB and AMQP client
-	//code, resp, err = helper.TestEndpoint(router, "", "healthz", http.MethodGet, nil)
-	//assert.NoError(t, err)
-	//assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
+	code, resp, err = helper.TestEndpoint(router, "", "healthz", http.MethodGet, nil)
+	assert.NoError(t, err)
+	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 }
