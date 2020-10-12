@@ -225,6 +225,8 @@ func StartAMQP(AMQPurl string, api *gin.RouterGroup) error {
 
 func processMessage(message amqp.Delivery) {
 
+	log.Println("Processing AMQP message: ", message.Body)
+
 	var payload ICUpdate
 	err := json.Unmarshal(message.Body, &payload)
 	if err != nil {
