@@ -46,8 +46,9 @@ type Action struct {
 	Act        string   `json:"action"`
 	When       float32  `json:"when"`
 	Parameters struct{} `json:"parameters"`
-	Model      struct{} `json:"model"`
-	Results    struct{} `json:"results"`
+	UUID       *string  `json:"uuid"`
+	//Model      struct{} `json:"model"`
+	//Results    struct{} `json:"results"`
 }
 
 type ICUpdate struct {
@@ -133,7 +134,7 @@ func ConnectAMQP(uri string) error {
 	return nil
 }
 
-func SendActionAMQP(action Action, uuid string) error {
+func SendActionAMQP(action Action) error {
 
 	payload, err := json.Marshal(action)
 	if err != nil {
@@ -149,11 +150,12 @@ func SendActionAMQP(action Action, uuid string) error {
 		Body:            payload,
 	}
 
-	if uuid != "" {
-		msg.Headers["uuid"] = uuid
-		msg.Headers["action"] = "ping"
+	err = CheckConnection()
+	if err != nil {
+		return err
 	}
 
+	log.Println("AMQP: Sending message", string(msg.Body))
 	err = client.channel.Publish(VILLAS_EXCHANGE,
 		"",
 		false,
@@ -168,8 +170,9 @@ func PingAMQP() error {
 
 	var a Action
 	a.Act = "ping"
+	*a.UUID = ""
 
-	err := SendActionAMQP(a, "")
+	err := SendActionAMQP(a)
 	return err
 }
 

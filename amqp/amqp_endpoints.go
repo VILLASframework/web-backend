@@ -27,7 +27,6 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/infrastructure-component"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"time"
 )
 
 func RegisterAMQPEndpoint(r *gin.RouterGroup) {
@@ -62,14 +61,14 @@ func sendActionToIC(c *gin.Context) {
 		return
 	}
 
-	now := time.Now()
+	//now := time.Now()
 
 	for _, action := range actions {
-		if action.When == 0 {
+		/*if action.When == 0 {
 			action.When = float32(now.Unix())
-		}
-
-		err = SendActionAMQP(action, s.UUID)
+		}*/
+		*action.UUID = s.UUID
+		err = SendActionAMQP(action)
 		if err != nil {
 			helper.InternalServerError(c, "Unable to send actions to IC: "+err.Error())
 			return
