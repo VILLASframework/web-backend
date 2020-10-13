@@ -26,6 +26,7 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/infrastructure-component"
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
 )
 
@@ -62,11 +63,13 @@ func sendActionToIC(c *gin.Context) {
 	}
 
 	//now := time.Now()
+	log.Println("AMQP: Will attempt to send the following actions:", actions)
 
 	for _, action := range actions {
 		/*if action.When == 0 {
 			action.When = float32(now.Unix())
 		}*/
+		action.UUID = new(string)
 		*action.UUID = s.UUID
 		err = SendActionAMQP(action)
 		if err != nil {
