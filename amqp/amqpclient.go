@@ -59,6 +59,8 @@ type ICUpdate struct {
 		Category *string `json:"category"`
 		Type     *string `json:"type"`
 		Location *string `json:"location"`
+		WS_url   *string `json:"ws_url"`
+		API_url  *string `json:"api_url"`
 	} `json:"properties"`
 }
 
@@ -269,6 +271,12 @@ func processMessage(message amqp.Delivery) {
 		} else {
 			newICReq.InfrastructureComponent.State = "unknown"
 		}
+		if payload.Properties.WS_url != nil {
+			newICReq.InfrastructureComponent.Host = *payload.Properties.WS_url
+		}
+		if payload.Properties.API_url != nil {
+			newICReq.InfrastructureComponent.APIHost = *payload.Properties.API_url
+		}
 		if payload.Properties.Location != nil {
 			newICReq.InfrastructureComponent.Properties = postgres.Jsonb{json.RawMessage(`{"location" : " ` + *payload.Properties.Location + `"}`)}
 		}
@@ -309,6 +317,12 @@ func processMessage(message amqp.Delivery) {
 		}
 		if payload.Properties.Name != nil {
 			updatedICReq.InfrastructureComponent.Name = *payload.Properties.Name
+		}
+		if payload.Properties.WS_url != nil {
+			updatedICReq.InfrastructureComponent.Host = *payload.Properties.WS_url
+		}
+		if payload.Properties.API_url != nil {
+			updatedICReq.InfrastructureComponent.APIHost = *payload.Properties.API_url
 		}
 		if payload.Properties.Location != nil {
 			updatedICReq.InfrastructureComponent.Properties = postgres.Jsonb{json.RawMessage(`{"location" : " ` + *payload.Properties.Location + `"}`)}
