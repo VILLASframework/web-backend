@@ -58,6 +58,7 @@ type ICRequest struct {
 	Location             string         `json:"location,omitempty"`
 	Description          string         `json:"description,omitempty"`
 	StartParameterScheme postgres.Jsonb `json:"startparameterscheme,omitempty"`
+	ManagedExternally    *bool          `json:"managedexternally,omitempty"`
 }
 
 type ScenarioRequest struct {
@@ -83,6 +84,7 @@ func addScenarioAndIC() (scenarioID uint, ICID uint) {
 		Location:             helper.ICA.Location,
 		Description:          helper.ICA.Description,
 		StartParameterScheme: helper.ICA.StartParameterScheme,
+		ManagedExternally:    &helper.ICA.ManagedExternally,
 	}
 	_, resp, _ := helper.TestEndpoint(router, token,
 		"/api/ic", "POST", helper.KeyModels{"ic": newICA})
@@ -101,6 +103,7 @@ func addScenarioAndIC() (scenarioID uint, ICID uint) {
 		Location:             helper.ICB.Location,
 		Description:          helper.ICB.Description,
 		StartParameterScheme: helper.ICB.StartParameterScheme,
+		ManagedExternally:    &helper.ICB.ManagedExternally,
 	}
 	_, resp, _ = helper.TestEndpoint(router, token,
 		"/api/ic", "POST", helper.KeyModels{"ic": newICB})

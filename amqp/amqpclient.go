@@ -126,7 +126,10 @@ func ConnectAMQP(uri string) error {
 	go func() {
 		for {
 			for message := range client.replies {
-				processMessage(message)
+				err = processMessage(message)
+				if err != nil {
+					log.Println(err.Error())
+				}
 			}
 			time.Sleep(2) // sleep for 2 sek
 		}
@@ -229,23 +232,21 @@ func StartAMQP(AMQPurl string, api *gin.RouterGroup) error {
 	return nil
 }
 
-func processMessage(message amqp.Delivery) {
+func processMessage(message amqp.Delivery) error {
 
 	log.Println("Processing AMQP message: ", string(message.Body))
 
 	var payload ICUpdate
 	err := json.Unmarshal(message.Body, &payload)
 	if err != nil {
-		log.Println("AMQP: Could not unmarshal message to JSON:", string(message.Body), "err: ", err)
-		return
+		return fmt.Errorf("AMQP: Could not unmarshal message to JSON: %v err: %v", string(message.Body), err)
 	}
 
 	ICUUID := payload.Properties.UUID
 	_, err = uuid.Parse(ICUUID)
 
 	if err != nil {
-		log.Printf("AMQP: UUID not valid: %v, message ignored: %v \n", ICUUID, string(message.Body))
-		return
+		return fmt.Errorf("AMQP: UUID not valid: %v, message ignored: %v \n", ICUUID, string(message.Body))
 	}
 
 	var sToBeUpdated infrastructure_component.InfrastructureComponent
@@ -253,107 +254,124 @@ func processMessage(message amqp.Delivery) {
 
 	if err == gorm.ErrRecordNotFound {
 		// create new record
-		var newICReq infrastructure_component.AddICRequest
-		newICReq.InfrastructureComponent.UUID = payload.Properties.UUID
-		if payload.Properties.Name == nil ||
-			payload.Properties.Category == nil ||
-			payload.Properties.Type == nil {
-			// cannot create new IC because required information (name, type, and/or category missing)
-			log.Println("AMQP: Cannot create new IC, required field(s) is/are missing: name, type, category")
-			return
-		}
-		newICReq.InfrastructureComponent.Name = *payload.Properties.Name
-		newICReq.InfrastructureComponent.Category = *payload.Properties.Category
-		newICReq.InfrastructureComponent.Type = *payload.Properties.Type
-
-		// add optional params
-		if payload.State != nil {
-			newICReq.InfrastructureComponent.State = *payload.State
-		} else {
-			newICReq.InfrastructureComponent.State = "unknown"
-		}
-		if payload.Properties.WS_url != nil {
-			newICReq.InfrastructureComponent.WebsocketURL = *payload.Properties.WS_url
-		}
-		if payload.Properties.API_url != nil {
-			newICReq.InfrastructureComponent.APIURL = *payload.Properties.API_url
-		}
-		if payload.Properties.Location != nil {
-			newICReq.InfrastructureComponent.Location = *payload.Properties.Location
-		}
-		if payload.Properties.Description != nil {
-			newICReq.InfrastructureComponent.Description = *payload.Properties.Description
-		}
-		// TODO add JSON start parameter scheme
-
-		// Validate the new IC
-		err = newICReq.Validate()
-		if err != nil {
-			log.Println("AMQP: Validation of new IC failed:", err)
-			return
-		}
-
-		// Create the new IC
-		newIC := newICReq.CreateIC()
-
-		// save IC
-		err = newIC.Save()
-		if err != nil {
-			log.Println("AMQP: Saving new IC to DB failed:", err)
-			return
-		}
-
-		log.Println("AMQP: Created IC ", newIC.Name)
-
+		err = createNewIC(payload)
 	} else if err != nil {
-		log.Println("AMQP: Database error for IC", ICUUID, " DB error message: ", err)
-		return
+		// database error
+		err = fmt.Errorf("AMQP: Database error for IC %v DB error message: %v", ICUUID, err)
 	} else {
-
-		var updatedICReq infrastructure_component.UpdateICRequest
-		if payload.State != nil {
-			updatedICReq.InfrastructureComponent.State = *payload.State
-		}
-		if payload.Properties.Type != nil {
-			updatedICReq.InfrastructureComponent.Type = *payload.Properties.Type
-		}
-		if payload.Properties.Category != nil {
-			updatedICReq.InfrastructureComponent.Category = *payload.Properties.Category
-		}
-		if payload.Properties.Name != nil {
-			updatedICReq.InfrastructureComponent.Name = *payload.Properties.Name
-		}
-		if payload.Properties.WS_url != nil {
-			updatedICReq.InfrastructureComponent.WebsocketURL = *payload.Properties.WS_url
-		}
-		if payload.Properties.API_url != nil {
-			updatedICReq.InfrastructureComponent.APIURL = *payload.Properties.API_url
-		}
-		if payload.Properties.Location != nil {
-			//postgres.Jsonb{json.RawMessage(`{"location" : " ` + *payload.Properties.Location + `"}`)}
-			updatedICReq.InfrastructureComponent.Location = *payload.Properties.Location
-		}
-		if payload.Properties.Description != nil {
-			updatedICReq.InfrastructureComponent.Description = *payload.Properties.Description
-		}
-		// TODO add JSON start parameter scheme
-
-		// Validate the updated IC
-		if err = updatedICReq.Validate(); err != nil {
-			log.Println("AMQP: Validation of updated IC failed:", err)
-			return
-		}
-
-		// Create the updated IC from old IC
-		updatedIC := updatedICReq.UpdatedIC(sToBeUpdated)
-
-		// Finally update the IC in the DB
-		err = sToBeUpdated.Update(updatedIC)
-		if err != nil {
-			log.Println("AMQP: Unable to update IC", sToBeUpdated.Name, "in DB: ", err)
-			return
-		}
-
-		log.Println("AMQP: Updated IC ", sToBeUpdated.Name)
+		// update record
+		err = updateIC(payload, sToBeUpdated)
 	}
+
+	return err
+}
+
+func createNewIC(payload ICUpdate) error {
+
+	var newICReq infrastructure_component.AddICRequest
+	newICReq.InfrastructureComponent.UUID = payload.Properties.UUID
+	if payload.Properties.Name == nil ||
+		payload.Properties.Category == nil ||
+		payload.Properties.Type == nil {
+		// cannot create new IC because required information (name, type, and/or category missing)
+		return fmt.Errorf("AMQP: Cannot create new IC, required field(s) is/are missing: name, type, category")
+	}
+	newICReq.InfrastructureComponent.Name = *payload.Properties.Name
+	newICReq.InfrastructureComponent.Category = *payload.Properties.Category
+	newICReq.InfrastructureComponent.Type = *payload.Properties.Type
+
+	// add optional params
+	if payload.State != nil {
+		newICReq.InfrastructureComponent.State = *payload.State
+	} else {
+		newICReq.InfrastructureComponent.State = "unknown"
+	}
+	if payload.Properties.WS_url != nil {
+		newICReq.InfrastructureComponent.WebsocketURL = *payload.Properties.WS_url
+	}
+	if payload.Properties.API_url != nil {
+		newICReq.InfrastructureComponent.APIURL = *payload.Properties.API_url
+	}
+	if payload.Properties.Location != nil {
+		newICReq.InfrastructureComponent.Location = *payload.Properties.Location
+	}
+	if payload.Properties.Description != nil {
+		newICReq.InfrastructureComponent.Description = *payload.Properties.Description
+	}
+	// TODO add JSON start parameter scheme
+
+	// set managed externally to true because this IC is created via AMQP
+	newICReq.InfrastructureComponent.ManagedExternally = newTrue()
+
+	// Validate the new IC
+	err := newICReq.Validate()
+	if err != nil {
+		return fmt.Errorf("AMQP: Validation of new IC failed: %v", err)
+	}
+
+	// Create the new IC
+	newIC := newICReq.CreateIC()
+
+	// save IC
+	err = newIC.Save()
+	if err != nil {
+		return fmt.Errorf("AMQP: Saving new IC to DB failed: %v", err)
+	}
+
+	return nil
+}
+
+func updateIC(payload ICUpdate, sToBeUpdated infrastructure_component.InfrastructureComponent) error {
+	var updatedICReq infrastructure_component.UpdateICRequest
+	if payload.State != nil {
+		updatedICReq.InfrastructureComponent.State = *payload.State
+	}
+	if payload.Properties.Type != nil {
+		updatedICReq.InfrastructureComponent.Type = *payload.Properties.Type
+	}
+	if payload.Properties.Category != nil {
+		updatedICReq.InfrastructureComponent.Category = *payload.Properties.Category
+	}
+	if payload.Properties.Name != nil {
+		updatedICReq.InfrastructureComponent.Name = *payload.Properties.Name
+	}
+	if payload.Properties.WS_url != nil {
+		updatedICReq.InfrastructureComponent.WebsocketURL = *payload.Properties.WS_url
+	}
+	if payload.Properties.API_url != nil {
+		updatedICReq.InfrastructureComponent.APIURL = *payload.Properties.API_url
+	}
+	if payload.Properties.Location != nil {
+		//postgres.Jsonb{json.RawMessage(`{"location" : " ` + *payload.Properties.Location + `"}`)}
+		updatedICReq.InfrastructureComponent.Location = *payload.Properties.Location
+	}
+	if payload.Properties.Description != nil {
+		updatedICReq.InfrastructureComponent.Description = *payload.Properties.Description
+	}
+	// TODO add JSON start parameter scheme
+
+	// set managed externally to true because this IC is updated via AMQP
+	updatedICReq.InfrastructureComponent.ManagedExternally = newTrue()
+
+	// Validate the updated IC
+	err := updatedICReq.Validate()
+	if err != nil {
+		return fmt.Errorf("AMQP: Validation of updated IC failed: %v", err)
+	}
+
+	// Create the updated IC from old IC
+	updatedIC := updatedICReq.UpdatedIC(sToBeUpdated)
+
+	// Finally update the IC in the DB
+	err = sToBeUpdated.Update(updatedIC)
+	if err != nil {
+		return fmt.Errorf("AMQP: Unable to update IC %v in DB: %v", sToBeUpdated.Name, err)
+	}
+
+	return err
+}
+
+func newTrue() *bool {
+	b := true
+	return &b
 }

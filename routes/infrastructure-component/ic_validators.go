@@ -38,10 +38,11 @@ type validNewIC struct {
 	Type                 string         `form:"Type" validate:"required"`
 	Name                 string         `form:"Name" validate:"required"`
 	Category             string         `form:"Category" validate:"required"`
-	StartParameterScheme postgres.Jsonb `form:"StartParameterScheme" validate:"omitempty"`
 	State                string         `form:"State" validate:"omitempty"`
 	Location             string         `form:"Location" validate:"omitempty"`
 	Description          string         `form:"Description" validate:"omitempty"`
+	StartParameterScheme postgres.Jsonb `form:"StartParameterScheme" validate:"omitempty"`
+	ManagedExternally    *bool          `form:"ManagedExternally" validate:"required"`
 }
 
 type validUpdatedIC struct {
@@ -51,10 +52,11 @@ type validUpdatedIC struct {
 	Type                 string         `form:"Type" validate:"omitempty"`
 	Name                 string         `form:"Name" validate:"omitempty"`
 	Category             string         `form:"Category" validate:"omitempty"`
-	StartParameterScheme postgres.Jsonb `form:"StartParameterScheme" validate:"omitempty"`
 	State                string         `form:"State" validate:"omitempty"`
 	Location             string         `form:"Location" validate:"omitempty"`
 	Description          string         `form:"Description" validate:"omitempty"`
+	StartParameterScheme postgres.Jsonb `form:"StartParameterScheme" validate:"omitempty"`
+	ManagedExternally    *bool          `form:"ManagedExternally" validate:"required"`
 }
 
 type AddICRequest struct {
@@ -89,6 +91,7 @@ func (r *AddICRequest) CreateIC() InfrastructureComponent {
 	s.Location = r.InfrastructureComponent.Location
 	s.Description = r.InfrastructureComponent.Description
 	s.StartParameterScheme = r.InfrastructureComponent.StartParameterScheme
+	s.ManagedExternally = *r.InfrastructureComponent.ManagedExternally
 	if r.InfrastructureComponent.State != "" {
 		s.State = r.InfrastructureComponent.State
 	} else {
@@ -138,6 +141,10 @@ func (r *UpdateICRequest) UpdatedIC(oldIC InfrastructureComponent) Infrastructur
 
 	if r.InfrastructureComponent.Description != "" {
 		s.Description = r.InfrastructureComponent.Description
+	}
+
+	if r.InfrastructureComponent.ManagedExternally != nil {
+		s.ManagedExternally = *r.InfrastructureComponent.ManagedExternally
 	}
 
 	// set last update time

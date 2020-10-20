@@ -49,6 +49,7 @@ type ICRequest struct {
 	Location             string         `json:"location,omitempty"`
 	Description          string         `json:"description,omitempty"`
 	StartParameterScheme postgres.Jsonb `json:"startparameterscheme,omitempty"`
+	ManagedExternally    *bool          `json:"managedexternally,omitempty"`
 }
 
 func TestMain(m *testing.M) {
@@ -112,6 +113,7 @@ func TestAddICAsAdmin(t *testing.T) {
 		Location:             helper.ICA.Location,
 		Description:          helper.ICA.Description,
 		StartParameterScheme: helper.ICA.StartParameterScheme,
+		ManagedExternally:    &helper.ICA.ManagedExternally,
 	}
 	code, resp, err = helper.TestEndpoint(router, token,
 		"/api/ic", "POST", helper.KeyModels{"ic": newIC})
@@ -166,6 +168,7 @@ func TestAddICAsUser(t *testing.T) {
 		Location:             helper.ICA.Location,
 		Description:          helper.ICA.Description,
 		StartParameterScheme: helper.ICA.StartParameterScheme,
+		ManagedExternally:    &helper.ICA.ManagedExternally,
 	}
 
 	// This should fail with unprocessable entity 422 error code
@@ -197,6 +200,7 @@ func TestUpdateICAsAdmin(t *testing.T) {
 		Location:             helper.ICA.Location,
 		Description:          helper.ICA.Description,
 		StartParameterScheme: helper.ICA.StartParameterScheme,
+		ManagedExternally:    &helper.ICA.ManagedExternally,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
 		"/api/ic", "POST", helper.KeyModels{"ic": newIC})
@@ -263,6 +267,7 @@ func TestUpdateICAsUser(t *testing.T) {
 		Location:             helper.ICA.Location,
 		Description:          helper.ICA.Description,
 		StartParameterScheme: helper.ICA.StartParameterScheme,
+		ManagedExternally:    &helper.ICA.ManagedExternally,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
 		"/api/ic", "POST", helper.KeyModels{"ic": newIC})
@@ -309,6 +314,7 @@ func TestDeleteICAsAdmin(t *testing.T) {
 		Location:             helper.ICA.Location,
 		Description:          helper.ICA.Description,
 		StartParameterScheme: helper.ICA.StartParameterScheme,
+		ManagedExternally:    &helper.ICA.ManagedExternally,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
 		"/api/ic", "POST", helper.KeyModels{"ic": newIC})
@@ -363,6 +369,7 @@ func TestDeleteICAsUser(t *testing.T) {
 		Location:             helper.ICA.Location,
 		Description:          helper.ICA.Description,
 		StartParameterScheme: helper.ICA.StartParameterScheme,
+		ManagedExternally:    &helper.ICA.ManagedExternally,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
 		"/api/ic", "POST", helper.KeyModels{"ic": newIC})
@@ -413,6 +420,7 @@ func TestGetAllICs(t *testing.T) {
 		Location:             helper.ICA.Location,
 		Description:          helper.ICA.Description,
 		StartParameterScheme: helper.ICA.StartParameterScheme,
+		ManagedExternally:    &helper.ICA.ManagedExternally,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
 		"/api/ic", "POST", helper.KeyModels{"ic": newICA})
@@ -430,6 +438,7 @@ func TestGetAllICs(t *testing.T) {
 		Location:             helper.ICB.Location,
 		Description:          helper.ICB.Description,
 		StartParameterScheme: helper.ICB.StartParameterScheme,
+		ManagedExternally:    &helper.ICB.ManagedExternally,
 	}
 	code, resp, err = helper.TestEndpoint(router, token,
 		"/api/ic", "POST", helper.KeyModels{"ic": newICB})
@@ -477,6 +486,7 @@ func TestGetConfigsOfIC(t *testing.T) {
 		Location:             helper.ICA.Location,
 		Description:          helper.ICA.Description,
 		StartParameterScheme: helper.ICA.StartParameterScheme,
+		ManagedExternally:    &helper.ICA.ManagedExternally,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
 		"/api/ic", "POST", helper.KeyModels{"ic": newICA})
