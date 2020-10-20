@@ -24,6 +24,7 @@ package infrastructure_component
 import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
@@ -36,6 +37,10 @@ func RegisterICEndpoints(r *gin.RouterGroup) {
 	r.GET("/:ICID", getIC)
 	r.DELETE("/:ICID", deleteIC)
 	r.GET("/:ICID/configs", getConfigsOfIC)
+}
+
+func RegisterAMQPEndpoint(r *gin.RouterGroup) {
+	r.POST("/:ICID/action", sendActionToIC)
 }
 
 // getICs godoc
@@ -96,6 +101,8 @@ func addIC(c *gin.Context) {
 		return
 	}
 
+	// TODO add case distinction here for externally managed IC
+
 	// Create the new IC from the request
 	newIC := req.CreateIC()
 
@@ -141,6 +148,8 @@ func updateIC(c *gin.Context) {
 		helper.UnprocessableEntityError(c, err.Error())
 		return
 	}
+
+	// TODO add case distinction here for externally managed IC
 
 	// Create the updatedIC from oldIC
 	updatedIC := req.UpdatedIC(oldIC)
@@ -196,6 +205,8 @@ func deleteIC(c *gin.Context) {
 		return
 	}
 
+	// TODO add case distinction here for externally managed IC
+
 	// Delete the IC
 	err := s.delete()
 	if !helper.DBError(c, err) {
@@ -230,4 +241,54 @@ func getConfigsOfIC(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"configs": allConfigs})
 	}
 
+}
+
+// sendActionToIC godoc
+// @Summary Send an action to IC (only available if backend server is started with -amqp parameter)
+// @ID sendActionToIC
+// @Tags infrastructure-components
+// @Produce json
+// @Param inputAction query string true "Action for IC"
+// @Success 200 {object} docs.ResponseError "Action sent successfully"
+// @Failure 400 {object} docs.ResponseError "Bad request"
+// @Failure 404 {object} docs.ResponseError "Not found"
+// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
+// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Param ICID path int true "InfrastructureComponent ID"
+// @Router /ic/{ICID}/action [post]
+// @Security Bearer
+func sendActionToIC(c *gin.Context) {
+
+	ok, s := CheckPermissions(c, database.ModelInfrastructureComponentAction, database.Update, true)
+	if !ok {
+		return
+	}
+
+	var actions []Action
+	err := c.BindJSON(&actions)
+	if err != nil {
+		helper.BadRequestError(c, "Error binding form data to JSON: "+err.Error())
+		return
+	}
+
+	//now := time.Now()
+	log.Println("AMQP: Will attempt to send the following actions:", actions)
+
+	for _, action := range actions {
+		/*if action.When == 0 {
+			action.When = float32(now.Unix())
+		}*/
+		action.UUID = new(string)
+		*action.UUID = s.UUID
+		err = SendActionAMQP(action)
+		if err != nil {
+			helper.InternalServerError(c, "Unable to send actions to IC: "+err.Error())
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "OK.",
+	})
 }

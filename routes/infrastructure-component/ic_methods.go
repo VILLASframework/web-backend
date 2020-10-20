@@ -77,3 +77,117 @@ func (s *InfrastructureComponent) getConfigs() ([]database.ComponentConfiguratio
 	err := db.Order("ID asc").Model(s).Related(&configs, "ComponentConfigurations").Error
 	return configs, len(configs), err
 }
+
+func createNewICviaAMQP(payload ICUpdate) error {
+
+	var newICReq AddICRequest
+	newICReq.InfrastructureComponent.UUID = payload.Properties.UUID
+	if payload.Properties.Name == nil ||
+		payload.Properties.Category == nil ||
+		payload.Properties.Type == nil {
+		// cannot create new IC because required information (name, type, and/or category missing)
+		return fmt.Errorf("AMQP: Cannot create new IC, required field(s) is/are missing: name, type, category")
+	}
+	newICReq.InfrastructureComponent.Name = *payload.Properties.Name
+	newICReq.InfrastructureComponent.Category = *payload.Properties.Category
+	newICReq.InfrastructureComponent.Type = *payload.Properties.Type
+
+	// add optional params
+	if payload.State != nil {
+		newICReq.InfrastructureComponent.State = *payload.State
+	} else {
+		newICReq.InfrastructureComponent.State = "unknown"
+	}
+	// TODO check if state is "gone" and abort creation of IC in this case
+
+	if payload.Properties.WS_url != nil {
+		newICReq.InfrastructureComponent.WebsocketURL = *payload.Properties.WS_url
+	}
+	if payload.Properties.API_url != nil {
+		newICReq.InfrastructureComponent.APIURL = *payload.Properties.API_url
+	}
+	if payload.Properties.Location != nil {
+		newICReq.InfrastructureComponent.Location = *payload.Properties.Location
+	}
+	if payload.Properties.Description != nil {
+		newICReq.InfrastructureComponent.Description = *payload.Properties.Description
+	}
+	// TODO add JSON start parameter scheme
+
+	// set managed externally to true because this IC is created via AMQP
+	newICReq.InfrastructureComponent.ManagedExternally = newTrue()
+
+	// Validate the new IC
+	err := newICReq.Validate()
+	if err != nil {
+		return fmt.Errorf("AMQP: Validation of new IC failed: %v", err)
+	}
+
+	// Create the new IC
+	newIC := newICReq.CreateIC()
+
+	// save IC
+	err = newIC.Save()
+	if err != nil {
+		return fmt.Errorf("AMQP: Saving new IC to DB failed: %v", err)
+	}
+
+	return nil
+}
+
+func (s *InfrastructureComponent) updateICviaAMQP(payload ICUpdate) error {
+	var updatedICReq UpdateICRequest
+	if payload.State != nil {
+		updatedICReq.InfrastructureComponent.State = *payload.State
+		// TODO check if state is "gone" and attempt to remove IC from DB if it still exists
+		// TODO if state is different from "gone", continue to update the IC
+	}
+	if payload.Properties.Type != nil {
+		updatedICReq.InfrastructureComponent.Type = *payload.Properties.Type
+	}
+	if payload.Properties.Category != nil {
+		updatedICReq.InfrastructureComponent.Category = *payload.Properties.Category
+	}
+	if payload.Properties.Name != nil {
+		updatedICReq.InfrastructureComponent.Name = *payload.Properties.Name
+	}
+	if payload.Properties.WS_url != nil {
+		updatedICReq.InfrastructureComponent.WebsocketURL = *payload.Properties.WS_url
+	}
+	if payload.Properties.API_url != nil {
+		updatedICReq.InfrastructureComponent.APIURL = *payload.Properties.API_url
+	}
+	if payload.Properties.Location != nil {
+		//postgres.Jsonb{json.RawMessage(`{"location" : " ` + *payload.Properties.Location + `"}`)}
+		updatedICReq.InfrastructureComponent.Location = *payload.Properties.Location
+	}
+	if payload.Properties.Description != nil {
+		updatedICReq.InfrastructureComponent.Description = *payload.Properties.Description
+	}
+	// TODO add JSON start parameter scheme
+
+	// set managed externally to true because this IC is updated via AMQP
+	updatedICReq.InfrastructureComponent.ManagedExternally = newTrue()
+
+	// Validate the updated IC
+	err := updatedICReq.Validate()
+	if err != nil {
+		return fmt.Errorf("AMQP: Validation of updated IC failed: %v", err)
+	}
+
+	// Create the updated IC from old IC
+	updatedIC := updatedICReq.UpdatedIC(*s)
+
+	// Finally update the IC in the DB
+	err = s.Update(updatedIC)
+	if err != nil {
+		return fmt.Errorf("AMQP: Unable to update IC %v in DB: %v", s.Name, err)
+	}
+
+	return err
+}
+
+func newTrue() *bool {
+	b := true
+	return &b
+}
