@@ -32,25 +32,29 @@ import (
 var validate *validator.Validate
 
 type validNewIC struct {
-	UUID       string         `form:"UUID" validate:"required"`
-	Host       string         `form:"Host" validate:"omitempty"`
-	APIHost    string         `form:"APIHost" validate:"omitempty"`
-	Type       string         `form:"Type" validate:"required"`
-	Name       string         `form:"Name" validate:"required"`
-	Category   string         `form:"Category" validate:"required"`
-	Properties postgres.Jsonb `form:"Properties" validate:"omitempty"`
-	State      string         `form:"State" validate:"omitempty"`
+	UUID         string         `form:"UUID" validate:"required"`
+	WebsocketURL string         `form:"WebsocketURL" validate:"omitempty"`
+	APIURL       string         `form:"APIURL" validate:"omitempty"`
+	Type         string         `form:"Type" validate:"required"`
+	Name         string         `form:"Name" validate:"required"`
+	Category     string         `form:"Category" validate:"required"`
+	Properties   postgres.Jsonb `form:"Properties" validate:"omitempty"`
+	State        string         `form:"State" validate:"omitempty"`
+	Location     string         `form:"Location" validate:"omitempty"`
+	Description  string         `form:"Description" validate:"omitempty"`
 }
 
 type validUpdatedIC struct {
-	UUID       string         `form:"UUID" validate:"omitempty"`
-	Host       string         `form:"Host" validate:"omitempty"`
-	APIHost    string         `form:"APIHost" validate:"omitempty"`
-	Type       string         `form:"Type" validate:"omitempty"`
-	Name       string         `form:"Name" validate:"omitempty"`
-	Category   string         `form:"Category" validate:"omitempty"`
-	Properties postgres.Jsonb `form:"Properties" validate:"omitempty"`
-	State      string         `form:"State" validate:"omitempty"`
+	UUID         string         `form:"UUID" validate:"omitempty"`
+	WebsocketURL string         `form:"WebsocketURL" validate:"omitempty"`
+	APIURL       string         `form:"APIURL" validate:"omitempty"`
+	Type         string         `form:"Type" validate:"omitempty"`
+	Name         string         `form:"Name" validate:"omitempty"`
+	Category     string         `form:"Category" validate:"omitempty"`
+	Properties   postgres.Jsonb `form:"Properties" validate:"omitempty"`
+	State        string         `form:"State" validate:"omitempty"`
+	Location     string         `form:"Location" validate:"omitempty"`
+	Description  string         `form:"Description" validate:"omitempty"`
 }
 
 type AddICRequest struct {
@@ -77,11 +81,13 @@ func (r *AddICRequest) CreateIC() InfrastructureComponent {
 	var s InfrastructureComponent
 
 	s.UUID = r.InfrastructureComponent.UUID
-	s.Host = r.InfrastructureComponent.Host
-	s.APIHost = r.InfrastructureComponent.APIHost
+	s.WebsocketURL = r.InfrastructureComponent.WebsocketURL
+	s.APIURL = r.InfrastructureComponent.APIURL
 	s.Type = r.InfrastructureComponent.Type
 	s.Name = r.InfrastructureComponent.Name
 	s.Category = r.InfrastructureComponent.Category
+	s.Location = r.InfrastructureComponent.Location
+	s.Description = r.InfrastructureComponent.Description
 	s.Properties = r.InfrastructureComponent.Properties
 	if r.InfrastructureComponent.State != "" {
 		s.State = r.InfrastructureComponent.State
@@ -102,12 +108,12 @@ func (r *UpdateICRequest) UpdatedIC(oldIC InfrastructureComponent) Infrastructur
 		s.UUID = r.InfrastructureComponent.UUID
 	}
 
-	if r.InfrastructureComponent.Host != "" {
-		s.Host = r.InfrastructureComponent.Host
+	if r.InfrastructureComponent.WebsocketURL != "" {
+		s.WebsocketURL = r.InfrastructureComponent.WebsocketURL
 	}
 
-	if r.InfrastructureComponent.APIHost != "" {
-		s.APIHost = r.InfrastructureComponent.APIHost
+	if r.InfrastructureComponent.APIURL != "" {
+		s.APIURL = r.InfrastructureComponent.APIURL
 	}
 
 	if r.InfrastructureComponent.Type != "" {
@@ -124,6 +130,14 @@ func (r *UpdateICRequest) UpdatedIC(oldIC InfrastructureComponent) Infrastructur
 
 	if r.InfrastructureComponent.State != "" {
 		s.State = r.InfrastructureComponent.State
+	}
+
+	if r.InfrastructureComponent.Location != "" {
+		s.Location = r.InfrastructureComponent.Location
+	}
+
+	if r.InfrastructureComponent.Description != "" {
+		s.Description = r.InfrastructureComponent.Description
 	}
 
 	// set last update time

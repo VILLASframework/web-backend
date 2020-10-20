@@ -39,14 +39,16 @@ import (
 var router *gin.Engine
 
 type ICRequest struct {
-	UUID       string         `json:"uuid,omitempty"`
-	Host       string         `json:"host,omitempty"`
-	APIHost    string         `json:"apihost,omitempty"`
-	Type       string         `json:"type,omitempty"`
-	Name       string         `json:"name,omitempty"`
-	Category   string         `json:"category,omitempty"`
-	State      string         `json:"state,omitempty"`
-	Properties postgres.Jsonb `json:"properties,omitempty"`
+	UUID         string         `json:"uuid,omitempty"`
+	WebsocketURL string         `json:"websocketurl,omitempty"`
+	APIURL       string         `json:"apiurl,omitempty"`
+	Type         string         `json:"type,omitempty"`
+	Name         string         `json:"name,omitempty"`
+	Category     string         `json:"category,omitempty"`
+	State        string         `json:"state,omitempty"`
+	Location     string         `json:"location,omitempty"`
+	Description  string         `json:"description,omitempty"`
+	Properties   postgres.Jsonb `json:"properties,omitempty"`
 }
 
 func TestMain(m *testing.M) {
@@ -100,13 +102,16 @@ func TestAddICAsAdmin(t *testing.T) {
 
 	// test POST ic/ $newIC
 	newIC := ICRequest{
-		UUID:       helper.ICA.UUID,
-		Host:       helper.ICA.Host,
-		Type:       helper.ICA.Type,
-		Name:       helper.ICA.Name,
-		Category:   helper.ICA.Category,
-		State:      helper.ICA.State,
-		Properties: helper.ICA.Properties,
+		UUID:         helper.ICA.UUID,
+		WebsocketURL: helper.ICA.WebsocketURL,
+		APIURL:       helper.ICB.APIURL,
+		Type:         helper.ICA.Type,
+		Name:         helper.ICA.Name,
+		Category:     helper.ICA.Category,
+		State:        helper.ICA.State,
+		Location:     helper.ICA.Location,
+		Description:  helper.ICA.Description,
+		Properties:   helper.ICA.Properties,
 	}
 	code, resp, err = helper.TestEndpoint(router, token,
 		"/api/ic", "POST", helper.KeyModels{"ic": newIC})
@@ -152,13 +157,15 @@ func TestAddICAsUser(t *testing.T) {
 
 	// test POST ic/ $newIC
 	newIC := ICRequest{
-		UUID:       helper.ICA.UUID,
-		Host:       helper.ICA.Host,
-		Type:       helper.ICA.Type,
-		Name:       helper.ICA.Name,
-		Category:   helper.ICA.Category,
-		State:      helper.ICA.State,
-		Properties: helper.ICA.Properties,
+		UUID:         helper.ICA.UUID,
+		WebsocketURL: helper.ICA.WebsocketURL,
+		Type:         helper.ICA.Type,
+		Name:         helper.ICA.Name,
+		Category:     helper.ICA.Category,
+		State:        helper.ICA.State,
+		Location:     helper.ICA.Location,
+		Description:  helper.ICA.Description,
+		Properties:   helper.ICA.Properties,
 	}
 
 	// This should fail with unprocessable entity 422 error code
@@ -181,13 +188,15 @@ func TestUpdateICAsAdmin(t *testing.T) {
 
 	// test POST ic/ $newIC
 	newIC := ICRequest{
-		UUID:       helper.ICA.UUID,
-		Host:       helper.ICA.Host,
-		Type:       helper.ICA.Type,
-		Name:       helper.ICA.Name,
-		Category:   helper.ICA.Category,
-		State:      helper.ICA.State,
-		Properties: helper.ICA.Properties,
+		UUID:         helper.ICA.UUID,
+		WebsocketURL: helper.ICA.WebsocketURL,
+		Type:         helper.ICA.Type,
+		Name:         helper.ICA.Name,
+		Category:     helper.ICA.Category,
+		State:        helper.ICA.State,
+		Location:     helper.ICA.Location,
+		Description:  helper.ICA.Description,
+		Properties:   helper.ICA.Properties,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
 		"/api/ic", "POST", helper.KeyModels{"ic": newIC})
@@ -210,7 +219,7 @@ func TestUpdateICAsAdmin(t *testing.T) {
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 
 	// Test PUT IC
-	newIC.Host = "ThisIsMyNewHost"
+	newIC.WebsocketURL = "ThisIsMyNewURL"
 	code, resp, err = helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/ic/%v", newICID), "PUT", helper.KeyModels{"ic": newIC})
 	assert.NoError(t, err)
@@ -245,13 +254,15 @@ func TestUpdateICAsUser(t *testing.T) {
 
 	// test POST ic/ $newIC
 	newIC := ICRequest{
-		UUID:       helper.ICA.UUID,
-		Host:       helper.ICA.Host,
-		Type:       helper.ICA.Type,
-		Name:       helper.ICA.Name,
-		Category:   helper.ICA.Category,
-		State:      helper.ICA.State,
-		Properties: helper.ICA.Properties,
+		UUID:         helper.ICA.UUID,
+		WebsocketURL: helper.ICA.WebsocketURL,
+		Type:         helper.ICA.Type,
+		Name:         helper.ICA.Name,
+		Category:     helper.ICA.Category,
+		State:        helper.ICA.State,
+		Location:     helper.ICA.Location,
+		Description:  helper.ICA.Description,
+		Properties:   helper.ICA.Properties,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
 		"/api/ic", "POST", helper.KeyModels{"ic": newIC})
@@ -269,7 +280,7 @@ func TestUpdateICAsUser(t *testing.T) {
 
 	// Test PUT IC
 	// This should fail with unprocessable entity status code 422
-	newIC.Host = "ThisIsMyNewHost"
+	newIC.WebsocketURL = "ThisIsMyNewURL"
 	code, resp, err = helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/ic/%v", newICID), "PUT", helper.KeyModels{"ic": newIC})
 	assert.NoError(t, err)
@@ -289,13 +300,15 @@ func TestDeleteICAsAdmin(t *testing.T) {
 
 	// test POST ic/ $newIC
 	newIC := ICRequest{
-		UUID:       helper.ICA.UUID,
-		Host:       helper.ICA.Host,
-		Type:       helper.ICA.Type,
-		Name:       helper.ICA.Name,
-		Category:   helper.ICA.Category,
-		State:      helper.ICA.State,
-		Properties: helper.ICA.Properties,
+		UUID:         helper.ICA.UUID,
+		WebsocketURL: helper.ICA.WebsocketURL,
+		Type:         helper.ICA.Type,
+		Name:         helper.ICA.Name,
+		Category:     helper.ICA.Category,
+		State:        helper.ICA.State,
+		Location:     helper.ICA.Location,
+		Description:  helper.ICA.Description,
+		Properties:   helper.ICA.Properties,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
 		"/api/ic", "POST", helper.KeyModels{"ic": newIC})
@@ -341,13 +354,15 @@ func TestDeleteICAsUser(t *testing.T) {
 
 	// test POST ic/ $newIC
 	newIC := ICRequest{
-		UUID:       helper.ICA.UUID,
-		Host:       helper.ICA.Host,
-		Type:       helper.ICA.Type,
-		Name:       helper.ICA.Name,
-		Category:   helper.ICA.Category,
-		State:      helper.ICA.State,
-		Properties: helper.ICA.Properties,
+		UUID:         helper.ICA.UUID,
+		WebsocketURL: helper.ICA.WebsocketURL,
+		Type:         helper.ICA.Type,
+		Name:         helper.ICA.Name,
+		Category:     helper.ICA.Category,
+		State:        helper.ICA.State,
+		Location:     helper.ICA.Location,
+		Description:  helper.ICA.Description,
+		Properties:   helper.ICA.Properties,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
 		"/api/ic", "POST", helper.KeyModels{"ic": newIC})
@@ -365,7 +380,7 @@ func TestDeleteICAsUser(t *testing.T) {
 
 	// Test DELETE ICs
 	// This should fail with unprocessable entity status code 422
-	newIC.Host = "ThisIsMyNewHost"
+	newIC.WebsocketURL = "ThisIsMyNewURL"
 	code, resp, err = helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/ic/%v", newICID), "DELETE", nil)
 	assert.NoError(t, err)
@@ -389,13 +404,15 @@ func TestGetAllICs(t *testing.T) {
 
 	// test POST ic/ $newICA
 	newICA := ICRequest{
-		UUID:       helper.ICA.UUID,
-		Host:       helper.ICA.Host,
-		Type:       helper.ICA.Type,
-		Name:       helper.ICA.Name,
-		Category:   helper.ICA.Category,
-		State:      helper.ICA.State,
-		Properties: helper.ICA.Properties,
+		UUID:         helper.ICA.UUID,
+		WebsocketURL: helper.ICA.WebsocketURL,
+		Type:         helper.ICA.Type,
+		Name:         helper.ICA.Name,
+		Category:     helper.ICA.Category,
+		State:        helper.ICA.State,
+		Location:     helper.ICA.Location,
+		Description:  helper.ICA.Description,
+		Properties:   helper.ICA.Properties,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
 		"/api/ic", "POST", helper.KeyModels{"ic": newICA})
@@ -404,13 +421,15 @@ func TestGetAllICs(t *testing.T) {
 
 	// test POST ic/ $newICB
 	newICB := ICRequest{
-		UUID:       helper.ICB.UUID,
-		Host:       helper.ICB.Host,
-		Type:       helper.ICB.Type,
-		Name:       helper.ICB.Name,
-		Category:   helper.ICB.Category,
-		State:      helper.ICB.State,
-		Properties: helper.ICB.Properties,
+		UUID:         helper.ICB.UUID,
+		WebsocketURL: helper.ICB.WebsocketURL,
+		Type:         helper.ICB.Type,
+		Name:         helper.ICB.Name,
+		Category:     helper.ICB.Category,
+		State:        helper.ICB.State,
+		Location:     helper.ICB.Location,
+		Description:  helper.ICB.Description,
+		Properties:   helper.ICB.Properties,
 	}
 	code, resp, err = helper.TestEndpoint(router, token,
 		"/api/ic", "POST", helper.KeyModels{"ic": newICB})
@@ -449,13 +468,15 @@ func TestGetConfigsOfIC(t *testing.T) {
 
 	// test POST ic/ $newICA
 	newICA := ICRequest{
-		UUID:       helper.ICA.UUID,
-		Host:       helper.ICA.Host,
-		Type:       helper.ICA.Type,
-		Name:       helper.ICA.Name,
-		Category:   helper.ICA.Category,
-		State:      helper.ICA.State,
-		Properties: helper.ICA.Properties,
+		UUID:         helper.ICA.UUID,
+		WebsocketURL: helper.ICA.WebsocketURL,
+		Type:         helper.ICA.Type,
+		Name:         helper.ICA.Name,
+		Category:     helper.ICA.Category,
+		State:        helper.ICA.State,
+		Location:     helper.ICA.Location,
+		Description:  helper.ICA.Description,
+		Properties:   helper.ICA.Properties,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
 		"/api/ic", "POST", helper.KeyModels{"ic": newICA})

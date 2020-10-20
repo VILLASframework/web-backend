@@ -120,10 +120,10 @@ type InfrastructureComponent struct {
 	UUID string `json:"uuid" gorm:"not null"`
 	// Name of the IC
 	Name string `json:"name" gorm:"default:''"`
-	// Host if the IC
-	Host string `json:"host" gorm:"default:''"`
-	// Host of API for IC
-	APIHost string `json:"apihost" gorm:"default:''"`
+	// WebsocketURL if the IC
+	WebsocketURL string `json:"websocketurl" gorm:"default:''"`
+	// API URL of API for IC
+	APIURL string `json:"apiurl" gorm:"default:''"`
 	// Category of IC (simulator, gateway, database, etc.)
 	Category string `json:"category" gorm:"default:''"`
 	// Type of IC (RTDS, VILLASnode, RTDS, etc.)
@@ -134,10 +134,12 @@ type InfrastructureComponent struct {
 	State string `json:"state" gorm:"default:''"`
 	// Time of last state update
 	StateUpdateAt string `json:"stateUpdateAt" gorm:"default:''"`
+	// Location of the IC
+	Location string `json:"location" gorm:"default:''"`
+	// Description of the IC
+	Description string `json:"description" gorm:"default:''"`
 	// Properties of IC as JSON string
 	Properties postgres.Jsonb `json:"properties"`
-	// Raw properties of IC as JSON string
-	RawProperties postgres.Jsonb `json:"rawProperties"`
 	// ComponentConfigurations in which the IC is used
 	ComponentConfigurations []ComponentConfiguration `json:"-" gorm:"foreignkey:ICID"`
 }

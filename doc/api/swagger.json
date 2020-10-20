@@ -13,7 +13,7 @@
         },
         "version": "2.0"
     },
-    "basePath": "http://localhost:4000/api/v2/",
+    "basePath": "/api/v2",
     "paths": {
         "/authenticate": {
             "post": {
@@ -1061,7 +1061,7 @@
                         "required": true,
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/infrastructure_component.addICRequest"
+                            "$ref": "#/definitions/infrastructure_component.AddICRequest"
                         }
                     }
                 ],
@@ -1181,7 +1181,7 @@
                         "required": true,
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/infrastructure_component.updateICRequest"
+                            "$ref": "#/definitions/infrastructure_component.UpdateICRequest"
                         }
                     },
                     {
@@ -2960,20 +2960,24 @@
         "database.InfrastructureComponent": {
             "type": "object",
             "properties": {
-                "apihost": {
-                    "description": "Host of API for IC",
+                "apiurl": {
+                    "description": "API URL of API for IC",
                     "type": "string"
                 },
                 "category": {
                     "description": "Category of IC (simulator, gateway, database, etc.)",
                     "type": "string"
                 },
-                "host": {
-                    "description": "Host if the IC",
+                "description": {
+                    "description": "Description of the IC",
                     "type": "string"
                 },
                 "id": {
                     "type": "integer"
+                },
+                "location": {
+                    "description": "Location of the IC",
+                    "type": "string"
                 },
                 "name": {
                     "description": "Name of the IC",
@@ -2981,10 +2985,6 @@
                 },
                 "properties": {
                     "description": "Properties of IC as JSON string",
-                    "type": "string"
-                },
-                "rawProperties": {
-                    "description": "Raw properties of IC as JSON string",
                     "type": "string"
                 },
                 "state": {
@@ -3005,6 +3005,10 @@
                 },
                 "uuid": {
                     "description": "UUID of the IC",
+                    "type": "string"
+                },
+                "websocketurl": {
+                    "description": "WebsocketURL if the IC",
                     "type": "string"
                 }
             }
@@ -3334,7 +3338,7 @@
                 }
             }
         },
-        "infrastructure_component.addICRequest": {
+        "infrastructure_component.AddICRequest": {
             "type": "object",
             "properties": {
                 "ic": {
@@ -3343,7 +3347,7 @@
                 }
             }
         },
-        "infrastructure_component.updateICRequest": {
+        "infrastructure_component.UpdateICRequest": {
             "type": "object",
             "properties": {
                 "ic": {
@@ -3361,13 +3365,16 @@
                 "UUID"
             ],
             "properties": {
-                "APIHost": {
+                "APIURL": {
                     "type": "string"
                 },
                 "Category": {
                     "type": "string"
                 },
-                "Host": {
+                "Description": {
+                    "type": "string"
+                },
+                "Location": {
                     "type": "string"
                 },
                 "Name": {
@@ -3383,6 +3390,9 @@
                     "type": "string"
                 },
                 "UUID": {
+                    "type": "string"
+                },
+                "WebsocketURL": {
                     "type": "string"
                 }
             }
@@ -3390,13 +3400,16 @@
         "infrastructure_component.validUpdatedIC": {
             "type": "object",
             "properties": {
-                "APIHost": {
+                "APIURL": {
                     "type": "string"
                 },
                 "Category": {
                     "type": "string"
                 },
-                "Host": {
+                "Description": {
+                    "type": "string"
+                },
+                "Location": {
                     "type": "string"
                 },
                 "Name": {
@@ -3412,6 +3425,9 @@
                     "type": "string"
                 },
                 "UUID": {
+                    "type": "string"
+                },
+                "WebsocketURL": {
                     "type": "string"
                 }
             }

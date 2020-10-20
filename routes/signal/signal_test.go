@@ -56,13 +56,15 @@ type ConfigRequest struct {
 }
 
 type ICRequest struct {
-	UUID       string         `json:"uuid,omitempty"`
-	Host       string         `json:"host,omitempty"`
-	Type       string         `json:"type,omitempty"`
-	Name       string         `json:"name,omitempty"`
-	Category   string         `json:"category,omitempty"`
-	State      string         `json:"state,omitempty"`
-	Properties postgres.Jsonb `json:"properties,omitempty"`
+	UUID         string         `json:"uuid,omitempty"`
+	WebsocketURL string         `json:"websocketurl,omitempty"`
+	Type         string         `json:"type,omitempty"`
+	Name         string         `json:"name,omitempty"`
+	Category     string         `json:"category,omitempty"`
+	State        string         `json:"state,omitempty"`
+	Location     string         `json:"location,omitempty"`
+	Description  string         `json:"description,omitempty"`
+	Properties   postgres.Jsonb `json:"properties,omitempty"`
 }
 
 type ScenarioRequest struct {
@@ -79,13 +81,15 @@ func addScenarioAndICAndConfig() (scenarioID uint, ICID uint, configID uint) {
 
 	// POST $newICA
 	newICA := ICRequest{
-		UUID:       helper.ICA.UUID,
-		Host:       helper.ICA.Host,
-		Type:       helper.ICA.Type,
-		Name:       helper.ICA.Name,
-		Category:   helper.ICA.Category,
-		State:      helper.ICA.State,
-		Properties: helper.ICA.Properties,
+		UUID:         helper.ICA.UUID,
+		WebsocketURL: helper.ICA.WebsocketURL,
+		Type:         helper.ICA.Type,
+		Name:         helper.ICA.Name,
+		Category:     helper.ICA.Category,
+		State:        helper.ICA.State,
+		Location:     helper.ICA.Location,
+		Description:  helper.ICA.Description,
+		Properties:   helper.ICA.Properties,
 	}
 	_, resp, _ := helper.TestEndpoint(router, token,
 		"/api/ic", "POST", helper.KeyModels{"ic": newICA})

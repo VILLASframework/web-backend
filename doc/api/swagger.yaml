@@ -1,4 +1,4 @@
-basePath: http://localhost:4000/api/v2/
+basePath: /api/v2
 definitions:
   component_configuration.addConfigRequest:
     properties:
@@ -146,25 +146,25 @@ definitions:
     type: object
   database.InfrastructureComponent:
     properties:
-      apihost:
-        description: Host of API for IC
+      apiurl:
+        description: API URL of API for IC
         type: string
       category:
         description: Category of IC (simulator, gateway, database, etc.)
         type: string
-      host:
-        description: Host if the IC
+      description:
+        description: Description of the IC
         type: string
       id:
         type: integer
+      location:
+        description: Location of the IC
+        type: string
       name:
         description: Name of the IC
         type: string
       properties:
         description: Properties of IC as JSON string
-        type: string
-      rawProperties:
-        description: Raw properties of IC as JSON string
         type: string
       state:
         description: State of the IC
@@ -180,6 +180,9 @@ definitions:
         type: integer
       uuid:
         description: UUID of the IC
+        type: string
+      websocketurl:
+        description: WebsocketURL if the IC
         type: string
     type: object
   database.Scenario:
@@ -404,13 +407,13 @@ definitions:
           $ref: '#/definitions/database.Widget'
         type: array
     type: object
-  infrastructure_component.addICRequest:
+  infrastructure_component.AddICRequest:
     properties:
       ic:
         $ref: '#/definitions/infrastructure_component.validNewIC'
         type: object
     type: object
-  infrastructure_component.updateICRequest:
+  infrastructure_component.UpdateICRequest:
     properties:
       ic:
         $ref: '#/definitions/infrastructure_component.validUpdatedIC'
@@ -418,11 +421,13 @@ definitions:
     type: object
   infrastructure_component.validNewIC:
     properties:
-      APIHost:
+      APIURL:
         type: string
       Category:
         type: string
-      Host:
+      Description:
+        type: string
+      Location:
         type: string
       Name:
         type: string
@@ -433,6 +438,8 @@ definitions:
       Type:
         type: string
       UUID:
+        type: string
+      WebsocketURL:
         type: string
     required:
     - Category
@@ -442,11 +449,13 @@ definitions:
     type: object
   infrastructure_component.validUpdatedIC:
     properties:
-      APIHost:
+      APIURL:
         type: string
       Category:
         type: string
-      Host:
+      Description:
+        type: string
+      Location:
         type: string
       Name:
         type: string
@@ -457,6 +466,8 @@ definitions:
       Type:
         type: string
       UUID:
+        type: string
+      WebsocketURL:
         type: string
     type: object
   scenario.addScenarioRequest:
@@ -1357,7 +1368,7 @@ paths:
         name: inputIC
         required: true
         schema:
-          $ref: '#/definitions/infrastructure_component.addICRequest'
+          $ref: '#/definitions/infrastructure_component.AddICRequest'
           type: object
       produces:
       - application/json
@@ -1470,7 +1481,7 @@ paths:
         name: inputIC
         required: true
         schema:
-          $ref: '#/definitions/infrastructure_component.updateICRequest'
+          $ref: '#/definitions/infrastructure_component.UpdateICRequest'
           type: object
       - description: InfrastructureComponent ID
         in: path

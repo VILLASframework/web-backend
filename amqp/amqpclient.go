@@ -28,7 +28,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
-	"github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/streadway/amqp"
 	"log"
 	"time"
@@ -54,14 +53,16 @@ type Action struct {
 type ICUpdate struct {
 	State      *string `json:"state"`
 	Properties struct {
-		UUID     string  `json:"uuid"`
-		Name     *string `json:"name"`
-		Category *string `json:"category"`
-		Type     *string `json:"type"`
-		Location *string `json:"location"`
-		WS_url   *string `json:"ws_url"`
-		API_url  *string `json:"api_url"`
+		UUID        string  `json:"uuid"`
+		Name        *string `json:"name"`
+		Category    *string `json:"category"`
+		Type        *string `json:"type"`
+		Location    *string `json:"location"`
+		WS_url      *string `json:"ws_url"`
+		API_url     *string `json:"api_url"`
+		Description *string `json:"description"`
 	} `json:"properties"`
+	// TODO add JSON start parameter scheme
 }
 
 var client AMQPclient
@@ -272,14 +273,18 @@ func processMessage(message amqp.Delivery) {
 			newICReq.InfrastructureComponent.State = "unknown"
 		}
 		if payload.Properties.WS_url != nil {
-			newICReq.InfrastructureComponent.Host = *payload.Properties.WS_url
+			newICReq.InfrastructureComponent.WebsocketURL = *payload.Properties.WS_url
 		}
 		if payload.Properties.API_url != nil {
-			newICReq.InfrastructureComponent.APIHost = *payload.Properties.API_url
+			newICReq.InfrastructureComponent.APIURL = *payload.Properties.API_url
 		}
 		if payload.Properties.Location != nil {
-			newICReq.InfrastructureComponent.Properties = postgres.Jsonb{json.RawMessage(`{"location" : " ` + *payload.Properties.Location + `"}`)}
+			newICReq.InfrastructureComponent.Location = *payload.Properties.Location
 		}
+		if payload.Properties.Description != nil {
+			newICReq.InfrastructureComponent.Description = *payload.Properties.Description
+		}
+		// TODO add JSON start parameter scheme
 
 		// Validate the new IC
 		err = newICReq.Validate()
@@ -319,14 +324,19 @@ func processMessage(message amqp.Delivery) {
 			updatedICReq.InfrastructureComponent.Name = *payload.Properties.Name
 		}
 		if payload.Properties.WS_url != nil {
-			updatedICReq.InfrastructureComponent.Host = *payload.Properties.WS_url
+			updatedICReq.InfrastructureComponent.WebsocketURL = *payload.Properties.WS_url
 		}
 		if payload.Properties.API_url != nil {
-			updatedICReq.InfrastructureComponent.APIHost = *payload.Properties.API_url
+			updatedICReq.InfrastructureComponent.APIURL = *payload.Properties.API_url
 		}
 		if payload.Properties.Location != nil {
-			updatedICReq.InfrastructureComponent.Properties = postgres.Jsonb{json.RawMessage(`{"location" : " ` + *payload.Properties.Location + `"}`)}
+			//postgres.Jsonb{json.RawMessage(`{"location" : " ` + *payload.Properties.Location + `"}`)}
+			updatedICReq.InfrastructureComponent.Location = *payload.Properties.Location
 		}
+		if payload.Properties.Description != nil {
+			updatedICReq.InfrastructureComponent.Description = *payload.Properties.Description
+		}
+		// TODO add JSON start parameter scheme
 
 		// Validate the updated IC
 		if err = updatedICReq.Validate(); err != nil {

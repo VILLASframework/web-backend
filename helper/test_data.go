@@ -88,34 +88,36 @@ var NewUserC = UserRequest{
 
 // Infrastructure components
 
-var propertiesA = json.RawMessage(`{"location" : "ACSlab"}`)
-var propertiesB = json.RawMessage(`{"location" : "ACSlab"}`)
+var propertiesA = json.RawMessage(`{"prop1" : "a nice prop"}`)
+var propertiesB = json.RawMessage(`{"prop1" : "not so nice"}`)
 
 var ICA = database.InfrastructureComponent{
-	UUID:          "4854af30-325f-44a5-ad59-b67b2597de68",
-	Host:          "xxx.yyy.zzz.aaa",
-	Type:          "DPsim",
-	Category:      "Simulator",
-	Name:          "Test DPsim Simulator",
-	Uptime:        0,
-	State:         "running",
-	StateUpdateAt: time.Now().Format(time.RFC1123),
-	Properties:    postgres.Jsonb{propertiesA},
-	RawProperties: postgres.Jsonb{propertiesA},
+	UUID:         "4854af30-325f-44a5-ad59-b67b2597de68",
+	WebsocketURL: "xxx.yyy.zzz.aaa",
+	Type:         "DPsim",
+	Category:     "Simulator",
+	Name:         "Test DPsim Simulator",
+	Uptime:       0,
+	State:        "running",
+	Location:     "ACS Laboratory",
+	Description:  "This is a test description",
+	//StateUpdateAt: time.Now().Format(time.RFC1123),
+	Properties: postgres.Jsonb{propertiesA},
 }
 
 var ICB = database.InfrastructureComponent{
-	UUID:          "7be0322d-354e-431e-84bd-ae4c9633138b",
-	Host:          "https://villas-new.k8s.eonerc.rwth-aachen.de/ws/ws_sig",
-	APIHost:       "https://villas-new.k8s.eonerc.rwth-aachen.de/ws/api",
-	Type:          "VILLASnode Signal Generator",
-	Category:      "Signal Generator",
-	Name:          "ACS Demo Signals",
-	Uptime:        0,
-	State:         "idle",
-	StateUpdateAt: time.Now().Format(time.RFC1123),
-	Properties:    postgres.Jsonb{propertiesB},
-	RawProperties: postgres.Jsonb{propertiesB},
+	UUID:         "7be0322d-354e-431e-84bd-ae4c9633138b",
+	WebsocketURL: "https://villas-new.k8s.eonerc.rwth-aachen.de/ws/ws_sig",
+	APIURL:       "https://villas-new.k8s.eonerc.rwth-aachen.de/ws/api",
+	Type:         "VILLASnode Signal Generator",
+	Category:     "Signal Generator",
+	Name:         "ACS Demo Signals",
+	Uptime:       0,
+	State:        "idle",
+	Location:     "k8s",
+	Description:  "A signal generator for testing purposes",
+	//StateUpdateAt: time.Now().Format(time.RFC1123),
+	Properties: postgres.Jsonb{propertiesB},
 }
 
 // Scenarios
