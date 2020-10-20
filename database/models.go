@@ -138,8 +138,8 @@ type InfrastructureComponent struct {
 	Location string `json:"location" gorm:"default:''"`
 	// Description of the IC
 	Description string `json:"description" gorm:"default:''"`
-	// Properties of IC as JSON string
-	Properties postgres.Jsonb `json:"properties"`
+	// JSON scheme of start parameters for IC
+	StartParameterScheme postgres.Jsonb `json:"startparameterscheme"`
 	// ComponentConfigurations in which the IC is used
 	ComponentConfigurations []ComponentConfiguration `json:"-" gorm:"foreignkey:ICID"`
 }

@@ -49,15 +49,15 @@ type ConfigRequest struct {
 }
 
 type ICRequest struct {
-	UUID         string         `json:"uuid,omitempty"`
-	WebsocketURL string         `json:"websocketurl,omitempty"`
-	Type         string         `json:"type,omitempty"`
-	Name         string         `json:"name,omitempty"`
-	Category     string         `json:"category,omitempty"`
-	State        string         `json:"state,omitempty"`
-	Location     string         `json:"location,omitempty"`
-	Description  string         `json:"description,omitempty"`
-	Properties   postgres.Jsonb `json:"properties,omitempty"`
+	UUID                 string         `json:"uuid,omitempty"`
+	WebsocketURL         string         `json:"websocketurl,omitempty"`
+	Type                 string         `json:"type,omitempty"`
+	Name                 string         `json:"name,omitempty"`
+	Category             string         `json:"category,omitempty"`
+	State                string         `json:"state,omitempty"`
+	Location             string         `json:"location,omitempty"`
+	Description          string         `json:"description,omitempty"`
+	StartParameterScheme postgres.Jsonb `json:"startparameterscheme,omitempty"`
 }
 
 type ScenarioRequest struct {
@@ -74,15 +74,15 @@ func addScenarioAndIC() (scenarioID uint, ICID uint) {
 
 	// POST $newICA
 	newICA := ICRequest{
-		UUID:         helper.ICA.UUID,
-		WebsocketURL: helper.ICA.WebsocketURL,
-		Type:         helper.ICA.Type,
-		Name:         helper.ICA.Name,
-		Category:     helper.ICA.Category,
-		State:        helper.ICA.State,
-		Location:     helper.ICA.Location,
-		Description:  helper.ICA.Description,
-		Properties:   helper.ICA.Properties,
+		UUID:                 helper.ICA.UUID,
+		WebsocketURL:         helper.ICA.WebsocketURL,
+		Type:                 helper.ICA.Type,
+		Name:                 helper.ICA.Name,
+		Category:             helper.ICA.Category,
+		State:                helper.ICA.State,
+		Location:             helper.ICA.Location,
+		Description:          helper.ICA.Description,
+		StartParameterScheme: helper.ICA.StartParameterScheme,
 	}
 	_, resp, _ := helper.TestEndpoint(router, token,
 		"/api/ic", "POST", helper.KeyModels{"ic": newICA})
@@ -92,15 +92,15 @@ func addScenarioAndIC() (scenarioID uint, ICID uint) {
 
 	// POST a second IC to change to that IC during testing
 	newICB := ICRequest{
-		UUID:         helper.ICB.UUID,
-		WebsocketURL: helper.ICB.WebsocketURL,
-		Type:         helper.ICB.Type,
-		Name:         helper.ICB.Name,
-		Category:     helper.ICB.Category,
-		State:        helper.ICB.State,
-		Location:     helper.ICB.Location,
-		Description:  helper.ICB.Description,
-		Properties:   helper.ICB.Properties,
+		UUID:                 helper.ICB.UUID,
+		WebsocketURL:         helper.ICB.WebsocketURL,
+		Type:                 helper.ICB.Type,
+		Name:                 helper.ICB.Name,
+		Category:             helper.ICB.Category,
+		State:                helper.ICB.State,
+		Location:             helper.ICB.Location,
+		Description:          helper.ICB.Description,
+		StartParameterScheme: helper.ICB.StartParameterScheme,
 	}
 	_, resp, _ = helper.TestEndpoint(router, token,
 		"/api/ic", "POST", helper.KeyModels{"ic": newICB})

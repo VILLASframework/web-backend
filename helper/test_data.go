@@ -102,7 +102,7 @@ var ICA = database.InfrastructureComponent{
 	Location:     "ACS Laboratory",
 	Description:  "This is a test description",
 	//StateUpdateAt: time.Now().Format(time.RFC1123),
-	Properties: postgres.Jsonb{propertiesA},
+	StartParameterScheme: postgres.Jsonb{propertiesA},
 }
 
 var ICB = database.InfrastructureComponent{
@@ -117,7 +117,7 @@ var ICB = database.InfrastructureComponent{
 	Location:     "k8s",
 	Description:  "A signal generator for testing purposes",
 	//StateUpdateAt: time.Now().Format(time.RFC1123),
-	Properties: postgres.Jsonb{propertiesB},
+	StartParameterScheme: postgres.Jsonb{propertiesB},
 }
 
 // Scenarios

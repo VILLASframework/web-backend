@@ -32,29 +32,29 @@ import (
 var validate *validator.Validate
 
 type validNewIC struct {
-	UUID         string         `form:"UUID" validate:"required"`
-	WebsocketURL string         `form:"WebsocketURL" validate:"omitempty"`
-	APIURL       string         `form:"APIURL" validate:"omitempty"`
-	Type         string         `form:"Type" validate:"required"`
-	Name         string         `form:"Name" validate:"required"`
-	Category     string         `form:"Category" validate:"required"`
-	Properties   postgres.Jsonb `form:"Properties" validate:"omitempty"`
-	State        string         `form:"State" validate:"omitempty"`
-	Location     string         `form:"Location" validate:"omitempty"`
-	Description  string         `form:"Description" validate:"omitempty"`
+	UUID                 string         `form:"UUID" validate:"required"`
+	WebsocketURL         string         `form:"WebsocketURL" validate:"omitempty"`
+	APIURL               string         `form:"APIURL" validate:"omitempty"`
+	Type                 string         `form:"Type" validate:"required"`
+	Name                 string         `form:"Name" validate:"required"`
+	Category             string         `form:"Category" validate:"required"`
+	StartParameterScheme postgres.Jsonb `form:"StartParameterScheme" validate:"omitempty"`
+	State                string         `form:"State" validate:"omitempty"`
+	Location             string         `form:"Location" validate:"omitempty"`
+	Description          string         `form:"Description" validate:"omitempty"`
 }
 
 type validUpdatedIC struct {
-	UUID         string         `form:"UUID" validate:"omitempty"`
-	WebsocketURL string         `form:"WebsocketURL" validate:"omitempty"`
-	APIURL       string         `form:"APIURL" validate:"omitempty"`
-	Type         string         `form:"Type" validate:"omitempty"`
-	Name         string         `form:"Name" validate:"omitempty"`
-	Category     string         `form:"Category" validate:"omitempty"`
-	Properties   postgres.Jsonb `form:"Properties" validate:"omitempty"`
-	State        string         `form:"State" validate:"omitempty"`
-	Location     string         `form:"Location" validate:"omitempty"`
-	Description  string         `form:"Description" validate:"omitempty"`
+	UUID                 string         `form:"UUID" validate:"omitempty"`
+	WebsocketURL         string         `form:"WebsocketURL" validate:"omitempty"`
+	APIURL               string         `form:"APIURL" validate:"omitempty"`
+	Type                 string         `form:"Type" validate:"omitempty"`
+	Name                 string         `form:"Name" validate:"omitempty"`
+	Category             string         `form:"Category" validate:"omitempty"`
+	StartParameterScheme postgres.Jsonb `form:"StartParameterScheme" validate:"omitempty"`
+	State                string         `form:"State" validate:"omitempty"`
+	Location             string         `form:"Location" validate:"omitempty"`
+	Description          string         `form:"Description" validate:"omitempty"`
 }
 
 type AddICRequest struct {
@@ -88,7 +88,7 @@ func (r *AddICRequest) CreateIC() InfrastructureComponent {
 	s.Category = r.InfrastructureComponent.Category
 	s.Location = r.InfrastructureComponent.Location
 	s.Description = r.InfrastructureComponent.Description
-	s.Properties = r.InfrastructureComponent.Properties
+	s.StartParameterScheme = r.InfrastructureComponent.StartParameterScheme
 	if r.InfrastructureComponent.State != "" {
 		s.State = r.InfrastructureComponent.State
 	} else {
@@ -147,11 +147,11 @@ func (r *UpdateICRequest) UpdatedIC(oldIC InfrastructureComponent) Infrastructur
 	var emptyJson postgres.Jsonb
 	// Serialize empty json and params
 	emptyJson_ser, _ := json.Marshal(emptyJson)
-	startParams_ser, _ := json.Marshal(r.InfrastructureComponent.Properties)
+	startParams_ser, _ := json.Marshal(r.InfrastructureComponent.StartParameterScheme)
 	opts := jsondiff.DefaultConsoleOptions()
 	diff, _ := jsondiff.Compare(emptyJson_ser, startParams_ser, &opts)
 	if diff.String() != "FullMatch" {
-		s.Properties = r.InfrastructureComponent.Properties
+		s.StartParameterScheme = r.InfrastructureComponent.StartParameterScheme
 	}
 
 	return s

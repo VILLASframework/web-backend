@@ -163,8 +163,8 @@ definitions:
       name:
         description: Name of the IC
         type: string
-      properties:
-        description: Properties of IC as JSON string
+      startparameterscheme:
+        description: JSON scheme of start parameters for IC
         type: string
       state:
         description: State of the IC
@@ -431,7 +431,7 @@ definitions:
         type: string
       Name:
         type: string
-      Properties:
+      StartParameterScheme:
         type: string
       State:
         type: string
@@ -459,7 +459,7 @@ definitions:
         type: string
       Name:
         type: string
-      Properties:
+      StartParameterScheme:
         type: string
       State:
         type: string

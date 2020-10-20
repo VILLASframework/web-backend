@@ -2983,8 +2983,8 @@
                     "description": "Name of the IC",
                     "type": "string"
                 },
-                "properties": {
-                    "description": "Properties of IC as JSON string",
+                "startparameterscheme": {
+                    "description": "JSON scheme of start parameters for IC",
                     "type": "string"
                 },
                 "state": {
@@ -3380,7 +3380,7 @@
                 "Name": {
                     "type": "string"
                 },
-                "Properties": {
+                "StartParameterScheme": {
                     "type": "string"
                 },
                 "State": {
@@ -3415,7 +3415,7 @@
                 "Name": {
                     "type": "string"
                 },
-                "Properties": {
+                "StartParameterScheme": {
                     "type": "string"
                 },
                 "State": {
