@@ -86,8 +86,11 @@ func addScenarioAndIC() (scenarioID uint, ICID uint) {
 		StartParameterScheme: helper.ICA.StartParameterScheme,
 		ManagedExternally:    &helper.ICA.ManagedExternally,
 	}
-	_, resp, _ := helper.TestEndpoint(router, token,
+	code, resp, err := helper.TestEndpoint(router, token,
 		"/api/ic", "POST", helper.KeyModels{"ic": newICA})
+	if code != 200 || err != nil {
+		fmt.Println("Adding IC returned code", code, err, resp)
+	}
 
 	// Read newIC's ID from the response
 	newICID, _ := helper.GetResponseID(resp)
@@ -103,10 +106,13 @@ func addScenarioAndIC() (scenarioID uint, ICID uint) {
 		Location:             helper.ICB.Location,
 		Description:          helper.ICB.Description,
 		StartParameterScheme: helper.ICB.StartParameterScheme,
-		ManagedExternally:    &helper.ICB.ManagedExternally,
+		ManagedExternally:    &helper.ICA.ManagedExternally,
 	}
-	_, resp, _ = helper.TestEndpoint(router, token,
+	code, resp, err = helper.TestEndpoint(router, token,
 		"/api/ic", "POST", helper.KeyModels{"ic": newICB})
+	if code != 200 || err != nil {
+		fmt.Println("Adding IC returned code", code, err, resp)
+	}
 
 	// authenticate as normal user
 	token, _ = helper.AuthenticateForTest(router,
@@ -118,8 +124,11 @@ func addScenarioAndIC() (scenarioID uint, ICID uint) {
 		Running:         helper.ScenarioA.Running,
 		StartParameters: helper.ScenarioA.StartParameters,
 	}
-	_, resp, _ = helper.TestEndpoint(router, token,
+	code, resp, err = helper.TestEndpoint(router, token,
 		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenario})
+	if code != 200 || err != nil {
+		fmt.Println("Adding Scenario returned code", code, err, resp)
+	}
 
 	// Read newScenario's ID from the response
 	newScenarioID, _ := helper.GetResponseID(resp)

@@ -22,12 +22,12 @@
 package infrastructure_component
 
 import (
+	"fmt"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
-
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 )
 
 func RegisterICEndpoints(r *gin.RouterGroup) {
@@ -96,22 +96,28 @@ func addIC(c *gin.Context) {
 	}
 
 	// Validate the request
-	if err = req.Validate(); err != nil {
+	if err = req.validate(); err != nil {
 		helper.UnprocessableEntityError(c, err.Error())
 		return
 	}
 
-	// TODO add case distinction here for externally managed IC
-
 	// Create the new IC from the request
-	newIC := req.CreateIC()
-
-	// Save new IC to DB
-	err = newIC.Save()
-	if !helper.DBError(c, err) {
-		c.JSON(http.StatusOK, gin.H{"ic": newIC.InfrastructureComponent})
+	newIC, err := req.createIC(false)
+	if err != nil {
+		helper.InternalServerError(c, "Unable to send create action: "+err.Error())
+		return
 	}
 
+	if !newIC.ManagedExternally {
+		// Save new IC to DB if not managed externally
+		err = newIC.Save()
+
+		if helper.DBError(c, err) {
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{"ic": newIC.InfrastructureComponent})
 }
 
 // updateIC godoc
@@ -144,15 +150,20 @@ func updateIC(c *gin.Context) {
 	}
 
 	// Validate the request
-	if err = req.Validate(); err != nil {
+	if err = req.validate(); err != nil {
 		helper.UnprocessableEntityError(c, err.Error())
 		return
 	}
 
-	// TODO add case distinction here for externally managed IC
-
 	// Create the updatedIC from oldIC
-	updatedIC := req.UpdatedIC(oldIC)
+	updatedIC, err := req.updatedIC(oldIC, false)
+	if err != nil {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("%v", err),
+		})
+		return
+	}
 
 	// Finally update the IC in the DB
 	err = oldIC.Update(updatedIC)
@@ -205,14 +216,16 @@ func deleteIC(c *gin.Context) {
 		return
 	}
 
-	// TODO add case distinction here for externally managed IC
-
 	// Delete the IC
-	err := s.delete()
-	if !helper.DBError(c, err) {
-		c.JSON(http.StatusOK, gin.H{"ic": s.InfrastructureComponent})
+	err := s.delete(false)
+	if helper.DBError(c, err) {
+		return
+	} else if err != nil {
+		helper.InternalServerError(c, "Unable to send delete action: "+err.Error())
+		return
 	}
 
+	c.JSON(http.StatusOK, gin.H{"ic": s.InfrastructureComponent})
 }
 
 // getConfigsOfIC godoc
@@ -278,9 +291,25 @@ func sendActionToIC(c *gin.Context) {
 		/*if action.When == 0 {
 			action.When = float32(now.Unix())
 		}*/
-		action.UUID = new(string)
-		*action.UUID = s.UUID
-		err = SendActionAMQP(action)
+		// make sure that the important properties are set correctly so that the message can be identified by the receiver
+		if action.Properties.UUID == nil {
+			action.Properties.UUID = new(string)
+			*action.Properties.UUID = s.UUID
+		}
+		if action.Properties.Type == nil {
+			action.Properties.Type = new(string)
+			*action.Properties.Type = s.Type
+		}
+		if action.Properties.Category == nil {
+			action.Properties.Category = new(string)
+			*action.Properties.Category = s.Category
+		}
+		if action.Properties.Name == nil {
+			action.Properties.Name = new(string)
+			*action.Properties.Name = s.Name
+		}
+
+		err = sendActionAMQP(action)
 		if err != nil {
 			helper.InternalServerError(c, "Unable to send actions to IC: "+err.Error())
 			return

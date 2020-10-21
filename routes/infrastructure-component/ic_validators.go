@@ -23,6 +23,8 @@ package infrastructure_component
 
 import (
 	"encoding/json"
+	"fmt"
+	"github.com/google/uuid"
 	"github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/nsf/jsondiff"
 	"gopkg.in/go-playground/validator.v9"
@@ -32,7 +34,7 @@ import (
 var validate *validator.Validate
 
 type validNewIC struct {
-	UUID                 string         `form:"UUID" validate:"required"`
+	UUID                 string         `form:"UUID" validate:"omitempty"`
 	WebsocketURL         string         `form:"WebsocketURL" validate:"omitempty"`
 	APIURL               string         `form:"APIURL" validate:"omitempty"`
 	Type                 string         `form:"Type" validate:"required"`
@@ -67,46 +69,103 @@ type UpdateICRequest struct {
 	InfrastructureComponent validUpdatedIC `json:"ic"`
 }
 
-func (r *AddICRequest) Validate() error {
+func (r *AddICRequest) validate() error {
 	validate = validator.New()
 	errs := validate.Struct(r)
-	return errs
-}
-
-func (r *UpdateICRequest) Validate() error {
-	validate = validator.New()
-	errs := validate.Struct(r)
-	return errs
-}
-
-func (r *AddICRequest) CreateIC() InfrastructureComponent {
-	var s InfrastructureComponent
-
-	s.UUID = r.InfrastructureComponent.UUID
-	s.WebsocketURL = r.InfrastructureComponent.WebsocketURL
-	s.APIURL = r.InfrastructureComponent.APIURL
-	s.Type = r.InfrastructureComponent.Type
-	s.Name = r.InfrastructureComponent.Name
-	s.Category = r.InfrastructureComponent.Category
-	s.Location = r.InfrastructureComponent.Location
-	s.Description = r.InfrastructureComponent.Description
-	s.StartParameterScheme = r.InfrastructureComponent.StartParameterScheme
-	s.ManagedExternally = *r.InfrastructureComponent.ManagedExternally
-	if r.InfrastructureComponent.State != "" {
-		s.State = r.InfrastructureComponent.State
-	} else {
-		s.State = "unknown"
+	if errs != nil {
+		return errs
 	}
-	// set last update to creation time of IC
-	s.StateUpdateAt = time.Now().Format(time.RFC1123)
 
-	return s
+	// check if uuid is valid
+	_, errs = uuid.Parse(r.InfrastructureComponent.UUID)
+	return errs
 }
 
-func (r *UpdateICRequest) UpdatedIC(oldIC InfrastructureComponent) InfrastructureComponent {
+func (r *UpdateICRequest) validate() error {
+	validate = validator.New()
+	errs := validate.Struct(r)
+	return errs
+}
+
+func (r *AddICRequest) createIC(receivedViaAMQP bool) (InfrastructureComponent, error) {
+	var s InfrastructureComponent
+	var err error
+	err = nil
+
+	// case distinction for externally managed IC
+	if *r.InfrastructureComponent.ManagedExternally && !receivedViaAMQP {
+		var action Action
+		action.Act = "create"
+		action.When = time.Now().Unix()
+		action.Properties.Type = new(string)
+		action.Properties.Name = new(string)
+		action.Properties.Category = new(string)
+
+		*action.Properties.Type = r.InfrastructureComponent.Type
+		*action.Properties.Name = r.InfrastructureComponent.Name
+		*action.Properties.Category = r.InfrastructureComponent.Category
+
+		// set optional properties
+		if r.InfrastructureComponent.Description != "" {
+			action.Properties.Description = new(string)
+			*action.Properties.Description = r.InfrastructureComponent.Description
+		}
+
+		if r.InfrastructureComponent.Location != "" {
+			action.Properties.Location = new(string)
+			*action.Properties.Location = r.InfrastructureComponent.Location
+		}
+
+		if r.InfrastructureComponent.APIURL != "" {
+			action.Properties.API_url = new(string)
+			*action.Properties.API_url = r.InfrastructureComponent.APIURL
+		}
+
+		if r.InfrastructureComponent.WebsocketURL != "" {
+			action.Properties.WS_url = new(string)
+			*action.Properties.WS_url = r.InfrastructureComponent.WebsocketURL
+		}
+
+		if r.InfrastructureComponent.UUID != "" {
+			action.Properties.UUID = new(string)
+			*action.Properties.UUID = r.InfrastructureComponent.UUID
+		}
+
+		err = sendActionAMQP(action)
+
+		// s remains empty
+
+	} else {
+		s.UUID = r.InfrastructureComponent.UUID
+		s.WebsocketURL = r.InfrastructureComponent.WebsocketURL
+		s.APIURL = r.InfrastructureComponent.APIURL
+		s.Type = r.InfrastructureComponent.Type
+		s.Name = r.InfrastructureComponent.Name
+		s.Category = r.InfrastructureComponent.Category
+		s.Location = r.InfrastructureComponent.Location
+		s.Description = r.InfrastructureComponent.Description
+		s.StartParameterScheme = r.InfrastructureComponent.StartParameterScheme
+		s.ManagedExternally = *r.InfrastructureComponent.ManagedExternally
+		if r.InfrastructureComponent.State != "" {
+			s.State = r.InfrastructureComponent.State
+		} else {
+			s.State = "unknown"
+		}
+		// set last update to creation time of IC
+		s.StateUpdateAt = time.Now().Format(time.RFC1123)
+	}
+
+	return s, err
+}
+
+func (r *UpdateICRequest) updatedIC(oldIC InfrastructureComponent, receivedViaAMQP bool) (InfrastructureComponent, error) {
 	// Use the old InfrastructureComponent as a basis for the updated InfrastructureComponent `s`
 	s := oldIC
 
+	if s.ManagedExternally && !receivedViaAMQP {
+		// externally managed IC cannot be updated via API, only via AMQP
+		return s, fmt.Errorf("cannot update externally managed IC %v", s.Name)
+	}
 	if r.InfrastructureComponent.UUID != "" {
 		s.UUID = r.InfrastructureComponent.UUID
 	}
@@ -161,5 +220,5 @@ func (r *UpdateICRequest) UpdatedIC(oldIC InfrastructureComponent) Infrastructur
 		s.StartParameterScheme = r.InfrastructureComponent.StartParameterScheme
 	}
 
-	return s
+	return s, nil
 }

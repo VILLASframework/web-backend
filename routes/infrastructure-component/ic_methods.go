@@ -23,8 +23,9 @@ package infrastructure_component
 
 import (
 	"fmt"
-
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
+	"log"
+	"time"
 )
 
 type InfrastructureComponent struct {
@@ -57,7 +58,18 @@ func (s *InfrastructureComponent) Update(updatedIC InfrastructureComponent) erro
 	return err
 }
 
-func (s *InfrastructureComponent) delete() error {
+func (s *InfrastructureComponent) delete(receivedViaAMQP bool) error {
+	if s.ManagedExternally && !receivedViaAMQP {
+		var action Action
+		action.Act = "delete"
+		action.When = time.Now().Unix()
+		action.Properties.UUID = new(string)
+		*action.Properties.UUID = s.UUID
+
+		err := sendActionAMQP(action)
+		return err
+	}
+
 	db := database.GetDB()
 
 	no_configs := db.Model(s).Association("ComponentConfigurations").Count()
@@ -118,13 +130,16 @@ func createNewICviaAMQP(payload ICUpdate) error {
 	newICReq.InfrastructureComponent.ManagedExternally = newTrue()
 
 	// Validate the new IC
-	err := newICReq.Validate()
+	err := newICReq.validate()
 	if err != nil {
 		return fmt.Errorf("AMQP: Validation of new IC failed: %v", err)
 	}
 
 	// Create the new IC
-	newIC := newICReq.CreateIC()
+	newIC, err := newICReq.createIC(true)
+	if err != nil {
+		return fmt.Errorf("AMQP: Creating new IC failed: %v", err)
+	}
 
 	// save IC
 	err = newIC.Save()
@@ -139,8 +154,17 @@ func (s *InfrastructureComponent) updateICviaAMQP(payload ICUpdate) error {
 	var updatedICReq UpdateICRequest
 	if payload.State != nil {
 		updatedICReq.InfrastructureComponent.State = *payload.State
-		// TODO check if state is "gone" and attempt to remove IC from DB if it still exists
-		// TODO if state is different from "gone", continue to update the IC
+
+		if *payload.State == "gone" {
+			// remove IC from DB
+			err := s.delete(true)
+			if err != nil {
+				// if component could not be deleted there are still configurations using it in the DB
+				// continue with the update to save the new state of the component and get back to the deletion later
+				log.Println("Could not delete IC because there is a config using it, deletion postponed")
+			}
+
+		}
 	}
 	if payload.Properties.Type != nil {
 		updatedICReq.InfrastructureComponent.Type = *payload.Properties.Type
@@ -170,13 +194,16 @@ func (s *InfrastructureComponent) updateICviaAMQP(payload ICUpdate) error {
 	updatedICReq.InfrastructureComponent.ManagedExternally = newTrue()
 
 	// Validate the updated IC
-	err := updatedICReq.Validate()
+	err := updatedICReq.validate()
 	if err != nil {
 		return fmt.Errorf("AMQP: Validation of updated IC failed: %v", err)
 	}
 
 	// Create the updated IC from old IC
-	updatedIC := updatedICReq.UpdatedIC(*s)
+	updatedIC, err := updatedICReq.updatedIC(*s, true)
+	if err != nil {
+		return fmt.Errorf("AMQP: Unable to update IC %v : %v", s.Name, err)
+	}
 
 	// Finally update the IC in the DB
 	err = s.Update(updatedIC)

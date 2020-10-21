@@ -103,7 +103,7 @@ var ICA = database.InfrastructureComponent{
 	Description:  "This is a test description",
 	//StateUpdateAt: time.Now().Format(time.RFC1123),
 	StartParameterScheme: postgres.Jsonb{propertiesA},
-	ManagedExternally:    true,
+	ManagedExternally:    false,
 }
 
 var ICB = database.InfrastructureComponent{
@@ -119,7 +119,7 @@ var ICB = database.InfrastructureComponent{
 	Description:  "A signal generator for testing purposes",
 	//StateUpdateAt: time.Now().Format(time.RFC1123),
 	StartParameterScheme: postgres.Jsonb{propertiesB},
-	ManagedExternally:    false,
+	ManagedExternally:    true,
 }
 
 // Scenarios

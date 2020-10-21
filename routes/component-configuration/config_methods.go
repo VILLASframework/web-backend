@@ -121,9 +121,37 @@ func (m *ComponentConfiguration) delete() error {
 		return err
 	}
 
+	var ic infrastructure_component.InfrastructureComponent
+	err = ic.ByID(m.ICID)
+	if err != nil {
+		return err
+	}
+
 	// remove association between ComponentConfiguration and Scenario
 	// ComponentConfiguration itself is not deleted from DB, it remains as "dangling"
 	err = db.Model(&so).Association("ComponentConfigurations").Delete(m).Error
+	if err != nil {
+		return err
+	}
 
-	return err
+	// remove association between Infrastructure component and config
+	err = db.Model(&ic).Association("ComponentConfigurations").Delete(m).Error
+	if err != nil {
+		return err
+	}
+
+	// delete component configuration
+	err = db.Delete(m).Error
+	if err != nil {
+		return err
+	}
+
+	// if IC has state gone and there is no component configuration associated with it: delete IC
+	no_configs := db.Model(ic).Association("ComponentConfigurations").Count()
+	if no_configs == 0 && ic.State == "gone" {
+		err = db.Delete(ic).Error
+		return err
+	}
+
+	return nil
 }

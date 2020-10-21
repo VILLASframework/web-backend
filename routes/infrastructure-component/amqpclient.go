@@ -41,12 +41,18 @@ type AMQPclient struct {
 }
 
 type Action struct {
-	Act        string   `json:"action"`
-	When       float32  `json:"when"`
-	Parameters struct{} `json:"parameters"`
-	UUID       *string  `json:"uuid"`
-	//Model      struct{} `json:"model"`
-	//Results    struct{} `json:"results"`
+	Act        string `json:"action"`
+	When       int64  `json:"when"`
+	Properties struct {
+		UUID        *string `json:"uuid"`
+		Name        *string `json:"name"`
+		Category    *string `json:"category"`
+		Type        *string `json:"type"`
+		Location    *string `json:"location"`
+		WS_url      *string `json:"ws_url"`
+		API_url     *string `json:"api_url"`
+		Description *string `json:"description"`
+	} `json:"properties"`
 }
 
 type ICUpdate struct {
@@ -139,7 +145,7 @@ func ConnectAMQP(uri string) error {
 	return nil
 }
 
-func SendActionAMQP(action Action) error {
+func sendActionAMQP(action Action) error {
 
 	payload, err := json.Marshal(action)
 	if err != nil {
@@ -154,6 +160,20 @@ func SendActionAMQP(action Action) error {
 		Priority:        0,
 		Body:            payload,
 	}
+
+	// set message headers
+	var headers map[string]interface{}
+	headers = make(map[string]interface{}) // empty map
+	if action.Properties.UUID != nil {
+		headers["uuid"] = *action.Properties.UUID
+	}
+	if action.Properties.Type != nil {
+		headers["type"] = *action.Properties.Type
+	}
+	if action.Properties.Category != nil {
+		headers["category"] = *action.Properties.Category
+	}
+	msg.Headers = headers
 
 	err = CheckConnection()
 	if err != nil {
@@ -175,9 +195,9 @@ func PingAMQP() error {
 
 	var a Action
 	a.Act = "ping"
-	*a.UUID = ""
+	*a.Properties.UUID = ""
 
-	err := SendActionAMQP(a)
+	err := sendActionAMQP(a)
 	return err
 }
 
