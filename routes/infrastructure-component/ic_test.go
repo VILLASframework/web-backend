@@ -26,6 +26,7 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/stretchr/testify/assert"
+	"log"
 	"os"
 	"testing"
 
@@ -70,6 +71,17 @@ func TestMain(m *testing.M) {
 	user.RegisterAuthenticate(api.Group("/authenticate"))
 	api.Use(user.Authentication(true))
 	RegisterICEndpoints(api.Group("/ic"))
+	RegisterAMQPEndpoint(api.Group("/ic"))
+
+	// connect AMQP client (make sure that AMQP_HOST, AMQP_USER, AMQP_PASS are set via command line parameters)
+	host, err := configuration.GolbalConfig.String("amqp.host")
+	user, err := configuration.GolbalConfig.String("amqp.user")
+	pass, err := configuration.GolbalConfig.String("amqp.pass")
+
+	amqpURI := "amqp://" + user + ":" + pass + "@" + host
+	log.Println("AMQP URI is", amqpURI)
+
+	err = ConnectAMQP(amqpURI)
 
 	os.Exit(m.Run())
 }
