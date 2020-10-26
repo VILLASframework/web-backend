@@ -261,26 +261,27 @@ func processMessage(message amqp.Delivery) error {
 		return fmt.Errorf("AMQP: Could not unmarshal message to JSON: %v err: %v", string(message.Body), err)
 	}
 
-	ICUUID := payload.Properties.UUID
-	_, err = uuid.Parse(ICUUID)
+	if payload.State != nil {
+		// if a message contains a "state" field, it is an update for an IC
+		ICUUID := payload.Properties.UUID
+		_, err = uuid.Parse(ICUUID)
 
-	if err != nil {
-		return fmt.Errorf("AMQP: UUID not valid: %v, message ignored: %v \n", ICUUID, string(message.Body))
+		if err != nil {
+			return fmt.Errorf("AMQP: UUID not valid: %v, message ignored: %v \n", ICUUID, string(message.Body))
+		}
+		var sToBeUpdated InfrastructureComponent
+		err = sToBeUpdated.ByUUID(ICUUID)
+
+		if err == gorm.ErrRecordNotFound {
+			// create new record
+			err = createNewICviaAMQP(payload)
+		} else if err != nil {
+			// database error
+			err = fmt.Errorf("AMQP: Database error for IC %v DB error message: %v", ICUUID, err)
+		} else {
+			// update record based on payload
+			err = sToBeUpdated.updateICviaAMQP(payload)
+		}
 	}
-
-	var sToBeUpdated InfrastructureComponent
-	err = sToBeUpdated.ByUUID(ICUUID)
-
-	if err == gorm.ErrRecordNotFound {
-		// create new record
-		err = createNewICviaAMQP(payload)
-	} else if err != nil {
-		// database error
-		err = fmt.Errorf("AMQP: Database error for IC %v DB error message: %v", ICUUID, err)
-	} else {
-		// update record based on payload
-		err = sToBeUpdated.updateICviaAMQP(payload)
-	}
-
 	return err
 }
