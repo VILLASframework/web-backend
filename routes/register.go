@@ -74,7 +74,7 @@ func RegisterEndpoints(router *gin.Engine, api *gin.RouterGroup) {
 }
 
 // Uses API endpoints to add test data to the backend; All endpoints have to be registered before invoking this function.
-func AddTestData(basePath string, router *gin.Engine) (*bytes.Buffer, error) {
+func AddTestData(basePath string, router *gin.Engine, amqphost string) (*bytes.Buffer, error) {
 
 	database.MigrateModels()
 	// Create entries of each model (data defined in test_data.go)
@@ -109,9 +109,11 @@ func AddTestData(basePath string, router *gin.Engine) (*bytes.Buffer, error) {
 	if code != http.StatusOK {
 		return resp, fmt.Errorf("error adding IC A")
 	}
-	code, resp, err = helper.TestEndpoint(router, token, basePath+"/ic", "POST", helper.KeyModels{"ic": helper.ICB})
-	if code != http.StatusOK {
-		return resp, fmt.Errorf("error adding IC B")
+	if amqphost != "" {
+		code, resp, err = helper.TestEndpoint(router, token, basePath+"/ic", "POST", helper.KeyModels{"ic": helper.ICB})
+		if code != http.StatusOK {
+			return resp, fmt.Errorf("error adding IC B")
+		}
 	}
 
 	// add scenarios
@@ -147,7 +149,7 @@ func AddTestData(basePath string, router *gin.Engine) (*bytes.Buffer, error) {
 	configB := helper.ConfigB
 	configA.ScenarioID = 1
 	configB.ScenarioID = 1
-	configA.ICID = 2
+	configA.ICID = 1
 	configB.ICID = 1
 	code, resp, err = helper.TestEndpoint(router, token, basePath+"/configs", "POST", helper.KeyModels{"config": configA})
 	if code != http.StatusOK {

@@ -33,6 +33,7 @@ import (
 )
 
 var router *gin.Engine
+var amqpURI string
 
 func TestMain(m *testing.M) {
 	err := configuration.InitConfig()
@@ -69,6 +70,6 @@ func TestRegisterEndpoints(t *testing.T) {
 }
 
 func TestAddTestData(t *testing.T) {
-	resp, err := AddTestData("/api", router)
+	resp, err := AddTestData("/api", router, amqpURI)
 	assert.NoError(t, err, "Response body: %v", resp)
 }

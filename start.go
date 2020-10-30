@@ -33,13 +33,13 @@ import (
 	"log"
 )
 
-func addData(router *gin.Engine, mode string, basePath string) error {
+func addData(router *gin.Engine, mode string, basePath string, amqphost string) error {
 
 	if mode == "test" {
 		// test mode: drop all tables and add test data to DB
 		database.DropTables()
 		log.Println("Database tables dropped, using API to add test data")
-		resp, err := routes.AddTestData(basePath, router)
+		resp, err := routes.AddTestData(basePath, router, amqphost)
 		if err != nil {
 			fmt.Println("error: testdata could not be added to DB:", err.Error(), "Response body: ", resp)
 			return err
@@ -95,7 +95,7 @@ func main() {
 	apidocs.SwaggerInfo.BasePath = basePath
 
 	// add data to DB (if any)
-	err = addData(r, mode, basePath)
+	err = addData(r, mode, basePath, amqphost)
 	if err != nil {
 		panic(err)
 	}
