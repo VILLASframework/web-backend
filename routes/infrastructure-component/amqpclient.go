@@ -56,17 +56,18 @@ type Action struct {
 }
 
 type ICUpdate struct {
-	State      *string `json:"state"`
-	Properties struct {
-		UUID        string  `json:"uuid"`
-		Name        *string `json:"name"`
-		Category    *string `json:"category"`
-		Type        *string `json:"type"`
-		Location    *string `json:"location"`
-		WS_url      *string `json:"ws_url"`
-		API_url     *string `json:"api_url"`
-		Description *string `json:"description"`
-	} `json:"properties"`
+	Status *struct {
+		UUID        string   `json:"uuid"`
+		State       *string  `json:"state"`
+		Name        *string  `json:"name"`
+		Category    *string  `json:"category"`
+		Type        *string  `json:"type"`
+		Location    *string  `json:"location"`
+		WS_url      *string  `json:"ws_url"`
+		API_url     *string  `json:"api_url"`
+		Description *string  `json:"description"`
+		Uptime      *float64 `json:"uptime"` // TODO check if data type of uptime is float64 or int
+	} `json:"status"`
 	// TODO add JSON start parameter scheme
 }
 
@@ -261,9 +262,9 @@ func processMessage(message amqp.Delivery) error {
 		return fmt.Errorf("AMQP: Could not unmarshal message to JSON: %v err: %v", string(message.Body), err)
 	}
 
-	if payload.State != nil {
+	if payload.Status != nil {
 		// if a message contains a "state" field, it is an update for an IC
-		ICUUID := payload.Properties.UUID
+		ICUUID := payload.Status.UUID
 		_, err = uuid.Parse(ICUUID)
 
 		if err != nil {

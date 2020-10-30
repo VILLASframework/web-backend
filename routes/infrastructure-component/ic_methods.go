@@ -93,20 +93,20 @@ func (s *InfrastructureComponent) getConfigs() ([]database.ComponentConfiguratio
 func createNewICviaAMQP(payload ICUpdate) error {
 
 	var newICReq AddICRequest
-	newICReq.InfrastructureComponent.UUID = payload.Properties.UUID
-	if payload.Properties.Name == nil ||
-		payload.Properties.Category == nil ||
-		payload.Properties.Type == nil {
+	newICReq.InfrastructureComponent.UUID = payload.Status.UUID
+	if payload.Status.Name == nil ||
+		payload.Status.Category == nil ||
+		payload.Status.Type == nil {
 		// cannot create new IC because required information (name, type, and/or category missing)
 		return fmt.Errorf("AMQP: Cannot create new IC, required field(s) is/are missing: name, type, category")
 	}
-	newICReq.InfrastructureComponent.Name = *payload.Properties.Name
-	newICReq.InfrastructureComponent.Category = *payload.Properties.Category
-	newICReq.InfrastructureComponent.Type = *payload.Properties.Type
+	newICReq.InfrastructureComponent.Name = *payload.Status.Name
+	newICReq.InfrastructureComponent.Category = *payload.Status.Category
+	newICReq.InfrastructureComponent.Type = *payload.Status.Type
 
 	// add optional params
-	if payload.State != nil {
-		newICReq.InfrastructureComponent.State = *payload.State
+	if payload.Status.State != nil {
+		newICReq.InfrastructureComponent.State = *payload.Status.State
 	} else {
 		newICReq.InfrastructureComponent.State = "unknown"
 	}
@@ -116,17 +116,20 @@ func createNewICviaAMQP(payload ICUpdate) error {
 		return nil
 	}
 
-	if payload.Properties.WS_url != nil {
-		newICReq.InfrastructureComponent.WebsocketURL = *payload.Properties.WS_url
+	if payload.Status.WS_url != nil {
+		newICReq.InfrastructureComponent.WebsocketURL = *payload.Status.WS_url
 	}
-	if payload.Properties.API_url != nil {
-		newICReq.InfrastructureComponent.APIURL = *payload.Properties.API_url
+	if payload.Status.API_url != nil {
+		newICReq.InfrastructureComponent.APIURL = *payload.Status.API_url
 	}
-	if payload.Properties.Location != nil {
-		newICReq.InfrastructureComponent.Location = *payload.Properties.Location
+	if payload.Status.Location != nil {
+		newICReq.InfrastructureComponent.Location = *payload.Status.Location
 	}
-	if payload.Properties.Description != nil {
-		newICReq.InfrastructureComponent.Description = *payload.Properties.Description
+	if payload.Status.Description != nil {
+		newICReq.InfrastructureComponent.Description = *payload.Status.Description
+	}
+	if payload.Status.Uptime != nil {
+		newICReq.InfrastructureComponent.Uptime = *payload.Status.Uptime
 	}
 	// TODO add JSON start parameter scheme
 
@@ -157,10 +160,10 @@ func createNewICviaAMQP(payload ICUpdate) error {
 func (s *InfrastructureComponent) updateICviaAMQP(payload ICUpdate) error {
 
 	var updatedICReq UpdateICRequest
-	if payload.State != nil {
-		updatedICReq.InfrastructureComponent.State = *payload.State
+	if payload.Status.State != nil {
+		updatedICReq.InfrastructureComponent.State = *payload.Status.State
 
-		if *payload.State == "gone" {
+		if *payload.Status.State == "gone" {
 			// remove IC from DB
 			log.Println("########## AMQP: Deleting IC with state gone")
 			err := s.delete(true)
@@ -172,27 +175,30 @@ func (s *InfrastructureComponent) updateICviaAMQP(payload ICUpdate) error {
 
 		}
 	}
-	if payload.Properties.Type != nil {
-		updatedICReq.InfrastructureComponent.Type = *payload.Properties.Type
+	if payload.Status.Type != nil {
+		updatedICReq.InfrastructureComponent.Type = *payload.Status.Type
 	}
-	if payload.Properties.Category != nil {
-		updatedICReq.InfrastructureComponent.Category = *payload.Properties.Category
+	if payload.Status.Category != nil {
+		updatedICReq.InfrastructureComponent.Category = *payload.Status.Category
 	}
-	if payload.Properties.Name != nil {
-		updatedICReq.InfrastructureComponent.Name = *payload.Properties.Name
+	if payload.Status.Name != nil {
+		updatedICReq.InfrastructureComponent.Name = *payload.Status.Name
 	}
-	if payload.Properties.WS_url != nil {
-		updatedICReq.InfrastructureComponent.WebsocketURL = *payload.Properties.WS_url
+	if payload.Status.WS_url != nil {
+		updatedICReq.InfrastructureComponent.WebsocketURL = *payload.Status.WS_url
 	}
-	if payload.Properties.API_url != nil {
-		updatedICReq.InfrastructureComponent.APIURL = *payload.Properties.API_url
+	if payload.Status.API_url != nil {
+		updatedICReq.InfrastructureComponent.APIURL = *payload.Status.API_url
 	}
-	if payload.Properties.Location != nil {
-		//postgres.Jsonb{json.RawMessage(`{"location" : " ` + *payload.Properties.Location + `"}`)}
-		updatedICReq.InfrastructureComponent.Location = *payload.Properties.Location
+	if payload.Status.Location != nil {
+		//postgres.Jsonb{json.RawMessage(`{"location" : " ` + *payload.Status.Location + `"}`)}
+		updatedICReq.InfrastructureComponent.Location = *payload.Status.Location
 	}
-	if payload.Properties.Description != nil {
-		updatedICReq.InfrastructureComponent.Description = *payload.Properties.Description
+	if payload.Status.Description != nil {
+		updatedICReq.InfrastructureComponent.Description = *payload.Status.Description
+	}
+	if payload.Status.Uptime != nil {
+		updatedICReq.InfrastructureComponent.Uptime = *payload.Status.Uptime
 	}
 	// TODO add JSON start parameter scheme
 

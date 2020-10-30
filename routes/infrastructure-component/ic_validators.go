@@ -46,6 +46,7 @@ type validNewIC struct {
 	Description          string         `form:"Description" validate:"omitempty"`
 	StartParameterScheme postgres.Jsonb `form:"StartParameterScheme" validate:"omitempty"`
 	ManagedExternally    *bool          `form:"ManagedExternally" validate:"required"`
+	Uptime               float64        `form:"Uptime" validate:"omitempty"`
 }
 
 type validUpdatedIC struct {
@@ -60,6 +61,7 @@ type validUpdatedIC struct {
 	Description          string         `form:"Description" validate:"omitempty"`
 	StartParameterScheme postgres.Jsonb `form:"StartParameterScheme" validate:"omitempty"`
 	ManagedExternally    *bool          `form:"ManagedExternally" validate:"required"`
+	Uptime               float64        `form:"Uptime" validate:"omitempty"`
 }
 
 type AddICRequest struct {
@@ -148,6 +150,7 @@ func (r *AddICRequest) createIC(receivedViaAMQP bool) (InfrastructureComponent, 
 		s.Description = r.InfrastructureComponent.Description
 		s.StartParameterScheme = r.InfrastructureComponent.StartParameterScheme
 		s.ManagedExternally = *r.InfrastructureComponent.ManagedExternally
+		s.Uptime = -1.0 // no uptime available
 		if r.InfrastructureComponent.State != "" {
 			s.State = r.InfrastructureComponent.State
 		} else {
