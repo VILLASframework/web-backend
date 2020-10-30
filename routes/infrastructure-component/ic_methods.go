@@ -110,7 +110,11 @@ func createNewICviaAMQP(payload ICUpdate) error {
 	} else {
 		newICReq.InfrastructureComponent.State = "unknown"
 	}
-	// TODO check if state is "gone" and abort creation of IC in this case
+	if newICReq.InfrastructureComponent.State == "gone" {
+		// Check if state is "gone" and abort creation of IC in this case
+		log.Println("########## AMQP: Aborting creation of IC with state gone")
+		return nil
+	}
 
 	if payload.Properties.WS_url != nil {
 		newICReq.InfrastructureComponent.WebsocketURL = *payload.Properties.WS_url
@@ -151,17 +155,19 @@ func createNewICviaAMQP(payload ICUpdate) error {
 }
 
 func (s *InfrastructureComponent) updateICviaAMQP(payload ICUpdate) error {
+
 	var updatedICReq UpdateICRequest
 	if payload.State != nil {
 		updatedICReq.InfrastructureComponent.State = *payload.State
 
 		if *payload.State == "gone" {
 			// remove IC from DB
+			log.Println("########## AMQP: Deleting IC with state gone")
 			err := s.delete(true)
 			if err != nil {
 				// if component could not be deleted there are still configurations using it in the DB
 				// continue with the update to save the new state of the component and get back to the deletion later
-				log.Println("Could not delete IC because there is a config using it, deletion postponed")
+				log.Println("########## AMQP: Deletion of IC postponed (config(s) associated to it)")
 			}
 
 		}

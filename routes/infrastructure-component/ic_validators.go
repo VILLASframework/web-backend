@@ -28,6 +28,7 @@ import (
 	"github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/nsf/jsondiff"
 	"gopkg.in/go-playground/validator.v9"
+	"log"
 	"time"
 )
 
@@ -131,6 +132,7 @@ func (r *AddICRequest) createIC(receivedViaAMQP bool) (InfrastructureComponent, 
 			*action.Properties.UUID = r.InfrastructureComponent.UUID
 		}
 
+		log.Println("########## AMQP: Sending request to create new IC")
 		err = sendActionAMQP(action)
 
 		// s remains empty
