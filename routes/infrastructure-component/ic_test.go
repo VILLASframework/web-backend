@@ -22,13 +22,16 @@
 package infrastructure_component
 
 import (
+	"encoding/json"
 	"fmt"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"github.com/jinzhu/gorm/dialects/postgres"
+	"github.com/streadway/amqp"
 	"github.com/stretchr/testify/assert"
 	"log"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -51,6 +54,21 @@ type ICRequest struct {
 	Description          string         `json:"description,omitempty"`
 	StartParameterScheme postgres.Jsonb `json:"startparameterscheme,omitempty"`
 	ManagedExternally    *bool          `json:"managedexternally,omitempty"`
+}
+
+type ICAction struct {
+	Act        string `json:"action,omitempty"`
+	When       int64  `json:"when,omitempty"`
+	Properties struct {
+		UUID        *string `json:"uuid,omitempty"`
+		Name        *string `json:"name,omitempty"`
+		Category    *string `json:"category,omitempty"`
+		Type        *string `json:"type,omitempty"`
+		Location    *string `json:"location,omitempty"`
+		WS_url      *string `json:"ws_url,omitempty"`
+		API_url     *string `json:"api_url,omitempty"`
+		Description *string `json:"description,omitempty"`
+	} `json:"properties,omitempty"`
 }
 
 func TestMain(m *testing.M) {
@@ -82,6 +100,9 @@ func TestMain(m *testing.M) {
 	log.Println("AMQP URI is", amqpURI)
 
 	err = ConnectAMQP(amqpURI)
+	if err != nil {
+		panic(m)
+	}
 
 	os.Exit(m.Run())
 }
@@ -538,4 +559,173 @@ func TestGetConfigsOfIC(t *testing.T) {
 		fmt.Sprintf("/api/ic/%v/configs", newICID+1), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
+}
+
+func TestSendActionToIC(t *testing.T) {
+	database.DropTables()
+	database.MigrateModels()
+	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+
+	// authenticate as admin
+	token, err := helper.AuthenticateForTest(router,
+		"/api/authenticate", "POST", helper.AdminCredentials)
+	assert.NoError(t, err)
+
+	// test POST ic/ $newICA
+	newICA := ICRequest{
+		UUID:                 helper.ICA.UUID,
+		WebsocketURL:         helper.ICA.WebsocketURL,
+		Type:                 helper.ICA.Type,
+		Name:                 helper.ICA.Name,
+		Category:             helper.ICA.Category,
+		State:                helper.ICA.State,
+		Location:             helper.ICA.Location,
+		Description:          helper.ICA.Description,
+		StartParameterScheme: helper.ICA.StartParameterScheme,
+		ManagedExternally:    &helper.ICA.ManagedExternally,
+	}
+	code, resp, err := helper.TestEndpoint(router, token,
+		"/api/ic", "POST", helper.KeyModels{"ic": newICA})
+	assert.NoError(t, err)
+	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
+
+	// Read newIC's ID from the response
+	newICID, err := helper.GetResponseID(resp)
+	assert.NoError(t, err)
+
+	// create action to be sent to IC
+	action1 := ICAction{
+		Act:  "start",
+		When: time.Now().Unix(),
+	}
+	action1.Properties.UUID = new(string)
+	*action1.Properties.UUID = newICA.UUID
+	actions := [1]ICAction{action1}
+
+	// Send action to IC
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/ic/%v/action", newICID), "POST", actions)
+	assert.NoError(t, err)
+	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
+
+	// Send malformed actions array to IC (should yield bad request)
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/ic/%v/action", newICID), "POST", action1)
+	assert.NoError(t, err)
+	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
+}
+
+func TestCreateUpdateDeleteViaAMQPRecv(t *testing.T) {
+
+	database.DropTables()
+	database.MigrateModels()
+	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+
+	// fake an IC update message
+	var update ICUpdate
+	update.Status = new(ICStatus)
+	update.Status.UUID = helper.ICA.UUID
+	update.Status.State = new(string)
+	*update.Status.State = "idle"
+	update.Status.Name = new(string)
+	*update.Status.Name = helper.ICA.Name
+	update.Status.Category = new(string)
+	*update.Status.Category = helper.ICA.Category
+	update.Status.Type = new(string)
+	*update.Status.Type = helper.ICA.Type
+
+	payload, err := json.Marshal(update)
+	assert.NoError(t, err)
+
+	msg := amqp.Publishing{
+		DeliveryMode:    2,
+		Timestamp:       time.Now(),
+		ContentType:     "application/json",
+		ContentEncoding: "utf-8",
+		Priority:        0,
+		Body:            payload,
+	}
+
+	err = CheckConnection()
+	assert.NoError(t, err)
+
+	err = client.channel.Publish(VILLAS_EXCHANGE,
+		"",
+		false,
+		false,
+		msg)
+	assert.NoError(t, err)
+
+	time.Sleep(4 * time.Second)
+	// authenticate as admin
+	token, err := helper.AuthenticateForTest(router,
+		"/api/authenticate", "POST", helper.AdminCredentials)
+	assert.NoError(t, err)
+
+	// get the length of the GET all ICs response for user
+	number, err := helper.LengthOfResponse(router, token,
+		"/api/ic", "GET", nil)
+	assert.NoError(t, err)
+	assert.Equal(t, 1, number)
+
+	// modify status update
+	*update.Status.Name = "This is the new name"
+	payload, err = json.Marshal(update)
+	assert.NoError(t, err)
+
+	msg = amqp.Publishing{
+		DeliveryMode:    2,
+		Timestamp:       time.Now(),
+		ContentType:     "application/json",
+		ContentEncoding: "utf-8",
+		Priority:        0,
+		Body:            payload,
+	}
+
+	err = client.channel.Publish(VILLAS_EXCHANGE,
+		"",
+		false,
+		false,
+		msg)
+	assert.NoError(t, err)
+
+	time.Sleep(4 * time.Second)
+	// get the length of the GET all ICs response for user
+	number, err = helper.LengthOfResponse(router, token,
+		"/api/ic", "GET", nil)
+	assert.NoError(t, err)
+	assert.Equal(t, 1, number)
+
+	// modify status update to state "gone"
+	*update.Status.State = "gone"
+	payload, err = json.Marshal(update)
+	assert.NoError(t, err)
+
+	msg = amqp.Publishing{
+		DeliveryMode:    2,
+		Timestamp:       time.Now(),
+		ContentType:     "application/json",
+		ContentEncoding: "utf-8",
+		Priority:        0,
+		Body:            payload,
+	}
+
+	err = client.channel.Publish(VILLAS_EXCHANGE,
+		"",
+		false,
+		false,
+		msg)
+	assert.NoError(t, err)
+
+	time.Sleep(4 * time.Second)
+	// get the length of the GET all ICs response for user
+	number, err = helper.LengthOfResponse(router, token,
+		"/api/ic", "GET", nil)
+	assert.NoError(t, err)
+	assert.Equal(t, 0, number)
+
+}
+
+func TestCreateDeleteViaAMQPSend(t *testing.T) {
+
 }

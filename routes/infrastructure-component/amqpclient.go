@@ -55,19 +55,21 @@ type Action struct {
 	} `json:"properties"`
 }
 
+type ICStatus struct {
+	UUID        string   `json:"uuid"`
+	State       *string  `json:"state"`
+	Name        *string  `json:"name"`
+	Category    *string  `json:"category"`
+	Type        *string  `json:"type"`
+	Location    *string  `json:"location"`
+	WS_url      *string  `json:"ws_url"`
+	API_url     *string  `json:"api_url"`
+	Description *string  `json:"description"`
+	Uptime      *float64 `json:"uptime"` // TODO check if data type of uptime is float64 or int
+}
+
 type ICUpdate struct {
-	Status *struct {
-		UUID        string   `json:"uuid"`
-		State       *string  `json:"state"`
-		Name        *string  `json:"name"`
-		Category    *string  `json:"category"`
-		Type        *string  `json:"type"`
-		Location    *string  `json:"location"`
-		WS_url      *string  `json:"ws_url"`
-		API_url     *string  `json:"api_url"`
-		Description *string  `json:"description"`
-		Uptime      *float64 `json:"uptime"` // TODO check if data type of uptime is float64 or int
-	} `json:"status"`
+	Status *ICStatus `json:"status"`
 	// TODO add JSON start parameter scheme
 }
 
