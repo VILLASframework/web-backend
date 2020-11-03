@@ -366,7 +366,6 @@ func TestUpdateICAsAdmin(t *testing.T) {
 	// try to update this IC
 	var updatedIC ICRequest
 	updatedIC.Name = "a new name"
-	updatedIC.ManagedExternally = newTrue()
 
 	// Should result in forbidden return code 403
 	code, resp, err = helper.TestEndpoint(router, token,
