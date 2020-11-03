@@ -22,7 +22,6 @@
 package infrastructure_component
 
 import (
-	"fmt"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"github.com/gin-gonic/gin"
@@ -108,9 +107,9 @@ func addIC(c *gin.Context) {
 		return
 	}
 
-	if !newIC.ManagedExternally {
+	if !(newIC.ManagedExternally) {
 		// Save new IC to DB if not managed externally
-		err = newIC.Save()
+		err = newIC.save()
 
 		if helper.DBError(c, err) {
 			return
@@ -142,6 +141,11 @@ func updateIC(c *gin.Context) {
 		return
 	}
 
+	if oldIC.ManagedExternally {
+		helper.ForbiddenError(c, "Cannot update externally managed component via API")
+		return
+	}
+
 	var req UpdateICRequest
 	err := c.BindJSON(&req)
 	if err != nil {
@@ -156,17 +160,10 @@ func updateIC(c *gin.Context) {
 	}
 
 	// Create the updatedIC from oldIC
-	updatedIC, err := req.updatedIC(oldIC, false)
-	if err != nil {
-		c.JSON(http.StatusForbidden, gin.H{
-			"success": false,
-			"message": fmt.Sprintf("%v", err),
-		})
-		return
-	}
+	updatedIC := req.updatedIC(oldIC)
 
 	// Finally update the IC in the DB
-	err = oldIC.Update(updatedIC)
+	err = oldIC.update(updatedIC)
 	if !helper.DBError(c, err) {
 		c.JSON(http.StatusOK, gin.H{"ic": updatedIC.InfrastructureComponent})
 	}
@@ -285,7 +282,7 @@ func sendActionToIC(c *gin.Context) {
 	}
 
 	//now := time.Now()
-	log.Println("AMQP: Will attempt to send the following actions:", actions)
+	log.Println("AMQP: Sending actions:", actions)
 
 	for _, action := range actions {
 		/*if action.When == 0 {

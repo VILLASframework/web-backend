@@ -45,7 +45,7 @@ func CheckPermissions(c *gin.Context, modeltype database.ModelName, operation da
 			return false, s
 		}
 
-		err = s.ByID(uint(ICID))
+		err = s.byID(uint(ICID))
 		if helper.DBError(c, err) {
 			return false, s
 		}

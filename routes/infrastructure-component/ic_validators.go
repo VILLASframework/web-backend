@@ -23,7 +23,6 @@ package infrastructure_component
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/nsf/jsondiff"
@@ -60,7 +59,6 @@ type validUpdatedIC struct {
 	Location             string         `form:"Location" validate:"omitempty"`
 	Description          string         `form:"Description" validate:"omitempty"`
 	StartParameterScheme postgres.Jsonb `form:"StartParameterScheme" validate:"omitempty"`
-	ManagedExternally    *bool          `form:"ManagedExternally" validate:"required"`
 	Uptime               float64        `form:"Uptime" validate:"omitempty"`
 }
 
@@ -134,43 +132,36 @@ func (r *AddICRequest) createIC(receivedViaAMQP bool) (InfrastructureComponent, 
 			*action.Properties.UUID = r.InfrastructureComponent.UUID
 		}
 
-		log.Println("########## AMQP: Sending request to create new IC")
+		log.Println("AMQP: Sending request to create new IC")
 		err = sendActionAMQP(action)
-
-		// s remains empty
-
-	} else {
-		s.UUID = r.InfrastructureComponent.UUID
-		s.WebsocketURL = r.InfrastructureComponent.WebsocketURL
-		s.APIURL = r.InfrastructureComponent.APIURL
-		s.Type = r.InfrastructureComponent.Type
-		s.Name = r.InfrastructureComponent.Name
-		s.Category = r.InfrastructureComponent.Category
-		s.Location = r.InfrastructureComponent.Location
-		s.Description = r.InfrastructureComponent.Description
-		s.StartParameterScheme = r.InfrastructureComponent.StartParameterScheme
-		s.ManagedExternally = *r.InfrastructureComponent.ManagedExternally
-		s.Uptime = -1.0 // no uptime available
-		if r.InfrastructureComponent.State != "" {
-			s.State = r.InfrastructureComponent.State
-		} else {
-			s.State = "unknown"
-		}
-		// set last update to creation time of IC
-		s.StateUpdateAt = time.Now().Format(time.RFC1123)
 	}
+
+	s.UUID = r.InfrastructureComponent.UUID
+	s.WebsocketURL = r.InfrastructureComponent.WebsocketURL
+	s.APIURL = r.InfrastructureComponent.APIURL
+	s.Type = r.InfrastructureComponent.Type
+	s.Name = r.InfrastructureComponent.Name
+	s.Category = r.InfrastructureComponent.Category
+	s.Location = r.InfrastructureComponent.Location
+	s.Description = r.InfrastructureComponent.Description
+	s.StartParameterScheme = r.InfrastructureComponent.StartParameterScheme
+	s.ManagedExternally = *r.InfrastructureComponent.ManagedExternally
+	s.Uptime = -1.0 // no uptime available
+	if r.InfrastructureComponent.State != "" {
+		s.State = r.InfrastructureComponent.State
+	} else {
+		s.State = "unknown"
+	}
+	// set last update to creation time of IC
+	s.StateUpdateAt = time.Now().Format(time.RFC1123)
 
 	return s, err
 }
 
-func (r *UpdateICRequest) updatedIC(oldIC InfrastructureComponent, receivedViaAMQP bool) (InfrastructureComponent, error) {
+func (r *UpdateICRequest) updatedIC(oldIC InfrastructureComponent) InfrastructureComponent {
 	// Use the old InfrastructureComponent as a basis for the updated InfrastructureComponent `s`
 	s := oldIC
 
-	if s.ManagedExternally && !receivedViaAMQP {
-		// externally managed IC cannot be updated via API, only via AMQP
-		return s, fmt.Errorf("cannot update externally managed IC %v", s.Name)
-	}
 	if r.InfrastructureComponent.UUID != "" {
 		s.UUID = r.InfrastructureComponent.UUID
 	}
@@ -207,10 +198,6 @@ func (r *UpdateICRequest) updatedIC(oldIC InfrastructureComponent, receivedViaAM
 		s.Description = r.InfrastructureComponent.Description
 	}
 
-	if r.InfrastructureComponent.ManagedExternally != nil {
-		s.ManagedExternally = *r.InfrastructureComponent.ManagedExternally
-	}
-
 	// set last update time
 	s.StateUpdateAt = time.Now().Format(time.RFC1123)
 
@@ -225,5 +212,5 @@ func (r *UpdateICRequest) updatedIC(oldIC InfrastructureComponent, receivedViaAM
 		s.StartParameterScheme = r.InfrastructureComponent.StartParameterScheme
 	}
 
-	return s, nil
+	return s
 }

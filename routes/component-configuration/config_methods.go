@@ -23,7 +23,6 @@ package component_configuration
 
 import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/infrastructure-component"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/scenario"
 )
 
@@ -61,8 +60,11 @@ func (m *ComponentConfiguration) addToScenario() error {
 	}
 
 	// associate IC with component configuration
-	var ic infrastructure_component.InfrastructureComponent
-	err = ic.ByID(m.ICID)
+	var ic database.InfrastructureComponent
+	err = db.Find(&ic, m.ICID).Error
+	if err != nil {
+		return err
+	}
 	err = db.Model(&ic).Association("ComponentConfigurations").Append(m).Error
 	if err != nil {
 		return err
@@ -80,23 +82,24 @@ func (m *ComponentConfiguration) Update(modifiedConfig ComponentConfiguration) e
 	// check if IC has been updated
 	if m.ICID != modifiedConfig.ICID {
 		// update IC
-		var s infrastructure_component.InfrastructureComponent
-		var s_old infrastructure_component.InfrastructureComponent
-		err := s.ByID(modifiedConfig.ICID)
+		var ic database.InfrastructureComponent
+		var ic_old database.InfrastructureComponent
+		err := db.Find(&ic, modifiedConfig.ICID).Error
 		if err != nil {
 			return err
 		}
-		err = s_old.ByID(m.ICID)
+		err = db.Find(&ic_old, m.ICID).Error
 		if err != nil {
 			return err
 		}
+
 		// remove component configuration from old IC
-		err = db.Model(&s_old).Association("ComponentConfigurations").Delete(m).Error
+		err = db.Model(&ic_old).Association("ComponentConfigurations").Delete(m).Error
 		if err != nil {
 			return err
 		}
 		// add component configuration to new IC
-		err = db.Model(&s).Association("ComponentConfigurations").Append(m).Error
+		err = db.Model(&ic).Association("ComponentConfigurations").Append(m).Error
 		if err != nil {
 			return err
 		}
@@ -121,8 +124,8 @@ func (m *ComponentConfiguration) delete() error {
 		return err
 	}
 
-	var ic infrastructure_component.InfrastructureComponent
-	err = ic.ByID(m.ICID)
+	var ic database.InfrastructureComponent
+	err = db.Find(&ic, m.ICID).Error
 	if err != nil {
 		return err
 	}
