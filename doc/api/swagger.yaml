@@ -160,6 +160,9 @@ definitions:
       location:
         description: Location of the IC
         type: string
+      managedexternally:
+        description: Boolean indicating if IC is managed externally (via AMQP/ VILLAScontroller)
+        type: boolean
       name:
         description: Name of the IC
         type: string
@@ -177,7 +180,7 @@ definitions:
         type: string
       uptime:
         description: Uptime of the IC
-        type: integer
+        type: number
       uuid:
         description: UUID of the IC
         type: string
@@ -429,6 +432,8 @@ definitions:
         type: string
       Location:
         type: string
+      ManagedExternally:
+        type: boolean
       Name:
         type: string
       StartParameterScheme:
@@ -439,13 +444,15 @@ definitions:
         type: string
       UUID:
         type: string
+      Uptime:
+        type: number
       WebsocketURL:
         type: string
     required:
     - Category
+    - ManagedExternally
     - Name
     - Type
-    - UUID
     type: object
   infrastructure_component.validUpdatedIC:
     properties:
@@ -467,6 +474,8 @@ definitions:
         type: string
       UUID:
         type: string
+      Uptime:
+        type: number
       WebsocketURL:
         type: string
     type: object
@@ -1558,7 +1567,7 @@ paths:
       summary: Send an action to IC (only available if backend server is started with
         -amqp parameter)
       tags:
-      - AMQP
+      - infrastructure-components
   /ic/{ICID}/configs:
     get:
       operationId: getConfigsOfIC

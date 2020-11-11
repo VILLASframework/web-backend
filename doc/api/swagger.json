@@ -1293,7 +1293,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "AMQP"
+                    "infrastructure-components"
                 ],
                 "summary": "Send an action to IC (only available if backend server is started with -amqp parameter)",
                 "operationId": "sendActionToIC",
@@ -2979,6 +2979,10 @@
                     "description": "Location of the IC",
                     "type": "string"
                 },
+                "managedexternally": {
+                    "description": "Boolean indicating if IC is managed externally (via AMQP/ VILLAScontroller)",
+                    "type": "boolean"
+                },
                 "name": {
                     "description": "Name of the IC",
                     "type": "string"
@@ -3001,7 +3005,7 @@
                 },
                 "uptime": {
                     "description": "Uptime of the IC",
-                    "type": "integer"
+                    "type": "number"
                 },
                 "uuid": {
                     "description": "UUID of the IC",
@@ -3360,9 +3364,9 @@
             "type": "object",
             "required": [
                 "Category",
+                "ManagedExternally",
                 "Name",
-                "Type",
-                "UUID"
+                "Type"
             ],
             "properties": {
                 "APIURL": {
@@ -3376,6 +3380,9 @@
                 },
                 "Location": {
                     "type": "string"
+                },
+                "ManagedExternally": {
+                    "type": "boolean"
                 },
                 "Name": {
                     "type": "string"
@@ -3391,6 +3398,9 @@
                 },
                 "UUID": {
                     "type": "string"
+                },
+                "Uptime": {
+                    "type": "number"
                 },
                 "WebsocketURL": {
                     "type": "string"
@@ -3426,6 +3436,9 @@
                 },
                 "UUID": {
                     "type": "string"
+                },
+                "Uptime": {
+                    "type": "number"
                 },
                 "WebsocketURL": {
                     "type": "string"
