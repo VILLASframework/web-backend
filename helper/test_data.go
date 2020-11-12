@@ -94,9 +94,9 @@ var propertiesB = json.RawMessage(`{"prop1" : "not so nice"}`)
 var ICA = database.InfrastructureComponent{
 	UUID:         "7be0322d-354e-431e-84bd-ae4c9633138b",
 	WebsocketURL: "https://villas-new.k8s.eonerc.rwth-aachen.de/ws/ws_sig",
-	APIURL:       "https://villas-new.k8s.eonerc.rwth-aachen.de/ws/api",
-	Type:         "VILLASnode Signal Generator",
-	Category:     "Signal Generator",
+	APIURL:       "https://villas-new.k8s.eonerc.rwth-aachen.de/ws/api/v2/node/ws_sig",
+	Type:         "villas-node",
+	Category:     "gateway",
 	Name:         "ACS Demo Signals",
 	Uptime:       -1.0,
 	State:        "idle",
@@ -110,8 +110,8 @@ var ICA = database.InfrastructureComponent{
 var ICB = database.InfrastructureComponent{
 	UUID:         "4854af30-325f-44a5-ad59-b67b2597de68",
 	WebsocketURL: "xxx.yyy.zzz.aaa",
-	Type:         "DPsim",
-	Category:     "Simulator",
+	Type:         "dpsim",
+	Category:     "simulator",
 	Name:         "Test DPsim Simulator",
 	Uptime:       -1.0,
 	State:        "running",

@@ -94,12 +94,6 @@ func main() {
 	apidocs.SwaggerInfo.Host = baseHost
 	apidocs.SwaggerInfo.BasePath = basePath
 
-	// add data to DB (if any)
-	err = addData(r, mode, basePath, amqphost)
-	if err != nil {
-		panic(err)
-	}
-
 	//Start AMQP client
 	if amqphost != "" {
 		// create amqp URL based on username, password and host
@@ -108,6 +102,12 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
+	}
+
+	// add data to DB (if any)
+	err = addData(r, mode, basePath, amqphost)
+	if err != nil {
+		panic(err)
 	}
 
 	// server at port 4000 to match frontend's redirect path
