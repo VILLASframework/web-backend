@@ -58,6 +58,7 @@ test:gotest:
     DB_HOST: ${POSTGRES_HOST}
     DB_USER: ${POSTGRES_USER}
     DB_PASS: ${POSTGRES_PASSWORD}
+    BASE_PATH: /api
     MODE: test
   tags:
     - docker
