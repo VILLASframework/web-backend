@@ -24,10 +24,14 @@ package helper
 import (
 	"encoding/json"
 	"fmt"
+	"math/rand"
+	"strings"
+	"time"
+
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"github.com/jinzhu/gorm/dialects/postgres"
+	"github.com/zpatrick/go-config"
 	"golang.org/x/crypto/bcrypt"
-	"time"
 )
 
 // #######################################################################
@@ -321,8 +325,22 @@ var WidgetE = database.Widget{
 	SignalIDs:        []int64{},
 }
 
-// add a default admin user to the DB
-func DBAddAdminUser() error {
+func generatePassword(Len int) string {
+	rand.Seed(time.Now().UnixNano())
+	chars := []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
+		"abcdefghijklmnopqrstuvwxyz" +
+		"0123456789")
+
+	var b strings.Builder
+	for i := 0; i < Len; i++ {
+		b.WriteRune(chars[rand.Intn(len(chars))])
+	}
+
+	return b.String()
+}
+
+// DBAddAdminUser adds a default admin user to the DB
+func DBAddAdminUser(cfg *config.Config) error {
 	database.DBpool.AutoMigrate(&database.User{})
 
 	// Check if admin user exists in DB
@@ -331,10 +349,31 @@ func DBAddAdminUser() error {
 
 	if len(users) == 0 {
 		fmt.Println("No admin user found in DB, adding default admin user.")
-		//create a copy of global test data
-		user0 := User0
+
+		name, err := cfg.String("admin.user")
+		if err != nil || name == "" {
+			name = "admin"
+		}
+
+		pw, err := cfg.String("admin.pass")
+		if err != nil || pw == "" {
+			pw = generatePassword(16)
+			fmt.Printf("  Generated admin password: %s\n", pw)
+		}
+
+		mail, err := cfg.String("admin.mail")
+		if err == nil || mail == "" {
+			mail = "admin@example.com"
+		}
+
+		pwEnc, _ := bcrypt.GenerateFromPassword([]byte(pw), bcryptCost)
+
+		// create a copy of global test data
+		user := database.User{Username: name, Password: string(pwEnc),
+			Role: "Admin", Mail: mail, Active: true}
+
 		// add admin user to DB
-		err = database.DBpool.Create(&user0).Error
+		err = database.DBpool.Create(&user).Error
 	}
 
 	return err

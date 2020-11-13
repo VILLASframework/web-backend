@@ -23,9 +23,10 @@ package configuration
 
 import (
 	"flag"
-	"github.com/zpatrick/go-config"
 	"log"
 	"os"
+
+	"github.com/zpatrick/go-config"
 )
 
 // Global configuration
@@ -50,22 +51,28 @@ func InitConfig() error {
 		port       = flag.String("port", "4000", "Port of the backend (default is 4000)")
 		baseHost   = flag.String("base-host", "localhost:4000", "The host at which the backend is hosted (default: localhost)")
 		basePath   = flag.String("base-path", "/api/v2", "The path at which the API routes are located (default /api/v2)")
+		adminUser  = flag.String("admin-user", "", "Initial admin username")
+		adminPass  = flag.String("admin-pass", "", "Initial admin password")
+		adminMail  = flag.String("admin-mail", "", "Initial admin mail address")
 	)
 	flag.Parse()
 
 	static := map[string]string{
-		"db.host":   *dbHost,
-		"db.name":   *dbName,
-		"db.user":   *dbUser,
-		"db.pass":   *dbPass,
-		"db.ssl":    *dbSSLMode,
-		"amqp.host": *amqpHost,
-		"amqp.user": *amqpUser,
-		"amqp.pass": *amqpPass,
-		"mode":      *mode,
-		"port":      *port,
-		"base.host": *baseHost,
-		"base.path": *basePath,
+		"db.host":    *dbHost,
+		"db.name":    *dbName,
+		"db.user":    *dbUser,
+		"db.pass":    *dbPass,
+		"db.ssl":     *dbSSLMode,
+		"amqp.host":  *amqpHost,
+		"amqp.user":  *amqpUser,
+		"amqp.pass":  *amqpPass,
+		"mode":       *mode,
+		"port":       *port,
+		"base.host":  *baseHost,
+		"base.path":  *basePath,
+		"admin.user": *adminUser,
+		"admin.pass": *adminPass,
+		"admin.mail": *adminMail,
 	}
 
 	mappings := map[string]string{
@@ -81,6 +88,9 @@ func InitConfig() error {
 		"BASE_PATH":  "base.path",
 		"MODE":       "mode",
 		"PORT":       "port",
+		"ADMIN_USER": "admin.user",
+		"ADMIN_PASS": "admin.pass",
+		"ADMIN_MAIL": "admin.mail",
 	}
 
 	defaults := config.NewStatic(static)
@@ -151,5 +161,4 @@ func ConfigureBackend() (string, string, string, string, string, string, string,
 	AMQPpass, _ := GolbalConfig.String("amqp.pass")
 
 	return mode, baseHost, basePath, port, AMQPhost, AMQPuser, AMQPpass, nil
-
 }
