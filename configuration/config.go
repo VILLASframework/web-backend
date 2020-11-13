@@ -38,15 +38,15 @@ func InitConfig() error {
 	}
 
 	var (
-		dbHost     = flag.String("dbhost", "/var/run/postgresql", "Host of the PostgreSQL database (default is /var/run/postgresql for localhost DB on Ubuntu systems)")
-		dbName     = flag.String("dbname", "villasdb", "Name of the database to use (default is villasdb)")
-		dbUser     = flag.String("dbuser", "", "Username of database connection (default is <empty>)")
-		dbPass     = flag.String("dbpass", "", "Password of database connection (default is <empty>)")
-		dbSSLMode  = flag.String("dbsslmode", "disable", "SSL mode of DB (default is disable)") // TODO: change default for production
-		amqpHost   = flag.String("amqphost", "", "If set, use this as host for AMQP broker (default is disabled)")
-		amqpUser   = flag.String("amqpuser", "", "Username for AMQP broker")
-		amqpPass   = flag.String("amqppass", "", "Password for AMQP broker")
-		configFile = flag.String("configFile", "", "Path to YAML configuration file")
+		dbHost     = flag.String("db-host", "/var/run/postgresql", "Host of the PostgreSQL database (default is /var/run/postgresql for localhost DB on Ubuntu systems)")
+		dbName     = flag.String("db-name", "villasdb", "Name of the database to use (default is villasdb)")
+		dbUser     = flag.String("db-user", "", "Username of database connection (default is <empty>)")
+		dbPass     = flag.String("db-pass", "", "Password of database connection (default is <empty>)")
+		dbSSLMode  = flag.String("db-ssl-mode", "disable", "SSL mode of DB (default is disable)") // TODO: change default for production
+		amqpHost   = flag.String("amqp-host", "", "If set, use this as host for AMQP broker (default is disabled)")
+		amqpUser   = flag.String("amqp-user", "", "Username for AMQP broker")
+		amqpPass   = flag.String("amqp-pass", "", "Password for AMQP broker")
+		configFile = flag.String("config", "", "Path to YAML configuration file")
 		mode       = flag.String("mode", "release", "Select debug/release/test mode (default is release)")
 		port       = flag.String("port", "4000", "Port of the backend (default is 4000)")
 		baseHost   = flag.String("base-host", "localhost:4000", "The host at which the backend is hosted (default: localhost)")
