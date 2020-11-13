@@ -96,11 +96,11 @@ func InitConfig() error {
 	defaults := config.NewStatic(static)
 	env := config.NewEnvironment(mappings)
 
-	if _, err := os.Stat(*configFile); os.IsExist(err) {
+	if _, err := os.Stat(*configFile); os.IsNotExist(err) {
+		GolbalConfig = config.NewConfig([]config.Provider{defaults, env})
+	} else {
 		yamlFile := config.NewYAMLFile(*configFile)
 		GolbalConfig = config.NewConfig([]config.Provider{defaults, yamlFile, env})
-	} else {
-		GolbalConfig = config.NewConfig([]config.Provider{defaults, env})
 	}
 
 	err := GolbalConfig.Load()
