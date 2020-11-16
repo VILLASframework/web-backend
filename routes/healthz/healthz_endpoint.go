@@ -22,10 +22,10 @@
 package healthz
 
 import (
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/amqp"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/infrastructure-component"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
@@ -68,7 +68,7 @@ func getHealth(c *gin.Context) {
 	}
 
 	if len(url) != 0 {
-		err = amqp.CheckConnection()
+		err = infrastructure_component.CheckConnection()
 		if err != nil {
 			log.Println(err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{

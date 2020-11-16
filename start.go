@@ -25,12 +25,12 @@ import (
 	"fmt"
 	"log"
 
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/amqp"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	apidocs "git.rwth-aachen.de/acs/public/villas/web-backend-go/doc/api" // doc/api folder is used by Swag CLI, you have to import it
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/infrastructure-component"
 	"github.com/gin-gonic/gin"
 	"github.com/zpatrick/go-config"
 )
@@ -96,20 +96,20 @@ func main() {
 	apidocs.SwaggerInfo.Host = baseHost
 	apidocs.SwaggerInfo.BasePath = basePath
 
-	// add data to DB (if any)
-	err = addData(r, configuration.GolbalConfig)
-	if err != nil {
-		panic(err)
-	}
-
 	//Start AMQP client
 	if amqphost != "" {
 		// create amqp URL based on username, password and host
 		amqpurl := "amqp://" + amqpuser + ":" + amqppass + "@" + amqphost
-		err = amqp.StartAMQP(amqpurl, api)
+		err = infrastructure_component.StartAMQP(amqpurl, api)
 		if err != nil {
 			panic(err)
 		}
+	}
+
+	// add data to DB (if any)
+	err = addData(r, configuration.GolbalConfig)
+	if err != nil {
+		panic(err)
 	}
 
 	// server at port 4000 to match frontend's redirect path

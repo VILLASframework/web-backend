@@ -22,10 +22,10 @@
 package healthz
 
 import (
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/amqp"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/infrastructure-component"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"log"
@@ -78,7 +78,7 @@ func TestHealthz(t *testing.T) {
 	amqpURI := "amqp://" + user + ":" + pass + "@" + host
 	log.Println("AMQP URI is", amqpURI)
 
-	err = amqp.ConnectAMQP(amqpURI)
+	err = infrastructure_component.ConnectAMQP(amqpURI)
 	assert.NoError(t, err)
 
 	// test healthz endpoint for connected DB and AMQP client

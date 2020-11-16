@@ -23,34 +23,43 @@ package infrastructure_component
 
 import (
 	"encoding/json"
+	"github.com/google/uuid"
 	"github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/nsf/jsondiff"
 	"gopkg.in/go-playground/validator.v9"
+	"log"
 	"time"
 )
 
 var validate *validator.Validate
 
 type validNewIC struct {
-	UUID       string         `form:"UUID" validate:"required"`
-	Host       string         `form:"Host" validate:"omitempty"`
-	APIHost    string         `form:"APIHost" validate:"omitempty"`
-	Type       string         `form:"Type" validate:"required"`
-	Name       string         `form:"Name" validate:"required"`
-	Category   string         `form:"Category" validate:"required"`
-	Properties postgres.Jsonb `form:"Properties" validate:"omitempty"`
-	State      string         `form:"State" validate:"omitempty"`
+	UUID                 string         `form:"UUID" validate:"omitempty"`
+	WebsocketURL         string         `form:"WebsocketURL" validate:"omitempty"`
+	APIURL               string         `form:"APIURL" validate:"omitempty"`
+	Type                 string         `form:"Type" validate:"required"`
+	Name                 string         `form:"Name" validate:"required"`
+	Category             string         `form:"Category" validate:"required"`
+	State                string         `form:"State" validate:"omitempty"`
+	Location             string         `form:"Location" validate:"omitempty"`
+	Description          string         `form:"Description" validate:"omitempty"`
+	StartParameterScheme postgres.Jsonb `form:"StartParameterScheme" validate:"omitempty"`
+	ManagedExternally    *bool          `form:"ManagedExternally" validate:"required"`
+	Uptime               float64        `form:"Uptime" validate:"omitempty"`
 }
 
 type validUpdatedIC struct {
-	UUID       string         `form:"UUID" validate:"omitempty"`
-	Host       string         `form:"Host" validate:"omitempty"`
-	APIHost    string         `form:"APIHost" validate:"omitempty"`
-	Type       string         `form:"Type" validate:"omitempty"`
-	Name       string         `form:"Name" validate:"omitempty"`
-	Category   string         `form:"Category" validate:"omitempty"`
-	Properties postgres.Jsonb `form:"Properties" validate:"omitempty"`
-	State      string         `form:"State" validate:"omitempty"`
+	UUID                 string         `form:"UUID" validate:"omitempty"`
+	WebsocketURL         string         `form:"WebsocketURL" validate:"omitempty"`
+	APIURL               string         `form:"APIURL" validate:"omitempty"`
+	Type                 string         `form:"Type" validate:"omitempty"`
+	Name                 string         `form:"Name" validate:"omitempty"`
+	Category             string         `form:"Category" validate:"omitempty"`
+	State                string         `form:"State" validate:"omitempty"`
+	Location             string         `form:"Location" validate:"omitempty"`
+	Description          string         `form:"Description" validate:"omitempty"`
+	StartParameterScheme postgres.Jsonb `form:"StartParameterScheme" validate:"omitempty"`
+	Uptime               float64        `form:"Uptime" validate:"omitempty"`
 }
 
 type AddICRequest struct {
@@ -61,28 +70,83 @@ type UpdateICRequest struct {
 	InfrastructureComponent validUpdatedIC `json:"ic"`
 }
 
-func (r *AddICRequest) Validate() error {
+func (r *AddICRequest) validate() error {
+	validate = validator.New()
+	errs := validate.Struct(r)
+	if errs != nil {
+		return errs
+	}
+
+	// check if uuid is valid
+	_, errs = uuid.Parse(r.InfrastructureComponent.UUID)
+	return errs
+}
+
+func (r *UpdateICRequest) validate() error {
 	validate = validator.New()
 	errs := validate.Struct(r)
 	return errs
 }
 
-func (r *UpdateICRequest) Validate() error {
-	validate = validator.New()
-	errs := validate.Struct(r)
-	return errs
-}
-
-func (r *AddICRequest) CreateIC() InfrastructureComponent {
+func (r *AddICRequest) createIC(receivedViaAMQP bool) (InfrastructureComponent, error) {
 	var s InfrastructureComponent
+	var err error
+	err = nil
+
+	// case distinction for externally managed IC
+	if *r.InfrastructureComponent.ManagedExternally && !receivedViaAMQP {
+		var action Action
+		action.Act = "create"
+		action.When = time.Now().Unix()
+		action.Properties.Type = new(string)
+		action.Properties.Name = new(string)
+		action.Properties.Category = new(string)
+
+		*action.Properties.Type = r.InfrastructureComponent.Type
+		*action.Properties.Name = r.InfrastructureComponent.Name
+		*action.Properties.Category = r.InfrastructureComponent.Category
+
+		// set optional properties
+		if r.InfrastructureComponent.Description != "" {
+			action.Properties.Description = new(string)
+			*action.Properties.Description = r.InfrastructureComponent.Description
+		}
+
+		if r.InfrastructureComponent.Location != "" {
+			action.Properties.Location = new(string)
+			*action.Properties.Location = r.InfrastructureComponent.Location
+		}
+
+		if r.InfrastructureComponent.APIURL != "" {
+			action.Properties.API_url = new(string)
+			*action.Properties.API_url = r.InfrastructureComponent.APIURL
+		}
+
+		if r.InfrastructureComponent.WebsocketURL != "" {
+			action.Properties.WS_url = new(string)
+			*action.Properties.WS_url = r.InfrastructureComponent.WebsocketURL
+		}
+
+		if r.InfrastructureComponent.UUID != "" {
+			action.Properties.UUID = new(string)
+			*action.Properties.UUID = r.InfrastructureComponent.UUID
+		}
+
+		log.Println("AMQP: Sending request to create new IC")
+		err = sendActionAMQP(action)
+	}
 
 	s.UUID = r.InfrastructureComponent.UUID
-	s.Host = r.InfrastructureComponent.Host
-	s.APIHost = r.InfrastructureComponent.APIHost
+	s.WebsocketURL = r.InfrastructureComponent.WebsocketURL
+	s.APIURL = r.InfrastructureComponent.APIURL
 	s.Type = r.InfrastructureComponent.Type
 	s.Name = r.InfrastructureComponent.Name
 	s.Category = r.InfrastructureComponent.Category
-	s.Properties = r.InfrastructureComponent.Properties
+	s.Location = r.InfrastructureComponent.Location
+	s.Description = r.InfrastructureComponent.Description
+	s.StartParameterScheme = r.InfrastructureComponent.StartParameterScheme
+	s.ManagedExternally = *r.InfrastructureComponent.ManagedExternally
+	s.Uptime = -1.0 // no uptime available
 	if r.InfrastructureComponent.State != "" {
 		s.State = r.InfrastructureComponent.State
 	} else {
@@ -91,10 +155,10 @@ func (r *AddICRequest) CreateIC() InfrastructureComponent {
 	// set last update to creation time of IC
 	s.StateUpdateAt = time.Now().Format(time.RFC1123)
 
-	return s
+	return s, err
 }
 
-func (r *UpdateICRequest) UpdatedIC(oldIC InfrastructureComponent) InfrastructureComponent {
+func (r *UpdateICRequest) updatedIC(oldIC InfrastructureComponent) InfrastructureComponent {
 	// Use the old InfrastructureComponent as a basis for the updated InfrastructureComponent `s`
 	s := oldIC
 
@@ -102,12 +166,12 @@ func (r *UpdateICRequest) UpdatedIC(oldIC InfrastructureComponent) Infrastructur
 		s.UUID = r.InfrastructureComponent.UUID
 	}
 
-	if r.InfrastructureComponent.Host != "" {
-		s.Host = r.InfrastructureComponent.Host
+	if r.InfrastructureComponent.WebsocketURL != "" {
+		s.WebsocketURL = r.InfrastructureComponent.WebsocketURL
 	}
 
-	if r.InfrastructureComponent.APIHost != "" {
-		s.APIHost = r.InfrastructureComponent.APIHost
+	if r.InfrastructureComponent.APIURL != "" {
+		s.APIURL = r.InfrastructureComponent.APIURL
 	}
 
 	if r.InfrastructureComponent.Type != "" {
@@ -126,6 +190,14 @@ func (r *UpdateICRequest) UpdatedIC(oldIC InfrastructureComponent) Infrastructur
 		s.State = r.InfrastructureComponent.State
 	}
 
+	if r.InfrastructureComponent.Location != "" {
+		s.Location = r.InfrastructureComponent.Location
+	}
+
+	if r.InfrastructureComponent.Description != "" {
+		s.Description = r.InfrastructureComponent.Description
+	}
+
 	// set last update time
 	s.StateUpdateAt = time.Now().Format(time.RFC1123)
 
@@ -133,11 +205,11 @@ func (r *UpdateICRequest) UpdatedIC(oldIC InfrastructureComponent) Infrastructur
 	var emptyJson postgres.Jsonb
 	// Serialize empty json and params
 	emptyJson_ser, _ := json.Marshal(emptyJson)
-	startParams_ser, _ := json.Marshal(r.InfrastructureComponent.Properties)
+	startParams_ser, _ := json.Marshal(r.InfrastructureComponent.StartParameterScheme)
 	opts := jsondiff.DefaultConsoleOptions()
 	diff, _ := jsondiff.Compare(emptyJson_ser, startParams_ser, &opts)
 	if diff.String() != "FullMatch" {
-		s.Properties = r.InfrastructureComponent.Properties
+		s.StartParameterScheme = r.InfrastructureComponent.StartParameterScheme
 	}
 
 	return s

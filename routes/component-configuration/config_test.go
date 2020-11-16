@@ -49,13 +49,16 @@ type ConfigRequest struct {
 }
 
 type ICRequest struct {
-	UUID       string         `json:"uuid,omitempty"`
-	Host       string         `json:"host,omitempty"`
-	Type       string         `json:"type,omitempty"`
-	Name       string         `json:"name,omitempty"`
-	Category   string         `json:"category,omitempty"`
-	State      string         `json:"state,omitempty"`
-	Properties postgres.Jsonb `json:"properties,omitempty"`
+	UUID                 string         `json:"uuid,omitempty"`
+	WebsocketURL         string         `json:"websocketurl,omitempty"`
+	Type                 string         `json:"type,omitempty"`
+	Name                 string         `json:"name,omitempty"`
+	Category             string         `json:"category,omitempty"`
+	State                string         `json:"state,omitempty"`
+	Location             string         `json:"location,omitempty"`
+	Description          string         `json:"description,omitempty"`
+	StartParameterScheme postgres.Jsonb `json:"startparameterscheme,omitempty"`
+	ManagedExternally    *bool          `json:"managedexternally,omitempty"`
 }
 
 type ScenarioRequest struct {
@@ -72,32 +75,44 @@ func addScenarioAndIC() (scenarioID uint, ICID uint) {
 
 	// POST $newICA
 	newICA := ICRequest{
-		UUID:       helper.ICA.UUID,
-		Host:       helper.ICA.Host,
-		Type:       helper.ICA.Type,
-		Name:       helper.ICA.Name,
-		Category:   helper.ICA.Category,
-		State:      helper.ICA.State,
-		Properties: helper.ICA.Properties,
+		UUID:                 helper.ICA.UUID,
+		WebsocketURL:         helper.ICA.WebsocketURL,
+		Type:                 helper.ICA.Type,
+		Name:                 helper.ICA.Name,
+		Category:             helper.ICA.Category,
+		State:                helper.ICA.State,
+		Location:             helper.ICA.Location,
+		Description:          helper.ICA.Description,
+		StartParameterScheme: helper.ICA.StartParameterScheme,
+		ManagedExternally:    &helper.ICA.ManagedExternally,
 	}
-	_, resp, _ := helper.TestEndpoint(router, token,
+	code, resp, err := helper.TestEndpoint(router, token,
 		"/api/ic", "POST", helper.KeyModels{"ic": newICA})
+	if code != 200 || err != nil {
+		fmt.Println("Adding IC returned code", code, err, resp)
+	}
 
 	// Read newIC's ID from the response
 	newICID, _ := helper.GetResponseID(resp)
 
 	// POST a second IC to change to that IC during testing
 	newICB := ICRequest{
-		UUID:       helper.ICB.UUID,
-		Host:       helper.ICB.Host,
-		Type:       helper.ICB.Type,
-		Name:       helper.ICB.Name,
-		Category:   helper.ICB.Category,
-		State:      helper.ICB.State,
-		Properties: helper.ICB.Properties,
+		UUID:                 helper.ICB.UUID,
+		WebsocketURL:         helper.ICB.WebsocketURL,
+		Type:                 helper.ICB.Type,
+		Name:                 helper.ICB.Name,
+		Category:             helper.ICB.Category,
+		State:                helper.ICB.State,
+		Location:             helper.ICB.Location,
+		Description:          helper.ICB.Description,
+		StartParameterScheme: helper.ICB.StartParameterScheme,
+		ManagedExternally:    &helper.ICA.ManagedExternally,
 	}
-	_, resp, _ = helper.TestEndpoint(router, token,
+	code, resp, err = helper.TestEndpoint(router, token,
 		"/api/ic", "POST", helper.KeyModels{"ic": newICB})
+	if code != 200 || err != nil {
+		fmt.Println("Adding IC returned code", code, err, resp)
+	}
 
 	// authenticate as normal user
 	token, _ = helper.AuthenticateForTest(router,
@@ -109,8 +124,11 @@ func addScenarioAndIC() (scenarioID uint, ICID uint) {
 		Running:         helper.ScenarioA.Running,
 		StartParameters: helper.ScenarioA.StartParameters,
 	}
-	_, resp, _ = helper.TestEndpoint(router, token,
+	code, resp, err = helper.TestEndpoint(router, token,
 		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenario})
+	if code != 200 || err != nil {
+		fmt.Println("Adding Scenario returned code", code, err, resp)
+	}
 
 	// Read newScenario's ID from the response
 	newScenarioID, _ := helper.GetResponseID(resp)

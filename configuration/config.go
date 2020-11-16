@@ -23,6 +23,7 @@ package configuration
 
 import (
 	"flag"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"log"
 	"os"
 
@@ -51,9 +52,9 @@ func InitConfig() error {
 		port       = flag.String("port", "4000", "Port of the backend (default is 4000)")
 		baseHost   = flag.String("base-host", "localhost:4000", "The host at which the backend is hosted (default: localhost)")
 		basePath   = flag.String("base-path", "/api/v2", "The path at which the API routes are located (default /api/v2)")
-		adminUser  = flag.String("admin-user", "", "Initial admin username")
-		adminPass  = flag.String("admin-pass", "", "Initial admin password")
-		adminMail  = flag.String("admin-mail", "", "Initial admin mail address")
+		adminUser  = flag.String("admin-user", helper.User0.Username, "Initial admin username")
+		adminPass  = flag.String("admin-pass", helper.StrPassword0, "Initial admin password")
+		adminMail  = flag.String("admin-mail", helper.User0.Mail, "Initial admin mail address")
 	)
 	flag.Parse()
 

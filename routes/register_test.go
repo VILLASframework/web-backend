@@ -28,11 +28,13 @@ import (
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
+	infrastructure_component "git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/infrastructure-component"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
 
 var router *gin.Engine
+var amqpURI string
 
 func TestMain(m *testing.M) {
 	err := configuration.InitConfig()
@@ -47,6 +49,15 @@ func TestMain(m *testing.M) {
 	defer database.DBpool.Close()
 
 	router = gin.Default()
+
+	// connect AMQP client (make sure that AMQP_HOST, AMQP_USER, AMQP_PASS are set via command line parameters)
+	host, err := configuration.GolbalConfig.String("amqp.host")
+	user, err := configuration.GolbalConfig.String("amqp.user")
+	pass, err := configuration.GolbalConfig.String("amqp.pass")
+
+	amqpURI := "amqp://" + user + ":" + pass + "@" + host
+
+	err = infrastructure_component.ConnectAMQP(amqpURI)
 
 	os.Exit(m.Run())
 }

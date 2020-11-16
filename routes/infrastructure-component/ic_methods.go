@@ -23,33 +23,34 @@ package infrastructure_component
 
 import (
 	"fmt"
-
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
+	"log"
+	"time"
 )
 
 type InfrastructureComponent struct {
 	database.InfrastructureComponent
 }
 
-func (s *InfrastructureComponent) Save() error {
+func (s *InfrastructureComponent) save() error {
 	db := database.GetDB()
 	err := db.Create(s).Error
 	return err
 }
 
-func (s *InfrastructureComponent) ByID(id uint) error {
+func (s *InfrastructureComponent) byID(id uint) error {
 	db := database.GetDB()
 	err := db.Find(s, id).Error
 	return err
 }
 
-func (s *InfrastructureComponent) ByUUID(uuid string) error {
+func (s *InfrastructureComponent) byUUID(uuid string) error {
 	db := database.GetDB()
 	err := db.Find(s, "UUID = ?", uuid).Error
 	return err
 }
 
-func (s *InfrastructureComponent) Update(updatedIC InfrastructureComponent) error {
+func (s *InfrastructureComponent) update(updatedIC InfrastructureComponent) error {
 
 	db := database.GetDB()
 	err := db.Model(s).Updates(updatedIC).Error
@@ -57,7 +58,19 @@ func (s *InfrastructureComponent) Update(updatedIC InfrastructureComponent) erro
 	return err
 }
 
-func (s *InfrastructureComponent) delete() error {
+func (s *InfrastructureComponent) delete(receivedViaAMQP bool) error {
+	if s.ManagedExternally && !receivedViaAMQP {
+		var action Action
+		action.Act = "delete"
+		action.When = time.Now().Unix()
+		action.Properties.UUID = new(string)
+		*action.Properties.UUID = s.UUID
+
+		log.Println("AMQP: Sending request to delete IC with UUID", s.UUID)
+		err := sendActionAMQP(action)
+		return err
+	}
+
 	db := database.GetDB()
 
 	no_configs := db.Model(s).Association("ComponentConfigurations").Count()

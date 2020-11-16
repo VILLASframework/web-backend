@@ -117,9 +117,12 @@ func AddTestData(cfg *config.Config, router *gin.Engine) (*bytes.Buffer, error) 
 	if code != http.StatusOK {
 		return resp, fmt.Errorf("error adding IC A")
 	}
-	code, resp, err = helper.TestEndpoint(router, token, basePath+"/ic", "POST", helper.KeyModels{"ic": helper.ICB})
-	if code != http.StatusOK {
-		return resp, fmt.Errorf("error adding IC B")
+	amqphost, err := cfg.String("amqp.host")
+	if err != nil && amqphost != "" {
+		code, resp, err = helper.TestEndpoint(router, token, basePath+"/ic", "POST", helper.KeyModels{"ic": helper.ICB})
+		if code != http.StatusOK {
+			return resp, fmt.Errorf("error adding IC B")
+		}
 	}
 
 	// add scenarios
@@ -155,7 +158,7 @@ func AddTestData(cfg *config.Config, router *gin.Engine) (*bytes.Buffer, error) 
 	configB := helper.ConfigB
 	configA.ScenarioID = 1
 	configB.ScenarioID = 1
-	configA.ICID = 2
+	configA.ICID = 1
 	configB.ICID = 1
 	code, resp, err = helper.TestEndpoint(router, token, basePath+"/configs", "POST", helper.KeyModels{"config": configA})
 	if code != http.StatusOK {
