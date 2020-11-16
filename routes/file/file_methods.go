@@ -24,11 +24,17 @@ package file
 import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/scenario"
 	"github.com/gin-gonic/gin"
+	"image"
+	_ "image/gif"
+	_ "image/jpeg"
+	_ "image/png"
 	"io/ioutil"
+	"log"
 	"mime/multipart"
 	"net/http"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
@@ -86,6 +92,24 @@ func (f *File) register(fileHeader *multipart.FileHeader, scenarioID uint) error
 	f.FileData, err = ioutil.ReadAll(fileContent)
 	defer fileContent.Close()
 
+	// Add image dimensions in case the file is an image
+	if strings.Contains(f.Type, "image") || strings.Contains(f.Type, "Image") {
+		// set the file reader back to the start of the file
+		_, err := fileContent.Seek(0, 0)
+		if err == nil {
+
+			imageConfig, _, err := image.DecodeConfig(fileContent)
+			if err != nil {
+				log.Println("Unable to decode image configuration: Dimensions of image file are not set: ", err)
+			} else {
+				f.ImageHeight = imageConfig.Height
+				f.ImageWidth = imageConfig.Width
+			}
+		} else {
+			log.Println("Error on setting file reader back to start of file, dimensions not updated:", err)
+		}
+	}
+
 	// Add File object with parameters to DB
 	err = f.save()
 	if err != nil {
@@ -117,13 +141,39 @@ func (f *File) update(fileHeader *multipart.FileHeader) error {
 	fileData, err := ioutil.ReadAll(fileContent)
 	defer fileContent.Close()
 
+	fileType := fileHeader.Header.Get("Content-Type")
+	imageHeight := f.ImageHeight
+	imageWidth := f.ImageWidth
+
+	// Update image dimensions in case the file is an image
+	if strings.Contains(fileType, "image") || strings.Contains(fileType, "Image") {
+		// set the file reader back to the start of the file
+		_, err := fileContent.Seek(0, 0)
+		if err == nil {
+			imageConfig, _, err := image.DecodeConfig(fileContent)
+			if err != nil {
+				log.Println("Unable to decode image configuration: Dimensions of image file are not updated.", err)
+			} else {
+				imageHeight = imageConfig.Height
+				imageWidth = imageConfig.Width
+			}
+		} else {
+			log.Println("Error on setting file reader back to start of file, dimensions not updated::", err)
+		}
+	} else {
+		imageWidth = 0
+		imageHeight = 0
+	}
+
 	db := database.GetDB()
 	err = db.Model(f).Updates(map[string]interface{}{
-		"Size":     uint(fileHeader.Size),
-		"FileData": fileData,
-		"Date":     time.Now().String(),
-		"Name":     filepath.Base(fileHeader.Filename),
-		"Type":     fileHeader.Header.Get("Content-Type"),
+		"Size":        uint(fileHeader.Size),
+		"FileData":    fileData,
+		"Date":        time.Now().String(),
+		"Name":        filepath.Base(fileHeader.Filename),
+		"Type":        fileType,
+		"ImageHeight": imageHeight,
+		"ImageWidth":  imageWidth,
 	}).Error
 
 	return err
