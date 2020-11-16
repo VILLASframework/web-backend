@@ -23,9 +23,10 @@ package configuration
 
 import (
 	"flag"
-	"github.com/zpatrick/go-config"
 	"log"
 	"os"
+
+	"github.com/zpatrick/go-config"
 )
 
 // Global configuration
@@ -37,35 +38,41 @@ func InitConfig() error {
 	}
 
 	var (
-		dbHost     = flag.String("dbhost", "/var/run/postgresql", "Host of the PostgreSQL database (default is /var/run/postgresql for localhost DB on Ubuntu systems)")
-		dbName     = flag.String("dbname", "villasdb", "Name of the database to use (default is villasdb)")
-		dbUser     = flag.String("dbuser", "", "Username of database connection (default is <empty>)")
-		dbPass     = flag.String("dbpass", "", "Password of database connection (default is <empty>)")
-		dbSSLMode  = flag.String("dbsslmode", "disable", "SSL mode of DB (default is disable)") // TODO: change default for production
-		amqpHost   = flag.String("amqphost", "", "If set, use this as host for AMQP broker (default is disabled)")
-		amqpUser   = flag.String("amqpuser", "", "Username for AMQP broker")
-		amqpPass   = flag.String("amqppass", "", "Password for AMQP broker")
-		configFile = flag.String("configFile", "", "Path to YAML configuration file")
+		dbHost     = flag.String("db-host", "/var/run/postgresql", "Host of the PostgreSQL database (default is /var/run/postgresql for localhost DB on Ubuntu systems)")
+		dbName     = flag.String("db-name", "villasdb", "Name of the database to use (default is villasdb)")
+		dbUser     = flag.String("db-user", "", "Username of database connection (default is <empty>)")
+		dbPass     = flag.String("db-pass", "", "Password of database connection (default is <empty>)")
+		dbSSLMode  = flag.String("db-ssl-mode", "disable", "SSL mode of DB (default is disable)") // TODO: change default for production
+		amqpHost   = flag.String("amqp-host", "", "If set, use this as host for AMQP broker (default is disabled)")
+		amqpUser   = flag.String("amqp-user", "", "Username for AMQP broker")
+		amqpPass   = flag.String("amqp-pass", "", "Password for AMQP broker")
+		configFile = flag.String("config", "", "Path to YAML configuration file")
 		mode       = flag.String("mode", "release", "Select debug/release/test mode (default is release)")
 		port       = flag.String("port", "4000", "Port of the backend (default is 4000)")
 		baseHost   = flag.String("base-host", "localhost:4000", "The host at which the backend is hosted (default: localhost)")
 		basePath   = flag.String("base-path", "/api/v2", "The path at which the API routes are located (default /api/v2)")
+		adminUser  = flag.String("admin-user", "", "Initial admin username")
+		adminPass  = flag.String("admin-pass", "", "Initial admin password")
+		adminMail  = flag.String("admin-mail", "", "Initial admin mail address")
 	)
 	flag.Parse()
 
 	static := map[string]string{
-		"db.host":   *dbHost,
-		"db.name":   *dbName,
-		"db.user":   *dbUser,
-		"db.pass":   *dbPass,
-		"db.ssl":    *dbSSLMode,
-		"amqp.host": *amqpHost,
-		"amqp.user": *amqpUser,
-		"amqp.pass": *amqpPass,
-		"mode":      *mode,
-		"port":      *port,
-		"base.host": *baseHost,
-		"base.path": *basePath,
+		"db.host":    *dbHost,
+		"db.name":    *dbName,
+		"db.user":    *dbUser,
+		"db.pass":    *dbPass,
+		"db.ssl":     *dbSSLMode,
+		"amqp.host":  *amqpHost,
+		"amqp.user":  *amqpUser,
+		"amqp.pass":  *amqpPass,
+		"mode":       *mode,
+		"port":       *port,
+		"base.host":  *baseHost,
+		"base.path":  *basePath,
+		"admin.user": *adminUser,
+		"admin.pass": *adminPass,
+		"admin.mail": *adminMail,
 	}
 
 	mappings := map[string]string{
@@ -81,16 +88,19 @@ func InitConfig() error {
 		"BASE_PATH":  "base.path",
 		"MODE":       "mode",
 		"PORT":       "port",
+		"ADMIN_USER": "admin.user",
+		"ADMIN_PASS": "admin.pass",
+		"ADMIN_MAIL": "admin.mail",
 	}
 
 	defaults := config.NewStatic(static)
 	env := config.NewEnvironment(mappings)
 
-	if _, err := os.Stat(*configFile); os.IsExist(err) {
+	if _, err := os.Stat(*configFile); os.IsNotExist(err) {
+		GolbalConfig = config.NewConfig([]config.Provider{defaults, env})
+	} else {
 		yamlFile := config.NewYAMLFile(*configFile)
 		GolbalConfig = config.NewConfig([]config.Provider{defaults, yamlFile, env})
-	} else {
-		GolbalConfig = config.NewConfig([]config.Provider{defaults, env})
 	}
 
 	err := GolbalConfig.Load()
@@ -151,5 +161,4 @@ func ConfigureBackend() (string, string, string, string, string, string, string,
 	AMQPpass, _ := GolbalConfig.String("amqp.pass")
 
 	return mode, baseHost, basePath, port, AMQPhost, AMQPuser, AMQPpass, nil
-
 }

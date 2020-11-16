@@ -24,14 +24,15 @@ package amqp
 import (
 	"encoding/json"
 	"fmt"
+	"log"
+	"time"
+
 	infrastructure_component "git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/infrastructure-component"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 	"github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/streadway/amqp"
-	"log"
-	"time"
 )
 
 const VILLAS_EXCHANGE = "villas"
@@ -131,7 +132,7 @@ func ConnectAMQP(uri string) error {
 		}
 	}()
 
-	log.Printf(" AMQP: Waiting for messages... ")
+	log.Printf("AMQP: Waiting for messages... ")
 
 	return nil
 }

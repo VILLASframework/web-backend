@@ -41,6 +41,25 @@ go run start.go --help
 ```
 to get a list of available parameters and default values
 
+## Environment variables
+
+| Variable		| Description										|
+|:--			|:--												|
+| `DB_HOST`		| PostgreSQL hostname								|
+| `DB_NAME`		| PostgreSQL database								|
+| `DB_USER`		| PostgreSQL username								|
+| `DB_PASS`		| PostgreSQL password								|
+| `DB_SSLMODE`	| PostgreSQL SSL enabled							|
+| `AMQP_HOST`	| AMQP hostname										|
+| `AMQP_USER`	| AMQP username										|
+| `AMQP_PASS`	| AMQP password										|
+| `BASE_HOST`	| Hostname of VILLASweb								|
+| `BASE_PATH`	| Base URL of VILLASweb								|
+| `MODE`		| Mode: debug/release/test							|
+| `PORT`		| Port on which the internal HTTP server listens	|
+| `ADMIN_USER`	| Username for initial admin user					|
+| `ADMIN_PASS`	| Password for initial admin user					|
+| `ADMIN_MAIL`	| Mail for initial admin user						|
 
 ## PostgreSQL Database
 Before running the application the user has to setup and configure

@@ -23,12 +23,13 @@
 package routes
 
 import (
+	"os"
+	"testing"
+
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
-	"os"
-	"testing"
 )
 
 var router *gin.Engine
@@ -59,6 +60,11 @@ func TestRegisterEndpoints(t *testing.T) {
 }
 
 func TestAddTestData(t *testing.T) {
-	resp, err := AddTestData("/api", router)
+	err := configuration.InitConfig()
+	if err != nil {
+		panic(t)
+	}
+
+	resp, err := AddTestData(configuration.GolbalConfig, router)
 	assert.NoError(t, err, "Response body: %v", resp)
 }

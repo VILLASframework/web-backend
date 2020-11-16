@@ -25,6 +25,12 @@ package routes
 import (
 	"bytes"
 	"fmt"
+	"io"
+	"mime/multipart"
+	"net/http"
+	"net/http/httptest"
+	"os"
+
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	component_configuration "git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/component-configuration"
@@ -40,11 +46,7 @@ import (
 	"github.com/gin-gonic/gin"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
-	"io"
-	"mime/multipart"
-	"net/http"
-	"net/http/httptest"
-	"os"
+	"github.com/zpatrick/go-config"
 )
 
 // register all backend endpoints; to be called after DB is initialized
@@ -74,12 +76,18 @@ func RegisterEndpoints(router *gin.Engine, api *gin.RouterGroup) {
 }
 
 // Uses API endpoints to add test data to the backend; All endpoints have to be registered before invoking this function.
-func AddTestData(basePath string, router *gin.Engine) (*bytes.Buffer, error) {
+func AddTestData(cfg *config.Config, router *gin.Engine) (*bytes.Buffer, error) {
+
+	basePath, err := cfg.String("base.path")
+	if err != nil {
+		fmt.Println("error: testdata could not be added to DB: no base path specified")
+		return nil, err
+	}
 
 	database.MigrateModels()
 	// Create entries of each model (data defined in test_data.go)
 	// add Admin user
-	err := helper.DBAddAdminUser()
+	err = helper.DBAddAdminUser(cfg)
 	if err != nil {
 		return nil, err
 	}
