@@ -207,4 +207,8 @@ type File struct {
 	ScenarioID uint `json:"scenarioID"`
 	// File itself
 	FileData []byte `json:"-" gorm:"column:FileData"`
+	// Height of an image file in pixels (optional)
+	ImageHeight int `json:"imageHeight" gorm:"default:0"`
+	// Width of an image file in pixels (optional)
+	ImageWidth int `json:"imageWidth" gorm:"default:0"`
 }
