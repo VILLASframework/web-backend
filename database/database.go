@@ -93,6 +93,7 @@ func DropTables() {
 	DBpool.DropTableIfExists(&User{})
 	DBpool.DropTableIfExists(&Dashboard{})
 	DBpool.DropTableIfExists(&Widget{})
+	DBpool.DropTableIfExists(&Result{})
 	// The following statement deletes the many to many relationship between users and scenarios
 	DBpool.DropTableIfExists("user_scenarios")
 }
@@ -107,4 +108,5 @@ func MigrateModels() {
 	DBpool.AutoMigrate(&User{})
 	DBpool.AutoMigrate(&Dashboard{})
 	DBpool.AutoMigrate(&Widget{})
+	DBpool.AutoMigrate(&Result{})
 }

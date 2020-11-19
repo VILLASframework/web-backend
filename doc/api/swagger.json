@@ -1422,6 +1422,517 @@
                 }
             }
         },
+        "/results": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "results"
+                ],
+                "summary": "Get all results of scenario",
+                "operationId": "getResults",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Scenario ID",
+                        "name": "scenarioID",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Results which belong to scenario",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ResponseResults"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "results"
+                ],
+                "summary": "Add a result to a scenario",
+                "operationId": "addResult",
+                "parameters": [
+                    {
+                        "description": "Result to be added incl. ID of Scenario",
+                        "name": "inputResult",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/result.addResultRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Result that was added",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ResponseResult"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/results/{resultID}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "results"
+                ],
+                "summary": "Get a Result",
+                "operationId": "getResult",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Result ID",
+                        "name": "resultID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Result that was requested",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ResponseResult"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "results"
+                ],
+                "summary": "Update a result",
+                "operationId": "updateResult",
+                "parameters": [
+                    {
+                        "description": "Result to be updated",
+                        "name": "inputResult",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/result.updateResultRequest"
+                        }
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Result ID",
+                        "name": "resultID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Result that was updated",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ResponseResult"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "results"
+                ],
+                "summary": "Delete a Result",
+                "operationId": "deleteResult",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Result ID",
+                        "name": "resultID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Result that was deleted",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ResponseResult"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/results/{resultID}/file": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "text/plain",
+                    "text/csv",
+                    "application/gzip",
+                    "application/x-gtar",
+                    "application/x-tar",
+                    "application/x-ustar",
+                    "application/zip",
+                    "application/msexcel",
+                    "application/xml",
+                    "application/x-bag"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "results"
+                ],
+                "summary": "Upload a result file to the DB and associate it with scenario and result",
+                "operationId": "addResultFile",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "File to be uploaded",
+                        "name": "inputFile",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Result ID",
+                        "name": "resultID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Result that was updated",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ResponseResult"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/results/{resultID}/file/{fileID}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "produces": [
+                    "text/plain",
+                    "text/csv",
+                    "application/gzip",
+                    "application/x-gtar",
+                    "application/x-tar",
+                    "application/x-ustar",
+                    "application/zip",
+                    "application/msexcel",
+                    "application/xml",
+                    "application/x-bag"
+                ],
+                "tags": [
+                    "results"
+                ],
+                "summary": "Download a result file",
+                "operationId": "getResultFile",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Result ID",
+                        "name": "resultID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID of the file to download",
+                        "name": "fileID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "File that was requested",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ResponseFile"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "results"
+                ],
+                "summary": "Delete a result file",
+                "operationId": "deleteResultFile",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Result ID",
+                        "name": "resultID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID of the file to delete",
+                        "name": "fileID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Result for which file was deleted",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ResponseResult"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/docs.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
         "/scenarios": {
             "get": {
                 "security": [
@@ -2872,6 +3383,9 @@
         "database.ComponentConfiguration": {
             "type": "object",
             "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
                 "fileIDs": {
                     "description": "Array of file IDs used by the component configuration",
                     "type": "string"
@@ -2902,12 +3416,18 @@
                 "startParameters": {
                     "description": "Start parameters of Component Configuration as JSON",
                     "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
                 }
             }
         },
         "database.Dashboard": {
             "type": "object",
             "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
                 "grid": {
                     "description": "Grid of dashboard",
                     "type": "integer"
@@ -2926,17 +3446,31 @@
                 "scenarioID": {
                     "description": "ID of scenario to which dashboard belongs",
                     "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
                 }
             }
         },
         "database.File": {
             "type": "object",
             "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
                 "date": {
                     "description": "Last modification time of file",
                     "type": "string"
                 },
                 "id": {
+                    "type": "integer"
+                },
+                "imageHeight": {
+                    "description": "Height of an image file in pixels (optional)",
+                    "type": "integer"
+                },
+                "imageWidth": {
+                    "description": "Width of an image file in pixels (optional)",
                     "type": "integer"
                 },
                 "name": {
@@ -2954,6 +3488,9 @@
                 "type": {
                     "description": "Type of file (MIME type)",
                     "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
                 }
             }
         },
@@ -2966,6 +3503,9 @@
                 },
                 "category": {
                     "description": "Category of IC (simulator, gateway, database, etc.)",
+                    "type": "string"
+                },
+                "createdAt": {
                     "type": "string"
                 },
                 "description": {
@@ -3003,6 +3543,9 @@
                     "description": "Type of IC (RTDS, VILLASnode, RTDS, etc.)",
                     "type": "string"
                 },
+                "updatedAt": {
+                    "type": "string"
+                },
                 "uptime": {
                     "description": "Uptime of the IC",
                     "type": "number"
@@ -3017,9 +3560,42 @@
                 }
             }
         },
+        "database.Result": {
+            "type": "object",
+            "properties": {
+                "configSnapshots": {
+                    "description": "JSON snapshots of component configurations used to generate results",
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "description": {
+                    "description": "Description of results",
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "resultFileIDs": {
+                    "description": "File IDs associated with result",
+                    "type": "string"
+                },
+                "scenarioID": {
+                    "description": "ID of Scenario to which result belongs",
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
         "database.Scenario": {
             "type": "object",
             "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -3034,6 +3610,9 @@
                 "startParameters": {
                     "description": "Start parameters of scenario as JSON",
                     "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
                 }
             }
         },
@@ -3043,6 +3622,9 @@
                 "configID": {
                     "description": "ID of Component Configuration",
                     "type": "integer"
+                },
+                "createdAt": {
+                    "type": "string"
                 },
                 "direction": {
                     "description": "Direction of the signal (in or out)",
@@ -3066,6 +3648,9 @@
                 "unit": {
                     "description": "Unit of Signal",
                     "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
                 }
             }
         },
@@ -3075,6 +3660,9 @@
                 "active": {
                     "description": "Indicating status of user (false means user is inactive and should not be able to login)",
                     "type": "boolean"
+                },
+                "createdAt": {
+                    "type": "string"
                 },
                 "id": {
                     "type": "integer"
@@ -3087,6 +3675,9 @@
                     "description": "Role of user",
                     "type": "string"
                 },
+                "updatedAt": {
+                    "type": "string"
+                },
                 "username": {
                     "description": "Username of user",
                     "type": "string"
@@ -3096,6 +3687,9 @@
         "database.Widget": {
             "type": "object",
             "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
                 "customProperties": {
                     "description": "Custom properties of widget as JSON string",
                     "type": "string"
@@ -3133,6 +3727,9 @@
                 },
                 "type": {
                     "description": "Type of widget",
+                    "type": "string"
+                },
+                "updatedAt": {
                     "type": "string"
                 },
                 "width": {
@@ -3258,6 +3855,26 @@
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/database.InfrastructureComponent"
+                    }
+                }
+            }
+        },
+        "docs.ResponseResult": {
+            "type": "object",
+            "properties": {
+                "result": {
+                    "type": "object",
+                    "$ref": "#/definitions/database.Result"
+                }
+            }
+        },
+        "docs.ResponseResults": {
+            "type": "object",
+            "properties": {
+                "results": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/database.Result"
                     }
                 }
             }
@@ -3442,6 +4059,65 @@
                 },
                 "WebsocketURL": {
                     "type": "string"
+                }
+            }
+        },
+        "result.addResultRequest": {
+            "type": "object",
+            "properties": {
+                "result": {
+                    "type": "object",
+                    "$ref": "#/definitions/result.validNewResult"
+                }
+            }
+        },
+        "result.updateResultRequest": {
+            "type": "object",
+            "properties": {
+                "result": {
+                    "type": "object",
+                    "$ref": "#/definitions/result.validUpdatedResult"
+                }
+            }
+        },
+        "result.validNewResult": {
+            "type": "object",
+            "required": [
+                "ConfigSnapshots",
+                "ScenarioID"
+            ],
+            "properties": {
+                "ConfigSnapshots": {
+                    "type": "string"
+                },
+                "Description": {
+                    "type": "string"
+                },
+                "ResultFileIDs": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "ScenarioID": {
+                    "type": "integer"
+                }
+            }
+        },
+        "result.validUpdatedResult": {
+            "type": "object",
+            "properties": {
+                "configSnapshots": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "resultFileIDs": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 }
             }
         },

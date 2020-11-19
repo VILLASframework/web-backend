@@ -101,3 +101,11 @@ type ResponseFiles struct {
 type ResponseFile struct {
 	file database.File
 }
+
+type ResponseResults struct {
+	results []database.Result
+}
+
+type ResponseResult struct {
+	result database.Result
+}

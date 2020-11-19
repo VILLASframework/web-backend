@@ -88,8 +88,10 @@ func (d *Dashboard) delete() error {
 	}
 
 	// remove association between Dashboard and Scenario
-	// Dashboard itself is not deleted from DB, it remains as "dangling"
 	err = db.Model(&sim).Association("Dashboards").Delete(d).Error
+
+	// Dashboard itself is not deleted from DB, it remains as "dangling"
+	// TODO: delete dashboard and associated widgets
 
 	return err
 }
