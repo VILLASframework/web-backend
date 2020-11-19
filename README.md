@@ -2,6 +2,7 @@
 
 [![pipeline status](https://git.rwth-aachen.de/acs/public/villas/web-backend-go/badges/master/pipeline.svg)](https://git.rwth-aachen.de/acs/public/villas/web-backend-go/commits/master)
 [![coverage report](https://git.rwth-aachen.de/acs/public/villas/web-backend-go/badges/master/coverage.svg)](https://git.rwth-aachen.de/acs/public/villas/web-backend-go/commits/master)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 ## Description
 This is a rewrite of the backend for the VILLASweb website in Go.
