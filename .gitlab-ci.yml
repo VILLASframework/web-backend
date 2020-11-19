@@ -3,8 +3,8 @@ services:
   - rabbitmq:latest
 
 variables:
-  DOCKER_IMAGE: ${CI_REGISTRY}/acs/public/villas/web-backend-go
-  DOCKER_IMAGE_DEV: ${CI_REGISTRY}/acs/public/villas/web-backend-go/dev
+  DOCKER_TAG: ${CI_COMMIT_SHORT_SHA}
+  DOCKER_IMAGE: ${CI_REGISTRY_IMAGE}
   POSTGRES_DB: testvillasdb
   POSTGRES_USER: villas
   POSTGRES_PASSWORD: villas
@@ -22,13 +22,12 @@ stages:
   - test
   - deploy
 
+
 # Stage: build
 ##############################################################################
 
 build:backend:
   stage: build
-  tags:
-    - docker
   image: ${GO_IMAGE}
   script:
     - go mod tidy
@@ -40,19 +39,12 @@ build:backend:
       - doc/api/swagger.json
       - doc/api/docs.go
 
-build:docker:
-  stage: build
-  tags:
-    - shell
-    - linux
-  script:
-    - docker build -t ${DOCKER_IMAGE}:${CI_COMMIT_SHORT_SHA} .
-
 # Stage: test
 ##############################################################################
 
 test:gotest:
   stage: test
+  image: ${GO_IMAGE}
   variables:
     DB_NAME: ${POSTGRES_DB}
     DB_HOST: ${POSTGRES_HOST}
@@ -62,9 +54,6 @@ test:gotest:
     MODE: test
     ADMIN_USER: User_0
     ADMIN_PASS: xyz789
-  tags:
-    - docker
-  image: ${GO_IMAGE}
   script:
     - go mod tidy
     - go test $(go list ./... )
@@ -77,6 +66,7 @@ test:gotest:
 
 test:database:
   stage: test
+  image: ${GO_IMAGE}
   variables:
     TEST_FOLDER: database
     MODE: test
@@ -84,9 +74,6 @@ test:database:
     DB_HOST: ${POSTGRES_HOST}
     DB_USER: ${POSTGRES_USER}
     DB_PASS: ${POSTGRES_PASSWORD}
-  tags:
-    - docker
-  image: ${GO_IMAGE}
   script:
     - go mod tidy
     - cd ${TEST_FOLDER}
@@ -139,19 +126,24 @@ test:healthz:
   variables:
     TEST_FOLDER: routes/healthz
 
+
 # Stage: deploy
 ##############################################################################
 
-deploy:docker:
+deploy:image:
   stage: deploy
-  before_script:
-    - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [ "" ]
   script:
-    - docker push ${DOCKER_IMAGE}:${CI_COMMIT_SHORT_SHA}
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"${CI_REGISTRY}\":{\"username\":\"${CI_REGISTRY_USER}\",\"password\":\"${CI_REGISTRY_PASSWORD}\"}}}" > /kaniko/.docker/config.json
+    - /kaniko/executor
+      --context ${CI_PROJECT_DIR}
+      --dockerfile ${CI_PROJECT_DIR}/Dockerfile
+      --destination ${DOCKER_IMAGE}:${DOCKER_TAG}
+      --snapshotMode=redo
+      --cache=true
+      --cache-ttl=12h
   dependencies:
-    - build:docker
-  only:
-    - master
-  tags:
-    - shell
-    - linux
+    - test:gotest
