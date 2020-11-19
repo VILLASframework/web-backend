@@ -13,7 +13,7 @@ func RegisterResultEndpoints(r *gin.RouterGroup) {
 	r.POST("", addResult)
 	r.PUT("/:resultID", updateResult)
 	r.GET("/:resultID", getResult)
-	r.DELETE("/:scenarioID", deleteResult)
+	r.DELETE("/:resultID", deleteResult)
 	r.POST("/:resultID/file", addResultFile)
 	r.GET("/:resultID/file/:fileID", getResultFile)
 	r.DELETE("/:resultID/file/:fileID", deleteResultFile)
