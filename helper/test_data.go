@@ -97,8 +97,8 @@ var propertiesB = json.RawMessage(`{"prop1" : "not so nice"}`)
 
 var ICA = database.InfrastructureComponent{
 	UUID:         "7be0322d-354e-431e-84bd-ae4c9633138b",
-	WebsocketURL: "https://villas-new.k8s.eonerc.rwth-aachen.de/ws/ws_sig",
-	APIURL:       "https://villas-new.k8s.eonerc.rwth-aachen.de/ws/api/v2",
+	WebsocketURL: "https://villas.k8s.eonerc.rwth-aachen.de/ws/ws_sig",
+	APIURL:       "https://villas.k8s.eonerc.rwth-aachen.de/ws/api/v2",
 	Type:         "villas-node",
 	Category:     "gateway",
 	Name:         "ACS Demo Signals",
