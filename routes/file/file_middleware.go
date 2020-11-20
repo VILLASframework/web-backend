@@ -29,7 +29,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func checkPermissions(c *gin.Context, operation database.CRUD) (bool, File) {
+func CheckPermissions(c *gin.Context, operation database.CRUD) (bool, File) {
 
 	var f File
 
@@ -44,7 +44,7 @@ func checkPermissions(c *gin.Context, operation database.CRUD) (bool, File) {
 		return false, f
 	}
 
-	err = f.byID(uint(fileID))
+	err = f.ByID(uint(fileID))
 	if helper.DBError(c, err) {
 		return false, f
 	}
