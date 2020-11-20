@@ -30,9 +30,9 @@ type Dashboard struct {
 	database.Dashboard
 }
 
-func (v *Dashboard) save() error {
+func (d *Dashboard) save() error {
 	db := database.GetDB()
-	err := db.Create(v).Error
+	err := db.Create(d).Error
 	return err
 }
 
@@ -90,8 +90,20 @@ func (d *Dashboard) delete() error {
 	// remove association between Dashboard and Scenario
 	err = db.Model(&sim).Association("Dashboards").Delete(d).Error
 
-	// Dashboard itself is not deleted from DB, it remains as "dangling"
-	// TODO: delete dashboard and associated widgets
+	// get all widgets of the dashboard
+	var widgets []database.Widget
+	err = db.Order("ID asc").Model(d).Related(&widgets, "Widgets").Error
+	if err != nil {
+		return err
+	}
+
+	// Delete widgets
+	for widget, _ := range widgets {
+		err = db.Delete(&widget).Error
+	}
+
+	// Delete dashboard
+	err = db.Delete(d).Error
 
 	return err
 }
