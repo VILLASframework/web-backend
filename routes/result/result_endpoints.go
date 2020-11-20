@@ -1,8 +1,32 @@
+/** Result package, endpoints.
+*
+* @author Sonja Happ <sonja.happ@eonerc.rwth-aachen.de>
+* @copyright 2014-2019, Institute for Automation of Complex Power Systems, EONERC
+* @license GNU General Public License (version 3)
+*
+* VILLASweb-backend-go
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*********************************************************************************/
+
 package result
 
 import (
+	"fmt"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/file"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/scenario"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -15,7 +39,6 @@ func RegisterResultEndpoints(r *gin.RouterGroup) {
 	r.GET("/:resultID", getResult)
 	r.DELETE("/:resultID", deleteResult)
 	r.POST("/:resultID/file", addResultFile)
-	r.GET("/:resultID/file/:fileID", getResultFile)
 	r.DELETE("/:resultID/file/:fileID", deleteResultFile)
 }
 
@@ -33,16 +56,16 @@ func RegisterResultEndpoints(r *gin.RouterGroup) {
 // @Security Bearer
 func getResults(c *gin.Context) {
 
-	ok, scenario := scenario.CheckPermissions(c, database.Read, "query", -1)
+	ok, sco := scenario.CheckPermissions(c, database.Read, "query", -1)
 	if !ok {
 		return
 	}
 
 	db := database.GetDB()
-	var result []database.Result
-	err := db.Order("ID asc").Model(scenario).Related(&result, "Results").Error
+	var results []database.Result
+	err := db.Order("ID asc").Model(sco).Related(&results, "Results").Error
 	if !helper.DBError(c, err) {
-		c.JSON(http.StatusOK, gin.H{"result": result})
+		c.JSON(http.StatusOK, gin.H{"results": results})
 	}
 }
 
@@ -109,7 +132,7 @@ func addResult(c *gin.Context) {
 // @Security Bearer
 func updateResult(c *gin.Context) {
 
-	ok, oldResult := CheckPermissions(c, database.Update, "path", -1)
+	ok, oldResult := checkPermissions(c, database.Update, "path", -1)
 	if !ok {
 		return
 	}
@@ -151,7 +174,7 @@ func updateResult(c *gin.Context) {
 // @Security Bearer
 func getResult(c *gin.Context) {
 
-	ok, result := CheckPermissions(c, database.Read, "path", -1)
+	ok, result := checkPermissions(c, database.Read, "path", -1)
 	if !ok {
 		return
 	}
@@ -160,7 +183,7 @@ func getResult(c *gin.Context) {
 }
 
 // deleteResult godoc
-// @Summary Delete a Result
+// @Summary Delete a Result incl. all result files
 // @ID deleteResult
 // @Tags results
 // @Produce json
@@ -173,7 +196,13 @@ func getResult(c *gin.Context) {
 // @Router /results/{resultID} [delete]
 // @Security Bearer
 func deleteResult(c *gin.Context) {
-	ok, result := CheckPermissions(c, database.Delete, "path", -1)
+	ok, result := checkPermissions(c, database.Delete, "path", -1)
+	if !ok {
+		return
+	}
+
+	// Check if user is allowed to modify scenario associated with result
+	ok, _ = scenario.CheckPermissions(c, database.Update, "body", int(result.ScenarioID))
 	if !ok {
 		return
 	}
@@ -210,49 +239,37 @@ func deleteResult(c *gin.Context) {
 // @Router /results/{resultID}/file [post]
 // @Security Bearer
 func addResultFile(c *gin.Context) {
-	ok, _ := CheckPermissions(c, database.Update, "path", -1)
+	ok, result := checkPermissions(c, database.Update, "path", -1)
 	if !ok {
 		return
 	}
 
-	// TODO check permissions of scenario first (file will be added to scenario)
-
-	// TODO add file to DB, associate with scenario and add file ID to result
-
-}
-
-// getResultFile godoc
-// @Summary Download a result file
-// @ID getResultFile
-// @Tags results
-// @Produce text/plain
-// @Produce text/csv
-// @Produce application/gzip
-// @Produce application/x-gtar
-// @Produce application/x-tar
-// @Produce application/x-ustar
-// @Produce application/zip
-// @Produce application/msexcel
-// @Produce application/xml
-// @Produce application/x-bag
-// @Success 200 {object} docs.ResponseFile "File that was requested"
-// @Failure 400 {object} docs.ResponseError "Bad request"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
-// @Param resultID path int true "Result ID"
-// @Param fileID path int true "ID of the file to download"
-// @Router /results/{resultID}/file/{fileID} [get]
-// @Security Bearer
-func getResultFile(c *gin.Context) {
-
-	// check access
-	ok, _ := CheckPermissions(c, database.Read, "path", -1)
+	// Check if user is allowed to modify scenario associated with result
+	ok, sco := scenario.CheckPermissions(c, database.Update, "body", int(result.ScenarioID))
 	if !ok {
 		return
 	}
 
-	// TODO download result file
+	// Extract file from POST request form
+	file_header, err := c.FormFile("file")
+	if err != nil {
+		helper.BadRequestError(c, fmt.Sprintf("Get form error: %s", err.Error()))
+		return
+	}
+
+	// save result file to DB and associate it with scenario
+	var newFile file.File
+	err = newFile.Register(file_header, sco.ID)
+	if helper.DBError(c, err) {
+		return
+	}
+
+	// add file ID to ResultFileIDs of Result
+	err = result.addResultFileID(newFile.File.ID)
+	if !helper.DBError(c, err) {
+		c.JSON(http.StatusOK, gin.H{"result": result.Result})
+	}
+
 }
 
 // deleteResultFile godoc
@@ -270,12 +287,34 @@ func getResultFile(c *gin.Context) {
 // @Router /results/{resultID}/file/{fileID} [delete]
 // @Security Bearer
 func deleteResultFile(c *gin.Context) {
-	// TODO check access to scenario (file deletion) first
 
 	// check access
-	ok, _ := CheckPermissions(c, database.Update, "path", -1)
+	ok, result := checkPermissions(c, database.Update, "path", -1)
 	if !ok {
 		return
+	}
+
+	ok, f := file.CheckPermissions(c, database.Delete)
+	if !ok {
+		return
+	}
+
+	// Check if user is allowed to modify scenario associated with result
+	ok, _ = scenario.CheckPermissions(c, database.Update, "body", int(result.ScenarioID))
+	if !ok {
+		return
+	}
+
+	// remove file ID from ResultFileIDs of Result
+	err := result.removeResultFileID(f.ID)
+	if helper.DBError(c, err) {
+		return
+	}
+
+	// Delete the file
+	err = f.Delete()
+	if !helper.DBError(c, err) {
+		c.JSON(http.StatusOK, gin.H{"result": result.Result})
 	}
 
 }
