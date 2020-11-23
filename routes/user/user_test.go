@@ -25,11 +25,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
+
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -128,6 +129,27 @@ func TestAuthenticate(t *testing.T) {
 		"/api/authenticate", "POST", helper.AdminCredentials)
 	assert.NoError(t, err)
 
+}
+
+func TestAuthenticateQueryToken(t *testing.T) {
+
+	database.DropTables()
+	database.MigrateModels()
+	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+
+	// authenticate as admin
+	token, err := helper.AuthenticateForTest(router,
+		"/api/authenticate", "POST", helper.AdminCredentials)
+	assert.NoError(t, err)
+
+	w := httptest.NewRecorder()
+
+	// Create the request
+	req, err := http.NewRequest("GET", "/api/users?token="+token, nil)
+	assert.NoError(t, err)
+
+	router.ServeHTTP(w, req)
+	assert.Equal(t, w.Code, 200)
 }
 
 func TestAddGetUser(t *testing.T) {
