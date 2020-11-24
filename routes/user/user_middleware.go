@@ -23,6 +23,7 @@ package user
 
 import (
 	"fmt"
+
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"github.com/dgrijalva/jwt-go"
@@ -52,7 +53,10 @@ func Authentication(unauthorized bool) gin.HandlerFunc {
 		// case of OAuth2 use the request.OAuth2Extractor and make sure
 		// that the argument is 'access-token' or provide a custom one
 		token, err := request.ParseFromRequest(ctx.Request,
-			request.AuthorizationHeaderExtractor,
+			request.MultiExtractor{
+				request.AuthorizationHeaderExtractor,
+				request.ArgumentExtractor{"token"},
+			},
 			func(token *jwt.Token) (interface{}, error) {
 
 				// validate alg for signing the jwt
