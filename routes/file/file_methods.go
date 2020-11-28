@@ -22,8 +22,7 @@
 package file
 
 import (
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/scenario"
-	"github.com/gin-gonic/gin"
+	"fmt"
 	"image"
 	_ "image/gif"
 	_ "image/jpeg"
@@ -33,9 +32,12 @@ import (
 	"mime/multipart"
 	"net/http"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"time"
+
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/scenario"
+	"github.com/gin-gonic/gin"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 )
@@ -62,20 +64,25 @@ func (f *File) save() error {
 
 func (f *File) download(c *gin.Context) error {
 
-	// create unique file name
-	filename := "file_" + strconv.FormatUint(uint64(f.ID), 10) + "_" + f.Name
-	// detect the content type of the file
-	contentType := http.DetectContentType(f.FileData)
-	//Seems this headers needed for some browsers (for example without this headers Chrome will download files as txt)
-	c.Header("Content-Description", "File Transfer")
-	c.Header("Content-Disposition", "attachment; filename="+filename)
-	c.Data(http.StatusOK, contentType, f.FileData)
+	if f.Key == "" {
+		// Seems this headers needed for some browsers (for example without this headers Chrome will download files as txt)
+		c.Header("Content-Description", "File Transfer")
+		c.Header("Content-Disposition", "attachment; filename="+f.Name)
+		c.Header("Expires", "")
+		c.Header("Cache-Control", "")
+		c.Data(http.StatusOK, f.Type, f.FileData)
+	} else {
+		url, err := f.getS3Url()
+		if err != nil {
+			return fmt.Errorf("Failed to presign S3 request: %s", err)
+		}
+		c.Redirect(http.StatusFound, url)
+	}
 
 	return nil
 }
 
 func (f *File) register(fileHeader *multipart.FileHeader, scenarioID uint) error {
-
 	// Obtain properties of file
 	f.Type = fileHeader.Header.Get("Content-Type")
 	f.Name = filepath.Base(fileHeader.Filename)
@@ -85,12 +92,21 @@ func (f *File) register(fileHeader *multipart.FileHeader, scenarioID uint) error
 
 	// set file data
 	fileContent, err := fileHeader.Open()
+	defer fileContent.Close()
 	if err != nil {
 		return err
 	}
 
-	f.FileData, err = ioutil.ReadAll(fileContent)
-	defer fileContent.Close()
+	bucket, err := configuration.GolbalConfig.String("s3.bucket")
+	if bucket == "" {
+		f.FileData, err = ioutil.ReadAll(fileContent)
+		f.Key = ""
+	} else {
+		err := f.putS3(fileContent)
+		if err != nil {
+			return fmt.Errorf("Failed to upload to S3 bucket: %s", err)
+		}
+	}
 
 	// Add image dimensions in case the file is an image
 	if strings.Contains(f.Type, "image") || strings.Contains(f.Type, "Image") {
@@ -100,13 +116,13 @@ func (f *File) register(fileHeader *multipart.FileHeader, scenarioID uint) error
 
 			imageConfig, _, err := image.DecodeConfig(fileContent)
 			if err != nil {
-				log.Println("Unable to decode image configuration: Dimensions of image file are not set: ", err)
-			} else {
-				f.ImageHeight = imageConfig.Height
-				f.ImageWidth = imageConfig.Width
+				return fmt.Errorf("Unable to decode image configuration: Dimensions of image file are not set: ", err)
 			}
+
+			f.ImageHeight = imageConfig.Height
+			f.ImageWidth = imageConfig.Width
 		} else {
-			log.Println("Error on setting file reader back to start of file, dimensions not updated:", err)
+			return fmt.Errorf("Error on setting file reader back to start of file, dimensions not updated: ", err)
 		}
 	}
 
@@ -134,49 +150,54 @@ func (f *File) update(fileHeader *multipart.FileHeader) error {
 
 	// set file data
 	fileContent, err := fileHeader.Open()
+	defer fileContent.Close()
 	if err != nil {
 		return err
 	}
 
-	fileData, err := ioutil.ReadAll(fileContent)
-	defer fileContent.Close()
+	bucket, err := configuration.GolbalConfig.String("s3.bucket")
+	if bucket == "" {
+		f.FileData, err = ioutil.ReadAll(fileContent)
+		f.Key = ""
+	} else {
+		err := f.putS3(fileContent)
+		if err != nil {
+			return fmt.Errorf("Failed to upload to S3 bucket: %s", err)
+		}
+	}
 
-	fileType := fileHeader.Header.Get("Content-Type")
-	imageHeight := f.ImageHeight
-	imageWidth := f.ImageWidth
+	f.Type = fileHeader.Header.Get("Content-Type")
+	f.Size = uint(fileHeader.Size)
+	f.Date = time.Now().String()
+	f.Name = filepath.Base(fileHeader.Filename)
 
 	// Update image dimensions in case the file is an image
-	if strings.Contains(fileType, "image") || strings.Contains(fileType, "Image") {
+	if strings.Contains(f.Type, "image") || strings.Contains(f.Type, "Image") {
 		// set the file reader back to the start of the file
 		_, err := fileContent.Seek(0, 0)
 		if err == nil {
 			imageConfig, _, err := image.DecodeConfig(fileContent)
 			if err != nil {
 				log.Println("Unable to decode image configuration: Dimensions of image file are not updated.", err)
-			} else {
-				imageHeight = imageConfig.Height
-				imageWidth = imageConfig.Width
 			}
+
+			f.ImageHeight = imageConfig.Height
+			f.ImageWidth = imageConfig.Width
 		} else {
 			log.Println("Error on setting file reader back to start of file, dimensions not updated::", err)
 		}
 	} else {
-		imageWidth = 0
-		imageHeight = 0
+		f.ImageWidth = 0
+		f.ImageHeight = 0
 	}
 
-	db := database.GetDB()
-	err = db.Model(f).Updates(map[string]interface{}{
-		"Size":        uint(fileHeader.Size),
-		"FileData":    fileData,
-		"Date":        time.Now().String(),
-		"Name":        filepath.Base(fileHeader.Filename),
-		"Type":        fileType,
-		"ImageHeight": imageHeight,
-		"ImageWidth":  imageWidth,
-	}).Error
+	// Add File object with parameters to DB
+	err = f.save()
+	if err != nil {
+		return err
+	}
 
-	return err
+	return nil
 }
 
 func (f *File) delete() error {
@@ -189,6 +210,12 @@ func (f *File) delete() error {
 	if err != nil {
 		return err
 	}
+
+	// delete file from s3 bucket
+	if f.Key != "" {
+		f.deleteS3()
+	}
+
 	err = db.Model(&so).Association("Files").Delete(f).Error
 	if err != nil {
 		return err
