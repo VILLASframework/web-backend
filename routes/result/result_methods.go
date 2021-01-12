@@ -94,11 +94,11 @@ func (r *Result) delete() error {
 	err = db.Model(&sco).Association("Results").Delete(r).Error
 
 	// Delete result files
-	for id, _ := range r.ResultFileIDs {
+	for _, fileid := range r.ResultFileIDs {
 		var f file.File
-		err := f.ByID(uint(id))
+		err := f.ByID(uint(fileid))
 		if err != nil {
-			log.Println("Unable to delete file with ID ", id, err)
+			log.Println("Unable to delete file with ID ", fileid, err)
 			continue
 		}
 		err = f.Delete()

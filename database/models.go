@@ -219,7 +219,7 @@ type File struct {
 type Result struct {
 	Model
 	// JSON snapshots of component configurations used to generate results
-	ConfigSnapshots []postgres.Jsonb `json:"configSnapshots"`
+	ConfigSnapshots postgres.Jsonb `json:"configSnapshots"`
 	// Description of results
 	Description string `json:"description"`
 	// ID of Scenario to which result belongs

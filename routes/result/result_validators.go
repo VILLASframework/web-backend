@@ -23,23 +23,25 @@
 package result
 
 import (
+	"encoding/json"
 	"github.com/jinzhu/gorm/dialects/postgres"
+	"github.com/nsf/jsondiff"
 	"gopkg.in/go-playground/validator.v9"
 )
 
 var validate *validator.Validate
 
 type validNewResult struct {
-	Description     string           `form:"Description" validate:"omitempty"`
-	ResultFileIDs   []int64          `form:"ResultFileIDs" validate:"omitempty"`
-	ConfigSnapshots []postgres.Jsonb `form:"ConfigSnapshots" validate:"required"`
-	ScenarioID      uint             `form:"ScenarioID" validate:"required"`
+	Description     string         `form:"Description" validate:"omitempty"`
+	ResultFileIDs   []int64        `form:"ResultFileIDs" validate:"omitempty"`
+	ConfigSnapshots postgres.Jsonb `form:"ConfigSnapshots" validate:"required"`
+	ScenarioID      uint           `form:"ScenarioID" validate:"required"`
 }
 
 type validUpdatedResult struct {
-	Description     string           `form:"Description" validate:"omitempty" json:"description"`
-	ResultFileIDs   []int64          `form:"ResultFileIDs" validate:"omitempty" json:"resultFileIDs"`
-	ConfigSnapshots []postgres.Jsonb `form:"ConfigSnapshots" validate:"omitempty" json:"configSnapshots"`
+	Description     string         `form:"Description" validate:"omitempty" json:"description"`
+	ResultFileIDs   []int64        `form:"ResultFileIDs" validate:"omitempty" json:"resultFileIDs"`
+	ConfigSnapshots postgres.Jsonb `form:"ConfigSnapshots" validate:"omitempty" json:"configSnapshots"`
 }
 
 type addResultRequest struct {
@@ -78,8 +80,18 @@ func (r *updateResultRequest) updatedResult(oldResult Result) Result {
 	s := oldResult
 
 	s.Result.Description = r.Result.Description
-	s.ConfigSnapshots = r.Result.ConfigSnapshots
 	s.ResultFileIDs = r.Result.ResultFileIDs
+
+	// only update snapshots if not empty
+	var emptyJson postgres.Jsonb
+	// Serialize empty json and params
+	emptyJson_ser, _ := json.Marshal(emptyJson)
+	configSnapshots_ser, _ := json.Marshal(r.Result.ConfigSnapshots)
+	opts := jsondiff.DefaultConsoleOptions()
+	diff, _ := jsondiff.Compare(emptyJson_ser, configSnapshots_ser, &opts)
+	if diff.String() != "FullMatch" {
+		s.ConfigSnapshots = r.Result.ConfigSnapshots
+	}
 
 	return s
 }
