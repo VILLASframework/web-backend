@@ -1,4 +1,4 @@
-/** File package, middleware.
+/** Result package, middleware.
 *
 * @author Sonja Happ <sonja.happ@eonerc.rwth-aachen.de>
 * @copyright 2014-2019, Institute for Automation of Complex Power Systems, EONERC
@@ -19,7 +19,8 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
-package file
+
+package result
 
 import (
 	"fmt"
@@ -29,30 +30,30 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func CheckPermissions(c *gin.Context, operation database.CRUD) (bool, File) {
+func checkPermissions(c *gin.Context, operation database.CRUD, resultIDSource string, resultIDBody int) (bool, Result) {
 
-	var f File
+	var result Result
 
-	err := database.ValidateRole(c, database.ModelFile, operation)
+	err := database.ValidateRole(c, database.ModelResult, operation)
 	if err != nil {
-		helper.UnprocessableEntityError(c, fmt.Sprintf("Access denied (role validation of file failed): %v", err.Error()))
-		return false, f
+		helper.UnprocessableEntityError(c, fmt.Sprintf("Access denied (role validation failed): %v", err.Error()))
+		return false, result
 	}
 
-	fileID, err := helper.GetIDOfElement(c, "fileID", "path", -1)
+	resultID, err := helper.GetIDOfElement(c, "resultID", resultIDSource, resultIDBody)
 	if err != nil {
-		return false, f
+		return false, result
 	}
 
-	err = f.ByID(uint(fileID))
+	err = result.ByID(uint(resultID))
 	if helper.DBError(c, err) {
-		return false, f
+		return false, result
 	}
 
-	ok, _ := scenario.CheckPermissions(c, operation, "body", int(f.ScenarioID))
+	ok, _ := scenario.CheckPermissions(c, operation, "body", int(result.ScenarioID))
 	if !ok {
-		return false, f
+		return false, result
 	}
 
-	return true, f
+	return true, result
 }

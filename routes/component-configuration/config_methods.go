@@ -131,7 +131,6 @@ func (m *ComponentConfiguration) delete() error {
 	}
 
 	// remove association between ComponentConfiguration and Scenario
-	// ComponentConfiguration itself is not deleted from DB, it remains as "dangling"
 	err = db.Model(&so).Association("ComponentConfigurations").Delete(m).Error
 	if err != nil {
 		return err
@@ -141,6 +140,32 @@ func (m *ComponentConfiguration) delete() error {
 	err = db.Model(&ic).Association("ComponentConfigurations").Delete(m).Error
 	if err != nil {
 		return err
+	}
+
+	// Get Signals of InputMapping and delete them
+	var InputMappingSignals []database.Signal
+	err = db.Model(m).Related(&InputMappingSignals, "InputMapping").Error
+	if err != nil {
+		return err
+	}
+	for sig, _ := range InputMappingSignals {
+		err = db.Delete(&sig).Error
+		if err != nil {
+			return err
+		}
+	}
+
+	// Get Signals of OutputMapping and delete them
+	var OutputMappingSignals []database.Signal
+	err = db.Model(m).Related(&OutputMappingSignals, "OutputMapping").Error
+	if err != nil {
+		return err
+	}
+	for sig, _ := range OutputMappingSignals {
+		err = db.Delete(&sig).Error
+		if err != nil {
+			return err
+		}
 	}
 
 	// delete component configuration

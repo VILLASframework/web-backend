@@ -104,7 +104,7 @@ func addFile(c *gin.Context) {
 	}
 
 	var newFile File
-	err = newFile.register(file_header, so.ID)
+	err = newFile.Register(file_header, so.ID)
 	if !helper.DBError(c, err) {
 		c.JSON(http.StatusOK, gin.H{"file": newFile.File})
 	}
@@ -116,6 +116,15 @@ func addFile(c *gin.Context) {
 // @ID getFile
 // @Tags files
 // @Produce text/plain
+// @Produce text/csv
+// @Produce application/gzip
+// @Produce application/x-gtar
+// @Produce application/x-tar
+// @Produce application/x-ustar
+// @Produce application/zip
+// @Produce application/msexcel
+// @Produce application/xml
+// @Produce application/x-bag
 // @Produce png
 // @Produce jpeg
 // @Produce gif
@@ -132,7 +141,7 @@ func addFile(c *gin.Context) {
 func getFile(c *gin.Context) {
 
 	// check access
-	ok, f := checkPermissions(c, database.Read)
+	ok, f := CheckPermissions(c, database.Read)
 	if !ok {
 		return
 	}
@@ -165,7 +174,7 @@ func getFile(c *gin.Context) {
 func updateFile(c *gin.Context) {
 
 	// check access
-	ok, f := checkPermissions(c, database.Update)
+	ok, f := CheckPermissions(c, database.Update)
 	if !ok {
 		return
 	}
@@ -199,12 +208,12 @@ func updateFile(c *gin.Context) {
 func deleteFile(c *gin.Context) {
 
 	// check access
-	ok, f := checkPermissions(c, database.Delete)
+	ok, f := CheckPermissions(c, database.Delete)
 	if !ok {
 		return
 	}
 
-	err := f.delete()
+	err := f.Delete()
 	if !helper.DBError(c, err) {
 		c.JSON(http.StatusOK, gin.H{"file": f.File})
 	}

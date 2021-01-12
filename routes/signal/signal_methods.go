@@ -107,7 +107,6 @@ func (s *Signal) delete() error {
 	}
 
 	// remove association between Signal and ComponentConfiguration
-	// Signal itself is not deleted from DB, it remains as "dangling"
 	if s.Direction == "in" {
 		err = db.Model(&m).Association("InputMapping").Delete(s).Error
 		if err != nil {
@@ -117,6 +116,9 @@ func (s *Signal) delete() error {
 		// Reduce length of mapping by 1
 		var newInputLength = m.InputLength - 1
 		err = db.Model(m).Update("InputLength", newInputLength).Error
+		if err != nil {
+			return err
+		}
 
 	} else {
 		err = db.Model(&m).Association("OutputMapping").Delete(s).Error
@@ -127,7 +129,13 @@ func (s *Signal) delete() error {
 		// Reduce length of mapping by 1
 		var newOutputLength = m.OutputLength - 1
 		err = db.Model(m).Update("OutputLength", newOutputLength).Error
+		if err != nil {
+			return err
+		}
 	}
+
+	// Delete signal
+	err = db.Delete(s).Error
 
 	return err
 }

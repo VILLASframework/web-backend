@@ -44,7 +44,7 @@ type File struct {
 	database.File
 }
 
-func (f *File) byID(id uint) error {
+func (f *File) ByID(id uint) error {
 	db := database.GetDB()
 	err := db.Find(f, id).Error
 	if err != nil {
@@ -74,7 +74,7 @@ func (f *File) download(c *gin.Context) error {
 	return nil
 }
 
-func (f *File) register(fileHeader *multipart.FileHeader, scenarioID uint) error {
+func (f *File) Register(fileHeader *multipart.FileHeader, scenarioID uint) error {
 
 	// Obtain properties of file
 	f.Type = fileHeader.Header.Get("Content-Type")
@@ -179,7 +179,7 @@ func (f *File) update(fileHeader *multipart.FileHeader) error {
 	return err
 }
 
-func (f *File) delete() error {
+func (f *File) Delete() error {
 
 	db := database.GetDB()
 

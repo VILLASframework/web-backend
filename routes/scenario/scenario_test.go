@@ -500,7 +500,12 @@ func TestAddUserToScenario(t *testing.T) {
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// Compare resp to userB
-	err = helper.CompareResponse(resp, helper.KeyModels{"user": helper.UserB})
+	userB := UserRequest{
+		Username: helper.UserB.Username,
+		Mail:     helper.UserB.Mail,
+		Role:     helper.UserB.Role,
+	}
+	err = helper.CompareResponse(resp, helper.KeyModels{"user": userB})
 	assert.NoError(t, err)
 
 	// Count AGAIN the number of all the users returned for newScenario
@@ -663,8 +668,13 @@ func TestRemoveUserFromScenario(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
-	// Compare DELETE's response with UserB
-	err = helper.CompareResponse(resp, helper.KeyModels{"user": helper.UserC})
+	// Compare DELETE's response with UserC's data
+	userC := UserRequest{
+		Username: helper.UserC.Username,
+		Mail:     helper.UserC.Mail,
+		Role:     helper.UserC.Role,
+	}
+	err = helper.CompareResponse(resp, helper.KeyModels{"user": userC})
 	assert.NoError(t, err)
 
 	// Count AGAIN the number of all the users returned for newScenario

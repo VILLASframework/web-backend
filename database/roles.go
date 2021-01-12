@@ -45,6 +45,7 @@ const ModelWidget = ModelName("widget")
 const ModelComponentConfiguration = ModelName("component-configuration")
 const ModelSignal = ModelName("signal")
 const ModelFile = ModelName("file")
+const ModelResult = ModelName("result")
 
 type CRUD string
 
@@ -83,6 +84,7 @@ var Roles = RoleActions{
 		ModelDashboard:                     crud,
 		ModelSignal:                        crud,
 		ModelFile:                          crud,
+		ModelResult:                        crud,
 	},
 	"User": {
 		ModelUser:                          _ru_,
@@ -95,6 +97,7 @@ var Roles = RoleActions{
 		ModelDashboard:                     crud,
 		ModelSignal:                        crud,
 		ModelFile:                          crud,
+		ModelResult:                        crud,
 	},
 	"Guest": {
 		ModelScenario:                      _r__,
@@ -107,6 +110,7 @@ var Roles = RoleActions{
 		ModelUsers:                         none,
 		ModelSignal:                        _r__,
 		ModelFile:                          _r__,
+		ModelResult:                        none,
 	},
 }
 
