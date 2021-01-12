@@ -789,6 +789,15 @@
                 ],
                 "produces": [
                     "text/plain",
+                    "text/csv",
+                    "application/gzip",
+                    "application/x-gtar",
+                    "application/x-tar",
+                    "application/x-ustar",
+                    "application/zip",
+                    "application/msexcel",
+                    "application/xml",
+                    "application/x-bag",
                     "image/png",
                     "image/jpeg",
                     "image/gif",
@@ -1674,7 +1683,7 @@
                 "tags": [
                     "results"
                 ],
-                "summary": "Delete a Result",
+                "summary": "Delete a Result incl. all result files",
                 "operationId": "deleteResult",
                 "parameters": [
                     {
@@ -1797,78 +1806,6 @@
             }
         },
         "/results/{resultID}/file/{fileID}": {
-            "get": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "produces": [
-                    "text/plain",
-                    "text/csv",
-                    "application/gzip",
-                    "application/x-gtar",
-                    "application/x-tar",
-                    "application/x-ustar",
-                    "application/zip",
-                    "application/msexcel",
-                    "application/xml",
-                    "application/x-bag"
-                ],
-                "tags": [
-                    "results"
-                ],
-                "summary": "Download a result file",
-                "operationId": "getResultFile",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Result ID",
-                        "name": "resultID",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "ID of the file to download",
-                        "name": "fileID",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "File that was requested",
-                        "schema": {
-                            "$ref": "#/definitions/docs.ResponseFile"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request",
-                        "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
-                        }
-                    },
-                    "404": {
-                        "description": "Not found",
-                        "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
-                        }
-                    },
-                    "422": {
-                        "description": "Unprocessable entity",
-                        "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
-                        }
-                    }
-                }
-            },
             "delete": {
                 "security": [
                     {
