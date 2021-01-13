@@ -144,6 +144,8 @@ func TestScenarioAssociations(t *testing.T) {
 	dashboardB := Dashboard{}
 	fileA := File{}
 	fileB := File{}
+	resultA := Result{}
+	resultB := Result{}
 
 	// add scenarios to DB
 	assert.NoError(t, DBpool.Create(&scenarioA).Error)
@@ -165,6 +167,10 @@ func TestScenarioAssociations(t *testing.T) {
 	assert.NoError(t, DBpool.Create(&fileA).Error)
 	assert.NoError(t, DBpool.Create(&fileB).Error)
 
+	// add results to DB
+	assert.NoError(t, DBpool.Create(&resultA).Error)
+	assert.NoError(t, DBpool.Create(&resultB).Error)
+
 	// add many-to-many associations between users and scenarios
 	// User HM Scenarios, Scenario HM Users (Many-to-Many)
 	assert.NoError(t, DBpool.Model(&scenarioA).Association("Users").Append(&userA).Error)
@@ -183,6 +189,10 @@ func TestScenarioAssociations(t *testing.T) {
 	// Scenario HM Dashboards
 	assert.NoError(t, DBpool.Model(&scenarioA).Association("Dashboards").Append(&dashboardA).Error)
 	assert.NoError(t, DBpool.Model(&scenarioA).Association("Dashboards").Append(&dashboardB).Error)
+
+	// Scenario HM Results
+	assert.NoError(t, DBpool.Model(&scenarioA).Association("Results").Append(&resultA).Error)
+	assert.NoError(t, DBpool.Model(&scenarioA).Association("Results").Append(&resultB).Error)
 
 	var scenario1 Scenario
 	assert.NoError(t, DBpool.Find(&scenario1, 1).Error, fmt.Sprintf("Find Scenario with ID=1"))
@@ -217,6 +227,14 @@ func TestScenarioAssociations(t *testing.T) {
 	if len(files) != 2 {
 		assert.Fail(t, "Scenario Associations",
 			"Expected to have %v Files. Has %v.", 2, len(files))
+	}
+
+	// Get results of scenario1
+	var results []File
+	assert.NoError(t, DBpool.Model(&scenario1).Related(&results, "Results").Error)
+	if len(files) != 2 {
+		assert.Fail(t, "Scenario Associations",
+			"Expected to have %v Results. Has %v.", 2, len(results))
 	}
 }
 

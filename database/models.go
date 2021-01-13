@@ -33,8 +33,8 @@ import (
 // except the json tags that are needed for serializing the models
 type Model struct {
 	ID        uint       `json:"id,omitempty" gorm:"primary_key:true"`
-	CreatedAt time.Time  `json:"-"`
-	UpdatedAt time.Time  `json:"-"`
+	CreatedAt time.Time  `json:"createdAt"`
+	UpdatedAt time.Time  `json:"updatedAt"`
 	DeletedAt *time.Time `json:"-" sql:"index"`
 }
 
@@ -72,6 +72,8 @@ type Scenario struct {
 	Dashboards []Dashboard `json:"-" gorm:"foreignkey:ScenarioID" `
 	// Files that belong to the Scenario (for example images, models, etc.)
 	Files []File `json:"-" gorm:"foreignkey:ScenarioID"`
+	// Results that belong to the Scenario
+	Results []Result `json:"-" gorm:"foreignkey:ScenarioID"`
 }
 
 // ComponentConfiguration data model
@@ -214,4 +216,17 @@ type File struct {
 	ImageHeight int `json:"imageHeight" gorm:"default:0"`
 	// Width of an image file in pixels (optional)
 	ImageWidth int `json:"imageWidth" gorm:"default:0"`
+}
+
+// Result data model
+type Result struct {
+	Model
+	// JSON snapshots of component configurations used to generate results
+	ConfigSnapshots postgres.Jsonb `json:"configSnapshots"`
+	// Description of results
+	Description string `json:"description"`
+	// ID of Scenario to which result belongs
+	ScenarioID uint `json:"scenarioID"`
+	// File IDs associated with result
+	ResultFileIDs pq.Int64Array `json:"resultFileIDs" gorm:"type:integer[]"`
 }

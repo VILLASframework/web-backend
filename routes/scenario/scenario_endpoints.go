@@ -59,7 +59,6 @@ func getScenarios(c *gin.Context) {
 
 	// ATTENTION: do not use c.GetInt (common.UserIDCtx) since user_id is of type uint and not int
 	userID, _ := c.Get(database.UserIDCtx)
-	userRole, _ := c.Get(database.UserRoleCtx)
 
 	var u user.User
 	err := u.ByID(userID.(uint))
@@ -70,7 +69,7 @@ func getScenarios(c *gin.Context) {
 	// get all scenarios for the user who issues the request
 	db := database.GetDB()
 	var scenarios []database.Scenario
-	if userRole == "Admin" { // Admin can see all scenarios
+	if u.Role == "Admin" { // Admin can see all scenarios
 		err = db.Order("ID asc").Find(&scenarios).Error
 		if helper.DBError(c, err) {
 			return

@@ -39,6 +39,7 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/healthz"
 	infrastructure_component "git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/infrastructure-component"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/metrics"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/result"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/scenario"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/signal"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/user"
@@ -68,6 +69,7 @@ func RegisterEndpoints(router *gin.Engine, api *gin.RouterGroup) {
 	file.RegisterFileEndpoints(api.Group("/files"))
 	user.RegisterUserEndpoints(api.Group("/users"))
 	infrastructure_component.RegisterICEndpoints(api.Group("/ic"))
+	result.RegisterResultEndpoints(api.Group("/results"))
 
 	router.GET("swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 

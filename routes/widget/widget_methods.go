@@ -96,10 +96,13 @@ func (w *Widget) delete() error {
 	}
 
 	// remove association between Dashboard and Widget
-	// Widget itself is not deleted from DB, it remains as "dangling"
 	err = db.Model(&dab).Association("Widgets").Delete(w).Error
+	if err != nil {
+		return err
+	}
 
-	// TODO: What about files that belong to a widget? Keep them or remove them here?
+	// Delete Widget
+	err = db.Delete(w).Error
 
 	return err
 }

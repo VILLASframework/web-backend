@@ -251,7 +251,7 @@ var FileD = database.File{
 var customPropertiesBox = json.RawMessage(`{"border_color" : "#4287f5", "border_color_opacity": 1, "background_color" : "#961520", "background_color_opacity" : 1}`)
 var customPropertiesSlider = json.RawMessage(`{"default_value" : 0, "orientation" : 0, "rangeUseMinMax": false, "rangeMin" : 0, "rangeMax": 200, "rangeUseMinMax" : true, "showUnit": true, "continous_update": false, "value": "", "resizeLeftRightLock": false, "resizeTopBottomLock": true, "step": 0.1 }`)
 var customPropertiesLabel = json.RawMessage(`{"textSize" : "20", "fontColor" : "#4287f5", "fontColor_opacity": 1}`)
-var customPropertiesButton = json.RawMessage(`{"pressed": false, "toggle" : false, "on_value" : 1, "off_value" : 0, "background_color": "#961520", "font_color": "#4287f5"}`)
+var customPropertiesButton = json.RawMessage(`{"pressed": false, "toggle" : false, "on_value" : 1, "off_value" : 0, "background_color": "#961520", "font_color": "#4287f5", "border_color": "#4287f5", "background_color_opacity": 1}`)
 var customPropertiesLamp = json.RawMessage(`{"signal" : 0, "on_color" : "#4287f5", "off_color": "#961520", "threshold" : 0.5, "on_color_opacity": 1, "off_color_opacity": 1}`)
 
 var WidgetA = database.Widget{

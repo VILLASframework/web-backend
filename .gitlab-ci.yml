@@ -22,11 +22,10 @@ stages:
   - test
   - deploy
 
-
 # Stage: build
 ##############################################################################
 
-build:backend:
+build:
   stage: build
   image: ${GO_IMAGE}
   script:
@@ -42,7 +41,7 @@ build:backend:
 # Stage: test
 ##############################################################################
 
-test:gotest:
+test:
   stage: test
   image: ${GO_IMAGE}
   variables:
@@ -62,75 +61,13 @@ test:gotest:
        -coverprofile ./testcover.txt
     - go tool cover -func=testcover.txt
   dependencies:
-    - build:backend
-
-test:database:
-  stage: test
-  image: ${GO_IMAGE}
-  variables:
-    TEST_FOLDER: database
-    MODE: test
-    DB_NAME: ${POSTGRES_DB}
-    DB_HOST: ${POSTGRES_HOST}
-    DB_USER: ${POSTGRES_USER}
-    DB_PASS: ${POSTGRES_PASSWORD}
-  script:
-    - go mod tidy
-    - cd ${TEST_FOLDER}
-    - go test -v
-  dependencies:
-    - build:backend
-
-test:scenario:
-  extends: test:database
-  variables:
-    TEST_FOLDER: routes/scenario
-
-test:component-configuration:
-  extends: test:database
-  variables:
-    TEST_FOLDER: routes/component-configuration
-
-test:signal:
-  extends: test:database
-  variables:
-    TEST_FOLDER: routes/signal
-
-test:dashboard:
-  extends: test:database
-  variables:
-    TEST_FOLDER: routes/dashboard
-
-test:widget:
-  extends: test:database
-  variables:
-    TEST_FOLDER: routes/widget
-
-test:infrastructure-component:
-  extends: test:database
-  variables:
-    TEST_FOLDER: routes/infrastructure-component
-
-test:file:
-  extends: test:database
-  variables:
-    TEST_FOLDER: routes/file
-
-test:user:
-  extends: test:database
-  variables:
-    TEST_FOLDER: routes/user
-
-test:healthz:
-  extends: test:database
-  variables:
-    TEST_FOLDER: routes/healthz
+    - build
 
 
 # Stage: deploy
 ##############################################################################
 
-deploy:image:
+deploy:
   stage: deploy
   image:
     name: gcr.io/kaniko-project/executor:debug
@@ -146,4 +83,4 @@ deploy:image:
       --cache=true
       --cache-ttl=12h
   dependencies:
-    - test:gotest
+    - test
