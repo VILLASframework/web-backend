@@ -38,16 +38,22 @@ import (
 // Global session
 var s3Session *session.Session = nil
 
-func getS3Session() (*session.Session, error) {
+func getS3Session() (*session.Session, string, error) {
+
+	bucket, err := configuration.GolbalConfig.String("s3.bucket")
+	if err != nil || bucket == "" {
+		return nil, "", fmt.Errorf("no S3 bucket configured: %s", err)
+	}
+
 	if s3Session == nil {
 		var err error
 		s3Session, err = createS3Session()
 		if err != nil {
-			return nil, err
+			return nil, "", err
 		}
 	}
 
-	return s3Session, nil
+	return s3Session, bucket, nil
 }
 
 func createS3Session() (*session.Session, error) {
@@ -65,7 +71,7 @@ func createS3Session() (*session.Session, error) {
 		},
 	)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create session: %s", err)
 	}
 
 	return sess, nil
@@ -73,15 +79,10 @@ func createS3Session() (*session.Session, error) {
 
 func (f *File) putS3(fileContent io.Reader) error {
 
-	bucket, err := configuration.GolbalConfig.String("s3.bucket")
-	if err != nil || bucket == "" {
-		return fmt.Errorf("No S3 bucket configured")
-	}
-
 	// The session the S3 Uploader will use
-	sess, err := getS3Session()
+	sess, bucket, err := getS3Session()
 	if err != nil {
-		return fmt.Errorf("Failed to create session: %s", err)
+		return err
 	}
 
 	// Create an uploader with the session and default options
@@ -97,22 +98,18 @@ func (f *File) putS3(fileContent io.Reader) error {
 		Body:   fileContent,
 	})
 	if err != nil {
-		return fmt.Errorf("Failed to upload file, %v", err)
+		return fmt.Errorf("failed to upload file, %v", err)
 	}
 
 	return nil
 }
 
 func (f *File) getS3Url() (string, error) {
-	bucket, err := configuration.GolbalConfig.String("s3.bucket")
-	if err != nil || bucket == "" {
-		return "", fmt.Errorf("No S3 bucket configured")
-	}
 
 	// The session the S3 Uploader will use
-	sess, err := getS3Session()
+	sess, bucket, err := getS3Session()
 	if err != nil {
-		return "", fmt.Errorf("Failed to create session: %s", err)
+		return "", err
 	}
 
 	// Create S3 service client
@@ -138,15 +135,11 @@ func (f *File) getS3Url() (string, error) {
 }
 
 func (f *File) deleteS3() error {
-	bucket, err := configuration.GolbalConfig.String("s3.bucket")
-	if err != nil || bucket == "" {
-		return fmt.Errorf("No S3 bucket configured")
-	}
 
 	// The session the S3 Uploader will use
-	sess, err := getS3Session()
+	sess, bucket, err := getS3Session()
 	if err != nil {
-		return fmt.Errorf("Failed to create session: %s", err)
+		return err
 	}
 
 	// Create S3 service client

@@ -97,14 +97,14 @@ func addFile(c *gin.Context) {
 	}
 
 	// Extract file from POST request form
-	file_header, err := c.FormFile("file")
+	fileHeader, err := c.FormFile("file")
 	if err != nil {
 		helper.BadRequestError(c, fmt.Sprintf("Get form error: %s", err.Error()))
 		return
 	}
 
 	var newFile File
-	err = newFile.Register(file_header, so.ID)
+	err = newFile.Register(fileHeader, so.ID)
 	if !helper.DBError(c, err) {
 		c.JSON(http.StatusOK, gin.H{"file": newFile.File})
 	}

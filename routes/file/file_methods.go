@@ -74,7 +74,7 @@ func (f *File) download(c *gin.Context) error {
 	} else {
 		url, err := f.getS3Url()
 		if err != nil {
-			return fmt.Errorf("Failed to presign S3 request: %s", err)
+			return fmt.Errorf("failed to presign S3 request: %s", err)
 		}
 		c.Redirect(http.StatusFound, url)
 	}
@@ -93,10 +93,10 @@ func (f *File) Register(fileHeader *multipart.FileHeader, scenarioID uint) error
 
 	// set file data
 	fileContent, err := fileHeader.Open()
-	defer fileContent.Close()
 	if err != nil {
 		return err
 	}
+	defer fileContent.Close()
 
 	bucket, err := configuration.GolbalConfig.String("s3.bucket")
 	if bucket == "" {
@@ -105,7 +105,7 @@ func (f *File) Register(fileHeader *multipart.FileHeader, scenarioID uint) error
 	} else {
 		err := f.putS3(fileContent)
 		if err != nil {
-			return fmt.Errorf("Failed to upload to S3 bucket: %s", err)
+			return fmt.Errorf("failed to upload to S3 bucket: %s", err)
 		}
 	}
 
@@ -151,10 +151,10 @@ func (f *File) update(fileHeader *multipart.FileHeader) error {
 
 	// set file data
 	fileContent, err := fileHeader.Open()
-	defer fileContent.Close()
 	if err != nil {
 		return err
 	}
+	defer fileContent.Close()
 
 	bucket, err := configuration.GolbalConfig.String("s3.bucket")
 	if bucket == "" {
@@ -163,7 +163,7 @@ func (f *File) update(fileHeader *multipart.FileHeader) error {
 	} else {
 		err := f.putS3(fileContent)
 		if err != nil {
-			return fmt.Errorf("Failed to upload to S3 bucket: %s", err)
+			return fmt.Errorf("failed to upload to S3 bucket: %s", err)
 		}
 	}
 
@@ -193,12 +193,19 @@ func (f *File) update(fileHeader *multipart.FileHeader) error {
 	}
 
 	// Add File object with parameters to DB
-	err = f.save()
-	if err != nil {
-		return err
-	}
+	db := database.GetDB()
+	err = db.Model(f).Updates(map[string]interface{}{
+		"Size":        f.Size,
+		"FileData":    f.FileData,
+		"Date":        f.Date,
+		"Name":        f.Name,
+		"Type":        f.Type,
+		"ImageHeight": f.ImageHeight,
+		"ImageWidth":  f.ImageWidth,
+		"Key":         f.Key,
+	}).Error
 
-	return nil
+	return err
 }
 
 func (f *File) Delete() error {
@@ -214,7 +221,10 @@ func (f *File) Delete() error {
 
 	// delete file from s3 bucket
 	if f.Key != "" {
-		f.deleteS3()
+		err = f.deleteS3()
+		if err != nil {
+			return err
+		}
 	}
 
 	err = db.Model(&so).Association("Files").Delete(f).Error
