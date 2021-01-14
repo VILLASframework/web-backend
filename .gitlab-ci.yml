@@ -19,7 +19,6 @@ variables:
   AMQP_PASS: villas
   MINIO_ACCESS_KEY: minio-villas
   MINIO_ACCESS_SECRET: minio-villas
-  MINIO_DOMAIN: localhost
   AWS_ACCESS_KEY_ID: ${MINIO_ACCESS_KEY}
   AWS_SECRET_ACCESS_KEY: ${MINIO_ACCESS_SECRET}
   S3_BUCKET: villas-web
