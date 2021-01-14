@@ -1,7 +1,7 @@
 services:
   - postgres:latest
   - rabbitmq:latest
-  - name: minio/minio
+  - name: minio/minio:RELEASE.2020-10-28T08-16-50Z.e0655e24f
     command: ['server', '/minio']
     alias: minio
 
@@ -17,13 +17,17 @@ variables:
   AMQP_HOST: rabbitmq:5672
   AMQP_USER: villas
   AMQP_PASS: villas
-  MINIO_ACCESS_KEY: minio-villas
-  MINIO_ACCESS_SECRET: minio-villas
+  MINIO_ROOT_USER: minio-villas
+  MINIO_ROOT_ACCESS: minio-villas
+  MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
+  MINIO_ACCESS_SECRET: ${MINIO_ROOT_ACCESS}
+  MINIO_DOMAIN: localhost
   AWS_ACCESS_KEY_ID: ${MINIO_ACCESS_KEY}
   AWS_SECRET_ACCESS_KEY: ${MINIO_ACCESS_SECRET}
   S3_BUCKET: villas-web
   S3_ENDPOINT: http://minio:9000
   S3_PATHSTYLE: 'true'
+  S3_NOSSL: 'true'
   PORT: 4000
   GO_IMAGE: golang:1.13-buster
 
