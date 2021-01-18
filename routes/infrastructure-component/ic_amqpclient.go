@@ -56,7 +56,7 @@ type Action struct {
 }
 
 type ICStatus struct {
-	UUID        string   `json:"uuid"`
+	UUID        *string  `json:"uuid"`
 	State       *string  `json:"state"`
 	Name        *string  `json:"name"`
 	Category    *string  `json:"category"`
@@ -262,12 +262,13 @@ func processMessage(message amqp.Delivery) error {
 		return fmt.Errorf("AMQP: Could not unmarshal message to JSON: %v err: %v", string(message.Body), err)
 	}
 
-	payload.Status.UUID = fmt.Sprintf("%v", message.Headers["uuid"])
+	payload.Status.UUID = new(string)
+	*payload.Status.UUID = fmt.Sprintf("%v", message.Headers["uuid"])
 
 	if payload.Status != nil {
 		//log.Println("Processing AMQP message: ", string(message.Body))
 		// if a message contains a "state" field, it is an update for an IC
-		ICUUID := payload.Status.UUID
+		ICUUID := *payload.Status.UUID
 		_, err = uuid.Parse(ICUUID)
 
 		if err != nil {
@@ -293,7 +294,7 @@ func processMessage(message amqp.Delivery) error {
 func createExternalIC(payload ICUpdate) error {
 
 	var newICReq AddICRequest
-	newICReq.InfrastructureComponent.UUID = payload.Status.UUID
+	newICReq.InfrastructureComponent.UUID = *payload.Status.UUID
 	if payload.Status.Name == nil ||
 		payload.Status.Category == nil ||
 		payload.Status.Type == nil {
