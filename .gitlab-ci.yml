@@ -3,6 +3,17 @@ variables:
   DOCKER_IMAGE: ${CI_REGISTRY_IMAGE}
   GO_IMAGE: golang:1.13-buster
 
+# Template
+.go:
+  image: ${GO_IMAGE}
+  variables:
+    GOPATH: $CI_PROJECT_DIR/.go
+  before_script:
+    - mkdir -p .go
+  cache:
+    paths:
+      - .go/pkg/mod/
+
 stages:
   - build
   - test
@@ -13,7 +24,7 @@ stages:
 
 build:
   stage: build
-  image: ${GO_IMAGE}
+  extends: .go
   script:
     - go mod tidy
     - go install github.com/swaggo/swag/cmd/swag
@@ -29,7 +40,7 @@ build:
 
 test:
   stage: test
-  image: ${GO_IMAGE}
+  extends: .go
   variables:
     POSTGRES_DB: testvillasdb
     POSTGRES_USER: villas
