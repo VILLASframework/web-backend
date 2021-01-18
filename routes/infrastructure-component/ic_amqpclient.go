@@ -262,6 +262,8 @@ func processMessage(message amqp.Delivery) error {
 		return fmt.Errorf("AMQP: Could not unmarshal message to JSON: %v err: %v", string(message.Body), err)
 	}
 
+	payload.Status.UUID = fmt.Sprintf("%v", message.Headers["uuid"])
+
 	if payload.Status != nil {
 		//log.Println("Processing AMQP message: ", string(message.Body))
 		// if a message contains a "state" field, it is an update for an IC
