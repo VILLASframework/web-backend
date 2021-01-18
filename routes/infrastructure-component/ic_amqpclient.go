@@ -262,7 +262,7 @@ func processMessage(message amqp.Delivery) error {
 		return fmt.Errorf("AMQP: Could not unmarshal message to JSON: %v err: %v", string(message.Body), err)
 	}
 
-	payload.Status.UUID = new(string)
+	//payload.Status.UUID = new(string)
 	headers := amqp.Table(message.Headers)
 	*payload.Status.UUID = fmt.Sprintf("%v", headers["uuid"])
 
