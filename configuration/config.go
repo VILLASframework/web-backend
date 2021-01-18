@@ -56,7 +56,7 @@ func InitConfig() error {
 		adminMail   = flag.String("admin-mail", "", "Initial admin mail address")
 		s3Bucket    = flag.String("s3-bucket", "", "S3 Bucket for uploading files")
 		s3Endpoint  = flag.String("s3-endpoint", "", "Endpoint of S3 API for file uploads")
-		s3Region    = flag.String("s3-region", "us-east-1", "S3 Region for file uploads")
+		s3Region    = flag.String("s3-region", "default", "S3 Region for file uploads")
 		s3NoSSL     = flag.Bool("s3-nossl", false, "Use encrypted connections to the S3 API")
 		s3PathStyle = flag.Bool("s3-pathstyle", false, "Use path-style S3 API")
 	)
