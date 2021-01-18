@@ -25,11 +25,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/nsf/jsondiff"
 	"log"
 	"net/http"
 	"net/http/httptest"
+
+	"github.com/gin-gonic/gin"
+	"github.com/nsf/jsondiff"
 )
 
 // data type used in testing
@@ -169,7 +170,25 @@ func TestEndpoint(router *gin.Engine, token string, url string,
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Add("Authorization", "Bearer "+token)
-	router.ServeHTTP(w, req)
+
+	const maxRedirCount = 10
+	var redirCount int
+	for redirCount = 0; redirCount < maxRedirCount; redirCount++ {
+		router.ServeHTTP(w, req)
+
+		if w.Code == 301 || w.Code == 302 || w.Code == 307 || w.Code == 308 {
+			req.URL, err = w.Result().Location()
+			if err != nil {
+				return 0, nil, fmt.Errorf("Invalid location header")
+			}
+		} else {
+			break
+		}
+	}
+
+	if redirCount == maxRedirCount {
+		return 0, nil, fmt.Errorf("Max redirection count exceeded")
+	}
 
 	return w.Code, w.Body, nil
 }
