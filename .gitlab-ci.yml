@@ -28,7 +28,7 @@ build:
   script:
     - go mod tidy
     - go install github.com/swaggo/swag/cmd/swag
-    - swag init -p pascalcase -g "start.go" -o "./doc/api/"
+    - ${GOPATH}/bin/swag init -p pascalcase -g "start.go" -o "./doc/api/"
     - go build
   artifacts:
     paths:
