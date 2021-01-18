@@ -842,6 +842,10 @@ func TestCreateUpdateViaAMQPRecv(t *testing.T) {
 	payload, err = json.Marshal(update)
 	assert.NoError(t, err)
 
+	var headersA map[string]interface{}
+	headersA = make(map[string]interface{}) // empty map
+	headersA["uuid"] = helper.ICA.UUID
+
 	msg = amqp.Publishing{
 		DeliveryMode:    2,
 		Timestamp:       time.Now(),
@@ -849,6 +853,7 @@ func TestCreateUpdateViaAMQPRecv(t *testing.T) {
 		ContentEncoding: "utf-8",
 		Priority:        0,
 		Body:            payload,
+		Headers:         headersA,
 	}
 
 	err = client.channel.Publish(VILLAS_EXCHANGE,
@@ -878,6 +883,7 @@ func TestCreateUpdateViaAMQPRecv(t *testing.T) {
 		ContentEncoding: "utf-8",
 		Priority:        0,
 		Body:            payload,
+		Headers:         headersA,
 	}
 
 	err = client.channel.Publish(VILLAS_EXCHANGE,
@@ -1019,6 +1025,7 @@ func TestDeleteICViaAMQPRecv(t *testing.T) {
 		ContentEncoding: "utf-8",
 		Priority:        0,
 		Body:            payload,
+		Headers:         headers,
 	}
 
 	// attempt to delete IC (should not work immediately because IC is still associated with component config)
