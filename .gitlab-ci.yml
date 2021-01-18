@@ -76,7 +76,7 @@ test:
       command: ['server', '/minio']
       alias: minio
   before_script:
-    - wget https://dl.min.io/client/mc/release/linux-amd64/mc -O /usr/bin/mc && chmod +x /usr/bin/mc
+    - wget -qO /usr/bin/mc https://dl.min.io/client/mc/release/linux-amd64/mc && chmod +x /usr/bin/mc
     - mc alias set gitlab http://minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD}
     - mc mb gitlab/${S3_BUCKET}
   script:

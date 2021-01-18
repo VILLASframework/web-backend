@@ -171,25 +171,37 @@ func TestEndpoint(router *gin.Engine, token string, url string,
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Add("Authorization", "Bearer "+token)
 
-	const maxRedirCount = 10
-	var redirCount int
-	for redirCount = 0; redirCount < maxRedirCount; redirCount++ {
-		router.ServeHTTP(w, req)
+	router.ServeHTTP(w, req)
 
-		if w.Code == 301 || w.Code == 302 || w.Code == 307 || w.Code == 308 {
-			req.URL, err = w.Result().Location()
-			if err != nil {
-				return 0, nil, fmt.Errorf("Invalid location header")
-			}
-		} else {
-			break
+	return handleRedirect(w, req)
+}
+
+func handleRedirect(w *httptest.ResponseRecorder, req *http.Request) (int, *bytes.Buffer, error) {
+	if w.Code == http.StatusMovedPermanently ||
+		w.Code == http.StatusFound ||
+		w.Code == http.StatusTemporaryRedirect ||
+		w.Code == http.StatusPermanentRedirect {
+
+		// Follow external redirect
+		var err error
+		req.URL, err = w.Result().Location()
+		if err != nil {
+			return 0, nil, fmt.Errorf("Invalid location header")
 		}
+
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		if err != nil {
+			return 0, nil, fmt.Errorf("Failed to follow redirect: %v", err)
+		}
+
+		buf := new(bytes.Buffer)
+		buf.ReadFrom(resp.Body)
+
+		return resp.StatusCode, buf, nil
 	}
 
-	if redirCount == maxRedirCount {
-		return 0, nil, fmt.Errorf("Max redirection count exceeded")
-	}
-
+	// No redirect
 	return w.Code, w.Body, nil
 }
 
