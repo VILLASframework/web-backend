@@ -50,7 +50,6 @@ test:
     RABBITMQ_DEFAULT_PASS: villas
     MINIO_ROOT_USER: minio-villas
     MINIO_ROOT_PASSWORD: minio-villas
-    MINIO_DOMAIN: localhost
     AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
     AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
     S3_BUCKET: villas-web
