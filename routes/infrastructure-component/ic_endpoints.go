@@ -282,7 +282,6 @@ func sendActionToIC(c *gin.Context) {
 	}
 
 	//now := time.Now()
-	log.Println("AMQP: Sending actions:", actions)
 
 	for _, action := range actions {
 		/*if action.When == 0 {
@@ -312,6 +311,7 @@ func sendActionToIC(c *gin.Context) {
 			return
 		}
 	}
+	log.Println("AMQP: Sending actions:", actions)
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
