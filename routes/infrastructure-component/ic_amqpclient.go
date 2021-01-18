@@ -56,7 +56,6 @@ type Action struct {
 }
 
 type ICStatus struct {
-	UUID        *string  `json:"uuid"`
 	State       *string  `json:"state"`
 	Name        *string  `json:"name"`
 	Category    *string  `json:"category"`
@@ -262,14 +261,12 @@ func processMessage(message amqp.Delivery) error {
 		return fmt.Errorf("AMQP: Could not unmarshal message to JSON: %v err: %v", string(message.Body), err)
 	}
 
-	//payload.Status.UUID = new(string)
-	headers := amqp.Table(message.Headers)
-	*payload.Status.UUID = fmt.Sprintf("%v", headers["uuid"])
-
 	if payload.Status != nil {
 		//log.Println("Processing AMQP message: ", string(message.Body))
 		// if a message contains a "state" field, it is an update for an IC
-		ICUUID := *payload.Status.UUID
+
+		headers := amqp.Table(message.Headers)
+		ICUUID := fmt.Sprintf("%v", headers["uuid"])
 		_, err = uuid.Parse(ICUUID)
 
 		if err != nil {
@@ -280,7 +277,7 @@ func processMessage(message amqp.Delivery) error {
 
 		if err == gorm.ErrRecordNotFound {
 			// create new record
-			err = createExternalIC(payload)
+			err = createExternalIC(payload, ICUUID)
 		} else if err != nil {
 			// database error
 			err = fmt.Errorf("AMQP: Database error for IC %v DB error message: %v", ICUUID, err)
@@ -292,10 +289,10 @@ func processMessage(message amqp.Delivery) error {
 	return err
 }
 
-func createExternalIC(payload ICUpdate) error {
+func createExternalIC(payload ICUpdate, ICUUID string) error {
 
 	var newICReq AddICRequest
-	newICReq.InfrastructureComponent.UUID = *payload.Status.UUID
+	newICReq.InfrastructureComponent.UUID = ICUUID
 	if payload.Status.Name == nil ||
 		payload.Status.Category == nil ||
 		payload.Status.Type == nil {

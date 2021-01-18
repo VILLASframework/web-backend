@@ -328,8 +328,6 @@ func TestUpdateICAsAdmin(t *testing.T) {
 	// fake an IC update (create) message
 	var update ICUpdate
 	update.Status = new(ICStatus)
-	update.Status.UUID = new(string)
-	*update.Status.UUID = helper.ICB.UUID
 	update.Status.State = new(string)
 	*update.Status.State = "idle"
 	update.Status.Name = new(string)
@@ -342,6 +340,10 @@ func TestUpdateICAsAdmin(t *testing.T) {
 	payload, err := json.Marshal(update)
 	assert.NoError(t, err)
 
+	var headers map[string]interface{}
+	headers = make(map[string]interface{}) // empty map
+	headers["uuid"] = helper.ICB.UUID      // set uuid
+
 	msg := amqp.Publishing{
 		DeliveryMode:    2,
 		Timestamp:       time.Now(),
@@ -349,6 +351,7 @@ func TestUpdateICAsAdmin(t *testing.T) {
 		ContentEncoding: "utf-8",
 		Priority:        0,
 		Body:            payload,
+		Headers:         headers,
 	}
 
 	err = CheckConnection()
@@ -479,8 +482,6 @@ func TestDeleteICAsAdmin(t *testing.T) {
 	// fake an IC update (create) message
 	var update ICUpdate
 	update.Status = new(ICStatus)
-	update.Status.UUID = new(string)
-	*update.Status.UUID = helper.ICB.UUID
 	update.Status.State = new(string)
 	*update.Status.State = "idle"
 	update.Status.Name = new(string)
@@ -493,6 +494,10 @@ func TestDeleteICAsAdmin(t *testing.T) {
 	payload, err := json.Marshal(update)
 	assert.NoError(t, err)
 
+	var headers map[string]interface{}
+	headers = make(map[string]interface{}) // empty map
+	headers["uuid"] = helper.ICB.UUID      // set uuid
+
 	msg := amqp.Publishing{
 		DeliveryMode:    2,
 		Timestamp:       time.Now(),
@@ -500,6 +505,7 @@ func TestDeleteICAsAdmin(t *testing.T) {
 		ContentEncoding: "utf-8",
 		Priority:        0,
 		Body:            payload,
+		Headers:         headers,
 	}
 
 	err = CheckConnection()
@@ -777,13 +783,15 @@ func TestCreateUpdateViaAMQPRecv(t *testing.T) {
 	// fake an IC update message
 	var update ICUpdate
 	update.Status = new(ICStatus)
-	update.Status.UUID = new(string)
-	*update.Status.UUID = helper.ICA.UUID
 	update.Status.State = new(string)
 	*update.Status.State = "idle"
 
 	payload, err := json.Marshal(update)
 	assert.NoError(t, err)
+
+	var headers map[string]interface{}
+	headers = make(map[string]interface{}) // empty map
+	headers["uuid"] = helper.ICB.UUID      // set uuid
 
 	msg := amqp.Publishing{
 		DeliveryMode:    2,
@@ -792,10 +800,12 @@ func TestCreateUpdateViaAMQPRecv(t *testing.T) {
 		ContentEncoding: "utf-8",
 		Priority:        0,
 		Body:            payload,
+		Headers:         headers,
 	}
 
 	err = CheckConnection()
 	assert.NoError(t, err)
+
 	err = client.channel.Publish(VILLAS_EXCHANGE,
 		"",
 		false,
@@ -900,8 +910,7 @@ func TestDeleteICViaAMQPRecv(t *testing.T) {
 	// fake an IC update message
 	var update ICUpdate
 	update.Status = new(ICStatus)
-	update.Status.UUID = new(string)
-	*update.Status.UUID = helper.ICA.UUID
+
 	update.Status.State = new(string)
 	*update.Status.State = "idle"
 	// complete the (required) data of an IC
@@ -925,6 +934,10 @@ func TestDeleteICViaAMQPRecv(t *testing.T) {
 	payload, err := json.Marshal(update)
 	assert.NoError(t, err)
 
+	var headers map[string]interface{}
+	headers = make(map[string]interface{}) // empty map
+	headers["uuid"] = helper.ICB.UUID      // set uuid
+
 	msg := amqp.Publishing{
 		DeliveryMode:    2,
 		Timestamp:       time.Now(),
@@ -932,6 +945,7 @@ func TestDeleteICViaAMQPRecv(t *testing.T) {
 		ContentEncoding: "utf-8",
 		Priority:        0,
 		Body:            payload,
+		Headers:         headers,
 	}
 
 	err = CheckConnection()
