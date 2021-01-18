@@ -183,10 +183,15 @@ func handleRedirect(w *httptest.ResponseRecorder, req *http.Request) (int, *byte
 		w.Code == http.StatusPermanentRedirect {
 
 		// Follow external redirect
-		var err error
-		req.URL, err = w.Result().Location()
+		redirURL, err := w.Result().Location()
 		if err != nil {
 			return 0, nil, fmt.Errorf("Invalid location header")
+		}
+
+		// TODO: resend orginal request body
+		req, err := http.NewRequest(req.Method, redirURL.String(), nil)
+		if err != nil {
+			return 0, nil, fmt.Errorf("Failed to create new request: %v", err)
 		}
 
 		client := &http.Client{}
