@@ -263,7 +263,8 @@ func processMessage(message amqp.Delivery) error {
 	}
 
 	payload.Status.UUID = new(string)
-	*payload.Status.UUID = fmt.Sprintf("%v", message.Headers["uuid"])
+	headers := amqp.Table(message.Headers)
+	*payload.Status.UUID = fmt.Sprintf("%v", headers["uuid"])
 
 	if payload.Status != nil {
 		//log.Println("Processing AMQP message: ", string(message.Body))
