@@ -107,6 +107,7 @@ func (f *File) Register(fileHeader *multipart.FileHeader, scenarioID uint) error
 		if err != nil {
 			return fmt.Errorf("failed to upload to S3 bucket: %s", err)
 		}
+		log.Println("Saved new file in S3 object storage")
 	}
 
 	// Add image dimensions in case the file is an image
@@ -165,6 +166,8 @@ func (f *File) update(fileHeader *multipart.FileHeader) error {
 		if err != nil {
 			return fmt.Errorf("failed to upload to S3 bucket: %s", err)
 		}
+
+		log.Println("Updated file in S3 object storage")
 	}
 
 	f.Type = fileHeader.Header.Get("Content-Type")
@@ -225,6 +228,7 @@ func (f *File) Delete() error {
 		if err != nil {
 			return err
 		}
+		log.Println("Deleted file in S3 object storage")
 	}
 
 	err = db.Model(&so).Association("Files").Delete(f).Error
