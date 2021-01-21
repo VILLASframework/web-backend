@@ -92,7 +92,7 @@ test:
     - build
 
 test:files_postgres:
-stage: test
+  stage: test
   extends: .go
   variables:
     POSTGRES_DB: testvillasdb
