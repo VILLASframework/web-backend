@@ -108,7 +108,5 @@ deploy:
       --dockerfile ${CI_PROJECT_DIR}/Dockerfile
       --destination ${DOCKER_IMAGE}:${DOCKER_TAG}
       --snapshotMode=redo
-      --cache=true
-      --cache-ttl=12h
   dependencies:
     - test

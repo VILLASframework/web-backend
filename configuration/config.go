@@ -83,13 +83,13 @@ func InitConfig() error {
 		"s3.region":   *s3Region,
 	}
 
-	if *s3NoSSL {
+	if *s3NoSSL == true {
 		static["s3.nossl"] = "true"
 	} else {
 		static["s3.nossl"] = "false"
 	}
 
-	if *s3PathStyle {
+	if *s3PathStyle == true {
 		static["s3.pathstyle"] = "true"
 	} else {
 		static["s3.pathstyle"] = "false"
