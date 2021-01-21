@@ -91,6 +91,32 @@ test:
   dependencies:
     - build
 
+test:files_postgres:
+stage: test
+  extends: .go
+  variables:
+    POSTGRES_DB: testvillasdb
+    POSTGRES_USER: villas
+    POSTGRES_PASSWORD: villas
+    POSTGRES_HOST: postgres
+    PORT: 4000
+    DB_NAME: ${POSTGRES_DB}
+    DB_HOST: ${POSTGRES_HOST}
+    DB_USER: ${POSTGRES_USER}
+    DB_PASS: ${POSTGRES_PASSWORD}
+    BASE_PATH: /api
+    MODE: release
+    ADMIN_USER: User_0
+    ADMIN_PASS: xyz789
+  services:
+    - postgres:latest
+  script:
+    - go mod tidy
+    - cd routes/file
+    - go test -v
+  dependencies:
+    - build
+
 
 # Stage: deploy
 ##############################################################################
