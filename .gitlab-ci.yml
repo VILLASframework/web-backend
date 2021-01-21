@@ -84,6 +84,7 @@ test:
     - go mod tidy
     - go test $(go list ./... )
        -p 1
+       -v
        -covermode=count
        -coverprofile ./testcover.txt
     - go tool cover -func=testcover.txt
