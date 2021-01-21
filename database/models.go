@@ -22,8 +22,9 @@
 package database
 
 import (
-	"github.com/lib/pq"
 	"time"
+
+	"github.com/lib/pq"
 
 	"github.com/jinzhu/gorm/dialects/postgres"
 )
@@ -199,6 +200,8 @@ type File struct {
 	Model
 	// Name of file
 	Name string `json:"name" gorm:"not null"`
+	// Key of file in S3 bucket
+	Key string `json:"key"`
 	// Type of file (MIME type)
 	Type string `json:"type"`
 	// Size of file (in byte)

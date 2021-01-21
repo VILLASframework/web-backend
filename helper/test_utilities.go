@@ -25,11 +25,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/nsf/jsondiff"
 	"log"
 	"net/http"
 	"net/http/httptest"
+
+	"github.com/gin-gonic/gin"
+	"github.com/nsf/jsondiff"
 )
 
 // data type used in testing
@@ -169,8 +170,47 @@ func TestEndpoint(router *gin.Engine, token string, url string,
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Add("Authorization", "Bearer "+token)
+
 	router.ServeHTTP(w, req)
 
+	return handleRedirect(w, req)
+}
+
+func handleRedirect(w *httptest.ResponseRecorder, req *http.Request) (int, *bytes.Buffer, error) {
+	if w.Code == http.StatusMovedPermanently ||
+		w.Code == http.StatusFound ||
+		w.Code == http.StatusTemporaryRedirect ||
+		w.Code == http.StatusPermanentRedirect {
+
+		// Follow external redirect
+		redirURL, err := w.Result().Location()
+		if err != nil {
+			return 0, nil, fmt.Errorf("invalid location header")
+		}
+
+		log.Println("redirecting request to", redirURL.String())
+
+		req, err := http.NewRequest(req.Method, redirURL.String(), req.Body)
+		if err != nil {
+			return 0, nil, fmt.Errorf("handle redirect: failed to create new request: %v", err)
+		}
+
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		if err != nil {
+			return 0, nil, fmt.Errorf("handle redirect: failed to follow redirect: %v", err)
+		}
+
+		buf := new(bytes.Buffer)
+		_, err = buf.ReadFrom(resp.Body)
+		if err != nil {
+			return 0, nil, fmt.Errorf("handle redirect: failed to follow redirect: %v", err)
+		}
+
+		return resp.StatusCode, buf, nil
+	}
+
+	// No redirect
 	return w.Code, w.Body, nil
 }
 

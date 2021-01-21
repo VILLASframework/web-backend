@@ -2,6 +2,7 @@ module git.rwth-aachen.de/acs/public/villas/web-backend-go
 
 require (
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
+	github.com/aws/aws-sdk-go v1.35.35
 	github.com/chenjiandongx/ginprom v0.0.0-20191022035802-6f3da3c84986
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.4.0
@@ -19,7 +20,7 @@ require (
 	github.com/swaggo/gin-swagger v1.2.0
 	github.com/swaggo/swag v1.6.3
 	github.com/zpatrick/go-config v0.0.0-20191104215613-50bc2709703f
-	golang.org/x/crypto v0.0.0-20191112222119-e1110fd1c708
+	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 	gopkg.in/go-playground/validator.v9 v9.30.0
 	gopkg.in/ini.v1 v1.51.0 // indirect
 )
