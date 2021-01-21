@@ -185,23 +185,27 @@ func handleRedirect(w *httptest.ResponseRecorder, req *http.Request) (int, *byte
 		// Follow external redirect
 		redirURL, err := w.Result().Location()
 		if err != nil {
-			return 0, nil, fmt.Errorf("Invalid location header")
+			return 0, nil, fmt.Errorf("invalid location header")
 		}
 
-		// TODO: resend orginal request body
-		req, err := http.NewRequest(req.Method, redirURL.String(), nil)
+		log.Println("redirecting request to", redirURL.String())
+
+		req, err := http.NewRequest(req.Method, redirURL.String(), req.Body)
 		if err != nil {
-			return 0, nil, fmt.Errorf("Failed to create new request: %v", err)
+			return 0, nil, fmt.Errorf("handle redirect: failed to create new request: %v", err)
 		}
 
 		client := &http.Client{}
 		resp, err := client.Do(req)
 		if err != nil {
-			return 0, nil, fmt.Errorf("Failed to follow redirect: %v", err)
+			return 0, nil, fmt.Errorf("handle redirect: failed to follow redirect: %v", err)
 		}
 
 		buf := new(bytes.Buffer)
-		buf.ReadFrom(resp.Body)
+		_, err = buf.ReadFrom(resp.Body)
+		if err != nil {
+			return 0, nil, fmt.Errorf("handle redirect: failed to follow redirect: %v", err)
+		}
 
 		return resp.StatusCode, buf, nil
 	}
