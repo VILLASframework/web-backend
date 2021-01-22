@@ -10,6 +10,10 @@ RUN go build -o villasweb-backend
 
 FROM debian:buster
 
+RUN apt-get update && \
+    apt-get install -y \
+        ca-certificates
+
 COPY --from=builder /build/villasweb-backend /usr/bin
 
 EXPOSE 4000
