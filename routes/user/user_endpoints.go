@@ -23,19 +23,15 @@ package user
 
 import (
 	"fmt"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"net/http"
 	"strings"
-	"time"
+
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 
 	"github.com/gin-gonic/gin"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 )
-
-// TODO: the signing secret must be environmental variable
-const jwtSigningSecret = "This should NOT be here!!@33$8&"
-const weekHours = time.Hour * 24 * 7
 
 func RegisterUserEndpoints(r *gin.RouterGroup) {
 	r.POST("", addUser)

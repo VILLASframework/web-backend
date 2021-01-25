@@ -24,8 +24,10 @@ package user
 import (
 	"fmt"
 
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
+
 	"github.com/dgrijalva/jwt-go"
 	"github.com/dgrijalva/jwt-go/request"
 	"github.com/gin-gonic/gin"
@@ -66,8 +68,8 @@ func Authentication(unauthorized bool) gin.HandlerFunc {
 				}
 
 				// return secret in byte format
-				secret := ([]byte(jwtSigningSecret))
-				return secret, nil
+				secret, _ := configuration.GolbalConfig.String("jwt.secret")
+				return []byte(secret), nil
 			})
 
 		// If the authentication extraction fails return HTTP CODE 401
