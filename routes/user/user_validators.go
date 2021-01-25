@@ -23,6 +23,7 @@ package user
 
 import (
 	"fmt"
+
 	"gopkg.in/go-playground/validator.v9"
 )
 
@@ -151,16 +152,4 @@ func (r *addUserRequest) validate() error {
 	validate = validator.New()
 	errs := validate.Struct(r)
 	return errs
-}
-
-func (r *addUserRequest) createUser() User {
-	var u User
-
-	u.Username = r.User.Username
-	u.Password = r.User.Password
-	u.Mail = r.User.Mail
-	u.Role = r.User.Role
-	u.Active = true
-
-	return u
 }
