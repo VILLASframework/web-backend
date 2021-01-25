@@ -68,7 +68,7 @@ func Authentication(unauthorized bool) gin.HandlerFunc {
 				}
 
 				// return secret in byte format
-				secret, _ := configuration.GolbalConfig.String("jwt.secret")
+				secret, _ := configuration.GlobalConfig.String("jwt.secret")
 				return []byte(secret), nil
 			})
 

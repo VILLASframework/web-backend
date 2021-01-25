@@ -98,7 +98,7 @@ func (f *File) Register(fileHeader *multipart.FileHeader, scenarioID uint) error
 	}
 	defer fileContent.Close()
 
-	bucket, err := configuration.GolbalConfig.String("s3.bucket")
+	bucket, err := configuration.GlobalConfig.String("s3.bucket")
 	if bucket == "" {
 		f.FileData, err = ioutil.ReadAll(fileContent)
 		f.Key = ""
@@ -157,7 +157,7 @@ func (f *File) update(fileHeader *multipart.FileHeader) error {
 	}
 	defer fileContent.Close()
 
-	bucket, err := configuration.GolbalConfig.String("s3.bucket")
+	bucket, err := configuration.GlobalConfig.String("s3.bucket")
 	if bucket == "" {
 		f.FileData, err = ioutil.ReadAll(fileContent)
 		f.Key = ""

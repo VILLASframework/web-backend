@@ -22,15 +22,16 @@
 package healthz
 
 import (
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/infrastructure-component"
-	"github.com/gin-gonic/gin"
-	"github.com/stretchr/testify/assert"
 	"log"
 	"net/http"
 	"testing"
+
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
+	infrastructure_component "git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/infrastructure-component"
+	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
 )
 
 var router *gin.Engine
@@ -40,7 +41,7 @@ func TestHealthz(t *testing.T) {
 	assert.NoError(t, err)
 
 	// connect DB
-	err = database.InitDB(configuration.GolbalConfig)
+	err = database.InitDB(configuration.GlobalConfig)
 	assert.NoError(t, err)
 	defer database.DBpool.Close()
 
@@ -58,7 +59,7 @@ func TestHealthz(t *testing.T) {
 	assert.Equalf(t, 500, code, "Response body: \n%v\n", resp)
 
 	// reconnect DB
-	err = database.InitDB(configuration.GolbalConfig)
+	err = database.InitDB(configuration.GlobalConfig)
 	assert.NoError(t, err)
 	defer database.DBpool.Close()
 
@@ -68,11 +69,11 @@ func TestHealthz(t *testing.T) {
 	assert.Equalf(t, 500, code, "Response body: \n%v\n", resp)
 
 	// connect AMQP client (make sure that AMQP_HOST, AMQP_USER, AMQP_PASS are set via command line parameters)
-	host, err := configuration.GolbalConfig.String("amqp.host")
+	host, err := configuration.GlobalConfig.String("amqp.host")
 	assert.NoError(t, err)
-	user, err := configuration.GolbalConfig.String("amqp.user")
+	user, err := configuration.GlobalConfig.String("amqp.user")
 	assert.NoError(t, err)
-	pass, err := configuration.GolbalConfig.String("amqp.pass")
+	pass, err := configuration.GlobalConfig.String("amqp.pass")
 	assert.NoError(t, err)
 
 	amqpURI := "amqp://" + user + ":" + pass + "@" + host

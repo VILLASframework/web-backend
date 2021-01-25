@@ -30,10 +30,10 @@ import (
 )
 
 // Global configuration
-var GolbalConfig *config.Config = nil
+var GlobalConfig *config.Config = nil
 
 func InitConfig() error {
-	if GolbalConfig != nil {
+	if GlobalConfig != nil {
 		return nil
 	}
 
@@ -128,25 +128,25 @@ func InitConfig() error {
 	env := config.NewEnvironment(mappings)
 
 	if _, err := os.Stat(*configFile); os.IsNotExist(err) {
-		GolbalConfig = config.NewConfig([]config.Provider{defaults, env})
+		GlobalConfig = config.NewConfig([]config.Provider{defaults, env})
 	} else {
 		yamlFile := config.NewYAMLFile(*configFile)
-		GolbalConfig = config.NewConfig([]config.Provider{defaults, yamlFile, env})
+		GlobalConfig = config.NewConfig([]config.Provider{defaults, yamlFile, env})
 	}
 
-	err := GolbalConfig.Load()
+	err := GlobalConfig.Load()
 	if err != nil {
 		log.Fatal("failed to parse config")
 		return err
 	}
 
-	m, err := GolbalConfig.String("mode")
+	m, err := GlobalConfig.String("mode")
 	if err != nil {
 		return err
 	}
 
 	if m != "test" {
-		settings, _ := GolbalConfig.Settings()
+		settings, _ := GlobalConfig.Settings()
 		log.Print("All settings:")
 		for key, val := range settings {
 			// TODO password settings should be excluded!
@@ -165,31 +165,31 @@ func ConfigureBackend() (string, string, string, string, string, string, string,
 		return "", "", "", "", "", "", "", err
 	}
 
-	mode, err := GolbalConfig.String("mode")
+	mode, err := GlobalConfig.String("mode")
 	if err != nil {
 		log.Printf("Error reading mode from global configuration: %v, aborting.", err.Error())
 		return "", "", "", "", "", "", "", err
 	}
 
-	baseHost, err := GolbalConfig.String("base.host")
+	baseHost, err := GlobalConfig.String("base.host")
 	if err != nil {
 		log.Printf("Error reading base.host from global configuration: %v, aborting.", err.Error())
 		return "", "", "", "", "", "", "", err
 	}
-	basePath, err := GolbalConfig.String("base.path")
+	basePath, err := GlobalConfig.String("base.path")
 	if err != nil {
 		log.Printf("Error reading base.path from global configuration: %v, aborting.", err.Error())
 		return "", "", "", "", "", "", "", err
 	}
-	port, err := GolbalConfig.String("port")
+	port, err := GlobalConfig.String("port")
 	if err != nil {
 		log.Printf("Error reading port from global configuration: %v, aborting.", err.Error())
 		return "", "", "", "", "", "", "", err
 	}
 
-	AMQPhost, _ := GolbalConfig.String("amqp.host")
-	AMQPuser, _ := GolbalConfig.String("amqp.user")
-	AMQPpass, _ := GolbalConfig.String("amqp.pass")
+	AMQPhost, _ := GlobalConfig.String("amqp.host")
+	AMQPuser, _ := GlobalConfig.String("amqp.user")
+	AMQPpass, _ := GlobalConfig.String("amqp.pass")
 
 	return mode, baseHost, basePath, port, AMQPhost, AMQPuser, AMQPpass, nil
 }

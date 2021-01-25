@@ -30,7 +30,7 @@ import (
 	apidocs "git.rwth-aachen.de/acs/public/villas/web-backend-go/doc/api" // doc/api folder is used by Swag CLI, you have to import it
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/infrastructure-component"
+	infrastructure_component "git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/infrastructure-component"
 	"github.com/gin-gonic/gin"
 	"github.com/zpatrick/go-config"
 )
@@ -79,7 +79,7 @@ func main() {
 	}
 
 	//init database
-	err = database.InitDB(configuration.GolbalConfig)
+	err = database.InitDB(configuration.GlobalConfig)
 	if err != nil {
 		log.Printf("Error during initialization of database: %v, aborting.", err.Error())
 		panic(err)
@@ -107,7 +107,7 @@ func main() {
 	}
 
 	// add data to DB (if any)
-	err = addData(r, configuration.GolbalConfig)
+	err = addData(r, configuration.GlobalConfig)
 	if err != nil {
 		panic(err)
 	}

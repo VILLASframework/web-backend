@@ -88,7 +88,7 @@ func authenticate(c *gin.Context) {
 		return
 	}
 
-	expiresStr, err := configuration.GolbalConfig.String("jwt.expires-after")
+	expiresStr, err := configuration.GlobalConfig.String("jwt.expires-after")
 	if err != nil {
 		helper.UnauthorizedError(c, "Backend configuration error")
 		return
@@ -100,7 +100,7 @@ func authenticate(c *gin.Context) {
 		return
 	}
 
-	secret, err := configuration.GolbalConfig.String("jwt.secret")
+	secret, err := configuration.GlobalConfig.String("jwt.secret")
 	if err != nil {
 		helper.UnauthorizedError(c, "Backend configuration error")
 		return
