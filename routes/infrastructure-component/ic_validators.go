@@ -107,30 +107,20 @@ func (r *AddICRequest) createIC(receivedViaAMQP bool) (InfrastructureComponent, 
 		*action.Properties.Category = r.InfrastructureComponent.Category
 
 		// set optional properties
-		if r.InfrastructureComponent.Description != "" {
-			action.Properties.Description = new(string)
-			*action.Properties.Description = r.InfrastructureComponent.Description
-		}
+		action.Properties.Description = new(string)
+		*action.Properties.Description = r.InfrastructureComponent.Description
 
-		if r.InfrastructureComponent.Location != "" {
-			action.Properties.Location = new(string)
-			*action.Properties.Location = r.InfrastructureComponent.Location
-		}
+		action.Properties.Location = new(string)
+		*action.Properties.Location = r.InfrastructureComponent.Location
 
-		if r.InfrastructureComponent.APIURL != "" {
-			action.Properties.API_url = new(string)
-			*action.Properties.API_url = r.InfrastructureComponent.APIURL
-		}
+		action.Properties.API_url = new(string)
+		*action.Properties.API_url = r.InfrastructureComponent.APIURL
 
-		if r.InfrastructureComponent.WebsocketURL != "" {
-			action.Properties.WS_url = new(string)
-			*action.Properties.WS_url = r.InfrastructureComponent.WebsocketURL
-		}
+		action.Properties.WS_url = new(string)
+		*action.Properties.WS_url = r.InfrastructureComponent.WebsocketURL
 
-		if r.InfrastructureComponent.UUID != "" {
-			action.Properties.UUID = new(string)
-			*action.Properties.UUID = r.InfrastructureComponent.UUID
-		}
+		action.Properties.UUID = new(string)
+		*action.Properties.UUID = r.InfrastructureComponent.UUID
 
 		log.Println("AMQP: Sending request to create new IC")
 		err = sendActionAMQP(action)
@@ -162,18 +152,6 @@ func (r *UpdateICRequest) updatedIC(oldIC InfrastructureComponent) Infrastructur
 	// Use the old InfrastructureComponent as a basis for the updated InfrastructureComponent `s`
 	s := oldIC
 
-	if r.InfrastructureComponent.UUID != "" {
-		s.UUID = r.InfrastructureComponent.UUID
-	}
-
-	if r.InfrastructureComponent.WebsocketURL != "" {
-		s.WebsocketURL = r.InfrastructureComponent.WebsocketURL
-	}
-
-	if r.InfrastructureComponent.APIURL != "" {
-		s.APIURL = r.InfrastructureComponent.APIURL
-	}
-
 	if r.InfrastructureComponent.Type != "" {
 		s.Type = r.InfrastructureComponent.Type
 	}
@@ -190,13 +168,11 @@ func (r *UpdateICRequest) updatedIC(oldIC InfrastructureComponent) Infrastructur
 		s.State = r.InfrastructureComponent.State
 	}
 
-	if r.InfrastructureComponent.Location != "" {
-		s.Location = r.InfrastructureComponent.Location
-	}
-
-	if r.InfrastructureComponent.Description != "" {
-		s.Description = r.InfrastructureComponent.Description
-	}
+	s.UUID = r.InfrastructureComponent.UUID
+	s.WebsocketURL = r.InfrastructureComponent.WebsocketURL
+	s.APIURL = r.InfrastructureComponent.APIURL
+	s.Location = r.InfrastructureComponent.Location
+	s.Description = r.InfrastructureComponent.Description
 
 	// set last update time
 	s.StateUpdateAt = time.Now().Format(time.RFC1123)
