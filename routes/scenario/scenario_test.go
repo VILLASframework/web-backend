@@ -23,6 +23,9 @@ package scenario
 
 import (
 	"fmt"
+	"os"
+	"testing"
+
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
@@ -30,8 +33,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/stretchr/testify/assert"
-	"os"
-	"testing"
 )
 
 var router *gin.Engine
@@ -56,7 +57,7 @@ func TestMain(m *testing.M) {
 		panic(m)
 	}
 
-	err = database.InitDB(configuration.GolbalConfig)
+	err = database.InitDB(configuration.GlobalConfig)
 	if err != nil {
 		panic(m)
 	}

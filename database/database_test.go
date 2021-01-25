@@ -23,9 +23,10 @@ package database
 
 import (
 	"fmt"
-	"github.com/zpatrick/go-config"
 	"os"
 	"testing"
+
+	"github.com/zpatrick/go-config"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
 	"github.com/stretchr/testify/assert"
@@ -52,33 +53,33 @@ func TestInitDB(t *testing.T) {
 
 	err = InitDB(ownconfig)
 	assert.Error(t, err)
-	dbname, err := configuration.GolbalConfig.String("db.name")
+	dbname, err := configuration.GlobalConfig.String("db.name")
 	assert.NoError(t, err)
 	static["db.name"] = dbname
 	ownconfig = config.NewConfig([]config.Provider{defaults, env})
 	err = InitDB(ownconfig)
 	assert.Error(t, err)
 
-	dbhost, err := configuration.GolbalConfig.String("db.host")
+	dbhost, err := configuration.GlobalConfig.String("db.host")
 	assert.NoError(t, err)
 	static["db.host"] = dbhost
 	ownconfig = config.NewConfig([]config.Provider{defaults, env})
 	err = InitDB(ownconfig)
 	assert.Error(t, err)
 
-	dbuser, err := configuration.GolbalConfig.String("db.user")
+	dbuser, err := configuration.GlobalConfig.String("db.user")
 	static["db.user"] = dbuser
 	ownconfig = config.NewConfig([]config.Provider{defaults, env})
 	err = InitDB(ownconfig)
 	assert.Error(t, err)
 
-	dbpass, err := configuration.GolbalConfig.String("db.pass")
+	dbpass, err := configuration.GlobalConfig.String("db.pass")
 	static["db.pass"] = dbpass
 	ownconfig = config.NewConfig([]config.Provider{defaults, env})
 	err = InitDB(ownconfig)
 	assert.Error(t, err)
 
-	dbssl, err := configuration.GolbalConfig.String("db.ssl")
+	dbssl, err := configuration.GlobalConfig.String("db.ssl")
 	assert.NoError(t, err)
 	static["db.ssl"] = dbssl
 	ownconfig = config.NewConfig([]config.Provider{defaults, env})

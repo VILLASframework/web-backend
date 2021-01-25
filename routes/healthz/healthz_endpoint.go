@@ -22,14 +22,15 @@
 package healthz
 
 import (
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/infrastructure-component"
-	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
 	"strings"
+
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
+	infrastructure_component "git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/infrastructure-component"
+	"github.com/gin-gonic/gin"
 )
 
 func RegisterHealthzEndpoint(r *gin.RouterGroup) {
@@ -55,7 +56,7 @@ func getHealth(c *gin.Context) {
 	}
 
 	// check if connection to AMQP broker is alive if backend was started with AMQP client
-	url, err := configuration.GolbalConfig.String("amqp.host")
+	url, err := configuration.GlobalConfig.String("amqp.host")
 	if err != nil && strings.Contains(err.Error(), "Required setting 'amqp.host' not set") {
 		c.JSON(http.StatusOK, gin.H{})
 		return

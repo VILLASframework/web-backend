@@ -23,9 +23,10 @@ package helper
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
-	"net/http"
 )
 
 func DBError(c *gin.Context, err error) bool {
@@ -70,7 +71,7 @@ func UnauthorizedError(c *gin.Context, err string) {
 
 func UnauthorizedAbort(c *gin.Context, err string) {
 	c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-		"succes":  false,
+		"success": false,
 		"message": fmt.Sprintf("%v", err),
 	})
 }

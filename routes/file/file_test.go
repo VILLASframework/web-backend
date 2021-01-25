@@ -24,6 +24,14 @@ package file
 import (
 	"bytes"
 	"fmt"
+	"io"
+	"io/ioutil"
+	"mime/multipart"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"testing"
+
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
@@ -32,13 +40,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/stretchr/testify/assert"
-	"io"
-	"io/ioutil"
-	"mime/multipart"
-	"net/http"
-	"net/http/httptest"
-	"os"
-	"testing"
 )
 
 var router *gin.Engine
@@ -83,7 +84,7 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		panic(m)
 	}
-	err = database.InitDB(configuration.GolbalConfig)
+	err = database.InitDB(configuration.GlobalConfig)
 	if err != nil {
 		panic(m)
 	}

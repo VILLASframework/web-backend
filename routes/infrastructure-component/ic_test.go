@@ -24,15 +24,16 @@ package infrastructure_component
 import (
 	"encoding/json"
 	"fmt"
+	"os"
+	"testing"
+	"time"
+
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	component_configuration "git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/component-configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/scenario"
 	"github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/streadway/amqp"
 	"github.com/stretchr/testify/assert"
-	"os"
-	"testing"
-	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -94,7 +95,7 @@ func TestMain(m *testing.M) {
 		panic(m)
 	}
 
-	err = database.InitDB(configuration.GolbalConfig)
+	err = database.InitDB(configuration.GlobalConfig)
 	if err != nil {
 		panic(m)
 	}
@@ -126,9 +127,9 @@ func TestAddICAsAdmin(t *testing.T) {
 
 	// connect AMQP client
 	// Make sure that AMQP_HOST, AMQP_USER, AMQP_PASS are set
-	host, err := configuration.GolbalConfig.String("amqp.host")
-	user, err := configuration.GolbalConfig.String("amqp.user")
-	pass, err := configuration.GolbalConfig.String("amqp.pass")
+	host, err := configuration.GlobalConfig.String("amqp.host")
+	user, err := configuration.GlobalConfig.String("amqp.user")
+	pass, err := configuration.GlobalConfig.String("amqp.pass")
 	amqpURI := "amqp://" + user + ":" + pass + "@" + host
 
 	// AMQP Connection startup is tested here

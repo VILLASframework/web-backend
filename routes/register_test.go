@@ -42,7 +42,7 @@ func TestMain(m *testing.M) {
 		panic(m)
 	}
 
-	err = database.InitDB(configuration.GolbalConfig)
+	err = database.InitDB(configuration.GlobalConfig)
 	if err != nil {
 		panic(m)
 	}
@@ -51,9 +51,9 @@ func TestMain(m *testing.M) {
 	router = gin.Default()
 
 	// connect AMQP client (make sure that AMQP_HOST, AMQP_USER, AMQP_PASS are set via command line parameters)
-	host, err := configuration.GolbalConfig.String("amqp.host")
-	user, err := configuration.GolbalConfig.String("amqp.user")
-	pass, err := configuration.GolbalConfig.String("amqp.pass")
+	host, err := configuration.GlobalConfig.String("amqp.host")
+	user, err := configuration.GlobalConfig.String("amqp.user")
+	pass, err := configuration.GlobalConfig.String("amqp.pass")
 
 	amqpURI := "amqp://" + user + ":" + pass + "@" + host
 
@@ -76,6 +76,6 @@ func TestAddTestData(t *testing.T) {
 		panic(t)
 	}
 
-	resp, err := AddTestData(configuration.GolbalConfig, router)
+	resp, err := AddTestData(configuration.GlobalConfig, router)
 	assert.NoError(t, err, "Response body: %v", resp)
 }

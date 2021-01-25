@@ -22,11 +22,13 @@
 package user
 
 import (
+	"net/http"
+	"time"
+
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-	"net/http"
-	"time"
 )
 
 type tokenClaims struct {
@@ -86,12 +88,30 @@ func authenticate(c *gin.Context) {
 		return
 	}
 
+	expiresStr, err := configuration.GlobalConfig.String("jwt.expires-after")
+	if err != nil {
+		helper.UnauthorizedError(c, "Backend configuration error")
+		return
+	}
+
+	expiresDuration, err := time.ParseDuration(expiresStr)
+	if err != nil {
+		helper.UnauthorizedError(c, "Backend configuration error")
+		return
+	}
+
+	secret, err := configuration.GlobalConfig.String("jwt.secret")
+	if err != nil {
+		helper.UnauthorizedError(c, "Backend configuration error")
+		return
+	}
+
 	// create authentication token
 	claims := tokenClaims{
 		user.ID,
 		user.Role,
 		jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(weekHours).Unix(),
+			ExpiresAt: time.Now().Add(expiresDuration).Unix(),
 			IssuedAt:  time.Now().Unix(),
 			Issuer:    "http://web.villas.fein-aachen.org/",
 		},
@@ -99,7 +119,7 @@ func authenticate(c *gin.Context) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	tokenString, err := token.SignedString([]byte(jwtSigningSecret))
+	tokenString, err := token.SignedString([]byte(secret))
 	if err != nil {
 		helper.InternalServerError(c, err.Error())
 		return

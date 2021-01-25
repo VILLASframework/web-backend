@@ -40,7 +40,7 @@ var s3Session *session.Session = nil
 
 func getS3Session() (*session.Session, string, error) {
 
-	bucket, err := configuration.GolbalConfig.String("s3.bucket")
+	bucket, err := configuration.GlobalConfig.String("s3.bucket")
 	if err != nil || bucket == "" {
 		return nil, "", fmt.Errorf("no S3 bucket configured: %s", err)
 	}
@@ -57,10 +57,10 @@ func getS3Session() (*session.Session, string, error) {
 }
 
 func createS3Session() (*session.Session, error) {
-	endpoint, err := configuration.GolbalConfig.String("s3.endpoint")
-	region, err := configuration.GolbalConfig.String("s3.region")
-	pathStyle, err := configuration.GolbalConfig.Bool("s3.pathstyle")
-	nossl, err := configuration.GolbalConfig.Bool("s3.nossl")
+	endpoint, err := configuration.GlobalConfig.String("s3.endpoint")
+	region, err := configuration.GlobalConfig.String("s3.region")
+	pathStyle, err := configuration.GlobalConfig.Bool("s3.pathstyle")
+	nossl, err := configuration.GlobalConfig.Bool("s3.nossl")
 
 	sess, err := session.NewSession(
 		&aws.Config{
