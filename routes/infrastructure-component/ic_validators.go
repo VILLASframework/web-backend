@@ -143,7 +143,7 @@ func (r *AddICRequest) createIC(receivedViaAMQP bool) (InfrastructureComponent, 
 		s.State = "unknown"
 	}
 	// set last update to creation time of IC
-	s.StateUpdateAt = time.Now().Format(time.RFC1123)
+	s.StateUpdateAt = time.Now().Format(time.RFC1123Z)
 
 	return s, err
 }
@@ -175,7 +175,7 @@ func (r *UpdateICRequest) updatedIC(oldIC InfrastructureComponent) Infrastructur
 	s.Description = r.InfrastructureComponent.Description
 
 	// set last update time
-	s.StateUpdateAt = time.Now().Format(time.RFC1123)
+	s.StateUpdateAt = time.Now().Format(time.RFC1123Z)
 
 	// only update props if not empty
 	var emptyJson postgres.Jsonb
