@@ -27,6 +27,7 @@ import (
 	"time"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
@@ -39,7 +40,62 @@ type tokenClaims struct {
 }
 
 func RegisterAuthenticate(r *gin.RouterGroup) {
+	r.GET("", authenticated)
 	r.POST("", authenticate)
+}
+
+// authenticated godoc
+// @Summary Check if user is authenticated and provide details on how the user can authenticate
+// @ID authenticate
+// @Accept json
+// @Produce json
+// @Tags authentication
+// @Param inputUser body user.loginRequest true "loginRequest of user"
+// @Success 200 {object} docs.ResponseAuthenticate "JSON web token, success status, message and authenticated user object"
+// @Failure 401 {object} docs.ResponseError "Unauthorized"
+// @Failure 500 {object} docs.ResponseError "Internal server error."
+// @Router /authenticate [post]
+func authenticated(c *gin.Context) {
+	ok, err := isAuthenticated(c)
+	if err != nil {
+		helper.InternalServerError(c, err.Error())
+	}
+
+	if ok {
+		// ATTENTION: do not use c.GetInt (common.UserIDCtx) since userID is of type uint and not int
+		userID, _ := c.Get(database.UserIDCtx)
+
+		var user User
+		err := user.ByID(userID.(uint))
+		if helper.DBError(c, err) {
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"success":       true,
+			"authenticated": true,
+			"user":          user.User,
+		})
+	} else {
+		externalAuth, err := configuration.GlobalConfig.Bool("external-auth")
+		if err != nil {
+			helper.UnauthorizedError(c, "Backend configuration error")
+			return
+		}
+
+		if externalAuth {
+			c.JSON(http.StatusOK, gin.H{
+				"success":       true,
+				"authenticated": false,
+				"external":      "/oauth/start",
+			})
+		} else {
+			c.JSON(http.StatusOK, gin.H{
+				"success":       true,
+				"authenticated": false,
+			})
+		}
+	}
 }
 
 // authenticate godoc
