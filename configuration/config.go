@@ -60,7 +60,7 @@ func InitConfig() error {
 		s3NoSSL         = flag.Bool("s3-nossl", false, "Use encrypted connections to the S3 API")
 		s3PathStyle     = flag.Bool("s3-pathstyle", false, "Use path-style S3 API")
 		jwtSecret       = flag.String("jwt-secret", "This should NOT be here!!@33$8&", "The JSON Web Token secret")
-		jwtExpiresAfter = flag.String("jwt-expires-after", "1w", "The time after which the JSON Web Token expires")
+		jwtExpiresAfter = flag.String("jwt-expires-after", "168h" /* 1 week */, "The time after which the JSON Web Token expires")
 	)
 	flag.Parse()
 
