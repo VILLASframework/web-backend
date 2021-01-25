@@ -165,7 +165,7 @@ func TestMain(m *testing.M) {
 	api := router.Group("/api")
 
 	user.RegisterAuthenticate(api.Group("/authenticate"))
-	api.Use(user.Authentication(true))
+	api.Use(user.Authentication())
 	// component-configuration endpoints required here to first add a component config to the DB
 	// that can be associated with a new signal
 	component_configuration.RegisterComponentConfigurationEndpoints(api.Group("/configs"))

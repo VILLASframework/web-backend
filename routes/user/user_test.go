@@ -66,7 +66,7 @@ func TestMain(m *testing.M) {
 	api := router.Group("/api")
 
 	RegisterAuthenticate(api.Group("/authenticate"))
-	api.Use(Authentication(true))
+	api.Use(Authentication())
 	RegisterUserEndpoints(api.Group("/users"))
 
 	os.Exit(m.Run())

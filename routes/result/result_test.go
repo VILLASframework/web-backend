@@ -113,7 +113,7 @@ func TestMain(m *testing.M) {
 	api := router.Group("/api")
 
 	user.RegisterAuthenticate(api.Group("/authenticate"))
-	api.Use(user.Authentication(true))
+	api.Use(user.Authentication())
 	// scenario endpoints required here to first add a scenario to the DB
 	scenario.RegisterScenarioEndpoints(api.Group("/scenarios"))
 	// file endpoints required to download result file

@@ -46,7 +46,7 @@ func userToContext(ctx *gin.Context, user_id uint) {
 	ctx.Set(database.UserIDCtx, user_id)
 }
 
-func Authentication(unauthorized bool) gin.HandlerFunc {
+func Authentication() gin.HandlerFunc {
 
 	return func(ctx *gin.Context) {
 
@@ -74,9 +74,7 @@ func Authentication(unauthorized bool) gin.HandlerFunc {
 
 		// If the authentication extraction fails return HTTP CODE 401
 		if err != nil {
-			if unauthorized {
-				helper.UnauthorizedAbort(ctx, "Authentication failed (claims extraction)")
-			}
+			helper.UnauthorizedAbort(ctx, "Authentication failed (claims extraction)")
 			return
 		}
 

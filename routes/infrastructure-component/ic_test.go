@@ -134,7 +134,7 @@ func TestMain(m *testing.M) {
 	api = router.Group("/api")
 
 	user.RegisterAuthenticate(api.Group("/authenticate"))
-	api.Use(user.Authentication(true))
+	api.Use(user.Authentication())
 	RegisterICEndpoints(api.Group("/ic"))
 	// component configuration endpoints required to associate an IC with a component config
 	component_configuration.RegisterComponentConfigurationEndpoints(api.Group("/configs"))

@@ -80,7 +80,7 @@ func TestMain(m *testing.M) {
 	api := router.Group("/api")
 
 	user.RegisterAuthenticate(api.Group("/authenticate"))
-	api.Use(user.Authentication(true))
+	api.Use(user.Authentication())
 
 	// user endpoints required to set user to inactive
 	user.RegisterUserEndpoints(api.Group("/users"))

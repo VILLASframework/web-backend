@@ -84,7 +84,7 @@ func RegisterEndpoints(router *gin.Engine, api *gin.RouterGroup) {
 	// login (POST /authenticate)
 	user.RegisterAuthenticate(api.Group("/authenticate"))
 
-	api.Use(user.Authentication(true))
+	api.Use(user.Authentication())
 
 	scenario.RegisterScenarioEndpoints(api.Group("/scenarios"))
 	component_configuration.RegisterComponentConfigurationEndpoints(api.Group("/configs"))
