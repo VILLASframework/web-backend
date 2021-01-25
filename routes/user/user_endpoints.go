@@ -28,8 +28,6 @@ import (
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
-
 	"github.com/gin-gonic/gin"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"

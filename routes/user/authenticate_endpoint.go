@@ -23,6 +23,7 @@ package user
 
 import (
 	"net/http"
+	"strings"
 	"time"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
@@ -53,39 +54,18 @@ func RegisterAuthenticate(r *gin.RouterGroup) {
 // @Failure 500 {object} api.ResponseError "Internal server error."
 // @Router /authenticate [post]
 func authenticate(c *gin.Context) {
+	var user *User
 
-	// Bind the response (context) with the loginRequest struct
-	var credentials loginRequest
-	if err := c.ShouldBindJSON(&credentials); err != nil {
-		helper.UnauthorizedError(c, "Wrong username or password")
-		return
-	}
-
-	// Validate the login request
-	if errs := credentials.validate(); errs != nil {
-		helper.UnauthorizedError(c, "Wrong username or password")
-		return
-	}
-
-	// Find the username in the database
-	var user User
-	err := user.ByUsername(credentials.Username)
+	externalAuth, err := configuration.GlobalConfig.Bool("external-auth")
 	if err != nil {
-		helper.UnauthorizedError(c, "Wrong username or password")
+		helper.UnauthorizedError(c, "Backend configuration error")
 		return
 	}
 
-	// Check if this is an active user
-	if !user.Active {
-		helper.UnauthorizedError(c, "Wrong username or password")
-		return
-	}
-
-	// Validate the password
-	err = user.validatePassword(credentials.Password)
-	if err != nil {
-		helper.UnauthorizedError(c, "Wrong username or password")
-		return
+	if err != nil || !externalAuth {
+		user = authenticateStandard(c)
+	} else {
+		user = authenticateExternal(c)
 	}
 
 	expiresStr, err := configuration.GlobalConfig.String("jwt.expires-after")
@@ -131,4 +111,78 @@ func authenticate(c *gin.Context) {
 		"token":   tokenString,
 		"user":    user.User,
 	})
+}
+
+func authenticateStandard(c *gin.Context) *User {
+	// Bind the response (context) with the loginRequest struct
+	var credentials loginRequest
+	if err := c.ShouldBindJSON(&credentials); err != nil {
+		helper.UnauthorizedError(c, "Wrong username or password")
+		return nil
+	}
+
+	// Validate the login request
+	if errs := credentials.validate(); errs != nil {
+		helper.UnauthorizedError(c, "Failed to validate request")
+		return nil
+	}
+
+	// Find the username in the database
+	var user User
+	err := user.ByUsername(credentials.Username)
+	if err != nil {
+		helper.UnauthorizedError(c, "Unknown username")
+		return nil
+	}
+
+	// Check if this is an active user
+	if !user.Active {
+		helper.UnauthorizedError(c, "User is not active")
+		return nil
+	}
+
+	// Validate the password
+	err = user.validatePassword(credentials.Password)
+	if err != nil {
+		helper.UnauthorizedError(c, "Invalid password")
+		return nil
+	}
+
+	return &user
+}
+
+func authenticateExternal(c *gin.Context) *User {
+	username := c.Request.Header.Get("X-Forwarded-User")
+	if username == "" {
+		helper.UnauthorizedAbort(c, "Authentication failed (X-Forwarded-User headers)")
+		return nil
+	}
+
+	email := c.Request.Header.Get("X-Forwarded-Email")
+	if email == "" {
+		helper.UnauthorizedAbort(c, "Authentication failed (X-Forwarded-Email headers)")
+		return nil
+	}
+
+	groups := strings.Split(c.Request.Header.Get("X-Forwarded-Groups"), ",")
+	// preferred_username := c.Request.Header.Get("X-Forwarded-Preferred-Username")
+
+	var user User
+	if err := user.ByUsername(username); err == nil {
+		// There is already a user by this name
+		return &user
+	} else {
+		role := "User"
+		if _, found := helper.Find(groups, "admin"); found {
+			role = "Admin"
+		}
+
+		newUser, err := NewUser(username, "", email, role, true)
+		if err != nil {
+			helper.UnauthorizedAbort(c, "Authentication failed (failed to create new user: "+err.Error()+")")
+			return nil
+		}
+
+		return newUser
+	}
 }

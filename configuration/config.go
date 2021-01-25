@@ -62,6 +62,7 @@ func InitConfig() error {
 		jwtSecret       = flag.String("jwt-secret", "This should NOT be here!!@33$8&", "The JSON Web Token secret")
 		jwtExpiresAfter = flag.String("jwt-expires-after", "168h" /* 1 week */, "The time after which the JSON Web Token expires")
 		testDataPath    = flag.String("test-data-path", "database/testdata.json", "The path to the test data json file (used in test mode)")
+		authExternal    = flag.Bool("auth.external", false, "Use external authentication via X-Forwarded-User header (e.g. OAuth2 Proxy)")
 	)
 	flag.Parse()
 
@@ -101,6 +102,12 @@ func InitConfig() error {
 		static["s3.pathstyle"] = "false"
 	}
 
+	if *authExternal == true {
+		static["auth.external"] = "true"
+	} else {
+		static["auth.external"] = "false"
+	}
+
 	mappings := map[string]string{
 		"DB_HOST":           "db.host",
 		"DB_NAME":           "db.name",
@@ -125,6 +132,7 @@ func InitConfig() error {
 		"JWT_SECRET":        "jwt.secret",
 		"JWT_EXPIRES_AFTER": "jwt.expires-after",
 		"TEST_DATA_PATH":    "test.datapath",
+		"AUTH_EXTERNAL":     "auth.external",
 	}
 
 	defaults := config.NewStatic(static)
