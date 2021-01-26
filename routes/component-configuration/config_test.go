@@ -172,7 +172,7 @@ func TestMain(m *testing.M) {
 func TestAddConfig(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// prepare the content of the DB for testing
 	// by adding a scenario and a IC to the DB
@@ -268,7 +268,7 @@ func TestUpdateConfig(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// prepare the content of the DB for testing
 	// by adding a scenario and a IC to the DB
@@ -380,7 +380,7 @@ func TestUpdateConfig(t *testing.T) {
 func TestDeleteConfig(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// prepare the content of the DB for testing
 	// by adding a scenario and a IC to the DB
@@ -453,7 +453,7 @@ func TestDeleteConfig(t *testing.T) {
 func TestGetAllConfigsOfScenario(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// prepare the content of the DB for testing
 	// by adding a scenario and a IC to the DB

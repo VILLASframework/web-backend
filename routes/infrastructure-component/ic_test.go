@@ -119,7 +119,7 @@ func TestMain(m *testing.M) {
 func TestAddICAsAdmin(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// check AMQP connection
 	err := CheckConnection()
@@ -232,7 +232,7 @@ func TestAddICAsAdmin(t *testing.T) {
 func TestAddICAsUser(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// authenticate as user
 	token, err := helper.AuthenticateForTest(router,
@@ -264,7 +264,7 @@ func TestAddICAsUser(t *testing.T) {
 func TestUpdateICAsAdmin(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -382,7 +382,7 @@ func TestUpdateICAsAdmin(t *testing.T) {
 func TestUpdateICAsUser(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -429,7 +429,7 @@ func TestUpdateICAsUser(t *testing.T) {
 func TestDeleteICAsAdmin(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -540,7 +540,7 @@ func TestDeleteICAsAdmin(t *testing.T) {
 func TestDeleteICAsUser(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -586,7 +586,7 @@ func TestDeleteICAsUser(t *testing.T) {
 func TestGetAllICs(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -658,7 +658,7 @@ func TestGetAllICs(t *testing.T) {
 func TestGetConfigsOfIC(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -719,7 +719,7 @@ func TestGetConfigsOfIC(t *testing.T) {
 func TestSendActionToIC(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -774,7 +774,7 @@ func TestCreateUpdateViaAMQPRecv(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -907,7 +907,7 @@ func TestDeleteICViaAMQPRecv(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,

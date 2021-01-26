@@ -124,7 +124,7 @@ func TestGetAllResultsOfScenario(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// prepare the content of the DB for testing
 	// by adding a scenario
@@ -175,7 +175,7 @@ func TestAddGetUpdateDeleteResult(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// prepare the content of the DB for testing
 	// by adding a scenario
@@ -360,7 +360,7 @@ func TestAddGetUpdateDeleteResult(t *testing.T) {
 func TestAddDeleteResultFile(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// prepare the content of the DB for testing
 	// by adding a scenario

@@ -41,13 +41,13 @@ type KeyModels map[string]interface{}
 // #######################################################################
 
 type Credentials struct {
-	Username string
-	Password string
+	Username string `json:"username,required"`
+	Password string `json:"password,required"`
 }
 
 var AdminCredentials = Credentials{
-	Username: "User_0",
-	Password: StrPassword0,
+	Username: "admin",
+	Password: "xyz789",
 }
 
 var UserACredentials = Credentials{

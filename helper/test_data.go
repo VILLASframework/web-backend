@@ -24,19 +24,36 @@ package helper
 import (
 	"encoding/json"
 	"fmt"
-	"math/rand"
-	"strings"
-	"time"
-
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"github.com/jinzhu/gorm/dialects/postgres"
-	"github.com/zpatrick/go-config"
 	"golang.org/x/crypto/bcrypt"
+	"io/ioutil"
+	"log"
+	"os"
 )
 
 // #######################################################################
 // #################### Data used for testing ############################
 // #######################################################################
+
+type jsonUser struct {
+	Username string
+	Password string
+	Mail     string
+	Role     string
+}
+
+var GlobalTestData struct {
+	Users      []jsonUser
+	ICs        []database.InfrastructureComponent
+	Scenarios  []database.Scenario
+	Results    []database.Result
+	Configs    []database.ComponentConfiguration
+	Dashboards []database.Dashboard
+	Widgets    []database.Widget
+	Signals    []database.Signal
+}
 
 // Credentials
 var StrPassword0 = "xyz789"
@@ -46,13 +63,10 @@ var StrPasswordC = "guestpw"
 
 // Hash passwords with bcrypt algorithm
 var bcryptCost = 10
-var pw0, _ = bcrypt.GenerateFromPassword([]byte(StrPassword0), bcryptCost)
 var pwA, _ = bcrypt.GenerateFromPassword([]byte(StrPasswordA), bcryptCost)
 var pwB, _ = bcrypt.GenerateFromPassword([]byte(StrPasswordB), bcryptCost)
 var pwC, _ = bcrypt.GenerateFromPassword([]byte(StrPasswordC), bcryptCost)
 
-var User0 = database.User{Username: "User_0", Password: string(pw0),
-	Role: "Admin", Mail: "User_0@example.com", Active: true}
 var UserA = database.User{Username: "User_A", Password: string(pwA),
 	Role: "User", Mail: "User_A@example.com", Active: true}
 var UserB = database.User{Username: "User_B", Password: string(pwB),
@@ -216,35 +230,6 @@ var DashboardB = database.Dashboard{
 	Grid: 10,
 }
 
-// Files
-
-var FileA = database.File{
-	Name: "File_A",
-	Type: "text/plain",
-	Size: 42,
-	Date: time.Now().String(),
-}
-
-var FileB = database.File{
-	Name: "File_B",
-	Type: "text/plain",
-	Size: 1234,
-	Date: time.Now().String(),
-}
-
-var FileC = database.File{
-	Name: "File_C",
-	Type: "text/plain",
-	Size: 32,
-	Date: time.Now().String(),
-}
-var FileD = database.File{
-	Name: "File_D",
-	Type: "text/plain",
-	Size: 5000,
-	Date: time.Now().String(),
-}
-
 // Widgets
 var customPropertiesBox = json.RawMessage(`{"border_color" : "#4287f5", "border_color_opacity": 1, "background_color" : "#961520", "background_color_opacity" : 1}`)
 var customPropertiesSlider = json.RawMessage(`{"default_value" : 0, "orientation" : 0, "rangeUseMinMax": false, "rangeMin" : 0, "rangeMax": 200, "rangeUseMinMax" : true, "showUnit": true, "continous_update": false, "value": "", "resizeLeftRightLock": false, "resizeTopBottomLock": true, "step": 0.1 }`)
@@ -327,84 +312,63 @@ var WidgetE = database.Widget{
 	SignalIDs:        []int64{},
 }
 
-func generatePassword(Len int) string {
-	rand.Seed(time.Now().UnixNano())
-	chars := []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
-		"abcdefghijklmnopqrstuvwxyz" +
-		"0123456789")
+func ReadTestDataFromJson(path string) error {
 
-	var b strings.Builder
-	for i := 0; i < Len; i++ {
-		b.WriteRune(chars[rand.Intn(len(chars))])
+	jsonFile, err := os.Open(path)
+	if err != nil {
+		return fmt.Errorf("error opening json file: %v", err)
+	}
+	log.Println("Successfully opened json data file", path)
+
+	defer jsonFile.Close()
+
+	byteValue, _ := ioutil.ReadAll(jsonFile)
+
+	err = json.Unmarshal(byteValue, &GlobalTestData)
+	if err != nil {
+		return fmt.Errorf("error unmarshalling json: %v", err)
 	}
 
-	return b.String()
-}
+	log.Println(len(GlobalTestData.Users))
 
-// DBAddAdminUser adds a default admin user to the DB
-func DBAddAdminUser(cfg *config.Config) error {
-	database.DBpool.AutoMigrate(&database.User{})
-
-	// Check if admin user exists in DB
-	var users []database.User
-	err := database.DBpool.Where("Role = ?", "Admin").Find(&users).Error
-
-	if len(users) == 0 {
-		fmt.Println("No admin user found in DB, adding default admin user.")
-
-		mode, err := cfg.String("mode")
-
-		name, err := cfg.String("admin.user")
-		if (err != nil || name == "") && mode != "test" {
-			name = "admin"
-		} else if mode == "test" {
-			name = User0.Username
-		}
-
-		pw, err := cfg.String("admin.pass")
-		if (err != nil || pw == "") && mode != "test" {
-			pw = generatePassword(16)
-			fmt.Printf("  Generated admin password: %s\n", pw)
-		} else if mode == "test" {
-			pw = StrPassword0
-		}
-
-		mail, err := cfg.String("admin.mail")
-		if (err == nil || mail == "") && mode != "test" {
-			mail = "admin@example.com"
-		} else if mode == "test" {
-			mail = User0.Mail
-		}
-
-		pwEnc, _ := bcrypt.GenerateFromPassword([]byte(pw), bcryptCost)
-
-		// create a copy of global test data
-		user := database.User{Username: name, Password: string(pwEnc),
-			Role: "Admin", Mail: mail, Active: true}
-
-		// add admin user to DB
-		err = database.DBpool.Create(&user).Error
-	}
-
-	return err
+	return nil
 }
 
 // add default admin user, normal users and a guest to the DB
-func DBAddAdminAndUserAndGuest() error {
-	database.DBpool.AutoMigrate(&database.User{})
+func AddTestUsers() error {
+
+	err := ReadTestDataFromJson("../../testdata/testdata.json")
+	if err != nil {
+		return err
+	}
 
 	//create a copy of global test data
-	user0 := User0
-	userA := UserA
-	userB := UserB
-	userC := UserC
+	if len(GlobalTestData.Users) == 0 {
+		return fmt.Errorf("no users in test data")
+	}
 
-	// add admin user to DB
-	err := database.DBpool.Create(&user0).Error
-	// add normal users to DB
-	err = database.DBpool.Create(&userA).Error
-	err = database.DBpool.Create(&userB).Error
-	// add guest user to DB
-	err = database.DBpool.Create(&userC).Error
-	return err
+	database.DBpool.AutoMigrate(&database.User{})
+	err, _ = database.DBAddAdminUser(configuration.GlobalConfig)
+	if err != nil {
+		return err
+	}
+
+	for _, user := range GlobalTestData.Users {
+		if user.Role != "Admin" {
+			// add users to DB that are not admin users
+			var newUser database.User
+			newUser.Username = user.Username
+			newUser.Role = user.Role
+			newUser.Mail = user.Mail
+
+			pwEnc, _ := bcrypt.GenerateFromPassword([]byte(user.Password), 10)
+			newUser.Password = string(pwEnc)
+			err = database.DBpool.Create(&newUser).Error
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }

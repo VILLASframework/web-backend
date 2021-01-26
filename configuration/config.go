@@ -61,6 +61,7 @@ func InitConfig() error {
 		s3PathStyle     = flag.Bool("s3-pathstyle", false, "Use path-style S3 API")
 		jwtSecret       = flag.String("jwt-secret", "This should NOT be here!!@33$8&", "The JSON Web Token secret")
 		jwtExpiresAfter = flag.String("jwt-expires-after", "168h" /* 1 week */, "The time after which the JSON Web Token expires")
+		testDataPath    = flag.String("test-data-path", "database/testdata.json", "The path to the test data json file (used in test mode)")
 	)
 	flag.Parse()
 
@@ -85,6 +86,7 @@ func InitConfig() error {
 		"s3.region":         *s3Region,
 		"jwt.secret":        *jwtSecret,
 		"jwt.expires-after": *jwtExpiresAfter,
+		"test.datapath":     *testDataPath,
 	}
 
 	if *s3NoSSL == true {
@@ -122,6 +124,7 @@ func InitConfig() error {
 		"S3_PATHSTYLE":      "s3.pathstyle",
 		"JWT_SECRET":        "jwt.secret",
 		"JWT_EXPIRES_AFTER": "jwt.expires-after",
+		"TEST_DATA_PATH":    "test.datapath",
 	}
 
 	defaults := config.NewStatic(static)

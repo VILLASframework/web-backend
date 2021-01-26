@@ -25,6 +25,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -55,7 +56,6 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		panic(m)
 	}
-
 	err = database.InitDB(configuration.GlobalConfig)
 	if err != nil {
 		panic(m)
@@ -75,7 +75,8 @@ func TestMain(m *testing.M) {
 func TestAuthenticate(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	err, adminpw := database.DBAddAdminUser(configuration.GlobalConfig)
+	assert.NoError(t, err)
 
 	// try to authenticate with non JSON body
 	// should result in unauthorized
@@ -125,8 +126,9 @@ func TestAuthenticate(t *testing.T) {
 	assert.Equal(t, 401, w4.Code, w4.Body)
 
 	// authenticate as admin
+	log.Println(helper.AdminCredentials)
 	_, err = helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.AdminCredentials)
+		"/api/authenticate", "POST", helper.Credentials{Username: "admin", Password: adminpw})
 	assert.NoError(t, err)
 
 }
@@ -135,11 +137,12 @@ func TestAuthenticateQueryToken(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	err, adminpw := database.DBAddAdminUser(configuration.GlobalConfig)
+	assert.NoError(t, err)
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.AdminCredentials)
+		"/api/authenticate", "POST", helper.Credentials{Username: "admin", Password: adminpw})
 	assert.NoError(t, err)
 
 	w := httptest.NewRecorder()
@@ -156,11 +159,12 @@ func TestAddGetUser(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	err, adminpw := database.DBAddAdminUser(configuration.GlobalConfig)
+	assert.NoError(t, err)
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.AdminCredentials)
+		"/api/authenticate", "POST", helper.Credentials{Username: "admin", Password: adminpw})
 	assert.NoError(t, err)
 
 	// try to POST with non JSON body
@@ -225,7 +229,7 @@ func TestAddGetUser(t *testing.T) {
 	wrongUser.Mail = "test@test.com"
 	wrongUser.Role = "Guest"
 	wrongUser.Password = "blablabla"
-	wrongUser.Username = "User_A"
+	wrongUser.Username = "admin"
 	code, resp, err = helper.TestEndpoint(router, token,
 		"/api/users", "POST", helper.KeyModels{"user": wrongUser})
 	assert.NoError(t, err)
@@ -280,11 +284,12 @@ func TestUsersNotAllowedActions(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	err, adminpw := database.DBAddAdminUser(configuration.GlobalConfig)
+	assert.NoError(t, err)
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.AdminCredentials)
+		"/api/authenticate", "POST", helper.Credentials{Username: "admin", Password: adminpw})
 	assert.NoError(t, err)
 
 	// Add a user
@@ -340,11 +345,12 @@ func TestGetAllUsers(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	err, adminpw := database.DBAddAdminUser(configuration.GlobalConfig)
+	assert.NoError(t, err)
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.AdminCredentials)
+		"/api/authenticate", "POST", helper.Credentials{Username: "admin", Password: adminpw})
 	assert.NoError(t, err)
 
 	// get the length of the GET all users response
@@ -371,9 +377,14 @@ func TestGetAllUsers(t *testing.T) {
 
 	assert.Equal(t, finalNumber, initialNumber+1)
 
+	newUserCredentials := helper.Credentials{
+		Username: newUser.Username,
+		Password: newUser.Password,
+	}
+
 	// authenticate as normal user
 	token, err = helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.UserACredentials)
+		"/api/authenticate", "POST", newUserCredentials)
 	assert.NoError(t, err)
 
 	// try to get all users as normal user
@@ -389,11 +400,12 @@ func TestModifyAddedUserAsUser(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	err, adminpw := database.DBAddAdminUser(configuration.GlobalConfig)
+	assert.NoError(t, err)
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.AdminCredentials)
+		"/api/authenticate", "POST", helper.Credentials{Username: "admin", Password: adminpw})
 	assert.NoError(t, err)
 
 	// Add a user that will modify itself
@@ -546,11 +558,12 @@ func TestInvalidUserUpdate(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	err, adminpw := database.DBAddAdminUser(configuration.GlobalConfig)
+	assert.NoError(t, err)
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.AdminCredentials)
+		"/api/authenticate", "POST", helper.Credentials{Username: "admin", Password: adminpw})
 	assert.NoError(t, err)
 
 	// Add a user
@@ -582,7 +595,7 @@ func TestInvalidUserUpdate(t *testing.T) {
 	// try to PUT with username that is already taken
 	// should result in bad request
 	modRequest.Password = ""
-	modRequest.Username = "User_A"
+	modRequest.Username = "admin"
 	code, resp, err = helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
 		helper.KeyModels{"user": modRequest})
@@ -619,11 +632,12 @@ func TestModifyAddedUserAsAdmin(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	err, adminpw := database.DBAddAdminUser(configuration.GlobalConfig)
+	assert.NoError(t, err)
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.AdminCredentials)
+		"/api/authenticate", "POST", helper.Credentials{Username: "admin", Password: adminpw})
 	assert.NoError(t, err)
 
 	// Add a user
@@ -693,7 +707,7 @@ func TestModifyAddedUserAsAdmin(t *testing.T) {
 	// modify newUser's password, requires admin password
 	modRequest = UserRequest{
 		Password:    "4_g00d_pw!",
-		OldPassword: helper.StrPassword0,
+		OldPassword: adminpw,
 	}
 	code, resp, err = helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
@@ -711,7 +725,7 @@ func TestModifyAddedUserAsAdmin(t *testing.T) {
 
 	// authenticate as admin
 	token, err = helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.AdminCredentials)
+		"/api/authenticate", "POST", helper.Credentials{Username: "admin", Password: adminpw})
 	assert.NoError(t, err)
 
 	// modify newUser's Active status
@@ -738,11 +752,12 @@ func TestDeleteUser(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	err, adminpw := database.DBAddAdminUser(configuration.GlobalConfig)
+	assert.NoError(t, err)
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.AdminCredentials)
+		"/api/authenticate", "POST", helper.Credentials{Username: "admin", Password: adminpw})
 	assert.NoError(t, err)
 
 	// Add a user
