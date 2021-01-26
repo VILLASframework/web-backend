@@ -24,7 +24,6 @@ package helper
 import (
 	"encoding/json"
 	"fmt"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"github.com/jinzhu/gorm/dialects/postgres"
 	"golang.org/x/crypto/bcrypt"
@@ -63,10 +62,13 @@ var StrPasswordC = "guestpw"
 
 // Hash passwords with bcrypt algorithm
 var bcryptCost = 10
+var pw0, _ = bcrypt.GenerateFromPassword([]byte(StrPassword0), bcryptCost)
 var pwA, _ = bcrypt.GenerateFromPassword([]byte(StrPasswordA), bcryptCost)
 var pwB, _ = bcrypt.GenerateFromPassword([]byte(StrPasswordB), bcryptCost)
 var pwC, _ = bcrypt.GenerateFromPassword([]byte(StrPasswordC), bcryptCost)
 
+var User0 = database.User{Username: "User_0", Password: string(pw0),
+	Role: "Admin", Mail: "User_0@example.com"}
 var UserA = database.User{Username: "User_A", Password: string(pwA),
 	Role: "User", Mail: "User_A@example.com", Active: true}
 var UserB = database.User{Username: "User_B", Password: string(pwB),
@@ -81,27 +83,6 @@ type UserRequest struct {
 	Mail        string `json:"mail,omitempty"`
 	Role        string `json:"role,omitempty"`
 	Active      string `json:"active,omitempty"`
-}
-
-var NewUserA = UserRequest{
-	Username: UserA.Username,
-	Password: StrPasswordA,
-	Role:     UserA.Role,
-	Mail:     UserA.Mail,
-}
-
-var NewUserB = UserRequest{
-	Username: UserB.Username,
-	Password: StrPasswordB,
-	Role:     UserB.Role,
-	Mail:     UserB.Mail,
-}
-
-var NewUserC = UserRequest{
-	Username: UserC.Username,
-	Password: StrPasswordC,
-	Role:     UserC.Role,
-	Mail:     UserC.Mail,
 }
 
 // Infrastructure components
@@ -148,11 +129,6 @@ var ScenarioA = database.Scenario{
 	Running:         true,
 	StartParameters: postgres.Jsonb{startParametersA},
 }
-var ScenarioB = database.Scenario{
-	Name:            "Scenario_B",
-	Running:         false,
-	StartParameters: postgres.Jsonb{startParametersB},
-}
 
 // Component Configuration
 
@@ -184,27 +160,6 @@ var OutSignalB = database.Signal{
 	Unit:      "V",
 }
 
-var OutSignalC = database.Signal{
-	Name:      "outSignal_C",
-	Direction: "out",
-	Index:     3,
-	Unit:      "---",
-}
-
-var OutSignalD = database.Signal{
-	Name:      "outSignal_D",
-	Direction: "out",
-	Index:     4,
-	Unit:      "---",
-}
-
-var OutSignalE = database.Signal{
-	Name:      "outSignal_E",
-	Direction: "out",
-	Index:     5,
-	Unit:      "---",
-}
-
 var InSignalA = database.Signal{
 	Name:      "inSignal_A",
 	Direction: "in",
@@ -231,11 +186,8 @@ var DashboardB = database.Dashboard{
 }
 
 // Widgets
-var customPropertiesBox = json.RawMessage(`{"border_color" : "#4287f5", "border_color_opacity": 1, "background_color" : "#961520", "background_color_opacity" : 1}`)
 var customPropertiesSlider = json.RawMessage(`{"default_value" : 0, "orientation" : 0, "rangeUseMinMax": false, "rangeMin" : 0, "rangeMax": 200, "rangeUseMinMax" : true, "showUnit": true, "continous_update": false, "value": "", "resizeLeftRightLock": false, "resizeTopBottomLock": true, "step": 0.1 }`)
 var customPropertiesLabel = json.RawMessage(`{"textSize" : "20", "fontColor" : "#4287f5", "fontColor_opacity": 1}`)
-var customPropertiesButton = json.RawMessage(`{"pressed": false, "toggle" : false, "on_value" : 1, "off_value" : 0, "background_color": "#961520", "font_color": "#4287f5", "border_color": "#4287f5", "background_color_opacity": 1}`)
-var customPropertiesLamp = json.RawMessage(`{"signal" : 0, "on_color" : "#4287f5", "off_color": "#961520", "threshold" : 0.5, "on_color_opacity": 1, "off_color_opacity": 1}`)
 
 var WidgetA = database.Widget{
 	Name:             "Label",
@@ -267,51 +219,6 @@ var WidgetB = database.Widget{
 	SignalIDs:        []int64{},
 }
 
-var WidgetC = database.Widget{
-	Name:             "Box",
-	Type:             "Box",
-	Width:            200,
-	Height:           200,
-	MinHeight:        10,
-	MinWidth:         50,
-	X:                300,
-	Y:                10,
-	Z:                0,
-	IsLocked:         false,
-	CustomProperties: postgres.Jsonb{customPropertiesBox},
-	SignalIDs:        []int64{},
-}
-
-var WidgetD = database.Widget{
-	Name:             "Button",
-	Type:             "Button",
-	Width:            100,
-	Height:           100,
-	MinHeight:        50,
-	MinWidth:         100,
-	X:                10,
-	Y:                50,
-	Z:                0,
-	IsLocked:         false,
-	CustomProperties: postgres.Jsonb{customPropertiesButton},
-	SignalIDs:        []int64{},
-}
-
-var WidgetE = database.Widget{
-	Name:             "Lamp",
-	Type:             "Lamp",
-	Width:            200,
-	Height:           20,
-	MinHeight:        10,
-	MinWidth:         50,
-	X:                50,
-	Y:                300,
-	Z:                0,
-	IsLocked:         false,
-	CustomProperties: postgres.Jsonb{customPropertiesLamp},
-	SignalIDs:        []int64{},
-}
-
 func ReadTestDataFromJson(path string) error {
 
 	jsonFile, err := os.Open(path)
@@ -334,40 +241,18 @@ func ReadTestDataFromJson(path string) error {
 	return nil
 }
 
-// add default admin user, normal users and a guest to the DB
+// add test users defined above
 func AddTestUsers() error {
 
-	err := ReadTestDataFromJson("../../testdata/testdata.json")
-	if err != nil {
-		return err
-	}
-
-	//create a copy of global test data
-	if len(GlobalTestData.Users) == 0 {
-		return fmt.Errorf("no users in test data")
-	}
-
+	testUsers := []database.User{User0, UserA, UserB, UserC}
 	database.DBpool.AutoMigrate(&database.User{})
-	err, _ = database.DBAddAdminUser(configuration.GlobalConfig)
-	if err != nil {
-		return err
-	}
 
-	for _, user := range GlobalTestData.Users {
-		if user.Role != "Admin" {
-			// add users to DB that are not admin users
-			var newUser database.User
-			newUser.Username = user.Username
-			newUser.Role = user.Role
-			newUser.Mail = user.Mail
-
-			pwEnc, _ := bcrypt.GenerateFromPassword([]byte(user.Password), 10)
-			newUser.Password = string(pwEnc)
-			err = database.DBpool.Create(&newUser).Error
-			if err != nil {
-				return err
-			}
+	for _, user := range testUsers {
+		err := database.DBpool.Create(&user).Error
+		if err != nil {
+			return err
 		}
+
 	}
 
 	return nil

@@ -22,6 +22,7 @@
 package scenario
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"testing"
@@ -49,6 +50,18 @@ type UserRequest struct {
 	Mail     string `json:"mail,omitempty"`
 	Role     string `json:"role,omitempty"`
 	Active   string `json:"active,omitempty"`
+}
+
+var newScenario1 = ScenarioRequest{
+	Name:            "Scenario1",
+	Running:         true,
+	StartParameters: postgres.Jsonb{json.RawMessage(`{"parameter1" : "testValue1A", "parameter2" : "testValue2A", "parameter3" : 42}`)},
+}
+
+var newScenario2 = ScenarioRequest{
+	Name:            "Scenario2",
+	Running:         false,
+	StartParameters: postgres.Jsonb{json.RawMessage(`{"parameter1" : "testValue1B", "parameter2" : "testValue2B", "parameter3" : 55}`)},
 }
 
 func TestMain(m *testing.M) {
@@ -82,12 +95,6 @@ func TestAddScenario(t *testing.T) {
 	database.MigrateModels()
 	assert.NoError(t, helper.AddTestUsers())
 
-	newScenario := ScenarioRequest{
-		Name:            helper.ScenarioA.Name,
-		Running:         helper.ScenarioA.Running,
-		StartParameters: helper.ScenarioA.StartParameters,
-	}
-
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
 		"/api/authenticate", "POST", helper.UserACredentials)
@@ -102,12 +109,12 @@ func TestAddScenario(t *testing.T) {
 
 	// test POST scenarios/ $newScenario as normal user
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenario})
+		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenario1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// Compare POST's response with the newScenario
-	err = helper.CompareResponse(resp, helper.KeyModels{"scenario": newScenario})
+	err = helper.CompareResponse(resp, helper.KeyModels{"scenario": newScenario1})
 	assert.NoError(t, err)
 
 	// Read newScenario's ID from the response
@@ -121,7 +128,7 @@ func TestAddScenario(t *testing.T) {
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// Compare GET's response with the newScenario
-	err = helper.CompareResponse(resp, helper.KeyModels{"scenario": newScenario})
+	err = helper.CompareResponse(resp, helper.KeyModels{"scenario": newScenario1})
 	assert.NoError(t, err)
 
 	// try to POST a malformed scenario
@@ -150,7 +157,7 @@ func TestAddScenario(t *testing.T) {
 	// try to add scenario as guest user
 	// should return an unprocessable entity error
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenario})
+		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenario1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
@@ -190,18 +197,13 @@ func TestUpdateScenario(t *testing.T) {
 	assert.NoError(t, err)
 
 	// test POST scenarios/ $newScenario
-	newScenario := ScenarioRequest{
-		Name:            helper.ScenarioA.Name,
-		Running:         helper.ScenarioA.Running,
-		StartParameters: helper.ScenarioA.StartParameters,
-	}
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenario})
+		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenario1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// Compare POST's response with the newScenario
-	err = helper.CompareResponse(resp, helper.KeyModels{"scenario": newScenario})
+	err = helper.CompareResponse(resp, helper.KeyModels{"scenario": newScenario1})
 	assert.NoError(t, err)
 
 	// Read newScenario's ID from the response
@@ -269,14 +271,9 @@ func TestGetAllScenariosAsAdmin(t *testing.T) {
 		"/api/authenticate", "POST", helper.UserBCredentials)
 	assert.NoError(t, err)
 
-	// test POST scenarios/ $newScenarioB
-	newScenarioB := ScenarioRequest{
-		Name:            helper.ScenarioB.Name,
-		Running:         helper.ScenarioB.Running,
-		StartParameters: helper.ScenarioB.StartParameters,
-	}
+	// test POST scenarios/ $newScenario1
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenarioB})
+		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenario1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -285,14 +282,9 @@ func TestGetAllScenariosAsAdmin(t *testing.T) {
 		"/api/authenticate", "POST", helper.UserACredentials)
 	assert.NoError(t, err)
 
-	// test POST scenarios/ $newScenarioA
-	newScenarioA := ScenarioRequest{
-		Name:            helper.ScenarioA.Name,
-		Running:         helper.ScenarioA.Running,
-		StartParameters: helper.ScenarioA.StartParameters,
-	}
+	// test POST scenarios/ $newScenario2
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenarioA})
+		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenario2})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -325,15 +317,9 @@ func TestGetAllScenariosAsUser(t *testing.T) {
 		"/api/scenarios", "GET", nil)
 	assert.NoError(t, err)
 
-	// test POST scenarios/ $newScenarioB
-	newScenarioB := ScenarioRequest{
-		Name:            helper.ScenarioB.Name,
-		Running:         helper.ScenarioB.Running,
-		StartParameters: helper.ScenarioB.StartParameters,
-	}
-
+	// test POST scenarios/ $newScenario2
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenarioB})
+		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenario2})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -342,14 +328,9 @@ func TestGetAllScenariosAsUser(t *testing.T) {
 		"/api/authenticate", "POST", helper.UserACredentials)
 	assert.NoError(t, err)
 
-	// test POST scenarios/ $newScenarioA
-	newScenarioA := ScenarioRequest{
-		Name:            helper.ScenarioA.Name,
-		Running:         helper.ScenarioA.Running,
-		StartParameters: helper.ScenarioA.StartParameters,
-	}
+	// test POST scenarios/ $newScenario1
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenarioA})
+		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenario1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -378,13 +359,8 @@ func TestDeleteScenario(t *testing.T) {
 	assert.NoError(t, err)
 
 	// test POST scenarios/ $newScenario
-	newScenario := ScenarioRequest{
-		Name:            helper.ScenarioA.Name,
-		Running:         helper.ScenarioA.Running,
-		StartParameters: helper.ScenarioA.StartParameters,
-	}
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenario})
+		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenario1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -427,7 +403,7 @@ func TestDeleteScenario(t *testing.T) {
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// Compare DELETE's response with the newScenario
-	err = helper.CompareResponse(resp, helper.KeyModels{"scenario": newScenario})
+	err = helper.CompareResponse(resp, helper.KeyModels{"scenario": newScenario1})
 	assert.NoError(t, err)
 
 	// Again count the number of all the scenarios returned
@@ -450,13 +426,8 @@ func TestAddUserToScenario(t *testing.T) {
 	assert.NoError(t, err)
 
 	// test POST scenarios/ $newScenario
-	newScenario := ScenarioRequest{
-		Name:            helper.ScenarioA.Name,
-		Running:         helper.ScenarioA.Running,
-		StartParameters: helper.ScenarioA.StartParameters,
-	}
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenario})
+		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenario1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -535,13 +506,8 @@ func TestGetAllUsersOfScenario(t *testing.T) {
 	assert.NoError(t, err)
 
 	// test POST scenarios/ $newScenario
-	newScenario := ScenarioRequest{
-		Name:            helper.ScenarioA.Name,
-		Running:         helper.ScenarioA.Running,
-		StartParameters: helper.ScenarioA.StartParameters,
-	}
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenario})
+		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenario1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -620,13 +586,8 @@ func TestRemoveUserFromScenario(t *testing.T) {
 	assert.NoError(t, err)
 
 	// test POST scenarios/ $newScenario
-	newScenario := ScenarioRequest{
-		Name:            helper.ScenarioA.Name,
-		Running:         helper.ScenarioA.Running,
-		StartParameters: helper.ScenarioA.StartParameters,
-	}
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenario})
+		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenario1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 

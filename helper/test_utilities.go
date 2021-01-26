@@ -46,8 +46,8 @@ type Credentials struct {
 }
 
 var AdminCredentials = Credentials{
-	Username: "admin",
-	Password: "xyz789",
+	Username: "User_0",
+	Password: StrPassword0,
 }
 
 var UserACredentials = Credentials{
