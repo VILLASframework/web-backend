@@ -88,7 +88,6 @@ type UserRequest struct {
 // Infrastructure components
 
 var propertiesA = json.RawMessage(`{"prop1" : "a nice prop"}`)
-var propertiesB = json.RawMessage(`{"prop1" : "not so nice"}`)
 
 var ICA = database.InfrastructureComponent{
 	UUID:                 "7be0322d-354e-431e-84bd-ae4c9633138b",
@@ -105,24 +104,9 @@ var ICA = database.InfrastructureComponent{
 	ManagedExternally:    false,
 }
 
-var ICB = database.InfrastructureComponent{
-	UUID:                 "4854af30-325f-44a5-ad59-b67b2597de68",
-	WebsocketURL:         "xxx.yyy.zzz.aaa",
-	Type:                 "dpsim",
-	Category:             "simulator",
-	Name:                 "Test DPsim Simulator",
-	Uptime:               -1.0,
-	State:                "running",
-	Location:             "ACS Laboratory",
-	Description:          "This is a test description",
-	StartParameterScheme: postgres.Jsonb{propertiesB},
-	ManagedExternally:    true,
-}
-
 // Scenarios
 
 var startParametersA = json.RawMessage(`{"parameter1" : "testValue1A", "parameter2" : "testValue2A", "parameter3" : 42}`)
-var startParametersB = json.RawMessage(`{"parameter1" : "testValue1B", "parameter2" : "testValue2B", "parameter3" : 43}`)
 
 var ScenarioA = database.Scenario{
 	Name:            "Scenario_A",
@@ -135,12 +119,6 @@ var ScenarioA = database.Scenario{
 var ConfigA = database.ComponentConfiguration{
 	Name:            "Example for Signal generator",
 	StartParameters: postgres.Jsonb{startParametersA},
-	FileIDs:         []int64{},
-}
-
-var ConfigB = database.ComponentConfiguration{
-	Name:            "VILLASnode gateway X",
-	StartParameters: postgres.Jsonb{startParametersB},
 	FileIDs:         []int64{},
 }
 
