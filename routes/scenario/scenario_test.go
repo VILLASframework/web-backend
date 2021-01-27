@@ -212,8 +212,8 @@ func TestUpdateScenario(t *testing.T) {
 
 	updatedScenario := ScenarioRequest{
 		Name:            "Updated name",
-		Running:         !helper.ScenarioA.Running,
-		StartParameters: helper.ScenarioA.StartParameters,
+		Running:         false,
+		StartParameters: postgres.Jsonb{RawMessage: json.RawMessage(`{"parameter1" : "testValue1A", "parameter2" : "testValue2A", "parameter3" : 42}`)},
 	}
 
 	// try to update with non JSON body

@@ -25,7 +25,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
-	"github.com/jinzhu/gorm/dialects/postgres"
 	"golang.org/x/crypto/bcrypt"
 	"io/ioutil"
 	"log"
@@ -83,16 +82,6 @@ type UserRequest struct {
 	Mail        string `json:"mail,omitempty"`
 	Role        string `json:"role,omitempty"`
 	Active      string `json:"active,omitempty"`
-}
-
-// Scenarios
-
-var startParametersA = json.RawMessage(`{"parameter1" : "testValue1A", "parameter2" : "testValue2A", "parameter3" : 42}`)
-
-var ScenarioA = database.Scenario{
-	Name:            "Scenario_A",
-	Running:         true,
-	StartParameters: postgres.Jsonb{startParametersA},
 }
 
 func ReadTestDataFromJson(path string) error {
