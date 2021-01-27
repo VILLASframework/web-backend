@@ -120,8 +120,6 @@ func ReadTestDataFromJson(path string) error {
 		return fmt.Errorf("error unmarshalling json: %v", err)
 	}
 
-	log.Println(len(GlobalTestData.Users))
-
 	return nil
 }
 
