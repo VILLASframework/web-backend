@@ -1,0 +1,267 @@
+{
+  "users": [
+    {
+      "username": "User_0",
+      "password": "xyz789",
+      "role": "Admin",
+      "mail": "User_0@example.com"
+    },
+    {
+      "username": "User_A",
+      "password": "abc123",
+      "role": "User",
+      "mail": "User_A@example.com"
+    },
+    {
+      "username": "User_B",
+      "password": "bcd234",
+      "role": "User",
+      "mail": "User_B@example.com"
+    },
+    {
+      "username": "User_C",
+      "password": "guestpw",
+      "role": "Guest",
+      "mail": "User_C@example.com"
+    }
+  ],
+  "ics": [
+    {
+      "uuid": "7be0322d-354e-431e-84bd-ae4c9633138b",
+      "name": "ACS Demo Signals",
+      "type": "villas-node",
+      "category": "gateway",
+      "websocketurl": "https://villas.k8s.eonerc.rwth-aachen.de/ws/ws_sig",
+      "apiurl": "https://villas.k8s.eonerc.rwth-aachen.de/ws/api/v2",
+      "location": "K8S",
+      "description": "A signal generator for testing purposes",
+      "state": "idle",
+      "managedexternally": false,
+      "startparameterscheme": {
+        "param1": 42,
+        "param2": "testvalue"
+      }
+    },
+    {
+      "uuid": "4854af30-325f-44a5-ad59-b67b2597de68",
+      "name": "Test DPsim Simulator",
+      "type": "dpsim",
+      "category": "simulator",
+      "location": "acs lab",
+      "description": "DPsim simulator",
+      "state": "running",
+      "managedexternally": true,
+      "startparameterscheme": {
+        "param1": 55,
+        "param2": "testvalue2"
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "name": "Scenario_A",
+      "startParameters": {
+        "param1": "a nice param",
+        "param2": "a not so nice param"
+      }
+    },
+    {
+      "name": "Scenario_B",
+      "startParameters": {
+        "param1": "another nice param",
+        "param2": "another not so nice param"
+      }
+    }
+  ],
+  "configs": [
+    {
+      "name": "Example for Signal generator",
+      "startParameters": {
+        "param1": "nice param",
+        "param2": "not so nice"
+      },
+      "fileIDs" : []
+    },
+    {
+      "name": "Example for DPsim simulator",
+      "startParameters": {
+        "param1": "cool thing",
+        "param2": "who needs this"
+      },
+      "fileIDs" : []
+    }
+  ],
+  "dashboards": [
+    {
+      "name": "Dashboard_A",
+      "grid": 15
+    },
+    {
+      "name": "Dashboard_B",
+      "grid": 10
+    }
+
+  ],
+  "results": [
+    {
+      "description": "Test run 1"
+    },
+    {
+      "description": "Test run 2"
+    }
+  ],
+  "widgets": [
+    {
+      "name": "MyLabel",
+      "type": "Label",
+      "width": 100,
+      "height": 50,
+      "minWidth": 40,
+      "minHeight": 80,
+      "x": 10,
+      "y": 10,
+      "z": 200,
+      "isLocked": false,
+      "signalIDs": [],
+      "customProperties": {
+        "textSize" : "20",
+        "fontColor" : "#4287f5",
+        "fontColor_opacity": 1
+      }
+    },
+    {
+      "name": "MySlider",
+      "type": "Slider",
+      "width": 400,
+      "height": 50,
+      "minWidth": 30,
+      "minHeight": 380,
+      "x": 70,
+      "y": 400,
+      "z": 0,
+      "isLocked": false,
+      "signalIDs": [],
+      "customProperties": {
+        "default_value" : 0,
+        "orientation" : 0,
+        "rangeMin" : 0,
+        "rangeMax": 200,
+        "rangeUseMinMax" : true,
+        "showUnit": true,
+        "continous_update": false,
+        "value": "",
+        "resizeLeftRightLock": false,
+        "resizeTopBottomLock": true,
+        "step": 0.1
+      }
+    },
+    {
+      "name": "MyBox",
+      "type": "Box",
+      "width": 200,
+      "height": 200,
+      "minWidth": 10,
+      "minHeight": 50,
+      "x": 300,
+      "y": 10,
+      "z": 0,
+      "isLocked": false,
+      "signalIDs": [],
+      "customProperties": {
+        "border_color" : "#4287f5",
+        "border_color_opacity": 1,
+        "background_color" : "#961520",
+        "background_color_opacity" : 1
+      }
+    },
+    {
+      "name": "MyButton",
+      "type": "Button",
+      "width": 100,
+      "height": 100,
+      "minWidth": 50,
+      "minHeight": 100,
+      "x": 10,
+      "y": 50,
+      "z": 0,
+      "isLocked": false,
+      "signalIDs": [],
+      "customProperties": {
+        "pressed": false,
+        "toggle" : false,
+        "on_value" : 1,
+        "off_value" : 0,
+        "background_color": "#961520",
+        "font_color": "#4287f5",
+        "border_color": "#4287f5",
+        "background_color_opacity": 1
+      }
+    },
+    {
+      "name": "MyLamp",
+      "type": "Lamp",
+      "width": 200,
+      "height": 20,
+      "minWidth": 10,
+      "minHeight": 50,
+      "x": 50,
+      "y": 300,
+      "z": 0,
+      "isLocked": false,
+      "signalIDs": [],
+      "customProperties": {
+        "on_color" : "#4287f5",
+        "off_color": "#961520",
+        "threshold" : 0.5,
+        "on_color_opacity": 1,
+        "off_color_opacity": 1
+      }
+    }
+  ],
+  "signals": [
+    {
+      "name": "outSignal_A",
+      "direction": "out",
+      "unit": "V",
+      "index": 1
+    },
+    {
+      "name": "outSignal_B",
+      "direction": "out",
+      "unit": "V",
+      "index": 2
+    },
+    {
+      "name": "outSignal_C",
+      "direction": "out",
+      "unit": "---",
+      "index": 3
+    },
+    {
+      "name": "outSignal_D",
+      "direction": "out",
+      "unit": "---",
+      "index": 4
+    },
+    {
+      "name": "outSignal_E",
+      "direction": "out",
+      "unit": "---",
+      "index": 5
+    },
+    {
+      "name": "inSignal_A",
+      "direction": "in",
+      "unit": "---",
+      "index": 1
+    },
+    {
+      "name": "inSignal_B",
+      "direction": "in",
+      "unit": "---",
+      "index": 2
+    }
+
+  ]
+
+}

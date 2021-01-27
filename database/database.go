@@ -23,8 +23,11 @@ package database
 
 import (
 	"fmt"
+	"golang.org/x/crypto/bcrypt"
 	"log"
+	"math/rand"
 	"strings"
+	"time"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
@@ -109,4 +112,59 @@ func MigrateModels() {
 	DBpool.AutoMigrate(&Dashboard{})
 	DBpool.AutoMigrate(&Widget{})
 	DBpool.AutoMigrate(&Result{})
+}
+
+// DBAddAdminUser adds a default admin user to the DB
+func DBAddAdminUser(cfg *config.Config) (error, string) {
+	DBpool.AutoMigrate(User{})
+
+	// Check if admin user exists in DB
+	var users []User
+	err := DBpool.Where("Role = ?", "Admin").Find(&users).Error
+	adminPW := ""
+
+	if len(users) == 0 {
+		fmt.Println("No admin user found in DB, adding default admin user.")
+
+		name, err := cfg.String("admin.user")
+		if err != nil || name == "" {
+			name = "admin"
+		}
+
+		adminPW, err = cfg.String("admin.pass")
+		if err != nil || adminPW == "" {
+			adminPW = generatePassword(16)
+			fmt.Printf("  Generated admin password: %s\n", adminPW)
+		}
+
+		mail, err := cfg.String("admin.mail")
+		if err == nil || mail == "" {
+			mail = "admin@example.com"
+		}
+
+		pwEnc, _ := bcrypt.GenerateFromPassword([]byte(adminPW), 10)
+
+		// create a copy of global test data
+		user := User{Username: name, Password: string(pwEnc),
+			Role: "Admin", Mail: mail, Active: true}
+
+		// add admin user to DB
+		err = DBpool.Create(&user).Error
+	}
+
+	return err, adminPW
+}
+
+func generatePassword(Len int) string {
+	rand.Seed(time.Now().UnixNano())
+	chars := []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
+		"abcdefghijklmnopqrstuvwxyz" +
+		"0123456789")
+
+	var b strings.Builder
+	for i := 0; i < Len; i++ {
+		b.WriteRune(chars[rand.Intn(len(chars))])
+	}
+
+	return b.String()
 }

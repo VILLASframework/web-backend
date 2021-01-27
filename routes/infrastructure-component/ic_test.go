@@ -89,6 +89,34 @@ type ICAction struct {
 	} `json:"properties,omitempty"`
 }
 
+var newIC1 = ICRequest{
+	UUID:                 "7be0322d-354e-431e-84bd-ae4c9633138b",
+	WebsocketURL:         "https://villas.k8s.eonerc.rwth-aachen.de/ws/ws_sig",
+	APIURL:               "https://villas.k8s.eonerc.rwth-aachen.de/ws/api/v2",
+	Type:                 "villas-node",
+	Name:                 "ACS Demo Signals",
+	Category:             "gateway",
+	State:                "idle",
+	Location:             "k8s",
+	Description:          "A signal generator for testing purposes",
+	StartParameterScheme: postgres.Jsonb{json.RawMessage(`{"prop1" : "a nice prop"}`)},
+	ManagedExternally:    newFalse(),
+}
+
+var newIC2 = ICRequest{
+	UUID:                 "4854af30-325f-44a5-ad59-b67b2597de68",
+	WebsocketURL:         "xxx.yyy.zzz.aaa",
+	APIURL:               "https://villas.k8s.eonerc.rwth-aachen.de/ws/api/v2",
+	Type:                 "dpsim",
+	Name:                 "Test DPsim Simulator",
+	Category:             "simulator",
+	State:                "running",
+	Location:             "k8s",
+	Description:          "This is a test description",
+	StartParameterScheme: postgres.Jsonb{json.RawMessage(`{"prop1" : "a nice prop"}`)},
+	ManagedExternally:    newTrue(),
+}
+
 func TestMain(m *testing.M) {
 	err := configuration.InitConfig()
 	if err != nil {
@@ -119,7 +147,7 @@ func TestMain(m *testing.M) {
 func TestAddICAsAdmin(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// check AMQP connection
 	err := CheckConnection()
@@ -152,7 +180,7 @@ func TestAddICAsAdmin(t *testing.T) {
 	// try to POST malformed IC (required fields missing, validation should fail)
 	// should result in an unprocessable entity
 	newMalformedIC := ICRequest{
-		UUID: helper.ICB.UUID,
+		UUID: newIC2.UUID,
 	}
 	code, resp, err = helper.TestEndpoint(router, token,
 		"/api/ic", "POST", helper.KeyModels{"ic": newMalformedIC})
@@ -160,26 +188,13 @@ func TestAddICAsAdmin(t *testing.T) {
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// test POST ic/ $newIC
-	newIC := ICRequest{
-		UUID:                 helper.ICA.UUID,
-		WebsocketURL:         helper.ICA.WebsocketURL,
-		APIURL:               helper.ICB.APIURL,
-		Type:                 helper.ICA.Type,
-		Name:                 helper.ICA.Name,
-		Category:             helper.ICA.Category,
-		State:                helper.ICA.State,
-		Location:             helper.ICA.Location,
-		Description:          helper.ICA.Description,
-		StartParameterScheme: helper.ICA.StartParameterScheme,
-		ManagedExternally:    newFalse(),
-	}
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/ic", "POST", helper.KeyModels{"ic": newIC})
+		"/api/ic", "POST", helper.KeyModels{"ic": newIC1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// Compare POST's response with the newIC
-	err = helper.CompareResponse(resp, helper.KeyModels{"ic": newIC})
+	err = helper.CompareResponse(resp, helper.KeyModels{"ic": newIC1})
 	assert.NoError(t, err)
 
 	// Read newIC's ID from the response
@@ -194,7 +209,7 @@ func TestAddICAsAdmin(t *testing.T) {
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// Compare GET's response with the newIC
-	err = helper.CompareResponse(resp, helper.KeyModels{"ic": newIC})
+	err = helper.CompareResponse(resp, helper.KeyModels{"ic": newIC1})
 	assert.NoError(t, err)
 
 	// Try to GET a IC that does not exist
@@ -204,35 +219,21 @@ func TestAddICAsAdmin(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
 
-	newExternalIC := ICRequest{
-		UUID:                 helper.ICB.UUID,
-		WebsocketURL:         helper.ICB.WebsocketURL,
-		APIURL:               helper.ICB.APIURL,
-		Type:                 helper.ICB.Type,
-		Name:                 helper.ICB.Name,
-		Category:             helper.ICB.Category,
-		State:                helper.ICB.State,
-		Location:             helper.ICB.Location,
-		Description:          helper.ICB.Description,
-		StartParameterScheme: helper.ICB.StartParameterScheme,
-		ManagedExternally:    newTrue(),
-	}
-
 	// test creation of external IC (should lead to emission of AMQP message to VILLAS)
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/ic", "POST", helper.KeyModels{"ic": newExternalIC})
+		"/api/ic", "POST", helper.KeyModels{"ic": newIC2})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// Compare POST's response with the newExternalIC
-	err = helper.CompareResponse(resp, helper.KeyModels{"ic": newExternalIC})
+	err = helper.CompareResponse(resp, helper.KeyModels{"ic": newIC2})
 	assert.NoError(t, err)
 }
 
 func TestAddICAsUser(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// authenticate as user
 	token, err := helper.AuthenticateForTest(router,
@@ -240,23 +241,10 @@ func TestAddICAsUser(t *testing.T) {
 	assert.NoError(t, err)
 
 	// test POST ic/ $newIC
-	newIC := ICRequest{
-		UUID:                 helper.ICA.UUID,
-		WebsocketURL:         helper.ICA.WebsocketURL,
-		Type:                 helper.ICA.Type,
-		Name:                 helper.ICA.Name,
-		Category:             helper.ICA.Category,
-		State:                helper.ICA.State,
-		Location:             helper.ICA.Location,
-		Description:          helper.ICA.Description,
-		StartParameterScheme: helper.ICA.StartParameterScheme,
-		ManagedExternally:    newFalse(),
-	}
-
 	// This should fail with unprocessable entity 422 error code
 	// Normal users are not allowed to add ICs
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/ic", "POST", helper.KeyModels{"ic": newIC})
+		"/api/ic", "POST", helper.KeyModels{"ic": newIC1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 }
@@ -264,7 +252,7 @@ func TestAddICAsUser(t *testing.T) {
 func TestUpdateICAsAdmin(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -272,25 +260,13 @@ func TestUpdateICAsAdmin(t *testing.T) {
 	assert.NoError(t, err)
 
 	// test POST ic/ $newIC
-	newIC := ICRequest{
-		UUID:                 helper.ICA.UUID,
-		WebsocketURL:         helper.ICA.WebsocketURL,
-		Type:                 helper.ICA.Type,
-		Name:                 helper.ICA.Name,
-		Category:             helper.ICA.Category,
-		State:                helper.ICA.State,
-		Location:             helper.ICA.Location,
-		Description:          helper.ICA.Description,
-		StartParameterScheme: helper.ICA.StartParameterScheme,
-		ManagedExternally:    newFalse(),
-	}
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/ic", "POST", helper.KeyModels{"ic": newIC})
+		"/api/ic", "POST", helper.KeyModels{"ic": newIC1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// Compare POST's response with the newIC
-	err = helper.CompareResponse(resp, helper.KeyModels{"ic": newIC})
+	err = helper.CompareResponse(resp, helper.KeyModels{"ic": newIC1})
 	assert.NoError(t, err)
 
 	// Read newIC's ID from the response
@@ -305,14 +281,14 @@ func TestUpdateICAsAdmin(t *testing.T) {
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 
 	// Test PUT IC
-	newIC.WebsocketURL = "ThisIsMyNewURL"
+	newIC1.WebsocketURL = "ThisIsMyNewURL"
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/ic/%v", newICID), "PUT", helper.KeyModels{"ic": newIC})
+		fmt.Sprintf("/api/ic/%v", newICID), "PUT", helper.KeyModels{"ic": newIC1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// Compare PUT's response with the updated newIC
-	err = helper.CompareResponse(resp, helper.KeyModels{"ic": newIC})
+	err = helper.CompareResponse(resp, helper.KeyModels{"ic": newIC1})
 	assert.NoError(t, err)
 
 	// Get the updated newIC
@@ -323,7 +299,7 @@ func TestUpdateICAsAdmin(t *testing.T) {
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// Compare GET's response with the updated newIC
-	err = helper.CompareResponse(resp, helper.KeyModels{"ic": newIC})
+	err = helper.CompareResponse(resp, helper.KeyModels{"ic": newIC1})
 	assert.NoError(t, err)
 
 	// fake an IC update (create) message
@@ -332,18 +308,18 @@ func TestUpdateICAsAdmin(t *testing.T) {
 	update.Status.State = new(string)
 	*update.Status.State = "idle"
 	update.Status.Name = new(string)
-	*update.Status.Name = helper.ICB.Name
+	*update.Status.Name = newIC2.Name
 	update.Status.Category = new(string)
-	*update.Status.Category = helper.ICB.Category
+	*update.Status.Category = newIC2.Category
 	update.Status.Type = new(string)
-	*update.Status.Type = helper.ICB.Type
+	*update.Status.Type = newIC2.Type
 
 	payload, err := json.Marshal(update)
 	assert.NoError(t, err)
 
 	var headers map[string]interface{}
 	headers = make(map[string]interface{}) // empty map
-	headers["uuid"] = helper.ICB.UUID      // set uuid
+	headers["uuid"] = newIC2.UUID          // set uuid
 
 	msg := amqp.Publishing{
 		DeliveryMode:    2,
@@ -382,7 +358,7 @@ func TestUpdateICAsAdmin(t *testing.T) {
 func TestUpdateICAsUser(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -390,20 +366,8 @@ func TestUpdateICAsUser(t *testing.T) {
 	assert.NoError(t, err)
 
 	// test POST ic/ $newIC
-	newIC := ICRequest{
-		UUID:                 helper.ICA.UUID,
-		WebsocketURL:         helper.ICA.WebsocketURL,
-		Type:                 helper.ICA.Type,
-		Name:                 helper.ICA.Name,
-		Category:             helper.ICA.Category,
-		State:                helper.ICA.State,
-		Location:             helper.ICA.Location,
-		Description:          helper.ICA.Description,
-		StartParameterScheme: helper.ICA.StartParameterScheme,
-		ManagedExternally:    newFalse(),
-	}
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/ic", "POST", helper.KeyModels{"ic": newIC})
+		"/api/ic", "POST", helper.KeyModels{"ic": newIC1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -418,9 +382,9 @@ func TestUpdateICAsUser(t *testing.T) {
 
 	// Test PUT IC
 	// This should fail with unprocessable entity status code 422
-	newIC.WebsocketURL = "ThisIsMyNewURL"
+	newIC1.WebsocketURL = "ThisIsMyNewURL2"
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/ic/%v", newICID), "PUT", helper.KeyModels{"ic": newIC})
+		fmt.Sprintf("/api/ic/%v", newICID), "PUT", helper.KeyModels{"ic": newIC1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
@@ -429,7 +393,7 @@ func TestUpdateICAsUser(t *testing.T) {
 func TestDeleteICAsAdmin(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -437,20 +401,8 @@ func TestDeleteICAsAdmin(t *testing.T) {
 	assert.NoError(t, err)
 
 	// test POST ic/ $newIC
-	newIC := ICRequest{
-		UUID:                 helper.ICA.UUID,
-		WebsocketURL:         helper.ICA.WebsocketURL,
-		Type:                 helper.ICA.Type,
-		Name:                 helper.ICA.Name,
-		Category:             helper.ICA.Category,
-		State:                helper.ICA.State,
-		Location:             helper.ICA.Location,
-		Description:          helper.ICA.Description,
-		StartParameterScheme: helper.ICA.StartParameterScheme,
-		ManagedExternally:    newFalse(),
-	}
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/ic", "POST", helper.KeyModels{"ic": newIC})
+		"/api/ic", "POST", helper.KeyModels{"ic": newIC1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -470,7 +422,7 @@ func TestDeleteICAsAdmin(t *testing.T) {
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// Compare DELETE's response with the newIC
-	err = helper.CompareResponse(resp, helper.KeyModels{"ic": newIC})
+	err = helper.CompareResponse(resp, helper.KeyModels{"ic": newIC1})
 	assert.NoError(t, err)
 
 	// Again count the number of all the ICs returned
@@ -486,18 +438,18 @@ func TestDeleteICAsAdmin(t *testing.T) {
 	update.Status.State = new(string)
 	*update.Status.State = "idle"
 	update.Status.Name = new(string)
-	*update.Status.Name = helper.ICB.Name
+	*update.Status.Name = newIC2.Name
 	update.Status.Category = new(string)
-	*update.Status.Category = helper.ICB.Category
+	*update.Status.Category = newIC2.Category
 	update.Status.Type = new(string)
-	*update.Status.Type = helper.ICB.Type
+	*update.Status.Type = newIC2.Type
 
 	payload, err := json.Marshal(update)
 	assert.NoError(t, err)
 
 	var headers map[string]interface{}
 	headers = make(map[string]interface{}) // empty map
-	headers["uuid"] = helper.ICB.UUID      // set uuid
+	headers["uuid"] = newIC2.UUID          // set uuid
 
 	msg := amqp.Publishing{
 		DeliveryMode:    2,
@@ -540,7 +492,7 @@ func TestDeleteICAsAdmin(t *testing.T) {
 func TestDeleteICAsUser(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -548,20 +500,8 @@ func TestDeleteICAsUser(t *testing.T) {
 	assert.NoError(t, err)
 
 	// test POST ic/ $newIC
-	newIC := ICRequest{
-		UUID:                 helper.ICA.UUID,
-		WebsocketURL:         helper.ICA.WebsocketURL,
-		Type:                 helper.ICA.Type,
-		Name:                 helper.ICA.Name,
-		Category:             helper.ICA.Category,
-		State:                helper.ICA.State,
-		Location:             helper.ICA.Location,
-		Description:          helper.ICA.Description,
-		StartParameterScheme: helper.ICA.StartParameterScheme,
-		ManagedExternally:    newFalse(),
-	}
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/ic", "POST", helper.KeyModels{"ic": newIC})
+		"/api/ic", "POST", helper.KeyModels{"ic": newIC1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -576,7 +516,7 @@ func TestDeleteICAsUser(t *testing.T) {
 
 	// Test DELETE ICs
 	// This should fail with unprocessable entity status code 422
-	newIC.WebsocketURL = "ThisIsMyNewURL"
+	newIC1.WebsocketURL = "ThisIsMyNewURL3"
 	code, resp, err = helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/ic/%v", newICID), "DELETE", nil)
 	assert.NoError(t, err)
@@ -586,7 +526,7 @@ func TestDeleteICAsUser(t *testing.T) {
 func TestGetAllICs(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -599,39 +539,15 @@ func TestGetAllICs(t *testing.T) {
 	assert.NoError(t, err)
 
 	// test POST ic/ $newICA
-	newICA := ICRequest{
-		UUID:                 helper.ICA.UUID,
-		WebsocketURL:         helper.ICA.WebsocketURL,
-		Type:                 helper.ICA.Type,
-		Name:                 helper.ICA.Name,
-		Category:             helper.ICA.Category,
-		State:                helper.ICA.State,
-		Location:             helper.ICA.Location,
-		Description:          helper.ICA.Description,
-		StartParameterScheme: helper.ICA.StartParameterScheme,
-		ManagedExternally:    newFalse(),
-	}
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/ic", "POST", helper.KeyModels{"ic": newICA})
+		"/api/ic", "POST", helper.KeyModels{"ic": newIC1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// test POST ic/ $newICB
-	newICB := ICRequest{
-		UUID:                 helper.ICB.UUID,
-		WebsocketURL:         helper.ICB.WebsocketURL,
-		Type:                 helper.ICB.Type,
-		Name:                 helper.ICB.Name,
-		Category:             helper.ICB.Category,
-		State:                helper.ICB.State,
-		Location:             helper.ICB.Location,
-		Description:          helper.ICB.Description,
-		StartParameterScheme: helper.ICB.StartParameterScheme,
-		ManagedExternally:    newFalse(),
-	}
 
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/ic", "POST", helper.KeyModels{"ic": newICB})
+		"/api/ic", "POST", helper.KeyModels{"ic": newIC1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -658,7 +574,7 @@ func TestGetAllICs(t *testing.T) {
 func TestGetConfigsOfIC(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -666,20 +582,8 @@ func TestGetConfigsOfIC(t *testing.T) {
 	assert.NoError(t, err)
 
 	// test POST ic/ $newICA
-	newICA := ICRequest{
-		UUID:                 helper.ICA.UUID,
-		WebsocketURL:         helper.ICA.WebsocketURL,
-		Type:                 helper.ICA.Type,
-		Name:                 helper.ICA.Name,
-		Category:             helper.ICA.Category,
-		State:                helper.ICA.State,
-		Location:             helper.ICA.Location,
-		Description:          helper.ICA.Description,
-		StartParameterScheme: helper.ICA.StartParameterScheme,
-		ManagedExternally:    newFalse(),
-	}
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/ic", "POST", helper.KeyModels{"ic": newICA})
+		"/api/ic", "POST", helper.KeyModels{"ic": newIC1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -719,7 +623,7 @@ func TestGetConfigsOfIC(t *testing.T) {
 func TestSendActionToIC(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -727,20 +631,8 @@ func TestSendActionToIC(t *testing.T) {
 	assert.NoError(t, err)
 
 	// test POST ic/ $newICA
-	newICA := ICRequest{
-		UUID:                 helper.ICA.UUID,
-		WebsocketURL:         helper.ICA.WebsocketURL,
-		Type:                 helper.ICA.Type,
-		Name:                 helper.ICA.Name,
-		Category:             helper.ICA.Category,
-		State:                helper.ICA.State,
-		Location:             helper.ICA.Location,
-		Description:          helper.ICA.Description,
-		StartParameterScheme: helper.ICA.StartParameterScheme,
-		ManagedExternally:    newFalse(),
-	}
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/ic", "POST", helper.KeyModels{"ic": newICA})
+		"/api/ic", "POST", helper.KeyModels{"ic": newIC1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -754,7 +646,7 @@ func TestSendActionToIC(t *testing.T) {
 		When: time.Now().Unix(),
 	}
 	action1.Properties.UUID = new(string)
-	*action1.Properties.UUID = newICA.UUID
+	*action1.Properties.UUID = newIC1.UUID
 	actions := [1]ICAction{action1}
 
 	// Send action to IC
@@ -774,7 +666,7 @@ func TestCreateUpdateViaAMQPRecv(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -792,7 +684,7 @@ func TestCreateUpdateViaAMQPRecv(t *testing.T) {
 
 	var headers map[string]interface{}
 	headers = make(map[string]interface{}) // empty map
-	headers["uuid"] = helper.ICB.UUID      // set uuid
+	headers["uuid"] = newIC2.UUID          // set uuid
 
 	msg := amqp.Publishing{
 		DeliveryMode:    2,
@@ -824,28 +716,28 @@ func TestCreateUpdateViaAMQPRecv(t *testing.T) {
 
 	// complete the (required) data of an IC
 	update.Status.Name = new(string)
-	*update.Status.Name = helper.ICA.Name
+	*update.Status.Name = newIC1.Name
 	update.Status.Category = new(string)
-	*update.Status.Category = helper.ICA.Category
+	*update.Status.Category = newIC1.Category
 	update.Status.Type = new(string)
-	*update.Status.Type = helper.ICA.Type
+	*update.Status.Type = newIC1.Type
 	update.Status.Uptime = new(float64)
 	*update.Status.Uptime = -1.0
 	update.Status.WS_url = new(string)
-	*update.Status.WS_url = helper.ICA.WebsocketURL
+	*update.Status.WS_url = newIC1.WebsocketURL
 	update.Status.API_url = new(string)
-	*update.Status.API_url = helper.ICA.APIURL
+	*update.Status.API_url = newIC1.APIURL
 	update.Status.Description = new(string)
-	*update.Status.Description = helper.ICA.Description
+	*update.Status.Description = newIC1.Description
 	update.Status.Location = new(string)
-	*update.Status.Location = helper.ICA.Location
+	*update.Status.Location = newIC1.Location
 
 	payload, err = json.Marshal(update)
 	assert.NoError(t, err)
 
 	var headersA map[string]interface{}
 	headersA = make(map[string]interface{}) // empty map
-	headersA["uuid"] = helper.ICA.UUID
+	headersA["uuid"] = newIC1.UUID
 
 	msg = amqp.Publishing{
 		DeliveryMode:    2,
@@ -907,7 +799,7 @@ func TestDeleteICViaAMQPRecv(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -922,28 +814,28 @@ func TestDeleteICViaAMQPRecv(t *testing.T) {
 	*update.Status.State = "idle"
 	// complete the (required) data of an IC
 	update.Status.Name = new(string)
-	*update.Status.Name = helper.ICA.Name
+	*update.Status.Name = newIC1.Name
 	update.Status.Category = new(string)
-	*update.Status.Category = helper.ICA.Category
+	*update.Status.Category = newIC1.Category
 	update.Status.Type = new(string)
-	*update.Status.Type = helper.ICA.Type
+	*update.Status.Type = newIC1.Type
 	update.Status.Uptime = new(float64)
 	*update.Status.Uptime = -1.0
 	update.Status.WS_url = new(string)
-	*update.Status.WS_url = helper.ICA.WebsocketURL
+	*update.Status.WS_url = newIC1.WebsocketURL
 	update.Status.API_url = new(string)
-	*update.Status.API_url = helper.ICA.APIURL
+	*update.Status.API_url = newIC1.APIURL
 	update.Status.Description = new(string)
-	*update.Status.Description = helper.ICA.Description
+	*update.Status.Description = newIC1.Description
 	update.Status.Location = new(string)
-	*update.Status.Location = helper.ICA.Location
+	*update.Status.Location = newIC1.Location
 
 	payload, err := json.Marshal(update)
 	assert.NoError(t, err)
 
 	var headers map[string]interface{}
 	headers = make(map[string]interface{}) // empty map
-	headers["uuid"] = helper.ICB.UUID      // set uuid
+	headers["uuid"] = newIC2.UUID          // set uuid
 
 	msg := amqp.Publishing{
 		DeliveryMode:    2,
@@ -974,9 +866,9 @@ func TestDeleteICViaAMQPRecv(t *testing.T) {
 
 	// add scenario
 	newScenario := ScenarioRequest{
-		Name:            helper.ScenarioA.Name,
-		Running:         helper.ScenarioA.Running,
-		StartParameters: helper.ScenarioA.StartParameters,
+		Name:            "ScenarioA",
+		Running:         true,
+		StartParameters: postgres.Jsonb{RawMessage: json.RawMessage(`{"parameter1" : "testValue1B", "parameter2" : "testValue2B", "parameter3" : 55}`)},
 	}
 
 	code, resp, err := helper.TestEndpoint(router, token,
@@ -994,11 +886,11 @@ func TestDeleteICViaAMQPRecv(t *testing.T) {
 
 	// Add component config and associate with IC and scenario
 	newConfig := ConfigRequest{
-		Name:            helper.ConfigA.Name,
+		Name:            "ConfigA",
 		ScenarioID:      uint(newScenarioID),
 		ICID:            1,
-		StartParameters: helper.ConfigA.StartParameters,
-		FileIDs:         helper.ConfigA.FileIDs,
+		StartParameters: postgres.Jsonb{json.RawMessage(`{"parameter1" : "testValue1B", "parameter2" : "testValue2B", "parameter3" : 55}`)},
+		FileIDs:         []int64{},
 	}
 
 	code, resp, err = helper.TestEndpoint(router, token,

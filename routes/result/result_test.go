@@ -65,6 +65,10 @@ type ResponseResult struct {
 	Result database.Result `json:"result"`
 }
 
+var newResult = ResultRequest{
+	Description: "This is a test result.",
+}
+
 func addScenario() (scenarioID uint) {
 
 	// authenticate as admin
@@ -77,9 +81,9 @@ func addScenario() (scenarioID uint) {
 
 	// POST $newScenario
 	newScenario := ScenarioRequest{
-		Name:            helper.ScenarioA.Name,
-		Running:         helper.ScenarioA.Running,
-		StartParameters: helper.ScenarioA.StartParameters,
+		Name:            "Scenario1",
+		Running:         true,
+		StartParameters: postgres.Jsonb{RawMessage: json.RawMessage(`{"parameter1" : "testValue1A", "parameter2" : "testValue2A", "parameter3" : 42}`)},
 	}
 	_, resp, _ := helper.TestEndpoint(router, token,
 		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenario})
@@ -124,7 +128,7 @@ func TestGetAllResultsOfScenario(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// prepare the content of the DB for testing
 	// by adding a scenario
@@ -139,12 +143,8 @@ func TestGetAllResultsOfScenario(t *testing.T) {
 	configSnapshot1 := json.RawMessage(`{"configs": [ {"Name" : "conf1", "scenarioID" : 1}, {"Name" : "conf2", "scenarioID" : 1}]}`)
 	confSnapshots := postgres.Jsonb{configSnapshot1}
 
-	newResult := ResultRequest{
-		Description:     "This is a test result.",
-		ScenarioID:      scenarioID,
-		ConfigSnapshots: confSnapshots,
-	}
-
+	newResult.ScenarioID = scenarioID
+	newResult.ConfigSnapshots = confSnapshots
 	code, resp, err := helper.TestEndpoint(router, token,
 		base_api_results, "POST", helper.KeyModels{"result": newResult})
 	assert.NoError(t, err)
@@ -175,20 +175,15 @@ func TestAddGetUpdateDeleteResult(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// prepare the content of the DB for testing
 	// by adding a scenario
 	scenarioID := addScenario()
 	configSnapshot1 := json.RawMessage(`{"configs": [ {"Name" : "conf1", "scenarioID" : 1}, {"Name" : "conf2", "scenarioID" : 1}]}`)
 	confSnapshots := postgres.Jsonb{configSnapshot1}
-
-	newResult := ResultRequest{
-		Description:     "This is a test result.",
-		ScenarioID:      scenarioID,
-		ConfigSnapshots: confSnapshots,
-	}
-
+	newResult.ScenarioID = scenarioID
+	newResult.ConfigSnapshots = confSnapshots
 	// authenticate as normal userB who has no access to new scenario
 	token, err := helper.AuthenticateForTest(router,
 		base_api_auth, "POST", helper.UserBCredentials)
@@ -360,7 +355,7 @@ func TestAddGetUpdateDeleteResult(t *testing.T) {
 func TestAddDeleteResultFile(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// prepare the content of the DB for testing
 	// by adding a scenario
@@ -368,12 +363,8 @@ func TestAddDeleteResultFile(t *testing.T) {
 	configSnapshot1 := json.RawMessage(`{"configs": [ {"Name" : "conf1", "scenarioID" : 1}, {"Name" : "conf2", "scenarioID" : 1}]}`)
 	confSnapshots := postgres.Jsonb{configSnapshot1}
 
-	newResult := ResultRequest{
-		Description:     "This is a test result.",
-		ScenarioID:      scenarioID,
-		ConfigSnapshots: confSnapshots,
-	}
-
+	newResult.ScenarioID = scenarioID
+	newResult.ConfigSnapshots = confSnapshots
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
 		base_api_auth, "POST", helper.UserACredentials)

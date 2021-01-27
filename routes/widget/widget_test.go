@@ -22,6 +22,7 @@
 package widget
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"testing"
@@ -67,13 +68,28 @@ type ScenarioRequest struct {
 	StartParameters postgres.Jsonb `json:"startParameters,omitempty"`
 }
 
+var newWidget = WidgetRequest{
+	Name:             "My label",
+	Type:             "Label",
+	Width:            100,
+	Height:           50,
+	MinWidth:         40,
+	MinHeight:        80,
+	X:                10,
+	Y:                10,
+	Z:                200,
+	IsLocked:         false,
+	CustomProperties: postgres.Jsonb{RawMessage: json.RawMessage(`{"textSize" : "20", "fontColor" : "#4287f5", "fontColor_opacity": 1}`)},
+	SignalIDs:        []int64{},
+}
+
 func addScenarioAndDashboard(token string) (scenarioID uint, dashboardID uint) {
 
 	// POST $newScenario
 	newScenario := ScenarioRequest{
-		Name:            helper.ScenarioA.Name,
-		Running:         helper.ScenarioA.Running,
-		StartParameters: helper.ScenarioA.StartParameters,
+		Name:            "Scenario1",
+		Running:         true,
+		StartParameters: postgres.Jsonb{json.RawMessage(`{"parameter1" : "testValue1A", "parameter2" : "testValue2A", "parameter3" : 42}`)},
 	}
 	_, resp, _ := helper.TestEndpoint(router, token,
 		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenario})
@@ -83,8 +99,8 @@ func addScenarioAndDashboard(token string) (scenarioID uint, dashboardID uint) {
 
 	// test POST dashboards/ $newDashboard
 	newDashboard := DashboardRequest{
-		Name:       helper.DashboardA.Name,
-		Grid:       helper.DashboardA.Grid,
+		Name:       "DashboardA",
+		Grid:       15,
 		ScenarioID: uint(newScenarioID),
 	}
 	_, resp, _ = helper.TestEndpoint(router, token,
@@ -131,7 +147,7 @@ func TestMain(m *testing.M) {
 func TestAddWidget(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
@@ -140,22 +156,7 @@ func TestAddWidget(t *testing.T) {
 
 	_, dashboardID := addScenarioAndDashboard(token)
 
-	newWidget := WidgetRequest{
-		Name:             helper.WidgetA.Name,
-		Type:             helper.WidgetA.Type,
-		Width:            helper.WidgetA.Width,
-		Height:           helper.WidgetA.Height,
-		MinWidth:         helper.WidgetA.MinWidth,
-		MinHeight:        helper.WidgetA.MinHeight,
-		X:                helper.WidgetA.X,
-		Y:                helper.WidgetA.Y,
-		Z:                helper.WidgetA.Z,
-		IsLocked:         helper.WidgetA.IsLocked,
-		CustomProperties: helper.WidgetA.CustomProperties,
-		DashboardID:      dashboardID,
-		SignalIDs:        helper.WidgetA.SignalIDs,
-	}
-
+	newWidget.DashboardID = dashboardID
 	// authenticate as userB who has no access to scenario
 	token, err = helper.AuthenticateForTest(router,
 		"/api/authenticate", "POST", helper.UserBCredentials)
@@ -231,7 +232,7 @@ func TestAddWidget(t *testing.T) {
 func TestUpdateWidget(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
@@ -241,21 +242,7 @@ func TestUpdateWidget(t *testing.T) {
 	_, dashboardID := addScenarioAndDashboard(token)
 
 	// test POST widgets/ $newWidget
-	newWidget := WidgetRequest{
-		Name:             helper.WidgetA.Name,
-		Type:             helper.WidgetA.Type,
-		Width:            helper.WidgetA.Width,
-		Height:           helper.WidgetA.Height,
-		MinWidth:         helper.WidgetA.MinWidth,
-		MinHeight:        helper.WidgetA.MinHeight,
-		X:                helper.WidgetA.X,
-		Y:                helper.WidgetA.Y,
-		Z:                helper.WidgetA.Z,
-		IsLocked:         helper.WidgetA.IsLocked,
-		CustomProperties: helper.WidgetA.CustomProperties,
-		DashboardID:      dashboardID,
-		SignalIDs:        helper.WidgetA.SignalIDs,
-	}
+	newWidget.DashboardID = dashboardID
 	code, resp, err := helper.TestEndpoint(router, token,
 		"/api/widgets", "POST", helper.KeyModels{"widget": newWidget})
 	assert.NoError(t, err)
@@ -266,14 +253,14 @@ func TestUpdateWidget(t *testing.T) {
 	assert.NoError(t, err)
 
 	updatedWidget := WidgetRequest{
-		Name:             helper.WidgetB.Name,
-		Type:             helper.WidgetB.Type,
-		Width:            helper.WidgetB.Width,
-		Height:           helper.WidgetB.Height,
-		MinWidth:         helper.WidgetB.MinWidth,
-		MinHeight:        helper.WidgetB.MinHeight,
-		CustomProperties: helper.WidgetA.CustomProperties,
-		SignalIDs:        helper.WidgetB.SignalIDs,
+		Name:             "My slider",
+		Type:             "Slider",
+		Width:            400,
+		Height:           50,
+		MinWidth:         30,
+		MinHeight:        380,
+		CustomProperties: postgres.Jsonb{RawMessage: json.RawMessage(`{"default_value" : 0, "orientation" : 0, "rangeUseMinMax": false, "rangeMin" : 0, "rangeMax": 200, "rangeUseMinMax" : true, "showUnit": true, "continous_update": false, "value": "", "resizeLeftRightLock": false, "resizeTopBottomLock": true, "step": 0.1 }`)},
+		SignalIDs:        []int64{},
 	}
 
 	// authenticate as userB who has no access to scenario
@@ -343,7 +330,7 @@ func TestUpdateWidget(t *testing.T) {
 func TestDeleteWidget(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
@@ -353,21 +340,7 @@ func TestDeleteWidget(t *testing.T) {
 	_, dashboardID := addScenarioAndDashboard(token)
 
 	// test POST widgets/ $newWidget
-	newWidget := WidgetRequest{
-		Name:             helper.WidgetA.Name,
-		Type:             helper.WidgetA.Type,
-		Width:            helper.WidgetA.Width,
-		Height:           helper.WidgetA.Height,
-		MinWidth:         helper.WidgetA.MinWidth,
-		MinHeight:        helper.WidgetA.MinHeight,
-		X:                helper.WidgetA.X,
-		Y:                helper.WidgetA.Y,
-		Z:                helper.WidgetA.Z,
-		IsLocked:         helper.WidgetA.IsLocked,
-		CustomProperties: helper.WidgetA.CustomProperties,
-		DashboardID:      dashboardID,
-		SignalIDs:        helper.WidgetA.SignalIDs,
-	}
+	newWidget.DashboardID = dashboardID
 	code, resp, err := helper.TestEndpoint(router, token,
 		"/api/widgets", "POST", helper.KeyModels{"widget": newWidget})
 	assert.NoError(t, err)
@@ -420,7 +393,7 @@ func TestDeleteWidget(t *testing.T) {
 func TestGetAllWidgetsOfDashboard(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
@@ -452,40 +425,26 @@ func TestGetAllWidgetsOfDashboard(t *testing.T) {
 	assert.NoError(t, err)
 
 	// test POST widgets/ $newWidget
-	newWidgetA := WidgetRequest{
-		Name:             helper.WidgetA.Name,
-		Type:             helper.WidgetA.Type,
-		Width:            helper.WidgetA.Width,
-		Height:           helper.WidgetA.Height,
-		MinWidth:         helper.WidgetA.MinWidth,
-		MinHeight:        helper.WidgetA.MinHeight,
-		X:                helper.WidgetA.X,
-		Y:                helper.WidgetA.Y,
-		Z:                helper.WidgetA.Z,
-		IsLocked:         helper.WidgetA.IsLocked,
-		CustomProperties: helper.WidgetA.CustomProperties,
-		DashboardID:      dashboardID,
-		SignalIDs:        helper.WidgetA.SignalIDs,
-	}
+	newWidget.DashboardID = dashboardID
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/widgets", "POST", helper.KeyModels{"widget": newWidgetA})
+		"/api/widgets", "POST", helper.KeyModels{"widget": newWidget})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	newWidgetB := WidgetRequest{
-		Name:             helper.WidgetB.Name,
-		Type:             helper.WidgetB.Type,
-		Width:            helper.WidgetB.Width,
-		Height:           helper.WidgetB.Height,
-		MinWidth:         helper.WidgetB.MinWidth,
-		MinHeight:        helper.WidgetB.MinHeight,
-		X:                helper.WidgetB.X,
-		Y:                helper.WidgetB.Y,
-		Z:                helper.WidgetB.Z,
-		IsLocked:         helper.WidgetB.IsLocked,
-		CustomProperties: helper.WidgetB.CustomProperties,
+		Name:             "My slider",
+		Type:             "Slider",
+		Width:            400,
+		Height:           50,
+		MinWidth:         30,
+		MinHeight:        380,
+		X:                70,
+		Y:                400,
+		Z:                0,
+		IsLocked:         true,
+		CustomProperties: postgres.Jsonb{RawMessage: json.RawMessage(`{"default_value" : 0, "orientation" : 0, "rangeUseMinMax": false, "rangeMin" : 0, "rangeMax": 200, "rangeUseMinMax" : true, "showUnit": true, "continous_update": false, "value": "", "resizeLeftRightLock": false, "resizeTopBottomLock": true, "step": 0.1 }`)},
 		DashboardID:      dashboardID,
-		SignalIDs:        helper.WidgetB.SignalIDs,
+		SignalIDs:        []int64{},
 	}
 	code, resp, err = helper.TestEndpoint(router, token,
 		"/api/widgets", "POST", helper.KeyModels{"widget": newWidgetB})

@@ -22,6 +22,7 @@
 package component_configuration
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"testing"
@@ -68,6 +69,17 @@ type ScenarioRequest struct {
 	StartParameters postgres.Jsonb `json:"startParameters,omitempty"`
 }
 
+var newConfig1 = ConfigRequest{
+	Name:            "Example for Signal generator",
+	StartParameters: postgres.Jsonb{RawMessage: json.RawMessage(`{"parameter1" : "testValue1A", "parameter2" : "testValue2A", "parameter3" : 42}`)},
+	FileIDs:         []int64{},
+}
+
+func newFalse() *bool {
+	b := false
+	return &b
+}
+
 func addScenarioAndIC() (scenarioID uint, ICID uint) {
 
 	// authenticate as admin
@@ -76,17 +88,18 @@ func addScenarioAndIC() (scenarioID uint, ICID uint) {
 
 	// POST $newICA
 	newICA := ICRequest{
-		UUID:                 helper.ICA.UUID,
-		WebsocketURL:         helper.ICA.WebsocketURL,
-		Type:                 helper.ICA.Type,
-		Name:                 helper.ICA.Name,
-		Category:             helper.ICA.Category,
-		State:                helper.ICA.State,
-		Location:             helper.ICA.Location,
-		Description:          helper.ICA.Description,
-		StartParameterScheme: helper.ICA.StartParameterScheme,
-		ManagedExternally:    &helper.ICA.ManagedExternally,
+		UUID:                 "7be0322d-354e-431e-84bd-ae4c9633138b",
+		WebsocketURL:         "https://villas.k8s.eonerc.rwth-aachen.de/ws/ws_sig",
+		Type:                 "villas-node",
+		Name:                 "ACS Demo Signals",
+		Category:             "gateway",
+		State:                "idle",
+		Location:             "k8s",
+		Description:          "A signal generator for testing purposes",
+		StartParameterScheme: postgres.Jsonb{json.RawMessage(`{"prop1" : "a nice prop"}`)},
+		ManagedExternally:    newFalse(),
 	}
+
 	code, resp, err := helper.TestEndpoint(router, token,
 		"/api/ic", "POST", helper.KeyModels{"ic": newICA})
 	if code != 200 || err != nil {
@@ -97,20 +110,8 @@ func addScenarioAndIC() (scenarioID uint, ICID uint) {
 	newICID, _ := helper.GetResponseID(resp)
 
 	// POST a second IC to change to that IC during testing
-	newICB := ICRequest{
-		UUID:                 helper.ICB.UUID,
-		WebsocketURL:         helper.ICB.WebsocketURL,
-		Type:                 helper.ICB.Type,
-		Name:                 helper.ICB.Name,
-		Category:             helper.ICB.Category,
-		State:                helper.ICB.State,
-		Location:             helper.ICB.Location,
-		Description:          helper.ICB.Description,
-		StartParameterScheme: helper.ICB.StartParameterScheme,
-		ManagedExternally:    &helper.ICA.ManagedExternally,
-	}
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/ic", "POST", helper.KeyModels{"ic": newICB})
+		"/api/ic", "POST", helper.KeyModels{"ic": newICA})
 	if code != 200 || err != nil {
 		fmt.Println("Adding IC returned code", code, err, resp)
 	}
@@ -121,9 +122,9 @@ func addScenarioAndIC() (scenarioID uint, ICID uint) {
 
 	// POST $newScenario
 	newScenario := ScenarioRequest{
-		Name:            helper.ScenarioA.Name,
-		Running:         helper.ScenarioA.Running,
-		StartParameters: helper.ScenarioA.StartParameters,
+		Name:            "Scenario1",
+		Running:         true,
+		StartParameters: postgres.Jsonb{json.RawMessage(`{"parameter1" : "testValue1A", "parameter2" : "testValue2A", "parameter3" : 42}`)},
 	}
 	code, resp, err = helper.TestEndpoint(router, token,
 		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenario})
@@ -172,21 +173,15 @@ func TestMain(m *testing.M) {
 func TestAddConfig(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// prepare the content of the DB for testing
 	// by adding a scenario and a IC to the DB
 	// using the respective endpoints of the API
 	scenarioID, ICID := addScenarioAndIC()
 
-	newConfig := ConfigRequest{
-		Name:            helper.ConfigA.Name,
-		ScenarioID:      scenarioID,
-		ICID:            ICID,
-		StartParameters: helper.ConfigA.StartParameters,
-		FileIDs:         helper.ConfigA.FileIDs,
-	}
-
+	newConfig1.ScenarioID = scenarioID
+	newConfig1.ICID = ICID
 	// authenticate as normal userB who has no access to new scenario
 	token, err := helper.AuthenticateForTest(router,
 		base_api_auth, "POST", helper.UserBCredentials)
@@ -195,7 +190,7 @@ func TestAddConfig(t *testing.T) {
 	// try to POST with no access
 	// should result in unprocessable entity
 	code, resp, err := helper.TestEndpoint(router, token,
-		base_api_configs, "POST", helper.KeyModels{"config": newConfig})
+		base_api_configs, "POST", helper.KeyModels{"config": newConfig1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
@@ -217,12 +212,12 @@ func TestAddConfig(t *testing.T) {
 
 	// test POST newConfig
 	code, resp, err = helper.TestEndpoint(router, token,
-		base_api_configs, "POST", helper.KeyModels{"config": newConfig})
+		base_api_configs, "POST", helper.KeyModels{"config": newConfig1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// Compare POST's response with the newConfig
-	err = helper.CompareResponse(resp, helper.KeyModels{"config": newConfig})
+	err = helper.CompareResponse(resp, helper.KeyModels{"config": newConfig1})
 	assert.NoError(t, err)
 
 	// Read newConfig's ID from the response
@@ -236,7 +231,7 @@ func TestAddConfig(t *testing.T) {
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// Compare GET's response with the newConfig
-	err = helper.CompareResponse(resp, helper.KeyModels{"config": newConfig})
+	err = helper.CompareResponse(resp, helper.KeyModels{"config": newConfig1})
 	assert.NoError(t, err)
 
 	// try to POST a malformed component config
@@ -268,7 +263,7 @@ func TestUpdateConfig(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// prepare the content of the DB for testing
 	// by adding a scenario and a IC to the DB
@@ -281,15 +276,10 @@ func TestUpdateConfig(t *testing.T) {
 	assert.NoError(t, err)
 
 	// test POST newConfig
-	newConfig := ConfigRequest{
-		Name:            helper.ConfigA.Name,
-		ScenarioID:      scenarioID,
-		ICID:            ICID,
-		StartParameters: helper.ConfigA.StartParameters,
-		FileIDs:         helper.ConfigA.FileIDs,
-	}
+	newConfig1.ScenarioID = scenarioID
+	newConfig1.ICID = ICID
 	code, resp, err := helper.TestEndpoint(router, token,
-		base_api_configs, "POST", helper.KeyModels{"config": newConfig})
+		base_api_configs, "POST", helper.KeyModels{"config": newConfig1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -298,8 +288,8 @@ func TestUpdateConfig(t *testing.T) {
 	assert.NoError(t, err)
 
 	updatedConfig := ConfigRequest{
-		Name:            helper.ConfigB.Name,
-		StartParameters: helper.ConfigB.StartParameters,
+		Name:            "VILLASnode gateway X",
+		StartParameters: postgres.Jsonb{RawMessage: json.RawMessage(`{"parameter1" : "testValue1B", "parameter2" : "testValue2B", "parameter3" : 43}`)},
 	}
 
 	// authenticate as normal userB who has no access to new scenario
@@ -380,20 +370,14 @@ func TestUpdateConfig(t *testing.T) {
 func TestDeleteConfig(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// prepare the content of the DB for testing
 	// by adding a scenario and a IC to the DB
 	// using the respective endpoints of the API
 	scenarioID, ICID := addScenarioAndIC()
-
-	newConfig := ConfigRequest{
-		Name:            helper.ConfigA.Name,
-		ScenarioID:      scenarioID,
-		ICID:            ICID,
-		StartParameters: helper.ConfigA.StartParameters,
-		FileIDs:         helper.ConfigA.FileIDs,
-	}
+	newConfig1.ScenarioID = scenarioID
+	newConfig1.ICID = ICID
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
@@ -402,7 +386,7 @@ func TestDeleteConfig(t *testing.T) {
 
 	// test POST newConfig
 	code, resp, err := helper.TestEndpoint(router, token,
-		base_api_configs, "POST", helper.KeyModels{"config": newConfig})
+		base_api_configs, "POST", helper.KeyModels{"config": newConfig1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -439,7 +423,7 @@ func TestDeleteConfig(t *testing.T) {
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// Compare DELETE's response with the newConfig
-	err = helper.CompareResponse(resp, helper.KeyModels{"config": newConfig})
+	err = helper.CompareResponse(resp, helper.KeyModels{"config": newConfig1})
 	assert.NoError(t, err)
 
 	// Again count the number of all the component configs returned
@@ -453,12 +437,14 @@ func TestDeleteConfig(t *testing.T) {
 func TestGetAllConfigsOfScenario(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// prepare the content of the DB for testing
 	// by adding a scenario and a IC to the DB
 	// using the respective endpoints of the API
 	scenarioID, ICID := addScenarioAndIC()
+	newConfig1.ScenarioID = scenarioID
+	newConfig1.ICID = ICID
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
@@ -466,15 +452,8 @@ func TestGetAllConfigsOfScenario(t *testing.T) {
 	assert.NoError(t, err)
 
 	// test POST newConfig
-	newConfig := ConfigRequest{
-		Name:            helper.ConfigA.Name,
-		ScenarioID:      scenarioID,
-		ICID:            ICID,
-		StartParameters: helper.ConfigA.StartParameters,
-		FileIDs:         helper.ConfigA.FileIDs,
-	}
 	code, resp, err := helper.TestEndpoint(router, token,
-		base_api_configs, "POST", helper.KeyModels{"config": newConfig})
+		base_api_configs, "POST", helper.KeyModels{"config": newConfig1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 

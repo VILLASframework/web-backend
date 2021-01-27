@@ -22,6 +22,7 @@
 package dashboard
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -52,13 +53,18 @@ type ScenarioRequest struct {
 	StartParameters postgres.Jsonb `json:"startParameters,omitempty"`
 }
 
+var newDashboard = DashboardRequest{
+	Name: "Dashboard_A",
+	Grid: 15,
+}
+
 func addScenario(token string) (scenarioID uint) {
 
 	// POST $newScenario
 	newScenario := ScenarioRequest{
-		Name:            helper.ScenarioA.Name,
-		Running:         helper.ScenarioA.Running,
-		StartParameters: helper.ScenarioA.StartParameters,
+		Name:            "Scenario1",
+		Running:         true,
+		StartParameters: postgres.Jsonb{json.RawMessage(`{"parameter1" : "testValue1A", "parameter2" : "testValue2A", "parameter3" : 42}`)},
 	}
 	_, resp, err := helper.TestEndpoint(router, token,
 		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenario})
@@ -103,7 +109,7 @@ func TestMain(m *testing.M) {
 func TestAddDashboard(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
@@ -112,12 +118,8 @@ func TestAddDashboard(t *testing.T) {
 
 	scenarioID := addScenario(token)
 
-	// test POST dashboards/ $newDashboard
-	newDashboard := DashboardRequest{
-		Name:       helper.DashboardA.Name,
-		Grid:       helper.DashboardA.Grid,
-		ScenarioID: scenarioID,
-	}
+	// test POST dashboards/ $newDashboad
+	newDashboard.ScenarioID = scenarioID
 	code, resp, err := helper.TestEndpoint(router, token,
 		"/api/dashboards", "POST", helper.KeyModels{"dashboard": newDashboard})
 	assert.NoError(t, err)
@@ -189,7 +191,7 @@ func TestAddDashboard(t *testing.T) {
 func TestUpdateDashboard(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
@@ -199,11 +201,7 @@ func TestUpdateDashboard(t *testing.T) {
 	scenarioID := addScenario(token)
 
 	// test POST dashboards/ $newDashboard
-	newDashboard := DashboardRequest{
-		Name:       helper.DashboardA.Name,
-		Grid:       helper.DashboardA.Grid,
-		ScenarioID: scenarioID,
-	}
+	newDashboard.ScenarioID = scenarioID
 	code, resp, err := helper.TestEndpoint(router, token,
 		"/api/dashboards", "POST", helper.KeyModels{"dashboard": newDashboard})
 	assert.NoError(t, err)
@@ -214,8 +212,8 @@ func TestUpdateDashboard(t *testing.T) {
 	assert.NoError(t, err)
 
 	updatedDashboard := DashboardRequest{
-		Name: helper.DashboardB.Name,
-		Grid: helper.DashboardB.Grid,
+		Name: "Dashboard_B",
+		Grid: 10,
 	}
 
 	// authenticate as guest user
@@ -270,7 +268,7 @@ func TestUpdateDashboard(t *testing.T) {
 func TestDeleteDashboard(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
@@ -280,11 +278,7 @@ func TestDeleteDashboard(t *testing.T) {
 	scenarioID := addScenario(token)
 
 	// test POST dashboards/ $newDashboard
-	newDashboard := DashboardRequest{
-		Name:       helper.DashboardA.Name,
-		Grid:       helper.DashboardA.Grid,
-		ScenarioID: scenarioID,
-	}
+	newDashboard.ScenarioID = scenarioID
 	code, resp, err := helper.TestEndpoint(router, token,
 		"/api/dashboards", "POST", helper.KeyModels{"dashboard": newDashboard})
 	assert.NoError(t, err)
@@ -343,7 +337,7 @@ func TestDeleteDashboard(t *testing.T) {
 func TestGetAllDashboardsOfScenario(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// authenticate as normal user
 	token, err := helper.AuthenticateForTest(router,
@@ -358,20 +352,16 @@ func TestGetAllDashboardsOfScenario(t *testing.T) {
 	assert.NoError(t, err)
 
 	// test POST dashboards/ $newDashboard
-	newDashboardA := DashboardRequest{
-		Name:       helper.DashboardA.Name,
-		Grid:       helper.DashboardA.Grid,
-		ScenarioID: scenarioID,
-	}
+	newDashboard.ScenarioID = scenarioID
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/dashboards", "POST", helper.KeyModels{"dashboard": newDashboardA})
+		"/api/dashboards", "POST", helper.KeyModels{"dashboard": newDashboard})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// POST a second dashboard for the same scenario
 	newDashboardB := DashboardRequest{
-		Name:       helper.DashboardB.Name,
-		Grid:       helper.DashboardB.Grid,
+		Name:       "Dashboard_B",
+		Grid:       10,
 		ScenarioID: scenarioID,
 	}
 	code, resp, err = helper.TestEndpoint(router, token,

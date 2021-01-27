@@ -28,7 +28,6 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	apidocs "git.rwth-aachen.de/acs/public/villas/web-backend-go/doc/api" // doc/api folder is used by Swag CLI, you have to import it
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes"
 	infrastructure_component "git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/infrastructure-component"
 	"github.com/gin-gonic/gin"
@@ -41,6 +40,17 @@ func addData(router *gin.Engine, cfg *config.Config) error {
 		// test mode: drop all tables and add test data to DB
 		database.DropTables()
 		log.Println("Database tables dropped, using API to add test data")
+
+		testDataPath, err := cfg.String("test.datapath")
+		if err != nil {
+			return err
+		}
+		err = routes.ReadTestDataFromJson(testDataPath)
+		if err != nil {
+			log.Println("testdata could not be read from json")
+			return err
+		}
+
 		resp, err := routes.AddTestData(cfg, router)
 		if err != nil {
 			fmt.Println("error: testdata could not be added to DB:", err.Error(), "Response body: ", resp)
@@ -48,7 +58,7 @@ func addData(router *gin.Engine, cfg *config.Config) error {
 		}
 	} else {
 		// release mode: make sure that at least one admin user exists in DB
-		err := helper.DBAddAdminUser(cfg)
+		err, _ := database.DBAddAdminUser(cfg)
 		if err != nil {
 			fmt.Println("error: adding admin user failed:", err.Error())
 			return err

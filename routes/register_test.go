@@ -34,7 +34,6 @@ import (
 )
 
 var router *gin.Engine
-var amqpURI string
 
 func TestMain(m *testing.M) {
 	err := configuration.InitConfig()
@@ -66,7 +65,9 @@ func TestRegisterEndpoints(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
 
-	api := router.Group("/api")
+	basePath, err := configuration.GlobalConfig.String("base.path")
+	assert.NoError(t, err)
+	api := router.Group(basePath)
 	RegisterEndpoints(router, api)
 }
 
@@ -75,6 +76,9 @@ func TestAddTestData(t *testing.T) {
 	if err != nil {
 		panic(t)
 	}
+
+	err = ReadTestDataFromJson("../database/testdata.json")
+	assert.NoError(t, err)
 
 	resp, err := AddTestData(configuration.GlobalConfig, router)
 	assert.NoError(t, err, "Response body: %v", resp)

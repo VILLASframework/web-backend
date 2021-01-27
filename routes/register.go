@@ -24,8 +24,11 @@ package routes
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
+	"log"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -49,6 +52,28 @@ import (
 	"github.com/swaggo/gin-swagger/swaggerFiles"
 	"github.com/zpatrick/go-config"
 )
+
+// #######################################################################
+// #################### Structures for test data #########################
+// #######################################################################
+
+type jsonUser struct {
+	Username string
+	Password string
+	Mail     string
+	Role     string
+}
+
+var GlobalTestData struct {
+	Users      []jsonUser
+	ICs        []database.InfrastructureComponent
+	Scenarios  []database.Scenario
+	Results    []database.Result
+	Configs    []database.ComponentConfiguration
+	Dashboards []database.Dashboard
+	Widgets    []database.Widget
+	Signals    []database.Signal
+}
 
 // register all backend endpoints; to be called after DB is initialized
 func RegisterEndpoints(router *gin.Engine, api *gin.RouterGroup) {
@@ -77,6 +102,27 @@ func RegisterEndpoints(router *gin.Engine, api *gin.RouterGroup) {
 
 }
 
+// Read test data from JSON file (path set by ENV variable or command line param)
+func ReadTestDataFromJson(path string) error {
+
+	jsonFile, err := os.Open(path)
+	if err != nil {
+		return fmt.Errorf("error opening json file: %v", err)
+	}
+	log.Println("Successfully opened json data file", path)
+
+	defer jsonFile.Close()
+
+	byteValue, _ := ioutil.ReadAll(jsonFile)
+
+	err = json.Unmarshal(byteValue, &GlobalTestData)
+	if err != nil {
+		return fmt.Errorf("error unmarshalling json: %v", err)
+	}
+
+	return nil
+}
+
 // Uses API endpoints to add test data to the backend; All endpoints have to be registered before invoking this function.
 func AddTestData(cfg *config.Config, router *gin.Engine) (*bytes.Buffer, error) {
 
@@ -87,221 +133,162 @@ func AddTestData(cfg *config.Config, router *gin.Engine) (*bytes.Buffer, error) 
 	}
 
 	database.MigrateModels()
-	// Create entries of each model (data defined in test_data.go)
-	// add Admin user
-	err = helper.DBAddAdminUser(cfg)
+
+	// add Admin user (defaults to User_0, xyz789)
+	err, adminpw := database.DBAddAdminUser(cfg)
+
+	var Admin = helper.Credentials{
+		Username: "admin",
+		Password: adminpw,
+	}
+
 	if err != nil {
 		return nil, err
 	}
 
 	// authenticate as admin
-	token, err := helper.AuthenticateForTest(router, basePath+"/authenticate", "POST", helper.AdminCredentials)
+	token, err := helper.AuthenticateForTest(router, basePath+"/authenticate", "POST", Admin)
 	if err != nil {
 		return nil, err
 	}
 
-	// add 2 normal and 1 guest user
-	code, resp, err := helper.TestEndpoint(router, token, basePath+"/users", "POST", helper.KeyModels{"user": helper.NewUserA})
-	if code != http.StatusOK {
-		return resp, fmt.Errorf("error adding User_A")
-	}
-	code, resp, err = helper.TestEndpoint(router, token, basePath+"/users", "POST", helper.KeyModels{"user": helper.NewUserB})
-	if code != http.StatusOK {
-		return resp, fmt.Errorf("error adding User_B")
-	}
-	code, resp, err = helper.TestEndpoint(router, token, basePath+"/users", "POST", helper.KeyModels{"user": helper.NewUserC})
-	if code != http.StatusOK {
-		return resp, fmt.Errorf("error adding User_C")
+	// add users
+	for _, u := range GlobalTestData.Users {
+		code, resp, err := helper.TestEndpoint(router, token, basePath+"/users", "POST", helper.KeyModels{"user": u})
+		if code != http.StatusOK {
+			return resp, fmt.Errorf("error adding user %v: %v", u.Username, err)
+		}
 	}
 
 	// add infrastructure components
-	code, resp, err = helper.TestEndpoint(router, token, basePath+"/ic", "POST", helper.KeyModels{"ic": helper.ICA})
-	if code != http.StatusOK {
-		return resp, fmt.Errorf("error adding IC A")
-	}
-	amqphost, err := cfg.String("amqp.host")
-	if err != nil && amqphost != "" {
-		code, resp, err = helper.TestEndpoint(router, token, basePath+"/ic", "POST", helper.KeyModels{"ic": helper.ICB})
-		if code != http.StatusOK {
-			return resp, fmt.Errorf("error adding IC B")
+	amqphost, _ := cfg.String("amqp.host")
+	counterICs := 0
+	for _, i := range GlobalTestData.ICs {
+
+		if (i.ManagedExternally && amqphost != "") || !i.ManagedExternally {
+			code, resp, err := helper.TestEndpoint(router, token, basePath+"/ic", "POST", helper.KeyModels{"ic": i})
+			if code != http.StatusOK {
+				return resp, fmt.Errorf("error adding IC %v: %v", i.Name, err)
+			}
+			counterICs++
 		}
 	}
 
 	// add scenarios
-	code, resp, err = helper.TestEndpoint(router, token, basePath+"/scenarios", "POST", helper.KeyModels{"scenario": helper.ScenarioA})
-	if code != http.StatusOK {
-		return resp, fmt.Errorf("error adding Scenario A")
-	}
-	code, resp, err = helper.TestEndpoint(router, token, basePath+"/scenarios", "POST", helper.KeyModels{"scenario": helper.ScenarioB})
-	if code != http.StatusOK {
-		return resp, fmt.Errorf("error adding Scenario B")
+	for _, s := range GlobalTestData.Scenarios {
+		code, resp, err := helper.TestEndpoint(router, token, basePath+"/scenarios", "POST", helper.KeyModels{"scenario": s})
+		if code != http.StatusOK {
+			return resp, fmt.Errorf("error adding Scenario %v: %v", s.Name, err)
+		}
+
+		// add all users to the scenario
+		for _, u := range GlobalTestData.Users {
+			code, resp, err := helper.TestEndpoint(router, token, fmt.Sprintf("%v/scenarios/1/user?username="+u.Username, basePath), "PUT", nil)
+			if code != http.StatusOK {
+				return resp, fmt.Errorf("error adding user %v to scenario %v: %v", u.Username, s.Name, err)
+			}
+		}
 	}
 
-	// add users to scenario
-	code, resp, err = helper.TestEndpoint(router, token, fmt.Sprintf("%v/scenarios/1/user?username=User_A", basePath), "PUT", nil)
-	if code != http.StatusOK {
-		return resp, fmt.Errorf("error adding User_A to Scenario A")
-	}
-	code, resp, err = helper.TestEndpoint(router, token, fmt.Sprintf("%v/scenarios/2/user?username=User_A", basePath), "PUT", nil)
-	if code != http.StatusOK {
-		return resp, fmt.Errorf("error adding User_A to Scenario B")
-	}
-	code, resp, err = helper.TestEndpoint(router, token, fmt.Sprintf("%v/scenarios/2/user?username=User_B", basePath), "PUT", nil)
-	if code != http.StatusOK {
-		return resp, fmt.Errorf("error adding User_B to Scenario B")
-	}
-	code, resp, err = helper.TestEndpoint(router, token, fmt.Sprintf("%v/scenarios/1/user?username=User_C", basePath), "PUT", nil)
-	if code != http.StatusOK {
-		return resp, fmt.Errorf("error adding User_C to Scenario A")
+	// If there is at least one scenario and one IC in the test data, add component configs
+	configCounter := 0
+	if len(GlobalTestData.Scenarios) > 0 && counterICs > 0 {
+
+		for _, c := range GlobalTestData.Configs {
+			c.ScenarioID = 1
+			c.ICID = 1
+			code, resp, err := helper.TestEndpoint(router, token, basePath+"/configs", "POST", helper.KeyModels{"config": c})
+			if code != http.StatusOK {
+				return resp, fmt.Errorf("error adding Config %v: %v", c.Name, err)
+			}
+			configCounter++
+		}
 	}
 
-	// add component configurations
-	configA := helper.ConfigA
-	configB := helper.ConfigB
-	configA.ScenarioID = 1
-	configB.ScenarioID = 1
-	configA.ICID = 1
-	configB.ICID = 1
-	code, resp, err = helper.TestEndpoint(router, token, basePath+"/configs", "POST", helper.KeyModels{"config": configA})
-	if code != http.StatusOK {
-		return resp, fmt.Errorf("error adding Config A")
-	}
-	code, resp, err = helper.TestEndpoint(router, token, basePath+"/configs", "POST", helper.KeyModels{"config": configB})
-	if code != http.StatusOK {
-		return resp, fmt.Errorf("error adding Config B")
+	// If there is at least one scenario, add dashboards, results, and 2 test files
+	dashboardCounter := 0
+	if len(GlobalTestData.Scenarios) > 0 {
+		for _, d := range GlobalTestData.Dashboards {
+			d.ScenarioID = 1
+			code, resp, err := helper.TestEndpoint(router, token, basePath+"/dashboards", "POST", helper.KeyModels{"dashboard": d})
+			if code != http.StatusOK {
+				return resp, fmt.Errorf("error adding Dashboard %v: %v", d.Name, err)
+			}
+			dashboardCounter++
+		}
+
+		for _, r := range GlobalTestData.Results {
+			r.ScenarioID = 1
+			r.ResultFileIDs = []int64{}
+			code, resp, err := helper.TestEndpoint(router, token, basePath+"/results", "POST", helper.KeyModels{"result": r})
+			if code != http.StatusOK {
+				return resp, fmt.Errorf("error adding Result %v: %v", r.Description, err)
+			}
+		}
+
+		// upload files
+
+		// upload readme file
+		bodyBuf := &bytes.Buffer{}
+		bodyWriter := multipart.NewWriter(bodyBuf)
+		fileWriter, _ := bodyWriter.CreateFormFile("file", "Readme.md")
+		fh, _ := os.Open("README.md")
+		defer fh.Close()
+
+		// io copy
+		_, err = io.Copy(fileWriter, fh)
+		contentType := bodyWriter.FormDataContentType()
+		bodyWriter.Close()
+
+		// Create the request and add file to scenario
+		w1 := httptest.NewRecorder()
+		req1, _ := http.NewRequest("POST", basePath+"/files?scenarioID=1", bodyBuf)
+		req1.Header.Set("Content-Type", contentType)
+		req1.Header.Add("Authorization", "Bearer "+token)
+		router.ServeHTTP(w1, req1)
+
+		// upload image file
+		bodyBuf = &bytes.Buffer{}
+		bodyWriter = multipart.NewWriter(bodyBuf)
+		fileWriter, _ = bodyWriter.CreateFormFile("file", "logo.png")
+		fh, _ = os.Open("doc/pictures/villas_web.png")
+		defer fh.Close()
+
+		// io copy
+		_, err = io.Copy(fileWriter, fh)
+		contentType = bodyWriter.FormDataContentType()
+		bodyWriter.Close()
+
+		// Create the request and add a second file to scenario
+		w2 := httptest.NewRecorder()
+		req2, _ := http.NewRequest("POST", basePath+"/files?scenarioID=1", bodyBuf)
+		req2.Header.Set("Content-Type", contentType)
+		req2.Header.Add("Authorization", "Bearer "+token)
+		router.ServeHTTP(w2, req2)
+
 	}
 
-	// add dashboards
-	dashboardA := helper.DashboardA
-	dashboardB := helper.DashboardB
-	dashboardA.ScenarioID = 1
-	dashboardB.ScenarioID = 1
-	code, resp, err = helper.TestEndpoint(router, token, basePath+"/dashboards", "POST", helper.KeyModels{"dashboard": dashboardA})
-	if code != http.StatusOK {
-		return resp, fmt.Errorf("error adding Dashboard B")
-	}
-	code, resp, err = helper.TestEndpoint(router, token, basePath+"/dashboards", "POST", helper.KeyModels{"dashboard": dashboardB})
-	if code != http.StatusOK {
-		return resp, fmt.Errorf("error adding Dashboard B")
+	// If there is at least one dashboard, add widgets
+	if dashboardCounter > 0 {
+		for _, w := range GlobalTestData.Widgets {
+			w.DashboardID = 1
+			code, resp, err := helper.TestEndpoint(router, token, basePath+"/widgets", "POST", helper.KeyModels{"widget": w})
+			if code != http.StatusOK {
+				return resp, fmt.Errorf("error adding Widget %v: %v", w.Name, err)
+			}
+		}
 	}
 
-	// add widgets
-	widgetA := helper.WidgetA
-	widgetB := helper.WidgetB
-	widgetC := helper.WidgetC
-	widgetD := helper.WidgetD
-	widgetE := helper.WidgetE
-	widgetA.DashboardID = 1
-	widgetB.DashboardID = 1
-	widgetC.DashboardID = 1
-	widgetD.DashboardID = 1
-	widgetE.DashboardID = 1
-	code, resp, err = helper.TestEndpoint(router, token, basePath+"/widgets", "POST", helper.KeyModels{"widget": widgetA})
-	if code != http.StatusOK {
-		return resp, fmt.Errorf("error adding Widget A")
+	// If there is at least one config, add signals
+	if configCounter > 0 {
+		for _, s := range GlobalTestData.Signals {
+			s.ConfigID = 1
+			code, resp, err := helper.TestEndpoint(router, token, basePath+"/signals", "POST", helper.KeyModels{"signal": s})
+			if code != http.StatusOK {
+				return resp, fmt.Errorf("error adding Signal %v: %v", s.Name, err)
+			}
+		}
 	}
-	code, resp, err = helper.TestEndpoint(router, token, basePath+"/widgets", "POST", helper.KeyModels{"widget": widgetB})
-	if code != http.StatusOK {
-		return resp, fmt.Errorf("error adding Widget B")
-	}
-	code, resp, err = helper.TestEndpoint(router, token, basePath+"/widgets", "POST", helper.KeyModels{"widget": widgetC})
-	if code != http.StatusOK {
-		return resp, fmt.Errorf("error adding Widget C")
-	}
-	code, resp, err = helper.TestEndpoint(router, token, basePath+"/widgets", "POST", helper.KeyModels{"widget": widgetD})
-	if code != http.StatusOK {
-		return resp, fmt.Errorf("error adding Widget D")
-	}
-	code, resp, err = helper.TestEndpoint(router, token, basePath+"/widgets", "POST", helper.KeyModels{"widget": widgetE})
-	if code != http.StatusOK {
-		return resp, fmt.Errorf("error adding Widget E")
-	}
-
-	// add signals
-	outSignalA := helper.OutSignalA
-	outSignalB := helper.OutSignalB
-	inSignalA := helper.InSignalA
-	inSignalB := helper.InSignalB
-	outSignalC := helper.OutSignalC
-	outSignalD := helper.OutSignalD
-	outSignalE := helper.OutSignalE
-	outSignalA.ConfigID = 1
-	outSignalB.ConfigID = 1
-	outSignalC.ConfigID = 1
-	outSignalD.ConfigID = 1
-	outSignalE.ConfigID = 1
-	inSignalA.ConfigID = 1
-	inSignalB.ConfigID = 2
-
-	code, resp, err = helper.TestEndpoint(router, token, basePath+"/signals", "POST", helper.KeyModels{"signal": outSignalB})
-	if code != http.StatusOK {
-		return resp, fmt.Errorf("error adding outSignalB")
-	}
-	code, resp, err = helper.TestEndpoint(router, token, basePath+"/signals", "POST", helper.KeyModels{"signal": outSignalA})
-	if code != http.StatusOK {
-		return resp, fmt.Errorf("error adding outSignalA")
-	}
-	code, resp, err = helper.TestEndpoint(router, token, basePath+"/signals", "POST", helper.KeyModels{"signal": outSignalC})
-	if code != http.StatusOK {
-		return resp, fmt.Errorf("error adding outSignalC")
-	}
-	code, resp, err = helper.TestEndpoint(router, token, basePath+"/signals", "POST", helper.KeyModels{"signal": outSignalD})
-	if code != http.StatusOK {
-		return resp, fmt.Errorf("error adding outSignalD")
-	}
-	code, resp, err = helper.TestEndpoint(router, token, basePath+"/signals", "POST", helper.KeyModels{"signal": outSignalE})
-	if code != http.StatusOK {
-		return resp, fmt.Errorf("error adding outSignalE")
-	}
-
-	code, resp, err = helper.TestEndpoint(router, token, basePath+"/signals", "POST", helper.KeyModels{"signal": inSignalA})
-	if code != http.StatusOK {
-		return resp, fmt.Errorf("error adding inSignalA")
-	}
-	code, resp, err = helper.TestEndpoint(router, token, basePath+"/signals", "POST", helper.KeyModels{"signal": inSignalB})
-	if code != http.StatusOK {
-		return resp, fmt.Errorf("error adding inSignalB")
-	}
-
-	// upload files
-
-	// upload readme file
-	bodyBuf := &bytes.Buffer{}
-	bodyWriter := multipart.NewWriter(bodyBuf)
-	fileWriter, _ := bodyWriter.CreateFormFile("file", "Readme.md")
-	fh, _ := os.Open("README.md")
-	defer fh.Close()
-
-	// io copy
-	_, err = io.Copy(fileWriter, fh)
-	contentType := bodyWriter.FormDataContentType()
-	bodyWriter.Close()
-
-	// Create the request and add file to scenario
-	w1 := httptest.NewRecorder()
-	req1, _ := http.NewRequest("POST", basePath+"/files?scenarioID=1", bodyBuf)
-	req1.Header.Set("Content-Type", contentType)
-	req1.Header.Add("Authorization", "Bearer "+token)
-	router.ServeHTTP(w1, req1)
-
-	// upload image file
-	bodyBuf = &bytes.Buffer{}
-	bodyWriter = multipart.NewWriter(bodyBuf)
-	fileWriter, _ = bodyWriter.CreateFormFile("file", "logo.png")
-	fh, _ = os.Open("doc/pictures/villas_web.png")
-	defer fh.Close()
-
-	// io copy
-	_, err = io.Copy(fileWriter, fh)
-	contentType = bodyWriter.FormDataContentType()
-	bodyWriter.Close()
-
-	// Create the request and add a second file to scenario
-	w2 := httptest.NewRecorder()
-	req2, _ := http.NewRequest("POST", basePath+"/files?scenarioID=1", bodyBuf)
-	req2.Header.Set("Content-Type", contentType)
-	req2.Header.Add("Authorization", "Bearer "+token)
-	router.ServeHTTP(w2, req2)
 
 	return nil, nil
 }

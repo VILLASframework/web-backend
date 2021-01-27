@@ -23,6 +23,7 @@ package file
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -62,9 +63,9 @@ func addScenario() (scenarioID uint) {
 
 	// POST $newScenario
 	newScenario := ScenarioRequest{
-		Name:            helper.ScenarioA.Name,
-		Running:         helper.ScenarioA.Running,
-		StartParameters: helper.ScenarioA.StartParameters,
+		Name:            "Scenario1",
+		Running:         true,
+		StartParameters: postgres.Jsonb{RawMessage: json.RawMessage(`{"parameter1" : "testValue1A", "parameter2" : "testValue2A", "parameter3" : 42}`)},
 	}
 	_, resp, _ := helper.TestEndpoint(router, token,
 		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenario})
@@ -106,7 +107,7 @@ func TestMain(m *testing.M) {
 func TestAddFile(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// prepare the content of the DB for testing
 	// using the respective endpoints of the API
@@ -207,7 +208,7 @@ func TestUpdateFile(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// prepare the content of the DB for testing
 	// using the respective endpoints of the API
@@ -340,7 +341,7 @@ func TestUpdateFile(t *testing.T) {
 func TestDeleteFile(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// prepare the content of the DB for testing
 	// using the respective endpoints of the API
@@ -477,7 +478,7 @@ func TestGetAllFilesOfScenario(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.DBAddAdminAndUserAndGuest())
+	assert.NoError(t, helper.AddTestUsers())
 
 	// prepare the content of the DB for testing
 	// using the respective endpoints of the API
