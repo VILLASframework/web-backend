@@ -22,6 +22,7 @@
 package signal
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"testing"
@@ -75,6 +76,18 @@ type ScenarioRequest struct {
 	StartParameters postgres.Jsonb `json:"startParameters,omitempty"`
 }
 
+var newSignal1 = SignalRequest{
+	Name:      "outSignal_A",
+	Unit:      "V",
+	Direction: "out",
+	Index:     1,
+}
+
+func newFalse() *bool {
+	b := false
+	return &b
+}
+
 func addScenarioAndICAndConfig() (scenarioID uint, ICID uint, configID uint) {
 
 	// authenticate as admin
@@ -83,16 +96,16 @@ func addScenarioAndICAndConfig() (scenarioID uint, ICID uint, configID uint) {
 
 	// POST $newICA
 	newICA := ICRequest{
-		UUID:                 helper.ICA.UUID,
-		WebsocketURL:         helper.ICA.WebsocketURL,
-		Type:                 helper.ICA.Type,
-		Name:                 helper.ICA.Name,
-		Category:             helper.ICA.Category,
-		State:                helper.ICA.State,
-		Location:             helper.ICA.Location,
-		Description:          helper.ICA.Description,
-		StartParameterScheme: helper.ICA.StartParameterScheme,
-		ManagedExternally:    &helper.ICA.ManagedExternally,
+		UUID:                 "7be0322d-354e-431e-84bd-ae4c9633138b",
+		WebsocketURL:         "https://villas.k8s.eonerc.rwth-aachen.de/ws/ws_sig",
+		Type:                 "villas-node",
+		Name:                 "ACS Demo Signals",
+		Category:             "gateway",
+		State:                "idle",
+		Location:             "k8s",
+		Description:          "A signal generator for testing purposes",
+		StartParameterScheme: postgres.Jsonb{json.RawMessage(`{"prop1" : "a nice prop"}`)},
+		ManagedExternally:    newFalse(),
 	}
 	_, resp, _ := helper.TestEndpoint(router, token,
 		"/api/ic", "POST", helper.KeyModels{"ic": newICA})
@@ -106,9 +119,9 @@ func addScenarioAndICAndConfig() (scenarioID uint, ICID uint, configID uint) {
 
 	// POST $newScenario
 	newScenario := ScenarioRequest{
-		Name:            helper.ScenarioA.Name,
-		Running:         helper.ScenarioA.Running,
-		StartParameters: helper.ScenarioA.StartParameters,
+		Name:            "Scenario1",
+		Running:         true,
+		StartParameters: postgres.Jsonb{json.RawMessage(`{"parameter1" : "testValue1A", "parameter2" : "testValue2A", "parameter3" : 42}`)},
 	}
 	_, resp, _ = helper.TestEndpoint(router, token,
 		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenario})
@@ -118,10 +131,10 @@ func addScenarioAndICAndConfig() (scenarioID uint, ICID uint, configID uint) {
 
 	// test POST newConfig
 	newConfig := ConfigRequest{
-		Name:            helper.ConfigA.Name,
+		Name:            "Example for Signal generator",
+		StartParameters: postgres.Jsonb{RawMessage: json.RawMessage(`{"parameter1" : "testValue1A", "parameter2" : "testValue2A", "parameter3" : 42}`)},
 		ScenarioID:      uint(newScenarioID),
 		ICID:            uint(newICID),
-		StartParameters: helper.ConfigA.StartParameters,
 	}
 	_, resp, _ = helper.TestEndpoint(router, token,
 		"/api/configs", "POST", helper.KeyModels{"config": newConfig})
@@ -182,14 +195,7 @@ func TestAddSignal(t *testing.T) {
 		"/api/authenticate", "POST", helper.UserACredentials)
 	assert.NoError(t, err)
 
-	newSignal := SignalRequest{
-		Name:      helper.InSignalA.Name,
-		Unit:      helper.InSignalA.Unit,
-		Direction: helper.InSignalA.Direction,
-		Index:     1,
-		ConfigID:  configID,
-	}
-
+	newSignal1.ConfigID = configID
 	// authenticate as normal userB who has no access to new scenario
 	token, err = helper.AuthenticateForTest(router,
 		"/api/authenticate", "POST", helper.UserBCredentials)
@@ -198,7 +204,7 @@ func TestAddSignal(t *testing.T) {
 	// try to POST to component config without access
 	// should result in unprocessable entity
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/signals", "POST", helper.KeyModels{"signal": newSignal})
+		"/api/signals", "POST", helper.KeyModels{"signal": newSignal1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
@@ -216,12 +222,12 @@ func TestAddSignal(t *testing.T) {
 
 	// test POST signals/ $newSignal
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/signals", "POST", helper.KeyModels{"signal": newSignal})
+		"/api/signals", "POST", helper.KeyModels{"signal": newSignal1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// Compare POST's response with the newSignal
-	err = helper.CompareResponse(resp, helper.KeyModels{"signal": newSignal})
+	err = helper.CompareResponse(resp, helper.KeyModels{"signal": newSignal1})
 	assert.NoError(t, err)
 
 	// Read newSignal's ID from the response
@@ -235,7 +241,7 @@ func TestAddSignal(t *testing.T) {
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// Compare GET's response with the newSSignal
-	err = helper.CompareResponse(resp, helper.KeyModels{"signal": newSignal})
+	err = helper.CompareResponse(resp, helper.KeyModels{"signal": newSignal1})
 	assert.NoError(t, err)
 
 	// try to POST a malformed signal
@@ -278,15 +284,9 @@ func TestUpdateSignal(t *testing.T) {
 	assert.NoError(t, err)
 
 	// test POST signals/ $newSignal
-	newSignal := SignalRequest{
-		Name:      helper.InSignalA.Name,
-		Unit:      helper.InSignalA.Unit,
-		Direction: helper.InSignalA.Direction,
-		Index:     1,
-		ConfigID:  configID,
-	}
+	newSignal1.ConfigID = configID
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/signals", "POST", helper.KeyModels{"signal": newSignal})
+		"/api/signals", "POST", helper.KeyModels{"signal": newSignal1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -295,8 +295,8 @@ func TestUpdateSignal(t *testing.T) {
 	assert.NoError(t, err)
 
 	updatedSignal := SignalRequest{
-		Name:  helper.InSignalB.Name,
-		Unit:  helper.InSignalB.Unit,
+		Name:  "outSignal_B",
+		Unit:  "A",
 		Index: 1,
 	}
 
@@ -381,9 +381,9 @@ func TestDeleteSignal(t *testing.T) {
 
 	// test POST signals/ $newSignal
 	newSignal := SignalRequest{
-		Name:      helper.InSignalA.Name,
-		Unit:      helper.InSignalA.Unit,
-		Direction: helper.InSignalA.Direction,
+		Name:      "insignalA",
+		Unit:      "s",
+		Direction: "in",
 		Index:     1,
 		ConfigID:  configID,
 	}
@@ -419,15 +419,9 @@ func TestDeleteSignal(t *testing.T) {
 	assert.NoError(t, err)
 
 	// add an output signal to make sure that counting of input signals works
-	newSignalout := SignalRequest{
-		Name:      helper.OutSignalA.Name,
-		Unit:      helper.OutSignalA.Unit,
-		Direction: helper.OutSignalA.Direction,
-		Index:     1,
-		ConfigID:  configID,
-	}
+	newSignal1.ConfigID = configID
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/signals", "POST", helper.KeyModels{"signal": newSignalout})
+		"/api/signals", "POST", helper.KeyModels{"signal": newSignal1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -481,9 +475,9 @@ func TestGetAllInputSignalsOfConfig(t *testing.T) {
 
 	// test POST signals/ $newSignal
 	newSignalA := SignalRequest{
-		Name:      helper.InSignalA.Name,
-		Unit:      helper.InSignalA.Unit,
-		Direction: helper.InSignalA.Direction,
+		Name:      "inA",
+		Unit:      "s",
+		Direction: "in",
 		Index:     1,
 		ConfigID:  configID,
 	}
@@ -494,9 +488,9 @@ func TestGetAllInputSignalsOfConfig(t *testing.T) {
 
 	// add a second input signal
 	newSignalB := SignalRequest{
-		Name:      helper.InSignalB.Name,
-		Unit:      helper.InSignalB.Unit,
-		Direction: helper.InSignalB.Direction,
+		Name:      "inB",
+		Unit:      "m",
+		Direction: "in",
 		Index:     2,
 		ConfigID:  configID,
 	}
@@ -506,23 +500,17 @@ func TestGetAllInputSignalsOfConfig(t *testing.T) {
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// add an output signal
-	newSignalAout := SignalRequest{
-		Name:      helper.OutSignalA.Name,
-		Unit:      helper.OutSignalA.Unit,
-		Direction: helper.OutSignalA.Direction,
-		Index:     1,
-		ConfigID:  configID,
-	}
+	newSignal1.ConfigID = configID
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/signals", "POST", helper.KeyModels{"signal": newSignalAout})
+		"/api/signals", "POST", helper.KeyModels{"signal": newSignal1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// add a second output signal
 	newSignalBout := SignalRequest{
-		Name:      helper.OutSignalB.Name,
-		Unit:      helper.OutSignalB.Unit,
-		Direction: helper.OutSignalB.Direction,
+		Name:      "outB",
+		Unit:      "A",
+		Direction: "out",
 		Index:     1,
 		ConfigID:  configID,
 	}

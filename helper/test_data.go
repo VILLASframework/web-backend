@@ -85,25 +85,6 @@ type UserRequest struct {
 	Active      string `json:"active,omitempty"`
 }
 
-// Infrastructure components
-
-var propertiesA = json.RawMessage(`{"prop1" : "a nice prop"}`)
-
-var ICA = database.InfrastructureComponent{
-	UUID:                 "7be0322d-354e-431e-84bd-ae4c9633138b",
-	WebsocketURL:         "https://villas.k8s.eonerc.rwth-aachen.de/ws/ws_sig",
-	APIURL:               "https://villas.k8s.eonerc.rwth-aachen.de/ws/api/v2",
-	Type:                 "villas-node",
-	Category:             "gateway",
-	Name:                 "ACS Demo Signals",
-	Uptime:               -1.0,
-	State:                "idle",
-	Location:             "k8s",
-	Description:          "A signal generator for testing purposes",
-	StartParameterScheme: postgres.Jsonb{propertiesA},
-	ManagedExternally:    false,
-}
-
 // Scenarios
 
 var startParametersA = json.RawMessage(`{"parameter1" : "testValue1A", "parameter2" : "testValue2A", "parameter3" : 42}`)
@@ -112,44 +93,6 @@ var ScenarioA = database.Scenario{
 	Name:            "Scenario_A",
 	Running:         true,
 	StartParameters: postgres.Jsonb{startParametersA},
-}
-
-// Component Configuration
-
-var ConfigA = database.ComponentConfiguration{
-	Name:            "Example for Signal generator",
-	StartParameters: postgres.Jsonb{startParametersA},
-	FileIDs:         []int64{},
-}
-
-// Signals
-
-var OutSignalA = database.Signal{
-	Name:      "outSignal_A",
-	Direction: "out",
-	Index:     1,
-	Unit:      "V",
-}
-
-var OutSignalB = database.Signal{
-	Name:      "outSignal_B",
-	Direction: "out",
-	Index:     2,
-	Unit:      "V",
-}
-
-var InSignalA = database.Signal{
-	Name:      "inSignal_A",
-	Direction: "in",
-	Index:     1,
-	Unit:      "---",
-}
-
-var InSignalB = database.Signal{
-	Name:      "inSignal_B",
-	Direction: "in",
-	Index:     2,
-	Unit:      "---",
 }
 
 func ReadTestDataFromJson(path string) error {
