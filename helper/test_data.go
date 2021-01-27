@@ -158,10 +158,6 @@ var DashboardA = database.Dashboard{
 	Name: "Dashboard_A",
 	Grid: 15,
 }
-var DashboardB = database.Dashboard{
-	Name: "Dashboard_B",
-	Grid: 10,
-}
 
 // Widgets
 var customPropertiesSlider = json.RawMessage(`{"default_value" : 0, "orientation" : 0, "rangeUseMinMax": false, "rangeMin" : 0, "rangeMax": 200, "rangeUseMinMax" : true, "showUnit": true, "continous_update": false, "value": "", "resizeLeftRightLock": false, "resizeTopBottomLock": true, "step": 0.1 }`)
