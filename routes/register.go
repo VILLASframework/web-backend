@@ -24,8 +24,10 @@ package routes
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"mime/multipart"
 	"net/http"
@@ -50,6 +52,28 @@ import (
 	"github.com/swaggo/gin-swagger/swaggerFiles"
 	"github.com/zpatrick/go-config"
 )
+
+// #######################################################################
+// #################### Structures for test data #########################
+// #######################################################################
+
+type jsonUser struct {
+	Username string
+	Password string
+	Mail     string
+	Role     string
+}
+
+var GlobalTestData struct {
+	Users      []jsonUser
+	ICs        []database.InfrastructureComponent
+	Scenarios  []database.Scenario
+	Results    []database.Result
+	Configs    []database.ComponentConfiguration
+	Dashboards []database.Dashboard
+	Widgets    []database.Widget
+	Signals    []database.Signal
+}
 
 // register all backend endpoints; to be called after DB is initialized
 func RegisterEndpoints(router *gin.Engine, api *gin.RouterGroup) {
@@ -76,6 +100,29 @@ func RegisterEndpoints(router *gin.Engine, api *gin.RouterGroup) {
 
 	metrics.InitCounters()
 
+}
+
+// Read test data from JSON file (path set by ENV variable or command line param)
+func ReadTestDataFromJson(path string) error {
+
+	jsonFile, err := os.Open(path)
+	if err != nil {
+		return fmt.Errorf("error opening json file: %v", err)
+	}
+	log.Println("Successfully opened json data file", path)
+
+	defer jsonFile.Close()
+
+	byteValue, _ := ioutil.ReadAll(jsonFile)
+
+	err = json.Unmarshal(byteValue, &GlobalTestData)
+	if err != nil {
+		return fmt.Errorf("error unmarshalling json: %v", err)
+	}
+
+	log.Println(len(GlobalTestData.Users))
+
+	return nil
 }
 
 // Uses API endpoints to add test data to the backend; All endpoints have to be registered before invoking this function.
@@ -108,7 +155,7 @@ func AddTestData(cfg *config.Config, router *gin.Engine) (*bytes.Buffer, error) 
 	}
 
 	// add users
-	for _, u := range helper.GlobalTestData.Users {
+	for _, u := range GlobalTestData.Users {
 		code, resp, err := helper.TestEndpoint(router, token, basePath+"/users", "POST", helper.KeyModels{"user": u})
 		if code != http.StatusOK {
 			return resp, fmt.Errorf("error adding user %v: %v", u.Username, err)
@@ -118,8 +165,7 @@ func AddTestData(cfg *config.Config, router *gin.Engine) (*bytes.Buffer, error) 
 	// add infrastructure components
 	amqphost, _ := cfg.String("amqp.host")
 	counterICs := 0
-	log.Println("ICS", helper.GlobalTestData.ICs)
-	for _, i := range helper.GlobalTestData.ICs {
+	for _, i := range GlobalTestData.ICs {
 
 		if (i.ManagedExternally && amqphost != "") || !i.ManagedExternally {
 			code, resp, err := helper.TestEndpoint(router, token, basePath+"/ic", "POST", helper.KeyModels{"ic": i})
@@ -131,14 +177,14 @@ func AddTestData(cfg *config.Config, router *gin.Engine) (*bytes.Buffer, error) 
 	}
 
 	// add scenarios
-	for _, s := range helper.GlobalTestData.Scenarios {
+	for _, s := range GlobalTestData.Scenarios {
 		code, resp, err := helper.TestEndpoint(router, token, basePath+"/scenarios", "POST", helper.KeyModels{"scenario": s})
 		if code != http.StatusOK {
 			return resp, fmt.Errorf("error adding Scenario %v: %v", s.Name, err)
 		}
 
 		// add all users to the scenario
-		for _, u := range helper.GlobalTestData.Users {
+		for _, u := range GlobalTestData.Users {
 			code, resp, err := helper.TestEndpoint(router, token, fmt.Sprintf("%v/scenarios/1/user?username="+u.Username, basePath), "PUT", nil)
 			if code != http.StatusOK {
 				return resp, fmt.Errorf("error adding user %v to scenario %v: %v", u.Username, s.Name, err)
@@ -148,9 +194,9 @@ func AddTestData(cfg *config.Config, router *gin.Engine) (*bytes.Buffer, error) 
 
 	// If there is at least one scenario and one IC in the test data, add component configs
 	configCounter := 0
-	if len(helper.GlobalTestData.Scenarios) > 0 && counterICs > 0 {
+	if len(GlobalTestData.Scenarios) > 0 && counterICs > 0 {
 
-		for _, c := range helper.GlobalTestData.Configs {
+		for _, c := range GlobalTestData.Configs {
 			c.ScenarioID = 1
 			c.ICID = 1
 			code, resp, err := helper.TestEndpoint(router, token, basePath+"/configs", "POST", helper.KeyModels{"config": c})
@@ -163,8 +209,8 @@ func AddTestData(cfg *config.Config, router *gin.Engine) (*bytes.Buffer, error) 
 
 	// If there is at least one scenario, add dashboards and 2 test files
 	dashboardCounter := 0
-	if len(helper.GlobalTestData.Scenarios) > 0 {
-		for _, d := range helper.GlobalTestData.Dashboards {
+	if len(GlobalTestData.Scenarios) > 0 {
+		for _, d := range GlobalTestData.Dashboards {
 			d.ScenarioID = 1
 			code, resp, err := helper.TestEndpoint(router, token, basePath+"/dashboards", "POST", helper.KeyModels{"dashboard": d})
 			if code != http.StatusOK {
@@ -217,7 +263,7 @@ func AddTestData(cfg *config.Config, router *gin.Engine) (*bytes.Buffer, error) 
 
 	// If there is at least one dashboard, add widgets
 	if dashboardCounter > 0 {
-		for _, w := range helper.GlobalTestData.Widgets {
+		for _, w := range GlobalTestData.Widgets {
 			w.DashboardID = 1
 			code, resp, err := helper.TestEndpoint(router, token, basePath+"/widgets", "POST", helper.KeyModels{"widget": w})
 			if code != http.StatusOK {
@@ -228,7 +274,7 @@ func AddTestData(cfg *config.Config, router *gin.Engine) (*bytes.Buffer, error) 
 
 	// If there is at least one config, add signals
 	if configCounter > 0 {
-		for _, s := range helper.GlobalTestData.Signals {
+		for _, s := range GlobalTestData.Signals {
 			s.ConfigID = 1
 			code, resp, err := helper.TestEndpoint(router, token, basePath+"/signals", "POST", helper.KeyModels{"signal": s})
 			if code != http.StatusOK {

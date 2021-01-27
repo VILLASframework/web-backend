@@ -23,7 +23,6 @@ package main
 
 import (
 	"fmt"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"log"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
@@ -46,7 +45,7 @@ func addData(router *gin.Engine, cfg *config.Config) error {
 		if err != nil {
 			return err
 		}
-		err = helper.ReadTestDataFromJson(testDataPath)
+		err = routes.ReadTestDataFromJson(testDataPath)
 		if err != nil {
 			log.Println("testdata could not be read from json")
 			return err
