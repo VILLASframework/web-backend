@@ -207,7 +207,7 @@ func AddTestData(cfg *config.Config, router *gin.Engine) (*bytes.Buffer, error) 
 		}
 	}
 
-	// If there is at least one scenario, add dashboards and 2 test files
+	// If there is at least one scenario, add dashboards, results, and 2 test files
 	dashboardCounter := 0
 	if len(GlobalTestData.Scenarios) > 0 {
 		for _, d := range GlobalTestData.Dashboards {
@@ -217,6 +217,15 @@ func AddTestData(cfg *config.Config, router *gin.Engine) (*bytes.Buffer, error) 
 				return resp, fmt.Errorf("error adding Dashboard %v: %v", d.Name, err)
 			}
 			dashboardCounter++
+		}
+
+		for _, r := range GlobalTestData.Results {
+			r.ScenarioID = 1
+			r.ResultFileIDs = []int64{}
+			code, resp, err := helper.TestEndpoint(router, token, basePath+"/results", "POST", helper.KeyModels{"result": r})
+			if code != http.StatusOK {
+				return resp, fmt.Errorf("error adding Result %v: %v", r.Description, err)
+			}
 		}
 
 		// upload files
