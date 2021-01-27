@@ -152,47 +152,6 @@ var InSignalB = database.Signal{
 	Unit:      "---",
 }
 
-// Dashboards
-
-var DashboardA = database.Dashboard{
-	Name: "Dashboard_A",
-	Grid: 15,
-}
-
-// Widgets
-var customPropertiesSlider = json.RawMessage(`{"default_value" : 0, "orientation" : 0, "rangeUseMinMax": false, "rangeMin" : 0, "rangeMax": 200, "rangeUseMinMax" : true, "showUnit": true, "continous_update": false, "value": "", "resizeLeftRightLock": false, "resizeTopBottomLock": true, "step": 0.1 }`)
-var customPropertiesLabel = json.RawMessage(`{"textSize" : "20", "fontColor" : "#4287f5", "fontColor_opacity": 1}`)
-
-var WidgetA = database.Widget{
-	Name:             "Label",
-	Type:             "Label",
-	Width:            100,
-	Height:           50,
-	MinHeight:        40,
-	MinWidth:         80,
-	X:                10,
-	Y:                10,
-	Z:                200,
-	IsLocked:         false,
-	CustomProperties: postgres.Jsonb{customPropertiesLabel},
-	SignalIDs:        []int64{},
-}
-
-var WidgetB = database.Widget{
-	Name:             "Slider",
-	Type:             "Slider",
-	Width:            400,
-	Height:           50,
-	MinHeight:        30,
-	MinWidth:         380,
-	X:                70,
-	Y:                400,
-	Z:                0,
-	IsLocked:         false,
-	CustomProperties: postgres.Jsonb{customPropertiesSlider},
-	SignalIDs:        []int64{},
-}
-
 func ReadTestDataFromJson(path string) error {
 
 	jsonFile, err := os.Open(path)
