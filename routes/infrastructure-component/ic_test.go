@@ -345,7 +345,7 @@ func TestUpdateICAsAdmin(t *testing.T) {
 	err = CheckConnection()
 	assert.NoError(t, err)
 
-	err = client.channel.Publish(VILLAS_EXCHANGE,
+	err = client.sendCh.Publish(VILLAS_EXCHANGE,
 		"",
 		false,
 		false,
@@ -476,7 +476,7 @@ func TestDeleteICAsAdmin(t *testing.T) {
 	err = CheckConnection()
 	assert.NoError(t, err)
 
-	err = client.channel.Publish(VILLAS_EXCHANGE,
+	err = client.sendCh.Publish(VILLAS_EXCHANGE,
 		"",
 		false,
 		false,
@@ -712,7 +712,7 @@ func TestCreateUpdateViaAMQPRecv(t *testing.T) {
 	err = CheckConnection()
 	assert.NoError(t, err)
 
-	err = client.channel.Publish(VILLAS_EXCHANGE,
+	err = client.sendCh.Publish(VILLAS_EXCHANGE,
 		"",
 		false,
 		false,
@@ -762,7 +762,7 @@ func TestCreateUpdateViaAMQPRecv(t *testing.T) {
 		Headers:         headersA,
 	}
 
-	err = client.channel.Publish(VILLAS_EXCHANGE,
+	err = client.sendCh.Publish(VILLAS_EXCHANGE,
 		"",
 		false,
 		false,
@@ -792,7 +792,7 @@ func TestCreateUpdateViaAMQPRecv(t *testing.T) {
 		Headers:         headersA,
 	}
 
-	err = client.channel.Publish(VILLAS_EXCHANGE,
+	err = client.sendCh.Publish(VILLAS_EXCHANGE,
 		"",
 		false,
 		false,
@@ -862,7 +862,7 @@ func TestDeleteICViaAMQPRecv(t *testing.T) {
 
 	err = CheckConnection()
 	assert.NoError(t, err)
-	err = client.channel.Publish(VILLAS_EXCHANGE,
+	err = client.sendCh.Publish(VILLAS_EXCHANGE,
 		"",
 		false,
 		false,
@@ -935,7 +935,7 @@ func TestDeleteICViaAMQPRecv(t *testing.T) {
 	}
 
 	// attempt to delete IC (should not work immediately because IC is still associated with component config)
-	err = client.channel.Publish(VILLAS_EXCHANGE,
+	err = client.sendCh.Publish(VILLAS_EXCHANGE,
 		"",
 		false,
 		false,
