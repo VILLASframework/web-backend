@@ -24,6 +24,8 @@ package infrastructure_component
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/streadway/amqp"
+	"log"
 	"os"
 	"testing"
 	"time"
@@ -32,7 +34,6 @@ import (
 	component_configuration "git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/component-configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/scenario"
 	"github.com/jinzhu/gorm/dialects/postgres"
-	"github.com/streadway/amqp"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/gin-gonic/gin"
@@ -141,6 +142,27 @@ func TestMain(m *testing.M) {
 	// that can be associated with a new component configuration
 	scenario.RegisterScenarioEndpoints(api.Group("/scenarios"))
 
+	// check AMQP connection
+	err = CheckConnection()
+	if err.Error() != "connection is nil" {
+		return
+	}
+
+	// connect AMQP client
+	// Make sure that AMQP_HOST, AMQP_USER, AMQP_PASS are set
+	host, err := configuration.GlobalConfig.String("amqp.host")
+	usr, err := configuration.GlobalConfig.String("amqp.user")
+	pass, err := configuration.GlobalConfig.String("amqp.pass")
+	amqpURI := "amqp://" + usr + ":" + pass + "@" + host
+
+	// AMQP Connection startup is tested here
+	// Not repeated in other tests because it is only needed once
+	err = StartAMQP(amqpURI, api)
+	if err != nil {
+		log.Println("unable to connect to AMQP")
+		return
+	}
+
 	os.Exit(m.Run())
 }
 
@@ -148,22 +170,6 @@ func TestAddICAsAdmin(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
 	assert.NoError(t, helper.AddTestUsers())
-
-	// check AMQP connection
-	err := CheckConnection()
-	assert.Errorf(t, err, "connection is nil")
-
-	// connect AMQP client
-	// Make sure that AMQP_HOST, AMQP_USER, AMQP_PASS are set
-	host, err := configuration.GlobalConfig.String("amqp.host")
-	user, err := configuration.GlobalConfig.String("amqp.user")
-	pass, err := configuration.GlobalConfig.String("amqp.pass")
-	amqpURI := "amqp://" + user + ":" + pass + "@" + host
-
-	// AMQP Connection startup is tested here
-	// Not repeated in other tests because it is only needed once
-	err = StartAMQP(amqpURI, api)
-	assert.NoError(t, err)
 
 	// authenticate as admin
 	token, err := helper.AuthenticateForTest(router,
@@ -228,6 +234,9 @@ func TestAddICAsAdmin(t *testing.T) {
 	// Compare POST's response with the newExternalIC
 	err = helper.CompareResponse(resp, helper.KeyModels{"ic": newIC2})
 	assert.NoError(t, err)
+
+	// wait to have async operation be completed
+	time.Sleep(waitingTime * time.Second)
 }
 
 func TestAddICAsUser(t *testing.T) {
@@ -243,6 +252,7 @@ func TestAddICAsUser(t *testing.T) {
 	// test POST ic/ $newIC
 	// This should fail with unprocessable entity 422 error code
 	// Normal users are not allowed to add ICs
+	newIC1.ManagedExternally = newFalse()
 	code, resp, err := helper.TestEndpoint(router, token,
 		"/api/ic", "POST", helper.KeyModels{"ic": newIC1})
 	assert.NoError(t, err)
@@ -305,14 +315,15 @@ func TestUpdateICAsAdmin(t *testing.T) {
 	// fake an IC update (create) message
 	var update ICUpdate
 	update.Status = new(ICStatus)
+	update.Properties = new(ICProperties)
 	update.Status.State = new(string)
 	*update.Status.State = "idle"
-	update.Status.Name = new(string)
-	*update.Status.Name = newIC2.Name
-	update.Status.Category = new(string)
-	*update.Status.Category = newIC2.Category
-	update.Status.Type = new(string)
-	*update.Status.Type = newIC2.Type
+	update.Properties.Name = new(string)
+	*update.Properties.Name = newIC2.Name
+	update.Properties.Category = new(string)
+	*update.Properties.Category = newIC2.Category
+	update.Properties.Type = new(string)
+	*update.Properties.Type = newIC2.Type
 
 	payload, err := json.Marshal(update)
 	assert.NoError(t, err)
@@ -435,14 +446,15 @@ func TestDeleteICAsAdmin(t *testing.T) {
 	// fake an IC update (create) message
 	var update ICUpdate
 	update.Status = new(ICStatus)
+	update.Properties = new(ICProperties)
 	update.Status.State = new(string)
 	*update.Status.State = "idle"
-	update.Status.Name = new(string)
-	*update.Status.Name = newIC2.Name
-	update.Status.Category = new(string)
-	*update.Status.Category = newIC2.Category
-	update.Status.Type = new(string)
-	*update.Status.Type = newIC2.Type
+	update.Properties.Name = new(string)
+	*update.Properties.Name = newIC2.Name
+	update.Properties.Category = new(string)
+	*update.Properties.Category = newIC2.Category
+	update.Properties.Type = new(string)
+	*update.Properties.Type = newIC2.Type
 
 	payload, err := json.Marshal(update)
 	assert.NoError(t, err)
@@ -676,6 +688,7 @@ func TestCreateUpdateViaAMQPRecv(t *testing.T) {
 	// fake an IC update message
 	var update ICUpdate
 	update.Status = new(ICStatus)
+	update.Properties = new(ICProperties)
 	update.Status.State = new(string)
 	*update.Status.State = "idle"
 
@@ -715,22 +728,22 @@ func TestCreateUpdateViaAMQPRecv(t *testing.T) {
 	assert.Equal(t, 0, number)
 
 	// complete the (required) data of an IC
-	update.Status.Name = new(string)
-	*update.Status.Name = newIC1.Name
-	update.Status.Category = new(string)
-	*update.Status.Category = newIC1.Category
-	update.Status.Type = new(string)
-	*update.Status.Type = newIC1.Type
+	update.Properties.Name = new(string)
+	*update.Properties.Name = newIC1.Name
+	update.Properties.Category = new(string)
+	*update.Properties.Category = newIC1.Category
+	update.Properties.Type = new(string)
+	*update.Properties.Type = newIC1.Type
 	update.Status.Uptime = new(float64)
 	*update.Status.Uptime = -1.0
-	update.Status.WS_url = new(string)
-	*update.Status.WS_url = newIC1.WebsocketURL
-	update.Status.API_url = new(string)
-	*update.Status.API_url = newIC1.APIURL
-	update.Status.Description = new(string)
-	*update.Status.Description = newIC1.Description
-	update.Status.Location = new(string)
-	*update.Status.Location = newIC1.Location
+	update.Properties.WS_url = new(string)
+	*update.Properties.WS_url = newIC1.WebsocketURL
+	update.Properties.API_url = new(string)
+	*update.Properties.API_url = newIC1.APIURL
+	update.Properties.Description = new(string)
+	*update.Properties.Description = newIC1.Description
+	update.Properties.Location = new(string)
+	*update.Properties.Location = newIC1.Location
 
 	payload, err = json.Marshal(update)
 	assert.NoError(t, err)
@@ -765,7 +778,7 @@ func TestCreateUpdateViaAMQPRecv(t *testing.T) {
 	assert.Equal(t, 1, number)
 
 	// modify status update
-	*update.Status.Name = "This is the new name"
+	*update.Properties.Name = "This is the new name"
 	payload, err = json.Marshal(update)
 	assert.NoError(t, err)
 
@@ -809,26 +822,26 @@ func TestDeleteICViaAMQPRecv(t *testing.T) {
 	// fake an IC update message
 	var update ICUpdate
 	update.Status = new(ICStatus)
-
+	update.Properties = new(ICProperties)
 	update.Status.State = new(string)
 	*update.Status.State = "idle"
 	// complete the (required) data of an IC
-	update.Status.Name = new(string)
-	*update.Status.Name = newIC1.Name
-	update.Status.Category = new(string)
-	*update.Status.Category = newIC1.Category
-	update.Status.Type = new(string)
-	*update.Status.Type = newIC1.Type
+	update.Properties.Name = new(string)
+	*update.Properties.Name = newIC1.Name
+	update.Properties.Category = new(string)
+	*update.Properties.Category = newIC1.Category
+	update.Properties.Type = new(string)
+	*update.Properties.Type = newIC1.Type
 	update.Status.Uptime = new(float64)
 	*update.Status.Uptime = -1.0
-	update.Status.WS_url = new(string)
-	*update.Status.WS_url = newIC1.WebsocketURL
-	update.Status.API_url = new(string)
-	*update.Status.API_url = newIC1.APIURL
-	update.Status.Description = new(string)
-	*update.Status.Description = newIC1.Description
-	update.Status.Location = new(string)
-	*update.Status.Location = newIC1.Location
+	update.Properties.WS_url = new(string)
+	*update.Properties.WS_url = newIC1.WebsocketURL
+	update.Properties.API_url = new(string)
+	*update.Properties.API_url = newIC1.APIURL
+	update.Properties.Description = new(string)
+	*update.Properties.Description = newIC1.Description
+	update.Properties.Location = new(string)
+	*update.Properties.Location = newIC1.Location
 
 	payload, err := json.Marshal(update)
 	assert.NoError(t, err)

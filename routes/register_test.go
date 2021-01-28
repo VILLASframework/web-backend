@@ -23,17 +23,18 @@
 package routes
 
 import (
+	infrastructure_component "git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/infrastructure-component"
 	"os"
 	"testing"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
-	infrastructure_component "git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/infrastructure-component"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
 
 var router *gin.Engine
+var api *gin.RouterGroup
 
 func TestMain(m *testing.M) {
 	err := configuration.InitConfig()
@@ -49,35 +50,42 @@ func TestMain(m *testing.M) {
 
 	router = gin.Default()
 
-	// connect AMQP client (make sure that AMQP_HOST, AMQP_USER, AMQP_PASS are set via command line parameters)
+	basePath, _ := configuration.GlobalConfig.String("base.path")
+	api = router.Group(basePath)
+	os.Exit(m.Run())
+}
+
+/*
+ * The order of test functions is important here
+ * 1. Start and connect AMQP
+ * 2. Register endpoints
+ * 3. Add test data
+ */
+
+func TestStartAMQP(t *testing.T) {
+	// connect AMQP client
+	// Make sure that AMQP_HOST, AMQP_USER, AMQP_PASS are set
 	host, err := configuration.GlobalConfig.String("amqp.host")
 	user, err := configuration.GlobalConfig.String("amqp.user")
 	pass, err := configuration.GlobalConfig.String("amqp.pass")
-
 	amqpURI := "amqp://" + user + ":" + pass + "@" + host
 
-	err = infrastructure_component.ConnectAMQP(amqpURI)
-
-	os.Exit(m.Run())
+	// AMQP Connection startup is tested here
+	// Not repeated in other tests because it is only needed once
+	err = infrastructure_component.StartAMQP(amqpURI, api)
+	assert.NoError(t, err)
 }
 
 func TestRegisterEndpoints(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
 
-	basePath, err := configuration.GlobalConfig.String("base.path")
-	assert.NoError(t, err)
-	api := router.Group(basePath)
 	RegisterEndpoints(router, api)
 }
 
 func TestAddTestData(t *testing.T) {
-	err := configuration.InitConfig()
-	if err != nil {
-		panic(t)
-	}
 
-	err = ReadTestDataFromJson("../database/testdata.json")
+	err := ReadTestDataFromJson("../database/testdata.json")
 	assert.NoError(t, err)
 
 	resp, err := AddTestData(configuration.GlobalConfig, router)
