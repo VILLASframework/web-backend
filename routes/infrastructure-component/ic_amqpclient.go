@@ -304,6 +304,10 @@ func processMessage(message amqp.Delivery) error {
 
 func createExternalIC(payload ICUpdate, ICUUID string) error {
 
+	if payload.Properties == nil {
+		return fmt.Errorf("AMQP: Cannot create new IC, Propertie field missing")
+	}
+
 	var newICReq AddICRequest
 	newICReq.InfrastructureComponent.UUID = ICUUID
 	if payload.Properties.Name == nil ||
@@ -317,15 +321,21 @@ func createExternalIC(payload ICUpdate, ICUUID string) error {
 	newICReq.InfrastructureComponent.Type = *payload.Properties.Type
 
 	// add optional params
-	if payload.Status.State != nil {
-		newICReq.InfrastructureComponent.State = *payload.Status.State
-	} else {
-		newICReq.InfrastructureComponent.State = "unknown"
-	}
-	if newICReq.InfrastructureComponent.State == "gone" {
-		// Check if state is "gone" and abort creation of IC in this case
-		log.Println("AMQP: Aborting creation of IC with state gone")
-		return nil
+	if payload.Status != nil {
+		if payload.Status.State != nil {
+			newICReq.InfrastructureComponent.State = *payload.Status.State
+		} else {
+			newICReq.InfrastructureComponent.State = "unknown"
+		}
+		if newICReq.InfrastructureComponent.State == "gone" {
+			// Check if state is "gone" and abort creation of IC in this case
+			log.Println("AMQP: Aborting creation of IC with state gone")
+			return nil
+		}
+
+		if payload.Status.Uptime != nil {
+			newICReq.InfrastructureComponent.Uptime = *payload.Status.Uptime
+		}
 	}
 
 	if payload.Properties.WS_url != nil {
@@ -340,9 +350,7 @@ func createExternalIC(payload ICUpdate, ICUUID string) error {
 	if payload.Properties.Description != nil {
 		newICReq.InfrastructureComponent.Description = *payload.Properties.Description
 	}
-	if payload.Status.Uptime != nil {
-		newICReq.InfrastructureComponent.Uptime = *payload.Status.Uptime
-	}
+
 	// TODO add JSON start parameter scheme
 
 	// set managed externally to true because this IC is created via AMQP
@@ -380,47 +388,51 @@ func createExternalIC(payload ICUpdate, ICUUID string) error {
 func (s *InfrastructureComponent) updateExternalIC(payload ICUpdate) error {
 
 	var updatedICReq UpdateICRequest
-	if payload.Status.State != nil {
-		updatedICReq.InfrastructureComponent.State = *payload.Status.State
 
-		if *payload.Status.State == "gone" {
-			// remove IC from DB
-			log.Println("AMQP: Deleting IC with state gone")
-			err := s.delete(true)
-			if err != nil {
-				// if component could not be deleted there are still configurations using it in the DB
-				// continue with the update to save the new state of the component and get back to the deletion later
-				log.Println("AMQP: Deletion of IC postponed (config(s) associated to it)")
+	if payload.Status != nil {
+		if payload.Status.State != nil {
+			updatedICReq.InfrastructureComponent.State = *payload.Status.State
+
+			if *payload.Status.State == "gone" {
+				// remove IC from DB
+				log.Println("AMQP: Deleting IC with state gone")
+				err := s.delete(true)
+				if err != nil {
+					// if component could not be deleted there are still configurations using it in the DB
+					// continue with the update to save the new state of the component and get back to the deletion later
+					log.Println("AMQP: Deletion of IC postponed (config(s) associated to it)")
+				}
+
 			}
+		}
 
+		if payload.Status.Uptime != nil {
+			updatedICReq.InfrastructureComponent.Uptime = *payload.Status.Uptime
 		}
 	}
 
-	if payload.Status.Uptime != nil {
-		updatedICReq.InfrastructureComponent.Uptime = *payload.Status.Uptime
-	}
-
-	if payload.Properties.Type != nil {
-		updatedICReq.InfrastructureComponent.Type = *payload.Properties.Type
-	}
-	if payload.Properties.Category != nil {
-		updatedICReq.InfrastructureComponent.Category = *payload.Properties.Category
-	}
-	if payload.Properties.Name != nil {
-		updatedICReq.InfrastructureComponent.Name = *payload.Properties.Name
-	}
-	if payload.Properties.WS_url != nil {
-		updatedICReq.InfrastructureComponent.WebsocketURL = *payload.Properties.WS_url
-	}
-	if payload.Properties.API_url != nil {
-		updatedICReq.InfrastructureComponent.APIURL = *payload.Properties.API_url
-	}
-	if payload.Properties.Location != nil {
-		//postgres.Jsonb{json.RawMessage(`{"location" : " ` + *payload.Status.Location + `"}`)}
-		updatedICReq.InfrastructureComponent.Location = *payload.Properties.Location
-	}
-	if payload.Properties.Description != nil {
-		updatedICReq.InfrastructureComponent.Description = *payload.Properties.Description
+	if payload.Properties != nil {
+		if payload.Properties.Type != nil {
+			updatedICReq.InfrastructureComponent.Type = *payload.Properties.Type
+		}
+		if payload.Properties.Category != nil {
+			updatedICReq.InfrastructureComponent.Category = *payload.Properties.Category
+		}
+		if payload.Properties.Name != nil {
+			updatedICReq.InfrastructureComponent.Name = *payload.Properties.Name
+		}
+		if payload.Properties.WS_url != nil {
+			updatedICReq.InfrastructureComponent.WebsocketURL = *payload.Properties.WS_url
+		}
+		if payload.Properties.API_url != nil {
+			updatedICReq.InfrastructureComponent.APIURL = *payload.Properties.API_url
+		}
+		if payload.Properties.Location != nil {
+			updatedICReq.InfrastructureComponent.Location = *payload.Properties.Location
+		}
+		if payload.Properties.Description != nil {
+			updatedICReq.InfrastructureComponent.Description = *payload.Properties.Description
+		}
 	}
 
 	// set raw status update if IC
