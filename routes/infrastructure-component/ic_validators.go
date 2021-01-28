@@ -44,6 +44,7 @@ type validNewIC struct {
 	Location             string         `form:"Location" validate:"omitempty"`
 	Description          string         `form:"Description" validate:"omitempty"`
 	StartParameterScheme postgres.Jsonb `form:"StartParameterScheme" validate:"omitempty"`
+	StatusUpdateRaw      postgres.Jsonb `form:"StatusUpdateRaw" validate:"omitempty"`
 	ManagedExternally    *bool          `form:"ManagedExternally" validate:"required"`
 	Uptime               float64        `form:"Uptime" validate:"omitempty"`
 }
@@ -59,6 +60,7 @@ type validUpdatedIC struct {
 	Location             string         `form:"Location" validate:"omitempty"`
 	Description          string         `form:"Description" validate:"omitempty"`
 	StartParameterScheme postgres.Jsonb `form:"StartParameterScheme" validate:"omitempty"`
+	StatusUpdateRaw      postgres.Jsonb `form:"StatusUpdateRaw" validate:"omitempty"`
 	Uptime               float64        `form:"Uptime" validate:"omitempty"`
 }
 
@@ -135,6 +137,7 @@ func (r *AddICRequest) createIC(receivedViaAMQP bool) (InfrastructureComponent, 
 	s.Location = r.InfrastructureComponent.Location
 	s.Description = r.InfrastructureComponent.Description
 	s.StartParameterScheme = r.InfrastructureComponent.StartParameterScheme
+	s.StatusUpdateRaw = r.InfrastructureComponent.StatusUpdateRaw
 	s.ManagedExternally = *r.InfrastructureComponent.ManagedExternally
 	s.Uptime = -1.0 // no uptime available
 	if r.InfrastructureComponent.State != "" {
@@ -181,11 +184,18 @@ func (r *UpdateICRequest) updatedIC(oldIC InfrastructureComponent) Infrastructur
 	var emptyJson postgres.Jsonb
 	// Serialize empty json and params
 	emptyJson_ser, _ := json.Marshal(emptyJson)
-	startParams_ser, _ := json.Marshal(r.InfrastructureComponent.StartParameterScheme)
 	opts := jsondiff.DefaultConsoleOptions()
+
+	startParams_ser, _ := json.Marshal(r.InfrastructureComponent.StartParameterScheme)
 	diff, _ := jsondiff.Compare(emptyJson_ser, startParams_ser, &opts)
 	if diff.String() != "FullMatch" {
 		s.StartParameterScheme = r.InfrastructureComponent.StartParameterScheme
+	}
+
+	statusUpdateRaw_ser, _ := json.Marshal(r.InfrastructureComponent.StatusUpdateRaw)
+	diff, _ = jsondiff.Compare(emptyJson_ser, statusUpdateRaw_ser, &opts)
+	if diff.String() != "FullMatch" {
+		s.StatusUpdateRaw = r.InfrastructureComponent.StatusUpdateRaw
 	}
 
 	return s

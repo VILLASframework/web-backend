@@ -143,6 +143,8 @@ type InfrastructureComponent struct {
 	Description string `json:"description" gorm:"default:''"`
 	// JSON scheme of start parameters for IC
 	StartParameterScheme postgres.Jsonb `json:"startparameterscheme"`
+	// raw JSON of last status update
+	StatusUpdateRaw postgres.Jsonb `json:"statusupdateraw"`
 	// Boolean indicating if IC is managed externally (via AMQP/ VILLAScontroller)
 	ManagedExternally bool `json:"managedexternally" gorm:"default:false"`
 	// ComponentConfigurations in which the IC is used
