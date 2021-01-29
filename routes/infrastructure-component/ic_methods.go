@@ -63,8 +63,7 @@ func (s *InfrastructureComponent) delete(receivedViaAMQP bool) error {
 		var action Action
 		action.Act = "delete"
 		action.When = time.Now().Unix()
-		action.Properties.UUID = new(string)
-		*action.Properties.UUID = s.UUID
+		action.Parameters.UUID = s.UUID
 
 		log.Println("AMQP: Sending request to delete IC with UUID", s.UUID)
 		err := sendActionAMQP(action)
@@ -72,11 +71,10 @@ func (s *InfrastructureComponent) delete(receivedViaAMQP bool) error {
 	}
 
 	db := database.GetDB()
+	noConfigs := db.Model(s).Association("ComponentConfigurations").Count()
 
-	no_configs := db.Model(s).Association("ComponentConfigurations").Count()
-
-	if no_configs > 0 {
-		return fmt.Errorf("Infrastructure Component cannot be deleted as it is still used in configurations (active or dangling)")
+	if noConfigs > 0 {
+		return fmt.Errorf("deletion of IC postponed, %v config(s) associated to it", noConfigs)
 	}
 
 	// delete InfrastructureComponent from DB (does NOT remain as dangling)

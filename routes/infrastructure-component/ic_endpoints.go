@@ -284,26 +284,11 @@ func sendActionToIC(c *gin.Context) {
 	//now := time.Now()
 
 	for _, action := range actions {
-		/*if action.When == 0 {
-			action.When = float32(now.Unix())
-		}*/
-		// make sure that the important properties are set correctly so that the message can be identified by the receiver
-		if action.Properties.UUID == nil {
-			action.Properties.UUID = new(string)
-			*action.Properties.UUID = s.UUID
-		}
-		if action.Properties.Type == nil {
-			action.Properties.Type = new(string)
-			*action.Properties.Type = s.Type
-		}
-		if action.Properties.Category == nil {
-			action.Properties.Category = new(string)
-			*action.Properties.Category = s.Category
-		}
-		if action.Properties.Name == nil {
-			action.Properties.Name = new(string)
-			*action.Properties.Name = s.Name
-		}
+
+		action.Parameters.UUID = s.UUID
+		action.Parameters.Type = s.Type
+		action.Parameters.Category = s.Category
+		action.Parameters.Name = s.Name
 
 		err = sendActionAMQP(action)
 		if err != nil {

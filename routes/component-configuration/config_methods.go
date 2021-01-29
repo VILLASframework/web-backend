@@ -24,6 +24,7 @@ package component_configuration
 import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/scenario"
+	"log"
 )
 
 type ComponentConfiguration struct {
@@ -177,6 +178,7 @@ func (m *ComponentConfiguration) delete() error {
 	// if IC has state gone and there is no component configuration associated with it: delete IC
 	no_configs := db.Model(ic).Association("ComponentConfigurations").Count()
 	if no_configs == 0 && ic.State == "gone" {
+		log.Println("Deleting IC with state gone, last component config deleted", ic.UUID)
 		err = db.Delete(ic).Error
 		return err
 	}

@@ -45,7 +45,7 @@ import (
 
 var router *gin.Engine
 var api *gin.RouterGroup
-var waitingTime time.Duration = 2
+var waitingTime time.Duration = 1
 
 type ICRequest struct {
 	UUID                 string         `json:"uuid,omitempty"`
@@ -75,7 +75,7 @@ type ConfigRequest struct {
 	FileIDs         []int64        `json:"fileIDs,omitempty"`
 }
 
-type ICAction struct {
+/*type ICAction struct {
 	Act        string `json:"action,omitempty"`
 	When       int64  `json:"when,omitempty"`
 	Properties struct {
@@ -88,7 +88,7 @@ type ICAction struct {
 		API_url     *string `json:"api_url,omitempty"`
 		Description *string `json:"description,omitempty"`
 	} `json:"properties,omitempty"`
-}
+}*/
 
 var newIC1 = ICRequest{
 	UUID:                 "7be0322d-354e-431e-84bd-ae4c9633138b",
@@ -314,16 +314,10 @@ func TestUpdateICAsAdmin(t *testing.T) {
 
 	// fake an IC update (create) message
 	var update ICUpdate
-	update.Status = new(ICStatus)
-	update.Properties = new(ICProperties)
-	update.Status.State = new(string)
-	*update.Status.State = "idle"
-	update.Properties.Name = new(string)
-	*update.Properties.Name = newIC2.Name
-	update.Properties.Category = new(string)
-	*update.Properties.Category = newIC2.Category
-	update.Properties.Type = new(string)
-	*update.Properties.Type = newIC2.Type
+	update.Status.State = "idle"
+	update.Properties.Name = newIC2.Name
+	update.Properties.Category = newIC2.Category
+	update.Properties.Type = newIC2.Type
 
 	payload, err := json.Marshal(update)
 	assert.NoError(t, err)
@@ -445,16 +439,10 @@ func TestDeleteICAsAdmin(t *testing.T) {
 
 	// fake an IC update (create) message
 	var update ICUpdate
-	update.Status = new(ICStatus)
-	update.Properties = new(ICProperties)
-	update.Status.State = new(string)
-	*update.Status.State = "idle"
-	update.Properties.Name = new(string)
-	*update.Properties.Name = newIC2.Name
-	update.Properties.Category = new(string)
-	*update.Properties.Category = newIC2.Category
-	update.Properties.Type = new(string)
-	*update.Properties.Type = newIC2.Type
+	update.Status.State = "idle"
+	update.Properties.Name = newIC2.Name
+	update.Properties.Category = newIC2.Category
+	update.Properties.Type = newIC2.Type
 
 	payload, err := json.Marshal(update)
 	assert.NoError(t, err)
@@ -491,6 +479,9 @@ func TestDeleteICAsAdmin(t *testing.T) {
 		fmt.Sprintf("/api/ic/%v", 2), "DELETE", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
+
+	// Wait until externally managed IC is deleted (happens async)
+	time.Sleep(waitingTime * time.Second)
 
 	// Again count the number of all the ICs returned
 	finalNumberAfterExtneralDelete, err := helper.LengthOfResponse(router, token,
@@ -653,13 +644,13 @@ func TestSendActionToIC(t *testing.T) {
 	assert.NoError(t, err)
 
 	// create action to be sent to IC
-	action1 := ICAction{
+	action1 := Action{
 		Act:  "start",
 		When: time.Now().Unix(),
 	}
-	action1.Properties.UUID = new(string)
-	*action1.Properties.UUID = newIC1.UUID
-	actions := [1]ICAction{action1}
+
+	action1.Parameters.UUID = newIC1.UUID
+	actions := [1]Action{action1}
 
 	// Send action to IC
 	code, resp, err = helper.TestEndpoint(router, token,
@@ -687,10 +678,7 @@ func TestCreateUpdateViaAMQPRecv(t *testing.T) {
 
 	// fake an IC update message
 	var update ICUpdate
-	update.Status = new(ICStatus)
-	update.Properties = new(ICProperties)
-	update.Status.State = new(string)
-	*update.Status.State = "idle"
+	update.Status.State = "idle"
 
 	payload, err := json.Marshal(update)
 	assert.NoError(t, err)
@@ -728,22 +716,14 @@ func TestCreateUpdateViaAMQPRecv(t *testing.T) {
 	assert.Equal(t, 0, number)
 
 	// complete the (required) data of an IC
-	update.Properties.Name = new(string)
-	*update.Properties.Name = newIC1.Name
-	update.Properties.Category = new(string)
-	*update.Properties.Category = newIC1.Category
-	update.Properties.Type = new(string)
-	*update.Properties.Type = newIC1.Type
-	update.Status.Uptime = new(float64)
-	*update.Status.Uptime = -1.0
-	update.Properties.WS_url = new(string)
-	*update.Properties.WS_url = newIC1.WebsocketURL
-	update.Properties.API_url = new(string)
-	*update.Properties.API_url = newIC1.APIURL
-	update.Properties.Description = new(string)
-	*update.Properties.Description = newIC1.Description
-	update.Properties.Location = new(string)
-	*update.Properties.Location = newIC1.Location
+	update.Properties.Name = newIC1.Name
+	update.Properties.Category = newIC1.Category
+	update.Properties.Type = newIC1.Type
+	update.Status.Uptime = 1000.1
+	update.Properties.WS_url = newIC1.WebsocketURL
+	update.Properties.API_url = newIC1.APIURL
+	update.Properties.Description = newIC1.Description
+	update.Properties.Location = newIC1.Location
 
 	payload, err = json.Marshal(update)
 	assert.NoError(t, err)
@@ -778,7 +758,7 @@ func TestCreateUpdateViaAMQPRecv(t *testing.T) {
 	assert.Equal(t, 1, number)
 
 	// modify status update
-	*update.Properties.Name = "This is the new name"
+	update.Properties.Name = "This is the new name"
 	payload, err = json.Marshal(update)
 	assert.NoError(t, err)
 
@@ -821,27 +801,16 @@ func TestDeleteICViaAMQPRecv(t *testing.T) {
 
 	// fake an IC update message
 	var update ICUpdate
-	update.Status = new(ICStatus)
-	update.Properties = new(ICProperties)
-	update.Status.State = new(string)
-	*update.Status.State = "idle"
+	update.Status.State = "idle"
 	// complete the (required) data of an IC
-	update.Properties.Name = new(string)
-	*update.Properties.Name = newIC1.Name
-	update.Properties.Category = new(string)
-	*update.Properties.Category = newIC1.Category
-	update.Properties.Type = new(string)
-	*update.Properties.Type = newIC1.Type
-	update.Status.Uptime = new(float64)
-	*update.Status.Uptime = -1.0
-	update.Properties.WS_url = new(string)
-	*update.Properties.WS_url = newIC1.WebsocketURL
-	update.Properties.API_url = new(string)
-	*update.Properties.API_url = newIC1.APIURL
-	update.Properties.Description = new(string)
-	*update.Properties.Description = newIC1.Description
-	update.Properties.Location = new(string)
-	*update.Properties.Location = newIC1.Location
+	update.Properties.Name = newIC1.Name
+	update.Properties.Category = newIC1.Category
+	update.Properties.Type = newIC1.Type
+	update.Status.Uptime = 500.544
+	update.Properties.WS_url = newIC1.WebsocketURL
+	update.Properties.API_url = newIC1.APIURL
+	update.Properties.Description = newIC1.Description
+	update.Properties.Location = newIC1.Location
 
 	payload, err := json.Marshal(update)
 	assert.NoError(t, err)
@@ -920,7 +889,7 @@ func TestDeleteICViaAMQPRecv(t *testing.T) {
 	assert.NoError(t, err)
 
 	// modify status update to state "gone"
-	*update.Status.State = "gone"
+	update.Status.State = "gone"
 	payload, err = json.Marshal(update)
 	assert.NoError(t, err)
 

@@ -100,29 +100,17 @@ func (r *AddICRequest) createIC(receivedViaAMQP bool) (InfrastructureComponent, 
 		var action Action
 		action.Act = "create"
 		action.When = time.Now().Unix()
-		action.Properties.Type = new(string)
-		action.Properties.Name = new(string)
-		action.Properties.Category = new(string)
 
-		*action.Properties.Type = r.InfrastructureComponent.Type
-		*action.Properties.Name = r.InfrastructureComponent.Name
-		*action.Properties.Category = r.InfrastructureComponent.Category
+		action.Parameters.Type = r.InfrastructureComponent.Type
+		action.Parameters.Name = r.InfrastructureComponent.Name
+		action.Parameters.Category = r.InfrastructureComponent.Category
 
 		// set optional properties
-		action.Properties.Description = new(string)
-		*action.Properties.Description = r.InfrastructureComponent.Description
-
-		action.Properties.Location = new(string)
-		*action.Properties.Location = r.InfrastructureComponent.Location
-
-		action.Properties.API_url = new(string)
-		*action.Properties.API_url = r.InfrastructureComponent.APIURL
-
-		action.Properties.WS_url = new(string)
-		*action.Properties.WS_url = r.InfrastructureComponent.WebsocketURL
-
-		action.Properties.UUID = new(string)
-		*action.Properties.UUID = r.InfrastructureComponent.UUID
+		action.Parameters.Description = r.InfrastructureComponent.Description
+		action.Parameters.Location = r.InfrastructureComponent.Location
+		action.Parameters.API_url = r.InfrastructureComponent.APIURL
+		action.Parameters.WS_url = r.InfrastructureComponent.WebsocketURL
+		action.Parameters.UUID = r.InfrastructureComponent.UUID
 
 		log.Println("AMQP: Sending request to create new IC")
 		err = sendActionAMQP(action)
