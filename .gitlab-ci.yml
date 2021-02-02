@@ -25,8 +25,6 @@ stages:
 build:
   stage: build
   extends: .go
-  before_script:
-    - echo 'git.rwth-aachen.de gitlab.host' >> /etc/hosts
   script:
     - go mod tidy
     - go install github.com/swaggo/swag/cmd/swag
@@ -77,7 +75,6 @@ test:
       command: ['server', '/minio']
       alias: minio
   before_script:
-    - echo 'git.rwth-aachen.de gitlab.host' >> /etc/hosts
     - wget -qO /usr/bin/mc https://dl.min.io/client/mc/release/linux-amd64/mc && chmod +x /usr/bin/mc
     - mc alias set gitlab http://minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD}
     - mc mb gitlab/${S3_BUCKET}
@@ -95,8 +92,6 @@ test:
 test:files_postgres:
   stage: test
   extends: .go
-  before_script:
-    - echo 'git.rwth-aachen.de gitlab.host' >> /etc/hosts
   variables:
     POSTGRES_DB: testvillasdb
     POSTGRES_USER: villas
@@ -124,8 +119,6 @@ test:files_postgres:
 
 deploy:
   stage: deploy
-  before_script:
-    - echo 'git.rwth-aachen.de gitlab.host' >> /etc/hosts
   image:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [ "" ]
