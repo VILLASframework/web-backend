@@ -136,10 +136,9 @@
       "height": 50,
       "minWidth": 30,
       "minHeight": 380,
-      "x": 70,
-      "y": 400,
+      "x": 600,
+      "y": 50,
       "z": 0,
-      "isLocked": false,
       "signalIDs": [],
       "customProperties": {
         "default_value" : 0,
