@@ -2,6 +2,7 @@ variables:
   DOCKER_TAG: ${CI_COMMIT_BRANCH}
   DOCKER_IMAGE: ${CI_REGISTRY_IMAGE}
   GO_IMAGE: golang:1.13-buster
+  FF_GITLAB_REGISTRY_HELPER_IMAGE: 1
 
 # Template
 .go:
