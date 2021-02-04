@@ -127,7 +127,7 @@ func (r *AddICRequest) createIC(receivedViaAMQP bool) (InfrastructureComponent, 
 	s.StartParameterScheme = r.InfrastructureComponent.StartParameterScheme
 	s.StatusUpdateRaw = r.InfrastructureComponent.StatusUpdateRaw
 	s.ManagedExternally = *r.InfrastructureComponent.ManagedExternally
-	s.Uptime = -1.0 // no uptime available
+	s.Uptime = r.InfrastructureComponent.Uptime
 	if r.InfrastructureComponent.State != "" {
 		s.State = r.InfrastructureComponent.State
 	} else {
@@ -164,6 +164,7 @@ func (r *UpdateICRequest) updatedIC(oldIC InfrastructureComponent) Infrastructur
 	s.APIURL = r.InfrastructureComponent.APIURL
 	s.Location = r.InfrastructureComponent.Location
 	s.Description = r.InfrastructureComponent.Description
+	s.Uptime = r.InfrastructureComponent.Uptime
 
 	// set last update time
 	s.StateUpdateAt = time.Now().Format(time.RFC1123Z)
