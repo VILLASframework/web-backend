@@ -37,6 +37,7 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	component_configuration "git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/component-configuration"
+	config_route "git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/config"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/dashboard"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/file"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/healthz"
@@ -80,9 +81,10 @@ func RegisterEndpoints(router *gin.Engine, api *gin.RouterGroup) {
 	healthz.RegisterHealthzEndpoint(api.Group("/healthz"))
 	metrics.RegisterMetricsEndpoint(api.Group("/metrics"))
 	openapi.RegisterOpenAPIEndpoint(api.Group("/openapi"))
-	// All endpoints (except for /healthz and /metrics) require authentication except when someone wants to
-	// login (POST /authenticate)
+	config_route.RegisterConfigEndpoint(api.Group("/config"))
 	user.RegisterAuthenticate(api.Group("/authenticate"))
+
+	// The following endpoints require authentication
 
 	api.Use(user.Authentication())
 
