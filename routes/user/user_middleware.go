@@ -60,7 +60,6 @@ func isAuthenticated(c *gin.Context) (bool, error) {
 			request.ArgumentExtractor{"token"},
 		},
 		func(token *jwt.Token) (interface{}, error) {
-
 			// Validate alg for signing the jwt
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, fmt.Errorf("Unexpected signing alg: %v",
@@ -74,14 +73,14 @@ func isAuthenticated(c *gin.Context) (bool, error) {
 
 	// If the authentication extraction fails return HTTP code 401
 	if err != nil {
-		return false, fmt.Errorf("Authentication failed (claims extraction)")
+		return false, fmt.Errorf("Authentication failed (claims extraction: %s)", err)
 	}
 
 	// If the token is ok, pass user id to context
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		err = claimsToContext(c, claims)
 		if err != nil {
-			return false, fmt.Errorf("Authentication failed (claims casting)")
+			return false, fmt.Errorf("Authentication failed (claims casting: %s)", err)
 		}
 	}
 
