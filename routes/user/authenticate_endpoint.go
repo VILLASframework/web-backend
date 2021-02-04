@@ -50,15 +50,15 @@ func RegisterAuthenticate(r *gin.RouterGroup) {
 // @Accept json
 // @Produce json
 // @Tags authentication
-// @Param inputUser body user.loginRequest true "loginRequest of user"
 // @Success 200 {object} docs.ResponseAuthenticate "JSON web token, success status, message and authenticated user object"
 // @Failure 401 {object} docs.ResponseError "Unauthorized"
 // @Failure 500 {object} docs.ResponseError "Internal server error."
-// @Router /authenticate [post]
+// @Router /authenticate [get]
 func authenticated(c *gin.Context) {
 	ok, err := isAuthenticated(c)
 	if err != nil {
 		helper.InternalServerError(c, err.Error())
+		return
 	}
 
 	if ok {
