@@ -77,13 +77,13 @@ func authenticated(c *gin.Context) {
 			"user":          user.User,
 		})
 	} else {
-		externalAuth, err := configuration.GlobalConfig.Bool("external-auth")
+		authExternal, err := configuration.GlobalConfig.Bool("auth-external")
 		if err != nil {
 			helper.UnauthorizedError(c, "Backend configuration error")
 			return
 		}
 
-		if externalAuth {
+		if authExternal {
 			c.JSON(http.StatusOK, gin.H{
 				"success":       true,
 				"authenticated": false,
@@ -112,16 +112,20 @@ func authenticated(c *gin.Context) {
 func authenticate(c *gin.Context) {
 	var user *User
 
-	externalAuth, err := configuration.GlobalConfig.Bool("auth.external")
+	authExternal, err := configuration.GlobalConfig.Bool("auth.external")
 	if err != nil {
 		helper.UnauthorizedError(c, "Backend configuration error")
 		return
 	}
 
-	if err != nil || !externalAuth {
+	if err != nil || !authExternal {
 		user = authenticateStandard(c)
 	} else {
 		user = authenticateExternal(c)
+	}
+
+	if user == nil {
+		return
 	}
 
 	expiresStr, err := configuration.GlobalConfig.String("jwt.expires-after")

@@ -42,7 +42,7 @@ func NewUser(username, password, mail, role string, active bool) (*User, error) 
 
 	// Check that the username is NOT taken
 	err := newUser.ByUsername(username)
-	if err != nil {
+	if err == nil {
 		return nil, fmt.Errorf("Username is already taken")
 	}
 
