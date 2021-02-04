@@ -25,6 +25,7 @@ import (
 	"flag"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/zpatrick/go-config"
 )
@@ -108,31 +109,13 @@ func InitConfig() error {
 		static["auth.external"] = "false"
 	}
 
-	mappings := map[string]string{
-		"DB_HOST":           "db.host",
-		"DB_NAME":           "db.name",
-		"DB_USER":           "db.user",
-		"DB_PASS":           "db.pass",
-		"DB_SSLMODE":        "db.ssl",
-		"AMQP_HOST":         "amqp.host",
-		"AMQP_USER":         "amqp.user",
-		"AMQP_PASS":         "amqp.pass",
-		"BASE_HOST":         "base.host",
-		"BASE_PATH":         "base.path",
-		"MODE":              "mode",
-		"PORT":              "port",
-		"ADMIN_USER":        "admin.user",
-		"ADMIN_PASS":        "admin.pass",
-		"ADMIN_MAIL":        "admin.mail",
-		"S3_BUCKET":         "s3.bucket",
-		"S3_ENDPOINT":       "s3.endpoint",
-		"S3_REGION":         "s3.region",
-		"S3_NOSSL":          "s3.nossl",
-		"S3_PATHSTYLE":      "s3.pathstyle",
-		"JWT_SECRET":        "jwt.secret",
-		"JWT_EXPIRES_AFTER": "jwt.expires-after",
-		"TEST_DATA_PATH":    "test.datapath",
-		"AUTH_EXTERNAL":     "auth.external",
+	mappings := map[string]string{}
+	for name, value := range static {
+		envName := strings.Replace(name, ".", "_")
+		envName := strings.Replace(envName, "-", "_")
+		envName := strings.ToUpper(envName)
+
+		mappings[envName] = name
 	}
 
 	defaults := config.NewStatic(static)
