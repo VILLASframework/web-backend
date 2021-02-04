@@ -41,7 +41,7 @@ type tokenClaims struct {
 
 func RegisterAuthenticate(r *gin.RouterGroup) {
 	r.GET("", authenticated)
-	r.POST("", authenticate)
+	r.POST("/:mechanism", authenticate)
 }
 
 // authenticated godoc
@@ -105,48 +105,57 @@ func authenticated(c *gin.Context) {
 // @Produce json
 // @Tags authentication
 // @Param inputUser body user.loginRequest true "loginRequest of user"
+// @Param mechanism path string true "Login mechanism" Enums(internal, external)
 // @Success 200 {object} api.ResponseAuthenticate "JSON web token, success status, message and authenticated user object"
 // @Failure 401 {object} api.ResponseError "Unauthorized"
 // @Failure 500 {object} api.ResponseError "Internal server error."
-// @Router /authenticate [post]
+// @Router /authenticate{mechanism} [post]
 func authenticate(c *gin.Context) {
-	var user *User
+	var user *User = nil
 
-	authExternal, err := configuration.GlobalConfig.Bool("auth.external")
-	if err != nil {
-		helper.UnauthorizedError(c, "Backend configuration error")
-		return
-	}
-
-	if err != nil || !authExternal {
-		user = authenticateStandard(c)
-	} else {
-		user = authenticateExternal(c)
+	switch c.Param("mechanism") {
+	case "internal":
+		user = authenticateInternal(c)
+	case "external":
+		authExternal, err := configuration.GlobalConfig.Bool("auth.external")
+		if err == nil && authExternal {
+			user = authenticateExternal(c)
+		} else {
+			helper.BadRequestError(c, "External authentication is not activated")
+		}
+	default:
+		helper.BadRequestError(c, "Invalid authentication mechanism")
 	}
 
 	if user == nil {
 		return
 	}
 
+	// Check if this is an active user
+	if !user.Active {
+		helper.UnauthorizedError(c, "User is not active")
+		return
+	}
+
 	expiresStr, err := configuration.GlobalConfig.String("jwt.expires-after")
 	if err != nil {
-		helper.UnauthorizedError(c, "Backend configuration error")
+		helper.InternalServerError(c, "Invalid backend configuration: jwt.expires-after")
 		return
 	}
 
 	expiresDuration, err := time.ParseDuration(expiresStr)
 	if err != nil {
-		helper.UnauthorizedError(c, "Backend configuration error")
+		helper.InternalServerError(c, "Invalid backend configuration: jwt.expires-after")
 		return
 	}
 
 	secret, err := configuration.GlobalConfig.String("jwt.secret")
 	if err != nil {
-		helper.UnauthorizedError(c, "Backend configuration error")
+		helper.InternalServerError(c, "Invalid backend configuration: jwt.secret")
 		return
 	}
 
-	// create authentication token
+	// Create authentication token
 	claims := tokenClaims{
 		user.ID,
 		user.Role,
@@ -161,7 +170,7 @@ func authenticate(c *gin.Context) {
 
 	tokenString, err := token.SignedString([]byte(secret))
 	if err != nil {
-		helper.InternalServerError(c, err.Error())
+		helper.InternalServerError(c, "Invalid backend configuration: jwt.secret")
 		return
 	}
 
@@ -173,7 +182,7 @@ func authenticate(c *gin.Context) {
 	})
 }
 
-func authenticateStandard(c *gin.Context) *User {
+func authenticateInternal(c *gin.Context) *User {
 	// Bind the response (context) with the loginRequest struct
 	var credentials loginRequest
 	if err := c.ShouldBindJSON(&credentials); err != nil {
@@ -192,12 +201,6 @@ func authenticateStandard(c *gin.Context) *User {
 	err := user.ByUsername(credentials.Username)
 	if err != nil {
 		helper.UnauthorizedError(c, "Unknown username")
-		return nil
-	}
-
-	// Check if this is an active user
-	if !user.Active {
-		helper.UnauthorizedError(c, "User is not active")
 		return nil
 	}
 

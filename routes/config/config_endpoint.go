@@ -39,7 +39,6 @@ type ConfigAuthenticationExternal struct {
 
 type ConfigAuthentication struct {
 	External  ConfigAuthenticationExternal `json:"external"`
-	LoginURL  string                       `json:"login_url"`
 	LogoutURL string                       `json:"logout_url"`
 }
 
@@ -76,8 +75,8 @@ func getConfig(c *gin.Context) {
 	resp.BasePath, _ = cfg.String("base.path")
 	resp.Authentication.LogoutURL, _ = cfg.String("auth.logout-url")
 	resp.Authentication.External.Enabled, _ = cfg.Bool("auth.external")
-	resp.Authentication.External.AuthorizeURL, _ = cfg.String("auth.external-authorize-url")
-	resp.Authentication.External.ProviderName, _ = cfg.String("auth.external-provider-name")
+	resp.Authentication.External.AuthorizeURL, _ = cfg.String("auth.external.authorize-url")
+	resp.Authentication.External.ProviderName, _ = cfg.String("auth.external.provider-name")
 	resp.Title, _ = cfg.String("title")
 	resp.SubTitle, _ = cfg.String("sub-title")
 	resp.Contact.Name, _ = cfg.String("contact.name")

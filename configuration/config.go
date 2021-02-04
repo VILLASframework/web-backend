@@ -39,56 +39,70 @@ func InitConfig() error {
 	}
 
 	var (
-		dbHost          = flag.String("db-host", "/var/run/postgresql", "Host of the PostgreSQL database (default is /var/run/postgresql for localhost DB on Ubuntu systems)")
-		dbName          = flag.String("db-name", "villasdb", "Name of the database to use (default is villasdb)")
-		dbUser          = flag.String("db-user", "", "Username of database connection (default is <empty>)")
-		dbPass          = flag.String("db-pass", "", "Password of database connection (default is <empty>)")
-		dbSSLMode       = flag.String("db-ssl-mode", "disable", "SSL mode of DB (default is disable)") // TODO: change default for production
-		amqpHost        = flag.String("amqp-host", "", "If set, use this as host for AMQP broker (default is disabled)")
-		amqpUser        = flag.String("amqp-user", "", "Username for AMQP broker")
-		amqpPass        = flag.String("amqp-pass", "", "Password for AMQP broker")
-		configFile      = flag.String("config", "", "Path to YAML configuration file")
-		mode            = flag.String("mode", "release", "Select debug/release/test mode (default is release)")
-		port            = flag.String("port", "4000", "Port of the backend (default is 4000)")
-		baseHost        = flag.String("base-host", "localhost:4000", "The host at which the backend is hosted (default: localhost)")
-		basePath        = flag.String("base-path", "/api/v2", "The path at which the API routes are located (default /api/v2)")
-		adminUser       = flag.String("admin-user", "", "Initial admin username")
-		adminPass       = flag.String("admin-pass", "", "Initial admin password")
-		adminMail       = flag.String("admin-mail", "", "Initial admin mail address")
-		s3Bucket        = flag.String("s3-bucket", "", "S3 Bucket for uploading files")
-		s3Endpoint      = flag.String("s3-endpoint", "", "Endpoint of S3 API for file uploads")
-		s3Region        = flag.String("s3-region", "default", "S3 Region for file uploads")
-		s3NoSSL         = flag.Bool("s3-nossl", false, "Use encrypted connections to the S3 API")
-		s3PathStyle     = flag.Bool("s3-pathstyle", false, "Use path-style S3 API")
-		jwtSecret       = flag.String("jwt-secret", "This should NOT be here!!@33$8&", "The JSON Web Token secret")
-		jwtExpiresAfter = flag.String("jwt-expires-after", "168h" /* 1 week */, "The time after which the JSON Web Token expires")
-		testDataPath    = flag.String("test-data-path", "database/testdata.json", "The path to the test data json file (used in test mode)")
-		authExternal    = flag.Bool("auth.external", false, "Use external authentication via X-Forwarded-User header (e.g. OAuth2 Proxy)")
+		dbHost                   = flag.String("db-host", "/var/run/postgresql", "Host of the PostgreSQL database (default is /var/run/postgresql for localhost DB on Ubuntu systems)")
+		dbName                   = flag.String("db-name", "villasdb", "Name of the database to use (default is villasdb)")
+		dbUser                   = flag.String("db-user", "", "Username of database connection (default is <empty>)")
+		dbPass                   = flag.String("db-pass", "", "Password of database connection (default is <empty>)")
+		dbSSLMode                = flag.String("db-ssl-mode", "disable", "SSL mode of DB (default is disable)") // TODO: change default for production
+		amqpHost                 = flag.String("amqp-host", "", "If set, use this as host for AMQP broker (default is disabled)")
+		amqpUser                 = flag.String("amqp-user", "", "Username for AMQP broker")
+		amqpPass                 = flag.String("amqp-pass", "", "Password for AMQP broker")
+		configFile               = flag.String("config", "", "Path to YAML configuration file")
+		mode                     = flag.String("mode", "release", "Select debug/release/test mode (default is release)")
+		port                     = flag.String("port", "4000", "Port of the backend (default is 4000)")
+		baseHost                 = flag.String("base-host", "localhost:4000", "The host at which the backend is hosted (default: localhost)")
+		basePath                 = flag.String("base-path", "/api/v2", "The path at which the API routes are located (default /api/v2)")
+		adminUser                = flag.String("admin-user", "", "Initial admin username")
+		adminPass                = flag.String("admin-pass", "", "Initial admin password")
+		adminMail                = flag.String("admin-mail", "", "Initial admin mail address")
+		s3Bucket                 = flag.String("s3-bucket", "", "S3 Bucket for uploading files")
+		s3Endpoint               = flag.String("s3-endpoint", "", "Endpoint of S3 API for file uploads")
+		s3Region                 = flag.String("s3-region", "default", "S3 Region for file uploads")
+		s3NoSSL                  = flag.Bool("s3-nossl", false, "Use encrypted connections to the S3 API")
+		s3PathStyle              = flag.Bool("s3-pathstyle", false, "Use path-style S3 API")
+		jwtSecret                = flag.String("jwt-secret", "This should NOT be here!!@33$8&", "The JSON Web Token secret")
+		jwtExpiresAfter          = flag.String("jwt-expires-after", "168h" /* 1 week */, "The time after which the JSON Web Token expires")
+		authExternal             = flag.Bool("auth-external", false, "Use external authentication via X-Forwarded-User header (e.g. OAuth2 Proxy)")
+		authExternalAuthorizeURL = flag.String("authexternal-authorize-url", "/oauth2/start", "A URL to initiate external login procedure")
+		authExternalProviderName = flag.String("auth-external-provider-name", "JupyterHub", "A name of the external authentication provider")
+		authLogoutURL            = flag.String("auth-logout-url", "/oauth2/sign_out?rd=https%3A%2F%2Fjupyter.k8s.eonerc.rwth-aachen.de%2Fhub%2Flogout", "The URL to redirect the user to log out")
+		title                    = flag.String("title", "VILLASweb", "Title shown in the frontend")
+		subTitle                 = flag.String("sub-title", "", "Sub-title shown in the frontend")
+		contactName              = flag.String("contact-name", "Steffen Vogel", "Name of the administrative contact")
+		contactMail              = flag.String("contact-mail", "svogel2@eonerc.rwth-aachen.de", "EMail of the administrative contact")
+		testDataPath             = flag.String("test-data-path", "database/testdata.json", "The path to the test data json file (used in test mode)")
 	)
 	flag.Parse()
 
 	static := map[string]string{
-		"db.host":           *dbHost,
-		"db.name":           *dbName,
-		"db.user":           *dbUser,
-		"db.pass":           *dbPass,
-		"db.ssl":            *dbSSLMode,
-		"amqp.host":         *amqpHost,
-		"amqp.user":         *amqpUser,
-		"amqp.pass":         *amqpPass,
-		"mode":              *mode,
-		"port":              *port,
-		"base.host":         *baseHost,
-		"base.path":         *basePath,
-		"admin.user":        *adminUser,
-		"admin.pass":        *adminPass,
-		"admin.mail":        *adminMail,
-		"s3.bucket":         *s3Bucket,
-		"s3.endpoint":       *s3Endpoint,
-		"s3.region":         *s3Region,
-		"jwt.secret":        *jwtSecret,
-		"jwt.expires-after": *jwtExpiresAfter,
-		"test.datapath":     *testDataPath,
+		"db.host":                     *dbHost,
+		"db.name":                     *dbName,
+		"db.user":                     *dbUser,
+		"db.pass":                     *dbPass,
+		"db.ssl":                      *dbSSLMode,
+		"amqp.host":                   *amqpHost,
+		"amqp.user":                   *amqpUser,
+		"amqp.pass":                   *amqpPass,
+		"mode":                        *mode,
+		"port":                        *port,
+		"base.host":                   *baseHost,
+		"base.path":                   *basePath,
+		"admin.user":                  *adminUser,
+		"admin.pass":                  *adminPass,
+		"admin.mail":                  *adminMail,
+		"s3.bucket":                   *s3Bucket,
+		"s3.endpoint":                 *s3Endpoint,
+		"s3.region":                   *s3Region,
+		"jwt.secret":                  *jwtSecret,
+		"jwt.expires-after":           *jwtExpiresAfter,
+		"auth.external.authorize-url": *authExternalAuthorizeURL,
+		"auth.external.provider-name": *authExternalProviderName,
+		"auth.logout-url":             *authLogoutURL,
+		"title":                       *title,
+		"sub-title":                   *subTitle,
+		"contact.name":                *contactName,
+		"contact.mail":                *contactMail,
+		"test.datapath":               *testDataPath,
 	}
 
 	if *s3NoSSL == true {
@@ -104,16 +118,16 @@ func InitConfig() error {
 	}
 
 	if *authExternal == true {
-		static["auth.external"] = "true"
+		static["auth.external.enabled"] = "true"
 	} else {
-		static["auth.external"] = "false"
+		static["auth.external.enabled"] = "false"
 	}
 
 	mappings := map[string]string{}
-	for name, value := range static {
-		envName := strings.Replace(name, ".", "_")
-		envName := strings.Replace(envName, "-", "_")
-		envName := strings.ToUpper(envName)
+	for name := range static {
+		envName := strings.ReplaceAll(name, ".", "_")
+		envName = strings.ReplaceAll(envName, "-", "_")
+		envName = strings.ToUpper(envName)
 
 		mappings[envName] = name
 	}
