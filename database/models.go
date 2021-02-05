@@ -132,7 +132,7 @@ type InfrastructureComponent struct {
 	// Type of IC (RTDS, VILLASnode, RTDS, etc.)
 	Type string `json:"type" gorm:"default:''"`
 	// Uptime of the IC
-	Uptime float64 `json:"uptime" gorm:"default:0"`
+	Uptime float64 `json:"uptime" gorm:"default:-1"`
 	// State of the IC
 	State string `json:"state" gorm:"default:''"`
 	// Time of last state update

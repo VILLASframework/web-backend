@@ -28,6 +28,7 @@ import (
 	"github.com/nsf/jsondiff"
 	"gopkg.in/go-playground/validator.v9"
 	"log"
+	"math"
 	"time"
 )
 
@@ -127,7 +128,7 @@ func (r *AddICRequest) createIC(receivedViaAMQP bool) (InfrastructureComponent, 
 	s.StartParameterScheme = r.InfrastructureComponent.StartParameterScheme
 	s.StatusUpdateRaw = r.InfrastructureComponent.StatusUpdateRaw
 	s.ManagedExternally = *r.InfrastructureComponent.ManagedExternally
-	s.Uptime = r.InfrastructureComponent.Uptime
+	s.Uptime = math.Round(r.InfrastructureComponent.Uptime) // round required for backward compatibility of data model
 	if r.InfrastructureComponent.State != "" {
 		s.State = r.InfrastructureComponent.State
 	} else {
@@ -164,7 +165,7 @@ func (r *UpdateICRequest) updatedIC(oldIC InfrastructureComponent) Infrastructur
 	s.APIURL = r.InfrastructureComponent.APIURL
 	s.Location = r.InfrastructureComponent.Location
 	s.Description = r.InfrastructureComponent.Description
-	s.Uptime = r.InfrastructureComponent.Uptime
+	s.Uptime = math.Round(r.InfrastructureComponent.Uptime) // round required for backward compatibility of data model
 
 	// set last update time
 	s.StateUpdateAt = time.Now().Format(time.RFC1123Z)
