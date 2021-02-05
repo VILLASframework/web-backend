@@ -85,5 +85,5 @@ func TestHealthz(t *testing.T) {
 	// test healthz endpoint for connected DB and AMQP client
 	code, resp, err = helper.TestEndpoint(router, "", "healthz", http.MethodGet, nil)
 	assert.NoError(t, err)
-	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
+	assert.Equalf(t, 204, code, "Response body: \n%v\n", resp)
 }
