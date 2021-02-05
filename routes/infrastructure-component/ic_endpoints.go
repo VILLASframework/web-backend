@@ -22,11 +22,12 @@
 package infrastructure_component
 
 import (
+	"log"
+	"net/http"
+
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"github.com/gin-gonic/gin"
-	"log"
-	"net/http"
 )
 
 func RegisterICEndpoints(r *gin.RouterGroup) {
@@ -47,10 +48,10 @@ func RegisterAMQPEndpoint(r *gin.RouterGroup) {
 // @ID getICs
 // @Tags infrastructure-components
 // @Produce json
-// @Success 200 {object} docs.ResponseICs "ICs requested"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseICs "ICs requested"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Router /ic [get]
 // @Security Bearer
 func getICs(c *gin.Context) {
@@ -72,11 +73,11 @@ func getICs(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Tags infrastructure-components
-// @Success 200 {object} docs.ResponseIC "Infrastructure Component that was added"
-// @Failure 400 {object} docs.ResponseError "Bad request"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseIC "Infrastructure Component that was added"
+// @Failure 400 {object} api.ResponseError "Bad request"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Param inputIC body infrastructure_component.AddICRequest true "Infrastructure Component to be added"
 // @Router /ic [post]
 // @Security Bearer
@@ -125,11 +126,11 @@ func addIC(c *gin.Context) {
 // @Tags infrastructure-components
 // @Accept json
 // @Produce json
-// @Success 200 {object} docs.ResponseIC "Infrastructure Component that was updated"
-// @Failure 400 {object} docs.ResponseError "Bad request"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseIC "Infrastructure Component that was updated"
+// @Failure 400 {object} api.ResponseError "Bad request"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Param inputIC body infrastructure_component.UpdateICRequest true "InfrastructureComponent to be updated"
 // @Param ICID path int true "InfrastructureComponent ID"
 // @Router /ic/{ICID} [put]
@@ -175,11 +176,11 @@ func updateIC(c *gin.Context) {
 // @ID getIC
 // @Produce  json
 // @Tags infrastructure-components
-// @Success 200 {object} docs.ResponseIC "Infrastructure Component that was requested"
-// @Failure 400 {object} docs.ResponseError "Bad request"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseIC "Infrastructure Component that was requested"
+// @Failure 400 {object} api.ResponseError "Bad request"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Param ICID path int true "Infrastructure Component ID"
 // @Router /ic/{ICID} [get]
 // @Security Bearer
@@ -198,11 +199,11 @@ func getIC(c *gin.Context) {
 // @ID deleteIC
 // @Tags infrastructure-components
 // @Produce json
-// @Success 200 {object} docs.ResponseIC "Infrastructure Component that was deleted"
-// @Failure 400 {object} docs.ResponseError "Bad request"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseIC "Infrastructure Component that was deleted"
+// @Failure 400 {object} api.ResponseError "Bad request"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Param ICID path int true "Infrastructure Component ID"
 // @Router /ic/{ICID} [delete]
 // @Security Bearer
@@ -230,11 +231,11 @@ func deleteIC(c *gin.Context) {
 // @ID getConfigsOfIC
 // @Tags infrastructure-components
 // @Produce json
-// @Success 200 {object} docs.ResponseConfigs "Configs requested by user"
-// @Failure 400 {object} docs.ResponseError "Bad request"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseConfigs "Configs requested by user"
+// @Failure 400 {object} api.ResponseError "Bad request"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Param ICID path int true "Infrastructure Component ID"
 // @Router /ic/{ICID}/configs [get]
 // @Security Bearer
@@ -259,11 +260,11 @@ func getConfigsOfIC(c *gin.Context) {
 // @Tags infrastructure-components
 // @Produce json
 // @Param inputAction query string true "Action for IC"
-// @Success 200 {object} docs.ResponseError "Action sent successfully"
-// @Failure 400 {object} docs.ResponseError "Bad request"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseError "Action sent successfully"
+// @Failure 400 {object} api.ResponseError "Bad request"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Param ICID path int true "InfrastructureComponent ID"
 // @Router /ic/{ICID}/action [post]
 // @Security Bearer

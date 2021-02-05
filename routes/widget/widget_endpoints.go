@@ -22,8 +22,9 @@
 package widget
 
 import (
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"net/http"
+
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 
 	"github.com/gin-gonic/gin"
 
@@ -44,10 +45,10 @@ func RegisterWidgetEndpoints(r *gin.RouterGroup) {
 // @ID getWidgets
 // @Produce  json
 // @Tags widgets
-// @Success 200 {object} docs.ResponseWidgets "Widgets to which belong to dashboard"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseWidgets "Widgets to which belong to dashboard"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Param dashboardID query int true "Dashboard ID"
 // @Router /widgets [get]
 // @Security Bearer
@@ -73,11 +74,11 @@ func getWidgets(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Tags widgets
-// @Success 200 {object} docs.ResponseWidget "Widget that was added"
-// @Failure 400 {object} docs.ResponseError "Bad request"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseWidget "Widget that was added"
+// @Failure 400 {object} api.ResponseError "Bad request"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Param inputWidget body widget.addWidgetRequest true "Widget to be added incl. ID of dashboard"
 // @Router /widgets [post]
 // @Security Bearer
@@ -117,11 +118,11 @@ func addWidget(c *gin.Context) {
 // @Tags widgets
 // @Accept json
 // @Produce json
-// @Success 200 {object} docs.ResponseWidget "Widget that was updated"
-// @Failure 400 {object} docs.ResponseError "Bad request"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseWidget "Widget that was updated"
+// @Failure 400 {object} api.ResponseError "Bad request"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Param inputWidget body widget.updateWidgetRequest true "Widget to be updated"
 // @Param widgetID path int true "Widget ID"
 // @Router /widgets/{widgetID} [put]
@@ -161,11 +162,11 @@ func updateWidget(c *gin.Context) {
 // @ID getWidget
 // @Tags widgets
 // @Produce json
-// @Success 200 {object} docs.ResponseWidget "Widget that was requested"
-// @Failure 400 {object} docs.ResponseError "Bad request"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseWidget "Widget that was requested"
+// @Failure 400 {object} api.ResponseError "Bad request"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Param widgetID path int true "Widget ID"
 // @Router /widgets/{widgetID} [get]
 // @Security Bearer
@@ -184,11 +185,11 @@ func getWidget(c *gin.Context) {
 // @ID deleteWidget
 // @Tags widgets
 // @Produce json
-// @Success 200 {object} docs.ResponseWidget "Widget that was deleted"
-// @Failure 400 {object} docs.ResponseError "Bad request"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseWidget "Widget that was deleted"
+// @Failure 400 {object} api.ResponseError "Bad request"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Param widgetID path int true "Widget ID"
 // @Router /widgets/{widgetID} [delete]
 // @Security Bearer

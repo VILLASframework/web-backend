@@ -22,8 +22,9 @@
 package dashboard
 
 import (
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"net/http"
+
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 
 	"github.com/gin-gonic/gin"
 
@@ -45,10 +46,10 @@ func RegisterDashboardEndpoints(r *gin.RouterGroup) {
 // @ID getDashboards
 // @Produce  json
 // @Tags dashboards
-// @Success 200 {object} docs.ResponseDashboards "Dashboards which belong to scenario"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseDashboards "Dashboards which belong to scenario"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Param scenarioID query int true "Scenario ID"
 // @Router /dashboards [get]
 // @Security Bearer
@@ -74,11 +75,11 @@ func getDashboards(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Tags dashboards
-// @Success 200 {object} docs.ResponseDashboard "Dashboard that was added"
-// @Failure 400 {object} docs.ResponseError "Bad request"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseDashboard "Dashboard that was added"
+// @Failure 400 {object} api.ResponseError "Bad request"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Param inputDab body dashboard.addDashboardRequest true "Dashboard to be added incl. ID of Scenario"
 // @Router /dashboards [post]
 // @Security Bearer
@@ -120,11 +121,11 @@ func addDashboard(c *gin.Context) {
 // @Tags dashboards
 // @Accept json
 // @Produce json
-// @Success 200 {object} docs.ResponseDashboard "Dashboard that was updated"
-// @Failure 400 {object} docs.ResponseError "Bad request"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseDashboard "Dashboard that was updated"
+// @Failure 400 {object} api.ResponseError "Bad request"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Param inputDab body dashboard.updateDashboardRequest true "Dashboard to be updated"
 // @Param dashboardID path int true "Dashboard ID"
 // @Router /dashboards/{dashboardID} [put]
@@ -163,11 +164,11 @@ func updateDashboard(c *gin.Context) {
 // @ID getDashboard
 // @Tags dashboards
 // @Produce json
-// @Success 200 {object} docs.ResponseDashboard "Dashboard that was requested"
-// @Failure 400 {object} docs.ResponseError "Bad request"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseDashboard "Dashboard that was requested"
+// @Failure 400 {object} api.ResponseError "Bad request"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Param dashboardID path int true "Dashboard ID"
 // @Router /dashboards/{dashboardID} [get]
 // @Security Bearer
@@ -186,11 +187,11 @@ func getDashboard(c *gin.Context) {
 // @ID deleteDashboard
 // @Tags dashboards
 // @Produce json
-// @Success 200 {object} docs.ResponseDashboard "Dashboard that was deleted"
-// @Failure 400 {object} docs.ResponseError "Bad request"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseDashboard "Dashboard that was deleted"
+// @Failure 400 {object} api.ResponseError "Bad request"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Param dashboardID path int true "Dashboard ID"
 // @Router /dashboards/{dashboardID} [delete]
 // @Security Bearer

@@ -48,9 +48,9 @@ func RegisterAuthenticate(r *gin.RouterGroup) {
 // @Produce json
 // @Tags authentication
 // @Param inputUser body user.loginRequest true "loginRequest of user"
-// @Success 200 {object} docs.ResponseAuthenticate "JSON web token, success status, message and authenticated user object"
-// @Failure 401 {object} docs.ResponseError "Unauthorized"
-// @Failure 500 {object} docs.ResponseError "Internal server error."
+// @Success 200 {object} api.ResponseAuthenticate "JSON web token, success status, message and authenticated user object"
+// @Failure 401 {object} api.ResponseError "Unauthorized"
+// @Failure 500 {object} api.ResponseError "Internal server error."
 // @Router /authenticate [post]
 func authenticate(c *gin.Context) {
 

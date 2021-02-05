@@ -1,11 +1,23 @@
-FROM golang:1.13-buster AS builder
+FROM golang:1.15.7-buster AS builder
 
 RUN mkdir /build
 WORKDIR /build
-ADD . /build
 
+# Make use of layer caching
+ADD go.* ./
+RUN go mod download
 RUN go install github.com/swaggo/swag/cmd/swag
-RUN swag init -p pascalcase -g "start.go" -o "./doc/api/"
+
+ADD . .
+
+RUN swag init --propertyStrategy pascalcase \
+              --generalInfo "start.go" \
+              --output "./doc/api/" \
+              --parseDependency \
+              --parseInternal \
+              --parseVendor \
+              --parseDepth 2
+
 RUN go build -o villasweb-backend
 
 FROM debian:buster

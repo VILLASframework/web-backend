@@ -43,8 +43,8 @@ func RegisterHealthzEndpoint(r *gin.RouterGroup) {
 // @ID getHealth
 // @Produce  json
 // @Tags healthz
-// @Success 200 "Backend is healthy, database and AMQP broker connections are alive"
-// @Failure 500 {object} docs.ResponseError "Backend is NOT healthy"
+// @Success 204 string string "Backend is healthy, database and AMQP broker connections are alive"
+// @Failure 500 {object} api.ResponseError "Backend is NOT healthy"
 // @Router /healthz [get]
 func getHealth(c *gin.Context) {
 
@@ -80,5 +80,6 @@ func getHealth(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusOK, gin.H{})
+	// Send a 204 reponse
+	c.Writer.WriteHeader(http.StatusNoContent)
 }

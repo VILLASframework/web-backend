@@ -27,7 +27,6 @@ import (
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
-	apidocs "git.rwth-aachen.de/acs/public/villas/web-backend-go/doc/api" // doc/api folder is used by Swag CLI, you have to import it
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes"
 	infrastructure_component "git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/infrastructure-component"
 	"github.com/gin-gonic/gin"
@@ -83,7 +82,7 @@ func addData(router *gin.Engine, cfg *config.Config) error {
 func main() {
 	log.Println("Starting VILLASweb-backend-go")
 
-	mode, baseHost, basePath, port, amqphost, amqpuser, amqppass, err := configuration.ConfigureBackend()
+	mode, _, basePath, port, amqphost, amqpuser, amqppass, err := configuration.ConfigureBackend()
 	if err != nil {
 		panic(err)
 	}
@@ -103,8 +102,6 @@ func main() {
 	r := gin.Default()
 	api := r.Group(basePath)
 	routes.RegisterEndpoints(r, api)
-	apidocs.SwaggerInfo.Host = baseHost
-	apidocs.SwaggerInfo.BasePath = basePath
 
 	//Start AMQP client
 	if amqphost != "" {

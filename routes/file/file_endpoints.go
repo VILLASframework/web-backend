@@ -23,10 +23,11 @@ package file
 
 import (
 	"fmt"
+	"net/http"
+
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/scenario"
 	"github.com/gin-gonic/gin"
-	"net/http"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 )
@@ -44,10 +45,10 @@ func RegisterFileEndpoints(r *gin.RouterGroup) {
 // @ID getFiles
 // @Tags files
 // @Produce json
-// @Success 200 {object} docs.ResponseFiles "Files which belong to scenario"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseFiles "Files which belong to scenario"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Param scenarioID query int true "Scenario ID"
 // @Router /files [get]
 // @Security Bearer
@@ -80,11 +81,11 @@ func getFiles(c *gin.Context) {
 // @Accept model/x-cim
 // @Accept model/x-cim.zip
 // @Accept multipart/form-data
-// @Success 200 {object} docs.ResponseFile "File that was added"
-// @Failure 400 {object} docs.ResponseError "Bad request"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseFile "File that was added"
+// @Failure 400 {object} api.ResponseError "Bad request"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Param inputFile formData file true "File to be uploaded"
 // @Param scenarioID query int true "ID of scenario to which file shall be added"
 // @Router /files [post]
@@ -130,11 +131,11 @@ func addFile(c *gin.Context) {
 // @Produce gif
 // @Produce model/x-cim
 // @Produce model/x-cim.zip
-// @Success 200 {object} docs.ResponseFile "File that was requested"
-// @Failure 400 {object} docs.ResponseError "Bad request"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseFile "File that was requested"
+// @Failure 400 {object} api.ResponseError "Bad request"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Param fileID path int true "ID of the file to download"
 // @Router /files/{fileID} [get]
 // @Security Bearer
@@ -162,11 +163,11 @@ func getFile(c *gin.Context) {
 // @Accept model/x-cim
 // @Accept model/x-cim.zip
 // @Accept multipart/form-data
-// @Success 200 {object} docs.ResponseFile "File that was updated"
-// @Failure 400 {object} docs.ResponseError "Bad request"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseFile "File that was updated"
+// @Failure 400 {object} api.ResponseError "Bad request"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Param inputFile formData file true "File to be uploaded"
 // @Param fileID path int true "ID of the file to update"
 // @Router /files/{fileID} [put]
@@ -197,11 +198,11 @@ func updateFile(c *gin.Context) {
 // @ID deleteFile
 // @Tags files
 // @Produce json
-// @Success 200 {object} docs.ResponseFile "File that was deleted"
-// @Failure 400 {object} docs.ResponseError "Bad request"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseFile "File that was deleted"
+// @Failure 400 {object} api.ResponseError "Bad request"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Param fileID path int true "ID of the file to update"
 // @Router /files/{fileID} [delete]
 // @Security Bearer

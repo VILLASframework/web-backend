@@ -22,13 +22,14 @@
 package signal
 
 import (
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"net/http"
+
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 
 	"github.com/gin-gonic/gin"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/component-configuration"
+	component_configuration "git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/component-configuration"
 )
 
 func RegisterSignalEndpoints(r *gin.RouterGroup) {
@@ -46,10 +47,10 @@ func RegisterSignalEndpoints(r *gin.RouterGroup) {
 // @Tags signals
 // @Param direction query string true "Direction of signal (in or out)"
 // @Param configID query string true "Config ID of signals to be obtained"
-// @Success 200 {object} docs.ResponseSignals "Signals which belong to component configuration"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseSignals "Signals which belong to component configuration"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Router /signals [get]
 // @Security Bearer
 func getSignals(c *gin.Context) {
@@ -85,11 +86,11 @@ func getSignals(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Tags signals
-// @Success 200 {object} docs.ResponseSignal "Signal that was added"
-// @Failure 400 {object} docs.ResponseError "Bad request"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseSignal "Signal that was added"
+// @Failure 400 {object} api.ResponseError "Bad request"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Param inputSignal body signal.addSignalRequest true "A signal to be added to the component configuration incl. direction and config ID to which signal shall be added"
 // @Router /signals [post]
 // @Security Bearer
@@ -128,11 +129,11 @@ func addSignal(c *gin.Context) {
 // @ID updateSignal
 // @Tags signals
 // @Produce json
-// @Success 200 {object} docs.ResponseSignal "Signal that was updated"
-// @Failure 400 {object} docs.ResponseError "Bad request"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseSignal "Signal that was updated"
+// @Failure 400 {object} api.ResponseError "Bad request"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Param inputSignal body signal.updateSignalRequest true "A signal to be updated"
 // @Param signalID path int true "ID of signal to be updated"
 // @Router /signals/{signalID} [put]
@@ -171,11 +172,11 @@ func updateSignal(c *gin.Context) {
 // @ID getSignal
 // @Tags signals
 // @Produce json
-// @Success 200 {object} docs.ResponseSignal "Signal that was requested"
-// @Failure 400 {object} docs.ResponseError "Bad request"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseSignal "Signal that was requested"
+// @Failure 400 {object} api.ResponseError "Bad request"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Param signalID path int true "ID of signal to be obtained"
 // @Router /signals/{signalID} [get]
 // @Security Bearer
@@ -193,11 +194,11 @@ func getSignal(c *gin.Context) {
 // @ID deleteSignal
 // @Tags signals
 // @Produce json
-// @Success 200 {object} docs.ResponseSignal "Signal that was deleted"
-// @Failure 400 {object} docs.ResponseError "Bad request"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseSignal "Signal that was deleted"
+// @Failure 400 {object} api.ResponseError "Bad request"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Param signalID path int true "ID of signal to be deleted"
 // @Router /signals/{signalID} [delete]
 // @Security Bearer
