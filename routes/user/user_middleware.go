@@ -47,7 +47,7 @@ func claimsToContext(c *gin.Context, claims jwt.MapClaims) error {
 	}
 
 	c.Set(database.UserRoleCtx, user.Role)
-	c.Set(database.UserIDCtx, userID)
+	c.Set(database.UserIDCtx, uint(userID))
 
 	return nil
 }

@@ -107,6 +107,7 @@ func addScenario(c *gin.Context) {
 		return
 	}
 
+	// ATTENTION: do not use c.GetInt (common.UserIDCtx) since userID is of type uint and not int
 	userID, _ := c.Get(database.UserIDCtx)
 
 	var u user.User
