@@ -145,6 +145,8 @@ func AddTestData(cfg *config.Config, router *gin.Engine) (*bytes.Buffer, error) 
 		return nil, err
 	}
 
+	basePath := "/api/v2"
+
 	// add users
 	for _, u := range GlobalTestData.Users {
 		code, resp, err := helper.TestEndpoint(router, token, basePath+"/users", "POST", helper.KeyModels{"user": u})

@@ -160,30 +160,3 @@ func InitConfig() error {
 
 	return nil
 }
-
-func ConfigureBackend() (string, string, string, string, string, error) {
-
-	err := InitConfig()
-	if err != nil {
-		log.Printf("Error during initialization of global configuration: %v, aborting.", err.Error())
-		return "", "", "", "", "", err
-	}
-
-	mode, err := GlobalConfig.String("mode")
-	if err != nil {
-		log.Printf("Error reading mode from global configuration: %v, aborting.", err.Error())
-		return "", "", "", "", "", err
-	}
-
-	port, err := GlobalConfig.String("port")
-	if err != nil {
-		log.Printf("Error reading port from global configuration: %v, aborting.", err.Error())
-		return "", "", "", "", "", err
-	}
-
-	AMQPhost, _ := GlobalConfig.String("amqp.host")
-	AMQPuser, _ := GlobalConfig.String("amqp.user")
-	AMQPpass, _ := GlobalConfig.String("amqp.pass")
-
-	return mode, port, AMQPhost, AMQPuser, AMQPpass, nil
-}
