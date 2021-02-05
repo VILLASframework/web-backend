@@ -22,8 +22,9 @@
 package scenario
 
 import (
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"net/http"
+
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 
 	"github.com/gin-gonic/gin"
 
@@ -47,10 +48,10 @@ func RegisterScenarioEndpoints(r *gin.RouterGroup) {
 // @ID getScenarios
 // @Produce  json
 // @Tags scenarios
-// @Success 200 {object} docs.ResponseScenarios "Scenarios to which user has access"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseScenarios "Scenarios to which user has access"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Router /scenarios [get]
 // @Security Bearer
 func getScenarios(c *gin.Context) {
@@ -91,11 +92,11 @@ func getScenarios(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Tags scenarios
-// @Success 200 {object} docs.ResponseScenario "scenario that was added"
-// @Failure 400 {object} docs.ResponseError "Bad request"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseScenario "scenario that was added"
+// @Failure 400 {object} api.ResponseError "Bad request"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Param inputScenario body scenario.addScenarioRequest true "Scenario to be added"
 // @Router /scenarios [post]
 // @Security Bearer
@@ -150,11 +151,11 @@ func addScenario(c *gin.Context) {
 // @Tags scenarios
 // @Accept json
 // @Produce json
-// @Success 200 {object} docs.ResponseScenario "Updated scenario."
-// @Failure 400 {object} docs.ResponseError "Bad request"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseScenario "Updated scenario."
+// @Failure 400 {object} api.ResponseError "Bad request"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Param inputScenario body scenario.updateScenarioRequest true "Scenario to be updated"
 // @Param scenarioID path int true "Scenario ID"
 // @Router /scenarios/{scenarioID} [put]
@@ -196,10 +197,10 @@ func updateScenario(c *gin.Context) {
 // @ID getScenario
 // @Produce  json
 // @Tags scenarios
-// @Success 200 {object} docs.ResponseScenario "Scenario requested by user"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseScenario "Scenario requested by user"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Param scenarioID path int true "Scenario ID"
 // @Router /scenarios/{scenarioID} [get]
 // @Security Bearer
@@ -219,10 +220,10 @@ func getScenario(c *gin.Context) {
 // @ID deleteScenario
 // @Tags scenarios
 // @Produce json
-// @Success 200 {object} docs.ResponseScenario  "Deleted scenario"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseScenario  "Deleted scenario"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Param scenarioID path int true "Scenario ID"
 // @Router /scenarios/{scenarioID} [delete]
 // @Security Bearer
@@ -246,10 +247,10 @@ func deleteScenario(c *gin.Context) {
 // @ID getUsersOfScenario
 // @Produce  json
 // @Tags scenarios
-// @Success 200 {object} docs.ResponseUsers "Array of users that have access to the scenario"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseUsers "Array of users that have access to the scenario"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Param scenarioID path int true "Scenario ID"
 // @Router /scenarios/{scenarioID}/users/ [get]
 // @Security Bearer
@@ -274,10 +275,10 @@ func getUsersOfScenario(c *gin.Context) {
 // @ID addUserToScenario
 // @Tags scenarios
 // @Produce json
-// @Success 200 {object} docs.ResponseUser "User that was added to scenario"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseUser "User that was added to scenario"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Param scenarioID path int true "Scenario ID"
 // @Param username query string true "User name"
 // @Router /scenarios/{scenarioID}/user [put]
@@ -315,10 +316,10 @@ func addUserToScenario(c *gin.Context) {
 // @ID deleteUserFromScenario
 // @Tags scenarios
 // @Produce json
-// @Success 200 {object} docs.ResponseUser "User that was deleted from scenario"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseUser "User that was deleted from scenario"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Param scenarioID path int true "Scenario ID"
 // @Param username query string true "User name"
 // @Router /scenarios/{scenarioID}/user [delete]

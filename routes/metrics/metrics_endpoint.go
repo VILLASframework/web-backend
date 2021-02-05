@@ -78,7 +78,7 @@ var (
 // @ID getMetrics
 // @Produce  json
 // @Tags metrics
-// @Success 200 "Returns Prometheus metrics"
+// @Success 200 {string} string "Returns Prometheus metrics"
 // @Router /metrics [get]
 func RegisterMetricsEndpoint(rg *gin.RouterGroup) {
 	// use prometheus metrics exporter middleware.

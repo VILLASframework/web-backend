@@ -46,10 +46,10 @@ func RegisterUserEndpoints(r *gin.RouterGroup) {
 // @ID GetUsers
 // @Produce  json
 // @Tags users
-// @Success 200 {object} docs.ResponseUsers "Array of users"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseUsers "Array of users"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Router /users [get]
 // @Security Bearer
 func getUsers(c *gin.Context) {
@@ -76,10 +76,10 @@ func getUsers(c *gin.Context) {
 // @Produce json
 // @Tags users
 // @Param inputUser body user.addUserRequest true "User to be added"
-// @Success 200 {object} docs.ResponseUser "Contains added user object"
-// @Failure 400 {object} docs.ResponseError "Bad request"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseUser "Contains added user object"
+// @Failure 400 {object} api.ResponseError "Bad request"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Router /users [post]
 // @Security Bearer
 func addUser(c *gin.Context) {
@@ -134,12 +134,12 @@ func addUser(c *gin.Context) {
 // @Tags users
 // @Accept json
 // @Produce json
-// @Success 200 {object} docs.ResponseUser "Contains updated user"
-// @Failure 400 {object} docs.ResponseError "Bad request."
-// @Failure 403 {object} docs.ResponseError "Access forbidden."
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseUser "Contains updated user"
+// @Failure 400 {object} api.ResponseError "Bad request."
+// @Failure 403 {object} api.ResponseError "Access forbidden."
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Param inputUser body user.updateUserRequest true "User to be updated (anything except for ID can be changed, role can only be change by admin)"
 // @Param userID path int true "User ID"
 // @Router /users/{userID} [put]
@@ -226,11 +226,11 @@ func updateUser(c *gin.Context) {
 // @ID GetUser
 // @Produce  json
 // @Tags users
-// @Success 200 {object} docs.ResponseUser "requested user"
-// @Failure 403 {object} docs.ResponseError "Access forbidden."
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseUser "requested user"
+// @Failure 403 {object} api.ResponseError "Access forbidden."
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Param userID path int true "User ID"
 // @Router /users/{userID} [get]
 // @Security Bearer
@@ -269,10 +269,10 @@ func getUser(c *gin.Context) {
 // @ID DeleteUser
 // @Tags users
 // @Produce json
-// @Success 200 {object} docs.ResponseUser "deleted user"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseUser "deleted user"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Param userID path int true "User ID"
 // @Router /users/{userID} [delete]
 // @Security Bearer

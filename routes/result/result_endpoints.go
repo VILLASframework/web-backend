@@ -24,12 +24,13 @@ package result
 
 import (
 	"fmt"
+	"net/http"
+
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/file"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/scenario"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 func RegisterResultEndpoints(r *gin.RouterGroup) {
@@ -47,10 +48,10 @@ func RegisterResultEndpoints(r *gin.RouterGroup) {
 // @ID getResults
 // @Produce  json
 // @Tags results
-// @Success 200 {object} docs.ResponseResults "Results which belong to scenario"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseResults "Results which belong to scenario"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Param scenarioID query int true "Scenario ID"
 // @Router /results [get]
 // @Security Bearer
@@ -75,11 +76,11 @@ func getResults(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Tags results
-// @Success 200 {object} docs.ResponseResult "Result that was added"
-// @Failure 400 {object} docs.ResponseError "Bad request"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseResult "Result that was added"
+// @Failure 400 {object} api.ResponseError "Bad request"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Param inputResult body result.addResultRequest true "Result to be added incl. ID of Scenario"
 // @Router /results [post]
 // @Security Bearer
@@ -121,11 +122,11 @@ func addResult(c *gin.Context) {
 // @Tags results
 // @Accept json
 // @Produce json
-// @Success 200 {object} docs.ResponseResult "Result that was updated"
-// @Failure 400 {object} docs.ResponseError "Bad request"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseResult "Result that was updated"
+// @Failure 400 {object} api.ResponseError "Bad request"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Param inputResult body result.updateResultRequest true "Result to be updated"
 // @Param resultID path int true "Result ID"
 // @Router /results/{resultID} [put]
@@ -164,11 +165,11 @@ func updateResult(c *gin.Context) {
 // @ID getResult
 // @Tags results
 // @Produce json
-// @Success 200 {object} docs.ResponseResult "Result that was requested"
-// @Failure 400 {object} docs.ResponseError "Bad request"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseResult "Result that was requested"
+// @Failure 400 {object} api.ResponseError "Bad request"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Param resultID path int true "Result ID"
 // @Router /results/{resultID} [get]
 // @Security Bearer
@@ -187,11 +188,11 @@ func getResult(c *gin.Context) {
 // @ID deleteResult
 // @Tags results
 // @Produce json
-// @Success 200 {object} docs.ResponseResult "Result that was deleted"
-// @Failure 400 {object} docs.ResponseError "Bad request"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseResult "Result that was deleted"
+// @Failure 400 {object} api.ResponseError "Bad request"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Param resultID path int true "Result ID"
 // @Router /results/{resultID} [delete]
 // @Security Bearer
@@ -229,11 +230,11 @@ func deleteResult(c *gin.Context) {
 // @Accept application/xml
 // @Accept application/x-bag
 // @Produce json
-// @Success 200 {object} docs.ResponseResult "Result that was updated"
-// @Failure 400 {object} docs.ResponseError "Bad request"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseResult "Result that was updated"
+// @Failure 400 {object} api.ResponseError "Bad request"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Param inputFile formData file true "File to be uploaded"
 // @Param resultID path int true "Result ID"
 // @Router /results/{resultID}/file [post]
@@ -277,11 +278,11 @@ func addResultFile(c *gin.Context) {
 // @ID deleteResultFile
 // @Tags results
 // @Produce json
-// @Success 200 {object} docs.ResponseResult "Result for which file was deleted"
-// @Failure 400 {object} docs.ResponseError "Bad request"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseResult "Result for which file was deleted"
+// @Failure 400 {object} api.ResponseError "Bad request"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Param resultID path int true "Result ID"
 // @Param fileID path int true "ID of the file to delete"
 // @Router /results/{resultID}/file/{fileID} [delete]

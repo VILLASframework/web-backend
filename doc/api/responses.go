@@ -19,7 +19,7 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
-package docs
+package api
 
 import "git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 

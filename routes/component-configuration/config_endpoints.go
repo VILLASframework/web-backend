@@ -22,8 +22,9 @@
 package component_configuration
 
 import (
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"net/http"
+
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 
 	"github.com/gin-gonic/gin"
 
@@ -44,10 +45,10 @@ func RegisterComponentConfigurationEndpoints(r *gin.RouterGroup) {
 // @ID getConfigs
 // @Produce  json
 // @Tags component-configurations
-// @Success 200 {object} docs.ResponseConfigs "Component configurations which belong to scenario"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseConfigs "Component configurations which belong to scenario"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Param scenarioID query int true "Scenario ID"
 // @Router /configs [get]
 // @Security Bearer
@@ -73,11 +74,11 @@ func getConfigs(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Tags component-configurations
-// @Success 200 {object} docs.ResponseConfig "Component configuration that was added"
-// @Failure 400 {object} docs.ResponseError "Bad request"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseConfig "Component configuration that was added"
+// @Failure 400 {object} api.ResponseError "Bad request"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Param inputConfig body component_configuration.addConfigRequest true "component configuration to be added incl. IDs of scenario and IC"
 // @Router /configs [post]
 // @Security Bearer
@@ -120,11 +121,11 @@ func addConfig(c *gin.Context) {
 // @Tags component-configurations
 // @Accept json
 // @Produce json
-// @Success 200 {object} docs.ResponseConfig "Component configuration that was added"
-// @Failure 400 {object} docs.ResponseError "Bad request"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseConfig "Component configuration that was added"
+// @Failure 400 {object} api.ResponseError "Bad request"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Param inputConfig body component_configuration.updateConfigRequest true "component configuration to be updated"
 // @Param configID path int true "Config ID"
 // @Router /configs/{configID} [put]
@@ -165,11 +166,11 @@ func updateConfig(c *gin.Context) {
 // @ID getConfig
 // @Tags component-configurations
 // @Produce json
-// @Success 200 {object} docs.ResponseConfig "component configuration that was requested"
-// @Failure 400 {object} docs.ResponseError "Bad request"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseConfig "component configuration that was requested"
+// @Failure 400 {object} api.ResponseError "Bad request"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Param configID path int true "Config ID"
 // @Router /configs/{configID} [get]
 // @Security Bearer
@@ -188,11 +189,11 @@ func getConfig(c *gin.Context) {
 // @ID deleteConfig
 // @Tags component-configurations
 // @Produce json
-// @Success 200 {object} docs.ResponseConfig "component configuration that was deleted"
-// @Failure 400 {object} docs.ResponseError "Bad request"
-// @Failure 404 {object} docs.ResponseError "Not found"
-// @Failure 422 {object} docs.ResponseError "Unprocessable entity"
-// @Failure 500 {object} docs.ResponseError "Internal server error"
+// @Success 200 {object} api.ResponseConfig "component configuration that was deleted"
+// @Failure 400 {object} api.ResponseError "Bad request"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
 // @Param configID path int true "Config ID"
 // @Router /configs/{configID} [delete]
 // @Security Bearer
