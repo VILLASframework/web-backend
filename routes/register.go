@@ -96,8 +96,6 @@ func RegisterEndpoints(router *gin.Engine, api *gin.RouterGroup) {
 	infrastructure_component.RegisterICEndpoints(api.Group("/ic"))
 	result.RegisterResultEndpoints(api.Group("/results"))
 
-	router.GET("swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-
 	metrics.InitCounters()
 
 }
