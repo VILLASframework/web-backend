@@ -42,14 +42,13 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/healthz"
 	infrastructure_component "git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/infrastructure-component"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/metrics"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/openapi"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/result"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/scenario"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/signal"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/user"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/widget"
 	"github.com/gin-gonic/gin"
-	ginSwagger "github.com/swaggo/gin-swagger"
-	"github.com/swaggo/gin-swagger/swaggerFiles"
 	"github.com/zpatrick/go-config"
 )
 
@@ -80,6 +79,7 @@ func RegisterEndpoints(router *gin.Engine, api *gin.RouterGroup) {
 
 	healthz.RegisterHealthzEndpoint(api.Group("/healthz"))
 	metrics.RegisterMetricsEndpoint(api.Group("/metrics"))
+	openapi.RegisterOpenAPIEndpoint(api.Group("/openapi"))
 	// All endpoints (except for /healthz and /metrics) require authentication except when someone wants to
 	// login (POST /authenticate)
 	user.RegisterAuthenticate(api.Group("/authenticate"))
