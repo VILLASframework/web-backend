@@ -46,13 +46,13 @@ func RegisterAuthenticate(r *gin.RouterGroup) {
 
 // authenticated godoc
 // @Summary Check if user is authenticated and provide details on how the user can authenticate
-// @ID authenticate
+// @ID authenticated
 // @Accept json
 // @Produce json
 // @Tags authentication
-// @Success 200 {object} docs.ResponseAuthenticate "JSON web token, success status, message and authenticated user object"
-// @Failure 401 {object} docs.ResponseError "Unauthorized"
-// @Failure 500 {object} docs.ResponseError "Internal server error."
+// @Success 200 {object} api.ResponseAuthenticate "JSON web token, success status, message and authenticated user object"
+// @Failure 401 {object} api.ResponseError "Unauthorized"
+// @Failure 500 {object} api.ResponseError "Internal server error."
 // @Router /authenticate [get]
 func authenticated(c *gin.Context) {
 	ok, err := isAuthenticated(c)
@@ -109,7 +109,7 @@ func authenticated(c *gin.Context) {
 // @Success 200 {object} api.ResponseAuthenticate "JSON web token, success status, message and authenticated user object"
 // @Failure 401 {object} api.ResponseError "Unauthorized"
 // @Failure 500 {object} api.ResponseError "Internal server error."
-// @Router /authenticate{mechanism} [post]
+// @Router /authenticate/{mechanism} [post]
 func authenticate(c *gin.Context) {
 	var user *User = nil
 

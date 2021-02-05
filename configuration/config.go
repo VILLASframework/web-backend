@@ -50,8 +50,6 @@ func InitConfig() error {
 		configFile               = flag.String("config", "", "Path to YAML configuration file")
 		mode                     = flag.String("mode", "release", "Select debug/release/test mode (default is release)")
 		port                     = flag.String("port", "4000", "Port of the backend (default is 4000)")
-		baseHost                 = flag.String("base-host", "localhost:4000", "The host at which the backend is hosted (default: localhost)")
-		basePath                 = flag.String("base-path", "/api/v2", "The path at which the API routes are located (default /api/v2)")
 		adminUser                = flag.String("admin-user", "", "Initial admin username")
 		adminPass                = flag.String("admin-pass", "", "Initial admin password")
 		adminMail                = flag.String("admin-mail", "", "Initial admin mail address")
@@ -85,8 +83,6 @@ func InitConfig() error {
 		"amqp.pass":                   *amqpPass,
 		"mode":                        *mode,
 		"port":                        *port,
-		"base.host":                   *baseHost,
-		"base.path":                   *basePath,
 		"admin.user":                  *adminUser,
 		"admin.pass":                  *adminPass,
 		"admin.mail":                  *adminMail,
@@ -165,39 +161,29 @@ func InitConfig() error {
 	return nil
 }
 
-func ConfigureBackend() (string, string, string, string, string, string, string, error) {
+func ConfigureBackend() (string, string, string, string, string, error) {
 
 	err := InitConfig()
 	if err != nil {
 		log.Printf("Error during initialization of global configuration: %v, aborting.", err.Error())
-		return "", "", "", "", "", "", "", err
+		return "", "", "", "", "", err
 	}
 
 	mode, err := GlobalConfig.String("mode")
 	if err != nil {
 		log.Printf("Error reading mode from global configuration: %v, aborting.", err.Error())
-		return "", "", "", "", "", "", "", err
+		return "", "", "", "", "", err
 	}
 
-	baseHost, err := GlobalConfig.String("base.host")
-	if err != nil {
-		log.Printf("Error reading base.host from global configuration: %v, aborting.", err.Error())
-		return "", "", "", "", "", "", "", err
-	}
-	basePath, err := GlobalConfig.String("base.path")
-	if err != nil {
-		log.Printf("Error reading base.path from global configuration: %v, aborting.", err.Error())
-		return "", "", "", "", "", "", "", err
-	}
 	port, err := GlobalConfig.String("port")
 	if err != nil {
 		log.Printf("Error reading port from global configuration: %v, aborting.", err.Error())
-		return "", "", "", "", "", "", "", err
+		return "", "", "", "", "", err
 	}
 
 	AMQPhost, _ := GlobalConfig.String("amqp.host")
 	AMQPuser, _ := GlobalConfig.String("amqp.user")
 	AMQPpass, _ := GlobalConfig.String("amqp.pass")
 
-	return mode, baseHost, basePath, port, AMQPhost, AMQPuser, AMQPpass, nil
+	return mode, port, AMQPhost, AMQPuser, AMQPpass, nil
 }

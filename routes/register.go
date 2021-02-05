@@ -125,13 +125,6 @@ func ReadTestDataFromJson(path string) error {
 
 // Uses API endpoints to add test data to the backend; All endpoints have to be registered before invoking this function.
 func AddTestData(cfg *config.Config, router *gin.Engine) (*bytes.Buffer, error) {
-
-	basePath, err := cfg.String("base.path")
-	if err != nil {
-		fmt.Println("error: testdata could not be added to DB: no base path specified")
-		return nil, err
-	}
-
 	database.MigrateModels()
 
 	// add Admin user (defaults to User_0, xyz789)
@@ -147,7 +140,7 @@ func AddTestData(cfg *config.Config, router *gin.Engine) (*bytes.Buffer, error) 
 	}
 
 	// authenticate as admin
-	token, err := helper.AuthenticateForTest(router, basePath+"/authenticate", "POST", Admin)
+	token, err := helper.AuthenticateForTest(router, Admin)
 	if err != nil {
 		return nil, err
 	}

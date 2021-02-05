@@ -51,8 +51,6 @@ type Config struct {
 	Title          string               `json:"title"`
 	SubTitle       string               `json:"sub_title"`
 	Mode           string               `json:"mode"`
-	BaseHost       string               `json:"base_host"`
-	BasePath       string               `json:"base_path"`
 	Contact        ConfigContact        `json:"contact"`
 	Authentication ConfigAuthentication `json:"authentication"`
 }
@@ -71,8 +69,6 @@ func getConfig(c *gin.Context) {
 	resp := &Config{}
 
 	resp.Mode, _ = cfg.String("mode")
-	resp.BaseHost, _ = cfg.String("base.host")
-	resp.BasePath, _ = cfg.String("base.path")
 	resp.Authentication.LogoutURL, _ = cfg.String("auth.logout-url")
 	resp.Authentication.External.Enabled, _ = cfg.Bool("auth.external")
 	resp.Authentication.External.AuthorizeURL, _ = cfg.String("auth.external.authorize-url")

@@ -83,6 +83,42 @@ definitions:
       StartParameters:
         $ref: '#/definitions/postgres.Jsonb'
     type: object
+  config.Config:
+    properties:
+      authentication:
+        $ref: '#/definitions/config.ConfigAuthentication'
+      contact:
+        $ref: '#/definitions/config.ConfigContact'
+      mode:
+        type: string
+      sub_title:
+        type: string
+      title:
+        type: string
+    type: object
+  config.ConfigAuthentication:
+    properties:
+      external:
+        $ref: '#/definitions/config.ConfigAuthenticationExternal'
+      logout_url:
+        type: string
+    type: object
+  config.ConfigAuthenticationExternal:
+    properties:
+      authorize_url:
+        type: string
+      enabled:
+        type: boolean
+      provider_name:
+        type: string
+    type: object
+  config.ConfigContact:
+    properties:
+      mail:
+        type: string
+      name:
+        type: string
+    type: object
   dashboard.addDashboardRequest:
     properties:
       dashboard:
@@ -446,6 +482,31 @@ info:
   version: "2.0"
 paths:
   /authenticate:
+    get:
+      consumes:
+      - application/json
+      operationId: authenticated
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: JSON web token, success status, message and authenticated user
+            object
+          schema:
+            $ref: '#/definitions/api.ResponseAuthenticate'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+        "500":
+          description: Internal server error.
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+      summary: Check if user is authenticated and provide details on how the user
+        can authenticate
+      tags:
+      - authentication
+  /authenticate/{mechanism}:
     post:
       consumes:
       - application/json
@@ -457,11 +518,20 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/user.loginRequest'
+      - description: Login mechanism
+        enum:
+        - internal
+        - external
+        in: path
+        name: mechanism
+        required: true
+        type: string
       produces:
       - application/json
       responses:
         "200":
-          description: JSON web token, success status, message and authenticated user object
+          description: JSON web token, success status, message and authenticated user
+            object
           schema:
             $ref: '#/definitions/api.ResponseAuthenticate'
         "401":
@@ -475,6 +545,19 @@ paths:
       summary: Authentication for user
       tags:
       - authentication
+  /config:
+    get:
+      operationId: config
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: The configuration
+          schema:
+            $ref: '#/definitions/config.Config'
+      summary: Get config VILLASweb to be used by frontend
+      tags:
+      - config
   /configs:
     get:
       operationId: getConfigs
@@ -513,7 +596,8 @@ paths:
       - application/json
       operationId: addConfig
       parameters:
-      - description: component configuration to be added incl. IDs of scenario and IC
+      - description: component configuration to be added incl. IDs of scenario and
+          IC
         in: body
         name: inputConfig
         required: true
@@ -1078,7 +1162,8 @@ paths:
       - application/json
       responses:
         "204":
-          description: Backend is healthy, database and AMQP broker connections are alive
+          description: Backend is healthy, database and AMQP broker connections are
+            alive
           schema:
             type: string
         "500":
@@ -1310,7 +1395,8 @@ paths:
             $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
-      summary: Send an action to IC (only available if backend server is started with -amqp parameter)
+      summary: Send an action to IC (only available if backend server is started with
+        -amqp parameter)
       tags:
       - infrastructure-components
   /ic/{ICID}/configs:
@@ -1986,7 +2072,8 @@ paths:
       - application/json
       operationId: AddSignal
       parameters:
-      - description: A signal to be added to the component configuration incl. direction and config ID to which signal shall be added
+      - description: A signal to be added to the component configuration incl. direction
+          and config ID to which signal shall be added
         in: body
         name: inputSignal
         required: true
@@ -2271,7 +2358,8 @@ paths:
       - application/json
       operationId: UpdateUser
       parameters:
-      - description: User to be updated (anything except for ID can be changed, role can only be change by admin)
+      - description: User to be updated (anything except for ID can be changed, role
+          can only be change by admin)
         in: body
         name: inputUser
         required: true

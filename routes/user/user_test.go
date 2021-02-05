@@ -25,7 +25,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -63,7 +62,7 @@ func TestMain(m *testing.M) {
 	defer database.DBpool.Close()
 
 	router = gin.Default()
-	api := router.Group("/api")
+	api := router.Group("/api/v2")
 
 	RegisterAuthenticate(api.Group("/authenticate"))
 	api.Use(Authentication())
@@ -82,7 +81,7 @@ func TestAuthenticate(t *testing.T) {
 	// should result in unauthorized
 	w1 := httptest.NewRecorder()
 	body, _ := json.Marshal("This is no JSON")
-	req, err := http.NewRequest("POST", "/api/authenticate", bytes.NewBuffer(body))
+	req, err := http.NewRequest("POST", "/api/v2/authenticate", bytes.NewBuffer(body))
 	assert.NoError(t, err)
 	req.Header.Set("Content-Type", "application/json")
 	router.ServeHTTP(w1, req)
@@ -95,7 +94,7 @@ func TestAuthenticate(t *testing.T) {
 	// should result in unauthorized
 	w2 := httptest.NewRecorder()
 	body, _ = json.Marshal(malformedCredentials)
-	req, err = http.NewRequest("POST", "/api/authenticate", bytes.NewBuffer(body))
+	req, err = http.NewRequest("POST", "/api/v2/authenticate", bytes.NewBuffer(body))
 	assert.NoError(t, err)
 	req.Header.Set("Content-Type", "application/json")
 	router.ServeHTTP(w2, req)
@@ -107,7 +106,7 @@ func TestAuthenticate(t *testing.T) {
 	malformedCredentials.Password = "blablabla"
 	w3 := httptest.NewRecorder()
 	body, _ = json.Marshal(malformedCredentials)
-	req, err = http.NewRequest("POST", "/api/authenticate", bytes.NewBuffer(body))
+	req, err = http.NewRequest("POST", "/api/v2/authenticate", bytes.NewBuffer(body))
 	assert.NoError(t, err)
 	req.Header.Set("Content-Type", "application/json")
 	router.ServeHTTP(w3, req)
@@ -119,16 +118,14 @@ func TestAuthenticate(t *testing.T) {
 	malformedCredentials.Password = "wrong password"
 	w4 := httptest.NewRecorder()
 	body, _ = json.Marshal(malformedCredentials)
-	req, err = http.NewRequest("POST", "/api/authenticate", bytes.NewBuffer(body))
+	req, err = http.NewRequest("POST", "/api/v2/authenticate", bytes.NewBuffer(body))
 	assert.NoError(t, err)
 	req.Header.Set("Content-Type", "application/json")
 	router.ServeHTTP(w4, req)
 	assert.Equal(t, 401, w4.Code, w4.Body)
 
 	// authenticate as admin
-	log.Println(helper.AdminCredentials)
-	_, err = helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.Credentials{Username: "admin", Password: adminpw})
+	_, err = helper.AuthenticateForTest(router, helper.Credentials{Username: "admin", Password: adminpw})
 	assert.NoError(t, err)
 
 }
@@ -141,14 +138,13 @@ func TestAuthenticateQueryToken(t *testing.T) {
 	assert.NoError(t, err)
 
 	// authenticate as admin
-	token, err := helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.Credentials{Username: "admin", Password: adminpw})
+	token, err := helper.AuthenticateForTest(router, helper.Credentials{Username: "admin", Password: adminpw})
 	assert.NoError(t, err)
 
 	w := httptest.NewRecorder()
 
 	// Create the request
-	req, err := http.NewRequest("GET", "/api/users?token="+token, nil)
+	req, err := http.NewRequest("GET", "/api/v2/users?token="+token, nil)
 	assert.NoError(t, err)
 
 	router.ServeHTTP(w, req)
@@ -163,14 +159,13 @@ func TestAddGetUser(t *testing.T) {
 	assert.NoError(t, err)
 
 	// authenticate as admin
-	token, err := helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.Credentials{Username: "admin", Password: adminpw})
+	token, err := helper.AuthenticateForTest(router, helper.Credentials{Username: "admin", Password: adminpw})
 	assert.NoError(t, err)
 
 	// try to POST with non JSON body
 	// should result in bad request
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/users", "POST", "This is not JSON")
+		"/api/v2/users", "POST", "This is not JSON")
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 
@@ -183,7 +178,7 @@ func TestAddGetUser(t *testing.T) {
 	// try POST with too short username
 	// should result in bad request
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/users", "POST", helper.KeyModels{"user": wrongUser})
+		"/api/v2/users", "POST", helper.KeyModels{"user": wrongUser})
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 
@@ -192,7 +187,7 @@ func TestAddGetUser(t *testing.T) {
 	wrongUser.Username = "Longenoughusername"
 	wrongUser.Password = "short"
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/users", "POST", helper.KeyModels{"user": wrongUser})
+		"/api/v2/users", "POST", helper.KeyModels{"user": wrongUser})
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 
@@ -201,7 +196,7 @@ func TestAddGetUser(t *testing.T) {
 	wrongUser.Password = "longenough"
 	wrongUser.Role = "ThisIsNotARole"
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/users", "POST", helper.KeyModels{"user": wrongUser})
+		"/api/v2/users", "POST", helper.KeyModels{"user": wrongUser})
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 
@@ -210,7 +205,7 @@ func TestAddGetUser(t *testing.T) {
 	wrongUser.Mail = "noemailaddress"
 	wrongUser.Role = "Guest"
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/users", "POST", helper.KeyModels{"user": wrongUser})
+		"/api/v2/users", "POST", helper.KeyModels{"user": wrongUser})
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 
@@ -220,7 +215,7 @@ func TestAddGetUser(t *testing.T) {
 	wrongUser.Role = ""
 	wrongUser.Password = ""
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/users", "POST", helper.KeyModels{"user": wrongUser})
+		"/api/v2/users", "POST", helper.KeyModels{"user": wrongUser})
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 
@@ -231,7 +226,7 @@ func TestAddGetUser(t *testing.T) {
 	wrongUser.Password = "blablabla"
 	wrongUser.Username = "admin"
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/users", "POST", helper.KeyModels{"user": wrongUser})
+		"/api/v2/users", "POST", helper.KeyModels{"user": wrongUser})
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
@@ -244,7 +239,7 @@ func TestAddGetUser(t *testing.T) {
 
 	// test POST user/ $newUser
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/users", "POST", helper.KeyModels{"user": newUser})
+		"/api/v2/users", "POST", helper.KeyModels{"user": newUser})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -264,7 +259,7 @@ func TestAddGetUser(t *testing.T) {
 
 	// Get the newUser
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/users/%v", newUserID), "GET", nil)
+		fmt.Sprintf("/api/v2/users/%v", newUserID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -275,7 +270,7 @@ func TestAddGetUser(t *testing.T) {
 	// try to GET user with invalid user ID
 	// should result in bad request
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/users/bla"), "GET", nil)
+		fmt.Sprintf("/api/v2/users/bla"), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 }
@@ -288,8 +283,7 @@ func TestUsersNotAllowedActions(t *testing.T) {
 	assert.NoError(t, err)
 
 	// authenticate as admin
-	token, err := helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.Credentials{Username: "admin", Password: adminpw})
+	token, err := helper.AuthenticateForTest(router, helper.Credentials{Username: "admin", Password: adminpw})
 	assert.NoError(t, err)
 
 	// Add a user
@@ -300,7 +294,7 @@ func TestUsersNotAllowedActions(t *testing.T) {
 		Role:     "User",
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/users", "POST", helper.KeyModels{"user": newUser})
+		"/api/v2/users", "POST", helper.KeyModels{"user": newUser})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -308,34 +302,33 @@ func TestUsersNotAllowedActions(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Authenticate as the added user
-	token, err = helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", UserRequest{
-			Username: newUser.Username,
-			Password: newUser.Password,
-		})
+	token, err = helper.AuthenticateForTest(router, UserRequest{
+		Username: newUser.Username,
+		Password: newUser.Password,
+	})
 	assert.NoError(t, err)
 
 	// Try to get all the users (NOT ALLOWED)
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/users", "POST", helper.KeyModels{"user": newUser})
+		"/api/v2/users", "POST", helper.KeyModels{"user": newUser})
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// Try to read another user than self (eg. Admin) (NOT ALLOWED)
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/users/0", "GET", nil)
+		"/api/v2/users/0", "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 403, code, "Response body: \n%v\n", resp)
 
 	// Try to delete another user (eg. Admin) (NOT ALLOWED)
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/users/0", "DELETE", nil)
+		"/api/v2/users/0", "DELETE", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// Try to delete self (NOT ALLOWED)
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/users/%v", newUserID), "DELETE", nil)
+		fmt.Sprintf("/api/v2/users/%v", newUserID), "DELETE", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
@@ -349,13 +342,12 @@ func TestGetAllUsers(t *testing.T) {
 	assert.NoError(t, err)
 
 	// authenticate as admin
-	token, err := helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.Credentials{Username: "admin", Password: adminpw})
+	token, err := helper.AuthenticateForTest(router, helper.Credentials{Username: "admin", Password: adminpw})
 	assert.NoError(t, err)
 
 	// get the length of the GET all users response
 	initialNumber, err := helper.LengthOfResponse(router, token,
-		"/api/users", "GET", nil)
+		"/api/v2/users", "GET", nil)
 	assert.NoError(t, err)
 
 	// Add a user
@@ -366,13 +358,13 @@ func TestGetAllUsers(t *testing.T) {
 		Role:     "User",
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/users", "POST", helper.KeyModels{"user": newUser})
+		"/api/v2/users", "POST", helper.KeyModels{"user": newUser})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// get the length of the GET all users response again
 	finalNumber, err := helper.LengthOfResponse(router, token,
-		"/api/users", "GET", nil)
+		"/api/v2/users", "GET", nil)
 	assert.NoError(t, err)
 
 	assert.Equal(t, finalNumber, initialNumber+1)
@@ -383,14 +375,13 @@ func TestGetAllUsers(t *testing.T) {
 	}
 
 	// authenticate as normal user
-	token, err = helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", newUserCredentials)
+	token, err = helper.AuthenticateForTest(router, newUserCredentials)
 	assert.NoError(t, err)
 
 	// try to get all users as normal user
 	// should result in unprocessable entity eror
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/users", "GET", nil)
+		"/api/v2/users", "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
@@ -404,8 +395,7 @@ func TestModifyAddedUserAsUser(t *testing.T) {
 	assert.NoError(t, err)
 
 	// authenticate as admin
-	token, err := helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.Credentials{Username: "admin", Password: adminpw})
+	token, err := helper.AuthenticateForTest(router, helper.Credentials{Username: "admin", Password: adminpw})
 	assert.NoError(t, err)
 
 	// Add a user that will modify itself
@@ -416,7 +406,7 @@ func TestModifyAddedUserAsUser(t *testing.T) {
 		Role:     "User",
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/users", "POST", helper.KeyModels{"user": newUser})
+		"/api/v2/users", "POST", helper.KeyModels{"user": newUser})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -424,16 +414,15 @@ func TestModifyAddedUserAsUser(t *testing.T) {
 	assert.NoError(t, err)
 
 	// authenticate as the new user
-	token, err = helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", UserRequest{
-			Username: newUser.Username,
-			Password: newUser.Password,
-		})
+	token, err = helper.AuthenticateForTest(router, UserRequest{
+		Username: newUser.Username,
+		Password: newUser.Password,
+	})
 	assert.NoError(t, err)
 
 	// Try PUT with invalid user ID in path
 	// Should return a bad request
-	code, resp, err = helper.TestEndpoint(router, token, fmt.Sprintf("/api/users/blabla"), "PUT",
+	code, resp, err = helper.TestEndpoint(router, token, fmt.Sprintf("/api/v2/users/blabla"), "PUT",
 		helper.KeyModels{"user": newUser})
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
@@ -441,7 +430,7 @@ func TestModifyAddedUserAsUser(t *testing.T) {
 	// Try to PUT a non JSON body
 	// Should return a bad request
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/users/%v", newUserID), "PUT", "This is no JSON")
+		fmt.Sprintf("/api/v2/users/%v", newUserID), "PUT", "This is no JSON")
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 
@@ -455,7 +444,7 @@ func TestModifyAddedUserAsUser(t *testing.T) {
 	// should result in forbidden
 	modActiveState := UserRequest{Active: "no"}
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/users/%v", newUserID), "PUT", helper.KeyModels{"user": modActiveState})
+		fmt.Sprintf("/api/v2/users/%v", newUserID), "PUT", helper.KeyModels{"user": modActiveState})
 	assert.NoError(t, err)
 	assert.Equalf(t, 403, code, "Response body: \n%v\n", resp)
 
@@ -463,7 +452,7 @@ func TestModifyAddedUserAsUser(t *testing.T) {
 	modRequest := UserRequest{Username: "myNewName"}
 	newUser.Username = modRequest.Username
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
+		fmt.Sprintf("/api/v2/users/%v", newUserID), "PUT",
 		helper.KeyModels{"user": modRequest})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -474,7 +463,7 @@ func TestModifyAddedUserAsUser(t *testing.T) {
 	modRequest = UserRequest{Username: "myNewName"}
 	newUser.Username = modRequest.Username
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/users/1", "PUT", helper.KeyModels{"user": modRequest})
+		"/api/v2/users/1", "PUT", helper.KeyModels{"user": modRequest})
 	assert.NoError(t, err)
 	assert.Equalf(t, 403, code, "Response body: \n%v\n", resp)
 
@@ -482,7 +471,7 @@ func TestModifyAddedUserAsUser(t *testing.T) {
 	modRequest = UserRequest{Mail: "my@new.email"}
 	newUser.Mail = modRequest.Mail
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
+		fmt.Sprintf("/api/v2/users/%v", newUserID), "PUT",
 		helper.KeyModels{"user": modRequest})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -493,7 +482,7 @@ func TestModifyAddedUserAsUser(t *testing.T) {
 	modRequest = UserRequest{Mail: "my@new.email"}
 	newUser.Mail = modRequest.Mail
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/users/1", "PUT", helper.KeyModels{"user": modRequest})
+		"/api/v2/users/1", "PUT", helper.KeyModels{"user": modRequest})
 	assert.NoError(t, err)
 	assert.Equalf(t, 403, code, "Response body: \n%v\n", resp)
 
@@ -501,7 +490,7 @@ func TestModifyAddedUserAsUser(t *testing.T) {
 	modRequest = UserRequest{Role: "Admin"}
 	newUser.Role = modRequest.Role
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
+		fmt.Sprintf("/api/v2/users/%v", newUserID), "PUT",
 		helper.KeyModels{"user": modRequest})
 	assert.NoError(t, err)
 	assert.Equalf(t, 403, code, "Response body: \n%v\n", resp)
@@ -511,7 +500,7 @@ func TestModifyAddedUserAsUser(t *testing.T) {
 		Password: "5tr0ng_pw!",
 	}
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
+		fmt.Sprintf("/api/v2/users/%v", newUserID), "PUT",
 		helper.KeyModels{"user": modRequest})
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
@@ -522,7 +511,7 @@ func TestModifyAddedUserAsUser(t *testing.T) {
 		OldPassword: "wrongoldpassword",
 	}
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
+		fmt.Sprintf("/api/v2/users/%v", newUserID), "PUT",
 		helper.KeyModels{"user": modRequest})
 	assert.NoError(t, err)
 	assert.Equalf(t, 403, code, "Response body: \n%v\n", resp)
@@ -533,23 +522,22 @@ func TestModifyAddedUserAsUser(t *testing.T) {
 		OldPassword: "mod_My5elf",
 	}
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
+		fmt.Sprintf("/api/v2/users/%v", newUserID), "PUT",
 		helper.KeyModels{"user": modRequest})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// try to login as newUser with the modified username and password
-	token, err = helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", UserRequest{
-			Username: newUser.Username,
-			Password: modRequest.Password,
-		})
+	token, err = helper.AuthenticateForTest(router, UserRequest{
+		Username: newUser.Username,
+		Password: modRequest.Password,
+	})
 	assert.NoError(t, err)
 
 	// modify Admin's password (ILLEGAL)
 	modRequest = UserRequest{Password: "4dm1ns_pw!"}
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/users/1", "PUT", helper.KeyModels{"user": modRequest})
+		"/api/v2/users/1", "PUT", helper.KeyModels{"user": modRequest})
 	assert.NoError(t, err)
 	assert.Equalf(t, 403, code, "Response body: \n%v\n", resp)
 }
@@ -562,8 +550,7 @@ func TestInvalidUserUpdate(t *testing.T) {
 	assert.NoError(t, err)
 
 	// authenticate as admin
-	token, err := helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.Credentials{Username: "admin", Password: adminpw})
+	token, err := helper.AuthenticateForTest(router, helper.Credentials{Username: "admin", Password: adminpw})
 	assert.NoError(t, err)
 
 	// Add a user
@@ -574,7 +561,7 @@ func TestInvalidUserUpdate(t *testing.T) {
 		Role:     "User",
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/users", "POST", helper.KeyModels{"user": newUser})
+		"/api/v2/users", "POST", helper.KeyModels{"user": newUser})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -587,7 +574,7 @@ func TestInvalidUserUpdate(t *testing.T) {
 		Password: "longenough",
 	}
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/users/%v", newUserID+1), "PUT",
+		fmt.Sprintf("/api/v2/users/%v", newUserID+1), "PUT",
 		helper.KeyModels{"user": modRequest})
 	assert.NoError(t, err)
 	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
@@ -597,7 +584,7 @@ func TestInvalidUserUpdate(t *testing.T) {
 	modRequest.Password = ""
 	modRequest.Username = "admin"
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
+		fmt.Sprintf("/api/v2/users/%v", newUserID), "PUT",
 		helper.KeyModels{"user": modRequest})
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
@@ -605,7 +592,7 @@ func TestInvalidUserUpdate(t *testing.T) {
 	// modify newUser's password with INVALID password
 	modRequest.Password = "short"
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
+		fmt.Sprintf("/api/v2/users/%v", newUserID), "PUT",
 		helper.KeyModels{"user": modRequest})
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
@@ -613,7 +600,7 @@ func TestInvalidUserUpdate(t *testing.T) {
 	// modify newUser's email with INVALID email
 	modRequest = UserRequest{Mail: "notEmail"}
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
+		fmt.Sprintf("/api/v2/users/%v", newUserID), "PUT",
 		helper.KeyModels{"user": modRequest})
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
@@ -621,7 +608,7 @@ func TestInvalidUserUpdate(t *testing.T) {
 	// modify newUser's role with INVALID role
 	modRequest = UserRequest{Role: "noRole"}
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
+		fmt.Sprintf("/api/v2/users/%v", newUserID), "PUT",
 		helper.KeyModels{"user": modRequest})
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
@@ -636,8 +623,7 @@ func TestModifyAddedUserAsAdmin(t *testing.T) {
 	assert.NoError(t, err)
 
 	// authenticate as admin
-	token, err := helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.Credentials{Username: "admin", Password: adminpw})
+	token, err := helper.AuthenticateForTest(router, helper.Credentials{Username: "admin", Password: adminpw})
 	assert.NoError(t, err)
 
 	// Add a user
@@ -648,7 +634,7 @@ func TestModifyAddedUserAsAdmin(t *testing.T) {
 		Role:     "User",
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/users", "POST", helper.KeyModels{"user": newUser})
+		"/api/v2/users", "POST", helper.KeyModels{"user": newUser})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -665,7 +651,7 @@ func TestModifyAddedUserAsAdmin(t *testing.T) {
 	modRequest := UserRequest{Username: "NewUsername"}
 	newUser.Username = modRequest.Username
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
+		fmt.Sprintf("/api/v2/users/%v", newUserID), "PUT",
 		helper.KeyModels{"user": modRequest})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -676,7 +662,7 @@ func TestModifyAddedUserAsAdmin(t *testing.T) {
 	modRequest = UserRequest{Mail: "new@e.mail"}
 	newUser.Mail = modRequest.Mail
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
+		fmt.Sprintf("/api/v2/users/%v", newUserID), "PUT",
 		helper.KeyModels{"user": modRequest})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -687,7 +673,7 @@ func TestModifyAddedUserAsAdmin(t *testing.T) {
 	modRequest = UserRequest{Role: "Admin"}
 	newUser.Role = modRequest.Role
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
+		fmt.Sprintf("/api/v2/users/%v", newUserID), "PUT",
 		helper.KeyModels{"user": modRequest})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -699,7 +685,7 @@ func TestModifyAddedUserAsAdmin(t *testing.T) {
 		Password: "4_g00d_pw!",
 	}
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
+		fmt.Sprintf("/api/v2/users/%v", newUserID), "PUT",
 		helper.KeyModels{"user": modRequest})
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
@@ -710,28 +696,26 @@ func TestModifyAddedUserAsAdmin(t *testing.T) {
 		OldPassword: adminpw,
 	}
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
+		fmt.Sprintf("/api/v2/users/%v", newUserID), "PUT",
 		helper.KeyModels{"user": modRequest})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// try to login as newUser with the modified username and password
-	_, err = helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", UserRequest{
-			Username: newUser.Username,
-			Password: modRequest.Password,
-		})
+	_, err = helper.AuthenticateForTest(router, UserRequest{
+		Username: newUser.Username,
+		Password: modRequest.Password,
+	})
 	assert.NoError(t, err)
 
 	// authenticate as admin
-	token, err = helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.Credentials{Username: "admin", Password: adminpw})
+	token, err = helper.AuthenticateForTest(router, helper.Credentials{Username: "admin", Password: adminpw})
 	assert.NoError(t, err)
 
 	// modify newUser's Active status
 	modRequest = UserRequest{Active: "no"}
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/users/%v", newUserID), "PUT",
+		fmt.Sprintf("/api/v2/users/%v", newUserID), "PUT",
 		helper.KeyModels{"user": modRequest})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -739,7 +723,7 @@ func TestModifyAddedUserAsAdmin(t *testing.T) {
 	// try to login as newUser with the modified active status
 	// should NOT work anymore!
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/authenticate", "POST",
+		"/api/v2/authenticate", "POST",
 		UserRequest{
 			Username: newUser.Username,
 			Password: "4_g00d_pw!",
@@ -756,8 +740,7 @@ func TestDeleteUser(t *testing.T) {
 	assert.NoError(t, err)
 
 	// authenticate as admin
-	token, err := helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.Credentials{Username: "admin", Password: adminpw})
+	token, err := helper.AuthenticateForTest(router, helper.Credentials{Username: "admin", Password: adminpw})
 	assert.NoError(t, err)
 
 	// Add a user
@@ -768,7 +751,7 @@ func TestDeleteUser(t *testing.T) {
 		Role:     "User",
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/users", "POST", helper.KeyModels{"user": newUser})
+		"/api/v2/users", "POST", helper.KeyModels{"user": newUser})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -778,31 +761,31 @@ func TestDeleteUser(t *testing.T) {
 	// try to DELETE with invalid ID
 	// should result in bad request
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/users/bla"), "DELETE", nil)
+		fmt.Sprintf("/api/v2/users/bla"), "DELETE", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 
 	// try to DELETE with ID that does not exist
 	// should result in not found
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/users/%v", newUserID+1), "DELETE", nil)
+		fmt.Sprintf("/api/v2/users/%v", newUserID+1), "DELETE", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
 
 	// Count the number of all the users returned
 	initialNumber, err := helper.LengthOfResponse(router, token,
-		"/api/users", "GET", nil)
+		"/api/v2/users", "GET", nil)
 	assert.NoError(t, err)
 
 	// Delete the added newUser
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/users/%v", newUserID), "DELETE", nil)
+		fmt.Sprintf("/api/v2/users/%v", newUserID), "DELETE", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// Again count the number of all the users returned
 	finalNumber, err := helper.LengthOfResponse(router, token,
-		"/api/users", "GET", nil)
+		"/api/v2/users", "GET", nil)
 	assert.NoError(t, err)
 
 	assert.Equal(t, finalNumber, initialNumber-1)

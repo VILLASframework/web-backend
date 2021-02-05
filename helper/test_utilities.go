@@ -266,8 +266,7 @@ func CompareResponse(resp *bytes.Buffer, expected interface{}) error {
 }
 
 // Authenticate a user for testing purposes
-func AuthenticateForTest(router *gin.Engine, url string,
-	method string, credentials interface{}) (string, error) {
+func AuthenticateForTest(router *gin.Engine, credentials interface{}) (string, error) {
 
 	w := httptest.NewRecorder()
 
@@ -277,7 +276,7 @@ func AuthenticateForTest(router *gin.Engine, url string,
 		return "", fmt.Errorf("Failed to marshal credentials: %v", err)
 	}
 
-	req, err := http.NewRequest(method, url, bytes.NewBuffer(body))
+	req, err := http.NewRequest("POST", "/api/v2/authenticate/internal", bytes.NewBuffer(body))
 	if err != nil {
 		return "", fmt.Errorf("Failed to create new request: %v", err)
 	}

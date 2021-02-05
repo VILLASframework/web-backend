@@ -46,8 +46,8 @@ import (
 )
 
 var router *gin.Engine
-var base_api_results = "/api/results"
-var base_api_auth = "/api/authenticate"
+var base_api_results = "/api/v2/results"
+var base_api_auth = "/api/v2/authenticate"
 
 type ScenarioRequest struct {
 	Name            string         `json:"name,omitempty"`
@@ -72,12 +72,10 @@ var newResult = ResultRequest{
 func addScenario() (scenarioID uint) {
 
 	// authenticate as admin
-	token, _ := helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.AdminCredentials)
+	token, _ := helper.AuthenticateForTest(router, helper.AdminCredentials)
 
 	// authenticate as normal user
-	token, _ = helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.UserACredentials)
+	token, _ = helper.AuthenticateForTest(router, helper.UserACredentials)
 
 	// POST $newScenario
 	newScenario := ScenarioRequest{
@@ -86,14 +84,14 @@ func addScenario() (scenarioID uint) {
 		StartParameters: postgres.Jsonb{RawMessage: json.RawMessage(`{"parameter1" : "testValue1A", "parameter2" : "testValue2A", "parameter3" : 42}`)},
 	}
 	_, resp, _ := helper.TestEndpoint(router, token,
-		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenario})
+		"/api/v2/scenarios", "POST", helper.KeyModels{"scenario": newScenario})
 
 	// Read newScenario's ID from the response
 	newScenarioID, _ := helper.GetResponseID(resp)
 
 	// add the guest user to the new scenario
 	_, resp, _ = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/scenarios/%v/user?username=User_C", newScenarioID), "PUT", nil)
+		fmt.Sprintf("/api/v2/scenarios/%v/user?username=User_C", newScenarioID), "PUT", nil)
 
 	return uint(newScenarioID)
 }
@@ -110,7 +108,7 @@ func TestMain(m *testing.M) {
 	defer database.DBpool.Close()
 
 	router = gin.Default()
-	api := router.Group("/api")
+	api := router.Group("/api/v2")
 
 	user.RegisterAuthenticate(api.Group("/authenticate"))
 	api.Use(user.Authentication())
@@ -135,8 +133,7 @@ func TestGetAllResultsOfScenario(t *testing.T) {
 	scenarioID := addScenario()
 
 	// authenticate as normal user
-	token, err := helper.AuthenticateForTest(router,
-		base_api_auth, "POST", helper.UserACredentials)
+	token, err := helper.AuthenticateForTest(router, helper.UserACredentials)
 	assert.NoError(t, err)
 
 	// test POST newResult
@@ -158,8 +155,7 @@ func TestGetAllResultsOfScenario(t *testing.T) {
 	assert.Equal(t, 1, NumberOfConfigs)
 
 	// authenticate as normal userB who has no access to scenario
-	token, err = helper.AuthenticateForTest(router,
-		base_api_auth, "POST", helper.UserBCredentials)
+	token, err = helper.AuthenticateForTest(router, helper.UserBCredentials)
 	assert.NoError(t, err)
 
 	// try to get results without access
@@ -185,8 +181,7 @@ func TestAddGetUpdateDeleteResult(t *testing.T) {
 	newResult.ScenarioID = scenarioID
 	newResult.ConfigSnapshots = confSnapshots
 	// authenticate as normal userB who has no access to new scenario
-	token, err := helper.AuthenticateForTest(router,
-		base_api_auth, "POST", helper.UserBCredentials)
+	token, err := helper.AuthenticateForTest(router, helper.UserBCredentials)
 	assert.NoError(t, err)
 
 	// try to POST with no access
@@ -197,8 +192,7 @@ func TestAddGetUpdateDeleteResult(t *testing.T) {
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// authenticate as normal user
-	token, err = helper.AuthenticateForTest(router,
-		base_api_auth, "POST", helper.UserACredentials)
+	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
 	assert.NoError(t, err)
 
 	// try to POST non JSON body
@@ -243,8 +237,7 @@ func TestAddGetUpdateDeleteResult(t *testing.T) {
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// authenticate as normal userB who has no access to new scenario
-	token, err = helper.AuthenticateForTest(router,
-		base_api_auth, "POST", helper.UserBCredentials)
+	token, err = helper.AuthenticateForTest(router, helper.UserBCredentials)
 	assert.NoError(t, err)
 
 	// Try to GET the newResult with no access
@@ -269,8 +262,7 @@ func TestAddGetUpdateDeleteResult(t *testing.T) {
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// authenticate as guest user who has access to result
-	token, err = helper.AuthenticateForTest(router,
-		base_api_auth, "POST", helper.GuestCredentials)
+	token, err = helper.AuthenticateForTest(router, helper.GuestCredentials)
 	assert.NoError(t, err)
 
 	// try to PUT as guest
@@ -281,8 +273,7 @@ func TestAddGetUpdateDeleteResult(t *testing.T) {
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// authenticate as normal user
-	token, err = helper.AuthenticateForTest(router,
-		base_api_auth, "POST", helper.UserACredentials)
+	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
 	assert.NoError(t, err)
 
 	// try to PUT a non JSON body
@@ -312,8 +303,7 @@ func TestAddGetUpdateDeleteResult(t *testing.T) {
 	newResult.Description = updatedResult.Description
 
 	// authenticate as normal userB who has no access to new scenario
-	token, err = helper.AuthenticateForTest(router,
-		base_api_auth, "POST", helper.UserBCredentials)
+	token, err = helper.AuthenticateForTest(router, helper.UserBCredentials)
 	assert.NoError(t, err)
 
 	// try to DELETE with no access
@@ -324,8 +314,7 @@ func TestAddGetUpdateDeleteResult(t *testing.T) {
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// authenticate as normal user
-	token, err = helper.AuthenticateForTest(router,
-		base_api_auth, "POST", helper.UserACredentials)
+	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
 	assert.NoError(t, err)
 
 	// Count the number of all the results returned for scenario
@@ -366,8 +355,7 @@ func TestAddDeleteResultFile(t *testing.T) {
 	newResult.ScenarioID = scenarioID
 	newResult.ConfigSnapshots = confSnapshots
 	// authenticate as normal user
-	token, err := helper.AuthenticateForTest(router,
-		base_api_auth, "POST", helper.UserACredentials)
+	token, err := helper.AuthenticateForTest(router, helper.UserACredentials)
 	assert.NoError(t, err)
 
 	// test POST newResult

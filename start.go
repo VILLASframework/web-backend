@@ -82,7 +82,7 @@ func addData(router *gin.Engine, cfg *config.Config) error {
 func main() {
 	log.Println("Starting VILLASweb-backend-go")
 
-	mode, _, basePath, port, amqphost, amqpuser, amqppass, err := configuration.ConfigureBackend()
+	mode, port, amqphost, amqpuser, amqppass, err := configuration.ConfigureBackend()
 	if err != nil {
 		panic(err)
 	}
@@ -100,7 +100,7 @@ func main() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 	r := gin.Default()
-	api := r.Group(basePath)
+	api := r.Group("/api/v2")
 	routes.RegisterEndpoints(r, api)
 
 	//Start AMQP client
