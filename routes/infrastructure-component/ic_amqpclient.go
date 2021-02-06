@@ -24,13 +24,14 @@ package infrastructure_component
 import (
 	"encoding/json"
 	"fmt"
+	"log"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 	"github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/streadway/amqp"
-	"log"
-	"time"
 )
 
 const VILLAS_EXCHANGE = "villas"
@@ -238,25 +239,6 @@ func StartAMQP(AMQPurl string, api *gin.RouterGroup) error {
 
 		// register IC action endpoint only if AMQP client is used
 		RegisterAMQPEndpoint(api.Group("/ic"))
-
-		// Periodically call the Ping function to check which ICs are still there
-		ticker := time.NewTicker(10 * time.Second)
-		go func() {
-
-			for {
-				select {
-				case <-ticker.C:
-					//TODO Add a useful regular event here
-					/*
-						err = PingAMQP()
-						if err != nil {
-							log.Println("AMQP Error: ", err.Error())
-						}
-					*/
-				}
-			}
-
-		}()
 
 		log.Printf("Connected AMQP client to %s", AMQPurl)
 	}
