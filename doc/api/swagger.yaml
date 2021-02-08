@@ -1,16 +1,54 @@
 basePath: /api/v2
 definitions:
+  api.ResponseAuthenticate:
+    type: object
+  api.ResponseConfig:
+    type: object
+  api.ResponseConfigs:
+    type: object
+  api.ResponseDashboard:
+    type: object
+  api.ResponseDashboards:
+    type: object
+  api.ResponseError:
+    type: object
+  api.ResponseFile:
+    type: object
+  api.ResponseFiles:
+    type: object
+  api.ResponseIC:
+    type: object
+  api.ResponseICs:
+    type: object
+  api.ResponseResult:
+    type: object
+  api.ResponseResults:
+    type: object
+  api.ResponseScenario:
+    type: object
+  api.ResponseScenarios:
+    type: object
+  api.ResponseSignal:
+    type: object
+  api.ResponseSignals:
+    type: object
+  api.ResponseUser:
+    type: object
+  api.ResponseUsers:
+    type: object
+  api.ResponseWidget:
+    type: object
+  api.ResponseWidgets:
+    type: object
   component_configuration.addConfigRequest:
     properties:
       config:
         $ref: '#/definitions/component_configuration.validNewConfig'
-        type: object
     type: object
   component_configuration.updateConfigRequest:
     properties:
       config:
         $ref: '#/definitions/component_configuration.validUpdatedConfig'
-        type: object
     type: object
   component_configuration.validNewConfig:
     properties:
@@ -25,7 +63,7 @@ definitions:
       ScenarioID:
         type: integer
       StartParameters:
-        type: string
+        $ref: '#/definitions/postgres.Jsonb'
     required:
     - ICID
     - Name
@@ -43,19 +81,17 @@ definitions:
       Name:
         type: string
       StartParameters:
-        type: string
+        $ref: '#/definitions/postgres.Jsonb'
     type: object
   dashboard.addDashboardRequest:
     properties:
       dashboard:
         $ref: '#/definitions/dashboard.validNewDashboard'
-        type: object
     type: object
   dashboard.updateDashboardRequest:
     properties:
       dashboard:
         $ref: '#/definitions/dashboard.validUpdatedDashboard'
-        type: object
     type: object
   dashboard.validNewDashboard:
     properties:
@@ -81,418 +117,15 @@ definitions:
       name:
         type: string
     type: object
-  database.ComponentConfiguration:
-    properties:
-      createdAt:
-        type: string
-      fileIDs:
-        description: Array of file IDs used by the component configuration
-        type: string
-      icID:
-        description: ID of IC associated with Component Configuration
-        type: integer
-      id:
-        type: integer
-      inputLength:
-        description: Number of input signals
-        type: integer
-      name:
-        description: Name of Component Configuration
-        type: string
-      outputLength:
-        description: Number of output signals
-        type: integer
-      scenarioID:
-        description: ID of Scenario to which Component Configuration belongs
-        type: integer
-      startParameters:
-        description: Start parameters of Component Configuration as JSON
-        type: string
-      updatedAt:
-        type: string
-    type: object
-  database.Dashboard:
-    properties:
-      createdAt:
-        type: string
-      grid:
-        description: Grid of dashboard
-        type: integer
-      height:
-        description: Height of dashboard
-        type: integer
-      id:
-        type: integer
-      name:
-        description: Name of dashboard
-        type: string
-      scenarioID:
-        description: ID of scenario to which dashboard belongs
-        type: integer
-      updatedAt:
-        type: string
-    type: object
-  database.File:
-    properties:
-      createdAt:
-        type: string
-      date:
-        description: Last modification time of file
-        type: string
-      id:
-        type: integer
-      imageHeight:
-        description: Height of an image file in pixels (optional)
-        type: integer
-      imageWidth:
-        description: Width of an image file in pixels (optional)
-        type: integer
-      name:
-        description: Name of file
-        type: string
-      scenarioID:
-        description: ID of Scenario to which file belongs
-        type: integer
-      size:
-        description: Size of file (in byte)
-        type: integer
-      type:
-        description: Type of file (MIME type)
-        type: string
-      updatedAt:
-        type: string
-    type: object
-  database.InfrastructureComponent:
-    properties:
-      apiurl:
-        description: API URL of API for IC
-        type: string
-      category:
-        description: Category of IC (simulator, gateway, database, etc.)
-        type: string
-      createdAt:
-        type: string
-      description:
-        description: Description of the IC
-        type: string
-      id:
-        type: integer
-      location:
-        description: Location of the IC
-        type: string
-      managedexternally:
-        description: Boolean indicating if IC is managed externally (via AMQP/ VILLAScontroller)
-        type: boolean
-      name:
-        description: Name of the IC
-        type: string
-      startparameterscheme:
-        description: JSON scheme of start parameters for IC
-        type: string
-      state:
-        description: State of the IC
-        type: string
-      stateUpdateAt:
-        description: Time of last state update
-        type: string
-      type:
-        description: Type of IC (RTDS, VILLASnode, RTDS, etc.)
-        type: string
-      updatedAt:
-        type: string
-      uptime:
-        description: Uptime of the IC
-        type: number
-      uuid:
-        description: UUID of the IC
-        type: string
-      websocketurl:
-        description: WebsocketURL if the IC
-        type: string
-    type: object
-  database.Result:
-    properties:
-      configSnapshots:
-        description: JSON snapshots of component configurations used to generate results
-        type: string
-      createdAt:
-        type: string
-      description:
-        description: Description of results
-        type: string
-      id:
-        type: integer
-      resultFileIDs:
-        description: File IDs associated with result
-        type: string
-      scenarioID:
-        description: ID of Scenario to which result belongs
-        type: integer
-      updatedAt:
-        type: string
-    type: object
-  database.Scenario:
-    properties:
-      createdAt:
-        type: string
-      id:
-        type: integer
-      name:
-        description: Name of scenario
-        type: string
-      running:
-        description: Running state of scenario
-        type: boolean
-      startParameters:
-        description: Start parameters of scenario as JSON
-        type: string
-      updatedAt:
-        type: string
-    type: object
-  database.Signal:
-    properties:
-      configID:
-        description: ID of Component Configuration
-        type: integer
-      createdAt:
-        type: string
-      direction:
-        description: Direction of the signal (in or out)
-        type: string
-      id:
-        type: integer
-      index:
-        description: Index of the Signal in the mapping
-        type: integer
-      name:
-        description: Name of Signal
-        type: string
-      scalingFactor:
-        description: Scaling factor for the signal raw value (defaults to 1.0)
-        type: number
-      unit:
-        description: Unit of Signal
-        type: string
-      updatedAt:
-        type: string
-    type: object
-  database.User:
-    properties:
-      active:
-        description: Indicating status of user (false means user is inactive and should
-          not be able to login)
-        type: boolean
-      createdAt:
-        type: string
-      id:
-        type: integer
-      mail:
-        description: Mail of user
-        type: string
-      role:
-        description: Role of user
-        type: string
-      updatedAt:
-        type: string
-      username:
-        description: Username of user
-        type: string
-    type: object
-  database.Widget:
-    properties:
-      createdAt:
-        type: string
-      customProperties:
-        description: Custom properties of widget as JSON string
-        type: string
-      dashboardID:
-        description: ID of dashboard to which widget belongs
-        type: integer
-      height:
-        description: Height of widget
-        type: integer
-      id:
-        type: integer
-      isLocked:
-        description: Locked state of widget
-        type: boolean
-      minHeight:
-        description: Minimal height of widget
-        type: integer
-      minWidth:
-        description: Minimal width of widget
-        type: integer
-      name:
-        description: Name of widget
-        type: string
-      signalIDs:
-        description: IDs of signals that widget uses
-        type: string
-      type:
-        description: Type of widget
-        type: string
-      updatedAt:
-        type: string
-      width:
-        description: Width of widget
-        type: integer
-      x:
-        description: X position of widget
-        type: integer
-      "y":
-        description: Y position of widget
-        type: integer
-      z:
-        description: Z position of widget
-        type: integer
-    type: object
-  docs.ResponseAuthenticate:
-    properties:
-      message:
-        type: string
-      success:
-        type: boolean
-      token:
-        type: string
-      user:
-        $ref: '#/definitions/database.User'
-        type: object
-    type: object
-  docs.ResponseConfig:
-    properties:
-      config:
-        $ref: '#/definitions/database.ComponentConfiguration'
-        type: object
-    type: object
-  docs.ResponseConfigs:
-    properties:
-      configs:
-        items:
-          $ref: '#/definitions/database.ComponentConfiguration'
-        type: array
-    type: object
-  docs.ResponseDashboard:
-    properties:
-      dashboard:
-        $ref: '#/definitions/database.Dashboard'
-        type: object
-    type: object
-  docs.ResponseDashboards:
-    properties:
-      dashboards:
-        items:
-          $ref: '#/definitions/database.Dashboard'
-        type: array
-    type: object
-  docs.ResponseError:
-    properties:
-      message:
-        type: string
-      success:
-        type: boolean
-    type: object
-  docs.ResponseFile:
-    properties:
-      file:
-        $ref: '#/definitions/database.File'
-        type: object
-    type: object
-  docs.ResponseFiles:
-    properties:
-      files:
-        items:
-          $ref: '#/definitions/database.File'
-        type: array
-    type: object
-  docs.ResponseIC:
-    properties:
-      ic:
-        $ref: '#/definitions/database.InfrastructureComponent'
-        type: object
-    type: object
-  docs.ResponseICs:
-    properties:
-      ics:
-        items:
-          $ref: '#/definitions/database.InfrastructureComponent'
-        type: array
-    type: object
-  docs.ResponseResult:
-    properties:
-      result:
-        $ref: '#/definitions/database.Result'
-        type: object
-    type: object
-  docs.ResponseResults:
-    properties:
-      results:
-        items:
-          $ref: '#/definitions/database.Result'
-        type: array
-    type: object
-  docs.ResponseScenario:
-    properties:
-      scenario:
-        $ref: '#/definitions/database.Scenario'
-        type: object
-    type: object
-  docs.ResponseScenarios:
-    properties:
-      scenarios:
-        items:
-          $ref: '#/definitions/database.Scenario'
-        type: array
-    type: object
-  docs.ResponseSignal:
-    properties:
-      signal:
-        $ref: '#/definitions/database.Signal'
-        type: object
-    type: object
-  docs.ResponseSignals:
-    properties:
-      signals:
-        items:
-          $ref: '#/definitions/database.Signal'
-        type: array
-    type: object
-  docs.ResponseUser:
-    properties:
-      user:
-        $ref: '#/definitions/database.User'
-        type: object
-    type: object
-  docs.ResponseUsers:
-    properties:
-      users:
-        items:
-          $ref: '#/definitions/database.User'
-        type: array
-    type: object
-  docs.ResponseWidget:
-    properties:
-      widget:
-        $ref: '#/definitions/database.Widget'
-        type: object
-    type: object
-  docs.ResponseWidgets:
-    properties:
-      widgets:
-        items:
-          $ref: '#/definitions/database.Widget'
-        type: array
-    type: object
   infrastructure_component.AddICRequest:
     properties:
       ic:
         $ref: '#/definitions/infrastructure_component.validNewIC'
-        type: object
     type: object
   infrastructure_component.UpdateICRequest:
     properties:
       ic:
         $ref: '#/definitions/infrastructure_component.validUpdatedIC'
-        type: object
     type: object
   infrastructure_component.validNewIC:
     properties:
@@ -509,9 +142,11 @@ definitions:
       Name:
         type: string
       StartParameterScheme:
-        type: string
+        $ref: '#/definitions/postgres.Jsonb'
       State:
         type: string
+      StatusUpdateRaw:
+        $ref: '#/definitions/postgres.Jsonb'
       Type:
         type: string
       UUID:
@@ -539,9 +174,11 @@ definitions:
       Name:
         type: string
       StartParameterScheme:
-        type: string
+        $ref: '#/definitions/postgres.Jsonb'
       State:
         type: string
+      StatusUpdateRaw:
+        $ref: '#/definitions/postgres.Jsonb'
       Type:
         type: string
       UUID:
@@ -551,22 +188,27 @@ definitions:
       WebsocketURL:
         type: string
     type: object
+  postgres.Jsonb:
+    properties:
+      json.RawMessage:
+        items:
+          type: integer
+        type: array
+    type: object
   result.addResultRequest:
     properties:
       result:
         $ref: '#/definitions/result.validNewResult'
-        type: object
     type: object
   result.updateResultRequest:
     properties:
       result:
         $ref: '#/definitions/result.validUpdatedResult'
-        type: object
     type: object
   result.validNewResult:
     properties:
       ConfigSnapshots:
-        type: string
+        $ref: '#/definitions/postgres.Jsonb'
       Description:
         type: string
       ResultFileIDs:
@@ -582,7 +224,7 @@ definitions:
   result.validUpdatedResult:
     properties:
       configSnapshots:
-        type: string
+        $ref: '#/definitions/postgres.Jsonb'
       description:
         type: string
       resultFileIDs:
@@ -594,13 +236,11 @@ definitions:
     properties:
       scenario:
         $ref: '#/definitions/scenario.validNewScenario'
-        type: object
     type: object
   scenario.updateScenarioRequest:
     properties:
       scenario:
         $ref: '#/definitions/scenario.validUpdatedScenario'
-        type: object
     type: object
   scenario.validNewScenario:
     properties:
@@ -609,7 +249,7 @@ definitions:
       Running:
         type: boolean
       StartParameters:
-        type: string
+        $ref: '#/definitions/postgres.Jsonb'
     required:
     - Name
     - StartParameters
@@ -621,19 +261,17 @@ definitions:
       Running:
         type: boolean
       StartParameters:
-        type: string
+        $ref: '#/definitions/postgres.Jsonb'
     type: object
   signal.addSignalRequest:
     properties:
       signal:
         $ref: '#/definitions/signal.validNewSignal'
-        type: object
     type: object
   signal.updateSignalRequest:
     properties:
       signal:
         $ref: '#/definitions/signal.validUpdatedSignal'
-        type: object
     type: object
   signal.validNewSignal:
     properties:
@@ -670,7 +308,6 @@ definitions:
     properties:
       user:
         $ref: '#/definitions/user.validNewUser'
-        type: object
     type: object
   user.loginRequest:
     properties:
@@ -686,7 +323,6 @@ definitions:
     properties:
       user:
         $ref: '#/definitions/user.validUpdatedRequest'
-        type: object
     type: object
   user.validNewUser:
     properties:
@@ -723,18 +359,16 @@ definitions:
     properties:
       widget:
         $ref: '#/definitions/widget.validNewWidget'
-        type: object
     type: object
   widget.updateWidgetRequest:
     properties:
       widget:
         $ref: '#/definitions/widget.validUpdatedWidget'
-        type: object
     type: object
   widget.validNewWidget:
     properties:
       CustomProperties:
-        type: string
+        $ref: '#/definitions/postgres.Jsonb'
       DashboardID:
         type: integer
       Height:
@@ -771,7 +405,7 @@ definitions:
   widget.validUpdatedWidget:
     properties:
       CustomProperties:
-        type: string
+        $ref: '#/definitions/postgres.Jsonb'
       Height:
         type: integer
       IsLocked:
@@ -823,23 +457,21 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/user.loginRequest'
-          type: object
       produces:
       - application/json
       responses:
         "200":
-          description: JSON web token, success status, message and authenticated user
-            object
+          description: JSON web token, success status, message and authenticated user object
           schema:
-            $ref: '#/definitions/docs.ResponseAuthenticate'
+            $ref: '#/definitions/api.ResponseAuthenticate'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error.
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       summary: Authentication for user
       tags:
       - authentication
@@ -858,19 +490,19 @@ paths:
         "200":
           description: Component configurations which belong to scenario
           schema:
-            $ref: '#/definitions/docs.ResponseConfigs'
+            $ref: '#/definitions/api.ResponseConfigs'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Get all component configurations of scenario
@@ -881,37 +513,35 @@ paths:
       - application/json
       operationId: addConfig
       parameters:
-      - description: component configuration to be added incl. IDs of scenario and
-          IC
+      - description: component configuration to be added incl. IDs of scenario and IC
         in: body
         name: inputConfig
         required: true
         schema:
           $ref: '#/definitions/component_configuration.addConfigRequest'
-          type: object
       produces:
       - application/json
       responses:
         "200":
           description: Component configuration that was added
           schema:
-            $ref: '#/definitions/docs.ResponseConfig'
+            $ref: '#/definitions/api.ResponseConfig'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Add a component configuration to a scenario
@@ -932,23 +562,23 @@ paths:
         "200":
           description: component configuration that was deleted
           schema:
-            $ref: '#/definitions/docs.ResponseConfig'
+            $ref: '#/definitions/api.ResponseConfig'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Delete a component configuration
@@ -968,23 +598,23 @@ paths:
         "200":
           description: component configuration that was requested
           schema:
-            $ref: '#/definitions/docs.ResponseConfig'
+            $ref: '#/definitions/api.ResponseConfig'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Get a component configuration
@@ -1001,7 +631,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/component_configuration.updateConfigRequest'
-          type: object
       - description: Config ID
         in: path
         name: configID
@@ -1013,23 +642,23 @@ paths:
         "200":
           description: Component configuration that was added
           schema:
-            $ref: '#/definitions/docs.ResponseConfig'
+            $ref: '#/definitions/api.ResponseConfig'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Update a component configuration
@@ -1050,19 +679,19 @@ paths:
         "200":
           description: Dashboards which belong to scenario
           schema:
-            $ref: '#/definitions/docs.ResponseDashboards'
+            $ref: '#/definitions/api.ResponseDashboards'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Get all dashboards of scenario
@@ -1079,30 +708,29 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/dashboard.addDashboardRequest'
-          type: object
       produces:
       - application/json
       responses:
         "200":
           description: Dashboard that was added
           schema:
-            $ref: '#/definitions/docs.ResponseDashboard'
+            $ref: '#/definitions/api.ResponseDashboard'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Add a dashboard to a scenario
@@ -1123,23 +751,23 @@ paths:
         "200":
           description: Dashboard that was deleted
           schema:
-            $ref: '#/definitions/docs.ResponseDashboard'
+            $ref: '#/definitions/api.ResponseDashboard'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Delete a dashboard
@@ -1159,23 +787,23 @@ paths:
         "200":
           description: Dashboard that was requested
           schema:
-            $ref: '#/definitions/docs.ResponseDashboard'
+            $ref: '#/definitions/api.ResponseDashboard'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Get a dashboard
@@ -1192,7 +820,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/dashboard.updateDashboardRequest'
-          type: object
       - description: Dashboard ID
         in: path
         name: dashboardID
@@ -1204,23 +831,23 @@ paths:
         "200":
           description: Dashboard that was updated
           schema:
-            $ref: '#/definitions/docs.ResponseDashboard'
+            $ref: '#/definitions/api.ResponseDashboard'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Update a dashboard
@@ -1241,19 +868,19 @@ paths:
         "200":
           description: Files which belong to scenario
           schema:
-            $ref: '#/definitions/docs.ResponseFiles'
+            $ref: '#/definitions/api.ResponseFiles'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Get all files of a specific scenario
@@ -1286,23 +913,23 @@ paths:
         "200":
           description: File that was added
           schema:
-            $ref: '#/definitions/docs.ResponseFile'
+            $ref: '#/definitions/api.ResponseFile'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Add a file to a specific scenario
@@ -1323,23 +950,23 @@ paths:
         "200":
           description: File that was deleted
           schema:
-            $ref: '#/definitions/docs.ResponseFile'
+            $ref: '#/definitions/api.ResponseFile'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Delete a file
@@ -1373,23 +1000,23 @@ paths:
         "200":
           description: File that was requested
           schema:
-            $ref: '#/definitions/docs.ResponseFile'
+            $ref: '#/definitions/api.ResponseFile'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Download a file
@@ -1422,23 +1049,23 @@ paths:
         "200":
           description: File that was updated
           schema:
-            $ref: '#/definitions/docs.ResponseFile'
+            $ref: '#/definitions/api.ResponseFile'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Update a file
@@ -1450,13 +1077,14 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: Backend is healthy, database and AMQP broker connections are
-            alive
+        "204":
+          description: Backend is healthy, database and AMQP broker connections are alive
+          schema:
+            type: string
         "500":
           description: Backend is NOT healthy
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       summary: Get health status of backend
       tags:
       - healthz
@@ -1469,19 +1097,19 @@ paths:
         "200":
           description: ICs requested
           schema:
-            $ref: '#/definitions/docs.ResponseICs'
+            $ref: '#/definitions/api.ResponseICs'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Get all infrastructure components
@@ -1498,30 +1126,29 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/infrastructure_component.AddICRequest'
-          type: object
       produces:
       - application/json
       responses:
         "200":
           description: Infrastructure Component that was added
           schema:
-            $ref: '#/definitions/docs.ResponseIC'
+            $ref: '#/definitions/api.ResponseIC'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Add an infrastructure component
@@ -1542,23 +1169,23 @@ paths:
         "200":
           description: Infrastructure Component that was deleted
           schema:
-            $ref: '#/definitions/docs.ResponseIC'
+            $ref: '#/definitions/api.ResponseIC'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Delete an infrastructure component
@@ -1578,23 +1205,23 @@ paths:
         "200":
           description: Infrastructure Component that was requested
           schema:
-            $ref: '#/definitions/docs.ResponseIC'
+            $ref: '#/definitions/api.ResponseIC'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Get infrastructure component
@@ -1611,7 +1238,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/infrastructure_component.UpdateICRequest'
-          type: object
       - description: InfrastructureComponent ID
         in: path
         name: ICID
@@ -1623,23 +1249,23 @@ paths:
         "200":
           description: Infrastructure Component that was updated
           schema:
-            $ref: '#/definitions/docs.ResponseIC'
+            $ref: '#/definitions/api.ResponseIC'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Update an infrastructure component
@@ -1665,27 +1291,26 @@ paths:
         "200":
           description: Action sent successfully
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
-      summary: Send an action to IC (only available if backend server is started with
-        -amqp parameter)
+      summary: Send an action to IC (only available if backend server is started with -amqp parameter)
       tags:
       - infrastructure-components
   /ic/{ICID}/configs:
@@ -1703,23 +1328,23 @@ paths:
         "200":
           description: Configs requested by user
           schema:
-            $ref: '#/definitions/docs.ResponseConfigs'
+            $ref: '#/definitions/api.ResponseConfigs'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Get all configurations of the infrastructure component
@@ -1733,9 +1358,24 @@ paths:
       responses:
         "200":
           description: Returns Prometheus metrics
+          schema:
+            type: string
       summary: Prometheus metrics endpoint
       tags:
       - metrics
+  /openapi:
+    get:
+      operationId: getOpenAPI
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: A OpenAPI 2.0 specification of the API
+          schema:
+            type: string
+      summary: Get OpenAPI 2.0 spec of API
+      tags:
+      - openapi
   /results:
     get:
       operationId: getResults
@@ -1751,19 +1391,19 @@ paths:
         "200":
           description: Results which belong to scenario
           schema:
-            $ref: '#/definitions/docs.ResponseResults'
+            $ref: '#/definitions/api.ResponseResults'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Get all results of scenario
@@ -1780,30 +1420,29 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/result.addResultRequest'
-          type: object
       produces:
       - application/json
       responses:
         "200":
           description: Result that was added
           schema:
-            $ref: '#/definitions/docs.ResponseResult'
+            $ref: '#/definitions/api.ResponseResult'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Add a result to a scenario
@@ -1824,23 +1463,23 @@ paths:
         "200":
           description: Result that was deleted
           schema:
-            $ref: '#/definitions/docs.ResponseResult'
+            $ref: '#/definitions/api.ResponseResult'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Delete a Result incl. all result files
@@ -1860,23 +1499,23 @@ paths:
         "200":
           description: Result that was requested
           schema:
-            $ref: '#/definitions/docs.ResponseResult'
+            $ref: '#/definitions/api.ResponseResult'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Get a Result
@@ -1893,7 +1532,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/result.updateResultRequest'
-          type: object
       - description: Result ID
         in: path
         name: resultID
@@ -1905,23 +1543,23 @@ paths:
         "200":
           description: Result that was updated
           schema:
-            $ref: '#/definitions/docs.ResponseResult'
+            $ref: '#/definitions/api.ResponseResult'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Update a result
@@ -1958,23 +1596,23 @@ paths:
         "200":
           description: Result that was updated
           schema:
-            $ref: '#/definitions/docs.ResponseResult'
+            $ref: '#/definitions/api.ResponseResult'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Upload a result file to the DB and associate it with scenario and result
@@ -2000,23 +1638,23 @@ paths:
         "200":
           description: Result for which file was deleted
           schema:
-            $ref: '#/definitions/docs.ResponseResult'
+            $ref: '#/definitions/api.ResponseResult'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Delete a result file
@@ -2031,19 +1669,19 @@ paths:
         "200":
           description: Scenarios to which user has access
           schema:
-            $ref: '#/definitions/docs.ResponseScenarios'
+            $ref: '#/definitions/api.ResponseScenarios'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Get all scenarios of requesting user
@@ -2060,30 +1698,29 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/scenario.addScenarioRequest'
-          type: object
       produces:
       - application/json
       responses:
         "200":
           description: scenario that was added
           schema:
-            $ref: '#/definitions/docs.ResponseScenario'
+            $ref: '#/definitions/api.ResponseScenario'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Add a scenario
@@ -2104,19 +1741,19 @@ paths:
         "200":
           description: Deleted scenario
           schema:
-            $ref: '#/definitions/docs.ResponseScenario'
+            $ref: '#/definitions/api.ResponseScenario'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Delete a scenario
@@ -2136,19 +1773,19 @@ paths:
         "200":
           description: Scenario requested by user
           schema:
-            $ref: '#/definitions/docs.ResponseScenario'
+            $ref: '#/definitions/api.ResponseScenario'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Get scenario
@@ -2165,7 +1802,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/scenario.updateScenarioRequest'
-          type: object
       - description: Scenario ID
         in: path
         name: scenarioID
@@ -2177,23 +1813,23 @@ paths:
         "200":
           description: Updated scenario.
           schema:
-            $ref: '#/definitions/docs.ResponseScenario'
+            $ref: '#/definitions/api.ResponseScenario'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Update a scenario
@@ -2219,19 +1855,19 @@ paths:
         "200":
           description: User that was deleted from scenario
           schema:
-            $ref: '#/definitions/docs.ResponseUser'
+            $ref: '#/definitions/api.ResponseUser'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Delete a user from a scenario
@@ -2256,19 +1892,19 @@ paths:
         "200":
           description: User that was added to scenario
           schema:
-            $ref: '#/definitions/docs.ResponseUser'
+            $ref: '#/definitions/api.ResponseUser'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Add a user to a a scenario
@@ -2289,19 +1925,19 @@ paths:
         "200":
           description: Array of users that have access to the scenario
           schema:
-            $ref: '#/definitions/docs.ResponseUsers'
+            $ref: '#/definitions/api.ResponseUsers'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Get users of a scenario
@@ -2327,19 +1963,19 @@ paths:
         "200":
           description: Signals which belong to component configuration
           schema:
-            $ref: '#/definitions/docs.ResponseSignals'
+            $ref: '#/definitions/api.ResponseSignals'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Get all signals of one direction
@@ -2350,37 +1986,35 @@ paths:
       - application/json
       operationId: AddSignal
       parameters:
-      - description: A signal to be added to the component configuration incl. direction
-          and config ID to which signal shall be added
+      - description: A signal to be added to the component configuration incl. direction and config ID to which signal shall be added
         in: body
         name: inputSignal
         required: true
         schema:
           $ref: '#/definitions/signal.addSignalRequest'
-          type: object
       produces:
       - application/json
       responses:
         "200":
           description: Signal that was added
           schema:
-            $ref: '#/definitions/docs.ResponseSignal'
+            $ref: '#/definitions/api.ResponseSignal'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Add a signal to a signal mapping of a component configuration
@@ -2401,23 +2035,23 @@ paths:
         "200":
           description: Signal that was deleted
           schema:
-            $ref: '#/definitions/docs.ResponseSignal'
+            $ref: '#/definitions/api.ResponseSignal'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Delete a signal
@@ -2437,23 +2071,23 @@ paths:
         "200":
           description: Signal that was requested
           schema:
-            $ref: '#/definitions/docs.ResponseSignal'
+            $ref: '#/definitions/api.ResponseSignal'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Get a signal
@@ -2468,7 +2102,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/signal.updateSignalRequest'
-          type: object
       - description: ID of signal to be updated
         in: path
         name: signalID
@@ -2480,23 +2113,23 @@ paths:
         "200":
           description: Signal that was updated
           schema:
-            $ref: '#/definitions/docs.ResponseSignal'
+            $ref: '#/definitions/api.ResponseSignal'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Update a signal
@@ -2511,19 +2144,19 @@ paths:
         "200":
           description: Array of users
           schema:
-            $ref: '#/definitions/docs.ResponseUsers'
+            $ref: '#/definitions/api.ResponseUsers'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Get all users
@@ -2540,26 +2173,25 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/user.addUserRequest'
-          type: object
       produces:
       - application/json
       responses:
         "200":
           description: Contains added user object
           schema:
-            $ref: '#/definitions/docs.ResponseUser'
+            $ref: '#/definitions/api.ResponseUser'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Add a user
@@ -2580,19 +2212,19 @@ paths:
         "200":
           description: deleted user
           schema:
-            $ref: '#/definitions/docs.ResponseUser'
+            $ref: '#/definitions/api.ResponseUser'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Delete a user
@@ -2612,23 +2244,23 @@ paths:
         "200":
           description: requested user
           schema:
-            $ref: '#/definitions/docs.ResponseUser'
+            $ref: '#/definitions/api.ResponseUser'
         "403":
           description: Access forbidden.
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Get user
@@ -2639,14 +2271,12 @@ paths:
       - application/json
       operationId: UpdateUser
       parameters:
-      - description: User to be updated (anything except for ID can be changed, role
-          can only be change by admin)
+      - description: User to be updated (anything except for ID can be changed, role can only be change by admin)
         in: body
         name: inputUser
         required: true
         schema:
           $ref: '#/definitions/user.updateUserRequest'
-          type: object
       - description: User ID
         in: path
         name: userID
@@ -2658,27 +2288,27 @@ paths:
         "200":
           description: Contains updated user
           schema:
-            $ref: '#/definitions/docs.ResponseUser'
+            $ref: '#/definitions/api.ResponseUser'
         "400":
           description: Bad request.
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "403":
           description: Access forbidden.
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Update a user
@@ -2699,19 +2329,19 @@ paths:
         "200":
           description: Widgets to which belong to dashboard
           schema:
-            $ref: '#/definitions/docs.ResponseWidgets'
+            $ref: '#/definitions/api.ResponseWidgets'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Get all widgets of dashboard
@@ -2728,30 +2358,29 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/widget.addWidgetRequest'
-          type: object
       produces:
       - application/json
       responses:
         "200":
           description: Widget that was added
           schema:
-            $ref: '#/definitions/docs.ResponseWidget'
+            $ref: '#/definitions/api.ResponseWidget'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Add a widget to a dashboard
@@ -2772,23 +2401,23 @@ paths:
         "200":
           description: Widget that was deleted
           schema:
-            $ref: '#/definitions/docs.ResponseWidget'
+            $ref: '#/definitions/api.ResponseWidget'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Delete a widget
@@ -2808,23 +2437,23 @@ paths:
         "200":
           description: Widget that was requested
           schema:
-            $ref: '#/definitions/docs.ResponseWidget'
+            $ref: '#/definitions/api.ResponseWidget'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Get a widget
@@ -2841,7 +2470,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/widget.updateWidgetRequest'
-          type: object
       - description: Widget ID
         in: path
         name: widgetID
@@ -2853,23 +2481,23 @@ paths:
         "200":
           description: Widget that was updated
           schema:
-            $ref: '#/definitions/docs.ResponseWidget'
+            $ref: '#/definitions/api.ResponseWidget'
         "400":
           description: Bad request
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "404":
           description: Not found
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "422":
           description: Unprocessable entity
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
         "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/docs.ResponseError'
+            $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
       summary: Update a widget

@@ -35,7 +35,6 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/user.loginRequest"
                         }
                     }
@@ -44,19 +43,19 @@
                     "200": {
                         "description": "JSON web token, success status, message and authenticated user object",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseAuthenticate"
+                            "$ref": "#/definitions/api.ResponseAuthenticate"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error.",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -90,25 +89,25 @@
                     "200": {
                         "description": "Component configurations which belong to scenario",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseConfigs"
+                            "$ref": "#/definitions/api.ResponseConfigs"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -137,7 +136,6 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/component_configuration.addConfigRequest"
                         }
                     }
@@ -146,31 +144,31 @@
                     "200": {
                         "description": "Component configuration that was added",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseConfig"
+                            "$ref": "#/definitions/api.ResponseConfig"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -204,31 +202,31 @@
                     "200": {
                         "description": "component configuration that was requested",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseConfig"
+                            "$ref": "#/definitions/api.ResponseConfig"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -257,7 +255,6 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/component_configuration.updateConfigRequest"
                         }
                     },
@@ -273,31 +270,31 @@
                     "200": {
                         "description": "Component configuration that was added",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseConfig"
+                            "$ref": "#/definitions/api.ResponseConfig"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -329,31 +326,31 @@
                     "200": {
                         "description": "component configuration that was deleted",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseConfig"
+                            "$ref": "#/definitions/api.ResponseConfig"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -387,25 +384,25 @@
                     "200": {
                         "description": "Dashboards which belong to scenario",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseDashboards"
+                            "$ref": "#/definitions/api.ResponseDashboards"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -434,7 +431,6 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/dashboard.addDashboardRequest"
                         }
                     }
@@ -443,31 +439,31 @@
                     "200": {
                         "description": "Dashboard that was added",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseDashboard"
+                            "$ref": "#/definitions/api.ResponseDashboard"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -501,31 +497,31 @@
                     "200": {
                         "description": "Dashboard that was requested",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseDashboard"
+                            "$ref": "#/definitions/api.ResponseDashboard"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -554,7 +550,6 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/dashboard.updateDashboardRequest"
                         }
                     },
@@ -570,31 +565,31 @@
                     "200": {
                         "description": "Dashboard that was updated",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseDashboard"
+                            "$ref": "#/definitions/api.ResponseDashboard"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -626,31 +621,31 @@
                     "200": {
                         "description": "Dashboard that was deleted",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseDashboard"
+                            "$ref": "#/definitions/api.ResponseDashboard"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -684,25 +679,25 @@
                     "200": {
                         "description": "Files which belong to scenario",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseFiles"
+                            "$ref": "#/definitions/api.ResponseFiles"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -750,31 +745,31 @@
                     "200": {
                         "description": "File that was added",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseFile"
+                            "$ref": "#/definitions/api.ResponseFile"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -822,31 +817,31 @@
                     "200": {
                         "description": "File that was requested",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseFile"
+                            "$ref": "#/definitions/api.ResponseFile"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -894,31 +889,31 @@
                     "200": {
                         "description": "File that was updated",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseFile"
+                            "$ref": "#/definitions/api.ResponseFile"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -950,31 +945,31 @@
                     "200": {
                         "description": "File that was deleted",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseFile"
+                            "$ref": "#/definitions/api.ResponseFile"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -991,13 +986,16 @@
                 "summary": "Get health status of backend",
                 "operationId": "getHealth",
                 "responses": {
-                    "200": {
-                        "description": "Backend is healthy, database and AMQP broker connections are alive"
+                    "204": {
+                        "description": "Backend is healthy, database and AMQP broker connections are alive",
+                        "schema": {
+                            "type": "string"
+                        }
                     },
                     "500": {
                         "description": "Backend is NOT healthy",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -1022,25 +1020,25 @@
                     "200": {
                         "description": "ICs requested",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseICs"
+                            "$ref": "#/definitions/api.ResponseICs"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -1069,7 +1067,6 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/infrastructure_component.AddICRequest"
                         }
                     }
@@ -1078,31 +1075,31 @@
                     "200": {
                         "description": "Infrastructure Component that was added",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseIC"
+                            "$ref": "#/definitions/api.ResponseIC"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -1136,31 +1133,31 @@
                     "200": {
                         "description": "Infrastructure Component that was requested",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseIC"
+                            "$ref": "#/definitions/api.ResponseIC"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -1189,7 +1186,6 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/infrastructure_component.UpdateICRequest"
                         }
                     },
@@ -1205,31 +1201,31 @@
                     "200": {
                         "description": "Infrastructure Component that was updated",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseIC"
+                            "$ref": "#/definitions/api.ResponseIC"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -1261,31 +1257,31 @@
                     "200": {
                         "description": "Infrastructure Component that was deleted",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseIC"
+                            "$ref": "#/definitions/api.ResponseIC"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -1326,31 +1322,31 @@
                     "200": {
                         "description": "Action sent successfully",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -1384,31 +1380,31 @@
                     "200": {
                         "description": "Configs requested by user",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseConfigs"
+                            "$ref": "#/definitions/api.ResponseConfigs"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -1426,7 +1422,30 @@
                 "operationId": "getMetrics",
                 "responses": {
                     "200": {
-                        "description": "Returns Prometheus metrics"
+                        "description": "Returns Prometheus metrics",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/openapi": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "openapi"
+                ],
+                "summary": "Get OpenAPI 2.0 spec of API",
+                "operationId": "getOpenAPI",
+                "responses": {
+                    "200": {
+                        "description": "A OpenAPI 2.0 specification of the API",
+                        "schema": {
+                            "type": "string"
+                        }
                     }
                 }
             }
@@ -1459,25 +1478,25 @@
                     "200": {
                         "description": "Results which belong to scenario",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseResults"
+                            "$ref": "#/definitions/api.ResponseResults"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -1506,7 +1525,6 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/result.addResultRequest"
                         }
                     }
@@ -1515,31 +1533,31 @@
                     "200": {
                         "description": "Result that was added",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseResult"
+                            "$ref": "#/definitions/api.ResponseResult"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -1573,31 +1591,31 @@
                     "200": {
                         "description": "Result that was requested",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseResult"
+                            "$ref": "#/definitions/api.ResponseResult"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -1626,7 +1644,6 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/result.updateResultRequest"
                         }
                     },
@@ -1642,31 +1659,31 @@
                     "200": {
                         "description": "Result that was updated",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseResult"
+                            "$ref": "#/definitions/api.ResponseResult"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -1698,31 +1715,31 @@
                     "200": {
                         "description": "Result that was deleted",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseResult"
+                            "$ref": "#/definitions/api.ResponseResult"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -1775,31 +1792,31 @@
                     "200": {
                         "description": "Result that was updated",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseResult"
+                            "$ref": "#/definitions/api.ResponseResult"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -1840,31 +1857,31 @@
                     "200": {
                         "description": "Result for which file was deleted",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseResult"
+                            "$ref": "#/definitions/api.ResponseResult"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -1889,25 +1906,25 @@
                     "200": {
                         "description": "Scenarios to which user has access",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseScenarios"
+                            "$ref": "#/definitions/api.ResponseScenarios"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -1936,7 +1953,6 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/scenario.addScenarioRequest"
                         }
                     }
@@ -1945,31 +1961,31 @@
                     "200": {
                         "description": "scenario that was added",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseScenario"
+                            "$ref": "#/definitions/api.ResponseScenario"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -2003,25 +2019,25 @@
                     "200": {
                         "description": "Scenario requested by user",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseScenario"
+                            "$ref": "#/definitions/api.ResponseScenario"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -2050,7 +2066,6 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/scenario.updateScenarioRequest"
                         }
                     },
@@ -2066,31 +2081,31 @@
                     "200": {
                         "description": "Updated scenario.",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseScenario"
+                            "$ref": "#/definitions/api.ResponseScenario"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -2122,25 +2137,25 @@
                     "200": {
                         "description": "Deleted scenario",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseScenario"
+                            "$ref": "#/definitions/api.ResponseScenario"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -2181,25 +2196,25 @@
                     "200": {
                         "description": "User that was added to scenario",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseUser"
+                            "$ref": "#/definitions/api.ResponseUser"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -2238,25 +2253,25 @@
                     "200": {
                         "description": "User that was deleted from scenario",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseUser"
+                            "$ref": "#/definitions/api.ResponseUser"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -2290,25 +2305,25 @@
                     "200": {
                         "description": "Array of users that have access to the scenario",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseUsers"
+                            "$ref": "#/definitions/api.ResponseUsers"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -2349,25 +2364,25 @@
                     "200": {
                         "description": "Signals which belong to component configuration",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseSignals"
+                            "$ref": "#/definitions/api.ResponseSignals"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -2396,7 +2411,6 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/signal.addSignalRequest"
                         }
                     }
@@ -2405,31 +2419,31 @@
                     "200": {
                         "description": "Signal that was added",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseSignal"
+                            "$ref": "#/definitions/api.ResponseSignal"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -2463,31 +2477,31 @@
                     "200": {
                         "description": "Signal that was requested",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseSignal"
+                            "$ref": "#/definitions/api.ResponseSignal"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -2513,7 +2527,6 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/signal.updateSignalRequest"
                         }
                     },
@@ -2529,31 +2542,31 @@
                     "200": {
                         "description": "Signal that was updated",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseSignal"
+                            "$ref": "#/definitions/api.ResponseSignal"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -2585,31 +2598,31 @@
                     "200": {
                         "description": "Signal that was deleted",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseSignal"
+                            "$ref": "#/definitions/api.ResponseSignal"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -2634,25 +2647,25 @@
                     "200": {
                         "description": "Array of users",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseUsers"
+                            "$ref": "#/definitions/api.ResponseUsers"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -2681,7 +2694,6 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/user.addUserRequest"
                         }
                     }
@@ -2690,25 +2702,25 @@
                     "200": {
                         "description": "Contains added user object",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseUser"
+                            "$ref": "#/definitions/api.ResponseUser"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -2742,31 +2754,31 @@
                     "200": {
                         "description": "requested user",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseUser"
+                            "$ref": "#/definitions/api.ResponseUser"
                         }
                     },
                     "403": {
                         "description": "Access forbidden.",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -2795,7 +2807,6 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/user.updateUserRequest"
                         }
                     },
@@ -2811,37 +2822,37 @@
                     "200": {
                         "description": "Contains updated user",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseUser"
+                            "$ref": "#/definitions/api.ResponseUser"
                         }
                     },
                     "400": {
                         "description": "Bad request.",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "403": {
                         "description": "Access forbidden.",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -2873,25 +2884,25 @@
                     "200": {
                         "description": "deleted user",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseUser"
+                            "$ref": "#/definitions/api.ResponseUser"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -2925,25 +2936,25 @@
                     "200": {
                         "description": "Widgets to which belong to dashboard",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseWidgets"
+                            "$ref": "#/definitions/api.ResponseWidgets"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -2972,7 +2983,6 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/widget.addWidgetRequest"
                         }
                     }
@@ -2981,31 +2991,31 @@
                     "200": {
                         "description": "Widget that was added",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseWidget"
+                            "$ref": "#/definitions/api.ResponseWidget"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -3039,31 +3049,31 @@
                     "200": {
                         "description": "Widget that was requested",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseWidget"
+                            "$ref": "#/definitions/api.ResponseWidget"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -3092,7 +3102,6 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/widget.updateWidgetRequest"
                         }
                     },
@@ -3108,31 +3117,31 @@
                     "200": {
                         "description": "Widget that was updated",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseWidget"
+                            "$ref": "#/definitions/api.ResponseWidget"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -3164,31 +3173,31 @@
                     "200": {
                         "description": "Widget that was deleted",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseWidget"
+                            "$ref": "#/definitions/api.ResponseWidget"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "422": {
                         "description": "Unprocessable entity",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "$ref": "#/definitions/docs.ResponseError"
+                            "$ref": "#/definitions/api.ResponseError"
                         }
                     }
                 }
@@ -3196,11 +3205,70 @@
         }
     },
     "definitions": {
+        "api.ResponseAuthenticate": {
+            "type": "object"
+        },
+        "api.ResponseConfig": {
+            "type": "object"
+        },
+        "api.ResponseConfigs": {
+            "type": "object"
+        },
+        "api.ResponseDashboard": {
+            "type": "object"
+        },
+        "api.ResponseDashboards": {
+            "type": "object"
+        },
+        "api.ResponseError": {
+            "type": "object"
+        },
+        "api.ResponseFile": {
+            "type": "object"
+        },
+        "api.ResponseFiles": {
+            "type": "object"
+        },
+        "api.ResponseIC": {
+            "type": "object"
+        },
+        "api.ResponseICs": {
+            "type": "object"
+        },
+        "api.ResponseResult": {
+            "type": "object"
+        },
+        "api.ResponseResults": {
+            "type": "object"
+        },
+        "api.ResponseScenario": {
+            "type": "object"
+        },
+        "api.ResponseScenarios": {
+            "type": "object"
+        },
+        "api.ResponseSignal": {
+            "type": "object"
+        },
+        "api.ResponseSignals": {
+            "type": "object"
+        },
+        "api.ResponseUser": {
+            "type": "object"
+        },
+        "api.ResponseUsers": {
+            "type": "object"
+        },
+        "api.ResponseWidget": {
+            "type": "object"
+        },
+        "api.ResponseWidgets": {
+            "type": "object"
+        },
         "component_configuration.addConfigRequest": {
             "type": "object",
             "properties": {
                 "config": {
-                    "type": "object",
                     "$ref": "#/definitions/component_configuration.validNewConfig"
                 }
             }
@@ -3209,7 +3277,6 @@
             "type": "object",
             "properties": {
                 "config": {
-                    "type": "object",
                     "$ref": "#/definitions/component_configuration.validUpdatedConfig"
                 }
             }
@@ -3239,7 +3306,7 @@
                     "type": "integer"
                 },
                 "StartParameters": {
-                    "type": "string"
+                    "$ref": "#/definitions/postgres.Jsonb"
                 }
             }
         },
@@ -3259,7 +3326,7 @@
                     "type": "string"
                 },
                 "StartParameters": {
-                    "type": "string"
+                    "$ref": "#/definitions/postgres.Jsonb"
                 }
             }
         },
@@ -3267,7 +3334,6 @@
             "type": "object",
             "properties": {
                 "dashboard": {
-                    "type": "object",
                     "$ref": "#/definitions/dashboard.validNewDashboard"
                 }
             }
@@ -3276,7 +3342,6 @@
             "type": "object",
             "properties": {
                 "dashboard": {
-                    "type": "object",
                     "$ref": "#/definitions/dashboard.validUpdatedDashboard"
                 }
             }
@@ -3317,590 +3382,10 @@
                 }
             }
         },
-        "database.ComponentConfiguration": {
-            "type": "object",
-            "properties": {
-                "createdAt": {
-                    "type": "string"
-                },
-                "fileIDs": {
-                    "description": "Array of file IDs used by the component configuration",
-                    "type": "string"
-                },
-                "icID": {
-                    "description": "ID of IC associated with Component Configuration",
-                    "type": "integer"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "inputLength": {
-                    "description": "Number of input signals",
-                    "type": "integer"
-                },
-                "name": {
-                    "description": "Name of Component Configuration",
-                    "type": "string"
-                },
-                "outputLength": {
-                    "description": "Number of output signals",
-                    "type": "integer"
-                },
-                "scenarioID": {
-                    "description": "ID of Scenario to which Component Configuration belongs",
-                    "type": "integer"
-                },
-                "startParameters": {
-                    "description": "Start parameters of Component Configuration as JSON",
-                    "type": "string"
-                },
-                "updatedAt": {
-                    "type": "string"
-                }
-            }
-        },
-        "database.Dashboard": {
-            "type": "object",
-            "properties": {
-                "createdAt": {
-                    "type": "string"
-                },
-                "grid": {
-                    "description": "Grid of dashboard",
-                    "type": "integer"
-                },
-                "height": {
-                    "description": "Height of dashboard",
-                    "type": "integer"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
-                    "description": "Name of dashboard",
-                    "type": "string"
-                },
-                "scenarioID": {
-                    "description": "ID of scenario to which dashboard belongs",
-                    "type": "integer"
-                },
-                "updatedAt": {
-                    "type": "string"
-                }
-            }
-        },
-        "database.File": {
-            "type": "object",
-            "properties": {
-                "createdAt": {
-                    "type": "string"
-                },
-                "date": {
-                    "description": "Last modification time of file",
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "imageHeight": {
-                    "description": "Height of an image file in pixels (optional)",
-                    "type": "integer"
-                },
-                "imageWidth": {
-                    "description": "Width of an image file in pixels (optional)",
-                    "type": "integer"
-                },
-                "name": {
-                    "description": "Name of file",
-                    "type": "string"
-                },
-                "scenarioID": {
-                    "description": "ID of Scenario to which file belongs",
-                    "type": "integer"
-                },
-                "size": {
-                    "description": "Size of file (in byte)",
-                    "type": "integer"
-                },
-                "type": {
-                    "description": "Type of file (MIME type)",
-                    "type": "string"
-                },
-                "updatedAt": {
-                    "type": "string"
-                }
-            }
-        },
-        "database.InfrastructureComponent": {
-            "type": "object",
-            "properties": {
-                "apiurl": {
-                    "description": "API URL of API for IC",
-                    "type": "string"
-                },
-                "category": {
-                    "description": "Category of IC (simulator, gateway, database, etc.)",
-                    "type": "string"
-                },
-                "createdAt": {
-                    "type": "string"
-                },
-                "description": {
-                    "description": "Description of the IC",
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "location": {
-                    "description": "Location of the IC",
-                    "type": "string"
-                },
-                "managedexternally": {
-                    "description": "Boolean indicating if IC is managed externally (via AMQP/ VILLAScontroller)",
-                    "type": "boolean"
-                },
-                "name": {
-                    "description": "Name of the IC",
-                    "type": "string"
-                },
-                "startparameterscheme": {
-                    "description": "JSON scheme of start parameters for IC",
-                    "type": "string"
-                },
-                "state": {
-                    "description": "State of the IC",
-                    "type": "string"
-                },
-                "stateUpdateAt": {
-                    "description": "Time of last state update",
-                    "type": "string"
-                },
-                "type": {
-                    "description": "Type of IC (RTDS, VILLASnode, RTDS, etc.)",
-                    "type": "string"
-                },
-                "updatedAt": {
-                    "type": "string"
-                },
-                "uptime": {
-                    "description": "Uptime of the IC",
-                    "type": "number"
-                },
-                "uuid": {
-                    "description": "UUID of the IC",
-                    "type": "string"
-                },
-                "websocketurl": {
-                    "description": "WebsocketURL if the IC",
-                    "type": "string"
-                }
-            }
-        },
-        "database.Result": {
-            "type": "object",
-            "properties": {
-                "configSnapshots": {
-                    "description": "JSON snapshots of component configurations used to generate results",
-                    "type": "string"
-                },
-                "createdAt": {
-                    "type": "string"
-                },
-                "description": {
-                    "description": "Description of results",
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "resultFileIDs": {
-                    "description": "File IDs associated with result",
-                    "type": "string"
-                },
-                "scenarioID": {
-                    "description": "ID of Scenario to which result belongs",
-                    "type": "integer"
-                },
-                "updatedAt": {
-                    "type": "string"
-                }
-            }
-        },
-        "database.Scenario": {
-            "type": "object",
-            "properties": {
-                "createdAt": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
-                    "description": "Name of scenario",
-                    "type": "string"
-                },
-                "running": {
-                    "description": "Running state of scenario",
-                    "type": "boolean"
-                },
-                "startParameters": {
-                    "description": "Start parameters of scenario as JSON",
-                    "type": "string"
-                },
-                "updatedAt": {
-                    "type": "string"
-                }
-            }
-        },
-        "database.Signal": {
-            "type": "object",
-            "properties": {
-                "configID": {
-                    "description": "ID of Component Configuration",
-                    "type": "integer"
-                },
-                "createdAt": {
-                    "type": "string"
-                },
-                "direction": {
-                    "description": "Direction of the signal (in or out)",
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "index": {
-                    "description": "Index of the Signal in the mapping",
-                    "type": "integer"
-                },
-                "name": {
-                    "description": "Name of Signal",
-                    "type": "string"
-                },
-                "scalingFactor": {
-                    "description": "Scaling factor for the signal raw value (defaults to 1.0)",
-                    "type": "number"
-                },
-                "unit": {
-                    "description": "Unit of Signal",
-                    "type": "string"
-                },
-                "updatedAt": {
-                    "type": "string"
-                }
-            }
-        },
-        "database.User": {
-            "type": "object",
-            "properties": {
-                "active": {
-                    "description": "Indicating status of user (false means user is inactive and should not be able to login)",
-                    "type": "boolean"
-                },
-                "createdAt": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "mail": {
-                    "description": "Mail of user",
-                    "type": "string"
-                },
-                "role": {
-                    "description": "Role of user",
-                    "type": "string"
-                },
-                "updatedAt": {
-                    "type": "string"
-                },
-                "username": {
-                    "description": "Username of user",
-                    "type": "string"
-                }
-            }
-        },
-        "database.Widget": {
-            "type": "object",
-            "properties": {
-                "createdAt": {
-                    "type": "string"
-                },
-                "customProperties": {
-                    "description": "Custom properties of widget as JSON string",
-                    "type": "string"
-                },
-                "dashboardID": {
-                    "description": "ID of dashboard to which widget belongs",
-                    "type": "integer"
-                },
-                "height": {
-                    "description": "Height of widget",
-                    "type": "integer"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "isLocked": {
-                    "description": "Locked state of widget",
-                    "type": "boolean"
-                },
-                "minHeight": {
-                    "description": "Minimal height of widget",
-                    "type": "integer"
-                },
-                "minWidth": {
-                    "description": "Minimal width of widget",
-                    "type": "integer"
-                },
-                "name": {
-                    "description": "Name of widget",
-                    "type": "string"
-                },
-                "signalIDs": {
-                    "description": "IDs of signals that widget uses",
-                    "type": "string"
-                },
-                "type": {
-                    "description": "Type of widget",
-                    "type": "string"
-                },
-                "updatedAt": {
-                    "type": "string"
-                },
-                "width": {
-                    "description": "Width of widget",
-                    "type": "integer"
-                },
-                "x": {
-                    "description": "X position of widget",
-                    "type": "integer"
-                },
-                "y": {
-                    "description": "Y position of widget",
-                    "type": "integer"
-                },
-                "z": {
-                    "description": "Z position of widget",
-                    "type": "integer"
-                }
-            }
-        },
-        "docs.ResponseAuthenticate": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string"
-                },
-                "success": {
-                    "type": "boolean"
-                },
-                "token": {
-                    "type": "string"
-                },
-                "user": {
-                    "type": "object",
-                    "$ref": "#/definitions/database.User"
-                }
-            }
-        },
-        "docs.ResponseConfig": {
-            "type": "object",
-            "properties": {
-                "config": {
-                    "type": "object",
-                    "$ref": "#/definitions/database.ComponentConfiguration"
-                }
-            }
-        },
-        "docs.ResponseConfigs": {
-            "type": "object",
-            "properties": {
-                "configs": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/database.ComponentConfiguration"
-                    }
-                }
-            }
-        },
-        "docs.ResponseDashboard": {
-            "type": "object",
-            "properties": {
-                "dashboard": {
-                    "type": "object",
-                    "$ref": "#/definitions/database.Dashboard"
-                }
-            }
-        },
-        "docs.ResponseDashboards": {
-            "type": "object",
-            "properties": {
-                "dashboards": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/database.Dashboard"
-                    }
-                }
-            }
-        },
-        "docs.ResponseError": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string"
-                },
-                "success": {
-                    "type": "boolean"
-                }
-            }
-        },
-        "docs.ResponseFile": {
-            "type": "object",
-            "properties": {
-                "file": {
-                    "type": "object",
-                    "$ref": "#/definitions/database.File"
-                }
-            }
-        },
-        "docs.ResponseFiles": {
-            "type": "object",
-            "properties": {
-                "files": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/database.File"
-                    }
-                }
-            }
-        },
-        "docs.ResponseIC": {
-            "type": "object",
-            "properties": {
-                "ic": {
-                    "type": "object",
-                    "$ref": "#/definitions/database.InfrastructureComponent"
-                }
-            }
-        },
-        "docs.ResponseICs": {
-            "type": "object",
-            "properties": {
-                "ics": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/database.InfrastructureComponent"
-                    }
-                }
-            }
-        },
-        "docs.ResponseResult": {
-            "type": "object",
-            "properties": {
-                "result": {
-                    "type": "object",
-                    "$ref": "#/definitions/database.Result"
-                }
-            }
-        },
-        "docs.ResponseResults": {
-            "type": "object",
-            "properties": {
-                "results": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/database.Result"
-                    }
-                }
-            }
-        },
-        "docs.ResponseScenario": {
-            "type": "object",
-            "properties": {
-                "scenario": {
-                    "type": "object",
-                    "$ref": "#/definitions/database.Scenario"
-                }
-            }
-        },
-        "docs.ResponseScenarios": {
-            "type": "object",
-            "properties": {
-                "scenarios": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/database.Scenario"
-                    }
-                }
-            }
-        },
-        "docs.ResponseSignal": {
-            "type": "object",
-            "properties": {
-                "signal": {
-                    "type": "object",
-                    "$ref": "#/definitions/database.Signal"
-                }
-            }
-        },
-        "docs.ResponseSignals": {
-            "type": "object",
-            "properties": {
-                "signals": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/database.Signal"
-                    }
-                }
-            }
-        },
-        "docs.ResponseUser": {
-            "type": "object",
-            "properties": {
-                "user": {
-                    "type": "object",
-                    "$ref": "#/definitions/database.User"
-                }
-            }
-        },
-        "docs.ResponseUsers": {
-            "type": "object",
-            "properties": {
-                "users": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/database.User"
-                    }
-                }
-            }
-        },
-        "docs.ResponseWidget": {
-            "type": "object",
-            "properties": {
-                "widget": {
-                    "type": "object",
-                    "$ref": "#/definitions/database.Widget"
-                }
-            }
-        },
-        "docs.ResponseWidgets": {
-            "type": "object",
-            "properties": {
-                "widgets": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/database.Widget"
-                    }
-                }
-            }
-        },
         "infrastructure_component.AddICRequest": {
             "type": "object",
             "properties": {
                 "ic": {
-                    "type": "object",
                     "$ref": "#/definitions/infrastructure_component.validNewIC"
                 }
             }
@@ -3909,7 +3394,6 @@
             "type": "object",
             "properties": {
                 "ic": {
-                    "type": "object",
                     "$ref": "#/definitions/infrastructure_component.validUpdatedIC"
                 }
             }
@@ -3942,10 +3426,13 @@
                     "type": "string"
                 },
                 "StartParameterScheme": {
-                    "type": "string"
+                    "$ref": "#/definitions/postgres.Jsonb"
                 },
                 "State": {
                     "type": "string"
+                },
+                "StatusUpdateRaw": {
+                    "$ref": "#/definitions/postgres.Jsonb"
                 },
                 "Type": {
                     "type": "string"
@@ -3980,10 +3467,13 @@
                     "type": "string"
                 },
                 "StartParameterScheme": {
-                    "type": "string"
+                    "$ref": "#/definitions/postgres.Jsonb"
                 },
                 "State": {
                     "type": "string"
+                },
+                "StatusUpdateRaw": {
+                    "$ref": "#/definitions/postgres.Jsonb"
                 },
                 "Type": {
                     "type": "string"
@@ -3999,11 +3489,21 @@
                 }
             }
         },
+        "postgres.Jsonb": {
+            "type": "object",
+            "properties": {
+                "json.RawMessage": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
         "result.addResultRequest": {
             "type": "object",
             "properties": {
                 "result": {
-                    "type": "object",
                     "$ref": "#/definitions/result.validNewResult"
                 }
             }
@@ -4012,7 +3512,6 @@
             "type": "object",
             "properties": {
                 "result": {
-                    "type": "object",
                     "$ref": "#/definitions/result.validUpdatedResult"
                 }
             }
@@ -4025,7 +3524,7 @@
             ],
             "properties": {
                 "ConfigSnapshots": {
-                    "type": "string"
+                    "$ref": "#/definitions/postgres.Jsonb"
                 },
                 "Description": {
                     "type": "string"
@@ -4045,7 +3544,7 @@
             "type": "object",
             "properties": {
                 "configSnapshots": {
-                    "type": "string"
+                    "$ref": "#/definitions/postgres.Jsonb"
                 },
                 "description": {
                     "type": "string"
@@ -4062,7 +3561,6 @@
             "type": "object",
             "properties": {
                 "scenario": {
-                    "type": "object",
                     "$ref": "#/definitions/scenario.validNewScenario"
                 }
             }
@@ -4071,7 +3569,6 @@
             "type": "object",
             "properties": {
                 "scenario": {
-                    "type": "object",
                     "$ref": "#/definitions/scenario.validUpdatedScenario"
                 }
             }
@@ -4090,7 +3587,7 @@
                     "type": "boolean"
                 },
                 "StartParameters": {
-                    "type": "string"
+                    "$ref": "#/definitions/postgres.Jsonb"
                 }
             }
         },
@@ -4104,7 +3601,7 @@
                     "type": "boolean"
                 },
                 "StartParameters": {
-                    "type": "string"
+                    "$ref": "#/definitions/postgres.Jsonb"
                 }
             }
         },
@@ -4112,7 +3609,6 @@
             "type": "object",
             "properties": {
                 "signal": {
-                    "type": "object",
                     "$ref": "#/definitions/signal.validNewSignal"
                 }
             }
@@ -4121,7 +3617,6 @@
             "type": "object",
             "properties": {
                 "signal": {
-                    "type": "object",
                     "$ref": "#/definitions/signal.validUpdatedSignal"
                 }
             }
@@ -4176,7 +3671,6 @@
             "type": "object",
             "properties": {
                 "user": {
-                    "type": "object",
                     "$ref": "#/definitions/user.validNewUser"
                 }
             }
@@ -4200,7 +3694,6 @@
             "type": "object",
             "properties": {
                 "user": {
-                    "type": "object",
                     "$ref": "#/definitions/user.validUpdatedRequest"
                 }
             }
@@ -4255,7 +3748,6 @@
             "type": "object",
             "properties": {
                 "widget": {
-                    "type": "object",
                     "$ref": "#/definitions/widget.validNewWidget"
                 }
             }
@@ -4264,7 +3756,6 @@
             "type": "object",
             "properties": {
                 "widget": {
-                    "type": "object",
                     "$ref": "#/definitions/widget.validUpdatedWidget"
                 }
             }
@@ -4280,7 +3771,7 @@
             ],
             "properties": {
                 "CustomProperties": {
-                    "type": "string"
+                    "$ref": "#/definitions/postgres.Jsonb"
                 },
                 "DashboardID": {
                     "type": "integer"
@@ -4327,7 +3818,7 @@
             "type": "object",
             "properties": {
                 "CustomProperties": {
-                    "type": "string"
+                    "$ref": "#/definitions/postgres.Jsonb"
                 },
                 "Height": {
                     "type": "integer"
