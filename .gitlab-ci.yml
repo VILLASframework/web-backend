@@ -93,30 +93,10 @@ test:
        -covermode=count
        -coverprofile ./testcover.txt
     - go tool cover -func=testcover.txt
-  dependencies:
-    - build
-
-test:files_postgres:
-  stage: test
-  extends: .go
-  variables:
-    POSTGRES_DB: testvillasdb
-    POSTGRES_USER: villas
-    POSTGRES_PASSWORD: villas
-    POSTGRES_HOST: postgres
-    PORT: 4000
-    DB_NAME: ${POSTGRES_DB}
-    DB_HOST: ${POSTGRES_HOST}
-    DB_USER: ${POSTGRES_USER}
-    DB_PASS: ${POSTGRES_PASSWORD}
-    BASE_PATH: /api
-    MODE: release
-  services:
-    - postgres:latest
-  script:
-    - go mod tidy
+    # test file package without S3 object storage (minio)
     - cd routes/file
-    - go test -v
+    - go test -v -args -s3-endpoint="" -s3-bucket=""
+    - cd ../../
   dependencies:
     - build
 
