@@ -81,7 +81,7 @@ func TestAuthenticate(t *testing.T) {
 	// should result in unauthorized
 	w1 := httptest.NewRecorder()
 	body, _ := json.Marshal("This is no JSON")
-	req, err := http.NewRequest("POST", "/api/v2/authenticate", bytes.NewBuffer(body))
+	req, err := http.NewRequest("POST", "/api/v2/authenticate/internal", bytes.NewBuffer(body))
 	assert.NoError(t, err)
 	req.Header.Set("Content-Type", "application/json")
 	router.ServeHTTP(w1, req)
@@ -94,7 +94,7 @@ func TestAuthenticate(t *testing.T) {
 	// should result in unauthorized
 	w2 := httptest.NewRecorder()
 	body, _ = json.Marshal(malformedCredentials)
-	req, err = http.NewRequest("POST", "/api/v2/authenticate", bytes.NewBuffer(body))
+	req, err = http.NewRequest("POST", "/api/v2/authenticate/internal", bytes.NewBuffer(body))
 	assert.NoError(t, err)
 	req.Header.Set("Content-Type", "application/json")
 	router.ServeHTTP(w2, req)
@@ -106,7 +106,7 @@ func TestAuthenticate(t *testing.T) {
 	malformedCredentials.Password = "blablabla"
 	w3 := httptest.NewRecorder()
 	body, _ = json.Marshal(malformedCredentials)
-	req, err = http.NewRequest("POST", "/api/v2/authenticate", bytes.NewBuffer(body))
+	req, err = http.NewRequest("POST", "/api/v2/authenticate/internal", bytes.NewBuffer(body))
 	assert.NoError(t, err)
 	req.Header.Set("Content-Type", "application/json")
 	router.ServeHTTP(w3, req)
@@ -118,7 +118,7 @@ func TestAuthenticate(t *testing.T) {
 	malformedCredentials.Password = "wrong password"
 	w4 := httptest.NewRecorder()
 	body, _ = json.Marshal(malformedCredentials)
-	req, err = http.NewRequest("POST", "/api/v2/authenticate", bytes.NewBuffer(body))
+	req, err = http.NewRequest("POST", "/api/v2/authenticate/internal", bytes.NewBuffer(body))
 	assert.NoError(t, err)
 	req.Header.Set("Content-Type", "application/json")
 	router.ServeHTTP(w4, req)
@@ -723,7 +723,7 @@ func TestModifyAddedUserAsAdmin(t *testing.T) {
 	// try to login as newUser with the modified active status
 	// should NOT work anymore!
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/v2/authenticate", "POST",
+		"/api/v2/authenticate/internal", "POST",
 		UserRequest{
 			Username: newUser.Username,
 			Password: "4_g00d_pw!",

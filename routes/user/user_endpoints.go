@@ -106,7 +106,7 @@ func addUser(c *gin.Context) {
 	// Create the new user from the request
 	newUser, err := NewUser(req.User.Username, req.User.Password, req.User.Mail, req.User.Role, true)
 	if err != nil {
-		helper.BadRequestError(c, err.Error())
+		helper.UnprocessableEntityError(c, err.Error())
 		return
 	}
 
