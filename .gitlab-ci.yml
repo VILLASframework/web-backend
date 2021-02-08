@@ -95,7 +95,7 @@ test:
     - go tool cover -func=testcover.txt
     # test file package without S3 object storage (minio)
     - cd routes/file
-    - go test -v -args -s3-endpoint="" -s3-bucket=""
+    - S3_BUCKET="" go test -v
     - cd ../../
   dependencies:
     - build
