@@ -39,8 +39,7 @@ import (
 )
 
 var router *gin.Engine
-var base_api_configs = "/api/v2/configs"
-var base_api_auth = "/api/v2/authenticate"
+var baseAPIConfigs = "/api/v2/configs"
 
 type ConfigRequest struct {
 	Name            string         `json:"name,omitempty"`
@@ -187,7 +186,7 @@ func TestAddConfig(t *testing.T) {
 	// try to POST with no access
 	// should result in unprocessable entity
 	code, resp, err := helper.TestEndpoint(router, token,
-		base_api_configs, "POST", helper.KeyModels{"config": newConfig1})
+		baseAPIConfigs, "POST", helper.KeyModels{"config": newConfig1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
@@ -197,7 +196,7 @@ func TestAddConfig(t *testing.T) {
 
 	// try to POST non JSON body
 	code, resp, err = helper.TestEndpoint(router, token,
-		base_api_configs, "POST", "this is not JSON")
+		baseAPIConfigs, "POST", "this is not JSON")
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 
@@ -207,7 +206,7 @@ func TestAddConfig(t *testing.T) {
 
 	// test POST newConfig
 	code, resp, err = helper.TestEndpoint(router, token,
-		base_api_configs, "POST", helper.KeyModels{"config": newConfig1})
+		baseAPIConfigs, "POST", helper.KeyModels{"config": newConfig1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -221,7 +220,7 @@ func TestAddConfig(t *testing.T) {
 
 	// Get the newConfig
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("%v/%v", base_api_configs, newConfigID), "GET", nil)
+		fmt.Sprintf("%v/%v", baseAPIConfigs, newConfigID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -236,7 +235,7 @@ func TestAddConfig(t *testing.T) {
 	}
 	// this should NOT work and return a unprocessable entity 442 status code
 	code, resp, err = helper.TestEndpoint(router, token,
-		base_api_configs, "POST", helper.KeyModels{"config": malformedNewConfig})
+		baseAPIConfigs, "POST", helper.KeyModels{"config": malformedNewConfig})
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
@@ -247,7 +246,7 @@ func TestAddConfig(t *testing.T) {
 	// Try to GET the newConfig with no access
 	// Should result in unprocessable entity
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("%v/%v", base_api_configs, newConfigID), "GET", nil)
+		fmt.Sprintf("%v/%v", baseAPIConfigs, newConfigID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
@@ -272,7 +271,7 @@ func TestUpdateConfig(t *testing.T) {
 	newConfig1.ScenarioID = scenarioID
 	newConfig1.ICID = ICID
 	code, resp, err := helper.TestEndpoint(router, token,
-		base_api_configs, "POST", helper.KeyModels{"config": newConfig1})
+		baseAPIConfigs, "POST", helper.KeyModels{"config": newConfig1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -292,7 +291,7 @@ func TestUpdateConfig(t *testing.T) {
 	// try to PUT with no access
 	// should result in unprocessable entity
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("%v/%v", base_api_configs, newConfigID), "PUT", helper.KeyModels{"config": updatedConfig})
+		fmt.Sprintf("%v/%v", baseAPIConfigs, newConfigID), "PUT", helper.KeyModels{"config": updatedConfig})
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
@@ -303,7 +302,7 @@ func TestUpdateConfig(t *testing.T) {
 	// try to PUT as guest
 	// should NOT work and result in unprocessable entity
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("%v/%v", base_api_configs, newConfigID), "PUT", helper.KeyModels{"config": updatedConfig})
+		fmt.Sprintf("%v/%v", baseAPIConfigs, newConfigID), "PUT", helper.KeyModels{"config": updatedConfig})
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
@@ -314,13 +313,13 @@ func TestUpdateConfig(t *testing.T) {
 	// try to PUT a non JSON body
 	// should result in a bad request
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("%v/%v", base_api_configs, newConfigID), "PUT", "This is not JSON")
+		fmt.Sprintf("%v/%v", baseAPIConfigs, newConfigID), "PUT", "This is not JSON")
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 
 	// test PUT
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("%v/%v", base_api_configs, newConfigID), "PUT", helper.KeyModels{"config": updatedConfig})
+		fmt.Sprintf("%v/%v", baseAPIConfigs, newConfigID), "PUT", helper.KeyModels{"config": updatedConfig})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -332,7 +331,7 @@ func TestUpdateConfig(t *testing.T) {
 	updatedConfig.ICID = ICID + 1
 	// test PUT again
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("%v/%v", base_api_configs, newConfigID), "PUT", helper.KeyModels{"config": updatedConfig})
+		fmt.Sprintf("%v/%v", baseAPIConfigs, newConfigID), "PUT", helper.KeyModels{"config": updatedConfig})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -342,7 +341,7 @@ func TestUpdateConfig(t *testing.T) {
 
 	// Get the updateConfig
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("%v/%v", base_api_configs, newConfigID), "GET", nil)
+		fmt.Sprintf("%v/%v", baseAPIConfigs, newConfigID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -352,7 +351,7 @@ func TestUpdateConfig(t *testing.T) {
 
 	// try to update a component config that does not exist (should return not found 404 status code)
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("%v/%v", base_api_configs, newConfigID+1), "PUT", helper.KeyModels{"config": updatedConfig})
+		fmt.Sprintf("%v/%v", baseAPIConfigs, newConfigID+1), "PUT", helper.KeyModels{"config": updatedConfig})
 	assert.NoError(t, err)
 	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
 }
@@ -375,7 +374,7 @@ func TestDeleteConfig(t *testing.T) {
 
 	// test POST newConfig
 	code, resp, err := helper.TestEndpoint(router, token,
-		base_api_configs, "POST", helper.KeyModels{"config": newConfig1})
+		baseAPIConfigs, "POST", helper.KeyModels{"config": newConfig1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -390,7 +389,7 @@ func TestDeleteConfig(t *testing.T) {
 	// try to DELETE with no access
 	// should result in unprocessable entity
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("%v/%v", base_api_configs, newConfigID), "DELETE", nil)
+		fmt.Sprintf("%v/%v", baseAPIConfigs, newConfigID), "DELETE", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
@@ -400,12 +399,12 @@ func TestDeleteConfig(t *testing.T) {
 
 	// Count the number of all the component config returned for scenario
 	initialNumber, err := helper.LengthOfResponse(router, token,
-		fmt.Sprintf("%v?scenarioID=%v", base_api_configs, scenarioID), "GET", nil)
+		fmt.Sprintf("%v?scenarioID=%v", baseAPIConfigs, scenarioID), "GET", nil)
 	assert.NoError(t, err)
 
 	// Delete the added newConfig
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("%v/%v", base_api_configs, newConfigID), "DELETE", nil)
+		fmt.Sprintf("%v/%v", baseAPIConfigs, newConfigID), "DELETE", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -415,7 +414,7 @@ func TestDeleteConfig(t *testing.T) {
 
 	// Again count the number of all the component configs returned
 	finalNumber, err := helper.LengthOfResponse(router, token,
-		fmt.Sprintf("%v?scenarioID=%v", base_api_configs, scenarioID), "GET", nil)
+		fmt.Sprintf("%v?scenarioID=%v", baseAPIConfigs, scenarioID), "GET", nil)
 	assert.NoError(t, err)
 
 	assert.Equal(t, initialNumber-1, finalNumber)
@@ -439,13 +438,13 @@ func TestGetAllConfigsOfScenario(t *testing.T) {
 
 	// test POST newConfig
 	code, resp, err := helper.TestEndpoint(router, token,
-		base_api_configs, "POST", helper.KeyModels{"config": newConfig1})
+		baseAPIConfigs, "POST", helper.KeyModels{"config": newConfig1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// Count the number of all the component config returned for scenario
 	NumberOfConfigs, err := helper.LengthOfResponse(router, token,
-		fmt.Sprintf("%v?scenarioID=%v", base_api_configs, scenarioID), "GET", nil)
+		fmt.Sprintf("%v?scenarioID=%v", baseAPIConfigs, scenarioID), "GET", nil)
 	assert.NoError(t, err)
 
 	assert.Equal(t, 1, NumberOfConfigs)
@@ -457,7 +456,7 @@ func TestGetAllConfigsOfScenario(t *testing.T) {
 	// try to get configs without access
 	// should result in unprocessable entity
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("%v?scenarioID=%v", base_api_configs, scenarioID), "GET", nil)
+		fmt.Sprintf("%v?scenarioID=%v", baseAPIConfigs, scenarioID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 

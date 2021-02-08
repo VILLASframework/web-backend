@@ -46,8 +46,7 @@ import (
 )
 
 var router *gin.Engine
-var base_api_results = "/api/v2/results"
-var base_api_auth = "/api/v2/authenticate"
+var baseAPIResults = "/api/v2/results"
 
 type ScenarioRequest struct {
 	Name            string         `json:"name,omitempty"`
@@ -143,13 +142,13 @@ func TestGetAllResultsOfScenario(t *testing.T) {
 	newResult.ScenarioID = scenarioID
 	newResult.ConfigSnapshots = confSnapshots
 	code, resp, err := helper.TestEndpoint(router, token,
-		base_api_results, "POST", helper.KeyModels{"result": newResult})
+		baseAPIResults, "POST", helper.KeyModels{"result": newResult})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// Count the number of all the results returned for scenario
 	NumberOfConfigs, err := helper.LengthOfResponse(router, token,
-		fmt.Sprintf("%v?scenarioID=%v", base_api_results, scenarioID), "GET", nil)
+		fmt.Sprintf("%v?scenarioID=%v", baseAPIResults, scenarioID), "GET", nil)
 	assert.NoError(t, err)
 
 	assert.Equal(t, 1, NumberOfConfigs)
@@ -161,7 +160,7 @@ func TestGetAllResultsOfScenario(t *testing.T) {
 	// try to get results without access
 	// should result in unprocessable entity
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("%v?scenarioID=%v", base_api_results, scenarioID), "GET", nil)
+		fmt.Sprintf("%v?scenarioID=%v", baseAPIResults, scenarioID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
@@ -187,7 +186,7 @@ func TestAddGetUpdateDeleteResult(t *testing.T) {
 	// try to POST with no access
 	// should result in unprocessable entity
 	code, resp, err := helper.TestEndpoint(router, token,
-		base_api_results, "POST", helper.KeyModels{"result": newResult})
+		baseAPIResults, "POST", helper.KeyModels{"result": newResult})
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
@@ -197,13 +196,13 @@ func TestAddGetUpdateDeleteResult(t *testing.T) {
 
 	// try to POST non JSON body
 	code, resp, err = helper.TestEndpoint(router, token,
-		base_api_results, "POST", "this is not JSON")
+		baseAPIResults, "POST", "this is not JSON")
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 
 	// test POST newResult
 	code, resp, err = helper.TestEndpoint(router, token,
-		base_api_results, "POST", helper.KeyModels{"result": newResult})
+		baseAPIResults, "POST", helper.KeyModels{"result": newResult})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -217,7 +216,7 @@ func TestAddGetUpdateDeleteResult(t *testing.T) {
 
 	// Get the newResult
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("%v/%v", base_api_results, newResultID), "GET", nil)
+		fmt.Sprintf("%v/%v", baseAPIResults, newResultID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -232,7 +231,7 @@ func TestAddGetUpdateDeleteResult(t *testing.T) {
 	}
 	// this should NOT work and return a unprocessable entity 442 status code
 	code, resp, err = helper.TestEndpoint(router, token,
-		base_api_results, "POST", helper.KeyModels{"result": malformedNewResult})
+		baseAPIResults, "POST", helper.KeyModels{"result": malformedNewResult})
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
@@ -243,7 +242,7 @@ func TestAddGetUpdateDeleteResult(t *testing.T) {
 	// Try to GET the newResult with no access
 	// Should result in unprocessable entity
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("%v/%v", base_api_results, newResultID), "GET", nil)
+		fmt.Sprintf("%v/%v", baseAPIResults, newResultID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
@@ -257,7 +256,7 @@ func TestAddGetUpdateDeleteResult(t *testing.T) {
 	// try to PUT with no access
 	// should result in unprocessable entity
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("%v/%v", base_api_results, newResultID), "PUT", helper.KeyModels{"result": updatedResult})
+		fmt.Sprintf("%v/%v", baseAPIResults, newResultID), "PUT", helper.KeyModels{"result": updatedResult})
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
@@ -268,7 +267,7 @@ func TestAddGetUpdateDeleteResult(t *testing.T) {
 	// try to PUT as guest
 	// should NOT work and result in unprocessable entity
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("%v/%v", base_api_results, newResultID), "PUT", helper.KeyModels{"result": updatedResult})
+		fmt.Sprintf("%v/%v", baseAPIResults, newResultID), "PUT", helper.KeyModels{"result": updatedResult})
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
@@ -279,13 +278,13 @@ func TestAddGetUpdateDeleteResult(t *testing.T) {
 	// try to PUT a non JSON body
 	// should result in a bad request
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("%v/%v", base_api_results, newResultID), "PUT", "This is not JSON")
+		fmt.Sprintf("%v/%v", baseAPIResults, newResultID), "PUT", "This is not JSON")
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 
 	// test PUT
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("%v/%v", base_api_results, newResultID), "PUT", helper.KeyModels{"result": updatedResult})
+		fmt.Sprintf("%v/%v", baseAPIResults, newResultID), "PUT", helper.KeyModels{"result": updatedResult})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -295,7 +294,7 @@ func TestAddGetUpdateDeleteResult(t *testing.T) {
 
 	// try to update a result that does not exist (should return not found 404 status code)
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("%v/%v", base_api_results, newResultID+1), "PUT", helper.KeyModels{"result": updatedResult})
+		fmt.Sprintf("%v/%v", baseAPIResults, newResultID+1), "PUT", helper.KeyModels{"result": updatedResult})
 	assert.NoError(t, err)
 	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
 
@@ -309,7 +308,7 @@ func TestAddGetUpdateDeleteResult(t *testing.T) {
 	// try to DELETE with no access
 	// should result in unprocessable entity
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("%v/%v", base_api_results, newResultID), "DELETE", nil)
+		fmt.Sprintf("%v/%v", baseAPIResults, newResultID), "DELETE", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
@@ -319,12 +318,12 @@ func TestAddGetUpdateDeleteResult(t *testing.T) {
 
 	// Count the number of all the results returned for scenario
 	initialNumber, err := helper.LengthOfResponse(router, token,
-		fmt.Sprintf("%v?scenarioID=%v", base_api_results, scenarioID), "GET", nil)
+		fmt.Sprintf("%v?scenarioID=%v", baseAPIResults, scenarioID), "GET", nil)
 	assert.NoError(t, err)
 
 	// Delete the added newResult
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("%v/%v", base_api_results, newResultID), "DELETE", nil)
+		fmt.Sprintf("%v/%v", baseAPIResults, newResultID), "DELETE", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -334,7 +333,7 @@ func TestAddGetUpdateDeleteResult(t *testing.T) {
 
 	// Again count the number of all the results returned
 	finalNumber, err := helper.LengthOfResponse(router, token,
-		fmt.Sprintf("%v?scenarioID=%v", base_api_results, scenarioID), "GET", nil)
+		fmt.Sprintf("%v?scenarioID=%v", baseAPIResults, scenarioID), "GET", nil)
 	assert.NoError(t, err)
 
 	assert.Equal(t, initialNumber-1, finalNumber)
@@ -360,7 +359,7 @@ func TestAddDeleteResultFile(t *testing.T) {
 
 	// test POST newResult
 	code, resp, err := helper.TestEndpoint(router, token,
-		base_api_results, "POST", helper.KeyModels{"result": newResult})
+		baseAPIResults, "POST", helper.KeyModels{"result": newResult})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -398,7 +397,7 @@ func TestAddDeleteResultFile(t *testing.T) {
 
 	// Create the request
 	w := httptest.NewRecorder()
-	req, err := http.NewRequest("POST", fmt.Sprintf("%v/%v/file", base_api_results, newResultID), bodyBuf)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%v/%v/file", baseAPIResults, newResultID), bodyBuf)
 	assert.NoError(t, err, "create request")
 
 	req.Header.Set("Content-Type", contentType)
@@ -419,7 +418,7 @@ func TestAddDeleteResultFile(t *testing.T) {
 	// DELETE the file
 
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("%v/%v/file/%v", base_api_results, newResultID, fileID), "DELETE", nil)
+		fmt.Sprintf("%v/%v/file/%v", baseAPIResults, newResultID, fileID), "DELETE", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -449,7 +448,7 @@ func TestAddDeleteResultFile(t *testing.T) {
 
 	// Create the request
 	w2 := httptest.NewRecorder()
-	req2, err := http.NewRequest("POST", fmt.Sprintf("%v/%v/file", base_api_results, newResultID), bodyBuf2)
+	req2, err := http.NewRequest("POST", fmt.Sprintf("%v/%v/file", baseAPIResults, newResultID), bodyBuf2)
 	assert.NoError(t, err, "create request")
 
 	req2.Header.Set("Content-Type", contentType2)
@@ -468,7 +467,7 @@ func TestAddDeleteResultFile(t *testing.T) {
 
 	// DELETE result inlc. file
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("%v/%v", base_api_results, newResultID), "DELETE", nil)
+		fmt.Sprintf("%v/%v", baseAPIResults, newResultID), "DELETE", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -478,7 +477,7 @@ func TestAddDeleteResultFile(t *testing.T) {
 
 	// Again count the number of all the results returned
 	finalNumber, err := helper.LengthOfResponse(router, token,
-		fmt.Sprintf("%v?scenarioID=%v", base_api_results, scenarioID), "GET", nil)
+		fmt.Sprintf("%v?scenarioID=%v", baseAPIResults, scenarioID), "GET", nil)
 	assert.NoError(t, err)
 
 	assert.Equal(t, 0, finalNumber)
