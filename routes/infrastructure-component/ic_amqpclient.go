@@ -54,6 +54,7 @@ type Action struct {
 		WS_url      string `json:"ws_url,omitempty"`
 		API_url     string `json:"api_url,omitempty"`
 		Description string `json:"description,omitempty"`
+		Manager     string `json:"manager,omitempty"`
 	} `json:"parameters,omitempty"`
 }
 
@@ -74,6 +75,7 @@ type ICProperties struct {
 	API_url     string `json:"api_url"`
 	Category    string `json:"category"`
 	Type        string `json:"type"`
+	ManagedBy   string `json:"managed_by"`
 }
 
 type ICUpdate struct {
@@ -183,9 +185,15 @@ func sendActionAMQP(action Action) error {
 	// set message headers
 	var headers map[string]interface{}
 	headers = make(map[string]interface{}) // empty map
-	headers["uuid"] = action.Parameters.UUID
-	headers["type"] = action.Parameters.Type
-	headers["category"] = action.Parameters.Category
+	if action.Act == "delete" || action.Act == "create" {
+		// set uuid header to uuid of manager of IC
+		headers["uuid"] = action.Parameters.Manager
+	} else {
+		headers["uuid"] = action.Parameters.UUID
+	}
+
+	//headers["type"] = action.Parameters.Type
+	//headers["category"] = action.Parameters.Category
 
 	msg.Headers = headers
 
@@ -203,17 +211,6 @@ func sendActionAMQP(action Action) error {
 	return err
 
 }
-
-//func PingAMQP() error {
-//	log.Println("AMQP: sending ping command to all ICs")
-//
-//	var a Action
-//	a.Act = "ping"
-//	*a.Parameters.UUID = ""
-//
-//	err := sendActionAMQP(a)
-//	return err
-//}
 
 func CheckConnection() error {
 
@@ -263,7 +260,7 @@ func processMessage(message amqp.Delivery) error {
 
 	if payload.Action != "" {
 		// if a message contains an action, it is not intended for the backend
-		log.Println("AMQP: Ignoring action message for action", payload.Action, ICUUID)
+		log.Println("AMQP: Ignoring action message for action", payload.Action, "sent to IC", ICUUID)
 		return nil
 	}
 
@@ -310,6 +307,7 @@ func createExternalIC(payload ICUpdate, ICUUID string, body []byte) error {
 	newICReq.InfrastructureComponent.Description = payload.Properties.Description
 	// set managed externally to true because this IC is created via AMQP
 	newICReq.InfrastructureComponent.ManagedExternally = newTrue()
+	newICReq.InfrastructureComponent.Manager = payload.Properties.ManagedBy
 	// set raw status update if IC
 	newICReq.InfrastructureComponent.StatusUpdateRaw = postgres.Jsonb{RawMessage: body}
 
@@ -365,6 +363,7 @@ func (s *InfrastructureComponent) updateExternalIC(payload ICUpdate, body []byte
 	updatedICReq.InfrastructureComponent.APIURL = payload.Properties.API_url
 	updatedICReq.InfrastructureComponent.Location = payload.Properties.Location
 	updatedICReq.InfrastructureComponent.Description = payload.Properties.Description
+	updatedICReq.InfrastructureComponent.Manager = payload.Properties.ManagedBy
 	// set raw status update if IC
 	updatedICReq.InfrastructureComponent.StatusUpdateRaw = postgres.Jsonb{RawMessage: body}
 

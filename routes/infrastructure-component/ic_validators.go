@@ -47,6 +47,7 @@ type validNewIC struct {
 	StartParameterScheme postgres.Jsonb `form:"StartParameterScheme" validate:"omitempty"`
 	StatusUpdateRaw      postgres.Jsonb `form:"StatusUpdateRaw" validate:"omitempty"`
 	ManagedExternally    *bool          `form:"ManagedExternally" validate:"required"`
+	Manager              string         `form:"Manager" validate:"omitempty"`
 	Uptime               float64        `form:"Uptime" validate:"omitempty"`
 }
 
@@ -62,6 +63,7 @@ type validUpdatedIC struct {
 	Description          string         `form:"Description" validate:"omitempty"`
 	StartParameterScheme postgres.Jsonb `form:"StartParameterScheme" validate:"omitempty"`
 	StatusUpdateRaw      postgres.Jsonb `form:"StatusUpdateRaw" validate:"omitempty"`
+	Manager              string         `form:"Manager" validate:"omitempty"`
 	Uptime               float64        `form:"Uptime" validate:"omitempty"`
 }
 
@@ -82,12 +84,36 @@ func (r *AddICRequest) validate() error {
 
 	// check if uuid is valid
 	_, errs = uuid.Parse(r.InfrastructureComponent.UUID)
+	if errs != nil {
+		return errs
+	}
+
+	if *r.InfrastructureComponent.ManagedExternally == true {
+		//check if valid manager UUID is provided
+		_, errs = uuid.Parse(r.InfrastructureComponent.Manager)
+		if errs != nil {
+			return errs
+		}
+	}
+
 	return errs
 }
 
 func (r *UpdateICRequest) validate() error {
 	validate = validator.New()
 	errs := validate.Struct(r)
+	if errs != nil {
+		return errs
+	}
+
+	if r.InfrastructureComponent.Manager != "" {
+		//check if valid manager UUID is provided
+		_, errs = uuid.Parse(r.InfrastructureComponent.Manager)
+		if errs != nil {
+			return errs
+		}
+	}
+
 	return errs
 }
 
@@ -112,6 +138,7 @@ func (r *AddICRequest) createIC(receivedViaAMQP bool) (InfrastructureComponent, 
 		action.Parameters.API_url = r.InfrastructureComponent.APIURL
 		action.Parameters.WS_url = r.InfrastructureComponent.WebsocketURL
 		action.Parameters.UUID = r.InfrastructureComponent.UUID
+		action.Parameters.Manager = r.InfrastructureComponent.Manager
 
 		log.Println("AMQP: Sending request to create new IC")
 		err = sendActionAMQP(action)
@@ -128,6 +155,7 @@ func (r *AddICRequest) createIC(receivedViaAMQP bool) (InfrastructureComponent, 
 	s.StartParameterScheme = r.InfrastructureComponent.StartParameterScheme
 	s.StatusUpdateRaw = r.InfrastructureComponent.StatusUpdateRaw
 	s.ManagedExternally = *r.InfrastructureComponent.ManagedExternally
+	s.Manager = r.InfrastructureComponent.Manager
 	s.Uptime = math.Round(r.InfrastructureComponent.Uptime) // round required for backward compatibility of data model
 	if r.InfrastructureComponent.State != "" {
 		s.State = r.InfrastructureComponent.State
@@ -166,6 +194,7 @@ func (r *UpdateICRequest) updatedIC(oldIC InfrastructureComponent) Infrastructur
 	s.Location = r.InfrastructureComponent.Location
 	s.Description = r.InfrastructureComponent.Description
 	s.Uptime = math.Round(r.InfrastructureComponent.Uptime) // round required for backward compatibility of data model
+	s.Manager = r.InfrastructureComponent.Manager
 
 	// set last update time
 	s.StateUpdateAt = time.Now().Format(time.RFC1123Z)

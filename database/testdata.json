@@ -51,6 +51,7 @@
       "description": "DPsim simulator",
       "state": "running",
       "managedexternally": true,
+      "manager": "4854af30-325f-44a5-ad59-b67bdeadbeef",
       "startparameterscheme": {
         "param1": 55,
         "param2": "testvalue2"

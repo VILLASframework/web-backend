@@ -147,6 +147,8 @@ type InfrastructureComponent struct {
 	StatusUpdateRaw postgres.Jsonb `json:"statusupdateraw"`
 	// Boolean indicating if IC is managed externally (via AMQP/ VILLAScontroller)
 	ManagedExternally bool `json:"managedexternally" gorm:"default:false"`
+	// UUID of IC that manages this IC
+	Manager string `json:"manager" gorm:"default:''"`
 	// ComponentConfigurations in which the IC is used
 	ComponentConfigurations []ComponentConfiguration `json:"-" gorm:"foreignkey:ICID"`
 }

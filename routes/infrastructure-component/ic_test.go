@@ -59,6 +59,7 @@ type ICRequest struct {
 	Description          string         `json:"description,omitempty"`
 	StartParameterScheme postgres.Jsonb `json:"startparameterscheme,omitempty"`
 	ManagedExternally    *bool          `json:"managedexternally"`
+	Manager              string         `json:"manager,omitempty"`
 }
 
 type ScenarioRequest struct {
@@ -75,21 +76,6 @@ type ConfigRequest struct {
 	FileIDs         []int64        `json:"fileIDs,omitempty"`
 }
 
-/*type ICAction struct {
-	Act        string `json:"action,omitempty"`
-	When       int64  `json:"when,omitempty"`
-	Properties struct {
-		UUID        *string `json:"uuid,omitempty"`
-		Name        *string `json:"name,omitempty"`
-		Category    *string `json:"category,omitempty"`
-		Type        *string `json:"type,omitempty"`
-		Location    *string `json:"location,omitempty"`
-		WS_url      *string `json:"ws_url,omitempty"`
-		API_url     *string `json:"api_url,omitempty"`
-		Description *string `json:"description,omitempty"`
-	} `json:"properties,omitempty"`
-}*/
-
 var newIC1 = ICRequest{
 	UUID:                 "7be0322d-354e-431e-84bd-ae4c9633138b",
 	WebsocketURL:         "https://villas.k8s.eonerc.rwth-aachen.de/ws/ws_sig",
@@ -102,6 +88,7 @@ var newIC1 = ICRequest{
 	Description:          "A signal generator for testing purposes",
 	StartParameterScheme: postgres.Jsonb{json.RawMessage(`{"prop1" : "a nice prop"}`)},
 	ManagedExternally:    newFalse(),
+	Manager:              "7be0322d-354e-431e-84bd-ae4c9633beef",
 }
 
 var newIC2 = ICRequest{
@@ -116,6 +103,7 @@ var newIC2 = ICRequest{
 	Description:          "This is a test description",
 	StartParameterScheme: postgres.Jsonb{json.RawMessage(`{"prop1" : "a nice prop"}`)},
 	ManagedExternally:    newTrue(),
+	Manager:              "4854af30-325f-44a5-ad59-b67b2597de99",
 }
 
 func TestMain(m *testing.M) {
@@ -270,6 +258,7 @@ func TestUpdateICAsAdmin(t *testing.T) {
 	assert.NoError(t, err)
 
 	// test POST ic/ $newIC
+	newIC1.ManagedExternally = newFalse()
 	code, resp, err := helper.TestEndpoint(router, token,
 		"/api/ic", "POST", helper.KeyModels{"ic": newIC1})
 	assert.NoError(t, err)
@@ -318,13 +307,14 @@ func TestUpdateICAsAdmin(t *testing.T) {
 	update.Properties.Name = newIC2.Name
 	update.Properties.Category = newIC2.Category
 	update.Properties.Type = newIC2.Type
+	update.Properties.ManagedBy = newIC2.Manager
 
 	payload, err := json.Marshal(update)
 	assert.NoError(t, err)
 
 	var headers map[string]interface{}
 	headers = make(map[string]interface{}) // empty map
-	headers["uuid"] = newIC2.UUID          // set uuid
+	headers["uuid"] = newIC2.Manager       // set uuid
 
 	msg := amqp.Publishing{
 		DeliveryMode:    2,
@@ -443,6 +433,7 @@ func TestDeleteICAsAdmin(t *testing.T) {
 	update.Properties.Name = newIC2.Name
 	update.Properties.Category = newIC2.Category
 	update.Properties.Type = newIC2.Type
+	update.Properties.ManagedBy = newIC2.Manager
 
 	payload, err := json.Marshal(update)
 	assert.NoError(t, err)
@@ -685,7 +676,7 @@ func TestCreateUpdateViaAMQPRecv(t *testing.T) {
 
 	var headers map[string]interface{}
 	headers = make(map[string]interface{}) // empty map
-	headers["uuid"] = newIC2.UUID          // set uuid
+	headers["uuid"] = newIC1.Manager       // set uuid
 
 	msg := amqp.Publishing{
 		DeliveryMode:    2,
@@ -724,13 +715,14 @@ func TestCreateUpdateViaAMQPRecv(t *testing.T) {
 	update.Properties.API_url = newIC1.APIURL
 	update.Properties.Description = newIC1.Description
 	update.Properties.Location = newIC1.Location
+	update.Properties.ManagedBy = newIC1.Manager
 
 	payload, err = json.Marshal(update)
 	assert.NoError(t, err)
 
 	var headersA map[string]interface{}
 	headersA = make(map[string]interface{}) // empty map
-	headersA["uuid"] = newIC1.UUID
+	headersA["uuid"] = newIC1.Manager
 
 	msg = amqp.Publishing{
 		DeliveryMode:    2,
@@ -811,13 +803,14 @@ func TestDeleteICViaAMQPRecv(t *testing.T) {
 	update.Properties.API_url = newIC1.APIURL
 	update.Properties.Description = newIC1.Description
 	update.Properties.Location = newIC1.Location
+	update.Properties.ManagedBy = newIC1.Manager
 
 	payload, err := json.Marshal(update)
 	assert.NoError(t, err)
 
 	var headers map[string]interface{}
 	headers = make(map[string]interface{}) // empty map
-	headers["uuid"] = newIC2.UUID          // set uuid
+	headers["uuid"] = newIC1.Manager       // set uuid
 
 	msg := amqp.Publishing{
 		DeliveryMode:    2,

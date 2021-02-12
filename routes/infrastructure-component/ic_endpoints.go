@@ -22,6 +22,7 @@
 package infrastructure_component
 
 import (
+	"github.com/google/uuid"
 	"log"
 	"net/http"
 
@@ -290,6 +291,12 @@ func sendActionToIC(c *gin.Context) {
 		action.Parameters.Type = s.Type
 		action.Parameters.Category = s.Category
 		action.Parameters.Name = s.Name
+		_, errs := uuid.Parse(s.Manager)
+		if errs != nil {
+			helper.InternalServerError(c, "Unable to send actions to IC: "+errs.Error())
+			return
+		}
+		action.Parameters.Manager = s.Manager
 
 		err = sendActionAMQP(action)
 		if err != nil {
