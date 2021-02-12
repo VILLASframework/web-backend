@@ -70,7 +70,7 @@ func getConfig(c *gin.Context) {
 
 	resp.Mode, _ = cfg.String("mode")
 	resp.Authentication.LogoutURL, _ = cfg.String("auth.logout-url")
-	resp.Authentication.External.Enabled, _ = cfg.Bool("auth.external")
+	resp.Authentication.External.Enabled, _ = cfg.Bool("auth.external.enabled")
 	resp.Authentication.External.AuthorizeURL, _ = cfg.String("auth.external.authorize-url")
 	resp.Authentication.External.ProviderName, _ = cfg.String("auth.external.provider-name")
 	resp.Title, _ = cfg.String("title")

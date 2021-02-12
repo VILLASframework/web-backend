@@ -117,7 +117,7 @@ func authenticate(c *gin.Context) {
 	case "internal":
 		user = authenticateInternal(c)
 	case "external":
-		authExternal, err := configuration.GlobalConfig.Bool("auth.external")
+		authExternal, err := configuration.GlobalConfig.Bool("auth.external.enabled")
 		if err == nil && authExternal {
 			user = authenticateExternal(c)
 		} else {
