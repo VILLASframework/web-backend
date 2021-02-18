@@ -67,8 +67,8 @@ func (s *Signal) addToConfig() error {
 		}
 
 		// adapt length of mapping
-		var newInputLength = db.Model(m).Where("Direction = ?", "in").Association("InputMapping").Count()
-		err = db.Model(m).Update("InputLength", newInputLength).Error
+		var newInputLength = db.Model(&m).Where("Direction = ?", "in").Association("InputMapping").Count()
+		err = db.Model(&m).Update("InputLength", newInputLength).Error
 
 	} else {
 		err = db.Model(&m).Association("OutputMapping").Append(s).Error
@@ -77,8 +77,8 @@ func (s *Signal) addToConfig() error {
 		}
 
 		// adapt length of mapping
-		var newOutputLength = db.Model(m).Where("Direction = ?", "out").Association("OutputMapping").Count()
-		err = db.Model(m).Update("OutputLength", newOutputLength).Error
+		var newOutputLength = db.Model(&m).Where("Direction = ?", "out").Association("OutputMapping").Count()
+		err = db.Model(&m).Update("OutputLength", newOutputLength).Error
 	}
 	return err
 }
