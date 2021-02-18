@@ -113,9 +113,9 @@ func (s *Signal) delete() error {
 			return err
 		}
 
-		// Reduce length of mapping by 1
-		var newInputLength = m.InputLength - 1
-		err = db.Model(m).Update("InputLength", newInputLength).Error
+		// Update input length
+		noSignals := db.Model(&m).Association("InputMapping").Count()
+		err = db.Model(&m).Update("InputLength", noSignals).Error
 		if err != nil {
 			return err
 		}
@@ -126,9 +126,9 @@ func (s *Signal) delete() error {
 			return err
 		}
 
-		// Reduce length of mapping by 1
-		var newOutputLength = m.OutputLength - 1
-		err = db.Model(m).Update("OutputLength", newOutputLength).Error
+		// Reduce output length
+		noSignals := db.Model(&m).Association("OutputMapping").Count()
+		err = db.Model(&m).Update("OutputLength", noSignals).Error
 		if err != nil {
 			return err
 		}
