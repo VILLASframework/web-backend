@@ -55,6 +55,8 @@ type Action struct {
 		API_url     string `json:"api_url,omitempty"`
 		Description string `json:"description,omitempty"`
 		Manager     string `json:"manager,omitempty"`
+		ResultURL   string `json:"result_url,omitempty"`
+		ModelURL    string `json:"model_url,omitempty"`
 	} `json:"parameters,omitempty"`
 }
 
