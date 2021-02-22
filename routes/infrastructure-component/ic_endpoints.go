@@ -22,7 +22,6 @@
 package infrastructure_component
 
 import (
-	"github.com/google/uuid"
 	"log"
 	"net/http"
 
@@ -102,8 +101,15 @@ func addIC(c *gin.Context) {
 		return
 	}
 
+	// Check if IC to be created is managed externally
+	if *req.InfrastructureComponent.ManagedExternally == true {
+		// if so: refuse creation
+		helper.BadRequestError(c, "create for externally managed IC not possible with this endpoint - use /ic/{ICID}/action endpoint instead to request creation of the component")
+		return
+	}
+
 	// Create the new IC from the request
-	newIC, err := req.createIC(false)
+	newIC, err := req.createIC()
 	if err != nil {
 		helper.InternalServerError(c, "Unable to send create action: "+err.Error())
 		return
@@ -215,8 +221,15 @@ func deleteIC(c *gin.Context) {
 		return
 	}
 
+	// Check if IC is managed externally
+	if s.ManagedExternally {
+		// if so: refuse deletion
+		helper.BadRequestError(c, "delete for externally managed IC not possible with this endpoint - use /ic/{ICID}/action endpoint instead to request deletion of the component")
+		return
+	}
+
 	// Delete the IC
-	err := s.delete(false)
+	err := s.delete()
 	if helper.DBError(c, err) {
 		return
 	} else if err != nil {
@@ -287,18 +300,13 @@ func sendActionToIC(c *gin.Context) {
 
 	for _, action := range actions {
 
-		action.Parameters.UUID = s.UUID
-		action.Parameters.Type = s.Type
-		action.Parameters.Category = s.Category
-		action.Parameters.Name = s.Name
-		_, errs := uuid.Parse(s.Manager)
-		if errs != nil {
-			helper.InternalServerError(c, "Unable to send actions to IC: "+errs.Error())
-			return
+		var destinationUUID = ""
+		if action.Act == "delete" || action.Act == "create" {
+			destinationUUID = s.Manager
+		} else {
+			destinationUUID = s.UUID
 		}
-		action.Parameters.Manager = s.Manager
-
-		err = sendActionAMQP(action)
+		err = sendActionAMQP(action, destinationUUID)
 		if err != nil {
 			helper.InternalServerError(c, "Unable to send actions to IC: "+err.Error())
 			return

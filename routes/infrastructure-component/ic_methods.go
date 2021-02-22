@@ -24,8 +24,6 @@ package infrastructure_component
 import (
 	"fmt"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
-	"log"
-	"time"
 )
 
 type InfrastructureComponent struct {
@@ -58,17 +56,7 @@ func (s *InfrastructureComponent) update(updatedIC InfrastructureComponent) erro
 	return err
 }
 
-func (s *InfrastructureComponent) delete(receivedViaAMQP bool) error {
-	if s.ManagedExternally && !receivedViaAMQP {
-		var action Action
-		action.Act = "delete"
-		action.When = time.Now().Unix()
-		action.Parameters.UUID = s.UUID
-
-		log.Println("AMQP: Sending request to delete IC with UUID", s.UUID)
-		err := sendActionAMQP(action)
-		return err
-	}
+func (s *InfrastructureComponent) delete() error {
 
 	db := database.GetDB()
 	noConfigs := db.Model(s).Association("ComponentConfigurations").Count()

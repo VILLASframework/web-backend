@@ -213,18 +213,11 @@ func TestAddICAsAdmin(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
 
-	// test creation of external IC (should lead to emission of AMQP message to VILLAS)
+	// test creation of external IC (should lead to bad request)
 	code, resp, err = helper.TestEndpoint(router, token,
 		"/api/ic", "POST", helper.KeyModels{"ic": newIC2})
 	assert.NoError(t, err)
-	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
-
-	// Compare POST's response with the newExternalIC
-	err = helper.CompareResponse(resp, helper.KeyModels{"ic": newIC2})
-	assert.NoError(t, err)
-
-	// wait to have async operation be completed
-	time.Sleep(waitingTime * time.Second)
+	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 }
 
 func TestAddICAsUser(t *testing.T) {
@@ -465,14 +458,11 @@ func TestDeleteICAsAdmin(t *testing.T) {
 	// Wait until externally managed IC is created (happens async)
 	time.Sleep(waitingTime * time.Second)
 
-	// Delete the added external IC (triggers an AMQP message, but should not remove the IC from the DB)
+	// Delete the added external IC (triggers a bad request error)
 	code, resp, err = helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/ic/%v", 2), "DELETE", nil)
 	assert.NoError(t, err)
-	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
-
-	// Wait until externally managed IC is deleted (happens async)
-	time.Sleep(waitingTime * time.Second)
+	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 
 	// Again count the number of all the ICs returned
 	finalNumberAfterExtneralDelete, err := helper.LengthOfResponse(router, token,
@@ -640,7 +630,14 @@ func TestSendActionToIC(t *testing.T) {
 		When: time.Now().Unix(),
 	}
 
-	action1.Parameters.UUID = newIC1.UUID
+	type startParams struct {
+		UUID string `json:"uuid"`
+	}
+	var params startParams
+	params.UUID = newIC1.UUID
+
+	paramsRaw, err := json.Marshal(&params)
+	action1.Parameters = paramsRaw
 	actions := [1]Action{action1}
 
 	// Send action to IC

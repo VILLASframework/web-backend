@@ -43,21 +43,9 @@ type AMQPclient struct {
 }
 
 type Action struct {
-	Act        string `json:"action"`
-	When       int64  `json:"when"`
-	Parameters struct {
-		UUID        string `json:"uuid,omitempty"`
-		Name        string `json:"name,omitempty"`
-		Category    string `json:"category,omitempty"`
-		Type        string `json:"type,omitempty"`
-		Location    string `json:"location,omitempty"`
-		WS_url      string `json:"ws_url,omitempty"`
-		API_url     string `json:"api_url,omitempty"`
-		Description string `json:"description,omitempty"`
-		Manager     string `json:"manager,omitempty"`
-		ResultURL   string `json:"result_url,omitempty"`
-		ModelURL    string `json:"model_url,omitempty"`
-	} `json:"parameters,omitempty"`
+	Act        string          `json:"action"`
+	When       int64           `json:"when"`
+	Parameters json.RawMessage `json:"parameters,omitempty"`
 }
 
 type ICStatus struct {
@@ -168,7 +156,7 @@ func ConnectAMQP(uri string) error {
 	return nil
 }
 
-func sendActionAMQP(action Action) error {
+func sendActionAMQP(action Action, destinationUUID string) error {
 
 	payload, err := json.Marshal(action)
 	if err != nil {
@@ -187,16 +175,7 @@ func sendActionAMQP(action Action) error {
 	// set message headers
 	var headers map[string]interface{}
 	headers = make(map[string]interface{}) // empty map
-	if action.Act == "delete" || action.Act == "create" {
-		// set uuid header to uuid of manager of IC
-		headers["uuid"] = action.Parameters.Manager
-	} else {
-		headers["uuid"] = action.Parameters.UUID
-	}
-
-	//headers["type"] = action.Parameters.Type
-	//headers["category"] = action.Parameters.Category
-
+	headers["uuid"] = destinationUUID
 	msg.Headers = headers
 
 	err = CheckConnection()
@@ -322,7 +301,7 @@ func createExternalIC(payload ICUpdate, ICUUID string, body []byte) error {
 	}
 
 	// Create the new IC
-	newIC, err := newICReq.createIC(true)
+	newIC, err := newICReq.createIC()
 	if err != nil {
 		return fmt.Errorf("AMQP: Creating new IC failed: %v", err)
 	}
@@ -347,7 +326,7 @@ func (s *InfrastructureComponent) updateExternalIC(payload ICUpdate, body []byte
 		if updatedICReq.InfrastructureComponent.State == "gone" {
 			// remove IC from DB
 			log.Println("AMQP: Deleting IC with state gone", s.UUID)
-			err := s.delete(true)
+			err := s.delete()
 			if err != nil {
 				// if component could not be deleted there are still configurations using it in the DB
 				// continue with the update to save the new state of the component and get back to the deletion later

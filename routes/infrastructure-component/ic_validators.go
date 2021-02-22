@@ -27,7 +27,6 @@ import (
 	"github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/nsf/jsondiff"
 	"gopkg.in/go-playground/validator.v9"
-	"log"
 	"math"
 	"time"
 )
@@ -117,32 +116,10 @@ func (r *UpdateICRequest) validate() error {
 	return errs
 }
 
-func (r *AddICRequest) createIC(receivedViaAMQP bool) (InfrastructureComponent, error) {
+func (r *AddICRequest) createIC() (InfrastructureComponent, error) {
 	var s InfrastructureComponent
 	var err error
 	err = nil
-
-	// case distinction for externally managed IC
-	if *r.InfrastructureComponent.ManagedExternally && !receivedViaAMQP {
-		var action Action
-		action.Act = "create"
-		action.When = time.Now().Unix()
-
-		action.Parameters.Type = r.InfrastructureComponent.Type
-		action.Parameters.Name = r.InfrastructureComponent.Name
-		action.Parameters.Category = r.InfrastructureComponent.Category
-
-		// set optional properties
-		action.Parameters.Description = r.InfrastructureComponent.Description
-		action.Parameters.Location = r.InfrastructureComponent.Location
-		action.Parameters.API_url = r.InfrastructureComponent.APIURL
-		action.Parameters.WS_url = r.InfrastructureComponent.WebsocketURL
-		action.Parameters.UUID = r.InfrastructureComponent.UUID
-		action.Parameters.Manager = r.InfrastructureComponent.Manager
-
-		log.Println("AMQP: Sending request to create new IC")
-		err = sendActionAMQP(action)
-	}
 
 	s.UUID = r.InfrastructureComponent.UUID
 	s.WebsocketURL = r.InfrastructureComponent.WebsocketURL
