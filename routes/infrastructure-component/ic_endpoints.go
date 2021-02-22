@@ -299,14 +299,10 @@ func sendActionToIC(c *gin.Context) {
 	//now := time.Now()
 
 	for _, action := range actions {
-
-		var destinationUUID = ""
-		if action.Act == "delete" || action.Act == "create" {
-			destinationUUID = s.Manager
-		} else {
-			destinationUUID = s.UUID
+		if (action.Act == "delete" || action.Act == "create") && s.Category != "manager" {
+			helper.BadRequestError(c, "cannot send a delete or create action to an IC of category "+s.Category)
 		}
-		err = sendActionAMQP(action, destinationUUID)
+		err = sendActionAMQP(action, s.UUID)
 		if err != nil {
 			helper.InternalServerError(c, "Unable to send actions to IC: "+err.Error())
 			return
