@@ -69,7 +69,12 @@ func (r *addResultRequest) createResult() Result {
 
 	s.Description = r.Result.Description
 	s.ConfigSnapshots = r.Result.ConfigSnapshots
-	s.ResultFileIDs = r.Result.ResultFileIDs
+	if r.Result.ResultFileIDs == nil {
+		s.ResultFileIDs = []int64{}
+	} else {
+		s.ResultFileIDs = r.Result.ResultFileIDs
+	}
+
 	s.ScenarioID = r.Result.ScenarioID
 
 	return s
@@ -80,7 +85,11 @@ func (r *updateResultRequest) updatedResult(oldResult Result) Result {
 	s := oldResult
 
 	s.Result.Description = r.Result.Description
-	s.ResultFileIDs = r.Result.ResultFileIDs
+	if r.Result.ResultFileIDs == nil {
+		s.ResultFileIDs = []int64{}
+	} else {
+		s.ResultFileIDs = r.Result.ResultFileIDs
+	}
 
 	// only update snapshots if not empty
 	var emptyJson postgres.Jsonb

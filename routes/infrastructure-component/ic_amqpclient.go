@@ -46,6 +46,8 @@ type Action struct {
 	Act        string          `json:"action"`
 	When       int64           `json:"when"`
 	Parameters json.RawMessage `json:"parameters,omitempty"`
+	Model      json.RawMessage `json:"model,omitempty"`
+	Results    json.RawMessage `json:"results,omitempty"`
 }
 
 type ICStatus struct {
