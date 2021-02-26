@@ -334,11 +334,11 @@ func TestUpdateICAsAdmin(t *testing.T) {
 	var updatedIC ICRequest
 	updatedIC.Name = "a new name"
 
-	// Should result in forbidden return code 403
+	// Should result in bad request return code 400
 	code, resp, err = helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/v2/ic/%v", 2), "PUT", helper.KeyModels{"ic": updatedIC})
 	assert.NoError(t, err)
-	assert.Equalf(t, 403, code, "Response body: \n%v\n", resp)
+	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 }
 
 func TestUpdateICAsUser(t *testing.T) {
