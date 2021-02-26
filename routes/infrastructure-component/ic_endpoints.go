@@ -150,7 +150,7 @@ func updateIC(c *gin.Context) {
 	}
 
 	if oldIC.ManagedExternally {
-		helper.ForbiddenError(c, "Cannot update externally managed component via API")
+		helper.BadRequestError(c, "Cannot update externally managed component via API")
 		return
 	}
 
