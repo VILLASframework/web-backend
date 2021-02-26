@@ -23,6 +23,7 @@ package user
 
 import (
 	"fmt"
+
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -34,6 +35,40 @@ const bcryptCost = 10
 // live in the same package.
 type User struct {
 	database.User // check golang embedding types
+}
+
+func NewUser(username, password, mail, role string, active bool) (*User, error) {
+	var newUser User
+
+	// Check that the username is NOT taken
+	err := newUser.ByUsername(username)
+	if err == nil {
+		return nil, fmt.Errorf("Username is already taken")
+	}
+
+	newUser.Username = username
+	newUser.Mail = mail
+	newUser.Role = role
+	newUser.Active = active
+
+	if password == "" {
+		// This user is authenticated via some external system
+		newUser.Password = ""
+	} else {
+		// Hash the password before saving it to the DB
+		err = newUser.setPassword(password)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// Save the user in the DB
+	err = newUser.save()
+	if err != nil {
+		return nil, err
+	}
+
+	return &newUser, nil
 }
 
 func (u *User) save() error {

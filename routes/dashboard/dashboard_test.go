@@ -67,7 +67,7 @@ func addScenario(token string) (scenarioID uint) {
 		StartParameters: postgres.Jsonb{json.RawMessage(`{"parameter1" : "testValue1A", "parameter2" : "testValue2A", "parameter3" : 42}`)},
 	}
 	_, resp, err := helper.TestEndpoint(router, token,
-		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenario})
+		"/api/v2/scenarios", "POST", helper.KeyModels{"scenario": newScenario})
 	if err != nil {
 		log.Panic("The following error happend on POSTing a scenario: ", err.Error())
 	}
@@ -77,7 +77,7 @@ func addScenario(token string) (scenarioID uint) {
 
 	// add the guest user to the new scenario
 	_, resp, _ = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/scenarios/%v/user?username=User_C", newScenarioID), "PUT", nil)
+		fmt.Sprintf("/api/v2/scenarios/%v/user?username=User_C", newScenarioID), "PUT", nil)
 
 	return uint(newScenarioID)
 }
@@ -94,10 +94,10 @@ func TestMain(m *testing.M) {
 	defer database.DBpool.Close()
 
 	router = gin.Default()
-	api := router.Group("/api")
+	api := router.Group("/api/v2")
 
 	user.RegisterAuthenticate(api.Group("/authenticate"))
-	api.Use(user.Authentication(true))
+	api.Use(user.Authentication())
 	RegisterDashboardEndpoints(api.Group("/dashboards"))
 	// scenario endpoints required here to first add a scenario to the DB
 	// that can be associated with a new dashboard
@@ -112,8 +112,7 @@ func TestAddDashboard(t *testing.T) {
 	assert.NoError(t, helper.AddTestUsers())
 
 	// authenticate as normal user
-	token, err := helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.UserACredentials)
+	token, err := helper.AuthenticateForTest(router, helper.UserACredentials)
 	assert.NoError(t, err)
 
 	scenarioID := addScenario(token)
@@ -121,7 +120,7 @@ func TestAddDashboard(t *testing.T) {
 	// test POST dashboards/ $newDashboad
 	newDashboard.ScenarioID = scenarioID
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/dashboards", "POST", helper.KeyModels{"dashboard": newDashboard})
+		"/api/v2/dashboards", "POST", helper.KeyModels{"dashboard": newDashboard})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -135,7 +134,7 @@ func TestAddDashboard(t *testing.T) {
 
 	// Get the newDashboard
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/dashboards/%v", newDashboardID), "GET", nil)
+		fmt.Sprintf("/api/v2/dashboards/%v", newDashboardID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -150,13 +149,13 @@ func TestAddDashboard(t *testing.T) {
 	}
 	// this should NOT work and return a unprocessable entity 442 status code
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/dashboards", "POST", helper.KeyModels{"dashboard": malformedNewDashboard})
+		"/api/v2/dashboards", "POST", helper.KeyModels{"dashboard": malformedNewDashboard})
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// this should NOT work and return a bad request 400 status code
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/dashboards", "POST", "This is a test using plain text as body")
+		"/api/v2/dashboards", "POST", "This is a test using plain text as body")
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 
@@ -164,18 +163,17 @@ func TestAddDashboard(t *testing.T) {
 	// should return not found error
 	newDashboard.ScenarioID = scenarioID + 1
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/dashboards", "POST", helper.KeyModels{"dashboard": newDashboard})
+		"/api/v2/dashboards", "POST", helper.KeyModels{"dashboard": newDashboard})
 	assert.NoError(t, err)
 	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
 
 	// try to get dashboard as a user that is not in the scenario (userB)
-	token, err = helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.UserBCredentials)
+	token, err = helper.AuthenticateForTest(router, helper.UserBCredentials)
 	assert.NoError(t, err)
 
 	// this should fail with unprocessable entity
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/dashboards/%v", newDashboardID), "GET", nil)
+		fmt.Sprintf("/api/v2/dashboards/%v", newDashboardID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
@@ -183,7 +181,7 @@ func TestAddDashboard(t *testing.T) {
 	// this should give an unprocessable entity error
 	newDashboard.ScenarioID = scenarioID
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/dashboards", "POST", helper.KeyModels{"dashboard": newDashboard})
+		"/api/v2/dashboards", "POST", helper.KeyModels{"dashboard": newDashboard})
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 }
@@ -194,8 +192,7 @@ func TestUpdateDashboard(t *testing.T) {
 	assert.NoError(t, helper.AddTestUsers())
 
 	// authenticate as normal user
-	token, err := helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.UserACredentials)
+	token, err := helper.AuthenticateForTest(router, helper.UserACredentials)
 	assert.NoError(t, err)
 
 	scenarioID := addScenario(token)
@@ -203,7 +200,7 @@ func TestUpdateDashboard(t *testing.T) {
 	// test POST dashboards/ $newDashboard
 	newDashboard.ScenarioID = scenarioID
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/dashboards", "POST", helper.KeyModels{"dashboard": newDashboard})
+		"/api/v2/dashboards", "POST", helper.KeyModels{"dashboard": newDashboard})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -217,24 +214,22 @@ func TestUpdateDashboard(t *testing.T) {
 	}
 
 	// authenticate as guest user
-	token, err = helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.GuestCredentials)
+	token, err = helper.AuthenticateForTest(router, helper.GuestCredentials)
 	assert.NoError(t, err)
 
 	// try to update a dashboard as guest
 	// should return an unprocessable entity error
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/dashboards/%v", newDashboardID), "PUT", helper.KeyModels{"dashboard": updatedDashboard})
+		fmt.Sprintf("/api/v2/dashboards/%v", newDashboardID), "PUT", helper.KeyModels{"dashboard": updatedDashboard})
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// authenticate as normal user
-	token, err = helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.UserACredentials)
+	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
 	assert.NoError(t, err)
 
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/dashboards/%v", newDashboardID), "PUT", helper.KeyModels{"dashboard": updatedDashboard})
+		fmt.Sprintf("/api/v2/dashboards/%v", newDashboardID), "PUT", helper.KeyModels{"dashboard": updatedDashboard})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -244,7 +239,7 @@ func TestUpdateDashboard(t *testing.T) {
 
 	// Get the updatedDashboard
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/dashboards/%v", newDashboardID), "GET", nil)
+		fmt.Sprintf("/api/v2/dashboards/%v", newDashboardID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -254,13 +249,13 @@ func TestUpdateDashboard(t *testing.T) {
 
 	// try to update a dashboard that does not exist (should return not found 404 status code)
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/dashboards/%v", newDashboardID+1), "PUT", helper.KeyModels{"dashboard": updatedDashboard})
+		fmt.Sprintf("/api/v2/dashboards/%v", newDashboardID+1), "PUT", helper.KeyModels{"dashboard": updatedDashboard})
 	assert.NoError(t, err)
 	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
 
 	// try to update with a malformed body, should return a bad request error
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/dashboards/%v", newDashboardID), "PUT", "This is the body of a malformed update request.")
+		fmt.Sprintf("/api/v2/dashboards/%v", newDashboardID), "PUT", "This is the body of a malformed update request.")
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 }
@@ -271,8 +266,7 @@ func TestDeleteDashboard(t *testing.T) {
 	assert.NoError(t, helper.AddTestUsers())
 
 	// authenticate as normal user
-	token, err := helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.UserACredentials)
+	token, err := helper.AuthenticateForTest(router, helper.UserACredentials)
 	assert.NoError(t, err)
 
 	scenarioID := addScenario(token)
@@ -280,7 +274,7 @@ func TestDeleteDashboard(t *testing.T) {
 	// test POST dashboards/ $newDashboard
 	newDashboard.ScenarioID = scenarioID
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/dashboards", "POST", helper.KeyModels{"dashboard": newDashboard})
+		"/api/v2/dashboards", "POST", helper.KeyModels{"dashboard": newDashboard})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -289,35 +283,33 @@ func TestDeleteDashboard(t *testing.T) {
 	assert.NoError(t, err)
 
 	// try to delete a dashboard from a scenario to which the user has no access
-	token, err = helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.UserBCredentials)
+	token, err = helper.AuthenticateForTest(router, helper.UserBCredentials)
 	assert.NoError(t, err)
 
 	// this should fail with unprocessable entity
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/dashboards/%v", newDashboardID), "DELETE", nil)
+		fmt.Sprintf("/api/v2/dashboards/%v", newDashboardID), "DELETE", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// authenticate as normal user
-	token, err = helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.UserACredentials)
+	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
 	assert.NoError(t, err)
 
 	// try to delete a dashboard that does not exist; should return a not found error
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/dashboards/%v", newDashboardID+1), "DELETE", nil)
+		fmt.Sprintf("/api/v2/dashboards/%v", newDashboardID+1), "DELETE", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
 
 	// Count the number of all the dashboards returned for scenario
 	initialNumber, err := helper.LengthOfResponse(router, token,
-		fmt.Sprintf("/api/dashboards?scenarioID=%v", scenarioID), "GET", nil)
+		fmt.Sprintf("/api/v2/dashboards?scenarioID=%v", scenarioID), "GET", nil)
 	assert.NoError(t, err)
 
 	// Delete the added newDashboard
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/dashboards/%v", newDashboardID), "DELETE", nil)
+		fmt.Sprintf("/api/v2/dashboards/%v", newDashboardID), "DELETE", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -327,7 +319,7 @@ func TestDeleteDashboard(t *testing.T) {
 
 	// Again count the number of all the dashboards returned for scenario
 	finalNumber, err := helper.LengthOfResponse(router, token,
-		fmt.Sprintf("/api/dashboards?scenarioID=%v", scenarioID), "GET", nil)
+		fmt.Sprintf("/api/v2/dashboards?scenarioID=%v", scenarioID), "GET", nil)
 	assert.NoError(t, err)
 
 	assert.Equal(t, finalNumber, initialNumber-1)
@@ -340,21 +332,20 @@ func TestGetAllDashboardsOfScenario(t *testing.T) {
 	assert.NoError(t, helper.AddTestUsers())
 
 	// authenticate as normal user
-	token, err := helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.UserACredentials)
+	token, err := helper.AuthenticateForTest(router, helper.UserACredentials)
 	assert.NoError(t, err)
 
 	scenarioID := addScenario(token)
 
 	// Count the number of all the dashboards returned for scenario
 	initialNumber, err := helper.LengthOfResponse(router, token,
-		fmt.Sprintf("/api/dashboards?scenarioID=%v", scenarioID), "GET", nil)
+		fmt.Sprintf("/api/v2/dashboards?scenarioID=%v", scenarioID), "GET", nil)
 	assert.NoError(t, err)
 
 	// test POST dashboards/ $newDashboard
 	newDashboard.ScenarioID = scenarioID
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/dashboards", "POST", helper.KeyModels{"dashboard": newDashboard})
+		"/api/v2/dashboards", "POST", helper.KeyModels{"dashboard": newDashboard})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -365,31 +356,30 @@ func TestGetAllDashboardsOfScenario(t *testing.T) {
 		ScenarioID: scenarioID,
 	}
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/dashboards", "POST", helper.KeyModels{"dashboard": newDashboardB})
+		"/api/v2/dashboards", "POST", helper.KeyModels{"dashboard": newDashboardB})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// Count again the number of all the dashboards returned for scenario
 	finalNumber, err := helper.LengthOfResponse(router, token,
-		fmt.Sprintf("/api/dashboards?scenarioID=%v", scenarioID), "GET", nil)
+		fmt.Sprintf("/api/v2/dashboards?scenarioID=%v", scenarioID), "GET", nil)
 	assert.NoError(t, err)
 
 	assert.Equal(t, initialNumber+2, finalNumber)
 
 	// try to get all dashboards of a scenario that does not exist (should fail with not found)
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/dashboards?scenarioID=%v", scenarioID+1), "GET", nil)
+		fmt.Sprintf("/api/v2/dashboards?scenarioID=%v", scenarioID+1), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
 
 	// try to get all dashboards as a user that does not belong to scenario
-	token, err = helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.UserBCredentials)
+	token, err = helper.AuthenticateForTest(router, helper.UserBCredentials)
 	assert.NoError(t, err)
 
 	// this should fail with unprocessable entity
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/dashboards?scenarioID=%v", scenarioID), "GET", nil)
+		fmt.Sprintf("/api/v2/dashboards?scenarioID=%v", scenarioID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 

@@ -82,43 +82,57 @@ func addData(router *gin.Engine, cfg *config.Config) error {
 func main() {
 	log.Println("Starting VILLASweb-backend-go")
 
-	mode, _, basePath, port, amqphost, amqpuser, amqppass, err := configuration.ConfigureBackend()
+	err := configuration.InitConfig()
 	if err != nil {
-		panic(err)
+		log.Fatalf("Error during initialization of global configuration: %s, aborting.", err)
 	}
 
-	//init database
+	mode, err := configuration.GlobalConfig.String("mode")
+	if err != nil {
+		log.Fatalf("Error reading mode from global configuration: %s, aborting.", err)
+	}
+
+	port, err := configuration.GlobalConfig.String("port")
+	if err != nil {
+		log.Fatalf("Error reading port from global configuration: %s, aborting.", err)
+	}
+
+	// Init database
 	err = database.InitDB(configuration.GlobalConfig)
 	if err != nil {
-		log.Printf("Error during initialization of database: %v, aborting.", err.Error())
-		panic(err)
+		log.Fatalf("Error during initialization of database: %s, aborting.", err)
 	}
 	defer database.DBpool.Close()
 
-	// init endpoints
+	// Init endpoints
 	if mode == "release" {
 		gin.SetMode(gin.ReleaseMode)
 	}
+
 	r := gin.Default()
-	api := r.Group(basePath)
+	api := r.Group("/api/v2")
 	routes.RegisterEndpoints(r, api)
 
-	//Start AMQP client
-	if amqphost != "" {
+	// Start AMQP client
+	AMQPhost, _ := configuration.GlobalConfig.String("amqp.host")
+	AMQPuser, _ := configuration.GlobalConfig.String("amqp.user")
+	AMQPpass, _ := configuration.GlobalConfig.String("amqp.pass")
+
+	if AMQPhost != "" {
 		// create amqp URL based on username, password and host
-		amqpurl := "amqp://" + amqpuser + ":" + amqppass + "@" + amqphost
+		amqpurl := "amqp://" + AMQPuser + ":" + AMQPpass + "@" + AMQPhost
 		err = infrastructure_component.StartAMQP(amqpurl, api)
 		if err != nil {
-			panic(err)
+			log.Fatal(err)
 		}
 	}
 
-	// add data to DB (if any)
+	// Add data to DB (if any)
 	err = addData(r, configuration.GlobalConfig)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
-	// server at port 4000 to match frontend's redirect path
+	// Server at port 4000 to match frontend's redirect path
 	r.Run(":" + port)
 }

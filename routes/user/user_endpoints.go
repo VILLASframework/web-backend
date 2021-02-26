@@ -104,28 +104,13 @@ func addUser(c *gin.Context) {
 	}
 
 	// Create the new user from the request
-	newUser := req.createUser()
-
-	// Check that the username is NOT taken
-	err = newUser.ByUsername(newUser.Username)
-	if err == nil {
-		helper.UnprocessableEntityError(c, "Username is already taken")
-		return
-	}
-
-	// Hash the password before saving it to the DB
-	err = newUser.setPassword(newUser.Password)
+	newUser, err := NewUser(req.User.Username, req.User.Password, req.User.Mail, req.User.Role, true)
 	if err != nil {
-		helper.InternalServerError(c, "Unable to encrypt the password")
+		helper.UnprocessableEntityError(c, err.Error())
 		return
 	}
 
-	// Save the user in the DB
-	err = newUser.save()
-	if !helper.DBError(c, err) {
-		c.JSON(http.StatusOK, gin.H{"user": newUser.User})
-	}
-
+	c.JSON(http.StatusOK, gin.H{"user": newUser.User})
 }
 
 // UpdateUser godoc

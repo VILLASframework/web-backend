@@ -33,65 +33,66 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func userToContext(ctx *gin.Context, user_id uint) {
+func claimsToContext(c *gin.Context, claims jwt.MapClaims) error {
+	userID, ok := claims["id"].(float64)
+	if !ok {
+		return fmt.Errorf("Authentication failed (claims casting)")
+	}
 
 	var user User
 
-	err := user.ByID(user_id)
-	if helper.DBError(ctx, err) {
-		return
+	err := user.ByID(uint(userID))
+	if err != nil {
+		return err
 	}
 
-	ctx.Set(database.UserRoleCtx, user.Role)
-	ctx.Set(database.UserIDCtx, user_id)
+	c.Set(database.UserRoleCtx, user.Role)
+	c.Set(database.UserIDCtx, uint(userID))
+
+	return nil
 }
 
-func Authentication(unauthorized bool) gin.HandlerFunc {
+func isAuthenticated(c *gin.Context) (bool, error) {
+	// Authentication's access token extraction
+	token, err := request.ParseFromRequest(c.Request,
+		request.MultiExtractor{
+			request.AuthorizationHeaderExtractor,
+			request.ArgumentExtractor{"token"},
+		},
+		func(token *jwt.Token) (interface{}, error) {
+			// Validate alg for signing the jwt
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("Unexpected signing alg: %v",
+					token.Header["alg"])
+			}
 
-	return func(ctx *gin.Context) {
+			// Return secret in byte format
+			secret, _ := configuration.GlobalConfig.String("jwt.secret")
+			return []byte(secret), nil
+		})
 
-		// Authentication's access token extraction
-		// XXX: if we have a multi-header for Authorization (e.g. in
-		// case of OAuth2 use the request.OAuth2Extractor and make sure
-		// that the argument is 'access-token' or provide a custom one
-		token, err := request.ParseFromRequest(ctx.Request,
-			request.MultiExtractor{
-				request.AuthorizationHeaderExtractor,
-				request.ArgumentExtractor{"token"},
-			},
-			func(token *jwt.Token) (interface{}, error) {
+	// If the authentication extraction fails return HTTP code 401
+	if err != nil {
+		return false, fmt.Errorf("Authentication failed (claims extraction: %s)", err)
+	}
 
-				// validate alg for signing the jwt
-				if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-					return nil, fmt.Errorf("Unexpected signing alg: %v",
-						token.Header["alg"])
-				}
-
-				// return secret in byte format
-				secret, _ := configuration.GlobalConfig.String("jwt.secret")
-				return []byte(secret), nil
-			})
-
-		// If the authentication extraction fails return HTTP CODE 401
+	// If the token is ok, pass user id to context
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		err = claimsToContext(c, claims)
 		if err != nil {
-			if unauthorized {
-				helper.UnauthorizedAbort(ctx, "Authentication failed (claims extraction)")
-			}
-			return
+			return false, fmt.Errorf("Authentication failed (claims casting: %s)", err)
 		}
+	}
 
-		// If the token is ok, pass user_id to context
-		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+	return true, nil
+}
 
-			user_id, ok := claims["id"].(float64)
+func Authentication() gin.HandlerFunc {
 
-			if !ok {
-				helper.UnauthorizedAbort(ctx, "Authentication failed (claims casting)")
-				return
-			}
-
-			userToContext(ctx, uint(user_id))
+	return func(c *gin.Context) {
+		ok, err := isAuthenticated(c)
+		if !ok || err != nil {
+			helper.UnauthorizedAbort(c, err.Error())
 		}
-
 	}
 }

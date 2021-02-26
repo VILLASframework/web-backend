@@ -24,11 +24,12 @@ package infrastructure_component
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/streadway/amqp"
 	"log"
 	"os"
 	"testing"
 	"time"
+
+	"github.com/streadway/amqp"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	component_configuration "git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/component-configuration"
@@ -119,10 +120,10 @@ func TestMain(m *testing.M) {
 	defer database.DBpool.Close()
 
 	router = gin.Default()
-	api = router.Group("/api")
+	api = router.Group("/api/v2")
 
 	user.RegisterAuthenticate(api.Group("/authenticate"))
-	api.Use(user.Authentication(true))
+	api.Use(user.Authentication())
 	RegisterICEndpoints(api.Group("/ic"))
 	// component configuration endpoints required to associate an IC with a component config
 	component_configuration.RegisterComponentConfigurationEndpoints(api.Group("/configs"))
@@ -160,14 +161,13 @@ func TestAddICAsAdmin(t *testing.T) {
 	assert.NoError(t, helper.AddTestUsers())
 
 	// authenticate as admin
-	token, err := helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.AdminCredentials)
+	token, err := helper.AuthenticateForTest(router, helper.AdminCredentials)
 	assert.NoError(t, err)
 
 	// try to POST with non JSON body
 	// should result in bad request
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/ic", "POST", "This is no JSON")
+		"/api/v2/ic", "POST", "This is no JSON")
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 
@@ -177,13 +177,13 @@ func TestAddICAsAdmin(t *testing.T) {
 		UUID: newIC2.UUID,
 	}
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/ic", "POST", helper.KeyModels{"ic": newMalformedIC})
+		"/api/v2/ic", "POST", helper.KeyModels{"ic": newMalformedIC})
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// test POST ic/ $newIC
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/ic", "POST", helper.KeyModels{"ic": newIC1})
+		"/api/v2/ic", "POST", helper.KeyModels{"ic": newIC1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -197,7 +197,7 @@ func TestAddICAsAdmin(t *testing.T) {
 
 	// Get the newIC
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/ic/%v", newICID), "GET", nil)
+		fmt.Sprintf("/api/v2/ic/%v", newICID), "GET", nil)
 	assert.NoError(t, err)
 
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -209,13 +209,13 @@ func TestAddICAsAdmin(t *testing.T) {
 	// Try to GET a IC that does not exist
 	// should result in not found
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/ic/%v", newICID+1), "GET", nil)
+		fmt.Sprintf("/api/v2/ic/%v", newICID+1), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
 
 	// test creation of external IC (should lead to bad request)
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/ic", "POST", helper.KeyModels{"ic": newIC2})
+		"/api/v2/ic", "POST", helper.KeyModels{"ic": newIC2})
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 }
@@ -226,8 +226,7 @@ func TestAddICAsUser(t *testing.T) {
 	assert.NoError(t, helper.AddTestUsers())
 
 	// authenticate as user
-	token, err := helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.UserACredentials)
+	token, err := helper.AuthenticateForTest(router, helper.UserACredentials)
 	assert.NoError(t, err)
 
 	// test POST ic/ $newIC
@@ -235,7 +234,7 @@ func TestAddICAsUser(t *testing.T) {
 	// Normal users are not allowed to add ICs
 	newIC1.ManagedExternally = newFalse()
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/ic", "POST", helper.KeyModels{"ic": newIC1})
+		"/api/v2/ic", "POST", helper.KeyModels{"ic": newIC1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 }
@@ -246,14 +245,13 @@ func TestUpdateICAsAdmin(t *testing.T) {
 	assert.NoError(t, helper.AddTestUsers())
 
 	// authenticate as admin
-	token, err := helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.AdminCredentials)
+	token, err := helper.AuthenticateForTest(router, helper.AdminCredentials)
 	assert.NoError(t, err)
 
 	// test POST ic/ $newIC
 	newIC1.ManagedExternally = newFalse()
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/ic", "POST", helper.KeyModels{"ic": newIC1})
+		"/api/v2/ic", "POST", helper.KeyModels{"ic": newIC1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -268,14 +266,14 @@ func TestUpdateICAsAdmin(t *testing.T) {
 	// try to PUT with non JSON body
 	// should result in bad request
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/ic/%v", newICID), "PUT", "This is no JSON")
+		fmt.Sprintf("/api/v2/ic/%v", newICID), "PUT", "This is no JSON")
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 
 	// Test PUT IC
 	newIC1.WebsocketURL = "ThisIsMyNewURL"
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/ic/%v", newICID), "PUT", helper.KeyModels{"ic": newIC1})
+		fmt.Sprintf("/api/v2/ic/%v", newICID), "PUT", helper.KeyModels{"ic": newIC1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -285,7 +283,7 @@ func TestUpdateICAsAdmin(t *testing.T) {
 
 	// Get the updated newIC
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/ic/%v", newICID), "GET", nil)
+		fmt.Sprintf("/api/v2/ic/%v", newICID), "GET", nil)
 	assert.NoError(t, err)
 
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
@@ -338,7 +336,7 @@ func TestUpdateICAsAdmin(t *testing.T) {
 
 	// Should result in forbidden return code 403
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/ic/%v", 2), "PUT", helper.KeyModels{"ic": updatedIC})
+		fmt.Sprintf("/api/v2/ic/%v", 2), "PUT", helper.KeyModels{"ic": updatedIC})
 	assert.NoError(t, err)
 	assert.Equalf(t, 403, code, "Response body: \n%v\n", resp)
 }
@@ -349,13 +347,12 @@ func TestUpdateICAsUser(t *testing.T) {
 	assert.NoError(t, helper.AddTestUsers())
 
 	// authenticate as admin
-	token, err := helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.AdminCredentials)
+	token, err := helper.AuthenticateForTest(router, helper.AdminCredentials)
 	assert.NoError(t, err)
 
 	// test POST ic/ $newIC
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/ic", "POST", helper.KeyModels{"ic": newIC1})
+		"/api/v2/ic", "POST", helper.KeyModels{"ic": newIC1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -364,15 +361,14 @@ func TestUpdateICAsUser(t *testing.T) {
 	assert.NoError(t, err)
 
 	// authenticate as user
-	token, err = helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.UserACredentials)
+	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
 	assert.NoError(t, err)
 
 	// Test PUT IC
 	// This should fail with unprocessable entity status code 422
 	newIC1.WebsocketURL = "ThisIsMyNewURL2"
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/ic/%v", newICID), "PUT", helper.KeyModels{"ic": newIC1})
+		fmt.Sprintf("/api/v2/ic/%v", newICID), "PUT", helper.KeyModels{"ic": newIC1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
@@ -384,13 +380,12 @@ func TestDeleteICAsAdmin(t *testing.T) {
 	assert.NoError(t, helper.AddTestUsers())
 
 	// authenticate as admin
-	token, err := helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.AdminCredentials)
+	token, err := helper.AuthenticateForTest(router, helper.AdminCredentials)
 	assert.NoError(t, err)
 
 	// test POST ic/ $newIC
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/ic", "POST", helper.KeyModels{"ic": newIC1})
+		"/api/v2/ic", "POST", helper.KeyModels{"ic": newIC1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -400,12 +395,12 @@ func TestDeleteICAsAdmin(t *testing.T) {
 
 	// Count the number of all the ICs returned for admin
 	initialNumber, err := helper.LengthOfResponse(router, token,
-		"/api/ic", "GET", nil)
+		"/api/v2/ic", "GET", nil)
 	assert.NoError(t, err)
 
 	// Delete the added newIC
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/ic/%v", newICID), "DELETE", nil)
+		fmt.Sprintf("/api/v2/ic/%v", newICID), "DELETE", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -415,7 +410,7 @@ func TestDeleteICAsAdmin(t *testing.T) {
 
 	// Again count the number of all the ICs returned
 	finalNumber, err := helper.LengthOfResponse(router, token,
-		"/api/ic", "GET", nil)
+		"/api/v2/ic", "GET", nil)
 	assert.NoError(t, err)
 
 	assert.Equal(t, finalNumber, initialNumber-1)
@@ -460,13 +455,13 @@ func TestDeleteICAsAdmin(t *testing.T) {
 
 	// Delete the added external IC (triggers a bad request error)
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/ic/%v", 2), "DELETE", nil)
+		fmt.Sprintf("/api/v2/ic/%v", 2), "DELETE", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 
 	// Again count the number of all the ICs returned
 	finalNumberAfterExtneralDelete, err := helper.LengthOfResponse(router, token,
-		"/api/ic", "GET", nil)
+		"/api/v2/ic", "GET", nil)
 	assert.NoError(t, err)
 
 	assert.Equal(t, finalNumber+1, finalNumberAfterExtneralDelete)
@@ -479,13 +474,12 @@ func TestDeleteICAsUser(t *testing.T) {
 	assert.NoError(t, helper.AddTestUsers())
 
 	// authenticate as admin
-	token, err := helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.AdminCredentials)
+	token, err := helper.AuthenticateForTest(router, helper.AdminCredentials)
 	assert.NoError(t, err)
 
 	// test POST ic/ $newIC
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/ic", "POST", helper.KeyModels{"ic": newIC1})
+		"/api/v2/ic", "POST", helper.KeyModels{"ic": newIC1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -494,15 +488,14 @@ func TestDeleteICAsUser(t *testing.T) {
 	assert.NoError(t, err)
 
 	// authenticate as user
-	token, err = helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.UserACredentials)
+	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
 	assert.NoError(t, err)
 
 	// Test DELETE ICs
 	// This should fail with unprocessable entity status code 422
 	newIC1.WebsocketURL = "ThisIsMyNewURL3"
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/ic/%v", newICID), "DELETE", nil)
+		fmt.Sprintf("/api/v2/ic/%v", newICID), "DELETE", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 }
@@ -513,43 +506,41 @@ func TestGetAllICs(t *testing.T) {
 	assert.NoError(t, helper.AddTestUsers())
 
 	// authenticate as admin
-	token, err := helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.AdminCredentials)
+	token, err := helper.AuthenticateForTest(router, helper.AdminCredentials)
 	assert.NoError(t, err)
 
 	// get the length of the GET all ICs response for user
 	initialNumber, err := helper.LengthOfResponse(router, token,
-		"/api/ic", "GET", nil)
+		"/api/v2/ic", "GET", nil)
 	assert.NoError(t, err)
 
 	// test POST ic/ $newICA
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/ic", "POST", helper.KeyModels{"ic": newIC1})
+		"/api/v2/ic", "POST", helper.KeyModels{"ic": newIC1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// test POST ic/ $newICB
 
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/ic", "POST", helper.KeyModels{"ic": newIC1})
+		"/api/v2/ic", "POST", helper.KeyModels{"ic": newIC1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// get the length of the GET all ICs response again
 	finalNumber, err := helper.LengthOfResponse(router, token,
-		"/api/ic", "GET", nil)
+		"/api/v2/ic", "GET", nil)
 	assert.NoError(t, err)
 
 	assert.Equal(t, finalNumber, initialNumber+2)
 
 	// authenticate as normal user
-	token, err = helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.UserACredentials)
+	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
 	assert.NoError(t, err)
 
 	// get the length of the GET all ICs response again
 	finalNumber2, err := helper.LengthOfResponse(router, token,
-		"/api/ic", "GET", nil)
+		"/api/v2/ic", "GET", nil)
 	assert.NoError(t, err)
 
 	assert.Equal(t, finalNumber2, initialNumber+2)
@@ -561,13 +552,12 @@ func TestGetConfigsOfIC(t *testing.T) {
 	assert.NoError(t, helper.AddTestUsers())
 
 	// authenticate as admin
-	token, err := helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.AdminCredentials)
+	token, err := helper.AuthenticateForTest(router, helper.AdminCredentials)
 	assert.NoError(t, err)
 
 	// test POST ic/ $newICA
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/ic", "POST", helper.KeyModels{"ic": newIC1})
+		"/api/v2/ic", "POST", helper.KeyModels{"ic": newIC1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -577,20 +567,19 @@ func TestGetConfigsOfIC(t *testing.T) {
 
 	// test GET ic/ID/confis
 	numberOfConfigs, err := helper.LengthOfResponse(router, token,
-		fmt.Sprintf("/api/ic/%v/configs", newICID), "GET", nil)
+		fmt.Sprintf("/api/v2/ic/%v/configs", newICID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	assert.Equal(t, 0, numberOfConfigs)
 
 	// authenticate as normal user
-	token, err = helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.UserACredentials)
+	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
 	assert.NoError(t, err)
 
 	// test GET ic/ID/configs
 	numberOfConfigs, err = helper.LengthOfResponse(router, token,
-		fmt.Sprintf("/api/ic/%v/configs", newICID), "GET", nil)
+		fmt.Sprintf("/api/v2/ic/%v/configs", newICID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -599,7 +588,7 @@ func TestGetConfigsOfIC(t *testing.T) {
 	// Try to get configs of IC that does not exist
 	// should result in not found
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/ic/%v/configs", newICID+1), "GET", nil)
+		fmt.Sprintf("/api/v2/ic/%v/configs", newICID+1), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
 }
@@ -610,13 +599,12 @@ func TestSendActionToIC(t *testing.T) {
 	assert.NoError(t, helper.AddTestUsers())
 
 	// authenticate as admin
-	token, err := helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.AdminCredentials)
+	token, err := helper.AuthenticateForTest(router, helper.AdminCredentials)
 	assert.NoError(t, err)
 
 	// test POST ic/ $newICA
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/ic", "POST", helper.KeyModels{"ic": newIC1})
+		"/api/v2/ic", "POST", helper.KeyModels{"ic": newIC1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -642,13 +630,13 @@ func TestSendActionToIC(t *testing.T) {
 
 	// Send action to IC
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/ic/%v/action", newICID), "POST", actions)
+		fmt.Sprintf("/api/v2/ic/%v/action", newICID), "POST", actions)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// Send malformed actions array to IC (should yield bad request)
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/ic/%v/action", newICID), "POST", action1)
+		fmt.Sprintf("/api/v2/ic/%v/action", newICID), "POST", action1)
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 }
@@ -660,8 +648,7 @@ func TestCreateUpdateViaAMQPRecv(t *testing.T) {
 	assert.NoError(t, helper.AddTestUsers())
 
 	// authenticate as admin
-	token, err := helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.AdminCredentials)
+	token, err := helper.AuthenticateForTest(router, helper.AdminCredentials)
 	assert.NoError(t, err)
 
 	// fake an IC update message
@@ -699,7 +686,7 @@ func TestCreateUpdateViaAMQPRecv(t *testing.T) {
 
 	// get the length of the GET all ICs response for user
 	number, err := helper.LengthOfResponse(router, token,
-		"/api/ic", "GET", nil)
+		"/api/v2/ic", "GET", nil)
 	assert.NoError(t, err)
 	assert.Equal(t, 0, number)
 
@@ -742,7 +729,7 @@ func TestCreateUpdateViaAMQPRecv(t *testing.T) {
 
 	// get the length of the GET all ICs response for user
 	number, err = helper.LengthOfResponse(router, token,
-		"/api/ic", "GET", nil)
+		"/api/v2/ic", "GET", nil)
 	assert.NoError(t, err)
 	assert.Equal(t, 1, number)
 
@@ -771,7 +758,7 @@ func TestCreateUpdateViaAMQPRecv(t *testing.T) {
 	time.Sleep(waitingTime * time.Second)
 	// get the length of the GET all ICs response for user
 	number, err = helper.LengthOfResponse(router, token,
-		"/api/ic", "GET", nil)
+		"/api/v2/ic", "GET", nil)
 	assert.NoError(t, err)
 	assert.Equal(t, 1, number)
 
@@ -784,8 +771,7 @@ func TestDeleteICViaAMQPRecv(t *testing.T) {
 	assert.NoError(t, helper.AddTestUsers())
 
 	// authenticate as admin
-	token, err := helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.AdminCredentials)
+	token, err := helper.AuthenticateForTest(router, helper.AdminCredentials)
 	assert.NoError(t, err)
 
 	// fake an IC update message
@@ -832,7 +818,7 @@ func TestDeleteICViaAMQPRecv(t *testing.T) {
 
 	// get the length of the GET all ICs response for user
 	number, err := helper.LengthOfResponse(router, token,
-		"/api/ic", "GET", nil)
+		"/api/v2/ic", "GET", nil)
 	assert.NoError(t, err)
 	assert.Equal(t, 1, number)
 
@@ -844,7 +830,7 @@ func TestDeleteICViaAMQPRecv(t *testing.T) {
 	}
 
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenario})
+		"/api/v2/scenarios", "POST", helper.KeyModels{"scenario": newScenario})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -866,7 +852,7 @@ func TestDeleteICViaAMQPRecv(t *testing.T) {
 	}
 
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/configs", "POST", helper.KeyModels{"config": newConfig})
+		"/api/v2/configs", "POST", helper.KeyModels{"config": newConfig})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -905,13 +891,13 @@ func TestDeleteICViaAMQPRecv(t *testing.T) {
 
 	// get the length of the GET all ICs response for user
 	number, err = helper.LengthOfResponse(router, token,
-		"/api/ic", "GET", nil)
+		"/api/v2/ic", "GET", nil)
 	assert.NoError(t, err)
 	assert.Equal(t, 1, number)
 
 	// Delete component config from earlier
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/configs/%v", newConfigID), "DELETE", nil)
+		fmt.Sprintf("/api/v2/configs/%v", newConfigID), "DELETE", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -921,7 +907,7 @@ func TestDeleteICViaAMQPRecv(t *testing.T) {
 
 	// get the length of the GET all ICs response for user
 	number, err = helper.LengthOfResponse(router, token,
-		"/api/ic", "GET", nil)
+		"/api/v2/ic", "GET", nil)
 	assert.NoError(t, err)
 	assert.Equal(t, 0, number)
 }

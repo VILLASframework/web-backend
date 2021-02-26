@@ -37,6 +37,7 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	component_configuration "git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/component-configuration"
+	config_route "git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/config"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/dashboard"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/file"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/healthz"
@@ -80,11 +81,12 @@ func RegisterEndpoints(router *gin.Engine, api *gin.RouterGroup) {
 	healthz.RegisterHealthzEndpoint(api.Group("/healthz"))
 	metrics.RegisterMetricsEndpoint(api.Group("/metrics"))
 	openapi.RegisterOpenAPIEndpoint(api.Group("/openapi"))
-	// All endpoints (except for /healthz and /metrics) require authentication except when someone wants to
-	// login (POST /authenticate)
+	config_route.RegisterConfigEndpoint(api.Group("/config"))
 	user.RegisterAuthenticate(api.Group("/authenticate"))
 
-	api.Use(user.Authentication(true))
+	// The following endpoints require authentication
+
+	api.Use(user.Authentication())
 
 	scenario.RegisterScenarioEndpoints(api.Group("/scenarios"))
 	component_configuration.RegisterComponentConfigurationEndpoints(api.Group("/configs"))
@@ -123,13 +125,6 @@ func ReadTestDataFromJson(path string) error {
 
 // Uses API endpoints to add test data to the backend; All endpoints have to be registered before invoking this function.
 func AddTestData(cfg *config.Config, router *gin.Engine) (*bytes.Buffer, error) {
-
-	basePath, err := cfg.String("base.path")
-	if err != nil {
-		fmt.Println("error: testdata could not be added to DB: no base path specified")
-		return nil, err
-	}
-
 	database.MigrateModels()
 
 	// add Admin user (defaults to User_0, xyz789)
@@ -145,10 +140,12 @@ func AddTestData(cfg *config.Config, router *gin.Engine) (*bytes.Buffer, error) 
 	}
 
 	// authenticate as admin
-	token, err := helper.AuthenticateForTest(router, basePath+"/authenticate", "POST", Admin)
+	token, err := helper.AuthenticateForTest(router, Admin)
 	if err != nil {
 		return nil, err
 	}
+
+	basePath := "/api/v2"
 
 	// add users
 	for _, u := range GlobalTestData.Users {

@@ -32,6 +32,41 @@ var doc = `{
     "basePath": "{{.BasePath}}",
     "paths": {
         "/authenticate": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "authentication"
+                ],
+                "summary": "Check if user is authenticated and provide details on how the user can authenticate",
+                "operationId": "authenticated",
+                "responses": {
+                    "200": {
+                        "description": "JSON web token, success status, message and authenticated user object",
+                        "schema": {
+                            "$ref": "#/definitions/api.ResponseAuthenticate"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error.",
+                        "schema": {
+                            "$ref": "#/definitions/api.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/authenticate/{mechanism}": {
             "post": {
                 "consumes": [
                     "application/json"
@@ -53,6 +88,17 @@ var doc = `{
                         "schema": {
                             "$ref": "#/definitions/user.loginRequest"
                         }
+                    },
+                    {
+                        "enum": [
+                            "internal",
+                            "external"
+                        ],
+                        "type": "string",
+                        "description": "Login mechanism",
+                        "name": "mechanism",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -72,6 +118,26 @@ var doc = `{
                         "description": "Internal server error.",
                         "schema": {
                             "$ref": "#/definitions/api.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/config": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "config"
+                ],
+                "summary": "Get config VILLASweb to be used by frontend",
+                "operationId": "config",
+                "responses": {
+                    "200": {
+                        "description": "The configuration",
+                        "schema": {
+                            "$ref": "#/definitions/config.Config"
                         }
                     }
                 }
@@ -3343,6 +3409,62 @@ var doc = `{
                 },
                 "StartParameters": {
                     "$ref": "#/definitions/postgres.Jsonb"
+                }
+            }
+        },
+        "config.Config": {
+            "type": "object",
+            "properties": {
+                "authentication": {
+                    "$ref": "#/definitions/config.ConfigAuthentication"
+                },
+                "contact": {
+                    "$ref": "#/definitions/config.ConfigContact"
+                },
+                "mode": {
+                    "type": "string"
+                },
+                "sub_title": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "config.ConfigAuthentication": {
+            "type": "object",
+            "properties": {
+                "external": {
+                    "$ref": "#/definitions/config.ConfigAuthenticationExternal"
+                },
+                "logout_url": {
+                    "type": "string"
+                }
+            }
+        },
+        "config.ConfigAuthenticationExternal": {
+            "type": "object",
+            "properties": {
+                "authorize_url": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "provider_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "config.ConfigContact": {
+            "type": "object",
+            "properties": {
+                "mail": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
                 }
             }
         },

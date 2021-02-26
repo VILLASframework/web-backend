@@ -23,9 +23,10 @@
 package routes
 
 import (
-	infrastructure_component "git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/infrastructure-component"
 	"os"
 	"testing"
+
+	infrastructure_component "git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/infrastructure-component"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
@@ -50,8 +51,7 @@ func TestMain(m *testing.M) {
 
 	router = gin.Default()
 
-	basePath, _ := configuration.GlobalConfig.String("base.path")
-	api = router.Group(basePath)
+	api = router.Group("/api/v2")
 	os.Exit(m.Run())
 }
 

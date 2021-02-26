@@ -92,7 +92,7 @@ func addScenarioAndDashboard(token string) (scenarioID uint, dashboardID uint) {
 		StartParameters: postgres.Jsonb{json.RawMessage(`{"parameter1" : "testValue1A", "parameter2" : "testValue2A", "parameter3" : 42}`)},
 	}
 	_, resp, _ := helper.TestEndpoint(router, token,
-		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenario})
+		"/api/v2/scenarios", "POST", helper.KeyModels{"scenario": newScenario})
 
 	// Read newScenario's ID from the response
 	newScenarioID, _ := helper.GetResponseID(resp)
@@ -104,14 +104,14 @@ func addScenarioAndDashboard(token string) (scenarioID uint, dashboardID uint) {
 		ScenarioID: uint(newScenarioID),
 	}
 	_, resp, _ = helper.TestEndpoint(router, token,
-		"/api/dashboards", "POST", helper.KeyModels{"dashboard": newDashboard})
+		"/api/v2/dashboards", "POST", helper.KeyModels{"dashboard": newDashboard})
 
 	// Read newDashboard's ID from the response
 	newDashboardID, _ := helper.GetResponseID(resp)
 
 	// add the guest user to the new scenario
 	_, resp, _ = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/scenarios/%v/user?username=User_C", newScenarioID), "PUT", nil)
+		fmt.Sprintf("/api/v2/scenarios/%v/user?username=User_C", newScenarioID), "PUT", nil)
 
 	return uint(newScenarioID), uint(newDashboardID)
 }
@@ -129,10 +129,10 @@ func TestMain(m *testing.M) {
 	defer database.DBpool.Close()
 
 	router = gin.Default()
-	api := router.Group("/api")
+	api := router.Group("/api/v2")
 
 	user.RegisterAuthenticate(api.Group("/authenticate"))
-	api.Use(user.Authentication(true))
+	api.Use(user.Authentication())
 	RegisterWidgetEndpoints(api.Group("/widgets"))
 	// scenario endpoints required here to first add a scenario to the DB
 	// that can be associated with a new dashboard
@@ -150,40 +150,37 @@ func TestAddWidget(t *testing.T) {
 	assert.NoError(t, helper.AddTestUsers())
 
 	// authenticate as normal user
-	token, err := helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.UserACredentials)
+	token, err := helper.AuthenticateForTest(router, helper.UserACredentials)
 	assert.NoError(t, err)
 
 	_, dashboardID := addScenarioAndDashboard(token)
 
 	newWidget.DashboardID = dashboardID
 	// authenticate as userB who has no access to scenario
-	token, err = helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.UserBCredentials)
+	token, err = helper.AuthenticateForTest(router, helper.UserBCredentials)
 	assert.NoError(t, err)
 
 	// try to POST the newWidget with no access to the scenario
 	// should result in unprocessable entity
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/widgets", "POST", helper.KeyModels{"widget": newWidget})
+		"/api/v2/widgets", "POST", helper.KeyModels{"widget": newWidget})
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// authenticate as normal user
-	token, err = helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.UserACredentials)
+	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
 	assert.NoError(t, err)
 
 	// try to POST non JSON body
 	// should result in bad request
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/widgets", "POST", "This is no JSON")
+		"/api/v2/widgets", "POST", "This is no JSON")
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 
 	// test POST widgets/ $newWidget
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/widgets", "POST", helper.KeyModels{"widget": newWidget})
+		"/api/v2/widgets", "POST", helper.KeyModels{"widget": newWidget})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -197,7 +194,7 @@ func TestAddWidget(t *testing.T) {
 
 	// Get the newWidget
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/widgets/%v", newWidgetID), "GET", nil)
+		fmt.Sprintf("/api/v2/widgets/%v", newWidgetID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -212,19 +209,18 @@ func TestAddWidget(t *testing.T) {
 	}
 	// this should NOT work and return a unprocessable entity 442 status code
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/widgets", "POST", helper.KeyModels{"widget": malformedNewWidget})
+		"/api/v2/widgets", "POST", helper.KeyModels{"widget": malformedNewWidget})
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// authenticate as userB who has no access to scenario
-	token, err = helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.UserBCredentials)
+	token, err = helper.AuthenticateForTest(router, helper.UserBCredentials)
 	assert.NoError(t, err)
 
 	// try to GET the newWidget with no access to the scenario
 	// should result in unprocessable entity
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/widgets/%v", newWidgetID), "GET", nil)
+		fmt.Sprintf("/api/v2/widgets/%v", newWidgetID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 }
@@ -235,8 +231,7 @@ func TestUpdateWidget(t *testing.T) {
 	assert.NoError(t, helper.AddTestUsers())
 
 	// authenticate as normal user
-	token, err := helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.UserACredentials)
+	token, err := helper.AuthenticateForTest(router, helper.UserACredentials)
 	assert.NoError(t, err)
 
 	_, dashboardID := addScenarioAndDashboard(token)
@@ -244,7 +239,7 @@ func TestUpdateWidget(t *testing.T) {
 	// test POST widgets/ $newWidget
 	newWidget.DashboardID = dashboardID
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/widgets", "POST", helper.KeyModels{"widget": newWidget})
+		"/api/v2/widgets", "POST", helper.KeyModels{"widget": newWidget})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -264,44 +259,41 @@ func TestUpdateWidget(t *testing.T) {
 	}
 
 	// authenticate as userB who has no access to scenario
-	token, err = helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.UserBCredentials)
+	token, err = helper.AuthenticateForTest(router, helper.UserBCredentials)
 	assert.NoError(t, err)
 
 	// try to PUT the updatedWidget with no access to the scenario
 	// should result in unprocessable entity
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/widgets/%v", newWidgetID), "PUT", helper.KeyModels{"widget": updatedWidget})
+		fmt.Sprintf("/api/v2/widgets/%v", newWidgetID), "PUT", helper.KeyModels{"widget": updatedWidget})
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// authenticate as guest user who has access to scenario
-	token, err = helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.GuestCredentials)
+	token, err = helper.AuthenticateForTest(router, helper.GuestCredentials)
 	assert.NoError(t, err)
 
 	// try to PUT as guest
 	// should NOT work and result in unprocessable entity
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/widgets/%v", newWidgetID), "PUT", helper.KeyModels{"widget": updatedWidget})
+		fmt.Sprintf("/api/v2/widgets/%v", newWidgetID), "PUT", helper.KeyModels{"widget": updatedWidget})
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// authenticate as normal user
-	token, err = helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.UserACredentials)
+	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
 	assert.NoError(t, err)
 
 	// try to PUT non JSON body
 	// should result in bad request
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/widgets/%v", newWidgetID), "PUT", "This is no JSON")
+		fmt.Sprintf("/api/v2/widgets/%v", newWidgetID), "PUT", "This is no JSON")
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 
 	// test PUT
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/widgets/%v", newWidgetID), "PUT", helper.KeyModels{"widget": updatedWidget})
+		fmt.Sprintf("/api/v2/widgets/%v", newWidgetID), "PUT", helper.KeyModels{"widget": updatedWidget})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -311,7 +303,7 @@ func TestUpdateWidget(t *testing.T) {
 
 	// Get the updatedWidget
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/widgets/%v", newWidgetID), "GET", nil)
+		fmt.Sprintf("/api/v2/widgets/%v", newWidgetID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -321,7 +313,7 @@ func TestUpdateWidget(t *testing.T) {
 
 	// try to update a widget that does not exist (should return not found 404 status code)
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/widgets/%v", newWidgetID+1), "PUT", helper.KeyModels{"widget": updatedWidget})
+		fmt.Sprintf("/api/v2/widgets/%v", newWidgetID+1), "PUT", helper.KeyModels{"widget": updatedWidget})
 	assert.NoError(t, err)
 	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
 
@@ -333,8 +325,7 @@ func TestDeleteWidget(t *testing.T) {
 	assert.NoError(t, helper.AddTestUsers())
 
 	// authenticate as normal user
-	token, err := helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.UserACredentials)
+	token, err := helper.AuthenticateForTest(router, helper.UserACredentials)
 	assert.NoError(t, err)
 
 	_, dashboardID := addScenarioAndDashboard(token)
@@ -342,7 +333,7 @@ func TestDeleteWidget(t *testing.T) {
 	// test POST widgets/ $newWidget
 	newWidget.DashboardID = dashboardID
 	code, resp, err := helper.TestEndpoint(router, token,
-		"/api/widgets", "POST", helper.KeyModels{"widget": newWidget})
+		"/api/v2/widgets", "POST", helper.KeyModels{"widget": newWidget})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -351,30 +342,28 @@ func TestDeleteWidget(t *testing.T) {
 	assert.NoError(t, err)
 
 	// authenticate as userB who has no access to scenario
-	token, err = helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.UserBCredentials)
+	token, err = helper.AuthenticateForTest(router, helper.UserBCredentials)
 	assert.NoError(t, err)
 
 	// try to DELETE the newWidget with no access to the scenario
 	// should result in unprocessable entity
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/widgets/%v", newWidgetID), "DELETE", nil)
+		fmt.Sprintf("/api/v2/widgets/%v", newWidgetID), "DELETE", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// authenticate as normal user
-	token, err = helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.UserACredentials)
+	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
 	assert.NoError(t, err)
 
 	// Count the number of all the widgets returned for dashboard
 	initialNumber, err := helper.LengthOfResponse(router, token,
-		fmt.Sprintf("/api/widgets?dashboardID=%v", dashboardID), "GET", nil)
+		fmt.Sprintf("/api/v2/widgets?dashboardID=%v", dashboardID), "GET", nil)
 	assert.NoError(t, err)
 
 	// Delete the added newWidget
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/widgets/%v", newWidgetID), "DELETE", nil)
+		fmt.Sprintf("/api/v2/widgets/%v", newWidgetID), "DELETE", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -384,7 +373,7 @@ func TestDeleteWidget(t *testing.T) {
 
 	// Again count the number of all the widgets returned for dashboard
 	finalNumber, err := helper.LengthOfResponse(router, token,
-		fmt.Sprintf("/api/widgets?dashboardID=%v", dashboardID), "GET", nil)
+		fmt.Sprintf("/api/v2/widgets?dashboardID=%v", dashboardID), "GET", nil)
 	assert.NoError(t, err)
 
 	assert.Equal(t, initialNumber-1, finalNumber)
@@ -396,38 +385,35 @@ func TestGetAllWidgetsOfDashboard(t *testing.T) {
 	assert.NoError(t, helper.AddTestUsers())
 
 	// authenticate as normal user
-	token, err := helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.UserACredentials)
+	token, err := helper.AuthenticateForTest(router, helper.UserACredentials)
 	assert.NoError(t, err)
 
 	_, dashboardID := addScenarioAndDashboard(token)
 
 	// authenticate as userB who has no access to scenario
-	token, err = helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.UserBCredentials)
+	token, err = helper.AuthenticateForTest(router, helper.UserBCredentials)
 	assert.NoError(t, err)
 
 	// try to GET all widgets of dashboard
 	// should result in unprocessable entity
 	code, resp, err := helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/widgets?dashboardID=%v", dashboardID), "GET", nil)
+		fmt.Sprintf("/api/v2/widgets?dashboardID=%v", dashboardID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// authenticate as normal user
-	token, err = helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.UserACredentials)
+	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
 	assert.NoError(t, err)
 
 	// Count the number of all the widgets returned for dashboard
 	initialNumber, err := helper.LengthOfResponse(router, token,
-		fmt.Sprintf("/api/widgets?dashboardID=%v", dashboardID), "GET", nil)
+		fmt.Sprintf("/api/v2/widgets?dashboardID=%v", dashboardID), "GET", nil)
 	assert.NoError(t, err)
 
 	// test POST widgets/ $newWidget
 	newWidget.DashboardID = dashboardID
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/widgets", "POST", helper.KeyModels{"widget": newWidget})
+		"/api/v2/widgets", "POST", helper.KeyModels{"widget": newWidget})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
@@ -447,13 +433,13 @@ func TestGetAllWidgetsOfDashboard(t *testing.T) {
 		SignalIDs:        []int64{},
 	}
 	code, resp, err = helper.TestEndpoint(router, token,
-		"/api/widgets", "POST", helper.KeyModels{"widget": newWidgetB})
+		"/api/v2/widgets", "POST", helper.KeyModels{"widget": newWidgetB})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// Again count the number of all the widgets returned for dashboard
 	finalNumber, err := helper.LengthOfResponse(router, token,
-		fmt.Sprintf("/api/widgets?dashboardID=%v", dashboardID), "GET", nil)
+		fmt.Sprintf("/api/v2/widgets?dashboardID=%v", dashboardID), "GET", nil)
 	assert.NoError(t, err)
 
 	assert.Equal(t, initialNumber+2, finalNumber)

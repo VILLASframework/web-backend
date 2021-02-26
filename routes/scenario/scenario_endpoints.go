@@ -58,7 +58,7 @@ func getScenarios(c *gin.Context) {
 
 	// Checking permissions is not required here as read access is independent of user's role
 
-	// ATTENTION: do not use c.GetInt (common.UserIDCtx) since user_id is of type uint and not int
+	// ATTENTION: do not use c.GetInt (common.UserIDCtx) since userID is of type uint and not int
 	userID, _ := c.Get(database.UserIDCtx)
 
 	var u user.User
@@ -107,6 +107,7 @@ func addScenario(c *gin.Context) {
 		return
 	}
 
+	// ATTENTION: do not use c.GetInt (common.UserIDCtx) since userID is of type uint and not int
 	userID, _ := c.Get(database.UserIDCtx)
 
 	var u user.User

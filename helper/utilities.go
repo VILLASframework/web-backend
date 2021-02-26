@@ -23,8 +23,9 @@ package helper
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 )
 
 func GetIDOfElement(c *gin.Context, elementName string, source string, providedID int) (int, error) {
@@ -49,4 +50,15 @@ func GetIDOfElement(c *gin.Context, elementName string, source string, providedI
 	} else {
 		return -1, fmt.Errorf("invalid source of element ID")
 	}
+}
+
+// Find takes a slice and looks for an element in it. If found it will
+// return it's key, otherwise it will return -1 and a bool of false.
+func Find(slice []string, val string) (int, bool) {
+	for i, item := range slice {
+		if item == val {
+			return i, true
+		}
+	}
+	return -1, false
 }

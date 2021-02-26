@@ -54,12 +54,10 @@ type ScenarioRequest struct {
 func addScenario() (scenarioID uint) {
 
 	// authenticate as admin
-	token, _ := helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.AdminCredentials)
+	token, _ := helper.AuthenticateForTest(router, helper.AdminCredentials)
 
 	// authenticate as normal user
-	token, _ = helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.UserACredentials)
+	token, _ = helper.AuthenticateForTest(router, helper.UserACredentials)
 
 	// POST $newScenario
 	newScenario := ScenarioRequest{
@@ -68,14 +66,14 @@ func addScenario() (scenarioID uint) {
 		StartParameters: postgres.Jsonb{RawMessage: json.RawMessage(`{"parameter1" : "testValue1A", "parameter2" : "testValue2A", "parameter3" : 42}`)},
 	}
 	_, resp, _ := helper.TestEndpoint(router, token,
-		"/api/scenarios", "POST", helper.KeyModels{"scenario": newScenario})
+		"/api/v2/scenarios", "POST", helper.KeyModels{"scenario": newScenario})
 
 	// Read newScenario's ID from the response
 	newScenarioID, _ := helper.GetResponseID(resp)
 
 	// add the guest user to the new scenario
 	_, resp, _ = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/scenarios/%v/user?username=User_C", newScenarioID), "PUT", nil)
+		fmt.Sprintf("/api/v2/scenarios/%v/user?username=User_C", newScenarioID), "PUT", nil)
 
 	return uint(newScenarioID)
 }
@@ -92,10 +90,10 @@ func TestMain(m *testing.M) {
 	defer database.DBpool.Close()
 
 	router = gin.Default()
-	api := router.Group("/api")
+	api := router.Group("/api/v2")
 
 	user.RegisterAuthenticate(api.Group("/authenticate"))
-	api.Use(user.Authentication(true))
+	api.Use(user.Authentication())
 	// scenario endpoints required here to first add a scenario to the DB
 	scenario.RegisterScenarioEndpoints(api.Group("/scenarios"))
 
@@ -114,8 +112,7 @@ func TestAddFile(t *testing.T) {
 	scenarioID := addScenario()
 
 	// authenticate as userB who has no access to the elements in the DB
-	token, err := helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.UserBCredentials)
+	token, err := helper.AuthenticateForTest(router, helper.UserBCredentials)
 	assert.NoError(t, err)
 
 	emptyBuf := &bytes.Buffer{}
@@ -123,26 +120,25 @@ func TestAddFile(t *testing.T) {
 	// try to POST to a scenario to which UserB has no access
 	// should return a 422 unprocessable entity error
 	code, resp, err := helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/files?scenarioID=%v", scenarioID), "POST", emptyBuf)
+		fmt.Sprintf("/api/v2/files?scenarioID=%v", scenarioID), "POST", emptyBuf)
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// authenticate as normal userA
-	token, err = helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.UserACredentials)
+	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
 	assert.NoError(t, err)
 
 	// try to POST without a scenario ID
 	// should return a bad request error
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/files"), "POST", emptyBuf)
+		fmt.Sprintf("/api/v2/files"), "POST", emptyBuf)
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 
 	// try to POST an invalid file
 	// should return a bad request
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/files?scenarioID=%v", scenarioID), "POST", emptyBuf)
+		fmt.Sprintf("/api/v2/files?scenarioID=%v", scenarioID), "POST", emptyBuf)
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 
@@ -171,7 +167,7 @@ func TestAddFile(t *testing.T) {
 
 	// Create the request
 	w := httptest.NewRecorder()
-	req, err := http.NewRequest("POST", fmt.Sprintf("/api/files?scenarioID=%v", scenarioID), bodyBuf)
+	req, err := http.NewRequest("POST", fmt.Sprintf("/api/v2/files?scenarioID=%v", scenarioID), bodyBuf)
 	assert.NoError(t, err, "create request")
 
 	req.Header.Set("Content-Type", contentType)
@@ -185,20 +181,19 @@ func TestAddFile(t *testing.T) {
 
 	// Get the new file
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/files/%v", newFileID), "GET", nil)
+		fmt.Sprintf("/api/v2/files/%v", newFileID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 	assert.Equalf(t, string(c1), resp.String(), "Response body: \n%v\n", resp)
 
 	// authenticate as userB who has no access to the elements in the DB
-	token, err = helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.UserBCredentials)
+	token, err = helper.AuthenticateForTest(router, helper.UserBCredentials)
 	assert.NoError(t, err)
 
 	// try to get a file to which user has no access
 	// should return unprocessable entity
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/files/%v", newFileID), "GET", nil)
+		fmt.Sprintf("/api/v2/files/%v", newFileID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
@@ -215,8 +210,7 @@ func TestUpdateFile(t *testing.T) {
 	scenarioID := addScenario()
 
 	// authenticate as normal user
-	token, err := helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.UserACredentials)
+	token, err := helper.AuthenticateForTest(router, helper.UserACredentials)
 	assert.NoError(t, err)
 
 	// create a testfile.txt in local folder
@@ -243,7 +237,7 @@ func TestUpdateFile(t *testing.T) {
 
 	// Create the POST request
 	w := httptest.NewRecorder()
-	req, err := http.NewRequest("POST", fmt.Sprintf("/api/files?scenarioID=%v", scenarioID), bodyBuf)
+	req, err := http.NewRequest("POST", fmt.Sprintf("/api/v2/files?scenarioID=%v", scenarioID), bodyBuf)
 	assert.NoError(t, err, "create request")
 
 	req.Header.Set("Content-Type", contentType)
@@ -256,8 +250,7 @@ func TestUpdateFile(t *testing.T) {
 	assert.NoError(t, err)
 
 	// authenticate as userB who has no access to the elements in the DB
-	token, err = helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.UserBCredentials)
+	token, err = helper.AuthenticateForTest(router, helper.UserBCredentials)
 	assert.NoError(t, err)
 
 	emptyBuf := &bytes.Buffer{}
@@ -265,32 +258,30 @@ func TestUpdateFile(t *testing.T) {
 	// try to PUT to a file to which UserB has no access
 	// should return a 422 unprocessable entity error
 	code, resp, err := helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/files/%v", newFileID), "PUT", emptyBuf)
+		fmt.Sprintf("/api/v2/files/%v", newFileID), "PUT", emptyBuf)
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// authenticate as guest user C
-	token, err = helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.GuestCredentials)
+	token, err = helper.AuthenticateForTest(router, helper.GuestCredentials)
 	assert.NoError(t, err)
 
 	// try to PUT as guest
 	// should return an unprocessable entity error
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/files/%v", newFileID), "PUT", emptyBuf)
+		fmt.Sprintf("/api/v2/files/%v", newFileID), "PUT", emptyBuf)
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// Prepare update
 	// authenticate as normal user
-	token, err = helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.UserACredentials)
+	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
 	assert.NoError(t, err)
 
 	// try to PUT with empty body
 	// should return bad request
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/files/%v", newFileID), "PUT", emptyBuf)
+		fmt.Sprintf("/api/v2/files/%v", newFileID), "PUT", emptyBuf)
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 
@@ -318,7 +309,7 @@ func TestUpdateFile(t *testing.T) {
 
 	// Create the PUT request
 	w_updated := httptest.NewRecorder()
-	req, err = http.NewRequest("PUT", fmt.Sprintf("/api/files/%v", newFileID), bodyBufUpdated)
+	req, err = http.NewRequest("PUT", fmt.Sprintf("/api/v2/files/%v", newFileID), bodyBufUpdated)
 	assert.NoError(t, err, "create request")
 
 	req.Header.Set("Content-Type", contentType)
@@ -332,7 +323,7 @@ func TestUpdateFile(t *testing.T) {
 
 	// Get the updated file
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/files/%v", newFileIDUpdated), "GET", nil)
+		fmt.Sprintf("/api/v2/files/%v", newFileIDUpdated), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 	assert.Equalf(t, string(c2), resp.String(), "Response body: \n%v\n", resp)
@@ -348,8 +339,7 @@ func TestDeleteFile(t *testing.T) {
 	scenarioID := addScenario()
 
 	// authenticate as normal user
-	token, err := helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.UserACredentials)
+	token, err := helper.AuthenticateForTest(router, helper.UserACredentials)
 	assert.NoError(t, err)
 
 	// create a testfile.txt in local folder
@@ -375,7 +365,7 @@ func TestDeleteFile(t *testing.T) {
 
 	// Create the request
 	w := httptest.NewRecorder()
-	req, err := http.NewRequest("POST", fmt.Sprintf("/api/files?scenarioID=%v", scenarioID), bodyBuf)
+	req, err := http.NewRequest("POST", fmt.Sprintf("/api/v2/files?scenarioID=%v", scenarioID), bodyBuf)
 	assert.NoError(t, err, "create request")
 	req.Header.Set("Content-Type", contentType)
 	req.Header.Add("Authorization", "Bearer "+token)
@@ -398,7 +388,7 @@ func TestDeleteFile(t *testing.T) {
 
 	// Create the request
 	w2 := httptest.NewRecorder()
-	req2, err := http.NewRequest("POST", fmt.Sprintf("/api/files?scenarioID=%v", scenarioID), bodyBuf2)
+	req2, err := http.NewRequest("POST", fmt.Sprintf("/api/v2/files?scenarioID=%v", scenarioID), bodyBuf2)
 	assert.NoError(t, err, "create request")
 	req2.Header.Set("Content-Type", contentType2)
 	req2.Header.Add("Authorization", "Bearer "+token)
@@ -409,66 +399,62 @@ func TestDeleteFile(t *testing.T) {
 	assert.NoError(t, err)
 
 	// authenticate as userB who has no access to the elements in the DB
-	token, err = helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.UserBCredentials)
+	token, err = helper.AuthenticateForTest(router, helper.UserBCredentials)
 	assert.NoError(t, err)
 
 	// try to DELETE file from scenario to which userB has no access
 	// should return an unprocessable entity error
 	code, resp, err := helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/files/%v", newFileID), "DELETE", nil)
+		fmt.Sprintf("/api/v2/files/%v", newFileID), "DELETE", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// authenticate as normal user
-	token, err = helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.UserACredentials)
+	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
 	assert.NoError(t, err)
 
 	// Count the number of all files returned for scenario
 	initialNumber, err := helper.LengthOfResponse(router, token,
-		fmt.Sprintf("/api/files?scenarioID=%v", scenarioID), "GET", nil)
+		fmt.Sprintf("/api/v2/files?scenarioID=%v", scenarioID), "GET", nil)
 	assert.NoError(t, err)
 
 	// try to DELETE non-existing fileID
 	// should return not found
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/files/5"), "DELETE", nil)
+		fmt.Sprintf("/api/v2/files/5"), "DELETE", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
 
 	// authenticate as guest user C
-	token, err = helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.GuestCredentials)
+	token, err = helper.AuthenticateForTest(router, helper.GuestCredentials)
 	assert.NoError(t, err)
 
 	// try to DELETE file of scenario as guest
 	// should return an unprocessable entity error
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/files/%v", newFileID), "DELETE", nil)
+		fmt.Sprintf("/api/v2/files/%v", newFileID), "DELETE", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// authenticate as normal user
-	token, err = helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.UserACredentials)
+	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
 	assert.NoError(t, err)
 
 	// Delete the added file 1
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/files/%v", newFileID), "DELETE", nil)
+		fmt.Sprintf("/api/v2/files/%v", newFileID), "DELETE", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// Delete the added file 2
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/files/%v", newFileID2), "DELETE", nil)
+		fmt.Sprintf("/api/v2/files/%v", newFileID2), "DELETE", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// Again count the number of all the files returned for scenario
 	finalNumber, err := helper.LengthOfResponse(router, token,
-		fmt.Sprintf("/api/files?scenarioID=%v", scenarioID), "GET", nil)
+		fmt.Sprintf("/api/v2/files?scenarioID=%v", scenarioID), "GET", nil)
 	assert.NoError(t, err)
 
 	assert.Equal(t, initialNumber-2, finalNumber)
@@ -485,31 +471,29 @@ func TestGetAllFilesOfScenario(t *testing.T) {
 	scenarioID := addScenario()
 
 	// authenticate as userB who has no access to the elements in the DB
-	token, err := helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.UserBCredentials)
+	token, err := helper.AuthenticateForTest(router, helper.UserBCredentials)
 	assert.NoError(t, err)
 
 	// try to get all files for scenario to which userB has not access
 	// should return unprocessable entity error
 	code, resp, err := helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/files?scenarioID=%v", scenarioID), "GET", nil)
+		fmt.Sprintf("/api/v2/files?scenarioID=%v", scenarioID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// authenticate as normal userA
-	token, err = helper.AuthenticateForTest(router,
-		"/api/authenticate", "POST", helper.UserACredentials)
+	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
 	assert.NoError(t, err)
 
 	//try to get all files with missing scenario ID; should return a bad request error
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/files"), "GET", nil)
+		fmt.Sprintf("/api/v2/files"), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 
 	// Count the number of all files returned for scenario
 	initialNumber, err := helper.LengthOfResponse(router, token,
-		fmt.Sprintf("/api/files?scenarioID=%v", scenarioID), "GET", nil)
+		fmt.Sprintf("/api/v2/files?scenarioID=%v", scenarioID), "GET", nil)
 	assert.NoError(t, err)
 
 	// create a testfile.txt in local folder
@@ -535,7 +519,7 @@ func TestGetAllFilesOfScenario(t *testing.T) {
 
 	// Create the request
 	w := httptest.NewRecorder()
-	req, err := http.NewRequest("POST", fmt.Sprintf("/api/files?scenarioID=%v", scenarioID), bodyBuf1)
+	req, err := http.NewRequest("POST", fmt.Sprintf("/api/v2/files?scenarioID=%v", scenarioID), bodyBuf1)
 	assert.NoError(t, err, "create request")
 	req.Header.Set("Content-Type", contentType1)
 	req.Header.Add("Authorization", "Bearer "+token)
@@ -561,7 +545,7 @@ func TestGetAllFilesOfScenario(t *testing.T) {
 	bodyWriter2.Close()
 
 	w2 := httptest.NewRecorder()
-	req2, err := http.NewRequest("POST", fmt.Sprintf("/api/files?scenarioID=%v", scenarioID), bodyBuf2)
+	req2, err := http.NewRequest("POST", fmt.Sprintf("/api/v2/files?scenarioID=%v", scenarioID), bodyBuf2)
 	assert.NoError(t, err, "create request")
 	req2.Header.Set("Content-Type", contentType2)
 	req2.Header.Add("Authorization", "Bearer "+token)
@@ -570,7 +554,7 @@ func TestGetAllFilesOfScenario(t *testing.T) {
 
 	// Again count the number of all the files returned for scenario
 	finalNumber, err := helper.LengthOfResponse(router, token,
-		fmt.Sprintf("/api/files?scenarioID=%v", scenarioID), "GET", nil)
+		fmt.Sprintf("/api/v2/files?scenarioID=%v", scenarioID), "GET", nil)
 	assert.NoError(t, err)
 	assert.Equal(t, initialNumber+2, finalNumber)
 }
