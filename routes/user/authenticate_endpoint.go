@@ -77,7 +77,7 @@ func authenticated(c *gin.Context) {
 			"user":          user.User,
 		})
 	} else {
-		authExternal, err := configuration.GlobalConfig.Bool("auth-external")
+		authExternal, err := configuration.GlobalConfig.Bool("auth.external.enabled")
 		if err != nil {
 			helper.UnauthorizedError(c, "Backend configuration error")
 			return
