@@ -59,6 +59,7 @@ type ICStatus struct {
 }
 
 type ICProperties struct {
+	UUID        string `json:"uuid"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Location    string `json:"location"`
@@ -234,8 +235,7 @@ func processMessage(message amqp.Delivery) error {
 		return fmt.Errorf("AMQP: Could not unmarshal message to JSON: %v err: %v", string(message.Body), err)
 	}
 
-	headers := amqp.Table(message.Headers)
-	ICUUID := fmt.Sprintf("%v", headers["uuid"])
+	ICUUID := payload.Properties.UUID
 	_, err = uuid.Parse(ICUUID)
 	if err != nil {
 		return fmt.Errorf("AMQP: UUID not valid: %v, message ignored: %v \n", ICUUID, string(message.Body))
@@ -283,6 +283,8 @@ func createExternalIC(payload ICUpdate, ICUUID string, body []byte) error {
 		log.Println("AMQP: Aborting creation of IC with state gone")
 		return nil
 	}
+
+	newICReq.InfrastructureComponent.UUID = payload.Properties.UUID
 	newICReq.InfrastructureComponent.Uptime = payload.Status.Uptime
 	newICReq.InfrastructureComponent.WebsocketURL = payload.Properties.WS_url
 	newICReq.InfrastructureComponent.APIURL = payload.Properties.API_url
@@ -338,6 +340,8 @@ func (s *InfrastructureComponent) updateExternalIC(payload ICUpdate, body []byte
 	} else {
 		updatedICReq.InfrastructureComponent.State = "unknown"
 	}
+
+	updatedICReq.InfrastructureComponent.UUID = payload.Properties.UUID
 	updatedICReq.InfrastructureComponent.Uptime = payload.Status.Uptime
 	updatedICReq.InfrastructureComponent.Type = payload.Properties.Type
 	updatedICReq.InfrastructureComponent.Category = payload.Properties.Category
