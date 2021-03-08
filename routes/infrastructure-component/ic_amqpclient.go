@@ -178,10 +178,8 @@ func sendActionAMQP(action Action, destinationUUID string) error {
 	}
 
 	// set message headers
-	var headers map[string]interface{}
-	headers = make(map[string]interface{}) // empty map
-	headers["uuid"] = destinationUUID
-	msg.Headers = headers
+	msg.Headers = make(map[string]interface{}) // empty map
+	msg.Headers["uuid"] = destinationUUID
 
 	err = CheckConnection()
 	if err != nil {

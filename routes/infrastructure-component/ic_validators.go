@@ -22,11 +22,12 @@
 package infrastructure_component
 
 import (
+	"math"
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm/dialects/postgres"
 	"gopkg.in/go-playground/validator.v9"
-	"math"
-	"time"
 )
 
 var validate *validator.Validate
@@ -86,7 +87,7 @@ func (r *AddICRequest) validate() error {
 	}
 
 	if *r.InfrastructureComponent.ManagedExternally == true {
-		//check if valid manager UUID is provided
+		// check if valid manager UUID is provided
 		_, errs = uuid.Parse(r.InfrastructureComponent.Manager)
 		if errs != nil {
 			return errs

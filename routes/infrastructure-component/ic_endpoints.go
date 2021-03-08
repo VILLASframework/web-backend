@@ -296,8 +296,6 @@ func sendActionToIC(c *gin.Context) {
 		return
 	}
 
-	//now := time.Now()
-
 	for _, action := range actions {
 		if (action.Act == "delete" || action.Act == "create") && s.Category != "manager" {
 			helper.BadRequestError(c, "cannot send a delete or create action to an IC of category "+s.Category)
