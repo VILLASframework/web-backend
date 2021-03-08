@@ -52,11 +52,12 @@ type Action struct {
 }
 
 type ICStatus struct {
-	State   string  `json:"state"`
-	Version string  `json:"version"`
-	Uptime  float64 `json:"uptime"`
-	Result  string  `json:"result"`
-	Error   string  `json:"error"`
+	State     string  `json:"state"`
+	Version   string  `json:"version"`
+	Uptime    float64 `json:"uptime"`
+	Result    string  `json:"result"`
+	Error     string  `json:"error"`
+	ManagedBy string  `json:"managed_by"`
 }
 
 type ICProperties struct {
@@ -69,7 +70,6 @@ type ICProperties struct {
 	API_url              string          `json:"api_url"`
 	Category             string          `json:"category"`
 	Type                 string          `json:"type"`
-	ManagedBy            string          `json:"managed_by"`
 	StartParameterSchema json.RawMessage `json:"start_parameter_schema"`
 }
 
@@ -294,7 +294,7 @@ func createExternalIC(payload ICUpdate, ICUUID string, body []byte) error {
 	newICReq.InfrastructureComponent.Description = payload.Properties.Description
 	// set managed externally to true because this IC is created via AMQP
 	newICReq.InfrastructureComponent.ManagedExternally = newTrue()
-	newICReq.InfrastructureComponent.Manager = payload.Properties.ManagedBy
+	newICReq.InfrastructureComponent.Manager = payload.Status.ManagedBy
 	newICReq.InfrastructureComponent.StartParameterSchema = postgres.Jsonb{RawMessage: payload.Properties.StartParameterSchema}
 	// set raw status update if IC
 	newICReq.InfrastructureComponent.StatusUpdateRaw = postgres.Jsonb{RawMessage: body}
@@ -360,7 +360,7 @@ func (s *InfrastructureComponent) updateExternalIC(payload ICUpdate, body []byte
 	updatedICReq.InfrastructureComponent.APIURL = payload.Properties.API_url
 	updatedICReq.InfrastructureComponent.Location = payload.Properties.Location
 	updatedICReq.InfrastructureComponent.Description = payload.Properties.Description
-	updatedICReq.InfrastructureComponent.Manager = payload.Properties.ManagedBy
+	updatedICReq.InfrastructureComponent.Manager = payload.Status.ManagedBy
 	updatedICReq.InfrastructureComponent.StartParameterSchema = postgres.Jsonb{RawMessage: payload.Properties.StartParameterSchema}
 	// set raw status update if IC
 	updatedICReq.InfrastructureComponent.StatusUpdateRaw = postgres.Jsonb{RawMessage: body}
