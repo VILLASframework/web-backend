@@ -37,7 +37,7 @@
       "description": "A signal generator for testing purposes",
       "state": "idle",
       "managedexternally": false,
-      "startparameterscheme": {
+      "startparameterschema": {
         "param1": 42,
         "param2": "testvalue"
       }
@@ -52,7 +52,7 @@
       "state": "running",
       "managedexternally": false,
       "manager": "4854af30-325f-44a5-ad59-b67bdeadbeef",
-      "startparameterscheme": {
+      "startparameterschema": {
         "param1": 55,
         "param2": "testvalue2"
       }

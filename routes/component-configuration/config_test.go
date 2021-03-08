@@ -58,7 +58,7 @@ type ICRequest struct {
 	State                string         `json:"state,omitempty"`
 	Location             string         `json:"location,omitempty"`
 	Description          string         `json:"description,omitempty"`
-	StartParameterScheme postgres.Jsonb `json:"startparameterscheme,omitempty"`
+	StartParameterSchema postgres.Jsonb `json:"startparameterschema,omitempty"`
 	ManagedExternally    *bool          `json:"managedexternally,omitempty"`
 }
 
@@ -94,7 +94,7 @@ func addScenarioAndIC() (scenarioID uint, ICID uint) {
 		State:                "idle",
 		Location:             "k8s",
 		Description:          "A signal generator for testing purposes",
-		StartParameterScheme: postgres.Jsonb{json.RawMessage(`{"prop1" : "a nice prop"}`)},
+		StartParameterSchema: postgres.Jsonb{json.RawMessage(`{"prop1" : "a nice prop"}`)},
 		ManagedExternally:    newFalse(),
 	}
 

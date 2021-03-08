@@ -58,7 +58,7 @@ type ICRequest struct {
 	State                string         `json:"state,omitempty"`
 	Location             string         `json:"location,omitempty"`
 	Description          string         `json:"description,omitempty"`
-	StartParameterScheme postgres.Jsonb `json:"startparameterscheme,omitempty"`
+	StartParameterSchema postgres.Jsonb `json:"startparameterschema,omitempty"`
 	ManagedExternally    *bool          `json:"managedexternally"`
 	Manager              string         `json:"manager,omitempty"`
 }
@@ -87,7 +87,7 @@ var newIC1 = ICRequest{
 	State:                "idle",
 	Location:             "k8s",
 	Description:          "A signal generator for testing purposes",
-	StartParameterScheme: postgres.Jsonb{json.RawMessage(`{"prop1" : "a nice prop"}`)},
+	StartParameterSchema: postgres.Jsonb{json.RawMessage(`{"prop1" : "a nice prop"}`)},
 	ManagedExternally:    newFalse(),
 	Manager:              "7be0322d-354e-431e-84bd-ae4c9633beef",
 }
@@ -102,7 +102,7 @@ var newIC2 = ICRequest{
 	State:                "running",
 	Location:             "k8s",
 	Description:          "This is a test description",
-	StartParameterScheme: postgres.Jsonb{json.RawMessage(`{"prop1" : "a nice prop"}`)},
+	StartParameterSchema: postgres.Jsonb{json.RawMessage(`{"prop1" : "a nice prop"}`)},
 	ManagedExternally:    newTrue(),
 	Manager:              "4854af30-325f-44a5-ad59-b67b2597de99",
 }

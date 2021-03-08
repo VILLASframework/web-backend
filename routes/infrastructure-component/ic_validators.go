@@ -43,7 +43,7 @@ type validNewIC struct {
 	State                string         `form:"State" validate:"omitempty"`
 	Location             string         `form:"Location" validate:"omitempty"`
 	Description          string         `form:"Description" validate:"omitempty"`
-	StartParameterScheme postgres.Jsonb `form:"StartParameterScheme" validate:"omitempty"`
+	StartParameterSchema postgres.Jsonb `form:"StartParameterSchema" validate:"omitempty"`
 	StatusUpdateRaw      postgres.Jsonb `form:"StatusUpdateRaw" validate:"omitempty"`
 	ManagedExternally    *bool          `form:"ManagedExternally" validate:"required"`
 	Manager              string         `form:"Manager" validate:"omitempty"`
@@ -60,7 +60,7 @@ type validUpdatedIC struct {
 	State                string         `form:"State" validate:"omitempty"`
 	Location             string         `form:"Location" validate:"omitempty"`
 	Description          string         `form:"Description" validate:"omitempty"`
-	StartParameterScheme postgres.Jsonb `form:"StartParameterScheme" validate:"omitempty"`
+	StartParameterSchema postgres.Jsonb `form:"StartParameterSchema" validate:"omitempty"`
 	StatusUpdateRaw      postgres.Jsonb `form:"StatusUpdateRaw" validate:"omitempty"`
 	Manager              string         `form:"Manager" validate:"omitempty"`
 	Uptime               float64        `form:"Uptime" validate:"omitempty"`
@@ -129,7 +129,7 @@ func (r *AddICRequest) createIC() (InfrastructureComponent, error) {
 	s.Category = r.InfrastructureComponent.Category
 	s.Location = r.InfrastructureComponent.Location
 	s.Description = r.InfrastructureComponent.Description
-	s.StartParameterScheme = r.InfrastructureComponent.StartParameterScheme
+	s.StartParameterSchema = r.InfrastructureComponent.StartParameterSchema
 	s.StatusUpdateRaw = r.InfrastructureComponent.StatusUpdateRaw
 	s.ManagedExternally = *r.InfrastructureComponent.ManagedExternally
 	s.Manager = r.InfrastructureComponent.Manager
@@ -182,10 +182,10 @@ func (r *UpdateICRequest) updatedIC(oldIC InfrastructureComponent) Infrastructur
 	emptyJson_ser, _ := json.Marshal(emptyJson)
 	opts := jsondiff.DefaultConsoleOptions()
 
-	startParams_ser, _ := json.Marshal(r.InfrastructureComponent.StartParameterScheme)
+	startParams_ser, _ := json.Marshal(r.InfrastructureComponent.StartParameterSchema)
 	diff, _ := jsondiff.Compare(emptyJson_ser, startParams_ser, &opts)
 	if diff.String() != "FullMatch" {
-		s.StartParameterScheme = r.InfrastructureComponent.StartParameterScheme
+		s.StartParameterSchema = r.InfrastructureComponent.StartParameterSchema
 	}
 
 	statusUpdateRaw_ser, _ := json.Marshal(r.InfrastructureComponent.StatusUpdateRaw)

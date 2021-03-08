@@ -3560,10 +3560,13 @@ var doc = `{
                 "ManagedExternally": {
                     "type": "boolean"
                 },
+                "Manager": {
+                    "type": "string"
+                },
                 "Name": {
                     "type": "string"
                 },
-                "StartParameterScheme": {
+                "StartParameterSchema": {
                     "$ref": "#/definitions/postgres.Jsonb"
                 },
                 "State": {
@@ -3601,10 +3604,13 @@ var doc = `{
                 "Location": {
                     "type": "string"
                 },
+                "Manager": {
+                    "type": "string"
+                },
                 "Name": {
                     "type": "string"
                 },
-                "StartParameterScheme": {
+                "StartParameterSchema": {
                     "$ref": "#/definitions/postgres.Jsonb"
                 },
                 "State": {

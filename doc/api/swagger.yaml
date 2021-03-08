@@ -175,9 +175,11 @@ definitions:
         type: string
       ManagedExternally:
         type: boolean
+      Manager:
+        type: string
       Name:
         type: string
-      StartParameterScheme:
+      StartParameterSchema:
         $ref: '#/definitions/postgres.Jsonb'
       State:
         type: string
@@ -207,9 +209,11 @@ definitions:
         type: string
       Location:
         type: string
+      Manager:
+        type: string
       Name:
         type: string
-      StartParameterScheme:
+      StartParameterSchema:
         $ref: '#/definitions/postgres.Jsonb'
       State:
         type: string
@@ -490,8 +494,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: JSON web token, success status, message and authenticated user
-            object
+          description: JSON web token, success status, message and authenticated user object
           schema:
             $ref: '#/definitions/api.ResponseAuthenticate'
         "401":
@@ -502,8 +505,7 @@ paths:
           description: Internal server error.
           schema:
             $ref: '#/definitions/api.ResponseError'
-      summary: Check if user is authenticated and provide details on how the user
-        can authenticate
+      summary: Check if user is authenticated and provide details on how the user can authenticate
       tags:
       - authentication
   /authenticate/{mechanism}:
@@ -530,8 +532,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: JSON web token, success status, message and authenticated user
-            object
+          description: JSON web token, success status, message and authenticated user object
           schema:
             $ref: '#/definitions/api.ResponseAuthenticate'
         "401":
@@ -596,8 +597,7 @@ paths:
       - application/json
       operationId: addConfig
       parameters:
-      - description: component configuration to be added incl. IDs of scenario and
-          IC
+      - description: component configuration to be added incl. IDs of scenario and IC
         in: body
         name: inputConfig
         required: true
@@ -1162,8 +1162,7 @@ paths:
       - application/json
       responses:
         "204":
-          description: Backend is healthy, database and AMQP broker connections are
-            alive
+          description: Backend is healthy, database and AMQP broker connections are alive
           schema:
             type: string
         "500":
@@ -1395,8 +1394,7 @@ paths:
             $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
-      summary: Send an action to IC (only available if backend server is started with
-        -amqp parameter)
+      summary: Send an action to IC (only available if backend server is started with -amqp parameter)
       tags:
       - infrastructure-components
   /ic/{ICID}/configs:
@@ -2072,8 +2070,7 @@ paths:
       - application/json
       operationId: AddSignal
       parameters:
-      - description: A signal to be added to the component configuration incl. direction
-          and config ID to which signal shall be added
+      - description: A signal to be added to the component configuration incl. direction and config ID to which signal shall be added
         in: body
         name: inputSignal
         required: true
@@ -2358,8 +2355,7 @@ paths:
       - application/json
       operationId: UpdateUser
       parameters:
-      - description: User to be updated (anything except for ID can be changed, role
-          can only be change by admin)
+      - description: User to be updated (anything except for ID can be changed, role can only be change by admin)
         in: body
         name: inputUser
         required: true
