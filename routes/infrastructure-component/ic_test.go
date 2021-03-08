@@ -299,6 +299,7 @@ func TestUpdateICAsAdmin(t *testing.T) {
 	update.Properties.Category = newIC2.Category
 	update.Properties.Type = newIC2.Type
 	update.Properties.ManagedBy = newIC2.Manager
+	update.Properties.UUID = newIC2.UUID
 
 	payload, err := json.Marshal(update)
 	assert.NoError(t, err)
@@ -422,6 +423,7 @@ func TestDeleteICAsAdmin(t *testing.T) {
 	update.Properties.Category = newIC2.Category
 	update.Properties.Type = newIC2.Type
 	update.Properties.ManagedBy = newIC2.Manager
+	update.Properties.UUID = newIC2.UUID
 
 	payload, err := json.Marshal(update)
 	assert.NoError(t, err)
@@ -700,6 +702,7 @@ func TestCreateUpdateViaAMQPRecv(t *testing.T) {
 	update.Properties.Description = newIC1.Description
 	update.Properties.Location = newIC1.Location
 	update.Properties.ManagedBy = newIC1.Manager
+	update.Properties.UUID = newIC1.UUID
 
 	payload, err = json.Marshal(update)
 	assert.NoError(t, err)
@@ -787,6 +790,7 @@ func TestDeleteICViaAMQPRecv(t *testing.T) {
 	update.Properties.Description = newIC1.Description
 	update.Properties.Location = newIC1.Location
 	update.Properties.ManagedBy = newIC1.Manager
+	update.Properties.UUID = newIC1.UUID
 
 	payload, err := json.Marshal(update)
 	assert.NoError(t, err)
