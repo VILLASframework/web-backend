@@ -25,6 +25,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -336,7 +337,14 @@ func (s *InfrastructureComponent) updateExternalIC(payload ICUpdate, body []byte
 			if err != nil {
 				// if component could not be deleted there are still configurations using it in the DB
 				// continue with the update to save the new state of the component and get back to the deletion later
-				log.Println(err)
+				if strings.Contains(err.Error(), "postponed") {
+					log.Println(err) // print log message
+				} else {
+					return err // return upon DB error
+				}
+			} else {
+				// if delete was successful, return here and do not run the update
+				return nil
 			}
 		}
 	} else {
