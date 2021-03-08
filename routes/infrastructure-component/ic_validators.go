@@ -22,10 +22,8 @@
 package infrastructure_component
 
 import (
-	"encoding/json"
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm/dialects/postgres"
-	"github.com/nsf/jsondiff"
 	"gopkg.in/go-playground/validator.v9"
 	"math"
 	"time"
@@ -148,23 +146,10 @@ func (r *AddICRequest) createIC() (InfrastructureComponent, error) {
 func (r *UpdateICRequest) updatedIC(oldIC InfrastructureComponent) InfrastructureComponent {
 	// Use the old InfrastructureComponent as a basis for the updated InfrastructureComponent `s`
 	s := oldIC
-
-	if r.InfrastructureComponent.Type != "" {
-		s.Type = r.InfrastructureComponent.Type
-	}
-
-	if r.InfrastructureComponent.Name != "" {
-		s.Name = r.InfrastructureComponent.Name
-	}
-
-	if r.InfrastructureComponent.Category != "" {
-		s.Category = r.InfrastructureComponent.Category
-	}
-
-	if r.InfrastructureComponent.State != "" {
-		s.State = r.InfrastructureComponent.State
-	}
-
+	s.Type = r.InfrastructureComponent.Type
+	s.Name = r.InfrastructureComponent.Name
+	s.Category = r.InfrastructureComponent.Category
+	s.State = r.InfrastructureComponent.State
 	s.UUID = r.InfrastructureComponent.UUID
 	s.WebsocketURL = r.InfrastructureComponent.WebsocketURL
 	s.APIURL = r.InfrastructureComponent.APIURL
@@ -172,27 +157,10 @@ func (r *UpdateICRequest) updatedIC(oldIC InfrastructureComponent) Infrastructur
 	s.Description = r.InfrastructureComponent.Description
 	s.Uptime = math.Round(r.InfrastructureComponent.Uptime) // round required for backward compatibility of data model
 	s.Manager = r.InfrastructureComponent.Manager
+	s.StartParameterSchema = r.InfrastructureComponent.StartParameterSchema
+	s.StatusUpdateRaw = r.InfrastructureComponent.StatusUpdateRaw
 
 	// set last update time
 	s.StateUpdateAt = time.Now().Format(time.RFC1123Z)
-
-	// only update props if not empty
-	var emptyJson postgres.Jsonb
-	// Serialize empty json and params
-	emptyJson_ser, _ := json.Marshal(emptyJson)
-	opts := jsondiff.DefaultConsoleOptions()
-
-	startParams_ser, _ := json.Marshal(r.InfrastructureComponent.StartParameterSchema)
-	diff, _ := jsondiff.Compare(emptyJson_ser, startParams_ser, &opts)
-	if diff.String() != "FullMatch" {
-		s.StartParameterSchema = r.InfrastructureComponent.StartParameterSchema
-	}
-
-	statusUpdateRaw_ser, _ := json.Marshal(r.InfrastructureComponent.StatusUpdateRaw)
-	diff, _ = jsondiff.Compare(emptyJson_ser, statusUpdateRaw_ser, &opts)
-	if diff.String() != "FullMatch" {
-		s.StatusUpdateRaw = r.InfrastructureComponent.StatusUpdateRaw
-	}
-
 	return s
 }
