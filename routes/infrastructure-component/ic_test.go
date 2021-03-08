@@ -295,10 +295,10 @@ func TestUpdateICAsAdmin(t *testing.T) {
 	// fake an IC update (create) message
 	var update ICUpdate
 	update.Status.State = "idle"
+	update.Status.ManagedBy = newIC2.Manager
 	update.Properties.Name = newIC2.Name
 	update.Properties.Category = newIC2.Category
 	update.Properties.Type = newIC2.Type
-	update.Properties.ManagedBy = newIC2.Manager
 	update.Properties.UUID = newIC2.UUID
 
 	payload, err := json.Marshal(update)
@@ -419,10 +419,10 @@ func TestDeleteICAsAdmin(t *testing.T) {
 	// fake an IC update (create) message
 	var update ICUpdate
 	update.Status.State = "idle"
+	update.Status.ManagedBy = newIC2.Manager
 	update.Properties.Name = newIC2.Name
 	update.Properties.Category = newIC2.Category
 	update.Properties.Type = newIC2.Type
-	update.Properties.ManagedBy = newIC2.Manager
 	update.Properties.UUID = newIC2.UUID
 
 	payload, err := json.Marshal(update)
@@ -697,11 +697,11 @@ func TestCreateUpdateViaAMQPRecv(t *testing.T) {
 	update.Properties.Category = newIC1.Category
 	update.Properties.Type = newIC1.Type
 	update.Status.Uptime = 1000.1
+	update.Status.ManagedBy = newIC1.Manager
 	update.Properties.WS_url = newIC1.WebsocketURL
 	update.Properties.API_url = newIC1.APIURL
 	update.Properties.Description = newIC1.Description
 	update.Properties.Location = newIC1.Location
-	update.Properties.ManagedBy = newIC1.Manager
 	update.Properties.UUID = newIC1.UUID
 
 	payload, err = json.Marshal(update)
@@ -785,11 +785,11 @@ func TestDeleteICViaAMQPRecv(t *testing.T) {
 	update.Properties.Category = newIC1.Category
 	update.Properties.Type = newIC1.Type
 	update.Status.Uptime = 500.544
+	update.Status.ManagedBy = newIC1.Manager
 	update.Properties.WS_url = newIC1.WebsocketURL
 	update.Properties.API_url = newIC1.APIURL
 	update.Properties.Description = newIC1.Description
 	update.Properties.Location = newIC1.Location
-	update.Properties.ManagedBy = newIC1.Manager
 	update.Properties.UUID = newIC1.UUID
 
 	payload, err := json.Marshal(update)
