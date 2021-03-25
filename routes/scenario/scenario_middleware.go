@@ -56,8 +56,8 @@ func CheckPermissions(c *gin.Context, operation database.CRUD, scenarioIDsource 
 		return false, so
 	}
 
-	if so.checkAccess(userID.(uint), userRole.(string)) == false {
-		helper.UnprocessableEntityError(c, "Access denied (for scenario ID).")
+	if so.checkAccess(userID.(uint), userRole.(string), operation) == false {
+		helper.UnprocessableEntityError(c, "Access denied (user has no access or scenario is locked).")
 		return false, so
 	}
 

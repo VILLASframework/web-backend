@@ -182,7 +182,8 @@ func updateScenario(c *gin.Context) {
 	}
 
 	// Create the updatedScenario from oldScenario
-	updatedScenario := req.updatedScenario(oldScenario)
+	userRole, _ := c.Get(database.UserRoleCtx)
+	updatedScenario := req.updatedScenario(oldScenario, userRole.(string))
 
 	// Finally update the scenario
 	err := oldScenario.update(updatedScenario)

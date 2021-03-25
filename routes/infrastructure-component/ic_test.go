@@ -65,7 +65,6 @@ type ICRequest struct {
 
 type ScenarioRequest struct {
 	Name            string         `json:"name,omitempty"`
-	Running         bool           `json:"running,omitempty"`
 	StartParameters postgres.Jsonb `json:"startParameters,omitempty"`
 }
 
@@ -829,7 +828,6 @@ func TestDeleteICViaAMQPRecv(t *testing.T) {
 	// add scenario
 	newScenario := ScenarioRequest{
 		Name:            "ScenarioA",
-		Running:         true,
 		StartParameters: postgres.Jsonb{RawMessage: json.RawMessage(`{"parameter1" : "testValue1B", "parameter2" : "testValue2B", "parameter3" : 55}`)},
 	}
 

@@ -58,7 +58,7 @@ func (s *Scenario) update(updatedScenario Scenario) error {
 
 	// TODO: if the field is empty member shouldn't be updated
 	s.Name = updatedScenario.Name
-	s.Running = updatedScenario.Running
+	s.IsLocked = updatedScenario.IsLocked
 	s.StartParameters = updatedScenario.StartParameters
 
 	db := database.GetDB()
@@ -146,7 +146,7 @@ func (s *Scenario) delete() error {
 	return nil
 }
 
-func (s *Scenario) checkAccess(userID uint, userRole string) bool {
+func (s *Scenario) checkAccess(userID uint, userRole string, operation database.CRUD) bool {
 
 	if userRole == "Admin" {
 		return true
@@ -155,7 +155,7 @@ func (s *Scenario) checkAccess(userID uint, userRole string) bool {
 		u := database.User{}
 		u.Username = ""
 		err := db.Order("ID asc").Model(s).Where("ID = ?", userID).Related(&u, "Users").Error
-		if err != nil || !u.Active {
+		if err != nil || !u.Active || (s.IsLocked && operation != database.Read) {
 			return false
 		} else {
 			return true

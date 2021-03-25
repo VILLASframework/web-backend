@@ -32,13 +32,12 @@ var validate *validator.Validate
 
 type validNewScenario struct {
 	Name            string         `form:"Name" validate:"required"`
-	Running         bool           `form:"Running" validate:"omitempty"`
 	StartParameters postgres.Jsonb `form:"StartParameters" validate:"required"`
 }
 
 type validUpdatedScenario struct {
 	Name            string         `form:"Name" validate:"omitempty"`
-	Running         bool           `form:"Running" validate:"omitempty"`
+	IsLocked        bool           `form:"IsLocked" validate:"omitempty"`
 	StartParameters postgres.Jsonb `form:"StartParameters" validate:"omitempty"`
 }
 
@@ -66,21 +65,23 @@ func (r *addScenarioRequest) createScenario() Scenario {
 	var s Scenario
 
 	s.Name = r.Scenario.Name
-	s.Running = r.Scenario.Running
+	s.IsLocked = false // new scenarios are not locked
 	s.StartParameters = r.Scenario.StartParameters
 
 	return s
 }
 
-func (r *updateScenarioRequest) updatedScenario(oldScenario Scenario) Scenario {
+func (r *updateScenarioRequest) updatedScenario(oldScenario Scenario, userRole string) Scenario {
 	// Use the old Scenario as a basis for the updated Scenario `s`
 	s := oldScenario
+
+	if userRole == "Admin" { // only admin users can change isLocked status
+		s.IsLocked = r.Scenario.IsLocked
+	}
 
 	if r.Scenario.Name != "" {
 		s.Name = r.Scenario.Name
 	}
-
-	s.Running = r.Scenario.Running
 
 	// only update Params if not empty
 	var emptyJson postgres.Jsonb

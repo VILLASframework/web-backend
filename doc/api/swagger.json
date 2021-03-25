@@ -3711,9 +3711,6 @@
                 "Name": {
                     "type": "string"
                 },
-                "Running": {
-                    "type": "boolean"
-                },
                 "StartParameters": {
                     "$ref": "#/definitions/postgres.Jsonb"
                 }
@@ -3722,11 +3719,11 @@
         "scenario.validUpdatedScenario": {
             "type": "object",
             "properties": {
+                "IsLocked": {
+                    "type": "boolean"
+                },
                 "Name": {
                     "type": "string"
-                },
-                "Running": {
-                    "type": "boolean"
                 },
                 "StartParameters": {
                     "$ref": "#/definitions/postgres.Jsonb"

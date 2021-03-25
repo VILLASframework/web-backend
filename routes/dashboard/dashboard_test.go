@@ -49,7 +49,6 @@ type DashboardRequest struct {
 
 type ScenarioRequest struct {
 	Name            string         `json:"name,omitempty"`
-	Running         bool           `json:"running,omitempty"`
 	StartParameters postgres.Jsonb `json:"startParameters,omitempty"`
 }
 
@@ -63,7 +62,6 @@ func addScenario(token string) (scenarioID uint) {
 	// POST $newScenario
 	newScenario := ScenarioRequest{
 		Name:            "Scenario1",
-		Running:         true,
 		StartParameters: postgres.Jsonb{json.RawMessage(`{"parameter1" : "testValue1A", "parameter2" : "testValue2A", "parameter3" : 42}`)},
 	}
 	_, resp, err := helper.TestEndpoint(router, token,
