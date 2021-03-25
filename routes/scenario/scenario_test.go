@@ -268,6 +268,48 @@ func TestUpdateScenario(t *testing.T) {
 	err = helper.CompareResponse(resp, helper.KeyModels{"scenario": updatedScenario})
 	assert.NoError(t, err)
 
+	// Get the updatedScenario
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/v2/scenarios/%v", newScenarioID), "GET", nil)
+	assert.NoError(t, err)
+	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
+
+	// Compare GET's response with the newScenario
+	err = helper.CompareResponse(resp, helper.KeyModels{"scenario": updatedScenario})
+	assert.NoError(t, err)
+
+	// change a locked scenario as admin user (should work)
+	updatedScenario.Name = "Updated as admin"
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/v2/scenarios/%v", newScenarioID), "PUT", helper.KeyModels{"scenario": updatedScenario})
+	assert.NoError(t, err)
+	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
+
+	// Compare GET's response with the updatedScenario
+	err = helper.CompareResponse(resp, helper.KeyModels{"scenario": updatedScenario})
+	assert.NoError(t, err)
+
+	// authenticate as normal user
+	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
+	assert.NoError(t, err)
+
+	// Get the updatedScenario
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/v2/scenarios/%v", newScenarioID), "GET", nil)
+	assert.NoError(t, err)
+	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
+
+	// Compare GET's response with the updatedScenario
+	err = helper.CompareResponse(resp, helper.KeyModels{"scenario": updatedScenario})
+	assert.NoError(t, err)
+
+	// try to change a locked scenario as normal user (should result in unprocessable entity error)
+	updatedScenario.Name = "another new name"
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/v2/scenarios/%v", newScenarioID), "PUT", helper.KeyModels{"scenario": updatedScenario})
+	assert.NoError(t, err)
+	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
+
 }
 
 func TestGetAllScenariosAsAdmin(t *testing.T) {
