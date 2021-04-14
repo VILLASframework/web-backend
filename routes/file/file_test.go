@@ -185,18 +185,6 @@ func TestAddFile(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 	assert.Equalf(t, string(c1), resp.String(), "Response body: \n%v\n", resp)
-
-	// authenticate as userB who has no access to the elements in the DB
-	token, err = helper.AuthenticateForTest(router, helper.UserBCredentials)
-	assert.NoError(t, err)
-
-	// try to get a file to which user has no access
-	// should return unprocessable entity
-	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/v2/files/%v", newFileID), "GET", nil)
-	assert.NoError(t, err)
-	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
-
 }
 
 func TestUpdateFile(t *testing.T) {
