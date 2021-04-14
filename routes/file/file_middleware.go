@@ -49,9 +49,12 @@ func CheckPermissions(c *gin.Context, operation database.CRUD) (bool, File) {
 		return false, f
 	}
 
-	ok, _ := scenario.CheckPermissions(c, operation, "body", int(f.ScenarioID))
-	if !ok {
-		return false, f
+	if operation != database.Read {
+		// check access to scenario only if operation is not Read (=download) of file
+		ok, _ := scenario.CheckPermissions(c, operation, "body", int(f.ScenarioID))
+		if !ok {
+			return false, f
+		}
 	}
 
 	return true, f

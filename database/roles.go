@@ -112,6 +112,19 @@ var Roles = RoleActions{
 		ModelFile:                          _r__,
 		ModelResult:                        none,
 	},
+	"Download": {
+		ModelScenario:                      none,
+		ModelComponentConfiguration:        none,
+		ModelDashboard:                     none,
+		ModelWidget:                        none,
+		ModelInfrastructureComponent:       none,
+		ModelInfrastructureComponentAction: none,
+		ModelUser:                          none,
+		ModelUsers:                         none,
+		ModelSignal:                        none,
+		ModelFile:                          _r__,
+		ModelResult:                        none,
+	},
 }
 
 func ValidateRole(c *gin.Context, model ModelName, action CRUD) error {
