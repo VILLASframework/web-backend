@@ -63,6 +63,12 @@ func (s *Scenario) update(updatedScenario Scenario) error {
 
 	db := database.GetDB()
 	err := db.Model(s).Update(updatedScenario).Error
+	if err != nil {
+		return err
+	}
+
+	// extra update for bool IsLocked since it is ignored if false
+	err = db.Model(s).Updates(map[string]interface{}{"IsLocked": updatedScenario.IsLocked}).Error
 	return err
 }
 

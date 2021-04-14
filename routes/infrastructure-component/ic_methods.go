@@ -52,6 +52,12 @@ func (s *InfrastructureComponent) update(updatedIC InfrastructureComponent) erro
 
 	db := database.GetDB()
 	err := db.Model(s).Updates(updatedIC).Error
+	if err != nil {
+		return err
+	}
+
+	// extra update for bool ManagedExternally since it is ignored if false
+	err = db.Model(s).Updates(map[string]interface{}{"ManagedExternally": updatedIC.ManagedExternally}).Error
 
 	return err
 }
