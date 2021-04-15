@@ -33,6 +33,10 @@ import (
 // Global configuration
 var GlobalConfig *config.Config = nil
 
+var ScenarioGroupMap = map[string][]int{
+	"moodle-l2pmanager@13306": {1, 2, 3},
+}
+
 func InitConfig() error {
 	if GlobalConfig != nil {
 		return nil

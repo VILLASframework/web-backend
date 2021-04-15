@@ -22,6 +22,7 @@
 package user
 
 import (
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -231,21 +232,41 @@ func authenticateExternal(c *gin.Context) *User {
 	// preferred_username := c.Request.Header.Get("X-Forwarded-Preferred-Username")
 
 	var user User
-	if err := user.ByUsername(username); err == nil {
-		// There is already a user by this name
-		return &user
-	} else {
+	if err := user.ByUsername(username); err != nil {
 		role := "User"
 		if _, found := helper.Find(groups, "admin"); found {
 			role = "Admin"
 		}
 
-		newUser, err := NewUser(username, "", email, role, true)
+		user, err := NewUser(username, "", email, role, true)
 		if err != nil {
 			helper.UnauthorizedAbort(c, "Authentication failed (failed to create new user: "+err.Error()+")")
 			return nil
 		}
 
-		return newUser
+		return user
 	}
+
+	// Add users to scenarios based on static map
+	for _, group := range groups {
+		if soIDs, ok := configuration.ScenarioGroupMap[group]; ok {
+			for soID := range soIDs {
+				db := database.GetDB()
+
+				var so database.Scenario
+				err := db.Find(so, soID).Error
+				if err != nil {
+					log.Printf("Failed to add user %s (id=%d) to scenario %d: Scenario does not exist\n", user.Username, user.ID, soID)
+					continue
+				}
+
+				err = db.Model(so).Association("Users").Append(user).Error
+				if err != nil {
+					log.Printf("Failed to add user %s (id=%d) to scenario %d: %s\n", user.Username, user.ID, soID, err)
+				}
+			}
+		}
+	}
+
+	return &user
 }
