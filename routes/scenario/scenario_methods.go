@@ -152,20 +152,32 @@ func (s *Scenario) delete() error {
 	return nil
 }
 
-func (s *Scenario) checkAccess(userID uint, userRole string, operation database.CRUD) bool {
+func (s *Scenario) checkAccess(userID uint, operation database.CRUD) bool {
 
-	if userRole == "Admin" {
+	db := database.GetDB()
+	u := database.User{}
+
+	err := db.Find(&u, userID).Error
+	if err != nil {
+		return false
+	}
+
+	if u.Role == "Admin" {
 		return true
+	}
+
+	scenarioUser := database.User{}
+	err = db.Order("ID asc").Model(s).Where("ID = ?", userID).Related(&scenarioUser, "Users").Error
+	if err != nil {
+		return false
+	}
+
+	if !scenarioUser.Active {
+		return false
+	} else if s.IsLocked && operation != database.Read {
+		return false
 	} else {
-		db := database.GetDB()
-		u := database.User{}
-		u.Username = ""
-		err := db.Order("ID asc").Model(s).Where("ID = ?", userID).Related(&u, "Users").Error
-		if err != nil || !u.Active || (s.IsLocked && operation != database.Read) {
-			return false
-		} else {
-			return true
-		}
+		return true
 	}
 
 }

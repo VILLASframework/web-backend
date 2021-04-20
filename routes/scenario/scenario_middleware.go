@@ -49,14 +49,13 @@ func CheckPermissions(c *gin.Context, operation database.CRUD, scenarioIDsource 
 	}
 
 	userID, _ := c.Get(database.UserIDCtx)
-	userRole, _ := c.Get(database.UserRoleCtx)
 
 	err = so.ByID(uint(scenarioID))
 	if helper.DBError(c, err) {
 		return false, so
 	}
 
-	if so.checkAccess(userID.(uint), userRole.(string), operation) == false {
+	if so.checkAccess(userID.(uint), operation) == false {
 		helper.UnprocessableEntityError(c, "Access denied (user has no access or scenario is locked).")
 		return false, so
 	}
