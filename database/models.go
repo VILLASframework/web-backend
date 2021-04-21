@@ -60,8 +60,8 @@ type Scenario struct {
 	Model
 	// Name of scenario
 	Name string `json:"name" gorm:"not null"`
-	// Running state of scenario
-	Running bool `json:"running" gorm:"default:false" `
+	// IsLocked state of scenario (true if scenario is locked by administrator)
+	IsLocked bool `json:"isLocked" gorm:"default:false" `
 	// Start parameters of scenario as JSON
 	StartParameters postgres.Jsonb `json:"startParameters"`
 	// Users that have access to the scenario

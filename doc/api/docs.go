@@ -3727,9 +3727,6 @@ var doc = `{
                 "Name": {
                     "type": "string"
                 },
-                "Running": {
-                    "type": "boolean"
-                },
                 "StartParameters": {
                     "$ref": "#/definitions/postgres.Jsonb"
                 }
@@ -3738,11 +3735,11 @@ var doc = `{
         "scenario.validUpdatedScenario": {
             "type": "object",
             "properties": {
+                "IsLocked": {
+                    "type": "boolean"
+                },
                 "Name": {
                     "type": "string"
-                },
-                "Running": {
-                    "type": "boolean"
                 },
                 "StartParameters": {
                     "$ref": "#/definitions/postgres.Jsonb"

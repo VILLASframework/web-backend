@@ -40,7 +40,7 @@ var router *gin.Engine
 
 type ScenarioRequest struct {
 	Name            string         `json:"name,omitempty"`
-	Running         bool           `json:"running,omitempty"`
+	IsLocked        bool           `json:"isLocked,omitempty"`
 	StartParameters postgres.Jsonb `json:"startParameters,omitempty"`
 }
 
@@ -54,13 +54,11 @@ type UserRequest struct {
 
 var newScenario1 = ScenarioRequest{
 	Name:            "Scenario1",
-	Running:         true,
 	StartParameters: postgres.Jsonb{json.RawMessage(`{"parameter1" : "testValue1A", "parameter2" : "testValue2A", "parameter3" : 42}`)},
 }
 
 var newScenario2 = ScenarioRequest{
 	Name:            "Scenario2",
-	Running:         false,
 	StartParameters: postgres.Jsonb{json.RawMessage(`{"parameter1" : "testValue1B", "parameter2" : "testValue2B", "parameter3" : 55}`)},
 }
 
@@ -133,7 +131,7 @@ func TestAddScenario(t *testing.T) {
 	// try to POST a malformed scenario
 	// Required fields are missing
 	malformedNewScenario := ScenarioRequest{
-		Running: false,
+		IsLocked: false,
 	}
 	// this should NOT work and return a unprocessable entity 442 status code
 	code, resp, err = helper.TestEndpoint(router, token,
@@ -205,12 +203,6 @@ func TestUpdateScenario(t *testing.T) {
 	newScenarioID, err := helper.GetResponseID(resp)
 	assert.NoError(t, err)
 
-	updatedScenario := ScenarioRequest{
-		Name:            "Updated name",
-		Running:         false,
-		StartParameters: postgres.Jsonb{RawMessage: json.RawMessage(`{"parameter1" : "testValue1A", "parameter2" : "testValue2A", "parameter3" : 42}`)},
-	}
-
 	// try to update with non JSON body
 	// should return a bad request error
 	code, resp, err = helper.TestEndpoint(router, token,
@@ -218,6 +210,24 @@ func TestUpdateScenario(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 
+	updatedScenario := ScenarioRequest{
+		Name:            "Updated name",
+		IsLocked:        true,
+		StartParameters: postgres.Jsonb{RawMessage: json.RawMessage(`{"parameter1" : "testValue1A", "parameter2" : "testValue2A", "parameter3" : 42}`)},
+	}
+
+	// try to change locked state as non admin user
+	// should return 200 but locked state not updated
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/v2/scenarios/%v", newScenarioID), "PUT", helper.KeyModels{"scenario": updatedScenario})
+	assert.NoError(t, err)
+	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
+
+	// Compare PUT's response with the updatedScenario (should result in error)
+	err = helper.CompareResponse(resp, helper.KeyModels{"scenario": updatedScenario})
+	assert.Error(t, err)
+
+	updatedScenario.IsLocked = false
 	code, resp, err = helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/v2/scenarios/%v", newScenarioID), "PUT", helper.KeyModels{"scenario": updatedScenario})
 	assert.NoError(t, err)
@@ -242,6 +252,63 @@ func TestUpdateScenario(t *testing.T) {
 		fmt.Sprintf("/api/v2/scenarios/%v", newScenarioID+1), "PUT", helper.KeyModels{"scenario": updatedScenario})
 	assert.NoError(t, err)
 	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
+
+	// authenticate as admin user who has no access to everything
+	token, err = helper.AuthenticateForTest(router, helper.AdminCredentials)
+	assert.NoError(t, err)
+
+	// changed locked state of scenario as admin user (should work)
+	updatedScenario.IsLocked = true
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/v2/scenarios/%v", newScenarioID), "PUT", helper.KeyModels{"scenario": updatedScenario})
+	assert.NoError(t, err)
+	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
+
+	// Compare PUT's response with the updatedScenario
+	err = helper.CompareResponse(resp, helper.KeyModels{"scenario": updatedScenario})
+	assert.NoError(t, err)
+
+	// Get the updatedScenario
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/v2/scenarios/%v", newScenarioID), "GET", nil)
+	assert.NoError(t, err)
+	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
+
+	// Compare GET's response with the newScenario
+	err = helper.CompareResponse(resp, helper.KeyModels{"scenario": updatedScenario})
+	assert.NoError(t, err)
+
+	// change a locked scenario as admin user (should work)
+	updatedScenario.Name = "Updated as admin"
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/v2/scenarios/%v", newScenarioID), "PUT", helper.KeyModels{"scenario": updatedScenario})
+	assert.NoError(t, err)
+	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
+
+	// Compare GET's response with the updatedScenario
+	err = helper.CompareResponse(resp, helper.KeyModels{"scenario": updatedScenario})
+	assert.NoError(t, err)
+
+	// authenticate as normal user
+	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
+	assert.NoError(t, err)
+
+	// Get the updatedScenario
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/v2/scenarios/%v", newScenarioID), "GET", nil)
+	assert.NoError(t, err)
+	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
+
+	// Compare GET's response with the updatedScenario
+	err = helper.CompareResponse(resp, helper.KeyModels{"scenario": updatedScenario})
+	assert.NoError(t, err)
+
+	// try to change a locked scenario as normal user (should result in unprocessable entity error)
+	updatedScenario.Name = "another new name"
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/v2/scenarios/%v", newScenarioID), "PUT", helper.KeyModels{"scenario": updatedScenario})
+	assert.NoError(t, err)
+	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 }
 

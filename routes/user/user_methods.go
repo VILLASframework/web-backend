@@ -124,8 +124,11 @@ func (u *User) update(updatedUser User) error {
 
 	db := database.GetDB()
 	err := db.Model(u).Update(updatedUser).Error
+	if err != nil {
+		return err
+	}
 
-	// extra update for bool active since it is ignored if false
+	// extra update for bool Active since it is ignored if false
 	err = db.Model(u).Updates(map[string]interface{}{"Active": updatedUser.Active}).Error
 
 	return err
