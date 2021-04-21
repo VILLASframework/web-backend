@@ -165,22 +165,10 @@ func InitConfig() error {
 		}
 	}
 
-	gPath, err := GlobalConfig.String("groups.path")
-	if err != nil {
-		return err
-	}
-
-	if gPath != "" {
-		err = readGroupsFile(gPath)
-		if err != nil {
-			return err
-		}
-	}
-
 	return nil
 }
 
-func readGroupsFile(path string) error {
+func ReadGroupsFile(path string) error {
 
 	jsonFile, err := os.Open(path)
 	if err != nil {

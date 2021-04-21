@@ -97,6 +97,18 @@ func main() {
 		log.Fatalf("Error reading port from global configuration: %s, aborting.", err)
 	}
 
+	gPath, err := configuration.GlobalConfig.String("groups.path")
+	if err != nil {
+		log.Fatalf("Error reading path to groups JSON file: %s, aborting.", err)
+	}
+
+	if gPath != "" {
+		err = configuration.ReadGroupsFile(gPath)
+		if err != nil {
+			log.Fatalf("Error reading groups JSON file: %s, aborting.", err)
+		}
+	}
+
 	// Init database
 	err = database.InitDB(configuration.GlobalConfig)
 	if err != nil {
