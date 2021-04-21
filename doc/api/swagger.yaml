@@ -286,8 +286,6 @@ definitions:
     properties:
       Name:
         type: string
-      Running:
-        type: boolean
       StartParameters:
         $ref: '#/definitions/postgres.Jsonb'
     required:
@@ -296,10 +294,10 @@ definitions:
     type: object
   scenario.validUpdatedScenario:
     properties:
+      IsLocked:
+        type: boolean
       Name:
         type: string
-      Running:
-        type: boolean
       StartParameters:
         $ref: '#/definitions/postgres.Jsonb'
     type: object

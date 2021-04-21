@@ -11,9 +11,6 @@ variables:
     GOPATH: $CI_PROJECT_DIR/.go
   before_script:
     - mkdir -p .go
-  cache:
-    paths:
-      - .go/pkg/mod/
 
 stages:
   - build
@@ -37,10 +34,6 @@ build:
         --parseVendor
         --parseDepth 2
     - go build
-  artifacts:
-    paths:
-      - doc/api/swagger.json
-      - doc/api/docs.go
 
 # Stage: test
 ##############################################################################
