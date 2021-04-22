@@ -22,7 +22,10 @@
 package configuration
 
 import (
+	"encoding/json"
 	"flag"
+	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -32,6 +35,8 @@ import (
 
 // Global configuration
 var GlobalConfig *config.Config = nil
+
+var ScenarioGroupMap = map[string][]int{}
 
 func InitConfig() error {
 	if GlobalConfig != nil {
@@ -69,6 +74,7 @@ func InitConfig() error {
 		contactName              = flag.String("contact-name", "Steffen Vogel", "Name of the administrative contact")
 		contactMail              = flag.String("contact-mail", "svogel2@eonerc.rwth-aachen.de", "EMail of the administrative contact")
 		testDataPath             = flag.String("test-data-path", "database/testdata.json", "The path to the test data json file (used in test mode)")
+		groupsPath               = flag.String("groups-path", "configuration/groups.json", "The path to the JSON file that maps user groups to scenario IDs")
 	)
 	flag.Parse()
 
@@ -99,6 +105,7 @@ func InitConfig() error {
 		"contact.name":                *contactName,
 		"contact.mail":                *contactMail,
 		"test.datapath":               *testDataPath,
+		"groups.path":                 *groupsPath,
 	}
 
 	if *s3NoSSL == true {
@@ -157,6 +164,28 @@ func InitConfig() error {
 			log.Printf("   %s = %s \n", key, val)
 		}
 	}
+
+	return nil
+}
+
+func ReadGroupsFile(path string) error {
+
+	jsonFile, err := os.Open(path)
+	if err != nil {
+		return fmt.Errorf("error opening json file for groups: %v", err)
+	}
+	log.Println("Successfully opened json groups file", path)
+
+	defer jsonFile.Close()
+
+	byteValue, _ := ioutil.ReadAll(jsonFile)
+
+	err = json.Unmarshal(byteValue, &ScenarioGroupMap)
+	if err != nil {
+		return fmt.Errorf("error unmarshalling json into ScenarioGroupMap: %v", err)
+	}
+
+	log.Println("ScenarioGroupMap", ScenarioGroupMap)
 
 	return nil
 }
