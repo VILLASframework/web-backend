@@ -170,22 +170,33 @@ func InitConfig() error {
 
 func ReadGroupsFile(path string) error {
 
-	jsonFile, err := os.Open(path)
-	if err != nil {
-		return fmt.Errorf("error opening json file for groups: %v", err)
+	_, err := os.Stat(path)
+
+	if err == nil {
+
+		jsonFile, err := os.Open(path)
+		if err != nil {
+			return fmt.Errorf("error opening json file for groups: %v", err)
+		}
+		log.Println("Successfully opened json groups file", path)
+
+		defer jsonFile.Close()
+
+		byteValue, _ := ioutil.ReadAll(jsonFile)
+
+		err = json.Unmarshal(byteValue, &ScenarioGroupMap)
+		if err != nil {
+			return fmt.Errorf("error unmarshalling json into ScenarioGroupMap: %v", err)
+		}
+
+		log.Println("ScenarioGroupMap", ScenarioGroupMap)
+
+		return nil
+	} else if os.IsNotExist(err) {
+		log.Println("File does not exist, no goups/scenarios mapping created:", path)
+		return nil
+	} else {
+		log.Println("Something is wrong with this file path:", path)
+		return nil
 	}
-	log.Println("Successfully opened json groups file", path)
-
-	defer jsonFile.Close()
-
-	byteValue, _ := ioutil.ReadAll(jsonFile)
-
-	err = json.Unmarshal(byteValue, &ScenarioGroupMap)
-	if err != nil {
-		return fmt.Errorf("error unmarshalling json into ScenarioGroupMap: %v", err)
-	}
-
-	log.Println("ScenarioGroupMap", ScenarioGroupMap)
-
-	return nil
 }
