@@ -34,7 +34,7 @@ func RegisterConfigEndpoint(r *gin.RouterGroup) {
 type ConfigAuthenticationExternal struct {
 	Enabled      bool   `json:"enabled"`
 	ProviderName string `json:"provider_name"`
-	LoginURL     string `json:"login_url"`
+	LoginURL     string `json:"authorize_url"`
 }
 
 type ConfigAuthentication struct {

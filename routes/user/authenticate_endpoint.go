@@ -238,21 +238,23 @@ func authenticateExternal(c *gin.Context) *User {
 			role = "Admin"
 		}
 
-		user, err := NewUser(username, "", email, role, true)
+		u, err := NewUser(username, "", email, role, true)
 		if err != nil {
 			helper.UnauthorizedAbort(c, "Authentication failed (failed to create new user: "+err.Error()+")")
 			return nil
 		}
 
-		return user
+		user = *u
+
+		log.Printf("Created new external user %s (id=%d)", user.Username, user.ID)
 	}
 
 	// Add users to scenarios based on static map
 	for _, group := range groups {
 		if soIDs, ok := configuration.ScenarioGroupMap[group]; ok {
-			for soID := range soIDs {
-				db := database.GetDB()
+			db := database.GetDB()
 
+			for _, soID := range soIDs {
 				var so database.Scenario
 				err := db.Find(&so, soID).Error
 				if err != nil {
@@ -264,6 +266,8 @@ func authenticateExternal(c *gin.Context) *User {
 				if err != nil {
 					log.Printf("Failed to add user %s (id=%d) to scenario %d: %s\n", user.Username, user.ID, soID, err)
 				}
+
+				log.Printf("Added user %s (id=%d) to scenario %d", user.Username, user.ID, soID)
 			}
 		}
 	}
