@@ -37,13 +37,13 @@ type User struct {
 	database.User // check golang embedding types
 }
 
-func NewUser(username, password, mail, role string, active bool) (*User, error) {
+func NewUser(username, password, mail, role string, active bool) (User, error) {
 	var newUser User
 
 	// Check that the username is NOT taken
 	err := newUser.ByUsername(username)
 	if err == nil {
-		return nil, fmt.Errorf("Username is already taken")
+		return newUser, fmt.Errorf("Username is already taken")
 	}
 
 	newUser.Username = username
@@ -58,17 +58,17 @@ func NewUser(username, password, mail, role string, active bool) (*User, error) 
 		// Hash the password before saving it to the DB
 		err = newUser.setPassword(password)
 		if err != nil {
-			return nil, err
+			return newUser, err
 		}
 	}
 
 	// Save the user in the DB
 	err = newUser.save()
 	if err != nil {
-		return nil, err
+		return newUser, err
 	}
 
-	return &newUser, nil
+	return newUser, nil
 }
 
 func (u *User) save() error {

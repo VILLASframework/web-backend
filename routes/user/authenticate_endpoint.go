@@ -22,6 +22,7 @@
 package user
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -112,15 +113,23 @@ func authenticated(c *gin.Context) {
 // @Failure 500 {object} api.ResponseError "Internal server error."
 // @Router /authenticate/{mechanism} [post]
 func authenticate(c *gin.Context) {
-	var user *User = nil
+	var myUser User
+	var err error
 
 	switch c.Param("mechanism") {
 	case "internal":
-		user = authenticateInternal(c)
+		myUser, err = authenticateInternal(c)
+		if err != nil {
+			helper.BadRequestError(c, err.Error())
+		}
 	case "external":
-		authExternal, err := configuration.GlobalConfig.Bool("auth.external.enabled")
+		var authExternal bool
+		authExternal, err = configuration.GlobalConfig.Bool("auth.external.enabled")
 		if err == nil && authExternal {
-			user = authenticateExternal(c)
+			myUser, err = authenticateExternal(c)
+			if err != nil {
+				helper.BadRequestError(c, err.Error())
+			}
 		} else {
 			helper.BadRequestError(c, "External authentication is not activated")
 		}
@@ -128,12 +137,8 @@ func authenticate(c *gin.Context) {
 		helper.BadRequestError(c, "Invalid authentication mechanism")
 	}
 
-	if user == nil {
-		return
-	}
-
 	// Check if this is an active user
-	if !user.Active {
+	if !myUser.Active {
 		helper.UnauthorizedError(c, "User is not active")
 		return
 	}
@@ -158,8 +163,8 @@ func authenticate(c *gin.Context) {
 
 	// Create authentication token
 	claims := tokenClaims{
-		user.ID,
-		user.Role,
+		myUser.ID,
+		myUser.Role,
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(expiresDuration).Unix(),
 			IssuedAt:  time.Now().Unix(),
@@ -179,72 +184,72 @@ func authenticate(c *gin.Context) {
 		"success": true,
 		"message": "Authenticated",
 		"token":   tokenString,
-		"user":    user.User,
+		"user":    myUser.User,
 	})
 }
 
-func authenticateInternal(c *gin.Context) *User {
+func authenticateInternal(c *gin.Context) (User, error) {
 	// Bind the response (context) with the loginRequest struct
+	var myUser User
 	var credentials loginRequest
 	if err := c.ShouldBindJSON(&credentials); err != nil {
 		helper.UnauthorizedError(c, "Wrong username or password")
-		return nil
+		return myUser, err
 	}
 
 	// Validate the login request
 	if errs := credentials.validate(); errs != nil {
 		helper.UnauthorizedError(c, "Failed to validate request")
-		return nil
+		return myUser, errs
 	}
 
 	// Find the username in the database
-	var user User
-	err := user.ByUsername(credentials.Username)
+	err := myUser.ByUsername(credentials.Username)
 	if err != nil {
 		helper.UnauthorizedError(c, "Unknown username")
-		return nil
+		return myUser, err
 	}
 
 	// Validate the password
-	err = user.validatePassword(credentials.Password)
+	err = myUser.validatePassword(credentials.Password)
 	if err != nil {
 		helper.UnauthorizedError(c, "Invalid password")
-		return nil
+		return myUser, err
 	}
 
-	return &user
+	return myUser, nil
 }
 
-func authenticateExternal(c *gin.Context) *User {
+func authenticateExternal(c *gin.Context) (User, error) {
+	var myUser User
 	username := c.Request.Header.Get("X-Forwarded-User")
 	if username == "" {
 		helper.UnauthorizedAbort(c, "Authentication failed (X-Forwarded-User headers)")
-		return nil
+		return myUser, fmt.Errorf("no username")
 	}
 
 	email := c.Request.Header.Get("X-Forwarded-Email")
 	if email == "" {
 		helper.UnauthorizedAbort(c, "Authentication failed (X-Forwarded-Email headers)")
-		return nil
+		return myUser, fmt.Errorf("no email")
 	}
 
 	groups := strings.Split(c.Request.Header.Get("X-Forwarded-Groups"), ",")
 	// preferred_username := c.Request.Header.Get("X-Forwarded-Preferred-Username")
 
-	var user User
-	if err := user.ByUsername(username); err != nil {
+	if err := myUser.ByUsername(username); err != nil {
 		role := "User"
 		if _, found := helper.Find(groups, "admin"); found {
 			role = "Admin"
 		}
 
-		user, err := NewUser(username, "", email, role, true)
+		myUser, err = NewUser(username, "", email, role, true)
 		if err != nil {
 			helper.UnauthorizedAbort(c, "Authentication failed (failed to create new user: "+err.Error()+")")
-			return nil
+			return myUser, fmt.Errorf("failed to create new user")
 		}
 
-		return user
+		return myUser, nil
 	}
 
 	// Add users to scenarios based on static map
@@ -256,17 +261,17 @@ func authenticateExternal(c *gin.Context) *User {
 				var so database.Scenario
 				err := db.Find(&so, soID).Error
 				if err != nil {
-					log.Printf("Failed to add user %s (id=%d) to scenario %d: %s\n", user.Username, user.ID, soID, err)
+					log.Printf("Failed to add user %s (id=%d) to scenario %d: %s\n", myUser.Username, myUser.ID, soID, err)
 					continue
 				}
 
-				err = db.Model(&so).Association("Users").Append(&user).Error
+				err = db.Model(&so).Association("Users").Append(&myUser).Error
 				if err != nil {
-					log.Printf("Failed to add user %s (id=%d) to scenario %d: %s\n", user.Username, user.ID, soID, err)
+					log.Printf("Failed to add user %s (id=%d) to scenario %d: %s\n", myUser.Username, myUser.ID, soID, err)
 				}
 			}
 		}
 	}
 
-	return &user
+	return myUser, nil
 }
