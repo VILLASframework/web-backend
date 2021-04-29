@@ -27,6 +27,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"sort"
 	"strings"
 
 	"gopkg.in/yaml.v3"
@@ -50,11 +51,11 @@ func InitConfig() error {
 		dbUser                   = flag.String("db-user", "", "Username of database connection (default is <empty>)")
 		dbPass                   = flag.String("db-pass", "", "Password of database connection (default is <empty>)")
 		dbSSLMode                = flag.String("db-ssl-mode", "disable", "SSL mode of DB (default is disable)") // TODO: change default for production
+		dbClear                  = flag.Bool("db-clear", false, "Set to true if you want to clear all DB tables upon startup. This parameter has to be used with great care, its effects cannot be reverted.")
 		amqpHost                 = flag.String("amqp-host", "", "If set, use this as host for AMQP broker (default is disabled)")
 		amqpUser                 = flag.String("amqp-user", "", "Username for AMQP broker")
 		amqpPass                 = flag.String("amqp-pass", "", "Password for AMQP broker")
 		configFile               = flag.String("config", "", "Path to YAML configuration file")
-		mode                     = flag.String("mode", "release", "Select debug/release/test mode (default is release)")
 		port                     = flag.String("port", "4000", "Port of the backend (default is 4000)")
 		adminUser                = flag.String("admin-user", "", "Initial admin username")
 		adminPass                = flag.String("admin-pass", "", "Initial admin password")
@@ -74,7 +75,7 @@ func InitConfig() error {
 		subTitle                 = flag.String("sub-title", "", "Sub-title shown in the frontend")
 		contactName              = flag.String("contact-name", "Steffen Vogel", "Name of the administrative contact")
 		contactMail              = flag.String("contact-mail", "svogel2@eonerc.rwth-aachen.de", "EMail of the administrative contact")
-		testDataPath             = flag.String("test-data-path", "database/testdata.json", "The path to the test data json file (used in test mode)")
+		testDataPath             = flag.String("test-data-path", "", "The path to a test data json file")
 		groupsPath               = flag.String("groups-path", "configuration/groups.yaml", "The path to a YAML file that maps user groups to scenario IDs")
 	)
 	flag.Parse()
@@ -88,7 +89,6 @@ func InitConfig() error {
 		"amqp.host":                   *amqpHost,
 		"amqp.user":                   *amqpUser,
 		"amqp.pass":                   *amqpPass,
-		"mode":                        *mode,
 		"port":                        *port,
 		"admin.user":                  *adminUser,
 		"admin.pass":                  *adminPass,
@@ -107,6 +107,13 @@ func InitConfig() error {
 		"contact.mail":                *contactMail,
 		"test.datapath":               *testDataPath,
 		"groups.path":                 *groupsPath,
+		"config.file":                 *configFile,
+	}
+
+	if *dbClear == true {
+		static["db.clear"] = "true"
+	} else {
+		static["db.clear"] = "false"
 	}
 
 	if *s3NoSSL == true {
@@ -152,20 +159,20 @@ func InitConfig() error {
 		return err
 	}
 
-	m, err := GlobalConfig.String("mode")
-	if err != nil {
-		return err
-	}
+	settings, _ := GlobalConfig.Settings()
 
-	if m != "test" {
-		settings, _ := GlobalConfig.Settings()
-		log.Print("All settings:")
-		for key, val := range settings {
-			// TODO password settings should be excluded!
-			log.Printf("   %s = %s \n", key, val)
+	keys := make([]string, 0, len(settings))
+	for k := range settings {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	log.Print("All settings (except for PW and secrets):")
+	for _, k := range keys {
+		if !strings.Contains(k, "pass") && !strings.Contains(k, "secret") {
+			log.Printf("   %s = %s \n", k, settings[k])
 		}
 	}
-
 	return nil
 }
 

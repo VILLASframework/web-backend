@@ -35,34 +35,23 @@ import (
 
 func addData(router *gin.Engine, cfg *config.Config) error {
 
-	if mode, err := cfg.String("mode"); err == nil && mode == "test" {
-		// test mode: drop all tables and add test data to DB
-		database.DropTables()
-		log.Println("Database tables dropped, using API to add test data")
-
-		testDataPath, err := cfg.String("test.datapath")
-		if err != nil {
-			return err
-		}
-		err = routes.ReadTestDataFromJson(testDataPath)
-		if err != nil {
-			log.Println("testdata could not be read from json")
-			return err
-		}
-
-		resp, err := routes.AddTestData(cfg, router)
-		if err != nil {
-			fmt.Println("error: testdata could not be added to DB:", err.Error(), "Response body: ", resp)
-			return err
-		}
-	} else {
-		// release mode: make sure that at least one admin user exists in DB
-		err, _ := database.DBAddAdminUser(cfg)
-		if err != nil {
-			fmt.Println("error: adding admin user failed:", err.Error())
-			return err
-		}
+	testDataPath, err := cfg.String("test.datapath")
+	if err != nil {
+		return err
 	}
+
+	err = routes.ReadTestDataFromJson(testDataPath)
+	if err != nil {
+		log.Println("testdata could not be read from json file")
+		return err
+	}
+
+	resp, err := routes.AddTestData(cfg, router)
+	if err != nil {
+		fmt.Println("error: testdata could not be added to DB:", err.Error(), "Response body: ", resp)
+		return err
+	}
+
 	return nil
 }
 
@@ -87,9 +76,9 @@ func main() {
 		log.Fatalf("Error during initialization of global configuration: %s, aborting.", err)
 	}
 
-	mode, err := configuration.GlobalConfig.String("mode")
+	dbClear, err := configuration.GlobalConfig.String("db.clear")
 	if err != nil {
-		log.Fatalf("Error reading mode from global configuration: %s, aborting.", err)
+		log.Fatalf("Error reading db.clear parameter from global configuration: %s, aborting.", err)
 	}
 
 	port, err := configuration.GlobalConfig.String("port")
@@ -110,16 +99,14 @@ func main() {
 	}
 
 	// Init database
-	err = database.InitDB(configuration.GlobalConfig)
+	err = database.InitDB(configuration.GlobalConfig, dbClear)
 	if err != nil {
 		log.Fatalf("Error during initialization of database: %s, aborting.", err)
 	}
 	defer database.DBpool.Close()
 
 	// Init endpoints
-	if mode == "release" {
-		gin.SetMode(gin.ReleaseMode)
-	}
+	gin.SetMode(gin.ReleaseMode)
 
 	r := gin.Default()
 	api := r.Group("/api/v2")
@@ -139,12 +126,20 @@ func main() {
 		}
 	}
 
-	// Add data to DB (if any)
+	// Make sure that at least one admin user exists in DB
+	err = database.DBAddAdminUser(configuration.GlobalConfig)
+	if err != nil {
+		fmt.Println("error: adding admin user failed:", err.Error())
+		log.Fatal(err)
+	}
+
+	// Add test/demo data to DB (if any)
 	err = addData(r, configuration.GlobalConfig)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	log.Println("Running...")
 	// Server at port 4000 to match frontend's redirect path
 	r.Run(":" + port)
 }

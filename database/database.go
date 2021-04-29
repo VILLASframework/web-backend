@@ -1,4 +1,4 @@
-/** Database package.
+/** Package database
 *
 * @author Sonja Happ <sonja.happ@eonerc.rwth-aachen.de>
 * @copyright 2014-2019, Institute for Automation of Complex Power Systems, EONERC
@@ -36,8 +36,8 @@ import (
 
 var DBpool *gorm.DB // database used by backend
 
-// Initialize connection to the database
-func InitDB(cfg *config.Config) error {
+// InitDB Initialize connection to the database
+func InitDB(cfg *config.Config, dbClear string) error {
 	name, err := cfg.String("db.name")
 	if err != nil {
 		return err
@@ -73,20 +73,25 @@ func InitDB(cfg *config.Config) error {
 	}
 
 	DBpool = db
+
+	// drop tables if parameter set
+	if dbClear == "true" {
+		DropTables()
+		log.Println("Database tables dropped")
+	}
+
 	MigrateModels()
 	log.Println("Database connection established")
 
 	return nil
 }
 
-// Connection pool to already opened DB
+// GetDB Connection pool to already opened DB
 func GetDB() *gorm.DB {
 	return DBpool
 }
 
-// Drop all the tables of the database
-// TODO: Remove that function from the codebase and substitute the body
-// to the Dummy*() where it is called
+// DropTables drops all the tables of the database (use with care!)
 func DropTables() {
 	DBpool.DropTableIfExists(&InfrastructureComponent{})
 	DBpool.DropTableIfExists(&Signal{})
@@ -101,7 +106,7 @@ func DropTables() {
 	DBpool.DropTableIfExists("user_scenarios")
 }
 
-// AutoMigrate the models
+// MigrateModels AutoMigrate the models
 func MigrateModels() {
 	DBpool.AutoMigrate(&InfrastructureComponent{})
 	DBpool.AutoMigrate(&Signal{})
@@ -115,26 +120,27 @@ func MigrateModels() {
 }
 
 // DBAddAdminUser adds a default admin user to the DB
-func DBAddAdminUser(cfg *config.Config) (error, string) {
+func DBAddAdminUser(cfg *config.Config) error {
 	DBpool.AutoMigrate(User{})
 
 	// Check if admin user exists in DB
 	var users []User
 	err := DBpool.Where("Role = ?", "Admin").Find(&users).Error
 	adminPW := ""
+	adminName := ""
 
 	if len(users) == 0 {
 		fmt.Println("No admin user found in DB, adding default admin user.")
 
-		name, err := cfg.String("admin.user")
-		if err != nil || name == "" {
-			name = "admin"
+		adminName, err = cfg.String("admin.user")
+		if err != nil || adminName == "" {
+			adminName = "admin"
 		}
 
 		adminPW, err = cfg.String("admin.pass")
 		if err != nil || adminPW == "" {
 			adminPW = generatePassword(16)
-			fmt.Printf("  Generated admin password: %s\n", adminPW)
+			fmt.Printf("  Generated admin password: %s for admin user %s\n", adminPW, adminName)
 		}
 
 		mail, err := cfg.String("admin.mail")
@@ -145,14 +151,16 @@ func DBAddAdminUser(cfg *config.Config) (error, string) {
 		pwEnc, _ := bcrypt.GenerateFromPassword([]byte(adminPW), 10)
 
 		// create a copy of global test data
-		user := User{Username: name, Password: string(pwEnc),
+		user := User{Username: adminName, Password: string(pwEnc),
 			Role: "Admin", Mail: mail, Active: true}
 
 		// add admin user to DB
 		err = DBpool.Create(&user).Error
+		if err != nil {
+			return err
+		}
 	}
-
-	return err, adminPW
+	return nil
 }
 
 func generatePassword(Len int) string {
