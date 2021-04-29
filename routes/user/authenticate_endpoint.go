@@ -270,7 +270,7 @@ func authenticateExternal(c *gin.Context) (User, error) {
 					log.Printf("Failed to add user %s (id=%d) to scenario %d: %s\n", myUser.Username, myUser.ID, soID, err)
 				}
 
-				log.Printf("Added user %s (id=%d) to scenario %d", user.Username, user.ID, soID)
+				log.Printf("Added user %s (id=%d) to scenario %d", myUser.Username, myUser.ID, soID)
 			}
 		}
 	}
