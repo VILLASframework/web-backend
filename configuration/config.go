@@ -67,7 +67,7 @@ func InitConfig() error {
 		jwtSecret                = flag.String("jwt-secret", "This should NOT be here!!@33$8&", "The JSON Web Token secret")
 		jwtExpiresAfter          = flag.String("jwt-expires-after", "168h" /* 1 week */, "The time after which the JSON Web Token expires")
 		authExternal             = flag.Bool("auth-external", false, "Use external authentication via X-Forwarded-User header (e.g. OAuth2 Proxy)")
-		authExternalAuthorizeURL = flag.String("authexternal-authorize-url", "/oauth2/start", "A URL to initiate external login procedure")
+		authExternalLoginURL     = flag.String("auth-external-login-url", "/oauth2/start", "A URL to initiate external login procedure")
 		authExternalProviderName = flag.String("auth-external-provider-name", "JupyterHub", "A name of the external authentication provider")
 		authLogoutURL            = flag.String("auth-logout-url", "/oauth2/sign_out?rd=https%3A%2F%2Fjupyter.k8s.eonerc.rwth-aachen.de%2Fhub%2Flogout", "The URL to redirect the user to log out")
 		title                    = flag.String("title", "VILLASweb", "Title shown in the frontend")
@@ -98,7 +98,7 @@ func InitConfig() error {
 		"s3.region":                   *s3Region,
 		"jwt.secret":                  *jwtSecret,
 		"jwt.expires-after":           *jwtExpiresAfter,
-		"auth.external.authorize-url": *authExternalAuthorizeURL,
+		"auth.external.login-url":     *authExternalLoginURL,
 		"auth.external.provider-name": *authExternalProviderName,
 		"auth.logout-url":             *authLogoutURL,
 		"title":                       *title,
