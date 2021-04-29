@@ -99,13 +99,13 @@ func main() {
 
 	gPath, err := configuration.GlobalConfig.String("groups.path")
 	if err != nil {
-		log.Fatalf("Error reading path to groups JSON file: %s, aborting.", err)
+		log.Fatalf("Error reading path to groups YAML file: %s, aborting.", err)
 	}
 
 	if gPath != "" {
 		err = configuration.ReadGroupsFile(gPath)
 		if err != nil {
-			log.Fatalf("Error reading groups JSON file: %s, aborting.", err)
+			log.Fatalf("Error reading groups YAML file: %s, aborting.", err)
 		}
 	}
 

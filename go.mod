@@ -24,6 +24,7 @@ require (
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 	gopkg.in/go-playground/validator.v9 v9.30.0
 	gopkg.in/ini.v1 v1.51.0 // indirect
+	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c // indirect
 )
 
 go 1.15

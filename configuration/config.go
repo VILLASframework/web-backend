@@ -22,13 +22,14 @@
 package configuration
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"strings"
+
+	"gopkg.in/yaml.v3"
 
 	"github.com/zpatrick/go-config"
 )
@@ -74,7 +75,7 @@ func InitConfig() error {
 		contactName              = flag.String("contact-name", "Steffen Vogel", "Name of the administrative contact")
 		contactMail              = flag.String("contact-mail", "svogel2@eonerc.rwth-aachen.de", "EMail of the administrative contact")
 		testDataPath             = flag.String("test-data-path", "database/testdata.json", "The path to the test data json file (used in test mode)")
-		groupsPath               = flag.String("groups-path", "configuration/groups.json", "The path to the JSON file that maps user groups to scenario IDs")
+		groupsPath               = flag.String("groups-path", "configuration/groups.json", "The path to a YAML file that maps user groups to scenario IDs")
 	)
 	flag.Parse()
 
@@ -184,9 +185,9 @@ func ReadGroupsFile(path string) error {
 
 		byteValue, _ := ioutil.ReadAll(jsonFile)
 
-		err = json.Unmarshal(byteValue, &ScenarioGroupMap)
+		err = yaml.Unmarshal(byteValue, &ScenarioGroupMap)
 		if err != nil {
-			return fmt.Errorf("error unmarshalling json into ScenarioGroupMap: %v", err)
+			return fmt.Errorf("error unmarshalling yaml into ScenarioGroupMap: %v", err)
 		}
 
 		log.Println("ScenarioGroupMap", ScenarioGroupMap)
