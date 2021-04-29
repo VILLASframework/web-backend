@@ -75,7 +75,7 @@ func InitConfig() error {
 		contactName              = flag.String("contact-name", "Steffen Vogel", "Name of the administrative contact")
 		contactMail              = flag.String("contact-mail", "svogel2@eonerc.rwth-aachen.de", "EMail of the administrative contact")
 		testDataPath             = flag.String("test-data-path", "database/testdata.json", "The path to the test data json file (used in test mode)")
-		groupsPath               = flag.String("groups-path", "configuration/groups.json", "The path to a YAML file that maps user groups to scenario IDs")
+		groupsPath               = flag.String("groups-path", "configuration/groups.yaml", "The path to a YAML file that maps user groups to scenario IDs")
 	)
 	flag.Parse()
 
@@ -175,15 +175,15 @@ func ReadGroupsFile(path string) error {
 
 	if err == nil {
 
-		jsonFile, err := os.Open(path)
+		yamlFile, err := os.Open(path)
 		if err != nil {
-			return fmt.Errorf("error opening json file for groups: %v", err)
+			return fmt.Errorf("error opening yaml file for groups: %v", err)
 		}
-		log.Println("Successfully opened json groups file", path)
+		log.Println("Successfully opened yaml groups file", path)
 
-		defer jsonFile.Close()
+		defer yamlFile.Close()
 
-		byteValue, _ := ioutil.ReadAll(jsonFile)
+		byteValue, _ := ioutil.ReadAll(yamlFile)
 
 		err = yaml.Unmarshal(byteValue, &ScenarioGroupMap)
 		if err != nil {
