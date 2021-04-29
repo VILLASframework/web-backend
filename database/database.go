@@ -120,7 +120,7 @@ func MigrateModels() {
 }
 
 // DBAddAdminUser adds a default admin user to the DB
-func DBAddAdminUser(cfg *config.Config) error {
+func DBAddAdminUser(cfg *config.Config) (error, string) {
 	DBpool.AutoMigrate(User{})
 
 	// Check if admin user exists in DB
@@ -157,10 +157,10 @@ func DBAddAdminUser(cfg *config.Config) error {
 		// add admin user to DB
 		err = DBpool.Create(&user).Error
 		if err != nil {
-			return err
+			return err, ""
 		}
 	}
-	return nil
+	return nil, adminPW
 }
 
 func generatePassword(Len int) string {

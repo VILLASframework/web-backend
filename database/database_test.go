@@ -51,39 +51,39 @@ func TestInitDB(t *testing.T) {
 
 	ownconfig := config.NewConfig([]config.Provider{defaults, env})
 
-	err = InitDB(ownconfig)
+	err = InitDB(ownconfig, "true")
 	assert.Error(t, err)
 	dbname, err := configuration.GlobalConfig.String("db.name")
 	assert.NoError(t, err)
 	static["db.name"] = dbname
 	ownconfig = config.NewConfig([]config.Provider{defaults, env})
-	err = InitDB(ownconfig)
+	err = InitDB(ownconfig, "true")
 	assert.Error(t, err)
 
 	dbhost, err := configuration.GlobalConfig.String("db.host")
 	assert.NoError(t, err)
 	static["db.host"] = dbhost
 	ownconfig = config.NewConfig([]config.Provider{defaults, env})
-	err = InitDB(ownconfig)
+	err = InitDB(ownconfig, "true")
 	assert.Error(t, err)
 
 	dbuser, err := configuration.GlobalConfig.String("db.user")
 	static["db.user"] = dbuser
 	ownconfig = config.NewConfig([]config.Provider{defaults, env})
-	err = InitDB(ownconfig)
+	err = InitDB(ownconfig, "true")
 	assert.Error(t, err)
 
 	dbpass, err := configuration.GlobalConfig.String("db.pass")
 	static["db.pass"] = dbpass
 	ownconfig = config.NewConfig([]config.Provider{defaults, env})
-	err = InitDB(ownconfig)
+	err = InitDB(ownconfig, "true")
 	assert.Error(t, err)
 
 	dbssl, err := configuration.GlobalConfig.String("db.ssl")
 	assert.NoError(t, err)
 	static["db.ssl"] = dbssl
 	ownconfig = config.NewConfig([]config.Provider{defaults, env})
-	err = InitDB(ownconfig)
+	err = InitDB(ownconfig, "true")
 	assert.NoError(t, err)
 
 	// Verify that you can connect to the database
