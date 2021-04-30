@@ -112,7 +112,7 @@ func TestMain(m *testing.M) {
 		panic(m)
 	}
 
-	err = database.InitDB(configuration.GlobalConfig)
+	err = database.InitDB(configuration.GlobalConfig, "true")
 	if err != nil {
 		panic(m)
 	}
