@@ -253,24 +253,24 @@ func authenticateExternal(c *gin.Context) (User, error) {
 	}
 
 	// Add users to scenarios based on static map
+	db := database.GetDB()
 	for _, group := range groups {
 		if soIDs, ok := configuration.ScenarioGroupMap[group]; ok {
-			db := database.GetDB()
-
 			for _, soID := range soIDs {
 				var so database.Scenario
 				err := db.Find(&so, soID).Error
 				if err != nil {
-					log.Printf("Failed to add user %s (id=%d) to scenario %d: %s\n", myUser.Username, myUser.ID, soID, err)
+					log.Printf("Failed to add user %s (id=%d) to scenario %s (id=%d): %s\n", myUser.Username, myUser.ID, so.Name, so.ID, err)
 					continue
 				}
 
 				err = db.Model(&so).Association("Users").Append(&myUser).Error
 				if err != nil {
-					log.Printf("Failed to add user %s (id=%d) to scenario %d: %s\n", myUser.Username, myUser.ID, soID, err)
+					log.Printf("Failed to add user %s (id=%d) to scenario %s (id=%d): %s\n", myUser.Username, myUser.ID, so.Name, so.ID, err)
+					continue
 				}
 
-				log.Printf("Added user %s (id=%d) to scenario %d", myUser.Username, myUser.ID, soID)
+				log.Printf("Added user %s (id=%d) to scenario %s (id=%d)", myUser.Username, myUser.ID, so.Name, so.ID)
 			}
 		}
 	}
