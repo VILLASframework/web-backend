@@ -37,18 +37,19 @@ func addData(router *gin.Engine, cfg *config.Config) error {
 
 	testDataPath, err := cfg.String("test.datapath")
 	if err != nil {
-		return err
+		// if param is missing, no test data will be added
+		return nil
 	}
 
 	err = routes.ReadTestDataFromJson(testDataPath)
 	if err != nil {
-		log.Println("testdata could not be read from json file")
-		return err
+		log.Println("WARNING: test data cannot not be read from file, continue without it: ", err)
+		return nil
 	}
 
 	resp, err := routes.AddTestData(cfg, router)
 	if err != nil {
-		fmt.Println("error: testdata could not be added to DB:", err.Error(), "Response body: ", resp)
+		fmt.Println("ERROR: test data could not be added to DB:", err.Error(), "Response body: ", resp)
 		return err
 	}
 

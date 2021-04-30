@@ -137,14 +137,17 @@ func ReadTestDataFromJson(path string) error {
 // AddTestData Uses API endpoints to add test data to the backend; All endpoints have to be registered before invoking this function.
 func AddTestData(cfg *config.Config, router *gin.Engine) (*bytes.Buffer, error) {
 
-	adminPW, err := cfg.String("admin.pass")
-	if err != nil {
-		log.Println("WARNING: cannot add test data: ", err)
-		return nil, nil
-	}
-	adminName, err := cfg.String("admin.user")
-	if err != nil {
-		log.Println("WARNING: cannot add test data: ", err)
+	adminPW, errPW := cfg.String("admin.pass")
+	adminName, errName := cfg.String("admin.user")
+	if errPW != nil || errName != nil {
+		if errName != nil {
+			log.Println("WARNING:", errName)
+		}
+		if errPW != nil {
+			log.Println("WARNING:", errPW)
+		}
+
+		log.Println("WARNING: cannot add test data because of missing admin config, continue without it")
 		return nil, nil
 	}
 
