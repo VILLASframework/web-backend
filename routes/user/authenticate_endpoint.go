@@ -264,7 +264,7 @@ func authenticateExternal(c *gin.Context) (User, error) {
 					continue
 				}
 
-				err = db.Model(&so).Association("Users").Append(&myUser).Error
+				err = db.Model(&so).Association("Users").Append(&(myUser.User)).Error
 				if err != nil {
 					log.Printf("Failed to add user %s (id=%d) to scenario %s (id=%d): %s\n", myUser.Username, myUser.ID, so.Name, so.ID, err)
 					continue
