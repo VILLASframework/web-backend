@@ -24,6 +24,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
@@ -139,6 +140,11 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// Update via external APIs of ICs (if not managed via AMQP)
+	intervalStr, _ := configuration.GlobalConfig.String("apiupdateinterval")
+	interval, _ := time.ParseDuration(intervalStr)
+	infrastructure_component.QueryICAPIs(interval)
 
 	log.Println("Running...")
 	// Server at port 4000 to match frontend's redirect path

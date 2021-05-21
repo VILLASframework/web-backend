@@ -8,6 +8,7 @@ require (
 	github.com/gin-gonic/gin v1.4.0
 	github.com/go-ini/ini v1.51.0 // indirect
 	github.com/go-playground/universal-translator v0.17.0 // indirect
+	github.com/go-resty/resty/v2 v2.6.0
 	github.com/google/uuid v1.1.2
 	github.com/jinzhu/gorm v1.9.11
 	github.com/kr/pretty v0.2.1 // indirect

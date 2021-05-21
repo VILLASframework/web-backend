@@ -77,6 +77,7 @@ func InitConfig() error {
 		contactMail              = flag.String("contact-mail", "svogel2@eonerc.rwth-aachen.de", "EMail of the administrative contact")
 		testDataPath             = flag.String("test-data-path", "", "The path to a test data json file")
 		groupsPath               = flag.String("groups-path", "configuration/groups.yaml", "The path to a YAML file that maps user groups to scenario IDs")
+		apiUpdateInterval        = flag.String("api-update-interval", "10s" /* 10 sec */, "Interval in which API URL is queried for status updates of ICs")
 	)
 	flag.Parse()
 
@@ -108,6 +109,7 @@ func InitConfig() error {
 		"test.datapath":               *testDataPath,
 		"groups.path":                 *groupsPath,
 		"config.file":                 *configFile,
+		"apiupdateinterval":           *apiUpdateInterval,
 	}
 
 	if *dbClear == true {
