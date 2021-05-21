@@ -1,4 +1,4 @@
-/** AMQP package, client.
+/** infrastructure-component package, AMQP client.
 *
 * @author Sonja Happ <sonja.happ@eonerc.rwth-aachen.de>
 * @copyright 2014-2019, Institute for Automation of Complex Power Systems, EONERC
