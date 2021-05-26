@@ -66,7 +66,7 @@ func QueryICAPIs(d time.Duration) {
 
 				if ic.Category == "gateway" && ic.Type == "villas-node" {
 
-					log.Println("External API: checking for IC", ic.Name)
+					log.Println("External API: checking for villas-node gateway", ic.Name)
 					statusResponse, err := client.R().SetHeader("Accept", "application/json").Get(ic.APIURL + "/status")
 					if err != nil {
 						log.Println("Error querying status of", ic.Name, err)
@@ -118,7 +118,7 @@ func QueryICAPIs(d time.Duration) {
 					// validate the update
 					err = updatedIC.validate()
 					if err != nil {
-						log.Println("Error validating updated IC", ic.Name, ic.UUID, err.Error())
+						log.Println("Error validating updated villas-node gateway", ic.Name, ic.UUID, err.Error())
 						continue
 					}
 
@@ -126,19 +126,60 @@ func QueryICAPIs(d time.Duration) {
 					var x InfrastructureComponent
 					err = x.byID(ic.ID)
 					if err != nil {
-						log.Println("Error getting IC by ID", ic.Name, err)
+						log.Println("Error getting villas-node gateway by ID", ic.Name, err)
 						continue
 					}
 					u := updatedIC.updatedIC(x)
 					err = x.update(u)
 					if err != nil {
-						log.Println("Error updating IC", ic.Name, ic.UUID, err.Error())
+						log.Println("Error updating villas-node gateway", ic.Name, ic.UUID, err.Error())
 						continue
 					}
 
 				} else if ic.Category == "manager" && ic.Type == "villas-relay" {
 
+					log.Println("External API: checking for villas-relay manager", ic.Name)
+					statusResponse, err := client.R().SetHeader("Accept", "application/json").Get(ic.APIURL)
+					if err != nil {
+						log.Println("Error querying API of", ic.Name, err)
+						continue
+					}
+					var status map[string]interface{}
+					err = json.Unmarshal(statusResponse.Body(), &status)
+					if err != nil {
+						log.Println("Error unmarshalling status villas-relay manager", ic.Name, err)
+						continue
+					}
+
+					var updatedIC UpdateICRequest
+					statusRaw, _ := json.Marshal(status)
+					updatedIC.InfrastructureComponent.StatusUpdateRaw = postgres.Jsonb{RawMessage: statusRaw}
+					updatedIC.InfrastructureComponent.UUID = fmt.Sprintf("%v", status["uuid"])
+
+					// validate the update
+					err = updatedIC.validate()
+					if err != nil {
+						log.Println("Error validating updated villas-relay manager", ic.Name, ic.UUID, err.Error())
+						continue
+					}
+
+					// create the update and update IC in DB
+					var x InfrastructureComponent
+					err = x.byID(ic.ID)
+					if err != nil {
+						log.Println("Error getting villas-relay manager by ID", ic.Name, err)
+						continue
+					}
+					u := updatedIC.updatedIC(x)
+					err = x.update(u)
+					if err != nil {
+						log.Println("Error updating villas-relay manager", ic.Name, ic.UUID, err.Error())
+						continue
+					}
+
 				} else if ic.Category == "gateway" && ic.Type == "villas-relay" {
+
+					// TODO add code here once API for VILLASrelay sessions is available
 
 				}
 			}
