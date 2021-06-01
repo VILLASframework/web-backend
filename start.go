@@ -126,6 +126,12 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		// send Ping to all externally managed ICs
+		err = infrastructure_component.SendPing("")
+		if err != nil {
+			log.Println("error sending ping action via AMQP: ", err)
+		}
 	}
 
 	// Make sure that at least one admin user exists in DB

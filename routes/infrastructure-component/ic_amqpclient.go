@@ -196,6 +196,41 @@ func sendActionAMQP(action Action, destinationUUID string) error {
 
 }
 
+func SendPing(uuid string) error {
+	var ping Action
+	ping.Act = "ping"
+
+	payload, err := json.Marshal(ping)
+	if err != nil {
+		return err
+	}
+
+	msg := amqp.Publishing{
+		DeliveryMode:    2,
+		Timestamp:       time.Now(),
+		ContentType:     "application/json",
+		ContentEncoding: "utf-8",
+		Priority:        0,
+		Body:            payload,
+	}
+
+	// set message headers
+	msg.Headers = make(map[string]interface{}) // empty map
+	msg.Headers["uuid"] = uuid                 // leave uuid empty if ping should go to all ICs
+
+	err = CheckConnection()
+	if err != nil {
+		return err
+	}
+
+	err = client.sendCh.Publish(VILLAS_EXCHANGE,
+		"",
+		false,
+		false,
+		msg)
+	return err
+}
+
 func CheckConnection() error {
 
 	if client.connection != nil {
@@ -235,16 +270,16 @@ func processMessage(message amqp.Delivery) error {
 		return fmt.Errorf("AMQP: Could not unmarshal message to JSON: %v err: %v", string(message.Body), err)
 	}
 
+	if payload.Action != "" {
+		// if a message contains an action, it is not intended for the backend
+		//log.Println("AMQP: Ignoring action message ", payload)
+		return nil
+	}
+
 	ICUUID := payload.Properties.UUID
 	_, err = uuid.Parse(ICUUID)
 	if err != nil {
 		return fmt.Errorf("AMQP: UUID not valid: %v, message ignored: %v \n", ICUUID, string(message.Body))
-	}
-
-	if payload.Action != "" {
-		// if a message contains an action, it is not intended for the backend
-		log.Println("AMQP: Ignoring action message for action", payload.Action, "sent to IC", ICUUID)
-		return nil
 	}
 
 	var sToBeUpdated InfrastructureComponent
@@ -318,7 +353,10 @@ func createExternalIC(payload ICUpdate, ICUUID string, body []byte) error {
 	}
 
 	log.Println("AMQP: Created IC with UUID ", newIC.UUID)
-	return nil
+
+	// send ping to get full status update of this IC
+	err = SendPing(ICUUID)
+	return err
 }
 
 func (s *InfrastructureComponent) updateExternalIC(payload ICUpdate, body []byte) error {
