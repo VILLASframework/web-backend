@@ -49,18 +49,19 @@ var api *gin.RouterGroup
 var waitingTime time.Duration = 1
 
 type ICRequest struct {
-	UUID                 string         `json:"uuid,omitempty"`
-	WebsocketURL         string         `json:"websocketurl,omitempty"`
-	APIURL               string         `json:"apiurl,omitempty"`
-	Type                 string         `json:"type,omitempty"`
-	Name                 string         `json:"name,omitempty"`
-	Category             string         `json:"category,omitempty"`
-	State                string         `json:"state,omitempty"`
-	Location             string         `json:"location,omitempty"`
-	Description          string         `json:"description,omitempty"`
-	StartParameterSchema postgres.Jsonb `json:"startparameterschema,omitempty"`
-	ManagedExternally    *bool          `json:"managedexternally"`
-	Manager              string         `json:"manager,omitempty"`
+	UUID                  string         `json:"uuid,omitempty"`
+	WebsocketURL          string         `json:"websocketurl,omitempty"`
+	APIURL                string         `json:"apiurl,omitempty"`
+	Type                  string         `json:"type,omitempty"`
+	Name                  string         `json:"name,omitempty"`
+	Category              string         `json:"category,omitempty"`
+	State                 string         `json:"state,omitempty"`
+	Location              string         `json:"location,omitempty"`
+	Description           string         `json:"description,omitempty"`
+	StartParameterSchema  postgres.Jsonb `json:"startparameterschema,omitempty"`
+	CreateParameterSchema postgres.Jsonb `json:"createparameterschema,omitempty"`
+	ManagedExternally     *bool          `json:"managedexternally"`
+	Manager               string         `json:"manager,omitempty"`
 }
 
 type ScenarioRequest struct {
@@ -77,33 +78,35 @@ type ConfigRequest struct {
 }
 
 var newIC1 = ICRequest{
-	UUID:                 "7be0322d-354e-431e-84bd-ae4c9633138b",
-	WebsocketURL:         "https://villas.k8s.eonerc.rwth-aachen.de/ws/ws_sig",
-	APIURL:               "https://villas.k8s.eonerc.rwth-aachen.de/ws/api/v2",
-	Type:                 "villas-node",
-	Name:                 "ACS Demo Signals",
-	Category:             "gateway",
-	State:                "idle",
-	Location:             "k8s",
-	Description:          "A signal generator for testing purposes",
-	StartParameterSchema: postgres.Jsonb{json.RawMessage(`{"prop1" : "a nice prop"}`)},
-	ManagedExternally:    newFalse(),
-	Manager:              "7be0322d-354e-431e-84bd-ae4c9633beef",
+	UUID:                  "7be0322d-354e-431e-84bd-ae4c9633138b",
+	WebsocketURL:          "https://villas.k8s.eonerc.rwth-aachen.de/ws/ws_sig",
+	APIURL:                "https://villas.k8s.eonerc.rwth-aachen.de/ws/api/v2",
+	Type:                  "villas-node",
+	Name:                  "ACS Demo Signals",
+	Category:              "gateway",
+	State:                 "idle",
+	Location:              "k8s",
+	Description:           "A signal generator for testing purposes",
+	StartParameterSchema:  postgres.Jsonb{json.RawMessage(`{"startprop1" : "a nice prop"}`)},
+	CreateParameterSchema: postgres.Jsonb{json.RawMessage(`{"createprop1" : "a really nice prop"}`)},
+	ManagedExternally:     newFalse(),
+	Manager:               "7be0322d-354e-431e-84bd-ae4c9633beef",
 }
 
 var newIC2 = ICRequest{
-	UUID:                 "4854af30-325f-44a5-ad59-b67b2597de68",
-	WebsocketURL:         "xxx.yyy.zzz.aaa",
-	APIURL:               "https://villas.k8s.eonerc.rwth-aachen.de/ws/api/v2",
-	Type:                 "dpsim",
-	Name:                 "Test DPsim Simulator",
-	Category:             "simulator",
-	State:                "running",
-	Location:             "k8s",
-	Description:          "This is a test description",
-	StartParameterSchema: postgres.Jsonb{json.RawMessage(`{"prop1" : "a nice prop"}`)},
-	ManagedExternally:    newTrue(),
-	Manager:              "4854af30-325f-44a5-ad59-b67b2597de99",
+	UUID:                  "4854af30-325f-44a5-ad59-b67b2597de68",
+	WebsocketURL:          "xxx.yyy.zzz.aaa",
+	APIURL:                "https://villas.k8s.eonerc.rwth-aachen.de/ws/api/v2",
+	Type:                  "dpsim",
+	Name:                  "Test DPsim Simulator",
+	Category:              "simulator",
+	State:                 "running",
+	Location:              "k8s",
+	Description:           "This is a test description",
+	StartParameterSchema:  postgres.Jsonb{json.RawMessage(`{"startprop1" : "a nice prop"}`)},
+	CreateParameterSchema: postgres.Jsonb{json.RawMessage(`{"createprop1" : "a really nice prop"}`)},
+	ManagedExternally:     newTrue(),
+	Manager:               "4854af30-325f-44a5-ad59-b67b2597de99",
 }
 
 func TestMain(m *testing.M) {

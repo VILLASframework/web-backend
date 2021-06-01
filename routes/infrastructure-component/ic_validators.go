@@ -33,36 +33,38 @@ import (
 var validate *validator.Validate
 
 type validNewIC struct {
-	UUID                 string         `form:"UUID" validate:"omitempty"`
-	WebsocketURL         string         `form:"WebsocketURL" validate:"omitempty"`
-	APIURL               string         `form:"APIURL" validate:"omitempty"`
-	Type                 string         `form:"Type" validate:"required"`
-	Name                 string         `form:"Name" validate:"required"`
-	Category             string         `form:"Category" validate:"required"`
-	State                string         `form:"State" validate:"omitempty"`
-	Location             string         `form:"Location" validate:"omitempty"`
-	Description          string         `form:"Description" validate:"omitempty"`
-	StartParameterSchema postgres.Jsonb `form:"StartParameterSchema" validate:"omitempty"`
-	StatusUpdateRaw      postgres.Jsonb `form:"StatusUpdateRaw" validate:"omitempty"`
-	ManagedExternally    *bool          `form:"ManagedExternally" validate:"required"`
-	Manager              string         `form:"Manager" validate:"omitempty"`
-	Uptime               float64        `form:"Uptime" validate:"omitempty"`
+	UUID                  string         `form:"UUID" validate:"omitempty"`
+	WebsocketURL          string         `form:"WebsocketURL" validate:"omitempty"`
+	APIURL                string         `form:"APIURL" validate:"omitempty"`
+	Type                  string         `form:"Type" validate:"required"`
+	Name                  string         `form:"Name" validate:"required"`
+	Category              string         `form:"Category" validate:"required"`
+	State                 string         `form:"State" validate:"omitempty"`
+	Location              string         `form:"Location" validate:"omitempty"`
+	Description           string         `form:"Description" validate:"omitempty"`
+	StartParameterSchema  postgres.Jsonb `form:"StartParameterSchema" validate:"omitempty"`
+	CreateParameterSchema postgres.Jsonb `form:"CreateParameterSchema" validate:"omitempty"`
+	StatusUpdateRaw       postgres.Jsonb `form:"StatusUpdateRaw" validate:"omitempty"`
+	ManagedExternally     *bool          `form:"ManagedExternally" validate:"required"`
+	Manager               string         `form:"Manager" validate:"omitempty"`
+	Uptime                float64        `form:"Uptime" validate:"omitempty"`
 }
 
 type validUpdatedIC struct {
-	UUID                 string         `form:"UUID" validate:"omitempty"`
-	WebsocketURL         string         `form:"WebsocketURL" validate:"omitempty"`
-	APIURL               string         `form:"APIURL" validate:"omitempty"`
-	Type                 string         `form:"Type" validate:"omitempty"`
-	Name                 string         `form:"Name" validate:"omitempty"`
-	Category             string         `form:"Category" validate:"omitempty"`
-	State                string         `form:"State" validate:"omitempty"`
-	Location             string         `form:"Location" validate:"omitempty"`
-	Description          string         `form:"Description" validate:"omitempty"`
-	StartParameterSchema postgres.Jsonb `form:"StartParameterSchema" validate:"omitempty"`
-	StatusUpdateRaw      postgres.Jsonb `form:"StatusUpdateRaw" validate:"omitempty"`
-	Manager              string         `form:"Manager" validate:"omitempty"`
-	Uptime               float64        `form:"Uptime" validate:"omitempty"`
+	UUID                  string         `form:"UUID" validate:"omitempty"`
+	WebsocketURL          string         `form:"WebsocketURL" validate:"omitempty"`
+	APIURL                string         `form:"APIURL" validate:"omitempty"`
+	Type                  string         `form:"Type" validate:"omitempty"`
+	Name                  string         `form:"Name" validate:"omitempty"`
+	Category              string         `form:"Category" validate:"omitempty"`
+	State                 string         `form:"State" validate:"omitempty"`
+	Location              string         `form:"Location" validate:"omitempty"`
+	Description           string         `form:"Description" validate:"omitempty"`
+	StartParameterSchema  postgres.Jsonb `form:"StartParameterSchema" validate:"omitempty"`
+	CreateParameterSchema postgres.Jsonb `form:"CreateParameterSchema" validate:"omitempty"`
+	StatusUpdateRaw       postgres.Jsonb `form:"StatusUpdateRaw" validate:"omitempty"`
+	Manager               string         `form:"Manager" validate:"omitempty"`
+	Uptime                float64        `form:"Uptime" validate:"omitempty"`
 }
 
 type AddICRequest struct {
@@ -129,6 +131,7 @@ func (r *AddICRequest) createIC() (InfrastructureComponent, error) {
 	s.Location = r.InfrastructureComponent.Location
 	s.Description = r.InfrastructureComponent.Description
 	s.StartParameterSchema = r.InfrastructureComponent.StartParameterSchema
+	s.CreateParameterSchema = r.InfrastructureComponent.CreateParameterSchema
 	s.StatusUpdateRaw = r.InfrastructureComponent.StatusUpdateRaw
 	s.ManagedExternally = *r.InfrastructureComponent.ManagedExternally
 	s.Manager = r.InfrastructureComponent.Manager
@@ -159,6 +162,7 @@ func (r *UpdateICRequest) updatedIC(oldIC InfrastructureComponent) Infrastructur
 	s.Uptime = math.Round(r.InfrastructureComponent.Uptime) // round required for backward compatibility of data model
 	s.Manager = r.InfrastructureComponent.Manager
 	s.StartParameterSchema = r.InfrastructureComponent.StartParameterSchema
+	s.CreateParameterSchema = r.InfrastructureComponent.CreateParameterSchema
 	s.StatusUpdateRaw = r.InfrastructureComponent.StatusUpdateRaw
 
 	// set last update time

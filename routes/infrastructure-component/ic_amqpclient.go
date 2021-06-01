@@ -61,24 +61,28 @@ type ICStatus struct {
 }
 
 type ICProperties struct {
-	UUID                 string          `json:"uuid"`
-	Name                 string          `json:"name"`
-	Description          string          `json:"description"`
-	Location             string          `json:"location"`
-	Owner                string          `json:"owner"`
-	WS_url               string          `json:"ws_url"`
-	API_url              string          `json:"api_url"`
-	Category             string          `json:"category"`
-	Type                 string          `json:"type"`
-	StartParameterSchema json.RawMessage `json:"start_parameter_schema"`
+	UUID        string `json:"uuid"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Location    string `json:"location"`
+	Owner       string `json:"owner"`
+	WS_url      string `json:"ws_url"`
+	API_url     string `json:"api_url"`
+	Category    string `json:"category"`
+	Type        string `json:"type"`
+}
+
+type ICSchema struct {
+	StartParameterSchema   json.RawMessage `json:"start"`
+	CreateParametersSchema json.RawMessage `json:"create"`
 }
 
 type ICUpdate struct {
 	Status     ICStatus     `json:"status"`
 	Properties ICProperties `json:"properties"`
+	Schema     ICSchema     `json:"schema"`
 	When       float64      `json:"when"`
 	Action     string       `json:"action"`
-	// TODO add JSON start parameter scheme
 }
 
 var client AMQPclient
@@ -328,11 +332,10 @@ func createExternalIC(payload ICUpdate, ICUUID string, body []byte) error {
 	// set managed externally to true because this IC is created via AMQP
 	newICReq.InfrastructureComponent.ManagedExternally = newTrue()
 	newICReq.InfrastructureComponent.Manager = payload.Status.ManagedBy
-	newICReq.InfrastructureComponent.StartParameterSchema = postgres.Jsonb{RawMessage: payload.Properties.StartParameterSchema}
+	newICReq.InfrastructureComponent.StartParameterSchema = postgres.Jsonb{RawMessage: payload.Schema.StartParameterSchema}
+	newICReq.InfrastructureComponent.CreateParameterSchema = postgres.Jsonb{RawMessage: payload.Schema.CreateParametersSchema}
 	// set raw status update if IC
 	newICReq.InfrastructureComponent.StatusUpdateRaw = postgres.Jsonb{RawMessage: body}
-
-	// TODO add JSON start parameter scheme
 
 	// Validate the new IC
 	err := newICReq.validate()
@@ -397,11 +400,10 @@ func (s *InfrastructureComponent) updateExternalIC(payload ICUpdate, body []byte
 	updatedICReq.InfrastructureComponent.Location = payload.Properties.Location
 	updatedICReq.InfrastructureComponent.Description = payload.Properties.Description
 	updatedICReq.InfrastructureComponent.Manager = payload.Status.ManagedBy
-	updatedICReq.InfrastructureComponent.StartParameterSchema = postgres.Jsonb{RawMessage: payload.Properties.StartParameterSchema}
+	updatedICReq.InfrastructureComponent.StartParameterSchema = postgres.Jsonb{RawMessage: payload.Schema.StartParameterSchema}
+	updatedICReq.InfrastructureComponent.CreateParameterSchema = postgres.Jsonb{RawMessage: payload.Schema.CreateParametersSchema}
 	// set raw status update if IC
 	updatedICReq.InfrastructureComponent.StatusUpdateRaw = postgres.Jsonb{RawMessage: body}
-
-	// TODO add JSON start parameter scheme
 
 	// Validate the updated IC
 	err := updatedICReq.validate()

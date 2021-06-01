@@ -58,16 +58,17 @@ type ConfigRequest struct {
 }
 
 type ICRequest struct {
-	UUID                 string         `json:"uuid,omitempty"`
-	WebsocketURL         string         `json:"websocketurl,omitempty"`
-	Type                 string         `json:"type,omitempty"`
-	Name                 string         `json:"name,omitempty"`
-	Category             string         `json:"category,omitempty"`
-	State                string         `json:"state,omitempty"`
-	Location             string         `json:"location,omitempty"`
-	Description          string         `json:"description,omitempty"`
-	StartParameterSchema postgres.Jsonb `json:"startparameterschema,omitempty"`
-	ManagedExternally    *bool          `json:"managedexternally,omitempty"`
+	UUID                  string         `json:"uuid,omitempty"`
+	WebsocketURL          string         `json:"websocketurl,omitempty"`
+	Type                  string         `json:"type,omitempty"`
+	Name                  string         `json:"name,omitempty"`
+	Category              string         `json:"category,omitempty"`
+	State                 string         `json:"state,omitempty"`
+	Location              string         `json:"location,omitempty"`
+	Description           string         `json:"description,omitempty"`
+	StartParameterSchema  postgres.Jsonb `json:"startparameterschema,omitempty"`
+	CreateParameterSchema postgres.Jsonb `json:"createparameterschema,omitempty"`
+	ManagedExternally     *bool          `json:"managedexternally,omitempty"`
 }
 
 type ScenarioRequest struct {
@@ -94,16 +95,17 @@ func addScenarioAndICAndConfig() (scenarioID uint, ICID uint, configID uint) {
 
 	// POST $newICA
 	newICA := ICRequest{
-		UUID:                 "7be0322d-354e-431e-84bd-ae4c9633138b",
-		WebsocketURL:         "https://villas.k8s.eonerc.rwth-aachen.de/ws/ws_sig",
-		Type:                 "villas-node",
-		Name:                 "ACS Demo Signals",
-		Category:             "gateway",
-		State:                "idle",
-		Location:             "k8s",
-		Description:          "A signal generator for testing purposes",
-		StartParameterSchema: postgres.Jsonb{json.RawMessage(`{"prop1" : "a nice prop"}`)},
-		ManagedExternally:    newFalse(),
+		UUID:                  "7be0322d-354e-431e-84bd-ae4c9633138b",
+		WebsocketURL:          "https://villas.k8s.eonerc.rwth-aachen.de/ws/ws_sig",
+		Type:                  "villas-node",
+		Name:                  "ACS Demo Signals",
+		Category:              "gateway",
+		State:                 "idle",
+		Location:              "k8s",
+		Description:           "A signal generator for testing purposes",
+		StartParameterSchema:  postgres.Jsonb{json.RawMessage(`{"startprop1" : "a nice prop"}`)},
+		CreateParameterSchema: postgres.Jsonb{json.RawMessage(`{"createprop1" : "a really nice prop"}`)},
+		ManagedExternally:     newFalse(),
 	}
 	_, resp, _ := helper.TestEndpoint(router, token,
 		"/api/v2/ic", "POST", helper.KeyModels{"ic": newICA})

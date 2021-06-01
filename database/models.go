@@ -141,8 +141,10 @@ type InfrastructureComponent struct {
 	Location string `json:"location" gorm:"default:''"`
 	// Description of the IC
 	Description string `json:"description" gorm:"default:''"`
-	// JSON scheme of start parameters for IC
+	// JSON schema of start parameters for IC
 	StartParameterSchema postgres.Jsonb `json:"startparameterschema"`
+	// JSON schema of create parameters for IC
+	CreateParameterSchema postgres.Jsonb `json:"createparameterschema"`
 	// raw JSON of last status update
 	StatusUpdateRaw postgres.Jsonb `json:"statusupdateraw"`
 	// Boolean indicating if IC is managed externally (via AMQP/ VILLAScontroller)
