@@ -118,11 +118,14 @@ func (f *File) Register(fileHeader *multipart.FileHeader, scenarioID uint) error
 
 			imageConfig, _, err := image.DecodeConfig(fileContent)
 			if err != nil {
-				return fmt.Errorf("unable to decode image configuration: Dimensions of image file are not set: %v", err)
+				log.Println("unable to decode image configuration: Dimensions of image file are not set, using default size 512x512, error:", err)
+				f.ImageWidth = 512
+				f.ImageHeight = 512
+			} else {
+				f.ImageHeight = imageConfig.Height
+				f.ImageWidth = imageConfig.Width
 			}
 
-			f.ImageHeight = imageConfig.Height
-			f.ImageWidth = imageConfig.Width
 		} else {
 			return fmt.Errorf("error on setting file reader back to start of file, dimensions not updated: %v", err)
 		}
