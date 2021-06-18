@@ -78,6 +78,8 @@ func InitConfig() error {
 		testDataPath             = flag.String("test-data-path", "", "The path to a test data json file")
 		groupsPath               = flag.String("groups-path", "configuration/groups.yaml", "The path to a YAML file that maps user groups to scenario IDs")
 		apiUpdateInterval        = flag.String("api-update-interval", "10s" /* 10 sec */, "Interval in which API URL is queried for status updates of ICs")
+		rancherURL               = flag.String("rancher-url", "rancher.k8s.eonerc.rwth-aachen.de", "URL of Rancher instance that is used to deploy the backend")
+		k8sCluster               = flag.String("k8s-cluster", "local", "Name of the Kubernetes cluster where the backend is deployed")
 	)
 	flag.Parse()
 
@@ -110,6 +112,8 @@ func InitConfig() error {
 		"groups.path":                 *groupsPath,
 		"config.file":                 *configFile,
 		"apiupdateinterval":           *apiUpdateInterval,
+		"rancherURL":                  *rancherURL,
+		"k8sCluster":                  *k8sCluster,
 	}
 
 	if *dbClear == true {

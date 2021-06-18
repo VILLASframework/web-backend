@@ -53,6 +53,8 @@ type Config struct {
 	Mode           string               `json:"mode"`
 	Contact        ConfigContact        `json:"contact"`
 	Authentication ConfigAuthentication `json:"authentication"`
+	RancherURL     string               `json:"rancherURL"`
+	K8sCluster     string               `json:"k8sCluster"`
 }
 
 // getHealth godoc
@@ -77,6 +79,8 @@ func getConfig(c *gin.Context) {
 	resp.SubTitle, _ = cfg.String("sub-title")
 	resp.Contact.Name, _ = cfg.String("contact.name")
 	resp.Contact.Mail, _ = cfg.String("contact.mail")
+	resp.RancherURL, _ = cfg.String("rancherURL")
+	resp.K8sCluster, _ = cfg.String("k8sCluster")
 
 	c.JSON(200, resp)
 }
