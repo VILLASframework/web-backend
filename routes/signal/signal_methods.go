@@ -47,8 +47,9 @@ func (s *Signal) byID(id uint) error {
 
 func (s *Signal) addToConfig() error {
 	db := database.GetDB()
+	var err error
 	var m component_configuration.ComponentConfiguration
-	err := m.ByID(s.ConfigID)
+	err = m.ByID(s.ConfigID)
 	if err != nil {
 		return err
 	}
@@ -62,24 +63,14 @@ func (s *Signal) addToConfig() error {
 	// associate signal with component configuration in correct direction
 	if s.Direction == "in" {
 		err = db.Model(&m).Association("InputMapping").Append(s).Error
-		if err != nil {
-			return err
-		}
-
-		// adapt length of mapping
-		var newInputLength = db.Model(&m).Where("Direction = ?", "in").Association("InputMapping").Count()
-		err = db.Model(&m).Update("InputLength", newInputLength).Error
-
 	} else {
 		err = db.Model(&m).Association("OutputMapping").Append(s).Error
-		if err != nil {
-			return err
-		}
-
-		// adapt length of mapping
-		var newOutputLength = db.Model(&m).Where("Direction = ?", "out").Association("OutputMapping").Count()
-		err = db.Model(&m).Update("OutputLength", newOutputLength).Error
 	}
+
+	if err != nil {
+		return err
+	}
+
 	return err
 }
 
@@ -100,8 +91,9 @@ func (s *Signal) update(modifiedSignal Signal) error {
 func (s *Signal) delete() error {
 
 	db := database.GetDB()
+	var err error
 	var m component_configuration.ComponentConfiguration
-	err := m.ByID(s.ConfigID)
+	err = m.ByID(s.ConfigID)
 	if err != nil {
 		return err
 	}
@@ -109,29 +101,12 @@ func (s *Signal) delete() error {
 	// remove association between Signal and ComponentConfiguration
 	if s.Direction == "in" {
 		err = db.Model(&m).Association("InputMapping").Delete(s).Error
-		if err != nil {
-			return err
-		}
-
-		// Update input length
-		noSignals := db.Model(&m).Association("InputMapping").Count()
-		err = db.Model(&m).Update("InputLength", noSignals).Error
-		if err != nil {
-			return err
-		}
-
 	} else {
 		err = db.Model(&m).Association("OutputMapping").Delete(s).Error
-		if err != nil {
-			return err
-		}
+	}
 
-		// Reduce output length
-		noSignals := db.Model(&m).Association("OutputMapping").Count()
-		err = db.Model(&m).Update("OutputLength", noSignals).Error
-		if err != nil {
-			return err
-		}
+	if err != nil {
+		return err
 	}
 
 	// Delete signal

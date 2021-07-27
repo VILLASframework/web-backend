@@ -81,10 +81,6 @@ type ComponentConfiguration struct {
 	Model
 	// Name of Component Configuration
 	Name string `json:"name" gorm:"not null"`
-	// Number of output signals
-	OutputLength int `json:"outputLength" gorm:"default:0"`
-	// Number of input signals
-	InputLength int `json:"inputLength" gorm:"default:0"`
 	// Start parameters of Component Configuration as JSON
 	StartParameters postgres.Jsonb `json:"startParameters"`
 	// ID of Scenario to which Component Configuration belongs
