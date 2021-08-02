@@ -56,7 +56,137 @@
         "param1": 55,
         "param2": "testvalue2"
       }
+    },
+
+    {
+      "uuid": "4854af30-325f-44a5-ad59-b67b2597DEED",
+      "name": "Test Manager",
+      "type": "generic",
+      "category": "manager",
+      "location": "somewhere",
+      "description": "Test Manager IC",
+      "state": "unknown",
+      "managedexternally": false,
+      "startparameterschema": {
+        "param1": 55,
+        "param2": "testvalue2"
+      },
+      "createparameterschema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "$schema": "http://json-schema.org/draft-07/schema",
+        "$id": "http://example.com/example.json",
+        "type": "object",
+        "default": {},
+        "required": [
+          "name",
+          "category",
+          "type",
+          "owner",
+          "location",
+          "realm",
+          "api_url",
+          "ws_url"
+        ],
+        "properties": {
+          "name": {
+            "$id": "#/properties/name",
+            "type": "string",
+            "title": "Name",
+            "default": "New Component",
+            "examples": [
+              "Generic Simulator #1"
+            ]
+          },
+          "category": {
+            "$id": "#/properties/category",
+            "type": "string",
+            "title": "Category",
+            "default": "",
+            "examples": [
+              "simulator"
+            ]
+          },
+          "type": {
+            "$id": "#/properties/type",
+            "type": "string",
+            "title": "Type",
+            "default": "",
+            "examples": [
+              "generic"
+            ]
+          },
+          "owner": {
+            "$id": "#/properties/owner",
+            "type": "string",
+            "title": "Owner",
+            "default": "",
+            "examples": [
+              "rmr",
+              "svg"
+            ]
+          },
+          "realm": {
+            "$id": "#/properties/realm",
+            "type": "string",
+            "title": "Realm",
+            "default": "",
+            "examples": [
+              "de.rwth-aachen.eonerc.acs"
+            ]
+          },
+
+          "location": {
+            "$id": "#/properties/location",
+            "type": "string",
+            "title": "Location",
+            "default": "",
+            "examples": [
+              "Richard\"s PC"
+            ]
+          },
+
+          "uuid": {
+            "$id": "#/properties/uuid",
+            "type": "string",
+            "title": "UUID",
+            "default": ""
+          },
+
+          "ws_url": {
+            "$id": "#/properties/ws_url",
+            "type": "string",
+            "title": "Websocket URL",
+            "default": "",
+            "examples": [
+              "https://villas.k8s.eonerc.rwth-aachen.de/",
+              "ws/relay/generic_1"
+            ]
+          },
+          "api_url": {
+            "$id": "#/properties/api_url",
+            "type": "string",
+            "title": "API URL",
+            "default": "",
+            "examples": [
+              "https://villas.k8s.eonerc.rwth-aachen.de/api/ic/generic_1"
+            ]
+          },
+
+          "shell": {
+            "$id": "#/properties/shell",
+            "type": "boolean",
+            "title": "Use Shell",
+            "default": false,
+            "examples": [
+              true
+            ]
+          }
+      },
+      "additionalProperties": true
+
     }
+    }
+
   ],
   "scenarios": [
     {
