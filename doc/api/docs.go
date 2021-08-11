@@ -3415,58 +3415,16 @@ var doc = `{
         "config.Config": {
             "type": "object",
             "properties": {
-                "authentication": {
-                    "$ref": "#/definitions/config.ConfigAuthentication"
-                },
-                "contact": {
-                    "$ref": "#/definitions/config.ConfigContact"
-                },
-                "mode": {
-                    "type": "string"
-                },
-                "sub_title": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
+                "Providers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/config.Provider"
+                    }
                 }
             }
         },
-        "config.ConfigAuthentication": {
-            "type": "object",
-            "properties": {
-                "external": {
-                    "$ref": "#/definitions/config.ConfigAuthenticationExternal"
-                },
-                "logout_url": {
-                    "type": "string"
-                }
-            }
-        },
-        "config.ConfigAuthenticationExternal": {
-            "type": "object",
-            "properties": {
-                "authorize_url": {
-                    "type": "string"
-                },
-                "enabled": {
-                    "type": "boolean"
-                },
-                "provider_name": {
-                    "type": "string"
-                }
-            }
-        },
-        "config.ConfigContact": {
-            "type": "object",
-            "properties": {
-                "mail": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                }
-            }
+        "config.Provider": {
+            "type": "object"
         },
         "dashboard.addDashboardRequest": {
             "type": "object",
@@ -3551,6 +3509,9 @@ var doc = `{
                 "Category": {
                     "type": "string"
                 },
+                "CreateParameterSchema": {
+                    "$ref": "#/definitions/postgres.Jsonb"
+                },
                 "Description": {
                     "type": "string"
                 },
@@ -3597,6 +3558,9 @@ var doc = `{
                 },
                 "Category": {
                     "type": "string"
+                },
+                "CreateParameterSchema": {
+                    "$ref": "#/definitions/postgres.Jsonb"
                 },
                 "Description": {
                     "type": "string"

@@ -25,6 +25,7 @@ build:
   extends: .go
   script:
     - go mod tidy
+    - go get github.com/swaggo/swag/cmd/swag@v1.7.0
     - go install github.com/swaggo/swag/cmd/swag
     - ${GOPATH}/bin/swag init --propertyStrategy pascalcase
         --generalInfo "start.go"

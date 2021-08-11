@@ -85,39 +85,12 @@ definitions:
     type: object
   config.Config:
     properties:
-      authentication:
-        $ref: '#/definitions/config.ConfigAuthentication'
-      contact:
-        $ref: '#/definitions/config.ConfigContact'
-      mode:
-        type: string
-      sub_title:
-        type: string
-      title:
-        type: string
+      Providers:
+        items:
+          $ref: '#/definitions/config.Provider'
+        type: array
     type: object
-  config.ConfigAuthentication:
-    properties:
-      external:
-        $ref: '#/definitions/config.ConfigAuthenticationExternal'
-      logout_url:
-        type: string
-    type: object
-  config.ConfigAuthenticationExternal:
-    properties:
-      authorize_url:
-        type: string
-      enabled:
-        type: boolean
-      provider_name:
-        type: string
-    type: object
-  config.ConfigContact:
-    properties:
-      mail:
-        type: string
-      name:
-        type: string
+  config.Provider:
     type: object
   dashboard.addDashboardRequest:
     properties:
@@ -169,6 +142,8 @@ definitions:
         type: string
       Category:
         type: string
+      CreateParameterSchema:
+        $ref: '#/definitions/postgres.Jsonb'
       Description:
         type: string
       Location:
@@ -205,6 +180,8 @@ definitions:
         type: string
       Category:
         type: string
+      CreateParameterSchema:
+        $ref: '#/definitions/postgres.Jsonb'
       Description:
         type: string
       Location:
