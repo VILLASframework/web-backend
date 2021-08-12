@@ -43,6 +43,7 @@ test:
     MODE: release
   services:
     - name: postgres:10
+      entrypoint: ["/"]
       command: ["sed -i 's/vm.nr_hugepages =.*/vm.nr_hugepages = 0/' /etc/sysctl.conf"]
       alias: postgres
     - rabbitmq:3
