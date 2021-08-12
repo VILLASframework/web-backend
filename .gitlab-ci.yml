@@ -42,7 +42,9 @@ test:
     BASE_PATH: /api
     MODE: release
   services:
-    - postgres:10
+    - name: postgres:10
+      command: ["sed -i 's/vm.nr_hugepages =.*/vm.nr_hugepages = 0/' /etc/sysctl.conf"]
+      alias: postgres
     - rabbitmq:3
     - name: minio/minio:RELEASE.2021-01-16T02-19-44Z
       command: ['server', '/minio']
