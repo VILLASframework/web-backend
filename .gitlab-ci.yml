@@ -44,7 +44,7 @@ test:
   services:
     - name: postgres:10
       entrypoint: [""]
-      command: ["sed -i -r 's/#huge_pages.*?/huge_pages = off/g' /usr/share/postgresql/postgresql.conf.sample", "docker-entrypoint.sh", "postgres"]
+      command: ["docker-entrypoint.sh", "sed -i -r 's/#huge_pages.*?/huge_pages = off/g' /usr/share/postgresql/postgresql.conf.sample", "postgres"]
       alias: postgres
     - rabbitmq:3
     - name: minio/minio:RELEASE.2021-01-16T02-19-44Z
