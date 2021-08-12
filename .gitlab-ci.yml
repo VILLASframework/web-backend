@@ -1,48 +1,20 @@
 variables:
   DOCKER_TAG: ${CI_COMMIT_BRANCH}
   DOCKER_IMAGE: ${CI_REGISTRY_IMAGE}
-  GO_IMAGE: golang:1.16
   FF_GITLAB_REGISTRY_HELPER_IMAGE: 1
 
-# Template
-.go:
-  image: ${GO_IMAGE}
-  variables:
-    GOPATH: $CI_PROJECT_DIR/.go
-  before_script:
-    - mkdir -p .go
-
 stages:
-  - build
   - test
   - deploy
-
-# Stage: build
-##############################################################################
-
-build:
-  stage: build
-  extends: .go
-  script:
-    - go mod tidy
-    - go get github.com/swaggo/swag/cmd/swag@v1.7.0
-    - go install github.com/swaggo/swag/cmd/swag
-    - ${GOPATH}/bin/swag init --propertyStrategy pascalcase
-        --generalInfo "start.go"
-        --output "./doc/api/"
-        --parseDependency
-        --parseInternal
-        --parseVendor
-        --parseDepth 2
-    - go build
 
 # Stage: test
 ##############################################################################
 
 test:
   stage: test
-  extends: .go
+  image: golang:1.16
   variables:
+    GOPATH: $CI_PROJECT_DIR/.go
     POSTGRES_DB: testvillasdb
     POSTGRES_USER: villas
     POSTGRES_PASSWORD: villas
@@ -70,29 +42,38 @@ test:
     BASE_PATH: /api
     MODE: release
   services:
-    - postgres:latest
-    - rabbitmq:latest
+    - postgres:13
+    - rabbitmq:3
     - name: minio/minio:RELEASE.2021-01-16T02-19-44Z
       command: ['server', '/minio']
       alias: minio
   before_script:
+    - mkdir -p .go
     - wget -qO /usr/bin/mc https://dl.min.io/client/mc/release/linux-amd64/mc && chmod +x /usr/bin/mc
     - mc alias set gitlab http://minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD}
     - mc mb gitlab/${S3_BUCKET}
   script:
     - go mod tidy
+    - go get github.com/swaggo/swag/cmd/swag@v1.7.0
+    - go install github.com/swaggo/swag/cmd/swag
+    - ${GOPATH}/bin/swag init --propertyStrategy pascalcase
+      --generalInfo "start.go"
+      --output "./doc/api/"
+      --parseDependency
+      --parseInternal
+      --parseVendor
+      --parseDepth 2
+    - go build
     - go test $(go list ./... )
-       -p 1
-       -v
-       -covermode=count
-       -coverprofile ./testcover.txt
+      -p 1
+      -v
+      -covermode=count
+      -coverprofile ./testcover.txt
     - go tool cover -func=testcover.txt
     # test file package without S3 object storage (minio)
     - cd routes/file
     - S3_BUCKET="" go test -v
     - cd ../../
-  dependencies:
-    - build
 
 
 # Stage: deploy
