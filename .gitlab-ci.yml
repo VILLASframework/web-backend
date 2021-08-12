@@ -19,8 +19,8 @@ test:
     POSTGRES_USER: villas
     POSTGRES_PASSWORD: villas
     POSTGRES_HOST: postgres
-    RABBITMQ_DEFAULT_USER: villas
-    RABBITMQ_DEFAULT_PASS: villas
+    DEFAULT_USER: villas
+    DEFAULT_PASS: villas
     MINIO_ROOT_USER: minio-villas
     MINIO_ROOT_PASSWORD: minio-villas
     MINIO_REGION_NAME: default
@@ -42,7 +42,7 @@ test:
     BASE_PATH: /api
     MODE: release
   services:
-    - postgres:13
+    - postgres:10
     - rabbitmq:3
     - name: minio/minio:RELEASE.2021-01-16T02-19-44Z
       command: ['server', '/minio']
