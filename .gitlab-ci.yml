@@ -43,7 +43,7 @@ test:
     MODE: release
   services:
     - name: postgres:9.6
-      command: ["postgres", "-d 5"]
+      command: ["sh", "-c", "sed -i -r 's/#huge_pages.*?/huge_pages = off/g' /usr/share/postgresql/postgresql.conf.sample; postgres"]
       alias: postgres
     - rabbitmq:3
     - name: minio/minio:RELEASE.2021-01-16T02-19-44Z
