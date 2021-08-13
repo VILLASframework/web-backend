@@ -42,7 +42,9 @@ test:
     BASE_PATH: /api
     MODE: release
   services:
-    - postgres:9.6
+    - name: postgres:9.6
+      command: ["postgres -c huge_pages=off"]
+      alias: postgres
     - rabbitmq:3
     - name: minio/minio:RELEASE.2021-01-16T02-19-44Z
       command: ['server', '/minio']
