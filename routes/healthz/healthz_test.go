@@ -46,15 +46,16 @@ func TestHealthz(t *testing.T) {
 	defer database.DBpool.Close()
 
 	router = gin.Default()
+	api := router.Group("/api/v2")
 
-	RegisterHealthzEndpoint(router.Group("/healthz"))
+	RegisterHealthzEndpoint(api.Group("/healthz"))
 
 	// close db connection
 	err = database.DBpool.Close()
 	assert.NoError(t, err)
 
 	// test healthz endpoint for unconnected DB and AMQP client
-	code, resp, err := helper.TestEndpoint(router, "", "healthz", http.MethodGet, nil)
+	code, resp, err := helper.TestEndpoint(router, "", "/api/v2/healthz", http.MethodGet, nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 500, code, "Response body: \n%v\n", resp)
 
@@ -64,7 +65,7 @@ func TestHealthz(t *testing.T) {
 	defer database.DBpool.Close()
 
 	// test healthz endpoint for connected DB and unconnected AMQP client
-	code, resp, err = helper.TestEndpoint(router, "", "healthz", http.MethodGet, nil)
+	code, resp, err = helper.TestEndpoint(router, "", "/api/v2/healthz", http.MethodGet, nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 500, code, "Response body: \n%v\n", resp)
 
@@ -83,7 +84,7 @@ func TestHealthz(t *testing.T) {
 	assert.NoError(t, err)
 
 	// test healthz endpoint for connected DB and AMQP client
-	code, resp, err = helper.TestEndpoint(router, "", "healthz", http.MethodGet, nil)
+	code, resp, err = helper.TestEndpoint(router, "", "/api/v2/healthz", http.MethodGet, nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 204, code, "Response body: \n%v\n", resp)
 }
