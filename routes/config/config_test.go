@@ -38,10 +38,11 @@ func TestConfig(t *testing.T) {
 	assert.NoError(t, err)
 
 	router = gin.Default()
+	api := router.Group("/api/v2")
 
-	RegisterConfigEndpoint(router.Group("/config"))
+	RegisterConfigEndpoint(api.Group("/config"))
 
-	code, resp, err := helper.TestEndpoint(router, "", "config", http.MethodGet, nil)
+	code, resp, err := helper.TestEndpoint(router, "", "/api/v2/config", http.MethodGet, nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 }
