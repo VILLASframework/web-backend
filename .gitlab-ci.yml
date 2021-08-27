@@ -12,7 +12,7 @@ stages:
 
 test:
   stage: test
-  image: golang:1.16
+  image: golang:1.16-buster
   variables:
     GOPATH: $CI_PROJECT_DIR/.go
     POSTGRES_DB: testvillasdb
