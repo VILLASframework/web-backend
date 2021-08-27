@@ -24,24 +24,13 @@ package infrastructure_component
 import (
 	"encoding/json"
 	"fmt"
-	"log"
-	"strings"
-	"time"
-
-	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 	"github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/streadway/amqp"
+	"log"
+	"strings"
 )
-
-const VILLAS_EXCHANGE = "villas"
-
-type AMQPclient struct {
-	connection *amqp.Connection
-	sendCh     *amqp.Channel
-	recvCh     *amqp.Channel
-}
 
 type Action struct {
 	Act        string          `json:"action"`
@@ -85,205 +74,24 @@ type ICUpdate struct {
 	Action     string       `json:"action"`
 }
 
-var client AMQPclient
-
-func ConnectAMQP(uri string) error {
-
-	var err error
-
-	// connect to broker
-	client.connection, err = amqp.Dial(uri)
-	if err != nil {
-		return fmt.Errorf("AMQP: failed to connect to RabbitMQ broker %v, error: %v", uri, err)
-	}
-
-	// create sendCh
-	client.sendCh, err = client.connection.Channel()
-	if err != nil {
-		return fmt.Errorf("AMQP: failed to open a sendCh, error: %v", err)
-	}
-	// declare exchange
-	err = client.sendCh.ExchangeDeclare(VILLAS_EXCHANGE,
-		"headers",
-		true,
-		false,
-		false,
-		false,
-		nil)
-	if err != nil {
-		return fmt.Errorf("AMQP: failed to declare the exchange, error: %v", err)
-	}
-
-	// add a queue for the ICs
-	ICQueue, err := client.sendCh.QueueDeclare("infrastructure_components",
-		true,
-		false,
-		false,
-		false,
-		nil)
-	if err != nil {
-		return fmt.Errorf("AMQP: failed to declare the queue, error: %v", err)
-	}
-
-	err = client.sendCh.QueueBind(ICQueue.Name, "", VILLAS_EXCHANGE, false, nil)
-	if err != nil {
-		return fmt.Errorf("AMQP: failed to bind the queue, error: %v", err)
-	}
-
-	// create receive channel
-	client.recvCh, err = client.connection.Channel()
-	if err != nil {
-		return fmt.Errorf("AMQP: failed to open a recvCh, error: %v", err)
-	}
-
-	// start deliveries
-	messages, err := client.recvCh.Consume(ICQueue.Name,
-		"",
-		true,
-		false,
-		false,
-		false,
-		nil)
-	if err != nil {
-		return fmt.Errorf("AMQP: failed to start deliveries: %v", err)
-	}
-
-	// consume deliveries
-	go func() {
-		for {
-			for message := range messages {
-				err = processMessage(message)
-				if err != nil {
-					log.Println("AMQP: Error processing message: ", err.Error())
-				}
-			}
-		}
-	}()
-
-	log.Printf(" AMQP: Waiting for messages... ")
-
-	return nil
-}
-
-func sendActionAMQP(action Action, destinationUUID string) error {
-
-	payload, err := json.Marshal(action)
-	if err != nil {
-		return err
-	}
-
-	msg := amqp.Publishing{
-		DeliveryMode:    2,
-		Timestamp:       time.Now(),
-		ContentType:     "application/json",
-		ContentEncoding: "utf-8",
-		Priority:        0,
-		Body:            payload,
-	}
-
-	// set message headers
-	msg.Headers = make(map[string]interface{}) // empty map
-	msg.Headers["uuid"] = destinationUUID
-
-	err = CheckConnection()
-	if err != nil {
-		return err
-	}
-
-	//log.Println("AMQP: Sending message", string(msg.Body))
-	err = client.sendCh.Publish(VILLAS_EXCHANGE,
-		"",
-		false,
-		false,
-		msg)
-	return err
-
-}
-
-func SendPing(uuid string) error {
-	var ping Action
-	ping.Act = "ping"
-
-	payload, err := json.Marshal(ping)
-	if err != nil {
-		return err
-	}
-
-	msg := amqp.Publishing{
-		DeliveryMode:    2,
-		Timestamp:       time.Now(),
-		ContentType:     "application/json",
-		ContentEncoding: "utf-8",
-		Priority:        0,
-		Body:            payload,
-	}
-
-	// set message headers
-	msg.Headers = make(map[string]interface{}) // empty map
-	msg.Headers["uuid"] = uuid                 // leave uuid empty if ping should go to all ICs
-
-	err = CheckConnection()
-	if err != nil {
-		return err
-	}
-
-	err = client.sendCh.Publish(VILLAS_EXCHANGE,
-		"",
-		false,
-		false,
-		msg)
-	return err
-}
-
-func CheckConnection() error {
-
-	if client.connection != nil {
-		if client.connection.IsClosed() {
-			return fmt.Errorf("connection to broker is closed")
-		}
-	} else {
-		return fmt.Errorf("connection is nil")
-	}
-
-	return nil
-}
-
-func StartAMQP(AMQPurl string, api *gin.RouterGroup) error {
-	if AMQPurl != "" {
-		log.Println("Starting AMQP client")
-
-		err := ConnectAMQP(AMQPurl)
-		if err != nil {
-			return err
-		}
-
-		// register IC action endpoint only if AMQP client is used
-		RegisterAMQPEndpoint(api.Group("/ic"))
-
-		log.Printf("Connected AMQP client to %s", AMQPurl)
-	}
-
-	return nil
-}
-
-func processMessage(message amqp.Delivery) error {
+func ProcessMessage(message amqp.Delivery) {
 
 	var payload ICUpdate
 	err := json.Unmarshal(message.Body, &payload)
 	if err != nil {
-		return fmt.Errorf("AMQP: Could not unmarshal message to JSON: %v err: %v", string(message.Body), err)
+		log.Printf("AMQP: Could not unmarshal message to JSON: %v err: %v", string(message.Body), err)
 	}
 
 	if payload.Action != "" {
 		// if a message contains an action, it is not intended for the backend
 		//log.Println("AMQP: Ignoring action message ", payload)
-		return nil
+		return
 	}
 
 	ICUUID := payload.Properties.UUID
 	_, err = uuid.Parse(ICUUID)
 	if err != nil {
-		return fmt.Errorf("AMQP: UUID not valid: %v, message ignored: %v \n", ICUUID, string(message.Body))
+		log.Printf("AMQP: UUID not valid: %v, message ignored: %v \n", ICUUID, string(message.Body))
 	}
 
 	var sToBeUpdated InfrastructureComponent
@@ -299,8 +107,10 @@ func processMessage(message amqp.Delivery) error {
 		// update record based on payload
 		err = sToBeUpdated.updateExternalIC(payload, message.Body)
 	}
+	if err != nil {
+		log.Printf(err.Error())
+	}
 
-	return err
 }
 
 func createExternalIC(payload ICUpdate, ICUUID string, body []byte) error {
@@ -358,7 +168,11 @@ func createExternalIC(payload ICUpdate, ICUUID string, body []byte) error {
 	log.Println("AMQP: Created IC with UUID ", newIC.UUID)
 
 	// send ping to get full status update of this IC
-	err = SendPing(ICUUID)
+	if session != nil {
+		err = SendPing(ICUUID)
+	} else {
+		err = fmt.Errorf("cannot sent ping to %v because AMQP session is nil", ICUUID)
+	}
 	return err
 }
 
@@ -432,4 +246,28 @@ func newTrue() *bool {
 func newFalse() *bool {
 	b := false
 	return &b
+}
+
+func SendPing(uuid string) error {
+	var ping Action
+	ping.Act = "ping"
+
+	payload, err := json.Marshal(ping)
+	if err != nil {
+		return err
+	}
+
+	err = session.Send(payload, uuid)
+	return err
+}
+
+func sendActionAMQP(action Action, destinationUUID string) error {
+
+	payload, err := json.Marshal(action)
+	if err != nil {
+		return err
+	}
+
+	err = session.Send(payload, destinationUUID)
+	return err
 }

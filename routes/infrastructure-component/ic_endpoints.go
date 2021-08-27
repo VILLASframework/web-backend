@@ -37,10 +37,13 @@ func RegisterICEndpoints(r *gin.RouterGroup) {
 	r.GET("/:ICID", getIC)
 	r.DELETE("/:ICID", deleteIC)
 	r.GET("/:ICID/configs", getConfigsOfIC)
+	r.POST("/:ICID/action", sendActionToIC)
 }
 
-func RegisterAMQPEndpoint(r *gin.RouterGroup) {
-	r.POST("/:ICID/action", sendActionToIC)
+var session *helper.AMQPsession
+
+func SetAMQPSession(s *helper.AMQPsession) {
+	session = s
 }
 
 // getICs godoc

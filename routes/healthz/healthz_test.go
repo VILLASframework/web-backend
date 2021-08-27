@@ -80,8 +80,14 @@ func TestHealthz(t *testing.T) {
 	amqpURI := "amqp://" + user + ":" + pass + "@" + host
 	log.Println("AMQP URI is", amqpURI)
 
-	err = infrastructure_component.ConnectAMQP(amqpURI)
-	assert.NoError(t, err)
+	session = helper.NewAMQPSession("villas-test-session", amqpURI, "villas", infrastructure_component.ProcessMessage)
+	SetAMQPSession(session)
+
+	for {
+		if session.IsReady {
+			break
+		}
+	}
 
 	// test healthz endpoint for connected DB and AMQP client
 	code, resp, err = helper.TestEndpoint(router, "", "/api/v2/healthz", http.MethodGet, nil)

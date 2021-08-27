@@ -23,6 +23,8 @@ package main
 
 import (
 	"fmt"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/healthz"
 	"log"
 	"time"
 
@@ -122,15 +124,19 @@ func main() {
 	if AMQPhost != "" {
 		// create amqp URL based on username, password and host
 		amqpurl := "amqp://" + AMQPuser + ":" + AMQPpass + "@" + AMQPhost
-		err = infrastructure_component.StartAMQP(amqpurl, api)
-		if err != nil {
-			log.Fatal(err)
-		}
+		session := helper.NewAMQPSession("villas-amqp-session", amqpurl, "villas", infrastructure_component.ProcessMessage)
+		healthz.SetAMQPSession(session)                  // healthz needs to know the amqp session to check the health of the backend
+		infrastructure_component.SetAMQPSession(session) // IC needs to know the session to send amqp messages
 
 		// send Ping to all externally managed ICs
-		err = infrastructure_component.SendPing("")
-		if err != nil {
-			log.Println("error sending ping action via AMQP: ", err)
+		for {
+			if session.IsReady {
+				err = infrastructure_component.SendPing("")
+				if err != nil {
+					log.Println("error sending ping action via AMQP: ", err.Error())
+				}
+				break
+			}
 		}
 	}
 
