@@ -288,8 +288,8 @@ func duplicateComponentConfig(config *database.ComponentConfiguration,
 	configDpl.Name = config.Name
 	configDpl.StartParameters = config.StartParameters
 	configDpl.ScenarioID = duplicateSo.ID
-	configDpl.OutputLength = config.OutputLength
-	configDpl.InputLength = config.InputLength
+	configDpl.OutputMapping = config.OutputMapping
+	configDpl.InputMapping = config.InputMapping
 
 	db := database.GetDB()
 	if icIds[config.ICID] == "" {
