@@ -1,12 +1,16 @@
-﻿moodle-l2pmanager@13306:
-  - 1
-  - 2
-  - 3
+﻿# Warning: this file is used for testing - please consider when making changes
+moodle-l2pmanager@13306:
+  - scenario: 1
+  - scenario: 2
+  - scenario: 3
 testGroup1:
-  - 4
-  - 5
-  - 6
+  - scenario: 1
+    duplicate: true
+  - scenario: 2
+    duplicate: false
+  - scenario: 3
 testGroup2:
-  - 7
-  - 8
-  - 9
+  - scenario: 1
+  - scenario: 4
+    duplicate: true
+  - scenario: 2

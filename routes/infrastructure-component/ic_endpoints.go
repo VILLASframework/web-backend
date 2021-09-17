@@ -289,7 +289,7 @@ func sendActionToIC(c *gin.Context) {
 		return
 	}
 
-	var actions []Action
+	var actions []helper.Action
 	err := c.BindJSON(&actions)
 	if err != nil {
 		helper.BadRequestError(c, "Error binding form data to JSON: "+err.Error())
@@ -300,7 +300,7 @@ func sendActionToIC(c *gin.Context) {
 		if (action.Act == "delete" || action.Act == "create") && s.Category != "manager" {
 			helper.BadRequestError(c, "cannot send a delete or create action to an IC of category "+s.Category)
 		}
-		err = sendActionAMQP(action, s.UUID)
+		err = helper.SendActionAMQP(action, s.UUID)
 		if err != nil {
 			helper.InternalServerError(c, "Unable to send actions to IC: "+err.Error())
 			return

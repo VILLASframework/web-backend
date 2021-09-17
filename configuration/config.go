@@ -38,7 +38,12 @@ import (
 // Global configuration
 var GlobalConfig *config.Config = nil
 
-var ScenarioGroupMap = map[string][]int{}
+type GroupedScenario struct {
+	Scenario  int  `yaml:"scenario"`
+	Duplicate bool `default:"false" yaml:"duplicate"`
+}
+
+var ScenarioGroupMap = map[string][]GroupedScenario{}
 
 func InitConfig() error {
 	if GlobalConfig != nil {
@@ -182,35 +187,45 @@ func InitConfig() error {
 	return nil
 }
 
+func remove(arr []GroupedScenario, index int) []GroupedScenario {
+	arr[index] = arr[len(arr)-1]
+	return arr[:len(arr)-1]
+}
+
 func ReadGroupsFile(path string) error {
 
 	_, err := os.Stat(path)
-
-	if err == nil {
-
-		yamlFile, err := os.Open(path)
-		if err != nil {
-			return fmt.Errorf("error opening yaml file for groups: %v", err)
-		}
-		log.Println("Successfully opened yaml groups file", path)
-
-		defer yamlFile.Close()
-
-		byteValue, _ := ioutil.ReadAll(yamlFile)
-
-		err = yaml.Unmarshal(byteValue, &ScenarioGroupMap)
-		if err != nil {
-			return fmt.Errorf("error unmarshalling yaml into ScenarioGroupMap: %v", err)
-		}
-
-		log.Println("ScenarioGroupMap", ScenarioGroupMap)
-
-		return nil
-	} else if os.IsNotExist(err) {
-		log.Println("File does not exist, no goups/scenarios mapping created:", path)
-		return nil
-	} else {
-		log.Println("Something is wrong with this file path:", path)
-		return nil
+	if err != nil {
+		return err
 	}
+
+	yamlFile, err := os.Open(path)
+	if err != nil {
+		return fmt.Errorf("error opening yaml file for groups: %v", err)
+	}
+	log.Println("Successfully opened yaml groups file", path)
+
+	defer yamlFile.Close()
+
+	byteValue, _ := ioutil.ReadAll(yamlFile)
+
+	err = yaml.Unmarshal(byteValue, &ScenarioGroupMap)
+	if err != nil {
+		return fmt.Errorf("error unmarshalling yaml into ScenarioGroupMap: %v", err)
+	}
+
+	for _, group := range ScenarioGroupMap {
+		for i, scenario := range group {
+			// remove invalid values that might have been introduced by typos
+			// (Unmarshal sets default values when it doesn't find a field)
+			if scenario.Scenario == 0 {
+				log.Println("Removing entry from ScenarioGroupMap, check for typos in the yaml!")
+				remove(group, i)
+			}
+		}
+	}
+
+	log.Println("ScenarioGroupMap", ScenarioGroupMap)
+
+	return nil
 }

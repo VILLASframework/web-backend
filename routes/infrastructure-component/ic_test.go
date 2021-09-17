@@ -134,7 +134,7 @@ func TestMain(m *testing.M) {
 	scenario.RegisterScenarioEndpoints(api.Group("/scenarios"))
 
 	// check AMQP connection
-	err = CheckConnection()
+	err = helper.CheckConnection()
 	if err.Error() != "connection is nil" {
 		return
 	}
@@ -320,14 +320,10 @@ func TestUpdateICAsAdmin(t *testing.T) {
 		Headers:         headers,
 	}
 
-	err = CheckConnection()
+	err = helper.CheckConnection()
 	assert.NoError(t, err)
 
-	err = client.sendCh.Publish(VILLAS_EXCHANGE,
-		"",
-		false,
-		false,
-		msg)
+	err = helper.PublishAMQP(msg)
 	assert.NoError(t, err)
 
 	// Wait until externally managed IC is created (happens async)
@@ -375,6 +371,48 @@ func TestUpdateICAsUser(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
+}
+
+func TestCreateICviaAMQP(t *testing.T) {
+	if os.Getenv("CI") != "" {
+		t.Skip("Skipping testing in CI environment")
+	}
+	database.DropTables()
+	database.MigrateModels()
+	assert.NoError(t, helper.AddTestUsers())
+
+	// authenticate as user
+	token, err := helper.AuthenticateForTest(router, helper.UserACredentials)
+	assert.NoError(t, err)
+
+	// Count the number of all the ICs before sending Action
+	numberOfICs, err := helper.LengthOfResponse(router, token,
+		"/api/v2/ic", "GET", nil)
+	assert.NoError(t, err)
+	assert.Equal(t, 0, numberOfICs)
+
+	err = helper.CheckConnection()
+	assert.NoError(t, err)
+
+	var ic database.InfrastructureComponent
+	ic.Name = "kubernetes simulator dpsim (backend test)"
+	ic.Location = "iko backend dev"
+	ic.Category = "simulator"
+	ic.Type = "kubernetes"
+
+	// send create Action to kubernetes manager via AMQP broker
+	uuidManager := "444fb73e-7e74-11eb-8f63-f3a5b3ab82f6"
+	_, err = helper.RequestICcreateAMQP(&ic, uuidManager)
+	assert.NoError(t, err)
+
+	// Wait until externally managed IC is created (happens async)
+	time.Sleep(2 * time.Second)
+
+	// check whether an external IC was created
+	numberOfICs, err = helper.LengthOfResponse(router, token,
+		"/api/v2/ic", "GET", nil)
+	assert.NoError(t, err)
+	assert.Equal(t, 1, numberOfICs)
 }
 
 func TestDeleteICAsAdmin(t *testing.T) {
@@ -444,14 +482,10 @@ func TestDeleteICAsAdmin(t *testing.T) {
 		Headers:         headers,
 	}
 
-	err = CheckConnection()
+	err = helper.CheckConnection()
 	assert.NoError(t, err)
 
-	err = client.sendCh.Publish(VILLAS_EXCHANGE,
-		"",
-		false,
-		false,
-		msg)
+	err = helper.PublishAMQP(msg)
 	assert.NoError(t, err)
 
 	// Wait until externally managed IC is created (happens async)
@@ -617,7 +651,7 @@ func TestSendActionToIC(t *testing.T) {
 	assert.NoError(t, err)
 
 	// create action to be sent to IC
-	action1 := Action{
+	action1 := helper.Action{
 		Act:  "start",
 		When: time.Now().Unix(),
 	}
@@ -630,7 +664,7 @@ func TestSendActionToIC(t *testing.T) {
 
 	paramsRaw, err := json.Marshal(&params)
 	action1.Parameters = paramsRaw
-	actions := [1]Action{action1}
+	actions := [1]helper.Action{action1}
 
 	// Send action to IC
 	code, resp, err = helper.TestEndpoint(router, token,
@@ -676,14 +710,10 @@ func TestCreateUpdateViaAMQPRecv(t *testing.T) {
 		Headers:         headers,
 	}
 
-	err = CheckConnection()
+	err = helper.CheckConnection()
 	assert.NoError(t, err)
 
-	err = client.sendCh.Publish(VILLAS_EXCHANGE,
-		"",
-		false,
-		false,
-		msg)
+	err = helper.PublishAMQP(msg)
 	assert.NoError(t, err)
 
 	time.Sleep(waitingTime * time.Second)
@@ -723,11 +753,7 @@ func TestCreateUpdateViaAMQPRecv(t *testing.T) {
 		Headers:         headersA,
 	}
 
-	err = client.sendCh.Publish(VILLAS_EXCHANGE,
-		"",
-		false,
-		false,
-		msg)
+	err = helper.PublishAMQP(msg)
 	assert.NoError(t, err)
 
 	time.Sleep(waitingTime * time.Second)
@@ -753,11 +779,7 @@ func TestCreateUpdateViaAMQPRecv(t *testing.T) {
 		Headers:         headersA,
 	}
 
-	err = client.sendCh.Publish(VILLAS_EXCHANGE,
-		"",
-		false,
-		false,
-		msg)
+	err = helper.PublishAMQP(msg)
 	assert.NoError(t, err)
 
 	time.Sleep(waitingTime * time.Second)
@@ -811,13 +833,9 @@ func TestDeleteICViaAMQPRecv(t *testing.T) {
 		Headers:         headers,
 	}
 
-	err = CheckConnection()
+	err = helper.CheckConnection()
 	assert.NoError(t, err)
-	err = client.sendCh.Publish(VILLAS_EXCHANGE,
-		"",
-		false,
-		false,
-		msg)
+	err = helper.PublishAMQP(msg)
 	assert.NoError(t, err)
 
 	time.Sleep(waitingTime * time.Second)
@@ -885,11 +903,7 @@ func TestDeleteICViaAMQPRecv(t *testing.T) {
 	}
 
 	// attempt to delete IC (should not work immediately because IC is still associated with component config)
-	err = client.sendCh.Publish(VILLAS_EXCHANGE,
-		"",
-		false,
-		false,
-		msg)
+	err = helper.PublishAMQP(msg)
 	assert.NoError(t, err)
 
 	time.Sleep(waitingTime * time.Second)
