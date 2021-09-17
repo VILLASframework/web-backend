@@ -62,3 +62,13 @@ func Find(slice []string, val string) (int, bool) {
 	}
 	return -1, false
 }
+
+// Returns whether slice contains the given element
+func Contains(slice []uint, element uint) bool {
+	for _, elem := range slice {
+		if elem == element {
+			return true
+		}
+	}
+	return false
+}

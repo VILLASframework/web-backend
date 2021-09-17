@@ -28,6 +28,7 @@ import (
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes"
 	infrastructure_component "git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/infrastructure-component"
 	"github.com/gin-gonic/gin"
@@ -128,7 +129,7 @@ func main() {
 		}
 
 		// send Ping to all externally managed ICs
-		err = infrastructure_component.SendPing("")
+		err = helper.SendPing("")
 		if err != nil {
 			log.Println("error sending ping action via AMQP: ", err)
 		}

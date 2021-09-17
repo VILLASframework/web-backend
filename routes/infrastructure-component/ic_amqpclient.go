@@ -26,30 +26,14 @@ import (
 	"fmt"
 	"log"
 	"strings"
-	"time"
 
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 	"github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/streadway/amqp"
 )
-
-const VILLAS_EXCHANGE = "villas"
-
-type AMQPclient struct {
-	connection *amqp.Connection
-	sendCh     *amqp.Channel
-	recvCh     *amqp.Channel
-}
-
-type Action struct {
-	Act        string          `json:"action"`
-	When       int64           `json:"when"`
-	Parameters json.RawMessage `json:"parameters,omitempty"`
-	Model      json.RawMessage `json:"model,omitempty"`
-	Results    json.RawMessage `json:"results,omitempty"`
-}
 
 type ICStatus struct {
 	State     string  `json:"state"`
@@ -85,174 +69,11 @@ type ICUpdate struct {
 	Action     string       `json:"action"`
 }
 
-var client AMQPclient
-
-func ConnectAMQP(uri string) error {
-
-	var err error
-
-	// connect to broker
-	client.connection, err = amqp.Dial(uri)
-	if err != nil {
-		return fmt.Errorf("AMQP: failed to connect to RabbitMQ broker %v, error: %v", uri, err)
-	}
-
-	// create sendCh
-	client.sendCh, err = client.connection.Channel()
-	if err != nil {
-		return fmt.Errorf("AMQP: failed to open a sendCh, error: %v", err)
-	}
-	// declare exchange
-	err = client.sendCh.ExchangeDeclare(VILLAS_EXCHANGE,
-		"headers",
-		true,
-		false,
-		false,
-		false,
-		nil)
-	if err != nil {
-		return fmt.Errorf("AMQP: failed to declare the exchange, error: %v", err)
-	}
-
-	// add a queue for the ICs
-	ICQueue, err := client.sendCh.QueueDeclare("infrastructure_components",
-		true,
-		false,
-		false,
-		false,
-		nil)
-	if err != nil {
-		return fmt.Errorf("AMQP: failed to declare the queue, error: %v", err)
-	}
-
-	err = client.sendCh.QueueBind(ICQueue.Name, "", VILLAS_EXCHANGE, false, nil)
-	if err != nil {
-		return fmt.Errorf("AMQP: failed to bind the queue, error: %v", err)
-	}
-
-	// create receive channel
-	client.recvCh, err = client.connection.Channel()
-	if err != nil {
-		return fmt.Errorf("AMQP: failed to open a recvCh, error: %v", err)
-	}
-
-	// start deliveries
-	messages, err := client.recvCh.Consume(ICQueue.Name,
-		"",
-		true,
-		false,
-		false,
-		false,
-		nil)
-	if err != nil {
-		return fmt.Errorf("AMQP: failed to start deliveries: %v", err)
-	}
-
-	// consume deliveries
-	go func() {
-		for {
-			for message := range messages {
-				err = processMessage(message)
-				if err != nil {
-					log.Println("AMQP: Error processing message: ", err.Error())
-				}
-			}
-		}
-	}()
-
-	log.Printf(" AMQP: Waiting for messages... ")
-
-	return nil
-}
-
-func sendActionAMQP(action Action, destinationUUID string) error {
-
-	payload, err := json.Marshal(action)
-	if err != nil {
-		return err
-	}
-
-	msg := amqp.Publishing{
-		DeliveryMode:    2,
-		Timestamp:       time.Now(),
-		ContentType:     "application/json",
-		ContentEncoding: "utf-8",
-		Priority:        0,
-		Body:            payload,
-	}
-
-	// set message headers
-	msg.Headers = make(map[string]interface{}) // empty map
-	msg.Headers["uuid"] = destinationUUID
-
-	err = CheckConnection()
-	if err != nil {
-		return err
-	}
-
-	//log.Println("AMQP: Sending message", string(msg.Body))
-	err = client.sendCh.Publish(VILLAS_EXCHANGE,
-		"",
-		false,
-		false,
-		msg)
-	return err
-
-}
-
-func SendPing(uuid string) error {
-	var ping Action
-	ping.Act = "ping"
-
-	payload, err := json.Marshal(ping)
-	if err != nil {
-		return err
-	}
-
-	msg := amqp.Publishing{
-		DeliveryMode:    2,
-		Timestamp:       time.Now(),
-		ContentType:     "application/json",
-		ContentEncoding: "utf-8",
-		Priority:        0,
-		Body:            payload,
-	}
-
-	// set message headers
-	msg.Headers = make(map[string]interface{}) // empty map
-	msg.Headers["uuid"] = uuid                 // leave uuid empty if ping should go to all ICs
-
-	err = CheckConnection()
-	if err != nil {
-		return err
-	}
-
-	err = client.sendCh.Publish(VILLAS_EXCHANGE,
-		"",
-		false,
-		false,
-		msg)
-	return err
-}
-
-func CheckConnection() error {
-
-	if client.connection != nil {
-		if client.connection.IsClosed() {
-			return fmt.Errorf("connection to broker is closed")
-		}
-	} else {
-		return fmt.Errorf("connection is nil")
-	}
-
-	return nil
-}
-
 func StartAMQP(AMQPurl string, api *gin.RouterGroup) error {
 	if AMQPurl != "" {
 		log.Println("Starting AMQP client")
 
-		err := ConnectAMQP(AMQPurl)
+		err := helper.ConnectAMQP(AMQPurl, ProcessMessage)
 		if err != nil {
 			return err
 		}
@@ -266,7 +87,7 @@ func StartAMQP(AMQPurl string, api *gin.RouterGroup) error {
 	return nil
 }
 
-func processMessage(message amqp.Delivery) error {
+func ProcessMessage(message amqp.Delivery) error {
 
 	var payload ICUpdate
 	err := json.Unmarshal(message.Body, &payload)
@@ -358,7 +179,7 @@ func createExternalIC(payload ICUpdate, ICUUID string, body []byte) error {
 	log.Println("AMQP: Created IC with UUID ", newIC.UUID)
 
 	// send ping to get full status update of this IC
-	err = SendPing(ICUUID)
+	err = helper.SendPing(ICUUID)
 	return err
 }
 

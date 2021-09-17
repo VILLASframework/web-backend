@@ -29,7 +29,6 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
-	infrastructure_component "git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/infrastructure-component"
 	"github.com/gin-gonic/gin"
 )
 
@@ -69,7 +68,7 @@ func getHealth(c *gin.Context) {
 	}
 
 	if len(url) != 0 {
-		err = infrastructure_component.CheckConnection()
+		err = helper.CheckConnection()
 		if err != nil {
 			log.Println(err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{
