@@ -89,16 +89,15 @@ func main() {
 		log.Fatalf("Error reading port from global configuration: %s, aborting.", err)
 	}
 
-	gPath, err := configuration.GlobalConfig.String("groups.path")
-	if err != nil {
-		log.Fatalf("Error reading path to groups YAML file: %s, aborting.", err)
-	}
+	gPath, _ := configuration.GlobalConfig.String("groups.path")
 
 	if gPath != "" {
 		err = configuration.ReadGroupsFile(gPath)
 		if err != nil {
 			log.Fatalf("Error reading groups YAML file: %s, aborting.", err)
 		}
+	} else {
+		log.Println("WARNING: path to groups yaml file not set, I am not initializing the scenario-groups mapping.")
 	}
 
 	// Init database
