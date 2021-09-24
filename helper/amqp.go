@@ -47,6 +47,23 @@ type Action struct {
 	Results    json.RawMessage `json:"results,omitempty"`
 }
 
+type ICPropertiesToCopy struct {
+	Job         json.RawMessage `json:"job"`
+	UUID        string          `json:"uuid"`
+	Name        string          `json:"name"`
+	Description string          `json:"description"`
+	Location    string          `json:"location"`
+	Owner       string          `json:"owner"`
+	Category    string          `json:"category"`
+	Type        string          `json:"type"`
+}
+
+type ICUpdateToCopy struct {
+	Properties ICPropertiesToCopy `json:"properties"`
+	Status     json.RawMessage    `json:"status"`
+	Schema     json.RawMessage    `json:"schema"`
+}
+
 var client AMQPclient
 
 const VILLAS_EXCHANGE = "villas"
@@ -225,31 +242,28 @@ func CheckConnection() error {
 
 func RequestICcreateAMQP(ic *database.InfrastructureComponent, managerUUID string) (string, error) {
 	newUUID := uuid.New().String()
-	// TODO: where to get the properties part from?
-	msg := `{"name": "` + ic.Name + `",` +
-		`"location": "` + ic.Location + `",` +
-		`"category": "` + ic.Category + `",` +
-		`"type": "` + ic.Type + `",` +
+
+	var lastUpdate ICUpdateToCopy
+	err := json.Unmarshal(ic.StatusUpdateRaw.RawMessage, &lastUpdate)
+	if err != nil {
+		return newUUID, err
+	}
+
+	var jobdef string
+	err = json.Unmarshal(lastUpdate.Properties.Job, &jobdef)
+	if err != nil {
+		return newUUID, err
+	}
+
+	msg := `{"name": "` + lastUpdate.Properties.Name + `",` +
+		`"description": "` + lastUpdate.Properties.Description + `",` +
+		`"location": "` + lastUpdate.Properties.Location + `",` +
+		`"category": "` + lastUpdate.Properties.Category + `",` +
+		`"type": "` + lastUpdate.Properties.Type + `",` +
 		`"uuid": "` + newUUID + `",` +
-		`"realm": "de.rwth-aachen.eonerc.acs",` +
 		`"properties": {` +
-		`"job": {` +
-		`"apiVersion": "batch/v1",` +
-		`"kind": "Job",` +
-		`"metadata": {` +
-		`"name": "dpsim"` +
-		`},` +
-		`"spec": {` +
-		`"activeDeadlineSeconds": 3600,` +
-		`"backoffLimit": 1,` +
-		`"ttlSecondsAfterFinished": 3600,` +
-		`"template": {` +
-		`"spec": {` +
-		`"restartPolicy": "Never",` +
-		`"containers": [{` +
-		`"image": "dpsimrwth/slew-villas",` +
-		`"name": "slew-dpsim"` +
-		`}]}}}}}}`
+		`"job": "` + jobdef + `",` +
+		`}}`
 
 	log.Print(msg)
 
@@ -259,7 +273,7 @@ func RequestICcreateAMQP(ic *database.InfrastructureComponent, managerUUID strin
 		Parameters: json.RawMessage(msg),
 	}
 
-	err := SendActionAMQP(actionCreate, managerUUID)
+	err = SendActionAMQP(actionCreate, managerUUID)
 
 	return newUUID, err
 }
