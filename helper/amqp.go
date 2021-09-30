@@ -71,8 +71,8 @@ func ConnectAMQP(uri string, cb callback) error {
 	// declare exchange
 	err = client.sendCh.ExchangeDeclare(VILLAS_EXCHANGE,
 		"headers",
-		true,
 		false,
+		true,
 		false,
 		false,
 		nil)
@@ -82,8 +82,8 @@ func ConnectAMQP(uri string, cb callback) error {
 
 	// add a queue for the ICs
 	ICQueue, err := client.sendCh.QueueDeclare("infrastructure_components",
-		true,
 		false,
+		true,
 		false,
 		false,
 		nil)
