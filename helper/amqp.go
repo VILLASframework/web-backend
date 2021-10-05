@@ -81,12 +81,15 @@ func ConnectAMQP(uri string, cb callback) error {
 	}
 
 	// add a queue for the ICs
-	ICQueue, err := client.sendCh.QueueDeclare("infrastructure_components",
+	ICQueue, err := client.sendCh.QueueDeclare("",
 		false,
 		true,
+		true,
 		false,
-		false,
-		nil)
+		amqp.Table{
+			"x-max-length-bytes": int32(32 << 20),
+			"x-message-ttl":      int32(10 * 60),
+		})
 	if err != nil {
 		return fmt.Errorf("AMQP: failed to declare the queue, error: %v", err)
 	}
