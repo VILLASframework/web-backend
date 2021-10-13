@@ -220,6 +220,34 @@ func authenticateInternal(c *gin.Context) (User, error) {
 	return myUser, nil
 }
 
+func duplicateFiles(originalSo *database.Scenario, duplicateSo *database.Scenario) error {
+	db := database.GetDB()
+	var files []database.File
+	err := db.Order("ID asc").Model(originalSo).Related(&files, "Files").Error
+	if err != nil {
+		log.Printf("error getting files for scenario %d", originalSo.ID)
+	}
+
+	for _, file := range files {
+		var duplicateF database.File
+		duplicateF.Name = file.Name
+		duplicateF.Key = file.Key
+		duplicateF.Type = file.Type
+		duplicateF.Size = file.Size
+		duplicateF.Date = file.Date
+		duplicateF.ScenarioID = duplicateSo.ID
+		duplicateF.FileData = file.FileData
+		duplicateF.ImageHeight = file.ImageHeight
+		duplicateF.ImageWidth = file.ImageWidth
+		err = db.Create(&duplicateF).Error
+		if err != nil {
+			log.Print("error creating duplicate file")
+			return err
+		}
+	}
+	return nil
+}
+
 func duplicateDashboards(originalSo *database.Scenario, duplicateSo *database.Scenario,
 	signalMap map[uint]uint, appendix string) error {
 
@@ -340,6 +368,10 @@ func duplicateScenario(so *database.Scenario, duplicateSo *database.Scenario, ic
 		return err
 	}
 	log.Print("created duplicate scenario")
+	err = duplicateFiles(so, duplicateSo)
+	if err != nil {
+		return err
+	}
 
 	var configs []database.ComponentConfiguration
 	// map existing signal IDs to duplicated signal IDs for widget duplication
