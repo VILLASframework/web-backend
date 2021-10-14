@@ -419,11 +419,11 @@ func DuplicateScenarioForUser(so *database.Scenario, user *database.User) {
 			}
 
 			if ic.Category == "simulator" && ic.Type == "kubernetes" {
-				duplicateUUID, err := helper.RequestICcreateAMQP(&ic, ic.Manager)
+				duplicateUUID, err := helper.RequestICcreateAMQP(&ic, ic.Manager, user.Username)
 				duplicatedICuuids[ic.ID] = duplicateUUID
 
 				if err != nil { // TODO: should this function call be interrupted here?
-					log.Printf("Duplication of IC (id=%d) unsuccessful", icID)
+					log.Printf("Duplication of IC (id=%d) unsuccessful, err: %s", icID, err)
 					continue
 				}
 				externalUUIDs = append(externalUUIDs, duplicateUUID)
@@ -436,10 +436,9 @@ func DuplicateScenarioForUser(so *database.Scenario, user *database.User) {
 		// copy scenario after all new external ICs are in DB
 		icsToWaitFor := len(externalUUIDs)
 		var duplicatedScenario database.Scenario
-		var timeout = 5 // seconds
+		var timeout = 20 // seconds
 
 		for i := 0; i < timeout; i++ {
-			log.Printf("i = %d", i)
 			if icsToWaitFor == 0 {
 				appendix := fmt.Sprintf("--%s-%d-%d", user.Username, user.ID, so.ID)
 				duplicateScenario(so, &duplicatedScenario, duplicatedICuuids, appendix)
@@ -473,6 +472,7 @@ func DuplicateScenarioForUser(so *database.Scenario, user *database.User) {
 				}
 			}
 		}
+		log.Printf("ALERT! Timed out while waiting for IC duplication, scenario not duplicated")
 	}()
 }
 
