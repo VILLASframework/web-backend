@@ -26,6 +26,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strconv"
 	"time"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
@@ -47,15 +48,42 @@ type Action struct {
 	Results    json.RawMessage `json:"results,omitempty"`
 }
 
+type Container struct {
+	Name  string `json:"name"`
+	Image string `json:"image"`
+}
+
+type TemplateSpec struct {
+	Containers []Container `json:"containers"`
+}
+
+type JobTemplate struct {
+	Spec TemplateSpec `json:"spec"`
+}
+
+type JobSpec struct {
+	Active   int         `json:"activeDeadlineSeconds"`
+	Template JobTemplate `json:"template"`
+}
+
+type JobMetaData struct {
+	JobName string `json:"name"`
+}
+
+type KubernetesJob struct {
+	Spec     JobSpec     `json:"spec"`
+	MetaData JobMetaData `json:"metadata"`
+}
+
 type ICPropertiesToCopy struct {
-	Job         json.RawMessage `json:"job"`
-	UUID        string          `json:"uuid"`
-	Name        string          `json:"name"`
-	Description string          `json:"description"`
-	Location    string          `json:"location"`
-	Owner       string          `json:"owner"`
-	Category    string          `json:"category"`
-	Type        string          `json:"type"`
+	Job         KubernetesJob `json:"job"`
+	UUID        string        `json:"uuid"`
+	Name        string        `json:"name"`
+	Description string        `json:"description"`
+	Location    string        `json:"location"`
+	Owner       string        `json:"owner"`
+	Category    string        `json:"category"`
+	Type        string        `json:"type"`
 }
 
 type ICUpdateToCopy struct {
@@ -242,28 +270,26 @@ func CheckConnection() error {
 
 func RequestICcreateAMQP(ic *database.InfrastructureComponent, managerUUID string) (string, error) {
 	newUUID := uuid.New().String()
+	log.Printf("New IC UUID: %s", newUUID)
 
 	var lastUpdate ICUpdateToCopy
+	log.Println(ic.StatusUpdateRaw.RawMessage)
 	err := json.Unmarshal(ic.StatusUpdateRaw.RawMessage, &lastUpdate)
 	if err != nil {
 		return newUUID, err
 	}
 
-	var jobdef string
-	err = json.Unmarshal(lastUpdate.Properties.Job, &jobdef)
-	if err != nil {
-		return newUUID, err
-	}
-
 	msg := `{"name": "` + lastUpdate.Properties.Name + `",` +
-		`"description": "` + lastUpdate.Properties.Description + `",` +
+		`"description": "copy of ` + ic.UUID + `",` +
 		`"location": "` + lastUpdate.Properties.Location + `",` +
 		`"category": "` + lastUpdate.Properties.Category + `",` +
 		`"type": "` + lastUpdate.Properties.Type + `",` +
 		`"uuid": "` + newUUID + `",` +
-		`"properties": {` +
-		`"job": "` + jobdef + `",` +
-		`}}`
+		`"jobname": "` + lastUpdate.Properties.Job.MetaData.JobName + `",` +
+		`"activeDeadlineSeconds": "` + strconv.Itoa(lastUpdate.Properties.Job.Spec.Active) + `",` +
+		`"containername": "` + lastUpdate.Properties.Job.Spec.Template.Spec.Containers[0].Name + `",` +
+		`"image": "` + lastUpdate.Properties.Job.Spec.Template.Spec.Containers[0].Image + `",` +
+		`"uuid": "` + newUUID + `"}`
 
 	log.Print(msg)
 

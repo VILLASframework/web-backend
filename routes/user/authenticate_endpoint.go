@@ -423,7 +423,7 @@ func DuplicateScenarioForUser(so *database.Scenario, user *database.User) {
 				duplicatedICuuids[ic.ID] = duplicateUUID
 
 				if err != nil { // TODO: should this function call be interrupted here?
-					log.Printf("Duplication of IC (id=%d) unsuccessful", icID)
+					log.Printf("Duplication of IC (id=%d) unsuccessful, err: %s", icID, err)
 					continue
 				}
 				externalUUIDs = append(externalUUIDs, duplicateUUID)
@@ -439,7 +439,6 @@ func DuplicateScenarioForUser(so *database.Scenario, user *database.User) {
 		var timeout = 5 // seconds
 
 		for i := 0; i < timeout; i++ {
-			log.Printf("i = %d", i)
 			if icsToWaitFor == 0 {
 				appendix := fmt.Sprintf("--%s-%d-%d", user.Username, user.ID, so.ID)
 				duplicateScenario(so, &duplicatedScenario, duplicatedICuuids, appendix)
