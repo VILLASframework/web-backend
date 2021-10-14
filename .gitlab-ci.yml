@@ -42,7 +42,7 @@ test:
     BASE_PATH: /api
     MODE: release
   services:
-    - postgres:9-buster
+    - postgres:12
     - rabbitmq:3.8
     - name: minio/minio:RELEASE.2021-01-16T02-19-44Z
       command: ['server', '/minio']
