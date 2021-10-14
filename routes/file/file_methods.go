@@ -227,11 +227,15 @@ func (f *File) Delete() error {
 
 	// delete file from s3 bucket
 	if f.Key != "" {
-		err = f.deleteS3()
-		if err != nil {
-			return err
-		}
-		log.Println("Deleted file in S3 object storage")
+		// TODO we do not delete the file from s3 object storage
+		// to ensure that no data is lost if multiple File objects reference the same S3 data object
+		// This behavior should be replaced by a different file handling in the future
+		//err = f.deleteS3()
+		//if err != nil {
+		//	return err
+		//}
+		//log.Println("Deleted file in S3 object storage")
+		log.Println("Did NOT delete file in S3 object storage!")
 	}
 
 	err = db.Model(&so).Association("Files").Delete(f).Error
