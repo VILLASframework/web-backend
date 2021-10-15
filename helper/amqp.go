@@ -267,12 +267,11 @@ func CheckConnection() error {
 	return nil
 }
 
-func RequestICcreateAMQP(ic *database.InfrastructureComponent, managerUUID string, userName string) (string, error) {
+// WARNING: this only works with the kubernetes-simple manager of VILLAScontroller
+func RequestICcreateAMQPsimpleManager(ic *database.InfrastructureComponent, managerUUID string, userName string) (string, error) {
 	newUUID := uuid.New().String()
-	log.Printf("New IC UUID: %s", newUUID)
 
 	var lastUpdate ICUpdateToCopy
-	log.Println(ic.StatusUpdateRaw.RawMessage)
 	err := json.Unmarshal(ic.StatusUpdateRaw.RawMessage, &lastUpdate)
 	if err != nil {
 		return newUUID, err
@@ -283,13 +282,11 @@ func RequestICcreateAMQP(ic *database.InfrastructureComponent, managerUUID strin
 		`"category": "` + lastUpdate.Properties.Category + `",` +
 		`"type": "` + lastUpdate.Properties.Type + `",` +
 		`"uuid": "` + newUUID + `",` +
-		`"jobname": "` + lastUpdate.Properties.Job.MetaData.JobName + `",` +
+		`"jobname": "` + lastUpdate.Properties.Job.MetaData.JobName + `-` + userName + `",` +
 		`"activeDeadlineSeconds": "` + lastUpdate.Properties.Job.Spec.Active + `",` +
-		`"containername": "` + lastUpdate.Properties.Job.Spec.Template.Spec.Containers[0].Name + `",` +
+		`"containername": "` + lastUpdate.Properties.Job.Spec.Template.Spec.Containers[0].Name + `-` + userName + `",` +
 		`"image": "` + lastUpdate.Properties.Job.Spec.Template.Spec.Containers[0].Image + `",` +
 		`"uuid": "` + newUUID + `"}`
-
-	log.Print(msg)
 
 	actionCreate := Action{
 		Act:        "create",
