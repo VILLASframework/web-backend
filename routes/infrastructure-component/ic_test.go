@@ -373,48 +373,6 @@ func TestUpdateICAsUser(t *testing.T) {
 
 }
 
-func TestCreateICviaAMQP(t *testing.T) {
-	if os.Getenv("CI") != "" {
-		t.Skip("Skipping testing in CI environment")
-	}
-	database.DropTables()
-	database.MigrateModels()
-	assert.NoError(t, helper.AddTestUsers())
-
-	// authenticate as user
-	token, err := helper.AuthenticateForTest(router, helper.UserACredentials)
-	assert.NoError(t, err)
-
-	// Count the number of all the ICs before sending Action
-	numberOfICs, err := helper.LengthOfResponse(router, token,
-		"/api/v2/ic", "GET", nil)
-	assert.NoError(t, err)
-	assert.Equal(t, 0, numberOfICs)
-
-	err = helper.CheckConnection()
-	assert.NoError(t, err)
-
-	var ic database.InfrastructureComponent
-	ic.Name = "kubernetes simulator dpsim (backend test)"
-	ic.Location = "iko backend dev"
-	ic.Category = "simulator"
-	ic.Type = "kubernetes"
-
-	// send create Action to kubernetes manager via AMQP broker
-	uuidManager := "444fb73e-7e74-11eb-8f63-f3a5b3ab82f6"
-	_, err = helper.RequestICcreateAMQP(&ic, uuidManager)
-	assert.NoError(t, err)
-
-	// Wait until externally managed IC is created (happens async)
-	time.Sleep(2 * time.Second)
-
-	// check whether an external IC was created
-	numberOfICs, err = helper.LengthOfResponse(router, token,
-		"/api/v2/ic", "GET", nil)
-	assert.NoError(t, err)
-	assert.Equal(t, 1, numberOfICs)
-}
-
 func TestDeleteICAsAdmin(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
