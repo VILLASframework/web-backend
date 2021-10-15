@@ -220,241 +220,6 @@ func authenticateInternal(c *gin.Context) (User, error) {
 	return myUser, nil
 }
 
-func duplicateDashboards(originalSo *database.Scenario, duplicateSo *database.Scenario,
-	signalMap map[uint]uint, appendix string) error {
-
-	db := database.GetDB()
-	var dabs []database.Dashboard
-	err := db.Order("ID asc").Model(originalSo).Related(&dabs, "Dashboards").Error
-	if err != nil {
-		log.Printf("error getting dashboards for scenario %d", originalSo.ID)
-	}
-
-	for _, dab := range dabs {
-		var duplicateD database.Dashboard
-		duplicateD.Grid = dab.Grid
-		duplicateD.Name = dab.Name + appendix
-		duplicateD.ScenarioID = duplicateSo.ID
-		duplicateD.Height = dab.Height
-		err = db.Create(&duplicateD).Error
-		if err != nil {
-			log.Print("error creating duplicate dashboard")
-			continue
-		}
-
-		// add widgets to duplicated dashboards
-		var widgets []database.Widget
-		err = db.Order("ID asc").Model(&dab).Related(&widgets, "Widgets").Error
-		if err != nil {
-			log.Printf("error getting widgets for dashboard %d", dab.ID)
-		}
-		for _, widget := range widgets {
-			var duplicateW database.Widget
-			duplicateW.DashboardID = duplicateD.ID
-			duplicateW.CustomProperties = widget.CustomProperties
-			duplicateW.Height = widget.Height
-			duplicateW.Width = widget.Width
-			duplicateW.MinHeight = widget.MinHeight
-			duplicateW.MinWidth = widget.MinWidth
-			duplicateW.Name = widget.Name
-			duplicateW.Type = widget.Type
-			duplicateW.X = widget.X
-			duplicateW.Y = widget.Y
-
-			duplicateW.SignalIDs = []int64{}
-			for _, id := range widget.SignalIDs {
-				duplicateW.SignalIDs = append(duplicateW.SignalIDs, int64(signalMap[uint(id)]))
-			}
-
-			err = db.Create(&duplicateW).Error
-			if err != nil {
-				log.Print("error creating duplicate widget")
-				continue
-			}
-			// associate dashboard with simulation
-			err = db.Model(&duplicateD).Association("Widgets").Append(&duplicateW).Error
-			if err != nil {
-				log.Print("error associating duplicate widget and dashboard")
-			}
-		}
-
-	}
-	return nil
-}
-
-func duplicateComponentConfig(config *database.ComponentConfiguration,
-	duplicateSo *database.Scenario, icIds map[uint]string, appendix string, signalMap *map[uint]uint) error {
-	var configDpl database.ComponentConfiguration
-	configDpl.Name = config.Name
-	configDpl.StartParameters = config.StartParameters
-	configDpl.ScenarioID = duplicateSo.ID
-	configDpl.OutputMapping = config.OutputMapping
-	configDpl.InputMapping = config.InputMapping
-
-	db := database.GetDB()
-	if icIds[config.ICID] == "" {
-		configDpl.ICID = config.ICID
-	} else {
-		var duplicatedIC database.InfrastructureComponent
-		err := db.Find(&duplicatedIC, "UUID = ?", icIds[config.ICID]).Error
-		if err != nil {
-			log.Print(err)
-			return err
-		}
-		configDpl.ICID = duplicatedIC.ID
-	}
-	err := db.Create(&configDpl).Error
-	if err != nil {
-		log.Print(err)
-		return err
-	}
-
-	// get all signals corresponding to component config
-	var sigs []database.Signal
-	err = db.Order("ID asc").Model(&config).Related(&sigs, "OutputMapping").Error
-	smap := *signalMap
-	for _, signal := range sigs {
-		var sig database.Signal
-		sig.Direction = signal.Direction
-		sig.Index = signal.Index
-		sig.Name = signal.Name + appendix
-		sig.ScalingFactor = signal.ScalingFactor
-		sig.Unit = signal.Unit
-		sig.ConfigID = configDpl.ID
-		err = db.Create(&sig).Error
-		if err == nil {
-			smap[signal.ID] = sig.ID
-		}
-	}
-
-	return err
-}
-
-func duplicateScenario(so *database.Scenario, duplicateSo *database.Scenario, icIds map[uint]string, appendix string) error {
-	duplicateSo.Name = so.Name + appendix
-	duplicateSo.StartParameters.RawMessage = so.StartParameters.RawMessage
-	db := database.GetDB()
-	err := db.Create(&duplicateSo).Error
-	if err != nil {
-		log.Printf("Could not create duplicate of scenario %d", so.ID)
-		return err
-	}
-	log.Print("created duplicate scenario")
-
-	var configs []database.ComponentConfiguration
-	// map existing signal IDs to duplicated signal IDs for widget duplication
-	signalMap := make(map[uint]uint)
-	err = db.Order("ID asc").Model(so).Related(&configs, "ComponentConfigurations").Error
-	if err == nil {
-		for _, config := range configs {
-			err = duplicateComponentConfig(&config, duplicateSo, icIds, appendix, &signalMap)
-			if err != nil {
-				return err
-			}
-		}
-
-	}
-
-	err = duplicateDashboards(so, duplicateSo, signalMap, appendix)
-	return err
-}
-
-func DuplicateScenarioForUser(so *database.Scenario, user *database.User) {
-	go func() {
-
-		// get all component configs of the scenario
-		db := database.GetDB()
-		var configs []database.ComponentConfiguration
-		err := db.Order("ID asc").Model(so).Related(&configs, "ComponentConfigurations").Error
-		if err != nil {
-			log.Printf("Warning: scenario to duplicate (id=%d) has no component configurations", so.ID)
-		}
-
-		// iterate over component configs to check for ICs to duplicate
-		duplicatedICuuids := make(map[uint]string) // key: icID; value: UUID of duplicate
-		var externalUUIDs []string                 // external ICs to wait for
-		for _, config := range configs {
-			icID := config.ICID
-			if duplicatedICuuids[icID] != "" { // this IC was already added
-				continue
-			}
-
-			var ic database.InfrastructureComponent
-			err = db.Find(&ic, icID).Error
-			if err != nil {
-				log.Printf("Cannot find IC with id %d in DB, will not duplicate for User %s", icID, user.Username)
-				continue
-			}
-
-			if ic.Category == "simulator" && ic.Type == "kubernetes" {
-				duplicateUUID, err := helper.RequestICcreateAMQP(&ic, ic.Manager)
-				duplicatedICuuids[ic.ID] = duplicateUUID
-
-				if err != nil { // TODO: should this function call be interrupted here?
-					log.Printf("Duplication of IC (id=%d) unsuccessful", icID)
-					continue
-				}
-				externalUUIDs = append(externalUUIDs, duplicateUUID)
-			} else { // use existing IC
-				duplicatedICuuids[ic.ID] = ""
-				err = nil
-			}
-		}
-
-		// copy scenario after all new external ICs are in DB
-		icsToWaitFor := len(externalUUIDs)
-		var duplicatedScenario database.Scenario
-		var timeout = 5 // seconds
-
-		for i := 0; i < timeout; i++ {
-			log.Printf("i = %d", i)
-			if icsToWaitFor == 0 {
-				appendix := fmt.Sprintf("--%s-%d-%d", user.Username, user.ID, so.ID)
-				duplicateScenario(so, &duplicatedScenario, duplicatedICuuids, appendix)
-
-				// associate user to new scenario
-				err = db.Model(&duplicatedScenario).Association("Users").Append(user).Error
-				if err != nil {
-					log.Printf("Could not associate User %s to scenario %d", user.Username, duplicatedScenario.ID)
-				}
-				log.Print("associated user to duplicated scenario")
-
-				return
-			} else {
-				time.Sleep(1 * time.Second)
-			}
-
-			// check for new ICs with previously created UUIDs
-			for _, uuid := range externalUUIDs {
-				if uuid == "" {
-					continue
-				}
-				log.Printf("looking for IC with UUID %s", uuid)
-				var duplicatedIC database.InfrastructureComponent
-				err = db.Find(&duplicatedIC, "UUID = ?", uuid).Error
-				// TODO: check if not found or other error
-				if err != nil {
-					log.Print(err)
-				} else {
-					icsToWaitFor--
-					uuid = ""
-				}
-			}
-		}
-	}()
-}
-
-func isAlreadyDuplicated(duplicatedName string) bool {
-	db := database.GetDB()
-	var scenarios []database.Scenario
-
-	db.Find(&scenarios, "name = ?", duplicatedName)
-	if len(scenarios) > 0 {
-		return true
-	}
-	return false
-}
-
 func authenticateExternal(c *gin.Context) (User, error) {
 	var myUser User
 	username := c.Request.Header.Get("X-Forwarded-User")
@@ -491,7 +256,7 @@ func authenticateExternal(c *gin.Context) (User, error) {
 		log.Printf("Created new external user %s (id=%d)", myUser.Username, myUser.ID)
 	}
 
-	// Add users to scenarios based on static map
+	// Add users to scenarios based on static groups map
 	db := database.GetDB()
 	for _, group := range groups {
 		if groupedArr, ok := configuration.ScenarioGroupMap[group]; ok {
@@ -504,7 +269,7 @@ func authenticateExternal(c *gin.Context) (User, error) {
 					continue
 				}
 
-				duplicateName := fmt.Sprintf("%s--%s-%d-%d", so.Name, myUser.Username, myUser.ID, so.ID)
+				duplicateName := fmt.Sprintf("%s %s", so.Name, myUser.Username)
 				alreadyDuplicated := isAlreadyDuplicated(duplicateName)
 				if alreadyDuplicated {
 					log.Printf("Scenario %d already duplicated for user %s", so.ID, myUser.Username)
@@ -513,7 +278,7 @@ func authenticateExternal(c *gin.Context) (User, error) {
 
 				if groupedScenario.Duplicate {
 					DuplicateScenarioForUser(&so, &myUser.User)
-				} else {
+				} else { // add user to scenario
 					err = db.Model(&so).Association("Users").Append(&(myUser.User)).Error
 					if err != nil {
 						log.Printf("Failed to add user %s (id=%d) to scenario %s (id=%d): %s\n", myUser.Username, myUser.ID, so.Name, so.ID, err)
@@ -526,4 +291,266 @@ func authenticateExternal(c *gin.Context) (User, error) {
 	}
 
 	return myUser, nil
+}
+
+func isAlreadyDuplicated(duplicatedName string) bool {
+	db := database.GetDB()
+	var scenarios []database.Scenario
+	db.Find(&scenarios, "name = ?", duplicatedName)
+
+	return (len(scenarios) > 0)
+}
+
+func DuplicateScenarioForUser(so *database.Scenario, user *database.User) {
+	go func() {
+
+		// get all component configs of the scenario
+		db := database.GetDB()
+		var configs []database.ComponentConfiguration
+		err := db.Order("ID asc").Model(so).Related(&configs, "ComponentConfigurations").Error
+		if err != nil {
+			log.Printf("Warning: scenario to duplicate (id=%d) has no component configurations", so.ID)
+		}
+
+		// iterate over component configs to check for ICs to duplicate
+		duplicatedICuuids := make(map[uint]string) // key: original icID; value: UUID of duplicate
+		var externalUUIDs []string                 // external ICs to wait for
+		for _, config := range configs {
+			icID := config.ICID
+			if duplicatedICuuids[icID] != "" { // this IC was already added
+				continue
+			}
+
+			var ic database.InfrastructureComponent
+			err = db.Find(&ic, icID).Error
+			if err != nil {
+				log.Printf("Cannot find IC with id %d in DB, will not duplicate for User %s", icID, user.Username)
+				continue
+			}
+
+			// create new kubernetes simulator OR use existing IC
+			if ic.Category == "simulator" && ic.Type == "kubernetes" {
+				duplicateUUID, err := helper.RequestICcreateAMQPsimpleManager(&ic, ic.Manager, user.Username)
+				duplicatedICuuids[ic.ID] = duplicateUUID
+
+				if err != nil {
+					log.Printf("Duplication of IC (id=%d) unsuccessful, err: %s", icID, err)
+					continue
+				}
+				externalUUIDs = append(externalUUIDs, duplicateUUID)
+			} else { // use existing IC
+				duplicatedICuuids[ic.ID] = ""
+				err = nil
+			}
+		}
+
+		// copy scenario after all new external ICs are in DB
+		icsToWaitFor := len(externalUUIDs)
+		var duplicatedScenario database.Scenario
+		var timeout = 20 // seconds
+
+		for i := 0; i < timeout; i++ {
+			// duplicate scenario after all duplicated ICs have been found in the DB
+			if icsToWaitFor == 0 {
+				duplicateScenario(so, &duplicatedScenario, duplicatedICuuids, user.Username)
+
+				// associate user to new scenario
+				err = db.Model(&duplicatedScenario).Association("Users").Append(user).Error
+				if err != nil {
+					log.Printf("Could not associate User %s to scenario %d", user.Username, duplicatedScenario.ID)
+				}
+				log.Println("Associated user to duplicated scenario")
+
+				return
+			} else {
+				time.Sleep(1 * time.Second)
+			}
+
+			// check for new ICs with previously created UUIDs
+			for _, uuid := range externalUUIDs {
+				if uuid == "" {
+					continue
+				}
+				log.Printf("Looking for duplicated IC with UUID %s", uuid)
+				var duplicatedIC database.InfrastructureComponent
+				err = db.Find(&duplicatedIC, "UUID = ?", uuid).Error
+				if err != nil {
+					log.Printf("Error looking up duplicated IC: %s", err)
+				} else {
+					icsToWaitFor--
+					uuid = ""
+				}
+			}
+		}
+		log.Printf("ALERT! Timed out while waiting for IC duplication, scenario not properly duplicated")
+	}()
+}
+
+func duplicateComponentConfig(config *database.ComponentConfiguration,
+	duplicateSo *database.Scenario, icIds map[uint]string, userName string, signalMap *map[uint]uint) error {
+	var configDpl database.ComponentConfiguration
+	configDpl.Name = config.Name
+	configDpl.StartParameters = config.StartParameters
+	configDpl.ScenarioID = duplicateSo.ID
+	configDpl.OutputMapping = config.OutputMapping
+	configDpl.InputMapping = config.InputMapping
+
+	db := database.GetDB()
+	if icIds[config.ICID] == "" {
+		configDpl.ICID = config.ICID
+	} else {
+		var duplicatedIC database.InfrastructureComponent
+		err := db.Find(&duplicatedIC, "UUID = ?", icIds[config.ICID]).Error
+		if err != nil {
+			log.Print(err)
+			return err
+		}
+		configDpl.ICID = duplicatedIC.ID
+	}
+	err := db.Create(&configDpl).Error
+	if err != nil {
+		log.Print(err)
+		return err
+	}
+
+	// get all signals corresponding to component config
+	var sigs []database.Signal
+	err = db.Order("ID asc").Model(&config).Related(&sigs, "OutputMapping").Error
+	smap := *signalMap
+	for _, signal := range sigs {
+		var sig database.Signal
+		sig.Direction = signal.Direction
+		sig.Index = signal.Index
+		sig.Name = signal.Name + ` ` + userName
+		sig.ScalingFactor = signal.ScalingFactor
+		sig.Unit = signal.Unit
+		sig.ConfigID = configDpl.ID
+		err = db.Create(&sig).Error
+		if err == nil {
+			smap[signal.ID] = sig.ID
+		}
+	}
+
+	return err
+}
+
+func duplicateScenario(so *database.Scenario, duplicateSo *database.Scenario, icIds map[uint]string, userName string) error {
+	duplicateSo.Name = so.Name + ` ` + userName
+	duplicateSo.StartParameters.RawMessage = so.StartParameters.RawMessage
+	db := database.GetDB()
+	err := db.Create(&duplicateSo).Error
+	if err != nil {
+		log.Printf("Could not create duplicate of scenario %d", so.ID)
+		return err
+	}
+
+	err = duplicateFiles(so, duplicateSo)
+	if err != nil {
+		return err
+	}
+
+	var configs []database.ComponentConfiguration
+	// map existing signal IDs to duplicated signal IDs for widget duplication
+	signalMap := make(map[uint]uint)
+	err = db.Order("ID asc").Model(so).Related(&configs, "ComponentConfigurations").Error
+	if err == nil {
+		for _, config := range configs {
+			err = duplicateComponentConfig(&config, duplicateSo, icIds, userName, &signalMap)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return duplicateDashboards(so, duplicateSo, signalMap, userName)
+}
+
+func duplicateFiles(originalSo *database.Scenario, duplicateSo *database.Scenario) error {
+	db := database.GetDB()
+	var files []database.File
+	err := db.Order("ID asc").Model(originalSo).Related(&files, "Files").Error
+	if err != nil {
+		log.Printf("error getting files for scenario %d", originalSo.ID)
+	}
+
+	for _, file := range files {
+		var duplicateF database.File
+		duplicateF.Name = file.Name
+		duplicateF.Key = file.Key
+		duplicateF.Type = file.Type
+		duplicateF.Size = file.Size
+		duplicateF.Date = file.Date
+		duplicateF.ScenarioID = duplicateSo.ID
+		duplicateF.FileData = file.FileData
+		duplicateF.ImageHeight = file.ImageHeight
+		duplicateF.ImageWidth = file.ImageWidth
+		err = db.Create(&duplicateF).Error
+		if err != nil {
+			log.Print("error creating duplicate file")
+			return err
+		}
+	}
+	return nil
+}
+
+func duplicateDashboards(originalSo *database.Scenario, duplicateSo *database.Scenario,
+	signalMap map[uint]uint, userName string) error {
+
+	db := database.GetDB()
+	var dabs []database.Dashboard
+	err := db.Order("ID asc").Model(originalSo).Related(&dabs, "Dashboards").Error
+	if err != nil {
+		log.Printf("Error getting dashboards for scenario %d: %s", originalSo.ID, err)
+	}
+
+	for _, dab := range dabs {
+		var duplicateD database.Dashboard
+		duplicateD.Grid = dab.Grid
+		duplicateD.Name = dab.Name + ` ` + userName
+		duplicateD.ScenarioID = duplicateSo.ID
+		duplicateD.Height = dab.Height
+		err = db.Create(&duplicateD).Error
+		if err != nil {
+			log.Printf("Error creating duplicate dashboard '%s': %s", dab.Name, err)
+			continue
+		}
+
+		// add widgets to duplicated dashboards
+		var widgets []database.Widget
+		err = db.Order("ID asc").Model(&dab).Related(&widgets, "Widgets").Error
+		if err != nil {
+			log.Printf("Error getting widgets for dashboard %d: %s", dab.ID, err)
+		}
+		for _, widget := range widgets {
+			var duplicateW database.Widget
+			duplicateW.DashboardID = duplicateD.ID
+			duplicateW.CustomProperties = widget.CustomProperties
+			duplicateW.Height = widget.Height
+			duplicateW.Width = widget.Width
+			duplicateW.MinHeight = widget.MinHeight
+			duplicateW.MinWidth = widget.MinWidth
+			duplicateW.Name = widget.Name
+			duplicateW.Type = widget.Type
+			duplicateW.X = widget.X
+			duplicateW.Y = widget.Y
+
+			duplicateW.SignalIDs = []int64{}
+			for _, id := range widget.SignalIDs {
+				duplicateW.SignalIDs = append(duplicateW.SignalIDs, int64(signalMap[uint(id)]))
+			}
+
+			err = db.Create(&duplicateW).Error
+			if err != nil {
+				log.Print("error creating duplicate widget")
+				continue
+			}
+			// associate dashboard with simulation
+			err = db.Model(&duplicateD).Association("Widgets").Append(&duplicateW).Error
+			if err != nil {
+				log.Printf("Error associating duplicate widget and dashboard: %s", err)
+				return err
+			}
+		}
+	}
+	return nil
 }

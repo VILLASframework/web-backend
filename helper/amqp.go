@@ -47,6 +47,50 @@ type Action struct {
 	Results    json.RawMessage `json:"results,omitempty"`
 }
 
+type Container struct {
+	Name  string `json:"name"`
+	Image string `json:"image"`
+}
+
+type TemplateSpec struct {
+	Containers []Container `json:"containers"`
+}
+
+type JobTemplate struct {
+	Spec TemplateSpec `json:"spec"`
+}
+
+type JobSpec struct {
+	Active   string      `json:"activeDeadlineSeconds"`
+	Template JobTemplate `json:"template"`
+}
+
+type JobMetaData struct {
+	JobName string `json:"name"`
+}
+
+type KubernetesJob struct {
+	Spec     JobSpec     `json:"spec"`
+	MetaData JobMetaData `json:"metadata"`
+}
+
+type ICPropertiesToCopy struct {
+	Job         KubernetesJob `json:"job"`
+	UUID        string        `json:"uuid"`
+	Name        string        `json:"name"`
+	Description string        `json:"description"`
+	Location    string        `json:"location"`
+	Owner       string        `json:"owner"`
+	Category    string        `json:"category"`
+	Type        string        `json:"type"`
+}
+
+type ICUpdateToCopy struct {
+	Properties ICPropertiesToCopy `json:"properties"`
+	Status     json.RawMessage    `json:"status"`
+	Schema     json.RawMessage    `json:"schema"`
+}
+
 var client AMQPclient
 
 const VILLAS_EXCHANGE = "villas"
@@ -226,35 +270,28 @@ func CheckConnection() error {
 	return nil
 }
 
-func RequestICcreateAMQP(ic *database.InfrastructureComponent, managerUUID string) (string, error) {
+// WARNING: this only works with the kubernetes-simple manager of VILLAScontroller
+func RequestICcreateAMQPsimpleManager(ic *database.InfrastructureComponent, managerUUID string, userName string) (string, error) {
 	newUUID := uuid.New().String()
-	// TODO: where to get the properties part from?
-	msg := `{"name": "` + ic.Name + `",` +
-		`"location": "` + ic.Location + `",` +
-		`"category": "` + ic.Category + `",` +
-		`"type": "` + ic.Type + `",` +
-		`"uuid": "` + newUUID + `",` +
-		`"realm": "de.rwth-aachen.eonerc.acs",` +
-		`"properties": {` +
-		`"job": {` +
-		`"apiVersion": "batch/v1",` +
-		`"kind": "Job",` +
-		`"metadata": {` +
-		`"name": "dpsim"` +
-		`},` +
-		`"spec": {` +
-		`"activeDeadlineSeconds": 3600,` +
-		`"backoffLimit": 1,` +
-		`"ttlSecondsAfterFinished": 3600,` +
-		`"template": {` +
-		`"spec": {` +
-		`"restartPolicy": "Never",` +
-		`"containers": [{` +
-		`"image": "dpsimrwth/slew-villas",` +
-		`"name": "slew-dpsim"` +
-		`}]}}}}}}`
+	log.Printf("New IC UUID: %s", newUUID)
 
-	log.Print(msg)
+	var lastUpdate ICUpdateToCopy
+	log.Println(ic.StatusUpdateRaw.RawMessage)
+	err := json.Unmarshal(ic.StatusUpdateRaw.RawMessage, &lastUpdate)
+	if err != nil {
+		return newUUID, err
+	}
+
+	msg := `{"name": "` + lastUpdate.Properties.Name + ` ` + userName + `",` +
+		`"location": "` + lastUpdate.Properties.Location + `",` +
+		`"category": "` + lastUpdate.Properties.Category + `",` +
+		`"type": "` + lastUpdate.Properties.Type + `",` +
+		`"uuid": "` + newUUID + `",` +
+		`"jobname": "` + lastUpdate.Properties.Job.MetaData.JobName + `-` + userName + `",` +
+		`"activeDeadlineSeconds": "` + lastUpdate.Properties.Job.Spec.Active + `",` +
+		`"containername": "` + lastUpdate.Properties.Job.Spec.Template.Spec.Containers[0].Name + `-` + userName + `",` +
+		`"image": "` + lastUpdate.Properties.Job.Spec.Template.Spec.Containers[0].Image + `",` +
+		`"uuid": "` + newUUID + `"}`
 
 	actionCreate := Action{
 		Act:        "create",
@@ -262,7 +299,7 @@ func RequestICcreateAMQP(ic *database.InfrastructureComponent, managerUUID strin
 		Parameters: json.RawMessage(msg),
 	}
 
-	err := SendActionAMQP(actionCreate, managerUUID)
+	err = SendActionAMQP(actionCreate, managerUUID)
 
 	return newUUID, err
 }
