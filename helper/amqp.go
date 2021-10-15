@@ -62,7 +62,7 @@ type JobTemplate struct {
 }
 
 type JobSpec struct {
-	Active   int         `json:"activeDeadlineSeconds"`
+	Active   string      `json:"activeDeadlineSeconds"`
 	Template JobTemplate `json:"template"`
 }
 
@@ -268,7 +268,8 @@ func CheckConnection() error {
 	return nil
 }
 
-func RequestICcreateAMQP(ic *database.InfrastructureComponent, managerUUID string) (string, error) {
+// WARNING: this only works with the kubernetes-simple manager of VILLAScontroller
+func RequestICcreateAMQPsimpleManager(ic *database.InfrastructureComponent, managerUUID string, userName string) (string, error) {
 	newUUID := uuid.New().String()
 	log.Printf("New IC UUID: %s", newUUID)
 
@@ -279,19 +280,16 @@ func RequestICcreateAMQP(ic *database.InfrastructureComponent, managerUUID strin
 		return newUUID, err
 	}
 
-	msg := `{"name": "` + lastUpdate.Properties.Name + `",` +
-		`"description": "copy of ` + ic.UUID + `",` +
+	msg := `{"name": "` + lastUpdate.Properties.Name + ` ` + userName + `",` +
 		`"location": "` + lastUpdate.Properties.Location + `",` +
 		`"category": "` + lastUpdate.Properties.Category + `",` +
 		`"type": "` + lastUpdate.Properties.Type + `",` +
 		`"uuid": "` + newUUID + `",` +
-		`"jobname": "` + lastUpdate.Properties.Job.MetaData.JobName + `",` +
-		`"activeDeadlineSeconds": "` + strconv.Itoa(lastUpdate.Properties.Job.Spec.Active) + `",` +
-		`"containername": "` + lastUpdate.Properties.Job.Spec.Template.Spec.Containers[0].Name + `",` +
+		`"jobname": "` + lastUpdate.Properties.Job.MetaData.JobName + `-` + userName + `",` +
+		`"activeDeadlineSeconds": "` + lastUpdate.Properties.Job.Spec.Active + `",` +
+		`"containername": "` + lastUpdate.Properties.Job.Spec.Template.Spec.Containers[0].Name + `-` + userName + `",` +
 		`"image": "` + lastUpdate.Properties.Job.Spec.Template.Spec.Containers[0].Image + `",` +
 		`"uuid": "` + newUUID + `"}`
-
-	log.Print(msg)
 
 	actionCreate := Action{
 		Act:        "create",
