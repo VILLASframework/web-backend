@@ -72,7 +72,7 @@ func ConnectAMQP(uri string, cb callback) error {
 	err = client.sendCh.ExchangeDeclare(VILLAS_EXCHANGE,
 		"headers",
 		true,
-		true,
+		false,
 		false,
 		false,
 		nil)
