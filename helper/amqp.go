@@ -270,8 +270,10 @@ func CheckConnection() error {
 // WARNING: this only works with the kubernetes-simple manager of VILLAScontroller
 func RequestICcreateAMQPsimpleManager(ic *database.InfrastructureComponent, managerUUID string, userName string) (string, error) {
 	newUUID := uuid.New().String()
+	log.Printf("New IC UUID: %s", newUUID)
 
 	var lastUpdate ICUpdateToCopy
+	log.Println(ic.StatusUpdateRaw.RawMessage)
 	err := json.Unmarshal(ic.StatusUpdateRaw.RawMessage, &lastUpdate)
 	if err != nil {
 		return newUUID, err
