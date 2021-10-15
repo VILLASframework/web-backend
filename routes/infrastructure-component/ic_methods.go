@@ -36,7 +36,7 @@ func (s *InfrastructureComponent) save() error {
 	return err
 }
 
-func (s *InfrastructureComponent) byID(id uint) error {
+func (s *InfrastructureComponent) ByID(id uint) error {
 	db := database.GetDB()
 	err := db.Find(s, id).Error
 	return err

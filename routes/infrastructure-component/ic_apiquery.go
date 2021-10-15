@@ -124,7 +124,7 @@ func QueryICAPIs(d time.Duration) {
 
 					// create the update and update IC in DB
 					var x InfrastructureComponent
-					err = x.byID(ic.ID)
+					err = x.ByID(ic.ID)
 					if err != nil {
 						log.Println("Error getting villas-node gateway by ID", ic.Name, err)
 						continue
@@ -165,7 +165,7 @@ func QueryICAPIs(d time.Duration) {
 
 					// create the update and update IC in DB
 					var x InfrastructureComponent
-					err = x.byID(ic.ID)
+					err = x.ByID(ic.ID)
 					if err != nil {
 						log.Println("Error getting villas-relay manager by ID", ic.Name, err)
 						continue

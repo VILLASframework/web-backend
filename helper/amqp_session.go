@@ -134,29 +134,6 @@ func (session *AMQPsession) handleReInit(conn *amqp.Connection) bool {
 
 // init will initialize channel & declare queue
 func (session *AMQPsession) init(conn *amqp.Connection) error {
-	ch, err := conn.Channel()
-
-	if err != nil {
-		return err
-	}
-
-	err = ch.Confirm(false)
-
-	if err != nil {
-		return err
-	}
-	_, err = ch.QueueDeclare(
-		session.name,
-		false, // Durable
-		false, // Delete when unused
-		false, // Exclusive
-		false, // No-wait
-		nil,   // Arguments
-	)
-
-	if err != nil {
-		return err
-	}
 
 	// create sendCh
 	sendCh, err := conn.Channel()
@@ -176,10 +153,10 @@ func (session *AMQPsession) init(conn *amqp.Connection) error {
 	}
 
 	// add a queue for the ICs
-	ICQueue, err := sendCh.QueueDeclare("infrastructure_components",
+	ICQueue, err := sendCh.QueueDeclare("",
+		false,
 		true,
-		false,
-		false,
+		true,
 		false,
 		nil)
 	if err != nil {
