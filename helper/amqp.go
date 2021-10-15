@@ -26,7 +26,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"strconv"
 	"time"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
