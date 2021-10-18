@@ -91,7 +91,7 @@ func newFalse() *bool {
 func addScenarioAndICAndConfig() (scenarioID uint, ICID uint, configID uint) {
 
 	// authenticate as admin
-	token, _ := helper.AuthenticateForTest(router, helper.AdminCredentials)
+	token, _ := helper.AuthenticateForTest(router, database.AdminCredentials)
 
 	// POST $newICA
 	newICA := ICRequest{
@@ -114,7 +114,7 @@ func addScenarioAndICAndConfig() (scenarioID uint, ICID uint, configID uint) {
 	newICID, _ := helper.GetResponseID(resp)
 
 	// authenticate as normal user
-	token, _ = helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, _ = helper.AuthenticateForTest(router, database.UserACredentials)
 
 	// POST $newScenario
 	newScenario := ScenarioRequest{
@@ -181,7 +181,7 @@ func TestMain(m *testing.M) {
 func TestAddSignal(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.AddTestUsers())
+	assert.NoError(t, database.AddTestUsers())
 
 	// prepare the content of the DB for testing
 	// by adding a scenario and a IC to the DB
@@ -189,12 +189,12 @@ func TestAddSignal(t *testing.T) {
 	_, _, configID := addScenarioAndICAndConfig()
 
 	// authenticate as normal user
-	token, err := helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err := helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	newSignal1.ConfigID = configID
 	// authenticate as normal userB who has no access to new scenario
-	token, err = helper.AuthenticateForTest(router, helper.UserBCredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserBCredentials)
 	assert.NoError(t, err)
 
 	// try to POST to component config without access
@@ -205,7 +205,7 @@ func TestAddSignal(t *testing.T) {
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// authenticate as normal user
-	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	// try to POST a signal with non JSON body
@@ -251,7 +251,7 @@ func TestAddSignal(t *testing.T) {
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// authenticate as normal userB who has no access to new scenario
-	token, err = helper.AuthenticateForTest(router, helper.UserBCredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserBCredentials)
 	assert.NoError(t, err)
 
 	// Try to Get the newSignal as user B
@@ -265,7 +265,7 @@ func TestAddSignal(t *testing.T) {
 func TestUpdateSignal(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.AddTestUsers())
+	assert.NoError(t, database.AddTestUsers())
 
 	// prepare the content of the DB for testing
 	// by adding a scenario and a IC to the DB
@@ -273,7 +273,7 @@ func TestUpdateSignal(t *testing.T) {
 	_, _, configID := addScenarioAndICAndConfig()
 
 	// authenticate as normal user
-	token, err := helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err := helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	// test POST signals/ $newSignal
@@ -294,7 +294,7 @@ func TestUpdateSignal(t *testing.T) {
 	}
 
 	// authenticate as normal userB who has no access to new scenario
-	token, err = helper.AuthenticateForTest(router, helper.UserBCredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserBCredentials)
 	assert.NoError(t, err)
 
 	// try to PUT signal without access
@@ -305,7 +305,7 @@ func TestUpdateSignal(t *testing.T) {
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// authenticate as guest user
-	token, err = helper.AuthenticateForTest(router, helper.GuestCredentials)
+	token, err = helper.AuthenticateForTest(router, database.GuestCredentials)
 	assert.NoError(t, err)
 
 	// try to update signal as guest who has access to scenario
@@ -316,7 +316,7 @@ func TestUpdateSignal(t *testing.T) {
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// authenticate as normal user
-	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	// try to PUT with non JSON body
@@ -357,7 +357,7 @@ func TestUpdateSignal(t *testing.T) {
 func TestDeleteSignal(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.AddTestUsers())
+	assert.NoError(t, database.AddTestUsers())
 
 	// prepare the content of the DB for testing
 	// by adding a scenario and a IC to the DB
@@ -365,7 +365,7 @@ func TestDeleteSignal(t *testing.T) {
 	_, _, configID := addScenarioAndICAndConfig()
 
 	// authenticate as normal user
-	token, err := helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err := helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	// test POST signals/ $newSignal
@@ -386,7 +386,7 @@ func TestDeleteSignal(t *testing.T) {
 	assert.NoError(t, err)
 
 	// authenticate as normal userB who has no access to new scenario
-	token, err = helper.AuthenticateForTest(router, helper.UserBCredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserBCredentials)
 	assert.NoError(t, err)
 
 	// Try to DELETE signal with no access
@@ -397,7 +397,7 @@ func TestDeleteSignal(t *testing.T) {
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// authenticate as normal user
-	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	// Count the number of all the input signals returned for component config
@@ -443,7 +443,7 @@ func TestDeleteSignal(t *testing.T) {
 func TestGetAllInputSignalsOfConfig(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.AddTestUsers())
+	assert.NoError(t, database.AddTestUsers())
 
 	// prepare the content of the DB for testing
 	// by adding a scenario and a IC to the DB
@@ -451,7 +451,7 @@ func TestGetAllInputSignalsOfConfig(t *testing.T) {
 	_, _, configID := addScenarioAndICAndConfig()
 
 	// authenticate as normal user
-	token, err := helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err := helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	// Count the number of all the input signals returned for component config
@@ -526,7 +526,7 @@ func TestGetAllInputSignalsOfConfig(t *testing.T) {
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 
 	// authenticate as normal userB who has no access to new scenario
-	token, err = helper.AuthenticateForTest(router, helper.UserBCredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserBCredentials)
 	assert.NoError(t, err)
 
 	// try to get all input signals

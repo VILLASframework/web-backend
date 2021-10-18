@@ -53,10 +53,10 @@ type ScenarioRequest struct {
 func addScenario() (scenarioID uint) {
 
 	// authenticate as admin
-	token, _ := helper.AuthenticateForTest(router, helper.AdminCredentials)
+	token, _ := helper.AuthenticateForTest(router, database.AdminCredentials)
 
 	// authenticate as normal user
-	token, _ = helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, _ = helper.AuthenticateForTest(router, database.UserACredentials)
 
 	// POST $newScenario
 	newScenario := ScenarioRequest{
@@ -103,14 +103,14 @@ func TestMain(m *testing.M) {
 func TestAddFile(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.AddTestUsers())
+	assert.NoError(t, database.AddTestUsers())
 
 	// prepare the content of the DB for testing
 	// using the respective endpoints of the API
 	scenarioID := addScenario()
 
 	// authenticate as userB who has no access to the elements in the DB
-	token, err := helper.AuthenticateForTest(router, helper.UserBCredentials)
+	token, err := helper.AuthenticateForTest(router, database.UserBCredentials)
 	assert.NoError(t, err)
 
 	emptyBuf := &bytes.Buffer{}
@@ -123,7 +123,7 @@ func TestAddFile(t *testing.T) {
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// authenticate as normal userA
-	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	// try to POST without a scenario ID
@@ -189,14 +189,14 @@ func TestUpdateFile(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.AddTestUsers())
+	assert.NoError(t, database.AddTestUsers())
 
 	// prepare the content of the DB for testing
 	// using the respective endpoints of the API
 	scenarioID := addScenario()
 
 	// authenticate as normal user
-	token, err := helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err := helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	// create a testfile.txt in local folder
@@ -236,7 +236,7 @@ func TestUpdateFile(t *testing.T) {
 	assert.NoError(t, err)
 
 	// authenticate as userB who has no access to the elements in the DB
-	token, err = helper.AuthenticateForTest(router, helper.UserBCredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserBCredentials)
 	assert.NoError(t, err)
 
 	emptyBuf := &bytes.Buffer{}
@@ -249,7 +249,7 @@ func TestUpdateFile(t *testing.T) {
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// authenticate as guest user C
-	token, err = helper.AuthenticateForTest(router, helper.GuestCredentials)
+	token, err = helper.AuthenticateForTest(router, database.GuestCredentials)
 	assert.NoError(t, err)
 
 	// try to PUT as guest
@@ -261,7 +261,7 @@ func TestUpdateFile(t *testing.T) {
 
 	// Prepare update
 	// authenticate as normal user
-	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	// try to PUT with empty body
@@ -318,14 +318,14 @@ func TestUpdateFile(t *testing.T) {
 func TestDeleteFile(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.AddTestUsers())
+	assert.NoError(t, database.AddTestUsers())
 
 	// prepare the content of the DB for testing
 	// using the respective endpoints of the API
 	scenarioID := addScenario()
 
 	// authenticate as normal user
-	token, err := helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err := helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	// create a testfile.txt in local folder
@@ -385,7 +385,7 @@ func TestDeleteFile(t *testing.T) {
 	assert.NoError(t, err)
 
 	// authenticate as userB who has no access to the elements in the DB
-	token, err = helper.AuthenticateForTest(router, helper.UserBCredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserBCredentials)
 	assert.NoError(t, err)
 
 	// try to DELETE file from scenario to which userB has no access
@@ -396,7 +396,7 @@ func TestDeleteFile(t *testing.T) {
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// authenticate as normal user
-	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	// Count the number of all files returned for scenario
@@ -412,7 +412,7 @@ func TestDeleteFile(t *testing.T) {
 	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
 
 	// authenticate as guest user C
-	token, err = helper.AuthenticateForTest(router, helper.GuestCredentials)
+	token, err = helper.AuthenticateForTest(router, database.GuestCredentials)
 	assert.NoError(t, err)
 
 	// try to DELETE file of scenario as guest
@@ -423,7 +423,7 @@ func TestDeleteFile(t *testing.T) {
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// authenticate as normal user
-	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	// Delete the added file 1
@@ -450,14 +450,14 @@ func TestGetAllFilesOfScenario(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.AddTestUsers())
+	assert.NoError(t, database.AddTestUsers())
 
 	// prepare the content of the DB for testing
 	// using the respective endpoints of the API
 	scenarioID := addScenario()
 
 	// authenticate as userB who has no access to the elements in the DB
-	token, err := helper.AuthenticateForTest(router, helper.UserBCredentials)
+	token, err := helper.AuthenticateForTest(router, database.UserBCredentials)
 	assert.NoError(t, err)
 
 	// try to get all files for scenario to which userB has not access
@@ -468,7 +468,7 @@ func TestGetAllFilesOfScenario(t *testing.T) {
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// authenticate as normal userA
-	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	//try to get all files with missing scenario ID; should return a bad request error

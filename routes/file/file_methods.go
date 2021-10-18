@@ -36,7 +36,6 @@ import (
 	"time"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/scenario"
 	"github.com/gin-gonic/gin"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
@@ -140,8 +139,8 @@ func (f *File) Register(fileHeader *multipart.FileHeader, scenarioID uint) error
 	// Create association to scenario
 	db := database.GetDB()
 
-	var so scenario.Scenario
-	err = so.ByID(scenarioID)
+	var so database.Scenario
+	err = db.Find(&so, scenarioID).Error
 	if err != nil {
 		return err
 	}
@@ -219,8 +218,8 @@ func (f *File) Delete() error {
 	db := database.GetDB()
 
 	// remove association between file and scenario
-	var so scenario.Scenario
-	err := so.ByID(f.ScenarioID)
+	var so database.Scenario
+	err := db.Find(&so, f.ScenarioID).Error
 	if err != nil {
 		return err
 	}
@@ -245,6 +244,41 @@ func (f *File) Delete() error {
 
 	// delete file from DB
 	err = db.Delete(f).Error
+
+	return err
+}
+
+func (f *File) Duplicate(scenarioID uint) error {
+
+	var dup File
+	dup.Name = f.Name
+	dup.Key = f.Key
+	dup.Type = f.Type
+	dup.Size = f.Size
+	dup.Date = f.Date
+	dup.ScenarioID = scenarioID
+	dup.FileData = f.FileData
+	dup.ImageHeight = f.ImageHeight
+	dup.ImageWidth = f.ImageWidth
+
+	// file duplicate will point to the same data blob in the DB (SQL or postgres)
+
+	// Add duplicate File object with parameters to DB
+	err := dup.save()
+	if err != nil {
+		return err
+	}
+
+	// Create association of duplicate file to scenario ID of duplicate file
+	db := database.GetDB()
+
+	var so database.Scenario
+	err = db.Find(&so, scenarioID).Error
+	if err != nil {
+		return err
+	}
+
+	err = db.Model(&so).Association("Files").Append(&dup).Error
 
 	return err
 }

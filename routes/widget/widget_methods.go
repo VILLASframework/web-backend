@@ -23,7 +23,6 @@ package widget
 
 import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/dashboard"
 )
 
 type Widget struct {
@@ -47,8 +46,8 @@ func (w *Widget) ByID(id uint) error {
 
 func (w *Widget) addToDashboard() error {
 	db := database.GetDB()
-	var dab dashboard.Dashboard
-	err := dab.ByID(uint(w.DashboardID))
+	var dab database.Dashboard
+	err := db.Find(&dab, uint(w.DashboardID)).Error
 	if err != nil {
 		return err
 	}
@@ -89,8 +88,8 @@ func (w *Widget) update(modifiedWidget Widget) error {
 func (w *Widget) delete() error {
 
 	db := database.GetDB()
-	var dab dashboard.Dashboard
-	err := dab.ByID(w.DashboardID)
+	var dab database.Dashboard
+	err := db.Find(&dab, uint(w.DashboardID)).Error
 	if err != nil {
 		return err
 	}
@@ -104,5 +103,28 @@ func (w *Widget) delete() error {
 	// Delete Widget
 	err = db.Delete(w).Error
 
+	return err
+}
+
+func (w *Widget) Duplicate(dashboardID uint, signalMap map[uint]uint) error {
+	var duplicateW Widget
+	duplicateW.DashboardID = dashboardID
+	duplicateW.CustomProperties = w.CustomProperties
+	duplicateW.Height = w.Height
+	duplicateW.Width = w.Width
+	duplicateW.MinHeight = w.MinHeight
+	duplicateW.MinWidth = w.MinWidth
+	duplicateW.Name = w.Name
+	duplicateW.Type = w.Type
+	duplicateW.X = w.X
+	duplicateW.Y = w.Y
+	duplicateW.Z = w.Z
+
+	duplicateW.SignalIDs = []int64{}
+	for _, id := range w.SignalIDs {
+		duplicateW.SignalIDs = append(duplicateW.SignalIDs, int64(signalMap[uint(id)]))
+	}
+
+	err := duplicateW.addToDashboard()
 	return err
 }

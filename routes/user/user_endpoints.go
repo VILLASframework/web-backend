@@ -179,7 +179,7 @@ func updateUser(c *gin.Context) {
 
 	// Find the user
 	var oldUser User
-	err = oldUser.ByID(uint(toBeUpdatedID))
+	err = oldUser.byID(uint(toBeUpdatedID))
 	if helper.DBError(c, err) {
 		return
 	}
@@ -242,7 +242,7 @@ func getUser(c *gin.Context) {
 	}
 
 	var user User
-	err = user.ByID(uint(id))
+	err = user.byID(uint(id))
 	if !helper.DBError(c, err) {
 		c.JSON(http.StatusOK, gin.H{"user": user.User})
 	}
@@ -276,7 +276,7 @@ func deleteUser(c *gin.Context) {
 	}
 
 	// Check that the user exist
-	err = user.ByID(uint(id))
+	err = user.byID(uint(id))
 	if helper.DBError(c, err) {
 		return
 	}

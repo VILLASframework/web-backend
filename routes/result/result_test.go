@@ -70,10 +70,10 @@ var newResult = ResultRequest{
 func addScenario() (scenarioID uint) {
 
 	// authenticate as admin
-	token, _ := helper.AuthenticateForTest(router, helper.AdminCredentials)
+	token, _ := helper.AuthenticateForTest(router, database.AdminCredentials)
 
 	// authenticate as normal user
-	token, _ = helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, _ = helper.AuthenticateForTest(router, database.UserACredentials)
 
 	// POST $newScenario
 	newScenario := ScenarioRequest{
@@ -123,14 +123,14 @@ func TestGetAllResultsOfScenario(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.AddTestUsers())
+	assert.NoError(t, database.AddTestUsers())
 
 	// prepare the content of the DB for testing
 	// by adding a scenario
 	scenarioID := addScenario()
 
 	// authenticate as normal user
-	token, err := helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err := helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	// test POST newResult
@@ -152,7 +152,7 @@ func TestGetAllResultsOfScenario(t *testing.T) {
 	assert.Equal(t, 1, NumberOfConfigs)
 
 	// authenticate as normal userB who has no access to scenario
-	token, err = helper.AuthenticateForTest(router, helper.UserBCredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserBCredentials)
 	assert.NoError(t, err)
 
 	// try to get results without access
@@ -168,7 +168,7 @@ func TestAddGetUpdateDeleteResult(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.AddTestUsers())
+	assert.NoError(t, database.AddTestUsers())
 
 	// prepare the content of the DB for testing
 	// by adding a scenario
@@ -178,7 +178,7 @@ func TestAddGetUpdateDeleteResult(t *testing.T) {
 	newResult.ScenarioID = scenarioID
 	newResult.ConfigSnapshots = confSnapshots
 	// authenticate as normal userB who has no access to new scenario
-	token, err := helper.AuthenticateForTest(router, helper.UserBCredentials)
+	token, err := helper.AuthenticateForTest(router, database.UserBCredentials)
 	assert.NoError(t, err)
 
 	// try to POST with no access
@@ -189,7 +189,7 @@ func TestAddGetUpdateDeleteResult(t *testing.T) {
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// authenticate as normal user
-	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	// try to POST non JSON body
@@ -234,7 +234,7 @@ func TestAddGetUpdateDeleteResult(t *testing.T) {
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// authenticate as normal userB who has no access to new scenario
-	token, err = helper.AuthenticateForTest(router, helper.UserBCredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserBCredentials)
 	assert.NoError(t, err)
 
 	// Try to GET the newResult with no access
@@ -259,7 +259,7 @@ func TestAddGetUpdateDeleteResult(t *testing.T) {
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// authenticate as guest user who has access to result
-	token, err = helper.AuthenticateForTest(router, helper.GuestCredentials)
+	token, err = helper.AuthenticateForTest(router, database.GuestCredentials)
 	assert.NoError(t, err)
 
 	// try to PUT as guest
@@ -270,7 +270,7 @@ func TestAddGetUpdateDeleteResult(t *testing.T) {
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// authenticate as normal user
-	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	// try to PUT a non JSON body
@@ -300,7 +300,7 @@ func TestAddGetUpdateDeleteResult(t *testing.T) {
 	newResult.Description = updatedResult.Description
 
 	// authenticate as normal userB who has no access to new scenario
-	token, err = helper.AuthenticateForTest(router, helper.UserBCredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserBCredentials)
 	assert.NoError(t, err)
 
 	// try to DELETE with no access
@@ -311,7 +311,7 @@ func TestAddGetUpdateDeleteResult(t *testing.T) {
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// authenticate as normal user
-	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	// Count the number of all the results returned for scenario
@@ -341,7 +341,7 @@ func TestAddGetUpdateDeleteResult(t *testing.T) {
 func TestAddDeleteResultFile(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.AddTestUsers())
+	assert.NoError(t, database.AddTestUsers())
 
 	// prepare the content of the DB for testing
 	// by adding a scenario
@@ -352,7 +352,7 @@ func TestAddDeleteResultFile(t *testing.T) {
 	newResult.ScenarioID = scenarioID
 	newResult.ConfigSnapshots = confSnapshots
 	// authenticate as normal user
-	token, err := helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err := helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	// test POST newResult

@@ -23,6 +23,7 @@ package user
 
 import (
 	"fmt"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/scenario"
 	"log"
 	"net/http"
 	"strings"
@@ -69,7 +70,7 @@ func authenticated(c *gin.Context) {
 		userID, _ := c.Get(database.UserIDCtx)
 
 		var user User
-		err := user.ByID(userID.(uint))
+		err := user.byID(userID.(uint))
 		if helper.DBError(c, err) {
 			return
 		}
@@ -205,7 +206,7 @@ func authenticateInternal(c *gin.Context) (User, error) {
 	}
 
 	// Find the username in the database
-	err := myUser.ByUsername(credentials.Username)
+	err := myUser.byUsername(credentials.Username)
 	if err != nil {
 		helper.UnauthorizedError(c, "Unknown username")
 		return myUser, err
@@ -239,7 +240,7 @@ func authenticateExternal(c *gin.Context) (User, error) {
 	// preferred_username := c.Request.Header.Get("X-Forwarded-Preferred-Username")
 
 	// check if user already exists
-	err := myUser.ByUsername(username)
+	err := myUser.byUsername(username)
 
 	if err != nil {
 		// this is the first login, create new user
@@ -262,7 +263,7 @@ func authenticateExternal(c *gin.Context) (User, error) {
 	for _, group := range groups {
 		if groupedArr, ok := configuration.ScenarioGroupMap[group]; ok {
 			for _, groupedScenario := range groupedArr {
-				var so database.Scenario
+				var so scenario.Scenario
 				err := db.Find(&so, groupedScenario.Scenario).Error
 				if err != nil {
 					log.Printf(`Cannot find scenario %s (id=%d) for adding/duplication.
@@ -278,9 +279,11 @@ func authenticateExternal(c *gin.Context) (User, error) {
 				}
 
 				if groupedScenario.Duplicate {
-					if err := <-duplicateScenarioForUser(&so, &myUser.User); err != nil {
+
+					if err := <-so.DuplicateScenarioForUser(&myUser.User); err != nil {
 						return User{}, err
 					}
+
 				} else { // add user to scenario
 					err = db.Model(&so).Association("Users").Append(&(myUser.User)).Error
 					if err != nil {

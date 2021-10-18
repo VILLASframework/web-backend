@@ -24,8 +24,13 @@ package scenario
 import (
 	"fmt"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/user"
+	component_configuration "git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/component-configuration"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/dashboard"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/file"
+	infrastructure_component "git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/infrastructure-component"
 	"github.com/jinzhu/gorm"
+	"log"
+	"time"
 )
 
 type Scenario struct {
@@ -82,8 +87,8 @@ func (s *Scenario) addUser(u *database.User) error {
 func (s *Scenario) deleteUser(username string) error {
 	db := database.GetDB()
 
-	var deletedUser user.User
-	err := deletedUser.ByUsername(username)
+	var deletedUser database.User
+	err := db.Find(&deletedUser, "Username = ?", username).Error
 	if err != nil {
 		return err
 	}
@@ -92,18 +97,18 @@ func (s *Scenario) deleteUser(username string) error {
 
 	if no_users > 1 {
 		// remove user from scenario
-		err = db.Model(s).Association("Users").Delete(&deletedUser.User).Error
+		err = db.Model(s).Association("Users").Delete(&deletedUser).Error
 		if err != nil {
 			return err
 		}
 		// remove scenario from user
-		err = db.Model(&deletedUser.User).Association("Scenarios").Delete(s).Error
+		err = db.Model(&deletedUser).Association("Scenarios").Delete(s).Error
 		if err != nil {
 			return err
 		}
 	} else {
 		// There is only one associated user
-		var remainingUser user.User
+		var remainingUser database.User
 		err = db.Model(s).Related(&remainingUser, "Users").Error
 		if remainingUser.Username == username {
 			// if the remaining user is the one to be deleted
@@ -152,32 +157,160 @@ func (s *Scenario) delete() error {
 	return nil
 }
 
-func (s *Scenario) checkAccess(userID uint, operation database.CRUD) bool {
+func (s *Scenario) DuplicateScenarioForUser(user *database.User) <-chan error {
+	errs := make(chan error, 1)
+
+	go func() {
+
+		// get all component configs of the scenario
+		db := database.GetDB()
+		var configs []database.ComponentConfiguration
+		err := db.Order("ID asc").Model(s).Related(&configs, "ComponentConfigurations").Error
+		if err != nil {
+			log.Printf("Warning: scenario to duplicate (id=%d) has no component configurations", s.ID)
+		}
+
+		// iterate over component configs to check for ICs to duplicate
+		duplicatedICuuids := make(map[uint]string) // key: original icID; value: UUID of duplicate
+		var externalUUIDs []string                 // external ICs to wait for
+		for _, config := range configs {
+			icID := config.ICID
+			if duplicatedICuuids[icID] != "" { // this IC was already added
+				continue
+			}
+
+			var ic infrastructure_component.InfrastructureComponent
+			err = ic.ByID(icID)
+
+			if err != nil {
+				errs <- fmt.Errorf("Cannot find IC with id %d in DB, will not duplicate for User %s: %s", icID, user.Username, err)
+				continue
+			}
+
+			// create new kubernetes simulator OR use existing IC
+			if ic.Category == "simulator" && ic.Type == "kubernetes" {
+				duplicateUUID, err := ic.RequestICcreateAMQPsimpleManager(user.Username)
+				if err != nil {
+					errs <- fmt.Errorf("Duplication of IC (id=%d) unsuccessful, err: %s", icID, err)
+					continue
+				}
+
+				duplicatedICuuids[ic.ID] = duplicateUUID
+				externalUUIDs = append(externalUUIDs, duplicateUUID)
+			} else { // use existing IC
+				duplicatedICuuids[ic.ID] = ""
+				err = nil
+			}
+		}
+
+		// copy scenario after all new external ICs are in DB
+		icsToWaitFor := len(externalUUIDs)
+		//var duplicatedScenario database.Scenario
+		var timeout = 20 // seconds
+
+		for i := 0; i < timeout; i++ {
+			// duplicate scenario after all duplicated ICs have been found in the DB
+			if icsToWaitFor == 0 {
+				err := s.duplicateScenario(duplicatedICuuids, user)
+				if err != nil {
+					errs <- fmt.Errorf("duplicate scenario %v fails with error %v", s.Name, err.Error())
+				}
+
+				close(errs)
+				return
+			} else {
+				time.Sleep(1 * time.Second)
+			}
+
+			// check for new ICs with previously created UUIDs
+			for _, uuid := range externalUUIDs {
+				if uuid == "" {
+					continue
+				}
+				log.Printf("Looking for duplicated IC with UUID %s", uuid)
+				var duplicatedIC database.InfrastructureComponent
+				err = db.Find(&duplicatedIC, "UUID = ?", uuid).Error
+				if err != nil {
+					errs <- fmt.Errorf("Error looking up duplicated IC: %s", err)
+				} else {
+					icsToWaitFor--
+					uuid = ""
+				}
+			}
+		}
+
+		errs <- fmt.Errorf("ALERT! Timed out while waiting for IC duplication, scenario not properly duplicated")
+		close(errs)
+
+	}()
+
+	return errs
+}
+
+func (s *Scenario) duplicateScenario(icIds map[uint]string, user *database.User) error {
 
 	db := database.GetDB()
-	u := database.User{}
 
-	err := db.Find(&u, userID).Error
+	var duplicateSo Scenario
+	duplicateSo.Name = s.Name + ` ` + user.Username
+	duplicateSo.StartParameters.RawMessage = s.StartParameters.RawMessage
+	err := duplicateSo.save()
 	if err != nil {
-		return false
+		log.Printf("Could not create duplicate of scenario %d", s.ID)
+		return err
 	}
 
-	if u.Role == "Admin" {
-		return true
-	}
-
-	scenarioUser := database.User{}
-	err = db.Order("ID asc").Model(s).Where("ID = ?", userID).Related(&scenarioUser, "Users").Error
+	// associate user to new scenario
+	err = duplicateSo.addUser(user)
 	if err != nil {
-		return false
+		log.Printf("Could not associate User %s to scenario %d", user.Username, duplicateSo.ID)
+	}
+	log.Println("Associated user to duplicated scenario")
+
+	// duplicate files
+	var files []file.File
+	err = db.Order("ID asc").Model(s).Related(&files, "Files").Error
+	if err != nil {
+		log.Printf("error getting files for scenario %d", s.ID)
+	}
+	for _, f := range files {
+		err = f.Duplicate(duplicateSo.ID)
+		if err != nil {
+			log.Print("error creating duplicate file %d: %s", f.ID, err)
+			continue
+		}
 	}
 
-	if !scenarioUser.Active {
-		return false
-	} else if s.IsLocked && operation != database.Read {
-		return false
+	var configs []component_configuration.ComponentConfiguration
+	// map existing signal IDs to duplicated signal IDs for widget duplication
+	signalMap := make(map[uint]uint)
+	err = db.Order("ID asc").Model(s).Related(&configs, "ComponentConfigurations").Error
+	if err == nil {
+		for _, c := range configs {
+			err = c.Duplicate(duplicateSo.ID, icIds, &signalMap)
+			//err = duplicateComponentConfig(&c, duplicateSo, icIds, userName, &signalMap)
+			if err != nil {
+				log.Printf("Error duplicating component config %d: %s", c.ID, err)
+				continue
+			}
+		}
 	} else {
-		return true
+		return err
 	}
 
+	var dabs []dashboard.Dashboard
+	err = db.Order("ID asc").Model(s).Related(&dabs, "Dashboards").Error
+	if err != nil {
+		log.Printf("Error getting dashboards for scenario %d: %s", s.ID, err)
+	}
+
+	for _, dab := range dabs {
+		err = dab.Duplicate(duplicateSo.ID, signalMap)
+		if err != nil {
+			log.Printf("Error duplicating dashboard %d: %s", dab.ID, err)
+			continue
+		}
+	}
+
+	return err
 }

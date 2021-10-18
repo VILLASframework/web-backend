@@ -23,7 +23,7 @@ package component_configuration
 
 import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/scenario"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/signal"
 	"log"
 )
 
@@ -48,8 +48,8 @@ func (m *ComponentConfiguration) ByID(id uint) error {
 
 func (m *ComponentConfiguration) addToScenario() error {
 	db := database.GetDB()
-	var so scenario.Scenario
-	err := so.ByID(m.ScenarioID)
+	var so database.Scenario
+	err := db.Find(&so, m.ScenarioID).Error
 	if err != nil {
 		return err
 	}
@@ -119,8 +119,8 @@ func (m *ComponentConfiguration) Update(modifiedConfig ComponentConfiguration) e
 func (m *ComponentConfiguration) delete() error {
 
 	db := database.GetDB()
-	var so scenario.Scenario
-	err := so.ByID(m.ScenarioID)
+	var so database.Scenario
+	err := db.Find(&so, m.ScenarioID).Error
 	if err != nil {
 		return err
 	}
@@ -181,6 +181,56 @@ func (m *ComponentConfiguration) delete() error {
 		log.Println("Deleting IC with state gone, last component config deleted", ic.UUID)
 		err = db.Delete(ic).Error
 		return err
+	}
+
+	return nil
+}
+
+func (m *ComponentConfiguration) Duplicate(scenarioID uint, icIds map[uint]string, signalMap *map[uint]uint) error {
+
+	db := database.GetDB()
+
+	var dup ComponentConfiguration
+	dup.Name = m.Name
+	dup.StartParameters = m.StartParameters
+	dup.ScenarioID = scenarioID
+
+	if icIds[m.ICID] == "" {
+		dup.ICID = m.ICID
+	} else {
+		var duplicatedIC database.InfrastructureComponent
+		err := db.Find(&duplicatedIC, "UUID = ?", icIds[m.ICID]).Error
+		if err != nil {
+			log.Print(err)
+			return err
+		}
+		dup.ICID = duplicatedIC.ID
+	}
+
+	// save duplicate to DB and create associations with IC and scenario
+	err := dup.addToScenario()
+	if err != nil {
+		return err
+	}
+
+	// duplication of signals
+	var sigs []signal.Signal
+	err = db.Order("ID asc").Model(&m).Related(&sigs, "OutputMapping").Error
+	smap := *signalMap
+	for _, s := range sigs {
+		var sigDup signal.Signal
+		sigDup.Direction = s.Direction
+		sigDup.Index = s.Index
+		sigDup.Name = s.Name // + ` ` + userName
+		sigDup.ScalingFactor = s.ScalingFactor
+		sigDup.Unit = s.Unit
+		sigDup.ConfigID = dup.ID
+		err = sigDup.AddToConfig()
+		if err != nil {
+			return err
+		}
+
+		smap[s.ID] = sigDup.ID
 	}
 
 	return nil

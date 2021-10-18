@@ -26,7 +26,6 @@ import (
 	"net/http"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/scenario"
 	"github.com/gin-gonic/gin"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
@@ -54,7 +53,7 @@ func RegisterFileEndpoints(r *gin.RouterGroup) {
 // @Security Bearer
 func getFiles(c *gin.Context) {
 
-	ok, so := scenario.CheckPermissions(c, database.Read, "query", -1)
+	ok, so := database.CheckScenarioPermissions(c, database.Read, "query", -1)
 	if !ok {
 		return
 	}
@@ -92,7 +91,7 @@ func getFiles(c *gin.Context) {
 // @Security Bearer
 func addFile(c *gin.Context) {
 
-	ok, so := scenario.CheckPermissions(c, database.Read, "query", -1)
+	ok, so := database.CheckScenarioPermissions(c, database.Read, "query", -1)
 	if !ok {
 		return
 	}
@@ -142,10 +141,13 @@ func addFile(c *gin.Context) {
 func getFile(c *gin.Context) {
 
 	// check access
-	ok, f := CheckPermissions(c, database.Read)
+	ok, f_r := database.CheckFilePermissions(c, database.Read)
 	if !ok {
 		return
 	}
+
+	var f File
+	f.File = f_r
 
 	err := f.download(c)
 	helper.DBError(c, err)
@@ -175,10 +177,13 @@ func getFile(c *gin.Context) {
 func updateFile(c *gin.Context) {
 
 	// check access
-	ok, f := CheckPermissions(c, database.Update)
+	ok, f_r := database.CheckFilePermissions(c, database.Update)
 	if !ok {
 		return
 	}
+
+	var f File
+	f.File = f_r
 
 	// Extract file from PUT request form
 	fileHeader, err := c.FormFile("file")
@@ -209,10 +214,13 @@ func updateFile(c *gin.Context) {
 func deleteFile(c *gin.Context) {
 
 	// check access
-	ok, f := CheckPermissions(c, database.Delete)
+	ok, f_r := database.CheckFilePermissions(c, database.Delete)
 	if !ok {
 		return
 	}
+
+	var f File
+	f.File = f_r
 
 	err := f.Delete()
 	if !helper.DBError(c, err) {

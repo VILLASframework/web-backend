@@ -148,10 +148,10 @@ func TestMain(m *testing.M) {
 func TestAddICAsAdmin(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.AddTestUsers())
+	assert.NoError(t, database.AddTestUsers())
 
 	// authenticate as admin
-	token, err := helper.AuthenticateForTest(router, helper.AdminCredentials)
+	token, err := helper.AuthenticateForTest(router, database.AdminCredentials)
 	assert.NoError(t, err)
 
 	// try to POST with non JSON body
@@ -213,10 +213,10 @@ func TestAddICAsAdmin(t *testing.T) {
 func TestAddICAsUser(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.AddTestUsers())
+	assert.NoError(t, database.AddTestUsers())
 
 	// authenticate as user
-	token, err := helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err := helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	// test POST ic/ $newIC
@@ -232,10 +232,10 @@ func TestAddICAsUser(t *testing.T) {
 func TestUpdateICAsAdmin(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.AddTestUsers())
+	assert.NoError(t, database.AddTestUsers())
 
 	// authenticate as admin
-	token, err := helper.AuthenticateForTest(router, helper.AdminCredentials)
+	token, err := helper.AuthenticateForTest(router, database.AdminCredentials)
 	assert.NoError(t, err)
 
 	// test POST ic/ $newIC
@@ -321,10 +321,10 @@ func TestUpdateICAsAdmin(t *testing.T) {
 func TestUpdateICAsUser(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.AddTestUsers())
+	assert.NoError(t, database.AddTestUsers())
 
 	// authenticate as admin
-	token, err := helper.AuthenticateForTest(router, helper.AdminCredentials)
+	token, err := helper.AuthenticateForTest(router, database.AdminCredentials)
 	assert.NoError(t, err)
 
 	// test POST ic/ $newIC
@@ -338,7 +338,7 @@ func TestUpdateICAsUser(t *testing.T) {
 	assert.NoError(t, err)
 
 	// authenticate as user
-	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	// Test PUT IC
@@ -354,10 +354,10 @@ func TestUpdateICAsUser(t *testing.T) {
 func TestDeleteICAsAdmin(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.AddTestUsers())
+	assert.NoError(t, database.AddTestUsers())
 
 	// authenticate as admin
-	token, err := helper.AuthenticateForTest(router, helper.AdminCredentials)
+	token, err := helper.AuthenticateForTest(router, database.AdminCredentials)
 	assert.NoError(t, err)
 
 	// test POST ic/ $newIC
@@ -431,10 +431,10 @@ func TestDeleteICAsAdmin(t *testing.T) {
 func TestDeleteICAsUser(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.AddTestUsers())
+	assert.NoError(t, database.AddTestUsers())
 
 	// authenticate as admin
-	token, err := helper.AuthenticateForTest(router, helper.AdminCredentials)
+	token, err := helper.AuthenticateForTest(router, database.AdminCredentials)
 	assert.NoError(t, err)
 
 	// test POST ic/ $newIC
@@ -448,7 +448,7 @@ func TestDeleteICAsUser(t *testing.T) {
 	assert.NoError(t, err)
 
 	// authenticate as user
-	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	// Test DELETE ICs
@@ -463,10 +463,10 @@ func TestDeleteICAsUser(t *testing.T) {
 func TestGetAllICs(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.AddTestUsers())
+	assert.NoError(t, database.AddTestUsers())
 
 	// authenticate as admin
-	token, err := helper.AuthenticateForTest(router, helper.AdminCredentials)
+	token, err := helper.AuthenticateForTest(router, database.AdminCredentials)
 	assert.NoError(t, err)
 
 	// get the length of the GET all ICs response for user
@@ -495,7 +495,7 @@ func TestGetAllICs(t *testing.T) {
 	assert.Equal(t, finalNumber, initialNumber+2)
 
 	// authenticate as normal user
-	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	// get the length of the GET all ICs response again
@@ -509,10 +509,10 @@ func TestGetAllICs(t *testing.T) {
 func TestGetConfigsOfIC(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.AddTestUsers())
+	assert.NoError(t, database.AddTestUsers())
 
 	// authenticate as admin
-	token, err := helper.AuthenticateForTest(router, helper.AdminCredentials)
+	token, err := helper.AuthenticateForTest(router, database.AdminCredentials)
 	assert.NoError(t, err)
 
 	// test POST ic/ $newICA
@@ -534,7 +534,7 @@ func TestGetConfigsOfIC(t *testing.T) {
 	assert.Equal(t, 0, numberOfConfigs)
 
 	// authenticate as normal user
-	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	// test GET ic/ID/configs
@@ -556,10 +556,10 @@ func TestGetConfigsOfIC(t *testing.T) {
 func TestSendActionToIC(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.AddTestUsers())
+	assert.NoError(t, database.AddTestUsers())
 
 	// authenticate as admin
-	token, err := helper.AuthenticateForTest(router, helper.AdminCredentials)
+	token, err := helper.AuthenticateForTest(router, database.AdminCredentials)
 	assert.NoError(t, err)
 
 	// test POST ic/ $newICA
@@ -605,10 +605,10 @@ func TestCreateUpdateViaAMQPRecv(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.AddTestUsers())
+	assert.NoError(t, database.AddTestUsers())
 
 	// authenticate as admin
-	token, err := helper.AuthenticateForTest(router, helper.AdminCredentials)
+	token, err := helper.AuthenticateForTest(router, database.AdminCredentials)
 	assert.NoError(t, err)
 
 	// fake an IC update message
@@ -679,10 +679,10 @@ func TestDeleteICViaAMQPRecv(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.AddTestUsers())
+	assert.NoError(t, database.AddTestUsers())
 
 	// authenticate as admin
-	token, err := helper.AuthenticateForTest(router, helper.AdminCredentials)
+	token, err := helper.AuthenticateForTest(router, database.AdminCredentials)
 	assert.NoError(t, err)
 
 	// fake an IC update message

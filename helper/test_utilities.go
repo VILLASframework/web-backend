@@ -25,10 +25,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"github.com/gin-gonic/gin"
 	"github.com/nsf/jsondiff"
-	"golang.org/x/crypto/bcrypt"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -41,28 +39,6 @@ type KeyModels map[string]interface{}
 // #################### User data used for testing #######################
 // #######################################################################
 
-// Credentials
-var StrPassword0 = "xyz789"
-var StrPasswordA = "abc123"
-var StrPasswordB = "bcd234"
-var StrPasswordC = "guestpw"
-
-// Hash passwords with bcrypt algorithm
-var bcryptCost = 10
-var pw0, _ = bcrypt.GenerateFromPassword([]byte(StrPassword0), bcryptCost)
-var pwA, _ = bcrypt.GenerateFromPassword([]byte(StrPasswordA), bcryptCost)
-var pwB, _ = bcrypt.GenerateFromPassword([]byte(StrPasswordB), bcryptCost)
-var pwC, _ = bcrypt.GenerateFromPassword([]byte(StrPasswordC), bcryptCost)
-
-var User0 = database.User{Username: "User_0", Password: string(pw0),
-	Role: "Admin", Mail: "User_0@example.com"}
-var UserA = database.User{Username: "User_A", Password: string(pwA),
-	Role: "User", Mail: "User_A@example.com", Active: true}
-var UserB = database.User{Username: "User_B", Password: string(pwB),
-	Role: "User", Mail: "User_B@example.com", Active: true}
-var UserC = database.User{Username: "User_C", Password: string(pwC),
-	Role: "Guest", Mail: "User_C@example.com", Active: true}
-
 type UserRequest struct {
 	Username    string `json:"username,omitempty"`
 	Password    string `json:"password,omitempty"`
@@ -70,31 +46,6 @@ type UserRequest struct {
 	Mail        string `json:"mail,omitempty"`
 	Role        string `json:"role,omitempty"`
 	Active      string `json:"active,omitempty"`
-}
-
-type Credentials struct {
-	Username string `json:"username,required"`
-	Password string `json:"password,required"`
-}
-
-var AdminCredentials = Credentials{
-	Username: User0.Username,
-	Password: StrPassword0,
-}
-
-var UserACredentials = Credentials{
-	Username: UserA.Username,
-	Password: StrPasswordA,
-}
-
-var UserBCredentials = Credentials{
-	Username: UserB.Username,
-	Password: StrPasswordB,
-}
-
-var GuestCredentials = Credentials{
-	Username: UserC.Username,
-	Password: StrPasswordC,
 }
 
 // ############################################################################
@@ -313,21 +264,4 @@ func AuthenticateForTest(router *gin.Engine, credentials interface{}) (string, e
 
 	// Return the token and nil error
 	return token, nil
-}
-
-// add test users defined above
-func AddTestUsers() error {
-
-	testUsers := []database.User{User0, UserA, UserB, UserC}
-	database.DBpool.AutoMigrate(&database.User{})
-
-	for _, user := range testUsers {
-		err := database.DBpool.Create(&user).Error
-		if err != nil {
-			return err
-		}
-
-	}
-
-	return nil
 }

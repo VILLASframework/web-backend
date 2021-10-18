@@ -88,7 +88,7 @@ func TestAuthenticate(t *testing.T) {
 	router.ServeHTTP(w1, req)
 	assert.Equalf(t, 401, w1.Code, "Response body: \n%v\n", w1.Body)
 
-	malformedCredentials := helper.Credentials{
+	malformedCredentials := database.Credentials{
 		Username: "TEST1",
 	}
 	// try to authenticate with malformed credentials
@@ -126,7 +126,7 @@ func TestAuthenticate(t *testing.T) {
 	assert.Equal(t, 401, w4.Code, w4.Body)
 
 	// authenticate as admin
-	_, err = helper.AuthenticateForTest(router, helper.Credentials{Username: "admin", Password: adminpw})
+	_, err = helper.AuthenticateForTest(router, database.Credentials{Username: "admin", Password: adminpw})
 	assert.NoError(t, err)
 
 }
@@ -140,7 +140,7 @@ func TestUserGroups(t *testing.T) {
 	role := "User"
 	userGroups := strings.Split("testGroup1,testGroup2", ",")
 
-	err := myUser.ByUsername(username)
+	err := myUser.byUsername(username)
 	assert.Error(t, err)
 	myUser, err = NewUser(username, "", email, role, true)
 	assert.NoError(t, err)
@@ -176,7 +176,7 @@ func TestAuthenticateQueryToken(t *testing.T) {
 	assert.NoError(t, err)
 
 	// authenticate as admin
-	token, err := helper.AuthenticateForTest(router, helper.Credentials{Username: "admin", Password: adminpw})
+	token, err := helper.AuthenticateForTest(router, database.Credentials{Username: "admin", Password: adminpw})
 	assert.NoError(t, err)
 
 	w := httptest.NewRecorder()
@@ -197,7 +197,7 @@ func TestAddGetUser(t *testing.T) {
 	assert.NoError(t, err)
 
 	// authenticate as admin
-	token, err := helper.AuthenticateForTest(router, helper.Credentials{Username: "admin", Password: adminpw})
+	token, err := helper.AuthenticateForTest(router, database.Credentials{Username: "admin", Password: adminpw})
 	assert.NoError(t, err)
 
 	// try to POST with non JSON body
@@ -321,7 +321,7 @@ func TestUsersNotAllowedActions(t *testing.T) {
 	assert.NoError(t, err)
 
 	// authenticate as admin
-	token, err := helper.AuthenticateForTest(router, helper.Credentials{Username: "admin", Password: adminpw})
+	token, err := helper.AuthenticateForTest(router, database.Credentials{Username: "admin", Password: adminpw})
 	assert.NoError(t, err)
 
 	// Add a user
@@ -380,7 +380,7 @@ func TestGetAllUsers(t *testing.T) {
 	assert.NoError(t, err)
 
 	// authenticate as admin
-	token, err := helper.AuthenticateForTest(router, helper.Credentials{Username: "admin", Password: adminpw})
+	token, err := helper.AuthenticateForTest(router, database.Credentials{Username: "admin", Password: adminpw})
 	assert.NoError(t, err)
 
 	// get the length of the GET all users response
@@ -407,7 +407,7 @@ func TestGetAllUsers(t *testing.T) {
 
 	assert.Equal(t, finalNumber, initialNumber+1)
 
-	newUserCredentials := helper.Credentials{
+	newUserCredentials := database.Credentials{
 		Username: newUser.Username,
 		Password: newUser.Password,
 	}
@@ -433,7 +433,7 @@ func TestModifyAddedUserAsUser(t *testing.T) {
 	assert.NoError(t, err)
 
 	// authenticate as admin
-	token, err := helper.AuthenticateForTest(router, helper.Credentials{Username: "admin", Password: adminpw})
+	token, err := helper.AuthenticateForTest(router, database.Credentials{Username: "admin", Password: adminpw})
 	assert.NoError(t, err)
 
 	// Add a user that will modify itself
@@ -588,7 +588,7 @@ func TestInvalidUserUpdate(t *testing.T) {
 	assert.NoError(t, err)
 
 	// authenticate as admin
-	token, err := helper.AuthenticateForTest(router, helper.Credentials{Username: "admin", Password: adminpw})
+	token, err := helper.AuthenticateForTest(router, database.Credentials{Username: "admin", Password: adminpw})
 	assert.NoError(t, err)
 
 	// Add a user
@@ -661,7 +661,7 @@ func TestModifyAddedUserAsAdmin(t *testing.T) {
 	assert.NoError(t, err)
 
 	// authenticate as admin
-	token, err := helper.AuthenticateForTest(router, helper.Credentials{Username: "admin", Password: adminpw})
+	token, err := helper.AuthenticateForTest(router, database.Credentials{Username: "admin", Password: adminpw})
 	assert.NoError(t, err)
 
 	// Add a user
@@ -747,7 +747,7 @@ func TestModifyAddedUserAsAdmin(t *testing.T) {
 	assert.NoError(t, err)
 
 	// authenticate as admin
-	token, err = helper.AuthenticateForTest(router, helper.Credentials{Username: "admin", Password: adminpw})
+	token, err = helper.AuthenticateForTest(router, database.Credentials{Username: "admin", Password: adminpw})
 	assert.NoError(t, err)
 
 	// modify newUser's Active status
@@ -778,7 +778,7 @@ func TestDeleteUser(t *testing.T) {
 	assert.NoError(t, err)
 
 	// authenticate as admin
-	token, err := helper.AuthenticateForTest(router, helper.Credentials{Username: "admin", Password: adminpw})
+	token, err := helper.AuthenticateForTest(router, database.Credentials{Username: "admin", Password: adminpw})
 	assert.NoError(t, err)
 
 	// Add a user

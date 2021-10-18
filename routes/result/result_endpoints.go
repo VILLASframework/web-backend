@@ -29,7 +29,6 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/file"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/scenario"
 	"github.com/gin-gonic/gin"
 )
 
@@ -57,7 +56,7 @@ func RegisterResultEndpoints(r *gin.RouterGroup) {
 // @Security Bearer
 func getResults(c *gin.Context) {
 
-	ok, sco := scenario.CheckPermissions(c, database.Read, "query", -1)
+	ok, sco := database.CheckScenarioPermissions(c, database.Read, "query", -1)
 	if !ok {
 		return
 	}
@@ -103,7 +102,7 @@ func addResult(c *gin.Context) {
 	newResult := req.createResult()
 
 	// Check if user is allowed to modify scenario specified in request
-	ok, _ := scenario.CheckPermissions(c, database.Update, "body", int(newResult.ScenarioID))
+	ok, _ := database.CheckScenarioPermissions(c, database.Update, "body", int(newResult.ScenarioID))
 	if !ok {
 		return
 	}
@@ -133,10 +132,13 @@ func addResult(c *gin.Context) {
 // @Security Bearer
 func updateResult(c *gin.Context) {
 
-	ok, oldResult := checkPermissions(c, database.Update, "path", -1)
+	ok, oldResult_r := database.CheckResultPermissions(c, database.Update, "path", -1)
 	if !ok {
 		return
 	}
+
+	var oldResult Result
+	oldResult.Result = oldResult_r
 
 	var req updateResultRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -175,12 +177,12 @@ func updateResult(c *gin.Context) {
 // @Security Bearer
 func getResult(c *gin.Context) {
 
-	ok, result := checkPermissions(c, database.Read, "path", -1)
+	ok, result := database.CheckResultPermissions(c, database.Read, "path", -1)
 	if !ok {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"result": result.Result})
+	c.JSON(http.StatusOK, gin.H{"result": result})
 }
 
 // deleteResult godoc
@@ -197,13 +199,16 @@ func getResult(c *gin.Context) {
 // @Router /results/{resultID} [delete]
 // @Security Bearer
 func deleteResult(c *gin.Context) {
-	ok, result := checkPermissions(c, database.Delete, "path", -1)
+	ok, result_r := database.CheckResultPermissions(c, database.Delete, "path", -1)
 	if !ok {
 		return
 	}
 
+	var result Result
+	result.Result = result_r
+
 	// Check if user is allowed to modify scenario associated with result
-	ok, _ = scenario.CheckPermissions(c, database.Update, "body", int(result.ScenarioID))
+	ok, _ = database.CheckScenarioPermissions(c, database.Update, "body", int(result.ScenarioID))
 	if !ok {
 		return
 	}
@@ -240,13 +245,16 @@ func deleteResult(c *gin.Context) {
 // @Router /results/{resultID}/file [post]
 // @Security Bearer
 func addResultFile(c *gin.Context) {
-	ok, result := checkPermissions(c, database.Update, "path", -1)
+	ok, result_r := database.CheckResultPermissions(c, database.Update, "path", -1)
 	if !ok {
 		return
 	}
 
+	var result Result
+	result.Result = result_r
+
 	// Check if user is allowed to modify scenario associated with result
-	ok, sco := scenario.CheckPermissions(c, database.Update, "body", int(result.ScenarioID))
+	ok, sco := database.CheckScenarioPermissions(c, database.Update, "body", int(result.ScenarioID))
 	if !ok {
 		return
 	}
@@ -290,18 +298,24 @@ func addResultFile(c *gin.Context) {
 func deleteResultFile(c *gin.Context) {
 
 	// check access
-	ok, result := checkPermissions(c, database.Update, "path", -1)
+	ok, result_r := database.CheckResultPermissions(c, database.Update, "path", -1)
 	if !ok {
 		return
 	}
 
-	ok, f := file.CheckPermissions(c, database.Delete)
+	var result Result
+	result.Result = result_r
+
+	ok, f_r := database.CheckFilePermissions(c, database.Delete)
 	if !ok {
 		return
 	}
+
+	var f file.File
+	f.File = f_r
 
 	// Check if user is allowed to modify scenario associated with result
-	ok, _ = scenario.CheckPermissions(c, database.Update, "body", int(result.ScenarioID))
+	ok, _ = database.CheckScenarioPermissions(c, database.Update, "body", int(result.ScenarioID))
 	if !ok {
 		return
 	}

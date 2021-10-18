@@ -25,7 +25,6 @@ package result
 import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/file"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/scenario"
 	"log"
 )
 
@@ -50,8 +49,8 @@ func (r *Result) ByID(id uint) error {
 
 func (r *Result) addToScenario() error {
 	db := database.GetDB()
-	var sco scenario.Scenario
-	err := sco.ByID(r.ScenarioID)
+	var sco database.Scenario
+	err := db.Find(&sco, r.ScenarioID).Error
 	if err != nil {
 		return err
 	}
@@ -84,8 +83,8 @@ func (r *Result) update(modifiedResult Result) error {
 func (r *Result) delete() error {
 
 	db := database.GetDB()
-	var sco scenario.Scenario
-	err := sco.ByID(r.ScenarioID)
+	var sco database.Scenario
+	err := db.Find(&sco, r.ScenarioID).Error
 	if err != nil {
 		return err
 	}

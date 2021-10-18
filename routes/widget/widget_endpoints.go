@@ -29,7 +29,6 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/dashboard"
 )
 
 func RegisterWidgetEndpoints(r *gin.RouterGroup) {
@@ -54,7 +53,7 @@ func RegisterWidgetEndpoints(r *gin.RouterGroup) {
 // @Security Bearer
 func getWidgets(c *gin.Context) {
 
-	ok, dab := dashboard.CheckPermissions(c, database.Read, "query", -1)
+	ok, dab := database.CheckDashboardPermissions(c, database.Read, "query", -1)
 	if !ok {
 		return
 	}
@@ -100,7 +99,7 @@ func addWidget(c *gin.Context) {
 	newWidget := req.createWidget()
 
 	// Check if user is allowed to modify selected dashboard (scenario)
-	ok, _ := dashboard.CheckPermissions(c, database.Update, "body", int(newWidget.DashboardID))
+	ok, _ := database.CheckDashboardPermissions(c, database.Update, "body", int(newWidget.DashboardID))
 	if !ok {
 		return
 	}
@@ -129,10 +128,13 @@ func addWidget(c *gin.Context) {
 // @Security Bearer
 func updateWidget(c *gin.Context) {
 
-	ok, oldWidget := CheckPermissions(c, database.Update, -1)
+	ok, oldWidget_r := database.CheckWidgetPermissions(c, database.Update, -1)
 	if !ok {
 		return
 	}
+
+	var oldWidget Widget
+	oldWidget.Widget = oldWidget_r
 
 	var req updateWidgetRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -172,12 +174,12 @@ func updateWidget(c *gin.Context) {
 // @Security Bearer
 func getWidget(c *gin.Context) {
 
-	ok, w := CheckPermissions(c, database.Read, -1)
+	ok, w := database.CheckWidgetPermissions(c, database.Read, -1)
 	if !ok {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"widget": w.Widget})
+	c.JSON(http.StatusOK, gin.H{"widget": w})
 }
 
 // deleteWidget godoc
@@ -195,10 +197,13 @@ func getWidget(c *gin.Context) {
 // @Security Bearer
 func deleteWidget(c *gin.Context) {
 
-	ok, w := CheckPermissions(c, database.Delete, -1)
+	ok, w_r := database.CheckWidgetPermissions(c, database.Delete, -1)
 	if !ok {
 		return
 	}
+
+	var w Widget
+	w.Widget = w_r
 
 	err := w.delete()
 	if !helper.DBError(c, err) {

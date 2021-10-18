@@ -151,7 +151,7 @@ func AddTestData(cfg *config.Config, router *gin.Engine) (*bytes.Buffer, error) 
 		return nil, nil
 	}
 
-	var Admin = helper.Credentials{
+	var Admin = database.Credentials{
 		Username: adminName,
 		Password: adminPW,
 	}

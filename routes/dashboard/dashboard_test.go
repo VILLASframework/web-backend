@@ -107,10 +107,10 @@ func TestMain(m *testing.M) {
 func TestAddDashboard(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.AddTestUsers())
+	assert.NoError(t, database.AddTestUsers())
 
 	// authenticate as normal user
-	token, err := helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err := helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	scenarioID := addScenario(token)
@@ -166,7 +166,7 @@ func TestAddDashboard(t *testing.T) {
 	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
 
 	// try to get dashboard as a user that is not in the scenario (userB)
-	token, err = helper.AuthenticateForTest(router, helper.UserBCredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserBCredentials)
 	assert.NoError(t, err)
 
 	// this should fail with unprocessable entity
@@ -187,10 +187,10 @@ func TestAddDashboard(t *testing.T) {
 func TestUpdateDashboard(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.AddTestUsers())
+	assert.NoError(t, database.AddTestUsers())
 
 	// authenticate as normal user
-	token, err := helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err := helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	scenarioID := addScenario(token)
@@ -212,7 +212,7 @@ func TestUpdateDashboard(t *testing.T) {
 	}
 
 	// authenticate as guest user
-	token, err = helper.AuthenticateForTest(router, helper.GuestCredentials)
+	token, err = helper.AuthenticateForTest(router, database.GuestCredentials)
 	assert.NoError(t, err)
 
 	// try to update a dashboard as guest
@@ -223,7 +223,7 @@ func TestUpdateDashboard(t *testing.T) {
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// authenticate as normal user
-	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	code, resp, err = helper.TestEndpoint(router, token,
@@ -261,10 +261,10 @@ func TestUpdateDashboard(t *testing.T) {
 func TestDeleteDashboard(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.AddTestUsers())
+	assert.NoError(t, database.AddTestUsers())
 
 	// authenticate as normal user
-	token, err := helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err := helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	scenarioID := addScenario(token)
@@ -281,7 +281,7 @@ func TestDeleteDashboard(t *testing.T) {
 	assert.NoError(t, err)
 
 	// try to delete a dashboard from a scenario to which the user has no access
-	token, err = helper.AuthenticateForTest(router, helper.UserBCredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserBCredentials)
 	assert.NoError(t, err)
 
 	// this should fail with unprocessable entity
@@ -291,7 +291,7 @@ func TestDeleteDashboard(t *testing.T) {
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// authenticate as normal user
-	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	// try to delete a dashboard that does not exist; should return a not found error
@@ -327,10 +327,10 @@ func TestDeleteDashboard(t *testing.T) {
 func TestGetAllDashboardsOfScenario(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.AddTestUsers())
+	assert.NoError(t, database.AddTestUsers())
 
 	// authenticate as normal user
-	token, err := helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err := helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	scenarioID := addScenario(token)
@@ -372,7 +372,7 @@ func TestGetAllDashboardsOfScenario(t *testing.T) {
 	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
 
 	// try to get all dashboards as a user that does not belong to scenario
-	token, err = helper.AuthenticateForTest(router, helper.UserBCredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserBCredentials)
 	assert.NoError(t, err)
 
 	// this should fail with unprocessable entity
