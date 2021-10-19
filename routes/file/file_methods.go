@@ -167,10 +167,9 @@ func (f *File) update(fileHeader *multipart.FileHeader) error {
 	defer fileContent.Close()
 
 	bucket, err := configuration.GlobalConfig.String("s3.bucket")
-	if err != nil {
-		return err
-	}
-	if bucket == "" {
+	if err != nil || bucket == "" {
+		// s3 object storage not used, s3.bucket param is empty
+		// save file to postgres DB
 		f.FileData, err = ioutil.ReadAll(fileContent)
 		if err != nil {
 			return err
