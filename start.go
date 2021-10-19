@@ -135,7 +135,7 @@ func main() {
 	}
 
 	// Make sure that at least one admin user exists in DB
-	_, err = database.DBAddAdminUser(configuration.GlobalConfig)
+	_, err = database.AddAdminUser(configuration.GlobalConfig)
 	if err != nil {
 		fmt.Println("error: adding admin user failed:", err.Error())
 		log.Fatal(err)

@@ -75,7 +75,7 @@ func TestMain(m *testing.M) {
 func TestAuthenticate(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	adminpw, err := database.DBAddAdminUser(configuration.GlobalConfig)
+	adminpw, err := database.AddAdminUser(configuration.GlobalConfig)
 	assert.NoError(t, err)
 
 	// try to authenticate with non JSON body
@@ -172,7 +172,7 @@ func TestAuthenticateQueryToken(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	adminpw, err := database.DBAddAdminUser(configuration.GlobalConfig)
+	adminpw, err := database.AddAdminUser(configuration.GlobalConfig)
 	assert.NoError(t, err)
 
 	// authenticate as admin
@@ -193,7 +193,7 @@ func TestAddGetUser(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	adminpw, err := database.DBAddAdminUser(configuration.GlobalConfig)
+	adminpw, err := database.AddAdminUser(configuration.GlobalConfig)
 	assert.NoError(t, err)
 
 	// authenticate as admin
@@ -317,7 +317,7 @@ func TestUsersNotAllowedActions(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	adminpw, err := database.DBAddAdminUser(configuration.GlobalConfig)
+	adminpw, err := database.AddAdminUser(configuration.GlobalConfig)
 	assert.NoError(t, err)
 
 	// authenticate as admin
@@ -376,7 +376,7 @@ func TestGetAllUsers(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	adminpw, err := database.DBAddAdminUser(configuration.GlobalConfig)
+	adminpw, err := database.AddAdminUser(configuration.GlobalConfig)
 	assert.NoError(t, err)
 
 	// authenticate as admin
@@ -429,7 +429,7 @@ func TestModifyAddedUserAsUser(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	adminpw, err := database.DBAddAdminUser(configuration.GlobalConfig)
+	adminpw, err := database.AddAdminUser(configuration.GlobalConfig)
 	assert.NoError(t, err)
 
 	// authenticate as admin
@@ -584,7 +584,7 @@ func TestInvalidUserUpdate(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	adminpw, err := database.DBAddAdminUser(configuration.GlobalConfig)
+	adminpw, err := database.AddAdminUser(configuration.GlobalConfig)
 	assert.NoError(t, err)
 
 	// authenticate as admin
@@ -656,7 +656,7 @@ func TestModifyAddedUserAsAdmin(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	adminpw, err := database.DBAddAdminUser(configuration.GlobalConfig)
+	adminpw, err := database.AddAdminUser(configuration.GlobalConfig)
 	assert.NoError(t, err)
 
 	// authenticate as admin
@@ -773,7 +773,7 @@ func TestDeleteUser(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	adminpw, err := database.DBAddAdminUser(configuration.GlobalConfig)
+	adminpw, err := database.AddAdminUser(configuration.GlobalConfig)
 	assert.NoError(t, err)
 
 	// authenticate as admin
