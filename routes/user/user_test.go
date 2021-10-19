@@ -650,7 +650,6 @@ func TestInvalidUserUpdate(t *testing.T) {
 		helper.KeyModels{"user": modRequest})
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
-
 }
 
 func TestModifyAddedUserAsAdmin(t *testing.T) {

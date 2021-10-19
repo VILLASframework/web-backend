@@ -126,17 +126,14 @@ func DBAddAdminUser(cfg *config.Config) (string, error) {
 
 	// Check if admin user exists in DB
 	var users []User
-	err := DBpool.Where("Role = ?", "Admin").Find(&users).Error
-	if err != nil {
-		return "", err
-	}
+	DBpool.Where("Role = ?", "Admin").Find(&users)
+
 	adminPW := ""
-	adminName := ""
 
 	if len(users) == 0 {
 		fmt.Println("No admin user found in DB, adding default admin user.")
 
-		adminName, err = cfg.String("admin.user")
+		adminName, err := cfg.String("admin.user")
 		if err != nil || adminName == "" {
 			adminName = "admin"
 		}

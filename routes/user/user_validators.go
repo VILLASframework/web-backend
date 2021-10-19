@@ -100,7 +100,7 @@ func (r *updateUserRequest) updatedUser(callerID interface{}, role interface{}, 
 	// Update the username making sure it is NOT taken
 	var testUser User
 	if err := testUser.ByUsername(r.User.Username); err == nil {
-		return u, fmt.Errorf("username is alreaday taken")
+		return u, fmt.Errorf("username is already taken")
 	}
 
 	if r.User.Username != "" {
