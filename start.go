@@ -115,14 +115,14 @@ func main() {
 	routes.RegisterEndpoints(r, api)
 
 	// Start AMQP client
-	AMQPhost, _ := configuration.GlobalConfig.String("amqp.host")
-	AMQPuser, _ := configuration.GlobalConfig.String("amqp.user")
-	AMQPpass, _ := configuration.GlobalConfig.String("amqp.pass")
+	amqpHost, _ := configuration.GlobalConfig.String("amqp.host")
+	amqpUser, _ := configuration.GlobalConfig.String("amqp.user")
+	amqpPass, _ := configuration.GlobalConfig.String("amqp.pass")
 
-	if AMQPhost != "" {
+	if amqpHost != "" {
 		// create amqp URL based on username, password and host
-		amqpurl := "amqp://" + AMQPuser + ":" + AMQPpass + "@" + AMQPhost
-		err = infrastructure_component.StartAMQP(amqpurl, api)
+		amqpURL := "amqp://" + amqpUser + ":" + amqpPass + "@" + amqpHost
+		err = infrastructure_component.StartAMQP(amqpURL, api)
 		if err != nil {
 			log.Fatal(err)
 		}
