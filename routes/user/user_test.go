@@ -25,11 +25,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	infrastructure_component "git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/infrastructure-component"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 
@@ -834,6 +836,20 @@ func TestDuplicateScenarioForUser(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
 	assert.NoError(t, database.AddTestUsers())
+
+	// connect AMQP client
+	// Make sure that AMQP_HOST, AMQP_USER, AMQP_PASS are set
+	host, _ := configuration.GlobalConfig.String("amqp.host")
+	usr, _ := configuration.GlobalConfig.String("amqp.user")
+	pass, _ := configuration.GlobalConfig.String("amqp.pass")
+	amqpURI := "amqp://" + usr + ":" + pass + "@" + host
+
+	// AMQP Connection startup is tested here
+	// Not repeated in other tests because it is only needed once
+	session = helper.NewAMQPSession("villas-test-session", amqpURI, "villas", infrastructure_component.ProcessMessage)
+	SetAMQPSession(session)
+
+	time.Sleep(3 * time.Second)
 
 	// TODO test duplicate scenario for user function here!!
 

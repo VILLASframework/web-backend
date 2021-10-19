@@ -126,7 +126,8 @@ func authenticate(c *gin.Context) {
 	case "internal":
 		myUser, err = authenticateInternal(c)
 		if err != nil {
-			helper.BadRequestError(c, err.Error())
+			log.Println("internal auth. failed with error: ", err.Error())
+			return
 		}
 	case "external":
 		var authExternal bool
@@ -134,13 +135,16 @@ func authenticate(c *gin.Context) {
 		if err == nil && authExternal {
 			myUser, err = authenticateExternal(c)
 			if err != nil {
-				helper.BadRequestError(c, err.Error())
+				log.Println("external auth. failed with error: ", err)
+				return
 			}
 		} else {
 			helper.BadRequestError(c, "External authentication is not activated")
+			return
 		}
 	default:
 		helper.BadRequestError(c, "Invalid authentication mechanism")
+		return
 	}
 
 	// Check if this is an active user
