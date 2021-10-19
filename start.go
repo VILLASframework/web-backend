@@ -101,7 +101,7 @@ func main() {
 	}
 
 	// Init database
-	err = database.InitDB(configuration.GlobalConfig, dbClear)
+	err = database.InitDB(configuration.GlobalConfig, dbClear == "true")
 	if err != nil {
 		log.Fatalf("Error during initialization of database: %s, aborting.", err)
 	}

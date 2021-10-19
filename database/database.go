@@ -38,7 +38,7 @@ import (
 var DBpool *gorm.DB // database used by backend
 
 // InitDB Initialize connection to the database
-func InitDB(cfg *config.Config, dbClear string) error {
+func InitDB(cfg *config.Config, clear bool) error {
 	name, err := cfg.String("db.name")
 	if err != nil {
 		return err
@@ -76,7 +76,7 @@ func InitDB(cfg *config.Config, dbClear string) error {
 	DBpool = db
 
 	// drop tables if parameter set
-	if dbClear == "true" {
+	if clear {
 		DropTables()
 		log.Println("Database tables dropped")
 	}

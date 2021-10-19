@@ -87,7 +87,7 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		panic(m)
 	}
-	err = database.InitDB(configuration.GlobalConfig, "true")
+	err = database.InitDB(configuration.GlobalConfig, true)
 	if err != nil {
 		panic(m)
 	}
