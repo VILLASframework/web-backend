@@ -247,38 +247,3 @@ func (f *File) Delete() error {
 
 	return err
 }
-
-func (f *File) Duplicate(scenarioID uint) error {
-
-	var dup File
-	dup.Name = f.Name
-	dup.Key = f.Key
-	dup.Type = f.Type
-	dup.Size = f.Size
-	dup.Date = f.Date
-	dup.ScenarioID = scenarioID
-	dup.FileData = f.FileData
-	dup.ImageHeight = f.ImageHeight
-	dup.ImageWidth = f.ImageWidth
-
-	// file duplicate will point to the same data blob in the DB (SQL or postgres)
-
-	// Add duplicate File object with parameters to DB
-	err := dup.save()
-	if err != nil {
-		return err
-	}
-
-	// Create association of duplicate file to scenario ID of duplicate file
-	db := database.GetDB()
-
-	var so database.Scenario
-	err = db.Find(&so, scenarioID).Error
-	if err != nil {
-		return err
-	}
-
-	err = db.Model(&so).Association("Files").Append(&dup).Error
-
-	return err
-}

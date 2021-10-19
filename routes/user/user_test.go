@@ -828,3 +828,13 @@ func TestDeleteUser(t *testing.T) {
 
 	assert.Equal(t, finalNumber, initialNumber-1)
 }
+
+func TestDuplicateScenarioForUser(t *testing.T) {
+
+	database.DropTables()
+	database.MigrateModels()
+	assert.NoError(t, database.AddTestUsers())
+
+	// TODO test duplicate scenario for user function here!!
+
+}

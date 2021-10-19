@@ -58,7 +58,7 @@ func (w *Widget) addToDashboard() error {
 		return err
 	}
 
-	// associate dashboard with simulation
+	// associate widget with dashboard
 	err = db.Model(&dab).Association("Widgets").Append(w).Error
 
 	return err
@@ -103,28 +103,5 @@ func (w *Widget) delete() error {
 	// Delete Widget
 	err = db.Delete(w).Error
 
-	return err
-}
-
-func (w *Widget) Duplicate(dashboardID uint, signalMap map[uint]uint) error {
-	var duplicateW Widget
-	duplicateW.DashboardID = dashboardID
-	duplicateW.CustomProperties = w.CustomProperties
-	duplicateW.Height = w.Height
-	duplicateW.Width = w.Width
-	duplicateW.MinHeight = w.MinHeight
-	duplicateW.MinWidth = w.MinWidth
-	duplicateW.Name = w.Name
-	duplicateW.Type = w.Type
-	duplicateW.X = w.X
-	duplicateW.Y = w.Y
-	duplicateW.Z = w.Z
-
-	duplicateW.SignalIDs = []int64{}
-	for _, id := range w.SignalIDs {
-		duplicateW.SignalIDs = append(duplicateW.SignalIDs, int64(signalMap[uint(id)]))
-	}
-
-	err := duplicateW.addToDashboard()
 	return err
 }

@@ -30,7 +30,6 @@ import (
 	"github.com/streadway/amqp"
 	"log"
 	"strings"
-	"time"
 )
 
 type Action struct {
@@ -73,50 +72,6 @@ type ICUpdate struct {
 	Schema     ICSchema     `json:"schema"`
 	When       float64      `json:"when"`
 	Action     string       `json:"action"`
-}
-
-type Container struct {
-	Name  string `json:"name"`
-	Image string `json:"image"`
-}
-
-type TemplateSpec struct {
-	Containers []Container `json:"containers"`
-}
-
-type JobTemplate struct {
-	Spec TemplateSpec `json:"spec"`
-}
-
-type JobSpec struct {
-	Active   string      `json:"activeDeadlineSeconds"`
-	Template JobTemplate `json:"template"`
-}
-
-type JobMetaData struct {
-	JobName string `json:"name"`
-}
-
-type KubernetesJob struct {
-	Spec     JobSpec     `json:"spec"`
-	MetaData JobMetaData `json:"metadata"`
-}
-
-type ICPropertiesToCopy struct {
-	Job         KubernetesJob `json:"job"`
-	UUID        string        `json:"uuid"`
-	Name        string        `json:"name"`
-	Description string        `json:"description"`
-	Location    string        `json:"location"`
-	Owner       string        `json:"owner"`
-	Category    string        `json:"category"`
-	Type        string        `json:"type"`
-}
-
-type ICUpdateToCopy struct {
-	Properties ICPropertiesToCopy `json:"properties"`
-	Status     json.RawMessage    `json:"status"`
-	Schema     json.RawMessage    `json:"schema"`
 }
 
 func ProcessMessage(message amqp.Delivery) {
@@ -315,43 +270,4 @@ func sendActionAMQP(action Action, destinationUUID string) error {
 
 	err = session.Send(payload, destinationUUID)
 	return err
-}
-
-func (s *InfrastructureComponent) RequestICcreateAMQPsimpleManager(userName string) (string, error) {
-
-	//WARNING: this function only works with the kubernetes-simple manager of VILLAScontroller
-	if s.Category != "simulator" || s.Type == "kubernetes" {
-		return "", nil
-	}
-
-	newUUID := uuid.New().String()
-	log.Printf("New IC UUID: %s", newUUID)
-
-	var lastUpdate ICUpdateToCopy
-	log.Println(s.StatusUpdateRaw.RawMessage)
-	err := json.Unmarshal(s.StatusUpdateRaw.RawMessage, &lastUpdate)
-	if err != nil {
-		return newUUID, err
-	}
-
-	msg := `{"name": "` + lastUpdate.Properties.Name + ` ` + userName + `",` +
-		`"location": "` + lastUpdate.Properties.Location + `",` +
-		`"category": "` + lastUpdate.Properties.Category + `",` +
-		`"type": "` + lastUpdate.Properties.Type + `",` +
-		`"uuid": "` + newUUID + `",` +
-		`"jobname": "` + lastUpdate.Properties.Job.MetaData.JobName + `-` + userName + `",` +
-		`"activeDeadlineSeconds": "` + lastUpdate.Properties.Job.Spec.Active + `",` +
-		`"containername": "` + lastUpdate.Properties.Job.Spec.Template.Spec.Containers[0].Name + `-` + userName + `",` +
-		`"image": "` + lastUpdate.Properties.Job.Spec.Template.Spec.Containers[0].Image + `",` +
-		`"uuid": "` + newUUID + `"}`
-
-	actionCreate := Action{
-		Act:        "create",
-		When:       time.Now().Unix(),
-		Parameters: json.RawMessage(msg),
-	}
-
-	err = sendActionAMQP(actionCreate, s.Manager)
-
-	return newUUID, err
 }

@@ -23,6 +23,7 @@ package main
 
 import (
 	"fmt"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/user"
 	"log"
 	"time"
 
@@ -126,6 +127,7 @@ func main() {
 		session := helper.NewAMQPSession("villas-amqp-session", amqpurl, "villas", infrastructure_component.ProcessMessage)
 		healthz.SetAMQPSession(session)                  // healthz needs to know the amqp session to check the health of the backend
 		infrastructure_component.SetAMQPSession(session) // IC needs to know the session to send amqp messages
+		user.SetAMQPSession(session)                     // User needs to know the session to duplicate ICs upon login
 
 		// send Ping to all externally managed ICs
 		for {

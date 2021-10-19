@@ -54,38 +54,33 @@ func CheckScenarioPermissions(c *gin.Context, operation CRUD, scenarioIDsource s
 		return false, so
 	}
 
-	hasAccess := false
 	u := User{}
-
 	err = db.Find(&u, userID.(uint)).Error
 	if err != nil {
-		hasAccess = false
+		helper.UnprocessableEntityError(c, "Access denied (user has no access or scenario is locked).")
+		return false, so
 	}
 
 	if u.Role == "Admin" {
-		hasAccess = true
+		return true, so
 	}
 
 	scenarioUser := User{}
 	err = db.Order("ID asc").Model(&so).Where("ID = ?", userID.(uint)).Related(&scenarioUser, "Users").Error
 	if err != nil {
-		hasAccess = false
-	}
-
-	if !scenarioUser.Active {
-		hasAccess = false
-	} else if so.IsLocked && operation != Read {
-		hasAccess = false
-	} else {
-		hasAccess = true
-	}
-
-	if hasAccess == false {
 		helper.UnprocessableEntityError(c, "Access denied (user has no access or scenario is locked).")
 		return false, so
 	}
 
-	return true, so
+	if !scenarioUser.Active {
+		helper.UnprocessableEntityError(c, "Access denied (user has no access or scenario is locked).")
+		return false, so
+	} else if so.IsLocked && operation != Read {
+		helper.UnprocessableEntityError(c, "Access denied (user has no access or scenario is locked).")
+		return false, so
+	} else {
+		return true, so
+	}
 
 }
 

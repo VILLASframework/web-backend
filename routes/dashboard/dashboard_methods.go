@@ -23,8 +23,6 @@ package dashboard
 
 import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/widget"
-	"log"
 )
 
 type Dashboard struct {
@@ -107,36 +105,4 @@ func (d *Dashboard) delete() error {
 	err = db.Delete(d).Error
 
 	return err
-}
-
-func (d *Dashboard) Duplicate(scenarioID uint, signalMap map[uint]uint) error {
-
-	var duplicateD Dashboard
-	duplicateD.Grid = d.Grid
-	duplicateD.Name = d.Name
-	duplicateD.ScenarioID = scenarioID
-	duplicateD.Height = d.Height
-	err := duplicateD.addToScenario()
-
-	if err != nil {
-		return err
-	}
-
-	// add widgets to duplicated dashboard
-	var widgets []widget.Widget
-	db := database.GetDB()
-	err = db.Order("ID asc").Model(d).Related(&widgets, "Widgets").Error
-	if err != nil {
-		log.Printf("Error getting widgets for dashboard %d: %s", d.ID, err)
-	}
-	for _, w := range widgets {
-
-		err = w.Duplicate(duplicateD.ID, signalMap)
-		if err != nil {
-			log.Printf("error creating duplicate for widget %d: %s", w.ID, err)
-			continue
-		}
-	}
-
-	return nil
 }

@@ -55,11 +55,13 @@ type UserRequest struct {
 var newScenario1 = ScenarioRequest{
 	Name:            "Scenario1",
 	StartParameters: postgres.Jsonb{json.RawMessage(`{"parameter1" : "testValue1A", "parameter2" : "testValue2A", "parameter3" : 42}`)},
+	IsLocked:        false,
 }
 
 var newScenario2 = ScenarioRequest{
 	Name:            "Scenario2",
 	StartParameters: postgres.Jsonb{json.RawMessage(`{"parameter1" : "testValue1B", "parameter2" : "testValue2B", "parameter3" : 55}`)},
+	IsLocked:        false,
 }
 
 func TestMain(m *testing.M) {
@@ -706,15 +708,5 @@ func TestRemoveUserFromScenario(t *testing.T) {
 		fmt.Sprintf("/api/v2/scenarios/%v/user?username=User_0", newScenarioID), "DELETE", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
-
-}
-
-func TestDuplicateScenarioForUser(t *testing.T) {
-
-	database.DropTables()
-	database.MigrateModels()
-	assert.NoError(t, database.AddTestUsers())
-
-	// TODO test duplicate scenario for user function here!!
 
 }
