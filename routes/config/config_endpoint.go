@@ -47,14 +47,18 @@ type ConfigContact struct {
 	Mail string `json:"mail"`
 }
 
+type ConfigKubernetes struct {
+	RancherURL  string `json:"rancher_url"`
+	ClusterName string `json:"cluster_name"`
+}
+
 type Config struct {
 	Title          string               `json:"title"`
 	SubTitle       string               `json:"sub_title"`
 	Mode           string               `json:"mode"`
 	Contact        ConfigContact        `json:"contact"`
 	Authentication ConfigAuthentication `json:"authentication"`
-	RancherURL     string               `json:"rancherURL"`
-	K8sCluster     string               `json:"k8sCluster"`
+	Kubernetes     ConfigKubernetes     `json:"kubernetes"`
 }
 
 // getHealth godoc
@@ -79,8 +83,8 @@ func getConfig(c *gin.Context) {
 	resp.SubTitle, _ = cfg.String("sub-title")
 	resp.Contact.Name, _ = cfg.String("contact.name")
 	resp.Contact.Mail, _ = cfg.String("contact.mail")
-	resp.RancherURL, _ = cfg.String("rancherURL")
-	resp.K8sCluster, _ = cfg.String("k8sCluster")
+	resp.Kubernetes.RancherURL, _ = cfg.String("k8s.rancher-url")
+	resp.Kubernetes.ClusterName, _ = cfg.String("k8s.cluster-name")
 
 	c.JSON(200, resp)
 }
