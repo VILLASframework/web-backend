@@ -48,44 +48,25 @@ func TestInitDB(t *testing.T) {
 	defaults := config.NewStatic(static)
 	env := config.NewEnvironment(mappings)
 
-	ownconfig := config.NewConfig([]config.Provider{defaults, env})
+	ownConfig := config.NewConfig([]config.Provider{defaults, env})
 
-	err = InitDB(ownconfig, true)
-	assert.Error(t, err)
-	dbname, err := configuration.GlobalConfig.String("db.name")
-	assert.NoError(t, err)
-	static["db.name"] = dbname
-	ownconfig = config.NewConfig([]config.Provider{defaults, env})
-	err = InitDB(ownconfig, true)
+	err = InitDB(ownConfig, true)
 	assert.Error(t, err)
 
-	dbhost, err := configuration.GlobalConfig.String("db.host")
-	assert.NoError(t, err)
-	static["db.host"] = dbhost
-	ownconfig = config.NewConfig([]config.Provider{defaults, env})
-	err = InitDB(ownconfig, true)
-	assert.Error(t, err)
+	dbOptions := []string{"db.name", "db.host", "db.user", "db.pass", "db.ssl"}
+	for _, opt := range dbOptions {
+		val, err := configuration.GlobalConfig.String(opt)
+		assert.NoError(t, err)
+		static[opt] = val
+		ownConfig = config.NewConfig([]config.Provider{defaults, env})
+		err = InitDB(ownConfig, true)
 
-	dbuser, err := configuration.GlobalConfig.String("db.user")
-	assert.NoError(t, err)
-	static["db.user"] = dbuser
-	ownconfig = config.NewConfig([]config.Provider{defaults, env})
-	err = InitDB(ownconfig, true)
-	assert.Error(t, err)
-
-	dbpass, err := configuration.GlobalConfig.String("db.pass")
-	assert.NoError(t, err)
-	static["db.pass"] = dbpass
-	ownconfig = config.NewConfig([]config.Provider{defaults, env})
-	err = InitDB(ownconfig, true)
-	assert.Error(t, err)
-
-	dbssl, err := configuration.GlobalConfig.String("db.ssl")
-	assert.NoError(t, err)
-	static["db.ssl"] = dbssl
-	ownconfig = config.NewConfig([]config.Provider{defaults, env})
-	err = InitDB(ownconfig, true)
-	assert.NoError(t, err)
+		if opt == "db.ssl" {
+			assert.NoError(t, err)
+		} else {
+			assert.Error(t, err)
+		}
+	}
 
 	// Verify that you can connect to the database
 	db := GetDB()

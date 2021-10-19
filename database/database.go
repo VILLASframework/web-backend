@@ -43,14 +43,17 @@ func InitDB(cfg *config.Config, clear bool) error {
 	if err != nil {
 		return err
 	}
+
 	host, err := cfg.String("db.host")
 	if err != nil {
 		return err
 	}
+
 	user, err := cfg.String("db.user")
 	if err != nil && !strings.Contains(err.Error(), "Required setting 'db.user' not set") {
 		return err
 	}
+
 	pass := ""
 	if user != "" {
 		pass, err = cfg.String("db.pass")
@@ -58,6 +61,7 @@ func InitDB(cfg *config.Config, clear bool) error {
 			return err
 		}
 	}
+
 	sslmode, err := cfg.String("db.ssl")
 	if err != nil {
 		return err
