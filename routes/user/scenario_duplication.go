@@ -57,7 +57,7 @@ func duplicateScenarioForUser(s database.Scenario, user *database.User) <-chan e
 			err = db.Find(&ic, icID).Error
 
 			if err != nil {
-				errs <- fmt.Errorf("Cannot find IC with id %d in DB, will not duplicate for User %s: %s", icID, user.Username, err)
+				log.Printf("Cannot find IC with id %d in DB, will not duplicate for User %s: %s", icID, user.Username, err)
 				continue
 			}
 

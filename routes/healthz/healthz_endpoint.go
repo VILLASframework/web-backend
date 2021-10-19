@@ -22,6 +22,7 @@
 package healthz
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -74,15 +75,24 @@ func getHealth(c *gin.Context) {
 	}
 
 	if len(url) != 0 {
-		err = session.CheckConnection()
-		if err != nil {
-			log.Println(err.Error())
+		if session != nil {
+			err = session.CheckConnection()
+			if err != nil {
+				log.Println(err.Error())
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"success:": false,
+					"message":  err.Error(),
+				})
+				return
+			}
+		} else {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"success:": false,
-				"message":  err.Error(),
+				"message":  fmt.Errorf("AMQP session is nil"),
 			})
 			return
 		}
+
 	}
 
 	// Send a 204 reponse
