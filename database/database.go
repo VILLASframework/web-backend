@@ -49,8 +49,8 @@ func InitDB(cfg *config.Config, clear bool) error {
 		return err
 	}
 
-	user, err := cfg.String("db.user")
-	if err != nil && !strings.Contains(err.Error(), "Required setting 'db.user' not set") {
+	user, err := cfg.StringOr("db.user", "")
+	if err != nil {
 		return err
 	}
 

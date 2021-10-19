@@ -22,7 +22,6 @@
 package infrastructure_component
 
 import (
-	"fmt"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 )
 
@@ -68,7 +67,7 @@ func (s *InfrastructureComponent) delete() error {
 	noConfigs := db.Model(s).Association("ComponentConfigurations").Count()
 
 	if noConfigs > 0 {
-		return fmt.Errorf("deletion of IC postponed, %v config(s) associated to it", noConfigs)
+		return &DeletionPostponed{References: noConfigs}
 	}
 
 	// delete InfrastructureComponent from DB (does NOT remain as dangling)

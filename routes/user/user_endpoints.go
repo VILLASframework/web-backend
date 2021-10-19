@@ -24,7 +24,6 @@ package user
 import (
 	"fmt"
 	"net/http"
-	"strings"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 
@@ -188,9 +187,9 @@ func updateUser(c *gin.Context) {
 	// case that the request updates the role of the old user)
 	updatedUser, err := req.updatedUser(callerID, callerRole, oldUser)
 	if err != nil {
-		if strings.Contains(err.Error(), "Admin") || strings.Contains(err.Error(), "pw not changed") {
+		if _, ok := err.(*ForbiddenError); ok {
 			helper.ForbiddenError(c, err.Error())
-		} else if strings.Contains(err.Error(), "Username") || strings.Contains(err.Error(), "old or admin password") {
+		} else if _, ok := err.(*UsernameAlreadyTaken); ok {
 			helper.BadRequestError(c, err.Error())
 		} else { // password encryption failed
 			helper.InternalServerError(c, err.Error())

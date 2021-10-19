@@ -54,11 +54,11 @@ type UserRequest struct {
 func TestMain(m *testing.M) {
 	err := configuration.InitConfig()
 	if err != nil {
-		panic(m)
+		panic(err)
 	}
 	err = database.InitDB(configuration.GlobalConfig, true)
 	if err != nil {
-		panic(m)
+		panic(err)
 	}
 	defer database.DBpool.Close()
 
@@ -541,7 +541,7 @@ func TestModifyAddedUserAsUser(t *testing.T) {
 		fmt.Sprintf("/api/v2/users/%v", newUserID), "PUT",
 		helper.KeyModels{"user": modRequest})
 	assert.NoError(t, err)
-	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
+	assert.Equalf(t, 403, code, "Response body: \n%v\n", resp)
 
 	// modify newUser's password with wring old password
 	modRequest = UserRequest{
@@ -725,7 +725,7 @@ func TestModifyAddedUserAsAdmin(t *testing.T) {
 		fmt.Sprintf("/api/v2/users/%v", newUserID), "PUT",
 		helper.KeyModels{"user": modRequest})
 	assert.NoError(t, err)
-	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
+	assert.Equalf(t, 403, code, "Response body: \n%v\n", resp)
 
 	// modify newUser's password, requires admin password
 	modRequest = UserRequest{

@@ -25,7 +25,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"strings"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"github.com/gin-gonic/gin"
@@ -197,7 +196,7 @@ func (s *InfrastructureComponent) updateExternalIC(payload ICUpdate, body []byte
 			if err != nil {
 				// if component could not be deleted there are still configurations using it in the DB
 				// continue with the update to save the new state of the component and get back to the deletion later
-				if strings.Contains(err.Error(), "postponed") {
+				if _, ok := err.(*DeletionPostponed); ok {
 					log.Println(err) // print log message
 				} else {
 					return err // return upon DB error

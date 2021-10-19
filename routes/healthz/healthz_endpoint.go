@@ -24,7 +24,6 @@ package healthz
 import (
 	"log"
 	"net/http"
-	"strings"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
@@ -55,8 +54,8 @@ func getHealth(c *gin.Context) {
 	}
 
 	// check if connection to AMQP broker is alive if backend was started with AMQP client
-	url, err := configuration.GlobalConfig.String("amqp.host")
-	if err != nil && strings.Contains(err.Error(), "Required setting 'amqp.host' not set") {
+	url, err := configuration.GlobalConfig.StringOr("amqp.host", "not-set")
+	if err != nil && url == "not-set" {
 		c.JSON(http.StatusOK, gin.H{})
 		return
 	} else if err != nil {
