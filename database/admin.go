@@ -35,39 +35,42 @@ import (
 func AddAdminUser(cfg *config.Config) (string, error) {
 	DBpool.AutoMigrate(User{})
 
+	updatedPW := false
+	generatedPW := false
+
+	adminName, _ := cfg.StringOr("admin.user", "admin")
+	adminMail, _ := cfg.StringOr("admin.mail", "admin@example.com")
+	adminPW, err := cfg.String("admin.pass")
+	if err == nil && adminPW != "" {
+		updatedPW = true
+	} else if err != nil || adminPW == "" {
+		adminPW = generatePassword(16)
+		generatedPW = true
+	}
+
+	adminPWEnc, err := bcrypt.GenerateFromPassword([]byte(adminPW), 10)
+	if err != nil {
+		return "", err
+	}
+
 	// Check if admin user exists in DB
 	var users []User
-	DBpool.Where("Role = ?", "Admin").Find(&users)
-
-	adminPW := ""
+	err = DBpool.Where("Username = ?", adminName).Find(&users).Error
+	if err != nil {
+		return "", err
+	}
 
 	if len(users) == 0 {
 		fmt.Println("No admin user found in DB, adding default admin user.")
-
-		adminName, err := cfg.String("admin.user")
-		if err != nil || adminName == "" {
-			adminName = "admin"
-		}
-
-		adminPW, err = cfg.String("admin.pass")
-		if err != nil || adminPW == "" {
-			adminPW = generatePassword(16)
+		if generatedPW {
 			fmt.Printf("  Generated admin password: %s for admin user %s\n", adminPW, adminName)
 		}
 
-		mail, err := cfg.String("admin.mail")
-		if err == nil || mail == "" {
-			mail = "admin@example.com"
-		}
-
-		pwEnc, _ := bcrypt.GenerateFromPassword([]byte(adminPW), 10)
-
-		// create a copy of global test data
 		user := User{
 			Username: adminName,
-			Password: string(pwEnc),
+			Password: string(adminPWEnc),
 			Role:     "Admin",
-			Mail:     mail,
+			Mail:     adminMail,
 			Active:   true,
 		}
 
@@ -76,8 +79,23 @@ func AddAdminUser(cfg *config.Config) (string, error) {
 		if err != nil {
 			return "", err
 		}
+	} else if updatedPW {
+		fmt.Println("Found existing admin user in DB, updating user from CLI parameters.")
+
+		user := users[0]
+
+		user.Password = string(adminPWEnc)
+		user.Role = "Admin"
+		user.Mail = adminMail
+		user.Active = true
+
+		err = DBpool.Model(user).Update(&user).Error
+		if err != nil {
+			return "", err
+		}
 	}
-	return adminPW, nil
+
+	return adminPW, err
 }
 
 func generatePassword(Len int) string {
