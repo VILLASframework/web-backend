@@ -23,11 +23,12 @@ package database
 
 import (
 	"fmt"
-	"golang.org/x/crypto/bcrypt"
 	"log"
 	"math/rand"
 	"strings"
 	"time"
+
+	"golang.org/x/crypto/bcrypt"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
@@ -120,12 +121,15 @@ func MigrateModels() {
 }
 
 // DBAddAdminUser adds a default admin user to the DB
-func DBAddAdminUser(cfg *config.Config) (error, string) {
+func DBAddAdminUser(cfg *config.Config) (string, error) {
 	DBpool.AutoMigrate(User{})
 
 	// Check if admin user exists in DB
 	var users []User
 	err := DBpool.Where("Role = ?", "Admin").Find(&users).Error
+	if err != nil {
+		return "", err
+	}
 	adminPW := ""
 	adminName := ""
 
@@ -157,10 +161,10 @@ func DBAddAdminUser(cfg *config.Config) (error, string) {
 		// add admin user to DB
 		err = DBpool.Create(&user).Error
 		if err != nil {
-			return err, ""
+			return "", err
 		}
 	}
-	return nil, adminPW
+	return adminPW, nil
 }
 
 func generatePassword(Len int) string {

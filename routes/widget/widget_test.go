@@ -86,8 +86,10 @@ func addScenarioAndDashboard(token string) (scenarioID uint, dashboardID uint) {
 
 	// POST $newScenario
 	newScenario := ScenarioRequest{
-		Name:            "Scenario1",
-		StartParameters: postgres.Jsonb{json.RawMessage(`{"parameter1" : "testValue1A", "parameter2" : "testValue2A", "parameter3" : 42}`)},
+		Name: "Scenario1",
+		StartParameters: postgres.Jsonb{
+			RawMessage: json.RawMessage(`{"parameter1" : "testValue1A", "parameter2" : "testValue2A", "parameter3" : 42}`),
+		},
 	}
 	_, resp, _ := helper.TestEndpoint(router, token,
 		"/api/v2/scenarios", "POST", helper.KeyModels{"scenario": newScenario})
@@ -108,7 +110,7 @@ func addScenarioAndDashboard(token string) (scenarioID uint, dashboardID uint) {
 	newDashboardID, _ := helper.GetResponseID(resp)
 
 	// add the guest user to the new scenario
-	_, resp, _ = helper.TestEndpoint(router, token,
+	_, _, _ = helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/v2/scenarios/%v/user?username=User_C", newScenarioID), "PUT", nil)
 
 	return uint(newScenarioID), uint(newDashboardID)

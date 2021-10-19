@@ -53,13 +53,17 @@ type UserRequest struct {
 }
 
 var newScenario1 = ScenarioRequest{
-	Name:            "Scenario1",
-	StartParameters: postgres.Jsonb{json.RawMessage(`{"parameter1" : "testValue1A", "parameter2" : "testValue2A", "parameter3" : 42}`)},
+	Name: "Scenario1",
+	StartParameters: postgres.Jsonb{
+		RawMessage: json.RawMessage(`{"parameter1" : "testValue1A", "parameter2" : "testValue2A", "parameter3" : 42}`),
+	},
 }
 
 var newScenario2 = ScenarioRequest{
-	Name:            "Scenario2",
-	StartParameters: postgres.Jsonb{json.RawMessage(`{"parameter1" : "testValue1B", "parameter2" : "testValue2B", "parameter3" : 55}`)},
+	Name: "Scenario2",
+	StartParameters: postgres.Jsonb{
+		RawMessage: json.RawMessage(`{"parameter1" : "testValue1B", "parameter2" : "testValue2B", "parameter3" : 55}`),
+	},
 }
 
 func TestMain(m *testing.M) {

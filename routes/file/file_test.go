@@ -53,10 +53,10 @@ type ScenarioRequest struct {
 func addScenario() (scenarioID uint) {
 
 	// authenticate as admin
-	token, _ := helper.AuthenticateForTest(router, helper.AdminCredentials)
+	_, _ = helper.AuthenticateForTest(router, helper.AdminCredentials)
 
 	// authenticate as normal user
-	token, _ = helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, _ := helper.AuthenticateForTest(router, helper.UserACredentials)
 
 	// POST $newScenario
 	newScenario := ScenarioRequest{
@@ -70,7 +70,7 @@ func addScenario() (scenarioID uint) {
 	newScenarioID, _ := helper.GetResponseID(resp)
 
 	// add the guest user to the new scenario
-	_, resp, _ = helper.TestEndpoint(router, token,
+	_, _, _ = helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/v2/scenarios/%v/user?username=User_C", newScenarioID), "PUT", nil)
 
 	return uint(newScenarioID)
@@ -129,7 +129,7 @@ func TestAddFile(t *testing.T) {
 	// try to POST without a scenario ID
 	// should return a bad request error
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/v2/files"), "POST", emptyBuf)
+		"/api/v2/files", "POST", emptyBuf)
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 
@@ -304,6 +304,7 @@ func TestUpdateFile(t *testing.T) {
 	assert.Equalf(t, 200, w_updated.Code, "Response body: \n%v\n", w_updated.Body)
 
 	newFileIDUpdated, err := helper.GetResponseID(w_updated.Body)
+	assert.NoError(t, err)
 
 	assert.Equal(t, newFileID, newFileIDUpdated)
 
@@ -407,7 +408,7 @@ func TestDeleteFile(t *testing.T) {
 	// try to DELETE non-existing fileID
 	// should return not found
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/v2/files/5"), "DELETE", nil)
+		"/api/v2/files/5", "DELETE", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
 
@@ -473,7 +474,7 @@ func TestGetAllFilesOfScenario(t *testing.T) {
 
 	//try to get all files with missing scenario ID; should return a bad request error
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/v2/files"), "GET", nil)
+		"/api/v2/files", "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 

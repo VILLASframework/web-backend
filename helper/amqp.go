@@ -209,8 +209,11 @@ func SendActionAMQP(action Action, destinationUUID string) error {
 		false,
 		false,
 		msg)
-	return PublishAMQP(msg)
+	if err != nil {
+		return err
+	}
 
+	return PublishAMQP(msg)
 }
 
 func PublishAMQP(msg amqp.Publishing) error {

@@ -104,7 +104,7 @@ func ProcessMessage(message amqp.Delivery) error {
 	ICUUID := payload.Properties.UUID
 	_, err = uuid.Parse(ICUUID)
 	if err != nil {
-		return fmt.Errorf("AMQP: UUID not valid: %v, message ignored: %v \n", ICUUID, string(message.Body))
+		return fmt.Errorf("amqp: UUID not valid: %v, message ignored: %vi", ICUUID, string(message.Body))
 	}
 
 	var sToBeUpdated InfrastructureComponent

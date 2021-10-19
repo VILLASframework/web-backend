@@ -23,6 +23,7 @@ package scenario
 
 import (
 	"fmt"
+
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/user"
 	"github.com/jinzhu/gorm"
@@ -105,6 +106,9 @@ func (s *Scenario) deleteUser(username string) error {
 		// There is only one associated user
 		var remainingUser user.User
 		err = db.Model(s).Related(&remainingUser, "Users").Error
+		if err != nil {
+			return err
+		}
 		if remainingUser.Username == username {
 			// if the remaining user is the one to be deleted
 			return fmt.Errorf("cannot delete last user from scenario without deleting scenario itself, doing nothing")

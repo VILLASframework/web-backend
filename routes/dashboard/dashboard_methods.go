@@ -89,6 +89,9 @@ func (d *Dashboard) delete() error {
 
 	// remove association between Dashboard and Scenario
 	err = db.Model(&sim).Association("Dashboards").Delete(d).Error
+	if err != nil {
+		return err
+	}
 
 	// get all widgets of the dashboard
 	var widgets []database.Widget
@@ -98,8 +101,11 @@ func (d *Dashboard) delete() error {
 	}
 
 	// Delete widgets
-	for widget, _ := range widgets {
+	for widget := range widgets {
 		err = db.Delete(&widget).Error
+		if err != nil {
+			return err
+		}
 	}
 
 	// Delete dashboard

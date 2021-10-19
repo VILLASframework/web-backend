@@ -82,16 +82,16 @@ func (r *updateUserRequest) updatedUser(callerID interface{}, role interface{}, 
 	// Only the Admin must be able to update user's role
 	if role != "Admin" && r.User.Role != "" {
 		if r.User.Role != u.Role {
-			return u, fmt.Errorf("Only Admin can update user's Role")
+			return u, fmt.Errorf("only Admin can update user's Role")
 		}
 	} else if role == "Admin" && r.User.Role != "" {
 		u.Role = r.User.Role
 	}
 
 	// Only the Admin must be able to update users Active state
-	if (r.User.Active == "yes" && u.Active == false) || (r.User.Active == "no" && u.Active == true) {
+	if (r.User.Active == "yes" && !u.Active) || (r.User.Active == "no" && u.Active) {
 		if role != "Admin" {
-			return u, fmt.Errorf("Only Admin can update user's Active state")
+			return u, fmt.Errorf("only Admin can update user's Active state")
 		} else {
 			u.Active = !u.Active
 		}
@@ -100,7 +100,7 @@ func (r *updateUserRequest) updatedUser(callerID interface{}, role interface{}, 
 	// Update the username making sure it is NOT taken
 	var testUser User
 	if err := testUser.ByUsername(r.User.Username); err == nil {
-		return u, fmt.Errorf("Username is alreaday taken")
+		return u, fmt.Errorf("username is alreaday taken")
 	}
 
 	if r.User.Username != "" {

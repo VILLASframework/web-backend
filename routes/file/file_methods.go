@@ -99,8 +99,14 @@ func (f *File) Register(fileHeader *multipart.FileHeader, scenarioID uint) error
 	defer fileContent.Close()
 
 	bucket, err := configuration.GlobalConfig.String("s3.bucket")
+	if err != nil {
+		return err
+	}
 	if bucket == "" {
 		f.FileData, err = ioutil.ReadAll(fileContent)
+		if err != nil {
+			return err
+		}
 		f.Key = ""
 	} else {
 		err := f.putS3(fileContent)
@@ -161,8 +167,14 @@ func (f *File) update(fileHeader *multipart.FileHeader) error {
 	defer fileContent.Close()
 
 	bucket, err := configuration.GlobalConfig.String("s3.bucket")
+	if err != nil {
+		return err
+	}
 	if bucket == "" {
 		f.FileData, err = ioutil.ReadAll(fileContent)
+		if err != nil {
+			return err
+		}
 		f.Key = ""
 	} else {
 		err := f.putS3(fileContent)

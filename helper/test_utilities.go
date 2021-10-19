@@ -25,13 +25,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
+	"net/http"
+	"net/http/httptest"
+
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"github.com/gin-gonic/gin"
 	"github.com/nsf/jsondiff"
 	"golang.org/x/crypto/bcrypt"
-	"log"
-	"net/http"
-	"net/http/httptest"
 )
 
 // data type used in testing
@@ -73,8 +74,8 @@ type UserRequest struct {
 }
 
 type Credentials struct {
-	Username string `json:"username,required"`
-	Password string `json:"password,required"`
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
 var AdminCredentials = Credentials{
@@ -105,13 +106,13 @@ var GuestCredentials = Credentials{
 func GetResponseID(resp *bytes.Buffer) (int, error) {
 
 	// Transform bytes buffer into byte slice
-	respBytes := []byte(resp.String())
+	respBytes := resp.Bytes()
 
 	// Map JSON response to a map[string]map[string]interface{}
 	var respRemapped map[string]map[string]interface{}
 	err := json.Unmarshal(respBytes, &respRemapped)
 	if err != nil {
-		return 0, fmt.Errorf("Unmarshal failed for respRemapped %v", err)
+		return 0, fmt.Errorf("failed to unmarshal for respRemapped %v", err)
 	}
 
 	// Get an arbitrary key from tha map. The only key (entry) of
@@ -124,11 +125,11 @@ func GetResponseID(resp *bytes.Buffer) (int, error) {
 		// the conversion to integer before returning
 		id, ok := respRemapped[arbitrary_key]["id"].(float64)
 		if !ok {
-			return 0, fmt.Errorf("Cannot type assert respRemapped")
+			return 0, fmt.Errorf("cannot type assert respRemapped")
 		}
 		return int(id), nil
 	}
-	return 0, fmt.Errorf("GetResponse reached exit")
+	return 0, fmt.Errorf("getResponse reached exit")
 }
 
 // Return the length of an response in case it is an array
@@ -139,7 +140,7 @@ func LengthOfResponse(router *gin.Engine, token string, url string,
 
 	req, err := http.NewRequest(method, url, nil)
 	if err != nil {
-		return 0, fmt.Errorf("Failed to create new request: %v", err)
+		return 0, fmt.Errorf("failed to create new request: %v", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Add("Authorization", "Bearer "+token)
@@ -152,7 +153,7 @@ func LengthOfResponse(router *gin.Engine, token string, url string,
 	}
 
 	// Convert the response in array of bytes
-	responseBytes := []byte(w.Body.String())
+	responseBytes := w.Body.Bytes()
 
 	// First we are trying to unmarshal the response into an array of
 	// general type variables ([]interface{}). If this fails we will try
@@ -180,7 +181,7 @@ func LengthOfResponse(router *gin.Engine, token string, url string,
 	}
 
 	// Failed to identify response.
-	return 0, fmt.Errorf("Length of response cannot be detected")
+	return 0, fmt.Errorf("length of response cannot be detected")
 }
 
 // Make a request to an endpoint
@@ -192,13 +193,13 @@ func TestEndpoint(router *gin.Engine, token string, url string,
 	// Marshal the HTTP request body
 	body, err := json.Marshal(requestBody)
 	if err != nil {
-		return 0, nil, fmt.Errorf("Failed to marshal request body: %v", err)
+		return 0, nil, fmt.Errorf("failed to marshal request body: %v", err)
 	}
 
 	// Create the request
 	req, err := http.NewRequest(method, url, bytes.NewBuffer(body))
 	if err != nil {
-		return 0, nil, fmt.Errorf("Failed to create new request: %v", err)
+		return 0, nil, fmt.Errorf("failed to create new request: %v", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Add("Authorization", "Bearer "+token)
@@ -251,14 +252,14 @@ func CompareResponse(resp *bytes.Buffer, expected interface{}) error {
 	// Serialize expected response
 	expectedBytes, err := json.Marshal(expected)
 	if err != nil {
-		return fmt.Errorf("Failed to marshal expected response: %v", err)
+		return fmt.Errorf("failed to marshal expected response: %v", err)
 	}
 	// Compare
 	opts := jsondiff.DefaultConsoleOptions()
 	diff, text := jsondiff.Compare(resp.Bytes(), expectedBytes, &opts)
 	if diff.String() != "FullMatch" && diff.String() != "SupersetMatch" {
 		log.Println(text)
-		return fmt.Errorf("Response: Expected \"%v\". Got \"%v\".",
+		return fmt.Errorf("response: Expected \"%v\". Got \"%v\"",
 			"(FullMatch OR SupersetMatch)", diff.String())
 	}
 
@@ -273,25 +274,25 @@ func AuthenticateForTest(router *gin.Engine, credentials interface{}) (string, e
 	// Marshal credentials
 	body, err := json.Marshal(credentials)
 	if err != nil {
-		return "", fmt.Errorf("Failed to marshal credentials: %v", err)
+		return "", fmt.Errorf("failed to marshal credentials: %v", err)
 	}
 
 	req, err := http.NewRequest("POST", "/api/v2/authenticate/internal", bytes.NewBuffer(body))
 	if err != nil {
-		return "", fmt.Errorf("Failed to create new request: %v", err)
+		return "", fmt.Errorf("failed to create new request: %v", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
 	router.ServeHTTP(w, req)
 
 	// Check that return HTTP Code is 200 (OK)
 	if w.Code != http.StatusOK {
-		return "", fmt.Errorf("HTTP Code: Expected \"%v\". Got \"%v\".",
+		return "", fmt.Errorf("http code: Expected \"%v\". Got \"%v\"",
 			http.StatusOK, w.Code)
 	}
 
 	// Get the response
 	var body_data map[string]interface{}
-	err = json.Unmarshal([]byte(w.Body.String()), &body_data)
+	err = json.Unmarshal(w.Body.Bytes(), &body_data)
 	if err != nil {
 		return "", err
 	}
@@ -299,16 +300,16 @@ func AuthenticateForTest(router *gin.Engine, credentials interface{}) (string, e
 	// Check the response
 	success, ok := body_data["success"].(bool)
 	if !ok {
-		return "", fmt.Errorf("Type asssertion of response[\"success\"] failed")
+		return "", fmt.Errorf("type asssertion of response[\"success\"] failed")
 	}
 	if !success {
-		return "", fmt.Errorf("Authentication failed: %v", body_data["message"])
+		return "", fmt.Errorf("authentication failed: %v", body_data["message"])
 	}
 
 	// Extract the token
 	token, ok := body_data["token"].(string)
 	if !ok {
-		return "", fmt.Errorf("Type assertion of response[\"token\"] failed")
+		return "", fmt.Errorf("type assertion of response[\"token\"] failed")
 	}
 
 	// Return the token and nil error
