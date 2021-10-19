@@ -35,14 +35,14 @@ func (s *Signal) save() error {
 	return err
 }
 
-func (s *Signal) byID(id uint) error {
+/*func (s *Signal) byID(id uint) error {
 	db := database.GetDB()
 	err := db.Find(s, id).Error
 	if err != nil {
 		return err
 	}
 	return nil
-}
+}*/
 
 func (s *Signal) AddToConfig() error {
 	db := database.GetDB()

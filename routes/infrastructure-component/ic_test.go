@@ -84,8 +84,8 @@ var newIC1 = ICRequest{
 	State:                 "idle",
 	Location:              "k8s",
 	Description:           "A signal generator for testing purposes",
-	StartParameterSchema:  postgres.Jsonb{json.RawMessage(`{"startprop1" : "a nice prop"}`)},
-	CreateParameterSchema: postgres.Jsonb{json.RawMessage(`{"createprop1" : "a really nice prop"}`)},
+	StartParameterSchema:  postgres.Jsonb{RawMessage: json.RawMessage(`{"startprop1" : "a nice prop"}`)},
+	CreateParameterSchema: postgres.Jsonb{RawMessage: json.RawMessage(`{"createprop1" : "a really nice prop"}`)},
 	ManagedExternally:     newFalse(),
 	Manager:               "7be0322d-354e-431e-84bd-ae4c9633beef",
 }
@@ -100,8 +100,8 @@ var newIC2 = ICRequest{
 	State:                 "running",
 	Location:              "k8s",
 	Description:           "This is a test description",
-	StartParameterSchema:  postgres.Jsonb{json.RawMessage(`{"startprop1" : "a nice prop"}`)},
-	CreateParameterSchema: postgres.Jsonb{json.RawMessage(`{"createprop1" : "a really nice prop"}`)},
+	StartParameterSchema:  postgres.Jsonb{RawMessage: json.RawMessage(`{"startprop1" : "a nice prop"}`)},
+	CreateParameterSchema: postgres.Jsonb{RawMessage: json.RawMessage(`{"createprop1" : "a really nice prop"}`)},
 	ManagedExternally:     newTrue(),
 	Manager:               "4854af30-325f-44a5-ad59-b67b2597de99",
 }
@@ -112,7 +112,7 @@ func TestMain(m *testing.M) {
 		panic(m)
 	}
 
-	err = database.InitDB(configuration.GlobalConfig, "true")
+	err = database.InitDB(configuration.GlobalConfig, true)
 	if err != nil {
 		panic(m)
 	}
@@ -132,9 +132,9 @@ func TestMain(m *testing.M) {
 
 	// connect AMQP client
 	// Make sure that AMQP_HOST, AMQP_USER, AMQP_PASS are set
-	host, err := configuration.GlobalConfig.String("amqp.host")
-	usr, err := configuration.GlobalConfig.String("amqp.user")
-	pass, err := configuration.GlobalConfig.String("amqp.pass")
+	host, _ := configuration.GlobalConfig.String("amqp.host")
+	usr, _ := configuration.GlobalConfig.String("amqp.user")
+	pass, _ := configuration.GlobalConfig.String("amqp.pass")
 	amqpURI := "amqp://" + usr + ":" + pass + "@" + host
 
 	// AMQP Connection startup is tested here
@@ -584,7 +584,7 @@ func TestSendActionToIC(t *testing.T) {
 	var params startParams
 	params.UUID = newIC1.UUID
 
-	paramsRaw, err := json.Marshal(&params)
+	paramsRaw, _ := json.Marshal(&params)
 	action1.Parameters = paramsRaw
 	actions := [1]Action{action1}
 
@@ -738,11 +738,13 @@ func TestDeleteICViaAMQPRecv(t *testing.T) {
 
 	// Add component config and associate with IC and scenario
 	newConfig := ConfigRequest{
-		Name:            "ConfigA",
-		ScenarioID:      uint(newScenarioID),
-		ICID:            1,
-		StartParameters: postgres.Jsonb{json.RawMessage(`{"parameter1" : "testValue1B", "parameter2" : "testValue2B", "parameter3" : 55}`)},
-		FileIDs:         []int64{},
+		Name:       "ConfigA",
+		ScenarioID: uint(newScenarioID),
+		ICID:       1,
+		StartParameters: postgres.Jsonb{
+			RawMessage: json.RawMessage(`{"parameter1" : "testValue1B", "parameter2" : "testValue2B", "parameter3" : 55}`),
+		},
+		FileIDs: []int64{},
 	}
 
 	code, resp, err = helper.TestEndpoint(router, token,

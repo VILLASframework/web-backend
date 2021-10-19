@@ -22,8 +22,9 @@
 package component_configuration
 
 import (
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"log"
+
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 )
 
 type ComponentConfiguration struct {
@@ -148,7 +149,7 @@ func (m *ComponentConfiguration) delete() error {
 	if err != nil {
 		return err
 	}
-	for sig, _ := range InputMappingSignals {
+	for sig := range InputMappingSignals {
 		err = db.Delete(&sig).Error
 		if err != nil {
 			return err
@@ -161,7 +162,7 @@ func (m *ComponentConfiguration) delete() error {
 	if err != nil {
 		return err
 	}
-	for sig, _ := range OutputMappingSignals {
+	for sig := range OutputMappingSignals {
 		err = db.Delete(&sig).Error
 		if err != nil {
 			return err

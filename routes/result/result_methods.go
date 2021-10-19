@@ -23,9 +23,10 @@
 package result
 
 import (
+	"log"
+
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/file"
-	"log"
 )
 
 type Result struct {
@@ -91,6 +92,9 @@ func (r *Result) delete() error {
 
 	// remove association between Result and Scenario
 	err = db.Model(&sco).Association("Results").Delete(r).Error
+	if err != nil {
+		return err
+	}
 
 	// Delete result files
 	for _, fileid := range r.ResultFileIDs {

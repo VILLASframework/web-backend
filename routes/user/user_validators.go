@@ -82,16 +82,16 @@ func (r *updateUserRequest) updatedUser(callerID interface{}, role interface{}, 
 	// Only the Admin must be able to update user's role
 	if role != "Admin" && r.User.Role != "" {
 		if r.User.Role != u.Role {
-			return u, fmt.Errorf("Only Admin can update user's Role")
+			return u, &ForbiddenError{Reason: "only Admin can update user's Role"}
 		}
 	} else if role == "Admin" && r.User.Role != "" {
 		u.Role = r.User.Role
 	}
 
 	// Only the Admin must be able to update users Active state
-	if (r.User.Active == "yes" && u.Active == false) || (r.User.Active == "no" && u.Active == true) {
+	if (r.User.Active == "yes" && !u.Active) || (r.User.Active == "no" && u.Active) {
 		if role != "Admin" {
-			return u, fmt.Errorf("Only Admin can update user's Active state")
+			return u, &ForbiddenError{Reason: "only Admin can update user's Active state"}
 		} else {
 			u.Active = !u.Active
 		}
@@ -100,7 +100,7 @@ func (r *updateUserRequest) updatedUser(callerID interface{}, role interface{}, 
 	// Update the username making sure it is NOT taken
 	var testUser User
 	if err := testUser.byUsername(r.User.Username); err == nil {
-		return u, fmt.Errorf("Username is alreaday taken")
+		return u, &UsernameAlreadyTaken{Username: r.User.Username}
 	}
 
 	if r.User.Username != "" {
@@ -111,7 +111,7 @@ func (r *updateUserRequest) updatedUser(callerID interface{}, role interface{}, 
 	if r.User.Password != "" {
 
 		if r.User.OldPassword == "" { // admin or old password has to be present for pw change
-			return u, fmt.Errorf("old or admin password is missing in request")
+			return u, &ForbiddenError{Reason: "missing old or admin password"}
 		}
 
 		if role == "Admin" { // admin has to enter admin password
@@ -123,14 +123,14 @@ func (r *updateUserRequest) updatedUser(callerID interface{}, role interface{}, 
 
 			err = adminUser.validatePassword(r.User.OldPassword)
 			if err != nil {
-				return u, fmt.Errorf("admin password not correct, pw not changed")
+				return u, &ForbiddenError{Reason: "admin password not correct, pw not changed"}
 			}
 
 		} else { //normal or guest user has to enter old password
 
 			err := oldUser.validatePassword(r.User.OldPassword)
 			if err != nil {
-				return u, fmt.Errorf("previous password not correct, pw not changed")
+				return u, &ForbiddenError{Reason: "previous password not correct, pw not changed"}
 			}
 		}
 

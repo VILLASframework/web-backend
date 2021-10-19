@@ -53,15 +53,19 @@ type UserRequest struct {
 }
 
 var newScenario1 = ScenarioRequest{
-	Name:            "Scenario1",
-	StartParameters: postgres.Jsonb{json.RawMessage(`{"parameter1" : "testValue1A", "parameter2" : "testValue2A", "parameter3" : 42}`)},
-	IsLocked:        false,
+	Name: "Scenario1",
+	StartParameters: postgres.Jsonb{
+		RawMessage: json.RawMessage(`{"parameter1" : "testValue1A", "parameter2" : "testValue2A", "parameter3" : 42}`),
+	},
+	IsLocked: false,
 }
 
 var newScenario2 = ScenarioRequest{
-	Name:            "Scenario2",
-	StartParameters: postgres.Jsonb{json.RawMessage(`{"parameter1" : "testValue1B", "parameter2" : "testValue2B", "parameter3" : 55}`)},
-	IsLocked:        false,
+	Name: "Scenario2",
+	StartParameters: postgres.Jsonb{
+		RawMessage: json.RawMessage(`{"parameter1" : "testValue1B", "parameter2" : "testValue2B", "parameter3" : 55}`),
+	},
+	IsLocked: false,
 }
 
 func TestMain(m *testing.M) {
@@ -70,7 +74,7 @@ func TestMain(m *testing.M) {
 		panic(m)
 	}
 
-	err = database.InitDB(configuration.GlobalConfig, "true")
+	err = database.InitDB(configuration.GlobalConfig, true)
 	if err != nil {
 		panic(m)
 	}

@@ -62,7 +62,7 @@ func isAuthenticated(c *gin.Context) (bool, error) {
 		func(token *jwt.Token) (interface{}, error) {
 			// Validate alg for signing the jwt
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, fmt.Errorf("Unexpected signing alg: %v",
+				return nil, fmt.Errorf("unexpected signing alg: %v",
 					token.Header["alg"])
 			}
 

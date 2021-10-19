@@ -65,7 +65,7 @@ func duplicateScenarioForUser(s database.Scenario, user *database.User) <-chan e
 			if ic.Category == "simulator" && ic.Type == "kubernetes" {
 				duplicateUUID, err := duplicateIC(ic, user.Username)
 				if err != nil {
-					errs <- fmt.Errorf("Duplication of IC (id=%d) unsuccessful, err: %s", icID, err)
+					errs <- fmt.Errorf("duplication of IC (id=%d) unsuccessful, err: %s", icID, err)
 					continue
 				}
 
@@ -278,6 +278,9 @@ func duplicateComponentConfig(m database.ComponentConfiguration, scenarioID uint
 	// duplication of signals
 	var sigs []database.Signal
 	err = db.Order("ID asc").Model(&m).Related(&sigs, "OutputMapping").Error
+	if err != nil {
+		return err
+	}
 	smap := *signalMap
 	for _, s := range sigs {
 		var sigDup database.Signal

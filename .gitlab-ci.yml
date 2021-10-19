@@ -10,6 +10,14 @@ stages:
 # Stage: test
 ##############################################################################
 
+staticcheck:
+  stage: test
+  image: golang:1.16-buster
+  before_script:
+    - go install honnef.co/go/tools/cmd/staticcheck@latest
+  script:
+    - staticcheck ./...
+
 test:
   stage: test
   image: golang:1.16-buster

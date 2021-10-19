@@ -43,7 +43,7 @@ func NewUser(username, password, mail, role string, active bool) (User, error) {
 	// Check that the username is NOT taken
 	err := newUser.byUsername(username)
 	if err == nil {
-		return newUser, fmt.Errorf("Username is already taken")
+		return newUser, &UsernameAlreadyTaken{Username: username}
 	}
 
 	newUser.Username = username
@@ -97,12 +97,12 @@ func (u *User) byID(id uint) error {
 
 func (u *User) setPassword(password string) error {
 	if len(password) == 0 {
-		return fmt.Errorf("Password cannot be empty")
+		return fmt.Errorf("password cannot be empty")
 	}
 	newPassword, err :=
 		bcrypt.GenerateFromPassword([]byte(password), bcryptCost)
 	if err != nil {
-		return fmt.Errorf("Failed to generate hash from password")
+		return fmt.Errorf("failed to generate hash from password")
 	}
 	u.Password = string(newPassword)
 	return nil

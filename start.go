@@ -103,7 +103,7 @@ func main() {
 	}
 
 	// Init database
-	err = database.InitDB(configuration.GlobalConfig, dbClear)
+	err = database.InitDB(configuration.GlobalConfig, dbClear == "true")
 	if err != nil {
 		log.Fatalf("Error during initialization of database: %s, aborting.", err)
 	}
@@ -142,7 +142,7 @@ func main() {
 	}
 
 	// Make sure that at least one admin user exists in DB
-	err, _ = database.DBAddAdminUser(configuration.GlobalConfig)
+	_, err = database.DBAddAdminUser(configuration.GlobalConfig)
 	if err != nil {
 		fmt.Println("error: adding admin user failed:", err.Error())
 		log.Fatal(err)

@@ -121,25 +121,25 @@ func InitConfig() error {
 		"k8sCluster":                  *k8sCluster,
 	}
 
-	if *dbClear == true {
+	if *dbClear {
 		static["db.clear"] = "true"
 	} else {
 		static["db.clear"] = "false"
 	}
 
-	if *s3NoSSL == true {
+	if *s3NoSSL {
 		static["s3.nossl"] = "true"
 	} else {
 		static["s3.nossl"] = "false"
 	}
 
-	if *s3PathStyle == true {
+	if *s3PathStyle {
 		static["s3.pathstyle"] = "true"
 	} else {
 		static["s3.pathstyle"] = "false"
 	}
 
-	if *authExternal == true {
+	if *authExternal {
 		static["auth.external.enabled"] = "true"
 	} else {
 		static["auth.external.enabled"] = "false"
