@@ -485,11 +485,15 @@ func duplicateIC(ic database.InfrastructureComponent, userName string) (string, 
 		return "", err
 	}
 
-	if session.IsReady {
-		err = session.Send(payload, ic.Manager)
-		return newUUID, err
+	if session != nil {
+		if session.IsReady {
+			err = session.Send(payload, ic.Manager)
+			return newUUID, err
+		} else {
+			return "", fmt.Errorf("could not send IC create action, AMQP session is not ready")
+		}
 	} else {
-		return "", fmt.Errorf("could not send IC create action, AMQP session is not ready")
+		return "", fmt.Errorf("could not send IC create action, AMQP session is nil")
 	}
 
 }

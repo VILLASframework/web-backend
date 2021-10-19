@@ -168,11 +168,7 @@ func createExternalIC(payload ICUpdate, ICUUID string, body []byte) error {
 	log.Println("AMQP: Created IC with UUID ", newIC.UUID)
 
 	// send ping to get full status update of this IC
-	if session != nil {
-		err = SendPing(ICUUID)
-	} else {
-		err = fmt.Errorf("cannot sent ping to %v because AMQP session is nil", ICUUID)
-	}
+	err = SendPing(ICUUID)
 	return err
 }
 
@@ -257,8 +253,17 @@ func SendPing(uuid string) error {
 		return err
 	}
 
-	err = session.Send(payload, uuid)
-	return err
+	if session != nil {
+		if session.IsReady {
+			err = session.Send(payload, uuid)
+			return err
+		} else {
+			return fmt.Errorf("could not send ping, AMQP session not ready")
+		}
+	} else {
+		return fmt.Errorf("could not send ping, AMQP session is nil")
+	}
+
 }
 
 func sendActionAMQP(action Action, destinationUUID string) error {
@@ -268,6 +273,15 @@ func sendActionAMQP(action Action, destinationUUID string) error {
 		return err
 	}
 
-	err = session.Send(payload, destinationUUID)
-	return err
+	if session != nil {
+		if session.IsReady {
+			err = session.Send(payload, destinationUUID)
+			return err
+		} else {
+			return fmt.Errorf("could not send action, AMQP session is not ready")
+		}
+	} else {
+		return fmt.Errorf("could not send action, AMQP session is nil")
+	}
+
 }
