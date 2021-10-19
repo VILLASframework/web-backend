@@ -22,13 +22,16 @@
 package file
 
 import (
+	"errors"
 	"fmt"
 	"io"
+	"net/url"
 	"time"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/request"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
@@ -83,7 +86,7 @@ func createS3Session() (*session.Session, error) {
 		},
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create session: %s", err)
+		return nil, fmt.Errorf("failed to create session: %w", err)
 	}
 
 	return sess, nil
@@ -110,7 +113,7 @@ func (f *File) putS3(fileContent io.Reader) error {
 		Body:   fileContent,
 	})
 	if err != nil {
-		return fmt.Errorf("failed to upload file, %v", err)
+		return fmt.Errorf("failed to upload file: %w", err)
 	}
 
 	return nil
@@ -128,15 +131,20 @@ func (f *File) getS3Url() (string, error) {
 	svc := s3.New(sess)
 
 	req, _ := svc.GetObjectRequest(&s3.GetObjectInput{
-		Bucket:              aws.String(bucket),
-		Key:                 aws.String(f.Key),
-		ResponseContentType: aws.String(f.Type),
-		// ResponseContentDisposition: aws.String("attachment; filename=" + f.Name),
+		Bucket:                     aws.String(bucket),
+		Key:                        aws.String(f.Key),
+		ResponseContentType:        aws.String(f.Type),
+		ResponseContentDisposition: aws.String("attachment; filename=" + f.Name),
 		// ResponseContentEncoding: aws.String(),
 		// ResponseContentLanguage: aws.String(),
 		// ResponseCacheControl:    aws.String(),
 		// ResponseExpires:         aws.String(),
 	})
+
+	err = updateS3Request(req)
+	if err != nil {
+		return "", err
+	}
 
 	urlStr, err := req.Presign(5 * 24 * 60 * time.Minute)
 	if err != nil {
@@ -169,4 +177,36 @@ func (f *File) deleteS3() error {
 	f.Key = ""
 
 	return nil
+}
+
+// updateS3Request updates the request host to the public accessible S3
+// endpoint host so that presigned URLs are still valid when accessed
+// by the user
+func updateS3Request(req *request.Request) error {
+	epURL, err := getS3EndpointURL()
+	if err != nil {
+		return err
+	}
+
+	req.HTTPRequest.URL.Scheme = epURL.Scheme
+	req.HTTPRequest.URL.Host = epURL.Host
+
+	return nil
+}
+
+func getS3EndpointURL() (*url.URL, error) {
+	ep, err := configuration.GlobalConfig.String("s3.endpoint-public")
+	if err != nil {
+		ep, err = configuration.GlobalConfig.String("s3.endpoint")
+		if err != nil {
+			return nil, errors.New("missing s3.endpoint setting")
+		}
+	}
+
+	epURL, err := url.Parse(ep)
+	if err != nil {
+		return nil, err
+	}
+
+	return epURL, nil
 }
