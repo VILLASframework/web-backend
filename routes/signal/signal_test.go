@@ -95,17 +95,21 @@ func addScenarioAndICAndConfig() (scenarioID uint, ICID uint, configID uint) {
 
 	// POST $newICA
 	newICA := ICRequest{
-		UUID:                  "7be0322d-354e-431e-84bd-ae4c9633138b",
-		WebsocketURL:          "https://villas.k8s.eonerc.rwth-aachen.de/ws/ws_sig",
-		Type:                  "villas-node",
-		Name:                  "ACS Demo Signals",
-		Category:              "gateway",
-		State:                 "idle",
-		Location:              "k8s",
-		Description:           "A signal generator for testing purposes",
-		StartParameterSchema:  postgres.Jsonb{json.RawMessage(`{"startprop1" : "a nice prop"}`)},
-		CreateParameterSchema: postgres.Jsonb{json.RawMessage(`{"createprop1" : "a really nice prop"}`)},
-		ManagedExternally:     newFalse(),
+		UUID:         "7be0322d-354e-431e-84bd-ae4c9633138b",
+		WebsocketURL: "https://villas.k8s.eonerc.rwth-aachen.de/ws/ws_sig",
+		Type:         "villas-node",
+		Name:         "ACS Demo Signals",
+		Category:     "gateway",
+		State:        "idle",
+		Location:     "k8s",
+		Description:  "A signal generator for testing purposes",
+		StartParameterSchema: postgres.Jsonb{
+			RawMessage: json.RawMessage(`{"startprop1" : "a nice prop"}`),
+		},
+		CreateParameterSchema: postgres.Jsonb{
+			RawMessage: json.RawMessage(`{"createprop1" : "a really nice prop"}`),
+		},
+		ManagedExternally: newFalse(),
 	}
 	_, resp, _ := helper.TestEndpoint(router, token,
 		"/api/v2/ic", "POST", helper.KeyModels{"ic": newICA})
@@ -118,8 +122,10 @@ func addScenarioAndICAndConfig() (scenarioID uint, ICID uint, configID uint) {
 
 	// POST $newScenario
 	newScenario := ScenarioRequest{
-		Name:            "Scenario1",
-		StartParameters: postgres.Jsonb{json.RawMessage(`{"parameter1" : "testValue1A", "parameter2" : "testValue2A", "parameter3" : 42}`)},
+		Name: "Scenario1",
+		StartParameters: postgres.Jsonb{
+			RawMessage: json.RawMessage(`{"parameter1" : "testValue1A", "parameter2" : "testValue2A", "parameter3" : 42}`),
+		},
 	}
 	_, resp, _ = helper.TestEndpoint(router, token,
 		"/api/v2/scenarios", "POST", helper.KeyModels{"scenario": newScenario})
@@ -141,7 +147,7 @@ func addScenarioAndICAndConfig() (scenarioID uint, ICID uint, configID uint) {
 	newConfigID, _ := helper.GetResponseID(resp)
 
 	// add the guest user to the new scenario
-	_, resp, _ = helper.TestEndpoint(router, token,
+	_, _, _ = helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/v2/scenarios/%v/user?username=User_C", newScenarioID), "PUT", nil)
 
 	return uint(newScenarioID), uint(newICID), uint(newConfigID)
@@ -153,7 +159,7 @@ func TestMain(m *testing.M) {
 		panic(m)
 	}
 
-	err = database.InitDB(configuration.GlobalConfig, "true")
+	err = database.InitDB(configuration.GlobalConfig, true)
 	if err != nil {
 		panic(m)
 	}
@@ -189,12 +195,12 @@ func TestAddSignal(t *testing.T) {
 	_, _, configID := addScenarioAndICAndConfig()
 
 	// authenticate as normal user
-	token, err := helper.AuthenticateForTest(router, helper.UserACredentials)
+	_, err := helper.AuthenticateForTest(router, helper.UserACredentials)
 	assert.NoError(t, err)
 
 	newSignal1.ConfigID = configID
 	// authenticate as normal userB who has no access to new scenario
-	token, err = helper.AuthenticateForTest(router, helper.UserBCredentials)
+	token, err := helper.AuthenticateForTest(router, helper.UserBCredentials)
 	assert.NoError(t, err)
 
 	// try to POST to component config without access

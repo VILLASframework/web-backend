@@ -21,6 +21,8 @@
 *********************************************************************************/
 package api
 
+//lint:file-ignore U1000 Ignore all unused code, it's generated
+
 import "git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 
 // This file defines the responses to any endpoint in the backend

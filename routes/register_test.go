@@ -43,7 +43,7 @@ func TestMain(m *testing.M) {
 		panic(m)
 	}
 
-	err = database.InitDB(configuration.GlobalConfig, "true")
+	err = database.InitDB(configuration.GlobalConfig, true)
 	if err != nil {
 		panic(m)
 	}
@@ -66,8 +66,11 @@ func TestStartAMQP(t *testing.T) {
 	// connect AMQP client
 	// Make sure that AMQP_HOST, AMQP_USER, AMQP_PASS are set
 	host, err := configuration.GlobalConfig.String("amqp.host")
+	assert.NoError(t, err)
 	user, err := configuration.GlobalConfig.String("amqp.user")
+	assert.NoError(t, err)
 	pass, err := configuration.GlobalConfig.String("amqp.pass")
+	assert.NoError(t, err)
 	amqpURI := "amqp://" + user + ":" + pass + "@" + host
 
 	// AMQP Connection startup is tested here

@@ -22,7 +22,6 @@
 package database
 
 import (
-	"fmt"
 	"os"
 	"testing"
 
@@ -49,42 +48,25 @@ func TestInitDB(t *testing.T) {
 	defaults := config.NewStatic(static)
 	env := config.NewEnvironment(mappings)
 
-	ownconfig := config.NewConfig([]config.Provider{defaults, env})
+	ownConfig := config.NewConfig([]config.Provider{defaults, env})
 
-	err = InitDB(ownconfig, "true")
-	assert.Error(t, err)
-	dbname, err := configuration.GlobalConfig.String("db.name")
-	assert.NoError(t, err)
-	static["db.name"] = dbname
-	ownconfig = config.NewConfig([]config.Provider{defaults, env})
-	err = InitDB(ownconfig, "true")
+	err = InitDB(ownConfig, true)
 	assert.Error(t, err)
 
-	dbhost, err := configuration.GlobalConfig.String("db.host")
-	assert.NoError(t, err)
-	static["db.host"] = dbhost
-	ownconfig = config.NewConfig([]config.Provider{defaults, env})
-	err = InitDB(ownconfig, "true")
-	assert.Error(t, err)
+	dbOptions := []string{"db.name", "db.host", "db.user", "db.pass", "db.ssl"}
+	for _, opt := range dbOptions {
+		val, err := configuration.GlobalConfig.String(opt)
+		assert.NoError(t, err)
+		static[opt] = val
+		ownConfig = config.NewConfig([]config.Provider{defaults, env})
+		err = InitDB(ownConfig, true)
 
-	dbuser, err := configuration.GlobalConfig.String("db.user")
-	static["db.user"] = dbuser
-	ownconfig = config.NewConfig([]config.Provider{defaults, env})
-	err = InitDB(ownconfig, "true")
-	assert.Error(t, err)
-
-	dbpass, err := configuration.GlobalConfig.String("db.pass")
-	static["db.pass"] = dbpass
-	ownconfig = config.NewConfig([]config.Provider{defaults, env})
-	err = InitDB(ownconfig, "true")
-	assert.Error(t, err)
-
-	dbssl, err := configuration.GlobalConfig.String("db.ssl")
-	assert.NoError(t, err)
-	static["db.ssl"] = dbssl
-	ownconfig = config.NewConfig([]config.Provider{defaults, env})
-	err = InitDB(ownconfig, "true")
-	assert.NoError(t, err)
+		if opt == "db.ssl" {
+			assert.NoError(t, err)
+		} else {
+			assert.Error(t, err)
+		}
+	}
 
 	// Verify that you can connect to the database
 	db := GetDB()
@@ -118,7 +100,7 @@ func TestUserAssociations(t *testing.T) {
 	assert.NoError(t, DBpool.Model(&userB).Association("Scenarios").Append(&scenarioA).Error)
 
 	var usr1 User
-	assert.NoError(t, DBpool.Find(&usr1, "ID = ?", 1).Error, fmt.Sprintf("Find User with ID=1"))
+	assert.NoError(t, DBpool.Find(&usr1, "ID = ?", 1).Error, "Find User with ID=1")
 
 	// Get scenarios of usr1
 	var scenarios []Scenario
@@ -196,7 +178,7 @@ func TestScenarioAssociations(t *testing.T) {
 	assert.NoError(t, DBpool.Model(&scenarioA).Association("Results").Append(&resultB).Error)
 
 	var scenario1 Scenario
-	assert.NoError(t, DBpool.Find(&scenario1, 1).Error, fmt.Sprintf("Find Scenario with ID=1"))
+	assert.NoError(t, DBpool.Find(&scenario1, 1).Error, "Find Scenario with ID=1")
 
 	// Get users of scenario1
 	var users []User
@@ -263,7 +245,7 @@ func TestICAssociations(t *testing.T) {
 	assert.NoError(t, DBpool.Model(&icA).Association("ComponentConfigurations").Append(&configB).Error)
 
 	var ic1 InfrastructureComponent
-	assert.NoError(t, DBpool.Find(&ic1, 1).Error, fmt.Sprintf("Find InfrastructureComponent with ID=1"))
+	assert.NoError(t, DBpool.Find(&ic1, 1).Error, "Find InfrastructureComponent with ID=1")
 
 	// Get Component Configurations of ic1
 	var configs []ComponentConfiguration
@@ -314,7 +296,7 @@ func TestComponentConfigurationAssociations(t *testing.T) {
 	assert.NoError(t, DBpool.Model(&icA).Association("ComponentConfigurations").Append(&configB).Error)
 
 	var config1 ComponentConfiguration
-	assert.NoError(t, DBpool.Find(&config1, 1).Error, fmt.Sprintf("Find ComponentConfiguration with ID=1"))
+	assert.NoError(t, DBpool.Find(&config1, 1).Error, "Find ComponentConfiguration with ID=1")
 
 	// Check IC ID
 	if config1.ICID != 1 {
@@ -355,7 +337,7 @@ func TestDashboardAssociations(t *testing.T) {
 	assert.NoError(t, DBpool.Model(&dashboardA).Association("Widgets").Append(&widgetB).Error)
 
 	var dashboard1 Dashboard
-	assert.NoError(t, DBpool.Find(&dashboard1, 1).Error, fmt.Sprintf("Find Dashboard with ID=1"))
+	assert.NoError(t, DBpool.Find(&dashboard1, 1).Error, "Find Dashboard with ID=1")
 
 	//Get widgets of dashboard1
 	var widgets []Widget
@@ -380,7 +362,7 @@ func TestWidgetAssociations(t *testing.T) {
 	assert.NoError(t, DBpool.Create(&widgetB).Error)
 
 	var widget1 Widget
-	assert.NoError(t, DBpool.Find(&widget1, 1).Error, fmt.Sprintf("Find Widget with ID=1"))
+	assert.NoError(t, DBpool.Find(&widget1, 1).Error, "Find Widget with ID=1")
 }
 
 func TestFileAssociations(t *testing.T) {
@@ -401,5 +383,5 @@ func TestFileAssociations(t *testing.T) {
 	assert.NoError(t, DBpool.Create(&fileD).Error)
 
 	var file1 File
-	assert.NoError(t, DBpool.Find(&file1, 1).Error, fmt.Sprintf("Find File with ID=1"))
+	assert.NoError(t, DBpool.Find(&file1, 1).Error, "Find File with ID=1")
 }

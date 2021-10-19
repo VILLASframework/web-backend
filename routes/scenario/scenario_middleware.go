@@ -23,6 +23,7 @@ package scenario
 
 import (
 	"fmt"
+
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"github.com/gin-gonic/gin"
 
@@ -55,7 +56,7 @@ func CheckPermissions(c *gin.Context, operation database.CRUD, scenarioIDsource 
 		return false, so
 	}
 
-	if so.checkAccess(userID.(uint), operation) == false {
+	if !so.checkAccess(userID.(uint), operation) {
 		helper.UnprocessableEntityError(c, "Access denied (user has no access or scenario is locked).")
 		return false, so
 	}

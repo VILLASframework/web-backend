@@ -66,9 +66,10 @@ type RoleActions map[string]ModelActions
 // Predefined CRUD operations permissions to be used in Roles
 var crud = Permission{Create: true, Read: true, Update: true, Delete: true}
 var _ru_ = Permission{Create: false, Read: true, Update: true, Delete: false}
-var __u_ = Permission{Create: false, Read: false, Update: true, Delete: false}
 var _r__ = Permission{Create: false, Read: true, Update: false, Delete: false}
 var none = Permission{Create: false, Read: false, Update: false, Delete: false}
+
+// var __u_ = Permission{Create: false, Read: false, Update: true, Delete: false}
 
 // Roles is used as a look up variable to determine if a certain user is
 // allowed to do a certain action on a given model based on his role
@@ -135,12 +136,12 @@ func ValidateRole(c *gin.Context, model ModelName, action CRUD) error {
 	// Get user's role from context
 	role, exists := c.Get(UserRoleCtx)
 	if !exists {
-		return fmt.Errorf("Request does not contain user's role")
+		return fmt.Errorf("request does not contain user's role")
 	}
 
 	// Check if the role can execute the action on the model
 	if !Roles[role.(string)][model][action] {
-		return fmt.Errorf("Action not allowed for role %v", role)
+		return fmt.Errorf("action not allowed for role %v", role)
 	}
 
 	return nil

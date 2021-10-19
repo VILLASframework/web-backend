@@ -85,16 +85,18 @@ func addScenarioAndIC() (scenarioID uint, ICID uint) {
 
 	// POST $newICA
 	newICA := ICRequest{
-		UUID:                 "7be0322d-354e-431e-84bd-ae4c9633138b",
-		WebsocketURL:         "https://villas.k8s.eonerc.rwth-aachen.de/ws/ws_sig",
-		Type:                 "villas-node",
-		Name:                 "ACS Demo Signals",
-		Category:             "gateway",
-		State:                "idle",
-		Location:             "k8s",
-		Description:          "A signal generator for testing purposes",
-		StartParameterSchema: postgres.Jsonb{json.RawMessage(`{"prop1" : "a nice prop"}`)},
-		ManagedExternally:    newFalse(),
+		UUID:         "7be0322d-354e-431e-84bd-ae4c9633138b",
+		WebsocketURL: "https://villas.k8s.eonerc.rwth-aachen.de/ws/ws_sig",
+		Type:         "villas-node",
+		Name:         "ACS Demo Signals",
+		Category:     "gateway",
+		State:        "idle",
+		Location:     "k8s",
+		Description:  "A signal generator for testing purposes",
+		StartParameterSchema: postgres.Jsonb{
+			RawMessage: json.RawMessage(`{"prop1" : "a nice prop"}`),
+		},
+		ManagedExternally: newFalse(),
 	}
 
 	code, resp, err := helper.TestEndpoint(router, token,
@@ -118,8 +120,10 @@ func addScenarioAndIC() (scenarioID uint, ICID uint) {
 
 	// POST $newScenario
 	newScenario := ScenarioRequest{
-		Name:            "Scenario1",
-		StartParameters: postgres.Jsonb{json.RawMessage(`{"parameter1" : "testValue1A", "parameter2" : "testValue2A", "parameter3" : 42}`)},
+		Name: "Scenario1",
+		StartParameters: postgres.Jsonb{
+			RawMessage: json.RawMessage(`{"parameter1" : "testValue1A", "parameter2" : "testValue2A", "parameter3" : 42}`),
+		},
 	}
 	code, resp, err = helper.TestEndpoint(router, token,
 		"/api/v2/scenarios", "POST", helper.KeyModels{"scenario": newScenario})
@@ -131,7 +135,7 @@ func addScenarioAndIC() (scenarioID uint, ICID uint) {
 	newScenarioID, _ := helper.GetResponseID(resp)
 
 	// add the guest user to the new scenario
-	_, resp, _ = helper.TestEndpoint(router, token,
+	_, _, _ = helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/v2/scenarios/%v/user?username=User_C", newScenarioID), "PUT", nil)
 
 	return uint(newScenarioID), uint(newICID)
@@ -143,7 +147,7 @@ func TestMain(m *testing.M) {
 		panic(m)
 	}
 
-	err = database.InitDB(configuration.GlobalConfig, "true")
+	err = database.InitDB(configuration.GlobalConfig, true)
 	if err != nil {
 		panic(m)
 	}
