@@ -25,7 +25,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	infrastructure_component "git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/infrastructure-component"
+	"io"
+	"io/ioutil"
+	"log"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -33,13 +36,20 @@ import (
 	"testing"
 	"time"
 
+	infrastructure_component "git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/infrastructure-component"
+
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/stretchr/testify/assert"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/dashboard"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/file"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/scenario"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/widget"
 )
 
 var router *gin.Engine
@@ -70,6 +80,12 @@ func TestMain(m *testing.M) {
 	RegisterAuthenticate(api.Group("/authenticate"))
 	api.Use(Authentication())
 	RegisterUserEndpoints(api.Group("/users"))
+
+	scenario.RegisterScenarioEndpoints(api.Group("/scenarios"))
+	infrastructure_component.RegisterICEndpoints(api.Group("/ic"))
+	dashboard.RegisterDashboardEndpoints(api.Group("/dashboards"))
+	file.RegisterFileEndpoints(api.Group("/files"))
+	widget.RegisterWidgetEndpoints(api.Group("/widgets"))
 
 	os.Exit(m.Run())
 }
@@ -846,11 +862,310 @@ func TestDuplicateScenarioForUser(t *testing.T) {
 
 	// AMQP Connection startup is tested here
 	// Not repeated in other tests because it is only needed once
+	//session = helper.NewAMQPSession("villas-test-session", amqpURI, "villas", infrastructure_component.ProcessMessage)
+	//SetAMQPSession(session)
+
+	// authenticate as admin (needed to create original IC)
+	token, err := helper.AuthenticateForTest(router, database.AdminCredentials)
+	assert.NoError(t, err)
+
+	/*** Create original scenario and entities ***/
+	scenarioID := addScenario(token)
+	var originalSo database.Scenario
+	db := database.GetDB()
+	err = db.Find(&originalSo, scenarioID).Error
+	assert.NoError(t, err)
+
+	// add file to scenario
+	fileID, err := addFile(scenarioID, token)
+	assert.NoError(t, err)
+	assert.NotEqual(t, 99, fileID)
+
+	// add IC
+	err = addIC(amqpURI, token)
+	assert.NoError(t, err)
+
+	// wait for IC to be created asynchronously
+	time.Sleep(3 * time.Second)
+
+	// add component config
+
+	// add dashboards to scenario
+	err = addTwoDashboards(scenarioID, token)
+	assert.NoError(t, err)
+	var dashboards []database.Dashboard
+	err = db.Find(&dashboards).Error
+	assert.NoError(t, err)
+	assert.Equal(t, 2, len(dashboards))
+
+	// add widgets
+	dashboardID_forAddingWidget := uint(0)
+	err = addWidget(dashboardID_forAddingWidget, token)
+	assert.NoError(t, err)
+
+	/*** Duplicate scenario for new user ***/
+	username := "Schnittlauch"
+	myUser, err := NewUser(username, "", "schnitti@lauch.de", "User", true)
+	assert.NoError(t, err)
+
+	if err := <-duplicateScenarioForUser(originalSo, &myUser.User); err != nil {
+		t.Fail()
+	}
+
+	/*** Check duplicated scenario for correctness ***/
+	var dplScenarios []database.Scenario
+	err = db.Find(&dplScenarios, "name = ?", originalSo.Name+" "+username).Error
+	assert.NoError(t, err)
+	assert.Equal(t, 1, len(dplScenarios))
+	assert.Equal(t, originalSo.StartParameters, dplScenarios[0].StartParameters)
+
+	// compare original and duplicated dashboards
+	err = db.Order("created_at asc").Find(&dashboards).Error
+	assert.NoError(t, err)
+	assert.Equal(t, 4, len(dashboards))
+	assert.Equal(t, dashboards[0].Name, dashboards[2].Name)
+	assert.Equal(t, dashboards[0].Grid, dashboards[2].Grid)
+	assert.Equal(t, dashboards[0].Height, dashboards[2].Height)
+	assert.NotEqual(t, dashboards[0].ScenarioID, dashboards[2].ScenarioID)
+
+	assert.Equal(t, dashboards[1].Name, dashboards[3].Name)
+	assert.Equal(t, dashboards[1].Grid, dashboards[3].Grid)
+	assert.Equal(t, dashboards[1].Height, dashboards[3].Height)
+	assert.NotEqual(t, dashboards[1].ScenarioID, dashboards[3].ScenarioID)
+
+	// compare original and duplicated file
+	var files []database.File
+	err = db.Find(&files).Error
+	assert.NoError(t, err)
+	assert.Equal(t, 2, len(files))
+	assert.Equal(t, files[0].Name, files[1].Name)
+	assert.Equal(t, files[0].FileData, files[1].FileData)
+	assert.Equal(t, files[0].ImageHeight, files[1].ImageHeight)
+	assert.Equal(t, files[0].ImageWidth, files[1].ImageWidth)
+	assert.Equal(t, files[0].Size, files[1].Size)
+	assert.NotEqual(t, files[0].ScenarioID, files[1].ScenarioID)
+
+}
+
+type ScenarioRequest struct {
+	Name            string         `json:"name,omitempty"`
+	StartParameters postgres.Jsonb `json:"startParameters,omitempty"`
+}
+
+func addScenario(token string) (scenarioID uint) {
+	newScenario := ScenarioRequest{
+		Name:            "Scenario1",
+		StartParameters: postgres.Jsonb{json.RawMessage(`{"parameter1" : "testValue1A", "parameter2" : "testValue2A", "parameter3" : 42}`)},
+	}
+	_, resp, err := helper.TestEndpoint(router, token,
+		"/api/v2/scenarios", "POST", helper.KeyModels{"scenario": newScenario})
+	if err != nil {
+		log.Panic("The following error happend on POSTing a scenario: ", err.Error())
+	}
+
+	// Read newScenario's ID from the response
+	newScenarioID, _ := helper.GetResponseID(resp)
+
+	// add the guest user to the new scenario
+	_, _, _ = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/v2/scenarios/%v/user?username=User_A", newScenarioID), "PUT", nil)
+
+	return uint(newScenarioID)
+}
+
+func addFile(scenarioID uint, token string) (uint, error) {
+	c1 := []byte(`<?xml version="1.0"?>
+	<svg xmlns="http://www.w3.org/2000/svg"
+			 width="400" height="400">
+		<circle cx="100" cy="100" r="50" stroke="black"
+			stroke-width="5" fill="red" />
+	</svg>`)
+	err := ioutil.WriteFile("circle.svg", c1, 0644)
+	if err != nil {
+		return 99, err
+	}
+
+	// test POST files
+	bodyBuf := &bytes.Buffer{}
+	bodyWriter := multipart.NewWriter(bodyBuf)
+	fileWriter, err := bodyWriter.CreateFormFile("file", "circle.svg")
+	if err != nil {
+		return 99, err
+	}
+
+	// open file handle
+	fh, err := os.Open("circle.svg")
+	if err != nil {
+		return 99, err
+	}
+	defer fh.Close()
+
+	// io copy
+	_, err = io.Copy(fileWriter, fh)
+	if err != nil {
+		return 99, err
+	}
+
+	contentType := bodyWriter.FormDataContentType()
+	bodyWriter.Close()
+
+	// Create the request
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest("POST", fmt.Sprintf("/api/v2/files?scenarioID=%v", scenarioID), bodyBuf)
+	if err != nil {
+		return 99, err
+	}
+	req.Header.Set("Content-Type", contentType)
+	req.Header.Add("Authorization", "Bearer "+token)
+	router.ServeHTTP(w, req)
+
+	newFileID, err := helper.GetResponseID(w.Body)
+	log.Println(w.Body)
+	if err != nil {
+		return 99, err
+	}
+	return uint(newFileID), nil
+}
+
+type DashboardRequest struct {
+	Name       string `json:"name,omitempty"`
+	Grid       int    `json:"grid,omitempty"`
+	Height     int    `json:"height,omitempty"`
+	ScenarioID uint   `json:"scenarioID,omitempty"`
+}
+
+func addTwoDashboards(scenarioID uint, token string) error {
+	newDashboardA := DashboardRequest{
+		Name:       "Dashboard_A",
+		Grid:       15,
+		Height:     200,
+		ScenarioID: scenarioID,
+	}
+
+	newDashboardB := DashboardRequest{
+		Name:       "Dashboard_B",
+		Grid:       35,
+		Height:     555,
+		ScenarioID: scenarioID,
+	}
+
+	_, _, err := helper.TestEndpoint(router, token,
+		"/api/v2/dashboards", "POST", helper.KeyModels{"dashboard": newDashboardA})
+	if err != nil {
+		return err
+	}
+
+	_, _, err = helper.TestEndpoint(router, token,
+		"/api/v2/dashboards", "POST", helper.KeyModels{"dashboard": newDashboardB})
+
+	return err
+}
+
+type WidgetRequest struct {
+	Name             string         `json:"name,omitempty"`
+	Type             string         `json:"type,omitempty"`
+	Width            uint           `json:"width,omitempty"`
+	Height           uint           `json:"height,omitempty"`
+	MinWidth         uint           `json:"minWidth,omitempty"`
+	MinHeight        uint           `json:"minHeight,omitempty"`
+	X                int            `json:"x,omitempty"`
+	Y                int            `json:"y,omitempty"`
+	Z                int            `json:"z,omitempty"`
+	DashboardID      uint           `json:"dashboardID,omitempty"`
+	IsLocked         bool           `json:"isLocked,omitempty"`
+	CustomProperties postgres.Jsonb `json:"customProperties,omitempty"`
+	SignalIDs        []int64        `json:"signalIDs,omitempty"`
+}
+
+func addWidget(dashboardID uint, token string) error {
+	newWidget := WidgetRequest{
+		Name:             "My label",
+		Type:             "Label",
+		Width:            100,
+		Height:           50,
+		MinWidth:         40,
+		MinHeight:        80,
+		X:                10,
+		Y:                10,
+		Z:                200,
+		IsLocked:         false,
+		CustomProperties: postgres.Jsonb{RawMessage: json.RawMessage(`{"textSize" : "20", "fontColor" : "#4287f5", "fontColor_opacity": 1}`)},
+		SignalIDs:        []int64{},
+	}
+
+	newWidget.DashboardID = dashboardID
+
+	_, _, err := helper.TestEndpoint(router, token,
+		"/api/v2/widgets", "POST", helper.KeyModels{"widget": newWidget})
+
+	return err
+}
+
+type ICRequest struct {
+	UUID                  string         `json:"uuid,omitempty"`
+	WebsocketURL          string         `json:"websocketurl,omitempty"`
+	APIURL                string         `json:"apiurl,omitempty"`
+	Type                  string         `json:"type,omitempty"`
+	Name                  string         `json:"name,omitempty"`
+	Category              string         `json:"category,omitempty"`
+	State                 string         `json:"state,omitempty"`
+	Location              string         `json:"location,omitempty"`
+	Description           string         `json:"description,omitempty"`
+	StartParameterSchema  postgres.Jsonb `json:"startparameterschema,omitempty"`
+	CreateParameterSchema postgres.Jsonb `json:"createparameterschema,omitempty"`
+	ManagedExternally     *bool          `json:"managedexternally"`
+	Manager               string         `json:"manager,omitempty"`
+}
+
+func newTrue() *bool {
+	b := true
+	return &b
+}
+
+func addIC(amqpURI string, token string) error {
+	// create IC
+	var newIC = ICRequest{
+		UUID:                  "7be0322d-354e-431e-84bd-ae4c9633138b",
+		WebsocketURL:          "https://villas.k8s.eonerc.rwth-aachen.de/ws/ws_sig",
+		APIURL:                "https://villas.k8s.eonerc.rwth-aachen.de/ws/api/v2",
+		Type:                  "kubernetes",
+		Name:                  "Kubernetes Simulator",
+		Category:              "simulator",
+		State:                 "idle",
+		Location:              "k8s",
+		Description:           "A kubernetes simulator for testing purposes",
+		StartParameterSchema:  postgres.Jsonb{json.RawMessage(`{"startprop1" : "a nice prop"}`)},
+		CreateParameterSchema: postgres.Jsonb{json.RawMessage(`{"createprop1" : "a really nice prop"}`)},
+		ManagedExternally:     newTrue(),
+		Manager:               "7be0322d-354e-431e-84bd-ae4c9633beef",
+	}
+
+	// fake an IC update (create) message
+	var update infrastructure_component.ICUpdate
+	update.Status.State = "idle"
+	update.Status.ManagedBy = newIC.Manager
+	update.Properties.Name = newIC.Name
+	update.Properties.Category = newIC.Category
+	update.Properties.Type = newIC.Type
+	update.Properties.UUID = newIC.UUID
+
+	payload, err := json.Marshal(update)
+	if err != nil {
+		return err
+	}
+
+	//var headers map[string]interface{}
+	//headers = make(map[string]interface{}) // empty map
+	//headers["uuid"] = newIC2.Manager       // set uuid
 	session = helper.NewAMQPSession("villas-test-session", amqpURI, "villas", infrastructure_component.ProcessMessage)
 	SetAMQPSession(session)
 
-	time.Sleep(3 * time.Second)
+	err = session.CheckConnection()
+	if err != nil {
+		return err
+	}
 
-	// TODO test duplicate scenario for user function here!!
+	err = session.Send(payload, newIC.Manager)
 
+	return err
 }
