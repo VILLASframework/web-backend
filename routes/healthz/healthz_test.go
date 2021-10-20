@@ -41,7 +41,7 @@ func TestHealthz(t *testing.T) {
 	assert.NoError(t, err)
 
 	// connect DB
-	err = database.InitDB(configuration.GlobalConfig, "true")
+	err = database.InitDB(configuration.GlobalConfig, true)
 	assert.NoError(t, err)
 	defer database.DBpool.Close()
 
@@ -60,7 +60,7 @@ func TestHealthz(t *testing.T) {
 	assert.Equalf(t, 500, code, "Response body: \n%v\n", resp)
 
 	// reconnect DB
-	err = database.InitDB(configuration.GlobalConfig, "true")
+	err = database.InitDB(configuration.GlobalConfig, true)
 	assert.NoError(t, err)
 	defer database.DBpool.Close()
 

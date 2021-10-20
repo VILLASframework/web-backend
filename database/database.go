@@ -23,11 +23,12 @@ package database
 
 import (
 	"fmt"
-	"golang.org/x/crypto/bcrypt"
 	"log"
 	"math/rand"
 	"strings"
 	"time"
+
+	"golang.org/x/crypto/bcrypt"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
@@ -37,19 +38,22 @@ import (
 var DBpool *gorm.DB // database used by backend
 
 // InitDB Initialize connection to the database
-func InitDB(cfg *config.Config, dbClear string) error {
+func InitDB(cfg *config.Config, clear bool) error {
 	name, err := cfg.String("db.name")
 	if err != nil {
 		return err
 	}
+
 	host, err := cfg.String("db.host")
 	if err != nil {
 		return err
 	}
-	user, err := cfg.String("db.user")
-	if err != nil && !strings.Contains(err.Error(), "Required setting 'db.user' not set") {
+
+	user, err := cfg.StringOr("db.user", "")
+	if err != nil {
 		return err
 	}
+
 	pass := ""
 	if user != "" {
 		pass, err = cfg.String("db.pass")
@@ -57,6 +61,7 @@ func InitDB(cfg *config.Config, dbClear string) error {
 			return err
 		}
 	}
+
 	sslmode, err := cfg.String("db.ssl")
 	if err != nil {
 		return err
@@ -75,7 +80,7 @@ func InitDB(cfg *config.Config, dbClear string) error {
 	DBpool = db
 
 	// drop tables if parameter set
-	if dbClear == "true" {
+	if clear {
 		DropTables()
 		log.Println("Database tables dropped")
 	}
@@ -120,19 +125,19 @@ func MigrateModels() {
 }
 
 // DBAddAdminUser adds a default admin user to the DB
-func DBAddAdminUser(cfg *config.Config) (error, string) {
+func DBAddAdminUser(cfg *config.Config) (string, error) {
 	DBpool.AutoMigrate(User{})
 
 	// Check if admin user exists in DB
 	var users []User
-	err := DBpool.Where("Role = ?", "Admin").Find(&users).Error
+	DBpool.Where("Role = ?", "Admin").Find(&users)
+
 	adminPW := ""
-	adminName := ""
 
 	if len(users) == 0 {
 		fmt.Println("No admin user found in DB, adding default admin user.")
 
-		adminName, err = cfg.String("admin.user")
+		adminName, err := cfg.String("admin.user")
 		if err != nil || adminName == "" {
 			adminName = "admin"
 		}
@@ -157,10 +162,10 @@ func DBAddAdminUser(cfg *config.Config) (error, string) {
 		// add admin user to DB
 		err = DBpool.Create(&user).Error
 		if err != nil {
-			return err, ""
+			return "", err
 		}
 	}
-	return nil, adminPW
+	return adminPW, nil
 }
 
 func generatePassword(Len int) string {
@@ -217,8 +222,8 @@ var UserC = User{Username: "User_C", Password: string(pwC),
 	Role: "Guest", Mail: "User_C@example.com", Active: true}
 
 type Credentials struct {
-	Username string `json:"username,required"`
-	Password string `json:"password,required"`
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
 var AdminCredentials = Credentials{

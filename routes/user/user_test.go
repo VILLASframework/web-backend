@@ -66,11 +66,11 @@ type UserRequest struct {
 func TestMain(m *testing.M) {
 	err := configuration.InitConfig()
 	if err != nil {
-		panic(m)
+		panic(err)
 	}
-	err = database.InitDB(configuration.GlobalConfig, "true")
+	err = database.InitDB(configuration.GlobalConfig, true)
 	if err != nil {
-		panic(m)
+		panic(err)
 	}
 	defer database.DBpool.Close()
 
@@ -93,7 +93,7 @@ func TestMain(m *testing.M) {
 func TestAuthenticate(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	err, adminpw := database.DBAddAdminUser(configuration.GlobalConfig)
+	adminpw, err := database.DBAddAdminUser(configuration.GlobalConfig)
 	assert.NoError(t, err)
 
 	// try to authenticate with non JSON body
@@ -190,7 +190,7 @@ func TestAuthenticateQueryToken(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	err, adminpw := database.DBAddAdminUser(configuration.GlobalConfig)
+	adminpw, err := database.DBAddAdminUser(configuration.GlobalConfig)
 	assert.NoError(t, err)
 
 	// authenticate as admin
@@ -211,7 +211,7 @@ func TestAddGetUser(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	err, adminpw := database.DBAddAdminUser(configuration.GlobalConfig)
+	adminpw, err := database.DBAddAdminUser(configuration.GlobalConfig)
 	assert.NoError(t, err)
 
 	// authenticate as admin
@@ -326,7 +326,7 @@ func TestAddGetUser(t *testing.T) {
 	// try to GET user with invalid user ID
 	// should result in bad request
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/v2/users/bla"), "GET", nil)
+		"/api/v2/users/bla", "GET", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 }
@@ -335,7 +335,7 @@ func TestUsersNotAllowedActions(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	err, adminpw := database.DBAddAdminUser(configuration.GlobalConfig)
+	adminpw, err := database.DBAddAdminUser(configuration.GlobalConfig)
 	assert.NoError(t, err)
 
 	// authenticate as admin
@@ -394,7 +394,7 @@ func TestGetAllUsers(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	err, adminpw := database.DBAddAdminUser(configuration.GlobalConfig)
+	adminpw, err := database.DBAddAdminUser(configuration.GlobalConfig)
 	assert.NoError(t, err)
 
 	// authenticate as admin
@@ -447,7 +447,7 @@ func TestModifyAddedUserAsUser(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	err, adminpw := database.DBAddAdminUser(configuration.GlobalConfig)
+	adminpw, err := database.DBAddAdminUser(configuration.GlobalConfig)
 	assert.NoError(t, err)
 
 	// authenticate as admin
@@ -478,7 +478,7 @@ func TestModifyAddedUserAsUser(t *testing.T) {
 
 	// Try PUT with invalid user ID in path
 	// Should return a bad request
-	code, resp, err = helper.TestEndpoint(router, token, fmt.Sprintf("/api/v2/users/blabla"), "PUT",
+	code, resp, err = helper.TestEndpoint(router, token, "/api/v2/users/blabla", "PUT",
 		helper.KeyModels{"user": newUser})
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
@@ -559,7 +559,7 @@ func TestModifyAddedUserAsUser(t *testing.T) {
 		fmt.Sprintf("/api/v2/users/%v", newUserID), "PUT",
 		helper.KeyModels{"user": modRequest})
 	assert.NoError(t, err)
-	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
+	assert.Equalf(t, 403, code, "Response body: \n%v\n", resp)
 
 	// modify newUser's password with wring old password
 	modRequest = UserRequest{
@@ -602,7 +602,7 @@ func TestInvalidUserUpdate(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	err, adminpw := database.DBAddAdminUser(configuration.GlobalConfig)
+	adminpw, err := database.DBAddAdminUser(configuration.GlobalConfig)
 	assert.NoError(t, err)
 
 	// authenticate as admin
@@ -668,14 +668,13 @@ func TestInvalidUserUpdate(t *testing.T) {
 		helper.KeyModels{"user": modRequest})
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
-
 }
 
 func TestModifyAddedUserAsAdmin(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	err, adminpw := database.DBAddAdminUser(configuration.GlobalConfig)
+	adminpw, err := database.DBAddAdminUser(configuration.GlobalConfig)
 	assert.NoError(t, err)
 
 	// authenticate as admin
@@ -744,7 +743,7 @@ func TestModifyAddedUserAsAdmin(t *testing.T) {
 		fmt.Sprintf("/api/v2/users/%v", newUserID), "PUT",
 		helper.KeyModels{"user": modRequest})
 	assert.NoError(t, err)
-	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
+	assert.Equalf(t, 403, code, "Response body: \n%v\n", resp)
 
 	// modify newUser's password, requires admin password
 	modRequest = UserRequest{
@@ -792,7 +791,7 @@ func TestDeleteUser(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	err, adminpw := database.DBAddAdminUser(configuration.GlobalConfig)
+	adminpw, err := database.DBAddAdminUser(configuration.GlobalConfig)
 	assert.NoError(t, err)
 
 	// authenticate as admin
@@ -817,7 +816,7 @@ func TestDeleteUser(t *testing.T) {
 	// try to DELETE with invalid ID
 	// should result in bad request
 	code, resp, err = helper.TestEndpoint(router, token,
-		fmt.Sprintf("/api/v2/users/bla"), "DELETE", nil)
+		"/api/v2/users/bla", "DELETE", nil)
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 

@@ -29,9 +29,6 @@ const (
 
 	// When setting up the channel after a channel exception
 	reInitDelay = 2 * time.Second
-
-	// When resending messages the server didn't confirm
-	resendDelay = 5 * time.Second
 )
 
 //var client AMQPsession

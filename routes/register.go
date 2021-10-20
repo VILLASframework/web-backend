@@ -311,7 +311,7 @@ func AddTestData(cfg *config.Config, router *gin.Engine) (*bytes.Buffer, error) 
 			defer fh.Close()
 
 			// io copy
-			_, err = io.Copy(fileWriter, fh)
+			_, _ = io.Copy(fileWriter, fh)
 			contentType := bodyWriter.FormDataContentType()
 			bodyWriter.Close()
 
@@ -338,7 +338,7 @@ func AddTestData(cfg *config.Config, router *gin.Engine) (*bytes.Buffer, error) 
 			defer fh.Close()
 
 			// io copy
-			_, err = io.Copy(fileWriter, fh)
+			_, _ = io.Copy(fileWriter, fh)
 			contentType := bodyWriter.FormDataContentType()
 			bodyWriter.Close()
 

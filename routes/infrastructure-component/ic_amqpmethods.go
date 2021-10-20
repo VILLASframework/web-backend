@@ -24,12 +24,12 @@ package infrastructure_component
 import (
 	"encoding/json"
 	"fmt"
+	"log"
+
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 	"github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/streadway/amqp"
-	"log"
-	"strings"
 )
 
 type Action struct {
@@ -91,7 +91,7 @@ func ProcessMessage(message amqp.Delivery) {
 	ICUUID := payload.Properties.UUID
 	_, err = uuid.Parse(ICUUID)
 	if err != nil {
-		log.Printf("AMQP: UUID not valid: %v, message ignored: %v \n", ICUUID, string(message.Body))
+		log.Printf("amqp: UUID not valid: %v, message ignored: %v \n", ICUUID, string(message.Body))
 	}
 
 	var sToBeUpdated InfrastructureComponent
@@ -108,7 +108,7 @@ func ProcessMessage(message amqp.Delivery) {
 		err = sToBeUpdated.updateExternalIC(payload, message.Body)
 	}
 	if err != nil {
-		log.Printf(err.Error())
+		log.Println(err.Error())
 	}
 
 }
@@ -186,7 +186,7 @@ func (s *InfrastructureComponent) updateExternalIC(payload ICUpdate, body []byte
 			if err != nil {
 				// if component could not be deleted there are still configurations using it in the DB
 				// continue with the update to save the new state of the component and get back to the deletion later
-				if strings.Contains(err.Error(), "postponed") {
+				if _, ok := err.(*DeletionPostponed); ok {
 					log.Println(err) // print log message
 				} else {
 					return err // return upon DB error

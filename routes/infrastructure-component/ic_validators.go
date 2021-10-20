@@ -88,7 +88,7 @@ func (r *AddICRequest) validate() error {
 		return errs
 	}
 
-	if *r.InfrastructureComponent.ManagedExternally == true {
+	if *r.InfrastructureComponent.ManagedExternally {
 		// check if valid manager UUID is provided
 		_, errs = uuid.Parse(r.InfrastructureComponent.Manager)
 		if errs != nil {
@@ -119,8 +119,7 @@ func (r *UpdateICRequest) validate() error {
 
 func (r *AddICRequest) createIC() (InfrastructureComponent, error) {
 	var s InfrastructureComponent
-	var err error
-	err = nil
+	var err error = nil
 
 	s.UUID = r.InfrastructureComponent.UUID
 	s.WebsocketURL = r.InfrastructureComponent.WebsocketURL

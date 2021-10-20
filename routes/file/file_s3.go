@@ -58,9 +58,21 @@ func getS3Session() (*session.Session, string, error) {
 
 func createS3Session() (*session.Session, error) {
 	endpoint, err := configuration.GlobalConfig.String("s3.endpoint")
+	if err != nil {
+		return nil, err
+	}
 	region, err := configuration.GlobalConfig.String("s3.region")
+	if err != nil {
+		return nil, err
+	}
 	pathStyle, err := configuration.GlobalConfig.Bool("s3.pathstyle")
+	if err != nil {
+		return nil, err
+	}
 	nossl, err := configuration.GlobalConfig.Bool("s3.nossl")
+	if err != nil {
+		return nil, err
+	}
 
 	sess, err := session.NewSession(
 		&aws.Config{
@@ -134,6 +146,7 @@ func (f *File) getS3Url() (string, error) {
 	return urlStr, nil
 }
 
+//lint:ignore U1000 will be used later
 func (f *File) deleteS3() error {
 
 	// The session the S3 Uploader will use

@@ -105,7 +105,7 @@ func addIC(c *gin.Context) {
 	}
 
 	// Check if IC to be created is managed externally
-	if *req.InfrastructureComponent.ManagedExternally == true {
+	if *req.InfrastructureComponent.ManagedExternally {
 		// if so: refuse creation
 		helper.BadRequestError(c, "create for externally managed IC not possible with this endpoint - use /ic/{ICID}/action endpoint instead to request creation of the component")
 		return

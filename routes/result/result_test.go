@@ -70,10 +70,10 @@ var newResult = ResultRequest{
 func addScenario() (scenarioID uint) {
 
 	// authenticate as admin
-	token, _ := helper.AuthenticateForTest(router, database.AdminCredentials)
+	_, _ = helper.AuthenticateForTest(router, database.AdminCredentials)
 
 	// authenticate as normal user
-	token, _ = helper.AuthenticateForTest(router, database.UserACredentials)
+	token, _ := helper.AuthenticateForTest(router, database.UserACredentials)
 
 	// POST $newScenario
 	newScenario := ScenarioRequest{
@@ -87,7 +87,7 @@ func addScenario() (scenarioID uint) {
 	newScenarioID, _ := helper.GetResponseID(resp)
 
 	// add the guest user to the new scenario
-	_, resp, _ = helper.TestEndpoint(router, token,
+	_, _, _ = helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/v2/scenarios/%v/user?username=User_C", newScenarioID), "PUT", nil)
 
 	return uint(newScenarioID)
@@ -98,7 +98,7 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		panic(m)
 	}
-	err = database.InitDB(configuration.GlobalConfig, "true")
+	err = database.InitDB(configuration.GlobalConfig, true)
 	if err != nil {
 		panic(m)
 	}
@@ -135,7 +135,9 @@ func TestGetAllResultsOfScenario(t *testing.T) {
 
 	// test POST newResult
 	configSnapshot1 := json.RawMessage(`{"configs": [ {"Name" : "conf1", "scenarioID" : 1}, {"Name" : "conf2", "scenarioID" : 1}]}`)
-	confSnapshots := postgres.Jsonb{configSnapshot1}
+	confSnapshots := postgres.Jsonb{
+		RawMessage: configSnapshot1,
+	}
 
 	newResult.ScenarioID = scenarioID
 	newResult.ConfigSnapshots = confSnapshots
@@ -174,7 +176,9 @@ func TestAddGetUpdateDeleteResult(t *testing.T) {
 	// by adding a scenario
 	scenarioID := addScenario()
 	configSnapshot1 := json.RawMessage(`{"configs": [ {"Name" : "conf1", "scenarioID" : 1}, {"Name" : "conf2", "scenarioID" : 1}]}`)
-	confSnapshots := postgres.Jsonb{configSnapshot1}
+	confSnapshots := postgres.Jsonb{
+		RawMessage: configSnapshot1,
+	}
 	newResult.ScenarioID = scenarioID
 	newResult.ConfigSnapshots = confSnapshots
 	// authenticate as normal userB who has no access to new scenario
@@ -347,7 +351,9 @@ func TestAddDeleteResultFile(t *testing.T) {
 	// by adding a scenario
 	scenarioID := addScenario()
 	configSnapshot1 := json.RawMessage(`{"configs": [ {"Name" : "conf1", "scenarioID" : 1}, {"Name" : "conf2", "scenarioID" : 1}]}`)
-	confSnapshots := postgres.Jsonb{configSnapshot1}
+	confSnapshots := postgres.Jsonb{
+		RawMessage: configSnapshot1,
+	}
 
 	newResult.ScenarioID = scenarioID
 	newResult.ConfigSnapshots = confSnapshots
@@ -404,6 +410,7 @@ func TestAddDeleteResultFile(t *testing.T) {
 
 	assert.Equalf(t, 200, w.Code, "Response body: \n%v\n", w.Body)
 	err = helper.CompareResponse(w.Body, helper.KeyModels{"result": newResult})
+	assert.NoError(t, err)
 
 	// extract file ID from response body
 	var respResult ResponseResult
@@ -455,6 +462,7 @@ func TestAddDeleteResultFile(t *testing.T) {
 
 	assert.Equalf(t, 200, w2.Code, "Response body: \n%v\n", w2.Body)
 	err = helper.CompareResponse(w2.Body, helper.KeyModels{"result": newResult})
+	assert.NoError(t, err)
 
 	// extract file ID from response body
 	var respResult3 ResponseResult
