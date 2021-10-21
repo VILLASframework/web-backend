@@ -25,10 +25,11 @@ package user
 import (
 	"encoding/json"
 	"fmt"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
-	"github.com/google/uuid"
 	"log"
 	"time"
+
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
+	"github.com/google/uuid"
 )
 
 func duplicateScenarioForUser(s database.Scenario, user *database.User) <-chan error {
@@ -397,6 +398,59 @@ func duplicateWidget(w database.Widget, dashboardID uint, signalMap map[uint]uin
 	return err
 }
 
+type Container struct {
+	Name  string `json:"name"`
+	Image string `json:"image"`
+}
+
+type TemplateSpec struct {
+	Containers []Container `json:"containers"`
+}
+
+type JobTemplate struct {
+	Spec TemplateSpec `json:"spec"`
+}
+
+type JobSpec struct {
+	Active   string      `json:"activeDeadlineSeconds"`
+	Template JobTemplate `json:"template"`
+}
+
+type JobMetaData struct {
+	JobName string `json:"name"`
+}
+
+type KubernetesJob struct {
+	Spec     JobSpec     `json:"spec"`
+	MetaData JobMetaData `json:"metadata"`
+}
+
+type ICPropertiesKubernetesJob struct {
+	Job         KubernetesJob `json:"job"`
+	UUID        string        `json:"uuid"`
+	Name        string        `json:"name"`
+	Description string        `json:"description"`
+	Location    string        `json:"location"`
+	Owner       string        `json:"owner"`
+	Category    string        `json:"category"`
+	Type        string        `json:"type"`
+}
+
+type ICStatus struct {
+	State     string  `json:"state"`
+	Version   string  `json:"version"`
+	Uptime    float64 `json:"uptime"`
+	Result    string  `json:"result"`
+	Error     string  `json:"error"`
+	ManagedBy string  `json:"managed_by"`
+}
+
+type ICUpdateKubernetesJob struct {
+	Properties ICPropertiesKubernetesJob `json:"properties"`
+	Status     ICStatus                  `json:"status"`
+	Schema     json.RawMessage           `json:"schema"`
+}
+
 func duplicateIC(ic database.InfrastructureComponent, userName string) (string, error) {
 
 	//WARNING: this function only works with the kubernetes-simple manager of VILLAScontroller
@@ -405,54 +459,8 @@ func duplicateIC(ic database.InfrastructureComponent, userName string) (string, 
 	}
 
 	newUUID := uuid.New().String()
-	log.Printf("New IC UUID: %s", newUUID)
 
-	type Container struct {
-		Name  string `json:"name"`
-		Image string `json:"image"`
-	}
-
-	type TemplateSpec struct {
-		Containers []Container `json:"containers"`
-	}
-
-	type JobTemplate struct {
-		Spec TemplateSpec `json:"spec"`
-	}
-
-	type JobSpec struct {
-		Active   string      `json:"activeDeadlineSeconds"`
-		Template JobTemplate `json:"template"`
-	}
-
-	type JobMetaData struct {
-		JobName string `json:"name"`
-	}
-
-	type KubernetesJob struct {
-		Spec     JobSpec     `json:"spec"`
-		MetaData JobMetaData `json:"metadata"`
-	}
-
-	type ICPropertiesToCopy struct {
-		Job         KubernetesJob `json:"job"`
-		UUID        string        `json:"uuid"`
-		Name        string        `json:"name"`
-		Description string        `json:"description"`
-		Location    string        `json:"location"`
-		Owner       string        `json:"owner"`
-		Category    string        `json:"category"`
-		Type        string        `json:"type"`
-	}
-
-	type ICUpdateToCopy struct {
-		Properties ICPropertiesToCopy `json:"properties"`
-		Status     json.RawMessage    `json:"status"`
-		Schema     json.RawMessage    `json:"schema"`
-	}
-
-	var lastUpdate ICUpdateToCopy
-	log.Println(ic.StatusUpdateRaw.RawMessage)
+	var lastUpdate ICUpdateKubernetesJob
 	err := json.Unmarshal(ic.StatusUpdateRaw.RawMessage, &lastUpdate)
 	if err != nil {
 		return newUUID, err

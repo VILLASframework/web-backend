@@ -46,6 +46,7 @@ import (
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
+	component_configuration "git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/component-configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/dashboard"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/file"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/scenario"
@@ -83,6 +84,7 @@ func TestMain(m *testing.M) {
 
 	scenario.RegisterScenarioEndpoints(api.Group("/scenarios"))
 	infrastructure_component.RegisterICEndpoints(api.Group("/ic"))
+	component_configuration.RegisterComponentConfigurationEndpoints(api.Group("/configs"))
 	dashboard.RegisterDashboardEndpoints(api.Group("/dashboards"))
 	file.RegisterFileEndpoints(api.Group("/files"))
 	widget.RegisterWidgetEndpoints(api.Group("/widgets"))
@@ -861,8 +863,7 @@ func TestDuplicateScenarioForUser(t *testing.T) {
 
 	// AMQP Connection startup is tested here
 	// Not repeated in other tests because it is only needed once
-	//session = helper.NewAMQPSession("villas-test-session", amqpURI, "villas", infrastructure_component.ProcessMessage)
-	//SetAMQPSession(session)
+	session = helper.NewAMQPSession("villas-test-session", amqpURI, "villas", infrastructure_component.ProcessMessage)
 
 	// authenticate as admin (needed to create original IC)
 	token, err := helper.AuthenticateForTest(router, database.AdminCredentials)
@@ -881,13 +882,17 @@ func TestDuplicateScenarioForUser(t *testing.T) {
 	assert.NotEqual(t, 99, fileID)
 
 	// add IC
-	err = addIC(amqpURI, token)
+	err = addIC(session, token)
 	assert.NoError(t, err)
 
 	// wait for IC to be created asynchronously
-	time.Sleep(3 * time.Second)
+	time.Sleep(4 * time.Second)
 
 	// add component config
+	err = addComponentConfig(scenarioID, token)
+	assert.NoError(t, err)
+
+	// TODO: add signals
 
 	// add dashboards to scenario
 	err = addTwoDashboards(scenarioID, token)
@@ -907,6 +912,11 @@ func TestDuplicateScenarioForUser(t *testing.T) {
 	myUser, err := NewUser(username, "", "schnitti@lauch.de", "User", true)
 	assert.NoError(t, err)
 
+	// create fake IC duplicate (would normally be created by villas-controller)
+	err = addFakeIC(session, token)
+	assert.NoError(t, err)
+
+	SetAMQPSession(session)
 	if err := <-duplicateScenarioForUser(originalSo, &myUser.User); err != nil {
 		t.Fail()
 	}
@@ -917,20 +927,6 @@ func TestDuplicateScenarioForUser(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(dplScenarios))
 	assert.Equal(t, originalSo.StartParameters, dplScenarios[0].StartParameters)
-
-	// compare original and duplicated dashboards
-	err = db.Order("created_at asc").Find(&dashboards).Error
-	assert.NoError(t, err)
-	assert.Equal(t, 4, len(dashboards))
-	assert.Equal(t, dashboards[0].Name, dashboards[2].Name)
-	assert.Equal(t, dashboards[0].Grid, dashboards[2].Grid)
-	assert.Equal(t, dashboards[0].Height, dashboards[2].Height)
-	assert.NotEqual(t, dashboards[0].ScenarioID, dashboards[2].ScenarioID)
-
-	assert.Equal(t, dashboards[1].Name, dashboards[3].Name)
-	assert.Equal(t, dashboards[1].Grid, dashboards[3].Grid)
-	assert.Equal(t, dashboards[1].Height, dashboards[3].Height)
-	assert.NotEqual(t, dashboards[1].ScenarioID, dashboards[3].ScenarioID)
 
 	// compare original and duplicated file
 	var files []database.File
@@ -943,6 +939,52 @@ func TestDuplicateScenarioForUser(t *testing.T) {
 	assert.Equal(t, files[0].ImageWidth, files[1].ImageWidth)
 	assert.Equal(t, files[0].Size, files[1].Size)
 	assert.NotEqual(t, files[0].ScenarioID, files[1].ScenarioID)
+	assert.NotEqual(t, files[0].ID, files[1].ID)
+
+	// compare original and duplicated component config
+	var configs []database.ComponentConfiguration
+	err = db.Find(&configs).Error
+	assert.NoError(t, err)
+	assert.Equal(t, 2, len(configs))
+	assert.Equal(t, configs[0].Name, configs[1].Name)
+	assert.Equal(t, configs[0].FileIDs, configs[1].FileIDs)
+	assert.Equal(t, configs[0].InputMapping, configs[1].InputMapping)
+	assert.Equal(t, configs[0].OutputMapping, configs[1].OutputMapping)
+	assert.Equal(t, configs[0].StartParameters, configs[1].StartParameters)
+	assert.NotEqual(t, configs[0].ScenarioID, configs[1].ScenarioID)
+	assert.NotEqual(t, configs[0].ICID, configs[1].ICID)
+	assert.NotEqual(t, configs[0].ID, configs[1].ID)
+
+	// compare original and duplicated infrastructure component
+
+	// compare original and duplicated dashboards
+	err = db.Order("created_at asc").Find(&dashboards).Error
+	assert.NoError(t, err)
+	assert.Equal(t, 4, len(dashboards))
+	assert.Equal(t, dashboards[0].Name, dashboards[2].Name)
+	assert.Equal(t, dashboards[0].Grid, dashboards[2].Grid)
+	assert.Equal(t, dashboards[0].Height, dashboards[2].Height)
+	assert.NotEqual(t, dashboards[0].ScenarioID, dashboards[2].ScenarioID)
+	assert.NotEqual(t, dashboards[0].ID, dashboards[2].ID)
+
+	assert.Equal(t, dashboards[1].Name, dashboards[3].Name)
+	assert.Equal(t, dashboards[1].Grid, dashboards[3].Grid)
+	assert.Equal(t, dashboards[1].Height, dashboards[3].Height)
+	assert.NotEqual(t, dashboards[1].ScenarioID, dashboards[3].ScenarioID)
+	assert.NotEqual(t, dashboards[1].ID, dashboards[3].ID)
+
+	// compare original and duplicated widget
+	var widgets []database.Widget
+	err = db.Find(&widgets).Error
+	assert.NoError(t, err)
+	assert.Equal(t, 2, len(widgets))
+	assert.Equal(t, widgets[0].Name, widgets[1].Name)
+	assert.Equal(t, widgets[0].CustomProperties, widgets[1].CustomProperties)
+	assert.Equal(t, widgets[0].SignalIDs, widgets[1].SignalIDs)
+	assert.Equal(t, widgets[0].MinHeight, widgets[1].MinHeight)
+	assert.Equal(t, widgets[0].MinWidth, widgets[1].MinWidth)
+	assert.NotEqual(t, widgets[0].DashboardID, widgets[1].DashboardID)
+	assert.NotEqual(t, widgets[0].ID, widgets[1].ID)
 
 }
 
@@ -1019,7 +1061,6 @@ func addFile(scenarioID uint, token string) (uint, error) {
 	router.ServeHTTP(w, req)
 
 	newFileID, err := helper.GetResponseID(w.Body)
-	log.Println(w.Body)
 	if err != nil {
 		return 99, err
 	}
@@ -1121,7 +1162,7 @@ func newTrue() *bool {
 	return &b
 }
 
-func addIC(amqpURI string, token string) error {
+func addIC(session *helper.AMQPsession, token string) error {
 	// create IC
 	var newIC = ICRequest{
 		UUID:                  "7be0322d-354e-431e-84bd-ae4c9633138b",
@@ -1140,24 +1181,30 @@ func addIC(amqpURI string, token string) error {
 	}
 
 	// fake an IC update (create) message
-	var update infrastructure_component.ICUpdate
-	update.Status.State = "idle"
-	update.Status.ManagedBy = newIC.Manager
+	var update ICUpdateKubernetesJob
 	update.Properties.Name = newIC.Name
 	update.Properties.Category = newIC.Category
 	update.Properties.Type = newIC.Type
 	update.Properties.UUID = newIC.UUID
+	update.Properties.Job.MetaData.JobName = "myJob"
+	update.Properties.Job.Spec.Active = "70"
+	update.Status.ManagedBy = newIC.Manager
+	update.Status.State = newIC.State
+	var container Container
+	container.Name = "myContainer"
+	container.Image = "python:latest"
+	var Containers []Container
+	update.Properties.Job.Spec.Template.Spec.Containers = append(Containers, container)
 
 	payload, err := json.Marshal(update)
 	if err != nil {
 		return err
 	}
 
-	//var headers map[string]interface{}
-	//headers = make(map[string]interface{}) // empty map
-	//headers["uuid"] = newIC2.Manager       // set uuid
-	session = helper.NewAMQPSession("villas-test-session", amqpURI, "villas", infrastructure_component.ProcessMessage)
+	//session = helper.NewAMQPSession("villas-test-session", amqpURI, "villas", infrastructure_component.ProcessMessage)
 	SetAMQPSession(session)
+
+	//time.Sleep(3 * time.Second)
 
 	err = session.CheckConnection()
 	if err != nil {
@@ -1165,6 +1212,68 @@ func addIC(amqpURI string, token string) error {
 	}
 
 	err = session.Send(payload, newIC.Manager)
+	time.Sleep(2 * time.Second)
+	return err
+}
 
+func addComponentConfig(scenarioID uint, token string) error {
+	type ConfigRequest struct {
+		Name            string         `json:"name,omitempty"`
+		ScenarioID      uint           `json:"scenarioID,omitempty"`
+		ICID            uint           `json:"icID,omitempty"`
+		StartParameters postgres.Jsonb `json:"startParameters,omitempty"`
+		FileIDs         []int64        `json:"fileIDs,omitempty"`
+	}
+
+	var newConfig1 = ConfigRequest{
+		Name:            "Example for Signal generator",
+		ScenarioID:      scenarioID,
+		ICID:            1,
+		StartParameters: postgres.Jsonb{RawMessage: json.RawMessage(`{"parameter1" : "testValue1A", "parameter2" : "testValue2A", "parameter3" : 42}`)},
+		FileIDs:         []int64{},
+	}
+
+	_, _, err := helper.TestEndpoint(router, token,
+		"/api/v2/configs", "POST", helper.KeyModels{"config": newConfig1})
+
+	return err
+}
+
+func addFakeIC(session *helper.AMQPsession, token string) error {
+
+	db := database.GetDB()
+	var originalIC database.InfrastructureComponent
+	err := db.Find(&originalIC, 1).Error
+	if err != nil {
+		return err
+	}
+
+	//session = helper.NewAMQPSession("villas-test-session", amqpURI, "villas", infrastructure_component.ProcessMessage)
+	log.Println(session)
+	SetAMQPSession(session)
+
+	//time.Sleep(3 * time.Second)
+
+	err = session.CheckConnection()
+	if err != nil {
+		return err
+	}
+
+	var update ICUpdateKubernetesJob
+	err = json.Unmarshal(originalIC.StatusUpdateRaw.RawMessage, &update)
+	if err != nil {
+		return err
+	}
+	update.Properties.UUID = "4854af30-325f-44a5-ad59-b67b2597de68"
+
+	payload, err := json.Marshal(update)
+	if err != nil {
+		return err
+	}
+
+	log.Println(session)
+
+	err = session.Send(payload, originalIC.Manager)
+	time.Sleep(2 * time.Second)
 	return err
 }
