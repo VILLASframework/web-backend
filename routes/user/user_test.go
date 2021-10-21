@@ -864,6 +864,9 @@ func TestDuplicateScenarioForUser(t *testing.T) {
 	// AMQP Connection startup is tested here
 	// Not repeated in other tests because it is only needed once
 	session = helper.NewAMQPSession("villas-test-session", amqpURI, "villas", infrastructure_component.ProcessMessage)
+	//session = helper.NewAMQPSession("villas-test-session", amqpURI, "villas", infrastructure_component.ProcessMessage)
+	SetAMQPSession(session)
+	infrastructure_component.SetAMQPSession(session)
 
 	// authenticate as admin (needed to create original IC)
 	token, err := helper.AuthenticateForTest(router, database.AdminCredentials)
@@ -916,7 +919,6 @@ func TestDuplicateScenarioForUser(t *testing.T) {
 	err = addFakeIC(session, token)
 	assert.NoError(t, err)
 
-	SetAMQPSession(session)
 	if err := <-duplicateScenarioForUser(originalSo, &myUser.User); err != nil {
 		t.Fail()
 	}
@@ -1201,9 +1203,6 @@ func addIC(session *helper.AMQPsession, token string) error {
 		return err
 	}
 
-	//session = helper.NewAMQPSession("villas-test-session", amqpURI, "villas", infrastructure_component.ProcessMessage)
-	SetAMQPSession(session)
-
 	//time.Sleep(3 * time.Second)
 
 	err = session.CheckConnection()
@@ -1250,7 +1249,6 @@ func addFakeIC(session *helper.AMQPsession, token string) error {
 
 	//session = helper.NewAMQPSession("villas-test-session", amqpURI, "villas", infrastructure_component.ProcessMessage)
 	log.Println(session)
-	SetAMQPSession(session)
 
 	//time.Sleep(3 * time.Second)
 
