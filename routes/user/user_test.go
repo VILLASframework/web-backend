@@ -36,8 +36,6 @@ import (
 	"testing"
 	"time"
 
-	infrastructure_component "git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/infrastructure-component"
-
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 
 	"github.com/gin-gonic/gin"
@@ -46,10 +44,13 @@ import (
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
+
 	component_configuration "git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/component-configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/dashboard"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/file"
+	infrastructure_component "git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/infrastructure-component"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/scenario"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/signal"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/widget"
 )
 
@@ -85,6 +86,7 @@ func TestMain(m *testing.M) {
 	scenario.RegisterScenarioEndpoints(api.Group("/scenarios"))
 	infrastructure_component.RegisterICEndpoints(api.Group("/ic"))
 	component_configuration.RegisterComponentConfigurationEndpoints(api.Group("/configs"))
+	signal.RegisterSignalEndpoints(api.Group("/signals"))
 	dashboard.RegisterDashboardEndpoints(api.Group("/dashboards"))
 	file.RegisterFileEndpoints(api.Group("/files"))
 	widget.RegisterWidgetEndpoints(api.Group("/widgets"))
@@ -849,7 +851,6 @@ func TestDeleteUser(t *testing.T) {
 }
 
 func TestDuplicateScenarioForUser(t *testing.T) {
-
 	database.DropTables()
 	database.MigrateModels()
 	assert.NoError(t, database.AddTestUsers())
@@ -864,7 +865,6 @@ func TestDuplicateScenarioForUser(t *testing.T) {
 	// AMQP Connection startup is tested here
 	// Not repeated in other tests because it is only needed once
 	session = helper.NewAMQPSession("villas-test-session", amqpURI, "villas", infrastructure_component.ProcessMessage)
-	//session = helper.NewAMQPSession("villas-test-session", amqpURI, "villas", infrastructure_component.ProcessMessage)
 	SetAMQPSession(session)
 	infrastructure_component.SetAMQPSession(session)
 
@@ -888,14 +888,13 @@ func TestDuplicateScenarioForUser(t *testing.T) {
 	err = addIC(session, token)
 	assert.NoError(t, err)
 
-	// wait for IC to be created asynchronously
-	time.Sleep(4 * time.Second)
-
 	// add component config
 	err = addComponentConfig(scenarioID, token)
 	assert.NoError(t, err)
 
-	// TODO: add signals
+	// add signals
+	err = addSignals(token)
+	assert.NoError(t, err)
 
 	// add dashboards to scenario
 	err = addTwoDashboards(scenarioID, token)
@@ -906,7 +905,7 @@ func TestDuplicateScenarioForUser(t *testing.T) {
 	assert.Equal(t, 2, len(dashboards))
 
 	// add widgets
-	dashboardID_forAddingWidget := uint(0)
+	dashboardID_forAddingWidget := uint(1)
 	err = addWidget(dashboardID_forAddingWidget, token)
 	assert.NoError(t, err)
 
@@ -916,10 +915,11 @@ func TestDuplicateScenarioForUser(t *testing.T) {
 	assert.NoError(t, err)
 
 	// create fake IC duplicate (would normally be created by villas-controller)
-	err = addFakeIC(session, token)
+	uuidDup := "4854af30-325f-44a5-ad59-b67b2597de68"
+	err = addFakeIC(uuidDup, session, token)
 	assert.NoError(t, err)
 
-	if err := <-duplicateScenarioForUser(originalSo, &myUser.User); err != nil {
+	if err := <-duplicateScenarioForUser(originalSo, &myUser.User, uuidDup); err != nil {
 		t.Fail()
 	}
 
@@ -957,7 +957,43 @@ func TestDuplicateScenarioForUser(t *testing.T) {
 	assert.NotEqual(t, configs[0].ICID, configs[1].ICID)
 	assert.NotEqual(t, configs[0].ID, configs[1].ID)
 
+	// compare original and duplicated signals
+	var signals []database.Signal
+	err = db.Order("created_at asc").Find(&signals).Error
+	assert.NoError(t, err)
+	assert.Equal(t, 4, len(signals))
+	assert.Equal(t, signals[0].ConfigID, signals[1].ConfigID)
+	assert.Equal(t, signals[2].ConfigID, signals[3].ConfigID)
+
+	assert.Equal(t, signals[0].Name, signals[2].Name)
+	assert.Equal(t, signals[0].Unit, signals[2].Unit)
+	assert.Equal(t, signals[0].ScalingFactor, signals[2].ScalingFactor)
+	assert.Equal(t, signals[0].Direction, signals[2].Direction)
+	assert.Equal(t, signals[0].Index, signals[2].Index)
+	assert.NotEqual(t, signals[0].ConfigID, signals[2].ConfigID)
+	assert.NotEqual(t, signals[0].ID, signals[2].ID)
+
+	assert.Equal(t, signals[1].Name, signals[3].Name)
+	assert.Equal(t, signals[1].Unit, signals[3].Unit)
+	assert.Equal(t, signals[1].ScalingFactor, signals[3].ScalingFactor)
+	assert.Equal(t, signals[1].Direction, signals[3].Direction)
+	assert.Equal(t, signals[1].Index, signals[3].Index)
+	assert.NotEqual(t, signals[1].ConfigID, signals[3].ConfigID)
+	assert.NotEqual(t, signals[1].ID, signals[3].ID)
+
 	// compare original and duplicated infrastructure component
+	var ics []database.InfrastructureComponent
+	err = db.Find(&ics).Error
+	assert.NoError(t, err)
+	assert.Equal(t, 2, len(ics))
+	assert.Equal(t, ics[0].Name, ics[1].Name)
+	assert.Equal(t, ics[0].Category, ics[1].Category)
+	assert.Equal(t, ics[0].Type, ics[1].Type)
+	assert.Equal(t, ics[0].CreateParameterSchema, ics[1].CreateParameterSchema)
+	assert.Equal(t, ics[0].StartParameterSchema, ics[1].StartParameterSchema)
+	assert.Equal(t, ics[0].Manager, ics[1].Manager)
+	assert.NotEqual(t, ics[0].UUID, ics[1].UUID)
+	assert.NotEqual(t, ics[0].ID, ics[1].ID)
 
 	// compare original and duplicated dashboards
 	err = db.Order("created_at asc").Find(&dashboards).Error
@@ -982,20 +1018,18 @@ func TestDuplicateScenarioForUser(t *testing.T) {
 	assert.Equal(t, 2, len(widgets))
 	assert.Equal(t, widgets[0].Name, widgets[1].Name)
 	assert.Equal(t, widgets[0].CustomProperties, widgets[1].CustomProperties)
-	assert.Equal(t, widgets[0].SignalIDs, widgets[1].SignalIDs)
 	assert.Equal(t, widgets[0].MinHeight, widgets[1].MinHeight)
 	assert.Equal(t, widgets[0].MinWidth, widgets[1].MinWidth)
 	assert.NotEqual(t, widgets[0].DashboardID, widgets[1].DashboardID)
 	assert.NotEqual(t, widgets[0].ID, widgets[1].ID)
-
-}
-
-type ScenarioRequest struct {
-	Name            string         `json:"name,omitempty"`
-	StartParameters postgres.Jsonb `json:"startParameters,omitempty"`
 }
 
 func addScenario(token string) (scenarioID uint) {
+	type ScenarioRequest struct {
+		Name            string         `json:"name,omitempty"`
+		StartParameters postgres.Jsonb `json:"startParameters,omitempty"`
+	}
+
 	newScenario := ScenarioRequest{
 		Name:            "Scenario1",
 		StartParameters: postgres.Jsonb{json.RawMessage(`{"parameter1" : "testValue1A", "parameter2" : "testValue2A", "parameter3" : 42}`)},
@@ -1069,14 +1103,14 @@ func addFile(scenarioID uint, token string) (uint, error) {
 	return uint(newFileID), nil
 }
 
-type DashboardRequest struct {
-	Name       string `json:"name,omitempty"`
-	Grid       int    `json:"grid,omitempty"`
-	Height     int    `json:"height,omitempty"`
-	ScenarioID uint   `json:"scenarioID,omitempty"`
-}
-
 func addTwoDashboards(scenarioID uint, token string) error {
+	type DashboardRequest struct {
+		Name       string `json:"name,omitempty"`
+		Grid       int    `json:"grid,omitempty"`
+		Height     int    `json:"height,omitempty"`
+		ScenarioID uint   `json:"scenarioID,omitempty"`
+	}
+
 	newDashboardA := DashboardRequest{
 		Name:       "Dashboard_A",
 		Grid:       15,
@@ -1103,23 +1137,23 @@ func addTwoDashboards(scenarioID uint, token string) error {
 	return err
 }
 
-type WidgetRequest struct {
-	Name             string         `json:"name,omitempty"`
-	Type             string         `json:"type,omitempty"`
-	Width            uint           `json:"width,omitempty"`
-	Height           uint           `json:"height,omitempty"`
-	MinWidth         uint           `json:"minWidth,omitempty"`
-	MinHeight        uint           `json:"minHeight,omitempty"`
-	X                int            `json:"x,omitempty"`
-	Y                int            `json:"y,omitempty"`
-	Z                int            `json:"z,omitempty"`
-	DashboardID      uint           `json:"dashboardID,omitempty"`
-	IsLocked         bool           `json:"isLocked,omitempty"`
-	CustomProperties postgres.Jsonb `json:"customProperties,omitempty"`
-	SignalIDs        []int64        `json:"signalIDs,omitempty"`
-}
-
 func addWidget(dashboardID uint, token string) error {
+	type WidgetRequest struct {
+		Name             string         `json:"name,omitempty"`
+		Type             string         `json:"type,omitempty"`
+		Width            uint           `json:"width,omitempty"`
+		Height           uint           `json:"height,omitempty"`
+		MinWidth         uint           `json:"minWidth,omitempty"`
+		MinHeight        uint           `json:"minHeight,omitempty"`
+		X                int            `json:"x,omitempty"`
+		Y                int            `json:"y,omitempty"`
+		Z                int            `json:"z,omitempty"`
+		DashboardID      uint           `json:"dashboardID,omitempty"`
+		IsLocked         bool           `json:"isLocked,omitempty"`
+		CustomProperties postgres.Jsonb `json:"customProperties,omitempty"`
+		SignalIDs        []int64        `json:"signalIDs,omitempty"`
+	}
+
 	newWidget := WidgetRequest{
 		Name:             "My label",
 		Type:             "Label",
@@ -1143,28 +1177,28 @@ func addWidget(dashboardID uint, token string) error {
 	return err
 }
 
-type ICRequest struct {
-	UUID                  string         `json:"uuid,omitempty"`
-	WebsocketURL          string         `json:"websocketurl,omitempty"`
-	APIURL                string         `json:"apiurl,omitempty"`
-	Type                  string         `json:"type,omitempty"`
-	Name                  string         `json:"name,omitempty"`
-	Category              string         `json:"category,omitempty"`
-	State                 string         `json:"state,omitempty"`
-	Location              string         `json:"location,omitempty"`
-	Description           string         `json:"description,omitempty"`
-	StartParameterSchema  postgres.Jsonb `json:"startparameterschema,omitempty"`
-	CreateParameterSchema postgres.Jsonb `json:"createparameterschema,omitempty"`
-	ManagedExternally     *bool          `json:"managedexternally"`
-	Manager               string         `json:"manager,omitempty"`
-}
-
 func newTrue() *bool {
 	b := true
 	return &b
 }
 
 func addIC(session *helper.AMQPsession, token string) error {
+	type ICRequest struct {
+		UUID                  string         `json:"uuid,omitempty"`
+		WebsocketURL          string         `json:"websocketurl,omitempty"`
+		APIURL                string         `json:"apiurl,omitempty"`
+		Type                  string         `json:"type,omitempty"`
+		Name                  string         `json:"name,omitempty"`
+		Category              string         `json:"category,omitempty"`
+		State                 string         `json:"state,omitempty"`
+		Location              string         `json:"location,omitempty"`
+		Description           string         `json:"description,omitempty"`
+		StartParameterSchema  postgres.Jsonb `json:"startparameterschema,omitempty"`
+		CreateParameterSchema postgres.Jsonb `json:"createparameterschema,omitempty"`
+		ManagedExternally     *bool          `json:"managedexternally"`
+		Manager               string         `json:"manager,omitempty"`
+	}
+
 	// create IC
 	var newIC = ICRequest{
 		UUID:                  "7be0322d-354e-431e-84bd-ae4c9633138b",
@@ -1203,8 +1237,6 @@ func addIC(session *helper.AMQPsession, token string) error {
 		return err
 	}
 
-	//time.Sleep(3 * time.Second)
-
 	err = session.CheckConnection()
 	if err != nil {
 		return err
@@ -1238,19 +1270,13 @@ func addComponentConfig(scenarioID uint, token string) error {
 	return err
 }
 
-func addFakeIC(session *helper.AMQPsession, token string) error {
-
+func addFakeIC(uuid string, session *helper.AMQPsession, token string) error {
 	db := database.GetDB()
 	var originalIC database.InfrastructureComponent
 	err := db.Find(&originalIC, 1).Error
 	if err != nil {
 		return err
 	}
-
-	//session = helper.NewAMQPSession("villas-test-session", amqpURI, "villas", infrastructure_component.ProcessMessage)
-	log.Println(session)
-
-	//time.Sleep(3 * time.Second)
 
 	err = session.CheckConnection()
 	if err != nil {
@@ -1262,16 +1288,53 @@ func addFakeIC(session *helper.AMQPsession, token string) error {
 	if err != nil {
 		return err
 	}
-	update.Properties.UUID = "4854af30-325f-44a5-ad59-b67b2597de68"
+	update.Properties.UUID = uuid
 
 	payload, err := json.Marshal(update)
 	if err != nil {
 		return err
 	}
 
-	log.Println(session)
-
 	err = session.Send(payload, originalIC.Manager)
 	time.Sleep(2 * time.Second)
+	return err
+}
+
+func addSignals(token string) error {
+	type SignalRequest struct {
+		Name          string  `json:"name,omitempty"`
+		Unit          string  `json:"unit,omitempty"`
+		Index         uint    `json:"index,omitempty"`
+		Direction     string  `json:"direction,omitempty"`
+		ScalingFactor float32 `json:"scalingFactor,omitempty"`
+		ConfigID      uint    `json:"configID,omitempty"`
+	}
+
+	var newSignalOut = SignalRequest{
+		Name:      "outSignal_A",
+		Unit:      "V",
+		Direction: "out",
+		Index:     1,
+		ConfigID:  1,
+	}
+
+	var newSignalIn = SignalRequest{
+		Name:      "inSignal_A",
+		Unit:      "V",
+		Direction: "in",
+		Index:     2,
+		ConfigID:  1,
+	}
+
+	_, _, err := helper.TestEndpoint(router, token,
+		"/api/v2/signals", "POST", helper.KeyModels{"signal": newSignalOut})
+
+	if err != nil {
+		return err
+	}
+
+	_, _, err = helper.TestEndpoint(router, token,
+		"/api/v2/signals", "POST", helper.KeyModels{"signal": newSignalIn})
+
 	return err
 }

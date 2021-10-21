@@ -288,7 +288,7 @@ func authenticateExternal(c *gin.Context) (User, error) {
 
 				if groupedScenario.Duplicate {
 
-					if err := <-duplicateScenarioForUser(so, &myUser.User); err != nil {
+					if err := <-duplicateScenarioForUser(so, &myUser.User, ""); err != nil {
 						return User{}, err
 					}
 

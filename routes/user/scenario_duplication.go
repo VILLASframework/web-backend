@@ -32,7 +32,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func duplicateScenarioForUser(s database.Scenario, user *database.User) <-chan error {
+func duplicateScenarioForUser(s database.Scenario, user *database.User, uuidstr string) <-chan error {
 	errs := make(chan error, 1)
 
 	go func() {
@@ -64,7 +64,7 @@ func duplicateScenarioForUser(s database.Scenario, user *database.User) <-chan e
 
 			// create new kubernetes simulator OR use existing IC
 			if ic.Category == "simulator" && ic.Type == "kubernetes" {
-				duplicateUUID, err := duplicateIC(ic, user.Username)
+				duplicateUUID, err := duplicateIC(ic, user.Username, uuidstr)
 				if err != nil {
 					errs <- fmt.Errorf("duplication of IC (id=%d) unsuccessful, err: %s", icID, err)
 					continue
@@ -80,7 +80,6 @@ func duplicateScenarioForUser(s database.Scenario, user *database.User) <-chan e
 
 		// copy scenario after all new external ICs are in DB
 		icsToWaitFor := len(externalUUIDs)
-		//var duplicatedScenario database.Scenario
 		var timeout = 20 // seconds
 
 		for i := 0; i < timeout; i++ {
@@ -248,7 +247,7 @@ func duplicateComponentConfig(m database.ComponentConfiguration, scenarioID uint
 
 	// save duplicate to DB and create associations with IC and scenario
 	var so database.Scenario
-	err := db.Find(&so, m.ScenarioID).Error
+	err := db.Find(&so, scenarioID).Error
 	if err != nil {
 		return err
 	}
@@ -299,10 +298,10 @@ func duplicateComponentConfig(m database.ComponentConfiguration, scenarioID uint
 		}
 
 		// associate signal with component configuration in correct direction
-		if s.Direction == "in" {
-			err = db.Model(&dup).Association("InputMapping").Append(&s).Error
+		if sigDup.Direction == "in" {
+			err = db.Model(&dup).Association("InputMapping").Append(&sigDup).Error
 		} else {
-			err = db.Model(&dup).Association("OutputMapping").Append(&s).Error
+			err = db.Model(&dup).Association("OutputMapping").Append(&sigDup).Error
 		}
 
 		if err != nil {
@@ -451,11 +450,11 @@ type ICUpdateKubernetesJob struct {
 	Schema     json.RawMessage           `json:"schema"`
 }
 
-func duplicateIC(ic database.InfrastructureComponent, userName string) (string, error) {
+func duplicateIC(ic database.InfrastructureComponent, userName string, uuidstr string) (string, error) {
 
 	//WARNING: this function only works with the kubernetes-simple manager of VILLAScontroller
-	if ic.Category != "simulator" || ic.Type == "kubernetes" {
-		return "", nil
+	if ic.Category != "simulator" || ic.Type != "kubernetes" {
+		return "", fmt.Errorf("IC to duplicate is not a kubernetes simulator (%s %s)", ic.Type, ic.Category)
 	}
 
 	newUUID := uuid.New().String()
@@ -464,6 +463,10 @@ func duplicateIC(ic database.InfrastructureComponent, userName string) (string, 
 	err := json.Unmarshal(ic.StatusUpdateRaw.RawMessage, &lastUpdate)
 	if err != nil {
 		return newUUID, err
+	}
+
+	if uuidstr != "" {
+		newUUID = "4854af30-325f-44a5-ad59-b67b2597de68"
 	}
 
 	msg := `{"name": "` + lastUpdate.Properties.Name + ` ` + userName + `",` +
