@@ -44,8 +44,6 @@ type ICStatus struct {
 	State     string  `json:"state"`
 	Version   string  `json:"version"`
 	Uptime    float64 `json:"uptime"`
-	Result    string  `json:"result"`
-	Error     string  `json:"error"`
 	ManagedBy string  `json:"managed_by"`
 }
 
