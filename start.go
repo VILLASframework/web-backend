@@ -23,6 +23,7 @@ package main
 
 import (
 	"fmt"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/user"
 	"log"
 	"time"
 
@@ -30,6 +31,7 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/healthz"
 	infrastructure_component "git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/infrastructure-component"
 	"github.com/gin-gonic/gin"
 	"github.com/zpatrick/go-config"
@@ -121,16 +123,21 @@ func main() {
 
 	if amqpHost != "" {
 		// create amqp URL based on username, password and host
-		amqpURL := "amqp://" + amqpUser + ":" + amqpPass + "@" + amqpHost
-		err = infrastructure_component.StartAMQP(amqpURL, api)
-		if err != nil {
-			log.Fatal(err)
-		}
+		amqpurl := "amqp://" + amqpUser + ":" + amqpPass + "@" + amqpHost
+		session := helper.NewAMQPSession("villas-amqp-session", amqpurl, "villas", infrastructure_component.ProcessMessage)
+		healthz.SetAMQPSession(session)                  // healthz needs to know the amqp session to check the health of the backend
+		infrastructure_component.SetAMQPSession(session) // IC needs to know the session to send amqp messages
+		user.SetAMQPSession(session)                     // User needs to know the session to duplicate ICs upon login
 
 		// send Ping to all externally managed ICs
-		err = helper.SendPing("")
-		if err != nil {
-			log.Println("error sending ping action via AMQP: ", err)
+		for {
+			if session.IsReady {
+				err = infrastructure_component.SendPing("")
+				if err != nil {
+					log.Println("error sending ping action via AMQP: ", err.Error())
+				}
+				break
+			}
 		}
 	}
 

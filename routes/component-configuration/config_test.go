@@ -81,7 +81,7 @@ func newFalse() *bool {
 func addScenarioAndIC() (scenarioID uint, ICID uint) {
 
 	// authenticate as admin
-	token, _ := helper.AuthenticateForTest(router, helper.AdminCredentials)
+	token, _ := helper.AuthenticateForTest(router, database.AdminCredentials)
 
 	// POST $newICA
 	newICA := ICRequest{
@@ -116,7 +116,7 @@ func addScenarioAndIC() (scenarioID uint, ICID uint) {
 	}
 
 	// authenticate as normal user
-	token, _ = helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, _ = helper.AuthenticateForTest(router, database.UserACredentials)
 
 	// POST $newScenario
 	newScenario := ScenarioRequest{
@@ -172,7 +172,7 @@ func TestMain(m *testing.M) {
 func TestAddConfig(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.AddTestUsers())
+	assert.NoError(t, database.AddTestUsers())
 
 	// prepare the content of the DB for testing
 	// by adding a scenario and a IC to the DB
@@ -182,7 +182,7 @@ func TestAddConfig(t *testing.T) {
 	newConfig1.ScenarioID = scenarioID
 	newConfig1.ICID = ICID
 	// authenticate as normal userB who has no access to new scenario
-	token, err := helper.AuthenticateForTest(router, helper.UserBCredentials)
+	token, err := helper.AuthenticateForTest(router, database.UserBCredentials)
 	assert.NoError(t, err)
 
 	// try to POST with no access
@@ -193,7 +193,7 @@ func TestAddConfig(t *testing.T) {
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// authenticate as normal user
-	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	// try to POST non JSON body
@@ -203,7 +203,7 @@ func TestAddConfig(t *testing.T) {
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 
 	// authenticate as normal user
-	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	// test POST newConfig
@@ -242,7 +242,7 @@ func TestAddConfig(t *testing.T) {
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// authenticate as normal userB who has no access to new scenario
-	token, err = helper.AuthenticateForTest(router, helper.UserBCredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserBCredentials)
 	assert.NoError(t, err)
 
 	// Try to GET the newConfig with no access
@@ -258,7 +258,7 @@ func TestUpdateConfig(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.AddTestUsers())
+	assert.NoError(t, database.AddTestUsers())
 
 	// prepare the content of the DB for testing
 	// by adding a scenario and a IC to the DB
@@ -266,7 +266,7 @@ func TestUpdateConfig(t *testing.T) {
 	scenarioID, ICID := addScenarioAndIC()
 
 	// authenticate as normal user
-	token, err := helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err := helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	// test POST newConfig
@@ -287,7 +287,7 @@ func TestUpdateConfig(t *testing.T) {
 	}
 
 	// authenticate as normal userB who has no access to new scenario
-	token, err = helper.AuthenticateForTest(router, helper.UserBCredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserBCredentials)
 	assert.NoError(t, err)
 
 	// try to PUT with no access
@@ -298,7 +298,7 @@ func TestUpdateConfig(t *testing.T) {
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// authenticate as guest user who has access to component config
-	token, err = helper.AuthenticateForTest(router, helper.GuestCredentials)
+	token, err = helper.AuthenticateForTest(router, database.GuestCredentials)
 	assert.NoError(t, err)
 
 	// try to PUT as guest
@@ -309,7 +309,7 @@ func TestUpdateConfig(t *testing.T) {
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// authenticate as normal user
-	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	// try to PUT a non JSON body
@@ -361,7 +361,7 @@ func TestUpdateConfig(t *testing.T) {
 func TestDeleteConfig(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.AddTestUsers())
+	assert.NoError(t, database.AddTestUsers())
 
 	// prepare the content of the DB for testing
 	// by adding a scenario and a IC to the DB
@@ -371,7 +371,7 @@ func TestDeleteConfig(t *testing.T) {
 	newConfig1.ICID = ICID
 
 	// authenticate as normal user
-	token, err := helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err := helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	// test POST newConfig
@@ -385,7 +385,7 @@ func TestDeleteConfig(t *testing.T) {
 	assert.NoError(t, err)
 
 	// authenticate as normal userB who has no access to new scenario
-	token, err = helper.AuthenticateForTest(router, helper.UserBCredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserBCredentials)
 	assert.NoError(t, err)
 
 	// try to DELETE with no access
@@ -396,7 +396,7 @@ func TestDeleteConfig(t *testing.T) {
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// authenticate as normal user
-	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	// Count the number of all the component config returned for scenario
@@ -425,7 +425,7 @@ func TestDeleteConfig(t *testing.T) {
 func TestGetAllConfigsOfScenario(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.AddTestUsers())
+	assert.NoError(t, database.AddTestUsers())
 
 	// prepare the content of the DB for testing
 	// by adding a scenario and a IC to the DB
@@ -435,7 +435,7 @@ func TestGetAllConfigsOfScenario(t *testing.T) {
 	newConfig1.ICID = ICID
 
 	// authenticate as normal user
-	token, err := helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err := helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	// test POST newConfig
@@ -452,7 +452,7 @@ func TestGetAllConfigsOfScenario(t *testing.T) {
 	assert.Equal(t, 1, NumberOfConfigs)
 
 	// authenticate as normal userB who has no access to scenario
-	token, err = helper.AuthenticateForTest(router, helper.UserBCredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserBCredentials)
 	assert.NoError(t, err)
 
 	// try to get configs without access

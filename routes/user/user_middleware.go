@@ -41,7 +41,7 @@ func claimsToContext(c *gin.Context, claims jwt.MapClaims) error {
 
 	var user User
 
-	err := user.ByID(uint(userID))
+	err := user.byID(uint(userID))
 	if err != nil {
 		return err
 	}

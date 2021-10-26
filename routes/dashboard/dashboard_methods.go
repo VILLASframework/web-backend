@@ -23,7 +23,6 @@ package dashboard
 
 import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/scenario"
 )
 
 type Dashboard struct {
@@ -47,8 +46,8 @@ func (d *Dashboard) ByID(id uint) error {
 
 func (d *Dashboard) addToScenario() error {
 	db := database.GetDB()
-	var sim scenario.Scenario
-	err := sim.ByID(d.ScenarioID)
+	var sim database.Scenario
+	err := db.Find(&sim, d.ScenarioID).Error
 	if err != nil {
 		return err
 	}
@@ -81,8 +80,8 @@ func (d *Dashboard) update(modifiedDab Dashboard) error {
 func (d *Dashboard) delete() error {
 
 	db := database.GetDB()
-	var sim scenario.Scenario
-	err := sim.ByID(d.ScenarioID)
+	var sim database.Scenario
+	err := db.Find(&sim, d.ScenarioID).Error
 	if err != nil {
 		return err
 	}

@@ -25,7 +25,6 @@ import (
 	"log"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/scenario"
 )
 
 type ComponentConfiguration struct {
@@ -49,8 +48,8 @@ func (m *ComponentConfiguration) ByID(id uint) error {
 
 func (m *ComponentConfiguration) addToScenario() error {
 	db := database.GetDB()
-	var so scenario.Scenario
-	err := so.ByID(m.ScenarioID)
+	var so database.Scenario
+	err := db.Find(&so, m.ScenarioID).Error
 	if err != nil {
 		return err
 	}
@@ -120,8 +119,8 @@ func (m *ComponentConfiguration) Update(modifiedConfig ComponentConfiguration) e
 func (m *ComponentConfiguration) delete() error {
 
 	db := database.GetDB()
-	var so scenario.Scenario
-	err := so.ByID(m.ScenarioID)
+	var so database.Scenario
+	err := db.Find(&so, m.ScenarioID).Error
 	if err != nil {
 		return err
 	}

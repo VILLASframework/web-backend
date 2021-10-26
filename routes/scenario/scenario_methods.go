@@ -25,7 +25,6 @@ import (
 	"fmt"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/user"
 	"github.com/jinzhu/gorm"
 )
 
@@ -83,8 +82,8 @@ func (s *Scenario) addUser(u *database.User) error {
 func (s *Scenario) deleteUser(username string) error {
 	db := database.GetDB()
 
-	var deletedUser user.User
-	err := deletedUser.ByUsername(username)
+	var deletedUser database.User
+	err := db.Find(&deletedUser, "Username = ?", username).Error
 	if err != nil {
 		return err
 	}
@@ -93,18 +92,18 @@ func (s *Scenario) deleteUser(username string) error {
 
 	if no_users > 1 {
 		// remove user from scenario
-		err = db.Model(s).Association("Users").Delete(&deletedUser.User).Error
+		err = db.Model(s).Association("Users").Delete(&deletedUser).Error
 		if err != nil {
 			return err
 		}
 		// remove scenario from user
-		err = db.Model(&deletedUser.User).Association("Scenarios").Delete(s).Error
+		err = db.Model(&deletedUser).Association("Scenarios").Delete(s).Error
 		if err != nil {
 			return err
 		}
 	} else {
 		// There is only one associated user
-		var remainingUser user.User
+		var remainingUser database.User
 		err = db.Model(s).Related(&remainingUser, "Users").Error
 		if err != nil {
 			return err
@@ -154,34 +153,4 @@ func (s *Scenario) delete() error {
 	}
 
 	return nil
-}
-
-func (s *Scenario) checkAccess(userID uint, operation database.CRUD) bool {
-
-	db := database.GetDB()
-	u := database.User{}
-
-	err := db.Find(&u, userID).Error
-	if err != nil {
-		return false
-	}
-
-	if u.Role == "Admin" {
-		return true
-	}
-
-	scenarioUser := database.User{}
-	err = db.Order("ID asc").Model(s).Where("ID = ?", userID).Related(&scenarioUser, "Users").Error
-	if err != nil {
-		return false
-	}
-
-	if !scenarioUser.Active {
-		return false
-	} else if s.IsLocked && operation != database.Read {
-		return false
-	} else {
-		return true
-	}
-
 }

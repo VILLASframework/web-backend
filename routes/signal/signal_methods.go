@@ -23,7 +23,6 @@ package signal
 
 import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/component-configuration"
 )
 
 type Signal struct {
@@ -36,20 +35,20 @@ func (s *Signal) save() error {
 	return err
 }
 
-func (s *Signal) byID(id uint) error {
+/*func (s *Signal) byID(id uint) error {
 	db := database.GetDB()
 	err := db.Find(s, id).Error
 	if err != nil {
 		return err
 	}
 	return nil
-}
+}*/
 
-func (s *Signal) addToConfig() error {
+func (s *Signal) AddToConfig() error {
 	db := database.GetDB()
 	var err error
-	var m component_configuration.ComponentConfiguration
-	err = m.ByID(s.ConfigID)
+	var m database.ComponentConfiguration
+	err = db.Find(&m, s.ConfigID).Error
 	if err != nil {
 		return err
 	}
@@ -92,8 +91,8 @@ func (s *Signal) delete() error {
 
 	db := database.GetDB()
 	var err error
-	var m component_configuration.ComponentConfiguration
-	err = m.ByID(s.ConfigID)
+	var m database.ComponentConfiguration
+	err = db.Find(&m, s.ConfigID).Error
 	if err != nil {
 		return err
 	}

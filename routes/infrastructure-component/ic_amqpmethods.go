@@ -26,13 +26,19 @@ import (
 	"fmt"
 	"log"
 
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
-	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 	"github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/streadway/amqp"
 )
+
+type Action struct {
+	Act        string          `json:"action"`
+	When       int64           `json:"when"`
+	Parameters json.RawMessage `json:"parameters,omitempty"`
+	Model      json.RawMessage `json:"model,omitempty"`
+	Results    json.RawMessage `json:"results,omitempty"`
+}
 
 type ICStatus struct {
 	State     string  `json:"state"`
@@ -68,42 +74,24 @@ type ICUpdate struct {
 	Action     string       `json:"action"`
 }
 
-func StartAMQP(AMQPurl string, api *gin.RouterGroup) error {
-	if AMQPurl != "" {
-		log.Println("Starting AMQP client")
-
-		err := helper.ConnectAMQP(AMQPurl, ProcessMessage)
-		if err != nil {
-			return err
-		}
-
-		// register IC action endpoint only if AMQP client is used
-		RegisterAMQPEndpoint(api.Group("/ic"))
-
-		log.Printf("Connected AMQP client to %s", AMQPurl)
-	}
-
-	return nil
-}
-
-func ProcessMessage(message amqp.Delivery) error {
+func ProcessMessage(message amqp.Delivery) {
 
 	var payload ICUpdate
 	err := json.Unmarshal(message.Body, &payload)
 	if err != nil {
-		return fmt.Errorf("AMQP: Could not unmarshal message to JSON: %v err: %v", string(message.Body), err)
+		log.Printf("AMQP: Could not unmarshal message to JSON: %v err: %v", string(message.Body), err)
 	}
 
 	if payload.Action != "" {
 		// if a message contains an action, it is not intended for the backend
 		//log.Println("AMQP: Ignoring action message ", payload)
-		return nil
+		return
 	}
 
 	ICUUID := payload.Properties.UUID
 	_, err = uuid.Parse(ICUUID)
 	if err != nil {
-		return fmt.Errorf("amqp: UUID not valid: %v, message ignored: %vi", ICUUID, string(message.Body))
+		log.Printf("amqp: UUID not valid: %v, message ignored: %v \n", ICUUID, string(message.Body))
 	}
 
 	var sToBeUpdated InfrastructureComponent
@@ -119,8 +107,10 @@ func ProcessMessage(message amqp.Delivery) error {
 		// update record based on payload
 		err = sToBeUpdated.updateExternalIC(payload, message.Body)
 	}
+	if err != nil {
+		log.Println(err.Error())
+	}
 
-	return err
 }
 
 func createExternalIC(payload ICUpdate, ICUUID string, body []byte) error {
@@ -178,7 +168,7 @@ func createExternalIC(payload ICUpdate, ICUUID string, body []byte) error {
 	log.Println("AMQP: Created IC with UUID ", newIC.UUID)
 
 	// send ping to get full status update of this IC
-	err = helper.SendPing(ICUUID)
+	err = SendPing(ICUUID)
 	return err
 }
 
@@ -252,4 +242,46 @@ func newTrue() *bool {
 func newFalse() *bool {
 	b := false
 	return &b
+}
+
+func SendPing(uuid string) error {
+	var ping Action
+	ping.Act = "ping"
+
+	payload, err := json.Marshal(ping)
+	if err != nil {
+		return err
+	}
+
+	if session != nil {
+		if session.IsReady {
+			err = session.Send(payload, uuid)
+			return err
+		} else {
+			return fmt.Errorf("could not send ping, AMQP session not ready")
+		}
+	} else {
+		return fmt.Errorf("could not send ping, AMQP session is nil")
+	}
+
+}
+
+func sendActionAMQP(action Action, destinationUUID string) error {
+
+	payload, err := json.Marshal(action)
+	if err != nil {
+		return err
+	}
+
+	if session != nil {
+		if session.IsReady {
+			err = session.Send(payload, destinationUUID)
+			return err
+		} else {
+			return fmt.Errorf("could not send action, AMQP session is not ready")
+		}
+	} else {
+		return fmt.Errorf("could not send action, AMQP session is nil")
+	}
+
 }

@@ -57,6 +57,7 @@ var newScenario1 = ScenarioRequest{
 	StartParameters: postgres.Jsonb{
 		RawMessage: json.RawMessage(`{"parameter1" : "testValue1A", "parameter2" : "testValue2A", "parameter3" : 42}`),
 	},
+	IsLocked: false,
 }
 
 var newScenario2 = ScenarioRequest{
@@ -64,6 +65,7 @@ var newScenario2 = ScenarioRequest{
 	StartParameters: postgres.Jsonb{
 		RawMessage: json.RawMessage(`{"parameter1" : "testValue1B", "parameter2" : "testValue2B", "parameter3" : 55}`),
 	},
+	IsLocked: false,
 }
 
 func TestMain(m *testing.M) {
@@ -95,10 +97,10 @@ func TestAddScenario(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.AddTestUsers())
+	assert.NoError(t, database.AddTestUsers())
 
 	// authenticate as normal user
-	token, err := helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err := helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	// try to POST with non JSON body
@@ -151,7 +153,7 @@ func TestAddScenario(t *testing.T) {
 	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
 
 	// authenticate as guest user
-	token, err = helper.AuthenticateForTest(router, helper.GuestCredentials)
+	token, err = helper.AuthenticateForTest(router, database.GuestCredentials)
 	assert.NoError(t, err)
 
 	// try to add scenario as guest user
@@ -162,7 +164,7 @@ func TestAddScenario(t *testing.T) {
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// authenticate as userB who has no access to the added scenario
-	token, err = helper.AuthenticateForTest(router, helper.UserBCredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserBCredentials)
 	assert.NoError(t, err)
 
 	// try to GET a scenario to which user B has no access
@@ -173,7 +175,7 @@ func TestAddScenario(t *testing.T) {
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// authenticate as admin user who has no access to everything
-	token, err = helper.AuthenticateForTest(router, helper.AdminCredentials)
+	token, err = helper.AuthenticateForTest(router, database.AdminCredentials)
 	assert.NoError(t, err)
 
 	// try to GET a scenario that is not created by admin user; should work anyway
@@ -187,10 +189,10 @@ func TestUpdateScenario(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.AddTestUsers())
+	assert.NoError(t, database.AddTestUsers())
 
 	// authenticate as normal user
-	token, err := helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err := helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	// test POST scenarios/ $newScenario
@@ -258,7 +260,7 @@ func TestUpdateScenario(t *testing.T) {
 	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
 
 	// authenticate as admin user who has no access to everything
-	token, err = helper.AuthenticateForTest(router, helper.AdminCredentials)
+	token, err = helper.AuthenticateForTest(router, database.AdminCredentials)
 	assert.NoError(t, err)
 
 	// changed locked state of scenario as admin user (should work)
@@ -294,7 +296,7 @@ func TestUpdateScenario(t *testing.T) {
 	assert.NoError(t, err)
 
 	// authenticate as normal user
-	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	// Get the updatedScenario
@@ -320,10 +322,10 @@ func TestGetAllScenariosAsAdmin(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.AddTestUsers())
+	assert.NoError(t, database.AddTestUsers())
 
 	// authenticate as admin
-	token, err := helper.AuthenticateForTest(router, helper.AdminCredentials)
+	token, err := helper.AuthenticateForTest(router, database.AdminCredentials)
 	assert.NoError(t, err)
 
 	// get the length of the GET all scenarios response for admin
@@ -332,7 +334,7 @@ func TestGetAllScenariosAsAdmin(t *testing.T) {
 	assert.NoError(t, err)
 
 	// authenticate as normal userB
-	token, err = helper.AuthenticateForTest(router, helper.UserBCredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserBCredentials)
 	assert.NoError(t, err)
 
 	// test POST scenarios/ $newScenario1
@@ -342,7 +344,7 @@ func TestGetAllScenariosAsAdmin(t *testing.T) {
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// authenticate as normal userA
-	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	// test POST scenarios/ $newScenario2
@@ -352,7 +354,7 @@ func TestGetAllScenariosAsAdmin(t *testing.T) {
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// authenticate as admin
-	token, err = helper.AuthenticateForTest(router, helper.AdminCredentials)
+	token, err = helper.AuthenticateForTest(router, database.AdminCredentials)
 	assert.NoError(t, err)
 
 	// get the length of the GET all scenarios response again
@@ -367,10 +369,10 @@ func TestGetAllScenariosAsUser(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.AddTestUsers())
+	assert.NoError(t, database.AddTestUsers())
 
 	// authenticate as normal userB
-	token, err := helper.AuthenticateForTest(router, helper.UserBCredentials)
+	token, err := helper.AuthenticateForTest(router, database.UserBCredentials)
 	assert.NoError(t, err)
 
 	// get the length of the GET all scenarios response for userB
@@ -385,7 +387,7 @@ func TestGetAllScenariosAsUser(t *testing.T) {
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// authenticate as normal userA
-	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	// test POST scenarios/ $newScenario1
@@ -395,7 +397,7 @@ func TestGetAllScenariosAsUser(t *testing.T) {
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// authenticate as normal userB
-	token, err = helper.AuthenticateForTest(router, helper.UserBCredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserBCredentials)
 	assert.NoError(t, err)
 
 	// get the length of the GET all scenarios response again
@@ -410,10 +412,10 @@ func TestDeleteScenario(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.AddTestUsers())
+	assert.NoError(t, database.AddTestUsers())
 
 	// authenticate as normal user
-	token, err := helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err := helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	// test POST scenarios/ $newScenario
@@ -433,7 +435,7 @@ func TestDeleteScenario(t *testing.T) {
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// authenticate as guest user
-	token, err = helper.AuthenticateForTest(router, helper.GuestCredentials)
+	token, err = helper.AuthenticateForTest(router, database.GuestCredentials)
 	assert.NoError(t, err)
 
 	// try to delete scenario as guest
@@ -444,7 +446,7 @@ func TestDeleteScenario(t *testing.T) {
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// authenticate as normal user
-	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	// Count the number of all the scenarios returned for userA
@@ -474,10 +476,10 @@ func TestAddUserToScenario(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.AddTestUsers())
+	assert.NoError(t, database.AddTestUsers())
 
 	// authenticate as normal user
-	token, err := helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err := helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	// test POST scenarios/ $newScenario
@@ -491,7 +493,7 @@ func TestAddUserToScenario(t *testing.T) {
 	assert.NoError(t, err)
 
 	// authenticate as normal userB who has no access to new scenario
-	token, err = helper.AuthenticateForTest(router, helper.UserBCredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserBCredentials)
 	assert.NoError(t, err)
 
 	// try to add new user User_C to scenario as userB
@@ -509,7 +511,7 @@ func TestAddUserToScenario(t *testing.T) {
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// authenticate as normal user
-	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	// Count the number of all the users returned for newScenario
@@ -526,9 +528,9 @@ func TestAddUserToScenario(t *testing.T) {
 
 	// Compare resp to userB
 	userB := UserRequest{
-		Username: helper.UserB.Username,
-		Mail:     helper.UserB.Mail,
-		Role:     helper.UserB.Role,
+		Username: database.UserB.Username,
+		Mail:     database.UserB.Mail,
+		Role:     database.UserB.Role,
 	}
 	err = helper.CompareResponse(resp, helper.KeyModels{"user": userB})
 	assert.NoError(t, err)
@@ -551,10 +553,10 @@ func TestGetAllUsersOfScenario(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.AddTestUsers())
+	assert.NoError(t, database.AddTestUsers())
 
 	// authenticate as normal user
-	token, err := helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err := helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	// test POST scenarios/ $newScenario
@@ -568,7 +570,7 @@ func TestGetAllUsersOfScenario(t *testing.T) {
 	assert.NoError(t, err)
 
 	// authenticate as normal userB who has no access to new scenario
-	token, err = helper.AuthenticateForTest(router, helper.UserBCredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserBCredentials)
 	assert.NoError(t, err)
 
 	// try to get all users of new scenario with userB
@@ -579,7 +581,7 @@ func TestGetAllUsersOfScenario(t *testing.T) {
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// authenticate as normal user
-	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	// Count the number of all the users returned for newScenario
@@ -601,7 +603,7 @@ func TestGetAllUsersOfScenario(t *testing.T) {
 	assert.Equal(t, finalNumber, initialNumber+1)
 
 	// authenticate as admin
-	token, err = helper.AuthenticateForTest(router, helper.AdminCredentials)
+	token, err = helper.AuthenticateForTest(router, database.AdminCredentials)
 	assert.NoError(t, err)
 
 	// set userB as inactive
@@ -612,7 +614,7 @@ func TestGetAllUsersOfScenario(t *testing.T) {
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// authenticate as normal user
-	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	// Count AGAIN the number of all the users returned for newScenario
@@ -626,10 +628,10 @@ func TestRemoveUserFromScenario(t *testing.T) {
 
 	database.DropTables()
 	database.MigrateModels()
-	assert.NoError(t, helper.AddTestUsers())
+	assert.NoError(t, database.AddTestUsers())
 
 	// authenticate as normal user
-	token, err := helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err := helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	// test POST scenarios/ $newScenario
@@ -649,7 +651,7 @@ func TestRemoveUserFromScenario(t *testing.T) {
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// authenticate as normal userB who has no access to new scenario
-	token, err = helper.AuthenticateForTest(router, helper.UserBCredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserBCredentials)
 	assert.NoError(t, err)
 
 	// try to delete userC from new scenario
@@ -660,7 +662,7 @@ func TestRemoveUserFromScenario(t *testing.T) {
 	assert.Equalf(t, 422, code, "Response body: \n%v\n", resp)
 
 	// authenticate as normal user
-	token, err = helper.AuthenticateForTest(router, helper.UserACredentials)
+	token, err = helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
 	// Count the number of all the users returned for newScenario
@@ -677,9 +679,9 @@ func TestRemoveUserFromScenario(t *testing.T) {
 
 	// Compare DELETE's response with UserC's data
 	userC := UserRequest{
-		Username: helper.UserC.Username,
-		Mail:     helper.UserC.Mail,
-		Role:     helper.UserC.Role,
+		Username: database.UserC.Username,
+		Mail:     database.UserC.Mail,
+		Role:     database.UserC.Role,
 	}
 	err = helper.CompareResponse(resp, helper.KeyModels{"user": userC})
 	assert.NoError(t, err)

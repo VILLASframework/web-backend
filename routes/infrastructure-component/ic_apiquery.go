@@ -140,7 +140,7 @@ func queryVillasNodeGateway(ic *database.InfrastructureComponent) error {
 
 	// create the update and update IC in DB
 	var x InfrastructureComponent
-	err = x.byID(ic.ID)
+	err = x.ByID(ic.ID)
 	if err != nil {
 		return fmt.Errorf("failed to get villas-node gateway by ID %s (%s): %w", ic.Name, ic.UUID, err)
 	}
@@ -181,7 +181,7 @@ func queryVillasRelayGateway(ic *database.InfrastructureComponent) error {
 
 	// create the update and update IC in DB
 	var x InfrastructureComponent
-	err = x.byID(ic.ID)
+	err = x.ByID(ic.ID)
 	if err != nil {
 		return fmt.Errorf("failed to get villas-relay manager by ID %s (%s): %w", ic.Name, ic.UUID, err)
 	}

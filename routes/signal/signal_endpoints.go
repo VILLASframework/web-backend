@@ -29,7 +29,6 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
-	component_configuration "git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/component-configuration"
 )
 
 func RegisterSignalEndpoints(r *gin.RouterGroup) {
@@ -55,7 +54,7 @@ func RegisterSignalEndpoints(r *gin.RouterGroup) {
 // @Security Bearer
 func getSignals(c *gin.Context) {
 
-	ok, m := component_configuration.CheckPermissions(c, database.Read, "query", -1)
+	ok, m := database.CheckComponentConfigPermissions(c, database.Read, "query", -1)
 	if !ok {
 		return
 	}
@@ -111,13 +110,13 @@ func addSignal(c *gin.Context) {
 	// Create the new signal from the request
 	newSignal := req.createSignal()
 
-	ok, _ := component_configuration.CheckPermissions(c, database.Update, "body", int(newSignal.ConfigID))
+	ok, _ := database.CheckComponentConfigPermissions(c, database.Update, "body", int(newSignal.ConfigID))
 	if !ok {
 		return
 	}
 
 	// Add signal to component configuration
-	err := newSignal.addToConfig()
+	err := newSignal.AddToConfig()
 	if !helper.DBError(c, err) {
 		c.JSON(http.StatusOK, gin.H{"signal": newSignal.Signal})
 	}
@@ -139,10 +138,13 @@ func addSignal(c *gin.Context) {
 // @Router /signals/{signalID} [put]
 // @Security Bearer
 func updateSignal(c *gin.Context) {
-	ok, oldSignal := checkPermissions(c, database.Delete)
+	ok, oldSignal_r := database.CheckSignalPermissions(c, database.Delete)
 	if !ok {
 		return
 	}
+
+	var oldSignal Signal
+	oldSignal.Signal = oldSignal_r
 
 	var req updateSignalRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -181,12 +183,12 @@ func updateSignal(c *gin.Context) {
 // @Router /signals/{signalID} [get]
 // @Security Bearer
 func getSignal(c *gin.Context) {
-	ok, sig := checkPermissions(c, database.Delete)
+	ok, sig := database.CheckSignalPermissions(c, database.Delete)
 	if !ok {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"signal": sig.Signal})
+	c.JSON(http.StatusOK, gin.H{"signal": sig})
 }
 
 // deleteSignal godoc
@@ -204,10 +206,13 @@ func getSignal(c *gin.Context) {
 // @Security Bearer
 func deleteSignal(c *gin.Context) {
 
-	ok, sig := checkPermissions(c, database.Delete)
+	ok, sig_r := database.CheckSignalPermissions(c, database.Delete)
 	if !ok {
 		return
 	}
+
+	var sig Signal
+	sig.Signal = sig_r
 
 	err := sig.delete()
 	if !helper.DBError(c, err) {

@@ -22,14 +22,10 @@
 package scenario
 
 import (
-	"net/http"
-
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
-
-	"github.com/gin-gonic/gin"
-
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/user"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
+	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
 func RegisterScenarioEndpoints(r *gin.RouterGroup) {
@@ -60,15 +56,15 @@ func getScenarios(c *gin.Context) {
 
 	// ATTENTION: do not use c.GetInt (common.UserIDCtx) since userID is of type uint and not int
 	userID, _ := c.Get(database.UserIDCtx)
-
-	var u user.User
-	err := u.ByID(userID.(uint))
+	db := database.GetDB()
+	var u database.User
+	err := db.Find(&u, userID.(uint)).Error
 	if helper.DBError(c, err) {
 		return
 	}
 
 	// get all scenarios for the user who issues the request
-	db := database.GetDB()
+
 	var scenarios []database.Scenario
 	if u.Role == "Admin" { // Admin can see all scenarios
 		err = db.Order("ID asc").Find(&scenarios).Error
@@ -102,16 +98,16 @@ func getScenarios(c *gin.Context) {
 // @Security Bearer
 func addScenario(c *gin.Context) {
 
-	ok, _ := CheckPermissions(c, database.Create, "none", -1)
+	ok, _ := database.CheckScenarioPermissions(c, database.Create, "none", -1)
 	if !ok {
 		return
 	}
 
 	// ATTENTION: do not use c.GetInt (common.UserIDCtx) since userID is of type uint and not int
 	userID, _ := c.Get(database.UserIDCtx)
-
-	var u user.User
-	err := u.ByID(userID.(uint))
+	db := database.GetDB()
+	var u database.User
+	err := db.Find(&u, userID.(uint)).Error
 	if helper.DBError(c, err) {
 		return
 	}
@@ -138,7 +134,7 @@ func addScenario(c *gin.Context) {
 	}
 
 	// add user to new scenario
-	err = newScenario.addUser(&(u.User))
+	err = newScenario.addUser(&(u))
 	if helper.DBError(c, err) {
 		return
 	}
@@ -163,10 +159,13 @@ func addScenario(c *gin.Context) {
 // @Security Bearer
 func updateScenario(c *gin.Context) {
 
-	ok, oldScenario := CheckPermissions(c, database.Update, "path", -1)
+	ok, oldScenario_r := database.CheckScenarioPermissions(c, database.Update, "path", -1)
 	if !ok {
 		return
 	}
+
+	var oldScenario Scenario
+	oldScenario.Scenario = oldScenario_r
 
 	// Bind the (context) with the updateScenarioRequest struct
 	var req updateScenarioRequest
@@ -208,13 +207,13 @@ func updateScenario(c *gin.Context) {
 // @Security Bearer
 func getScenario(c *gin.Context) {
 
-	ok, so := CheckPermissions(c, database.Read, "path", -1)
+	ok, so := database.CheckScenarioPermissions(c, database.Read, "path", -1)
 	if !ok {
 		return
 	}
 
 	// TODO return list of configIDs, dashboardIDs and userIDs per scenario
-	c.JSON(http.StatusOK, gin.H{"scenario": so.Scenario})
+	c.JSON(http.StatusOK, gin.H{"scenario": so})
 }
 
 // deleteScenario godoc
@@ -231,10 +230,13 @@ func getScenario(c *gin.Context) {
 // @Security Bearer
 func deleteScenario(c *gin.Context) {
 
-	ok, so := CheckPermissions(c, database.Delete, "path", -1)
+	ok, so_r := database.CheckScenarioPermissions(c, database.Delete, "path", -1)
 	if !ok {
 		return
 	}
+
+	var so Scenario
+	so.Scenario = so_r
 
 	err := so.delete()
 	if helper.DBError(c, err) {
@@ -258,10 +260,13 @@ func deleteScenario(c *gin.Context) {
 // @Security Bearer
 func getUsersOfScenario(c *gin.Context) {
 
-	ok, so := CheckPermissions(c, database.Read, "path", -1)
+	ok, so_r := database.CheckScenarioPermissions(c, database.Read, "path", -1)
 	if !ok {
 		return
 	}
+
+	var so Scenario
+	so.Scenario = so_r
 
 	// Find all users of scenario
 	allUsers, _, err := so.getUsers()
@@ -287,15 +292,18 @@ func getUsersOfScenario(c *gin.Context) {
 // @Security Bearer
 func addUserToScenario(c *gin.Context) {
 
-	ok, so := CheckPermissions(c, database.Update, "path", -1)
+	ok, so_r := database.CheckScenarioPermissions(c, database.Update, "path", -1)
 	if !ok {
 		return
 	}
 
-	username := c.Request.URL.Query().Get("username")
+	var so Scenario
+	so.Scenario = so_r
 
-	var u user.User
-	err := u.ByUsername(username)
+	username := c.Request.URL.Query().Get("username")
+	var u database.User
+	db := database.GetDB()
+	err := db.Find(&u, "Username = ?", username).Error
 	if helper.DBError(c, err) {
 		return
 	}
@@ -305,12 +313,12 @@ func addUserToScenario(c *gin.Context) {
 		return
 	}
 
-	err = so.addUser(&(u.User))
+	err = so.addUser(&(u))
 	if helper.DBError(c, err) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"user": u.User})
+	c.JSON(http.StatusOK, gin.H{"user": u})
 }
 
 // deleteUserFromScenario godoc
@@ -328,15 +336,18 @@ func addUserToScenario(c *gin.Context) {
 // @Security Bearer
 func deleteUserFromScenario(c *gin.Context) {
 
-	ok, so := CheckPermissions(c, database.Update, "path", -1)
+	ok, so_r := database.CheckScenarioPermissions(c, database.Update, "path", -1)
 	if !ok {
 		return
 	}
 
-	username := c.Request.URL.Query().Get("username")
+	var so Scenario
+	so.Scenario = so_r
 
-	var u user.User
-	err := u.ByUsername(username)
+	username := c.Request.URL.Query().Get("username")
+	var u database.User
+	db := database.GetDB()
+	err := db.Find(&u, "Username = ?", username).Error
 	if helper.DBError(c, err) {
 		return
 	}
@@ -346,5 +357,5 @@ func deleteUserFromScenario(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"user": u.User})
+	c.JSON(http.StatusOK, gin.H{"user": u})
 }

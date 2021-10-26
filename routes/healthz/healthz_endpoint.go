@@ -22,6 +22,7 @@
 package healthz
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
@@ -31,9 +32,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var session *helper.AMQPsession
+
 func RegisterHealthzEndpoint(r *gin.RouterGroup) {
 
 	r.GET("", getHealth)
+}
+
+func SetAMQPSession(s *helper.AMQPsession) {
+	session = s
 }
 
 // getHealth godoc
@@ -67,12 +74,20 @@ func getHealth(c *gin.Context) {
 		c.Writer.WriteHeader(http.StatusNoContent)
 		return
 	} else {
-		err = helper.CheckConnection()
-		if err != nil {
-			log.Println(err.Error())
+		if session != nil {
+			err = session.CheckConnection()
+			if err != nil {
+				log.Println(err.Error())
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"success:": false,
+					"message":  err.Error(),
+				})
+				return
+			}
+		} else {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"success:": false,
-				"message":  err.Error(),
+				"message":  fmt.Errorf("AMQP session is nil"),
 			})
 			return
 		}

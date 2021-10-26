@@ -29,7 +29,6 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/scenario"
 )
 
 func RegisterComponentConfigurationEndpoints(r *gin.RouterGroup) {
@@ -54,7 +53,7 @@ func RegisterComponentConfigurationEndpoints(r *gin.RouterGroup) {
 // @Security Bearer
 func getConfigs(c *gin.Context) {
 
-	ok, so := scenario.CheckPermissions(c, database.Read, "query", -1)
+	ok, so := database.CheckScenarioPermissions(c, database.Read, "query", -1)
 	if !ok {
 		return
 	}
@@ -102,7 +101,7 @@ func addConfig(c *gin.Context) {
 	newConfig := req.createConfig()
 
 	// check access to the scenario
-	ok, _ := scenario.CheckPermissions(c, database.Update, "body", int(newConfig.ScenarioID))
+	ok, _ := database.CheckScenarioPermissions(c, database.Update, "body", int(newConfig.ScenarioID))
 	if !ok {
 		return
 	}
@@ -132,10 +131,14 @@ func addConfig(c *gin.Context) {
 // @Security Bearer
 func updateConfig(c *gin.Context) {
 
-	ok, oldConfig := CheckPermissions(c, database.Update, "path", -1)
+	ok, oldConfig_r := database.CheckComponentConfigPermissions(c, database.Update, "path", -1)
+
 	if !ok {
 		return
 	}
+
+	var oldConfig ComponentConfiguration
+	oldConfig.ComponentConfiguration = oldConfig_r
 
 	var req updateConfigRequest
 	err := c.BindJSON(&req)
@@ -176,12 +179,12 @@ func updateConfig(c *gin.Context) {
 // @Security Bearer
 func getConfig(c *gin.Context) {
 
-	ok, m := CheckPermissions(c, database.Read, "path", -1)
+	ok, m := database.CheckComponentConfigPermissions(c, database.Read, "path", -1)
 	if !ok {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"config": m.ComponentConfiguration})
+	c.JSON(http.StatusOK, gin.H{"config": m})
 }
 
 // deleteConfig godoc
@@ -199,10 +202,13 @@ func getConfig(c *gin.Context) {
 // @Security Bearer
 func deleteConfig(c *gin.Context) {
 
-	ok, m := CheckPermissions(c, database.Delete, "path", -1)
+	ok, m_r := database.CheckComponentConfigPermissions(c, database.Delete, "path", -1)
 	if !ok {
 		return
 	}
+
+	var m ComponentConfiguration
+	m.ComponentConfiguration = m_r
 
 	err := m.delete()
 	if !helper.DBError(c, err) {

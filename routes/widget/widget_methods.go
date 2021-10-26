@@ -23,7 +23,6 @@ package widget
 
 import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/dashboard"
 )
 
 type Widget struct {
@@ -47,8 +46,8 @@ func (w *Widget) ByID(id uint) error {
 
 func (w *Widget) addToDashboard() error {
 	db := database.GetDB()
-	var dab dashboard.Dashboard
-	err := dab.ByID(uint(w.DashboardID))
+	var dab database.Dashboard
+	err := db.Find(&dab, uint(w.DashboardID)).Error
 	if err != nil {
 		return err
 	}
@@ -59,7 +58,7 @@ func (w *Widget) addToDashboard() error {
 		return err
 	}
 
-	// associate dashboard with simulation
+	// associate widget with dashboard
 	err = db.Model(&dab).Association("Widgets").Append(w).Error
 
 	return err
@@ -89,8 +88,8 @@ func (w *Widget) update(modifiedWidget Widget) error {
 func (w *Widget) delete() error {
 
 	db := database.GetDB()
-	var dab dashboard.Dashboard
-	err := dab.ByID(w.DashboardID)
+	var dab database.Dashboard
+	err := db.Find(&dab, uint(w.DashboardID)).Error
 	if err != nil {
 		return err
 	}

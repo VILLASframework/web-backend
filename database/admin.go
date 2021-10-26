@@ -111,3 +111,67 @@ func generatePassword(Len int) string {
 
 	return b.String()
 }
+
+// add test users defined above
+func AddTestUsers() error {
+
+	testUsers := []User{User0, UserA, UserB, UserC}
+	DBpool.AutoMigrate(&User{})
+
+	for _, user := range testUsers {
+		err := DBpool.Create(&user).Error
+		if err != nil {
+			return err
+		}
+
+	}
+
+	return nil
+}
+
+// Credentials
+var StrPassword0 = "xyz789"
+var StrPasswordA = "abc123"
+var StrPasswordB = "bcd234"
+var StrPasswordC = "guestpw"
+
+// Hash passwords with bcrypt algorithm
+var bcryptCost = 10
+var pw0, _ = bcrypt.GenerateFromPassword([]byte(StrPassword0), bcryptCost)
+var pwA, _ = bcrypt.GenerateFromPassword([]byte(StrPasswordA), bcryptCost)
+var pwB, _ = bcrypt.GenerateFromPassword([]byte(StrPasswordB), bcryptCost)
+var pwC, _ = bcrypt.GenerateFromPassword([]byte(StrPasswordC), bcryptCost)
+
+var User0 = User{Username: "User_0", Password: string(pw0),
+	Role: "Admin", Mail: "User_0@example.com"}
+var UserA = User{Username: "User_A", Password: string(pwA),
+	Role: "User", Mail: "User_A@example.com", Active: true}
+var UserB = User{Username: "User_B", Password: string(pwB),
+	Role: "User", Mail: "User_B@example.com", Active: true}
+var UserC = User{Username: "User_C", Password: string(pwC),
+	Role: "Guest", Mail: "User_C@example.com", Active: true}
+
+type Credentials struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+var AdminCredentials = Credentials{
+	Username: User0.Username,
+	Password: StrPassword0,
+}
+
+var UserACredentials = Credentials{
+	Username: UserA.Username,
+	Password: StrPasswordA,
+}
+
+var UserBCredentials = Credentials{
+	Username: UserB.Username,
+	Password: StrPasswordB,
+}
+
+var GuestCredentials = Credentials{
+	Username: UserC.Username,
+	Password: StrPasswordC,
+}

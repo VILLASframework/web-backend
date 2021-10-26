@@ -26,8 +26,6 @@ import (
 	"os"
 	"testing"
 
-	infrastructure_component "git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/infrastructure-component"
-
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"github.com/gin-gonic/gin"
@@ -53,30 +51,6 @@ func TestMain(m *testing.M) {
 
 	api = router.Group("/api/v2")
 	os.Exit(m.Run())
-}
-
-/*
- * The order of test functions is important here
- * 1. Start and connect AMQP
- * 2. Register endpoints
- * 3. Add test data
- */
-
-func TestStartAMQP(t *testing.T) {
-	// connect AMQP client
-	// Make sure that AMQP_HOST, AMQP_USER, AMQP_PASS are set
-	host, err := configuration.GlobalConfig.String("amqp.host")
-	assert.NoError(t, err)
-	user, err := configuration.GlobalConfig.String("amqp.user")
-	assert.NoError(t, err)
-	pass, err := configuration.GlobalConfig.String("amqp.pass")
-	assert.NoError(t, err)
-	amqpURI := "amqp://" + user + ":" + pass + "@" + host
-
-	// AMQP Connection startup is tested here
-	// Not repeated in other tests because it is only needed once
-	err = infrastructure_component.StartAMQP(amqpURI, api)
-	assert.NoError(t, err)
 }
 
 func TestRegisterEndpoints(t *testing.T) {

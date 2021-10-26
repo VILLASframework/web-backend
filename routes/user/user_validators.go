@@ -99,7 +99,7 @@ func (r *updateUserRequest) updatedUser(callerID interface{}, role interface{}, 
 
 	// Update the username making sure it is NOT taken
 	var testUser User
-	if err := testUser.ByUsername(r.User.Username); err == nil {
+	if err := testUser.byUsername(r.User.Username); err == nil {
 		return u, &UsernameAlreadyTaken{Username: r.User.Username}
 	}
 
@@ -116,7 +116,7 @@ func (r *updateUserRequest) updatedUser(callerID interface{}, role interface{}, 
 
 		if role == "Admin" { // admin has to enter admin password
 			var adminUser User
-			err := adminUser.ByID(callerID.(uint))
+			err := adminUser.byID(callerID.(uint))
 			if err != nil {
 				return u, err
 			}

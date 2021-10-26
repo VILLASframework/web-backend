@@ -37,10 +37,13 @@ func RegisterICEndpoints(r *gin.RouterGroup) {
 	r.GET("/:ICID", getIC)
 	r.DELETE("/:ICID", deleteIC)
 	r.GET("/:ICID/configs", getConfigsOfIC)
+	r.POST("/:ICID/action", sendActionToIC)
 }
 
-func RegisterAMQPEndpoint(r *gin.RouterGroup) {
-	r.POST("/:ICID/action", sendActionToIC)
+var session *helper.AMQPsession
+
+func SetAMQPSession(s *helper.AMQPsession) {
+	session = s
 }
 
 // getICs godoc
@@ -83,7 +86,7 @@ func getICs(c *gin.Context) {
 // @Security Bearer
 func addIC(c *gin.Context) {
 
-	ok, _ := CheckPermissions(c, database.ModelInfrastructureComponent, database.Create, false)
+	ok, _ := database.CheckICPermissions(c, database.ModelInfrastructureComponent, database.Create, false)
 	if !ok {
 		return
 	}
@@ -144,10 +147,13 @@ func addIC(c *gin.Context) {
 // @Security Bearer
 func updateIC(c *gin.Context) {
 
-	ok, oldIC := CheckPermissions(c, database.ModelInfrastructureComponent, database.Update, true)
+	ok, oldIC_r := database.CheckICPermissions(c, database.ModelInfrastructureComponent, database.Update, true)
 	if !ok {
 		return
 	}
+
+	var oldIC InfrastructureComponent
+	oldIC.InfrastructureComponent = oldIC_r
 
 	if oldIC.ManagedExternally {
 		helper.BadRequestError(c, "Cannot update externally managed component via API")
@@ -193,12 +199,12 @@ func updateIC(c *gin.Context) {
 // @Security Bearer
 func getIC(c *gin.Context) {
 
-	ok, s := CheckPermissions(c, database.ModelInfrastructureComponent, database.Read, true)
+	ok, s := database.CheckICPermissions(c, database.ModelInfrastructureComponent, database.Read, true)
 	if !ok {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"ic": s.InfrastructureComponent})
+	c.JSON(http.StatusOK, gin.H{"ic": s})
 }
 
 // deleteIC godoc
@@ -216,10 +222,13 @@ func getIC(c *gin.Context) {
 // @Security Bearer
 func deleteIC(c *gin.Context) {
 
-	ok, s := CheckPermissions(c, database.ModelInfrastructureComponent, database.Delete, true)
+	ok, s_r := database.CheckICPermissions(c, database.ModelInfrastructureComponent, database.Delete, true)
 	if !ok {
 		return
 	}
+
+	var s InfrastructureComponent
+	s.InfrastructureComponent = s_r
 
 	// Check if IC is managed externally
 	if s.ManagedExternally {
@@ -255,10 +264,13 @@ func deleteIC(c *gin.Context) {
 // @Security Bearer
 func getConfigsOfIC(c *gin.Context) {
 
-	ok, s := CheckPermissions(c, database.ModelInfrastructureComponent, database.Read, true)
+	ok, s_r := database.CheckICPermissions(c, database.ModelInfrastructureComponent, database.Read, true)
 	if !ok {
 		return
 	}
+
+	var s InfrastructureComponent
+	s.InfrastructureComponent = s_r
 
 	// get all associated configurations
 	allConfigs, _, err := s.getConfigs()
@@ -284,12 +296,12 @@ func getConfigsOfIC(c *gin.Context) {
 // @Security Bearer
 func sendActionToIC(c *gin.Context) {
 
-	ok, s := CheckPermissions(c, database.ModelInfrastructureComponentAction, database.Update, true)
+	ok, s := database.CheckICPermissions(c, database.ModelInfrastructureComponentAction, database.Update, true)
 	if !ok {
 		return
 	}
 
-	var actions []helper.Action
+	var actions []Action
 	err := c.BindJSON(&actions)
 	if err != nil {
 		helper.BadRequestError(c, "Error binding form data to JSON: "+err.Error())
@@ -300,7 +312,7 @@ func sendActionToIC(c *gin.Context) {
 		if (action.Act == "delete" || action.Act == "create") && s.Category != "manager" {
 			helper.BadRequestError(c, "cannot send a delete or create action to an IC of category "+s.Category)
 		}
-		err = helper.SendActionAMQP(action, s.UUID)
+		err = sendActionAMQP(action, s.UUID)
 		if err != nil {
 			helper.InternalServerError(c, "Unable to send actions to IC: "+err.Error())
 			return

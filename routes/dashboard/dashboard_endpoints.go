@@ -29,7 +29,6 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/scenario"
 )
 
 func RegisterDashboardEndpoints(r *gin.RouterGroup) {
@@ -55,7 +54,7 @@ func RegisterDashboardEndpoints(r *gin.RouterGroup) {
 // @Security Bearer
 func getDashboards(c *gin.Context) {
 
-	ok, sim := scenario.CheckPermissions(c, database.Read, "query", -1)
+	ok, sim := database.CheckScenarioPermissions(c, database.Read, "query", -1)
 	if !ok {
 		return
 	}
@@ -102,7 +101,7 @@ func addDashboard(c *gin.Context) {
 	newDashboard := req.createDashboard()
 
 	// Check if user is allowed to modify scenario specified in request
-	ok, _ := scenario.CheckPermissions(c, database.Update, "body", int(newDashboard.ScenarioID))
+	ok, _ := database.CheckScenarioPermissions(c, database.Update, "body", int(newDashboard.ScenarioID))
 	if !ok {
 		return
 	}
@@ -132,10 +131,13 @@ func addDashboard(c *gin.Context) {
 // @Security Bearer
 func updateDashboard(c *gin.Context) {
 
-	ok, oldDashboard := CheckPermissions(c, database.Update, "path", -1)
+	ok, oldDashboard_r := database.CheckDashboardPermissions(c, database.Update, "path", -1)
 	if !ok {
 		return
 	}
+
+	var oldDashboard Dashboard
+	oldDashboard.Dashboard = oldDashboard_r
 
 	var req updateDashboardRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -174,12 +176,12 @@ func updateDashboard(c *gin.Context) {
 // @Security Bearer
 func getDashboard(c *gin.Context) {
 
-	ok, dab := CheckPermissions(c, database.Read, "path", -1)
+	ok, dab := database.CheckDashboardPermissions(c, database.Read, "path", -1)
 	if !ok {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"dashboard": dab.Dashboard})
+	c.JSON(http.StatusOK, gin.H{"dashboard": dab})
 }
 
 // deleteDashboard godoc
@@ -196,10 +198,13 @@ func getDashboard(c *gin.Context) {
 // @Router /dashboards/{dashboardID} [delete]
 // @Security Bearer
 func deleteDashboard(c *gin.Context) {
-	ok, dab := CheckPermissions(c, database.Delete, "path", -1)
+	ok, dab_r := database.CheckDashboardPermissions(c, database.Delete, "path", -1)
 	if !ok {
 		return
 	}
+
+	var dab Dashboard
+	dab.Dashboard = dab_r
 
 	err := dab.delete()
 	if !helper.DBError(c, err) {

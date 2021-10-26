@@ -41,7 +41,7 @@ func NewUser(username, password, mail, role string, active bool) (User, error) {
 	var newUser User
 
 	// Check that the username is NOT taken
-	err := newUser.ByUsername(username)
+	err := newUser.byUsername(username)
 	if err == nil {
 		return newUser, &UsernameAlreadyTaken{Username: username}
 	}
@@ -83,13 +83,13 @@ func (u *User) remove() error {
 	return err
 }
 
-func (u *User) ByUsername(username string) error {
+func (u *User) byUsername(username string) error {
 	db := database.GetDB()
 	err := db.Find(u, "Username = ?", username).Error
 	return err
 }
 
-func (u *User) ByID(id uint) error {
+func (u *User) byID(id uint) error {
 	db := database.GetDB()
 	err := db.Find(u, id).Error
 	return err
