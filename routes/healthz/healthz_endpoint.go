@@ -61,11 +61,8 @@ func getHealth(c *gin.Context) {
 	}
 
 	// check if connection to AMQP broker is alive if backend was started with AMQP client
-	url, err := configuration.GlobalConfig.StringOr("amqp.host", "not-set")
-	if err != nil && url == "not-set" {
-		c.JSON(http.StatusOK, gin.H{})
-		return
-	} else if err != nil {
+	url, err := configuration.GlobalConfig.StringOr("amqp.host", "")
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success:": false,
 			"message":  err.Error(),
@@ -73,7 +70,10 @@ func getHealth(c *gin.Context) {
 		return
 	}
 
-	if len(url) != 0 {
+	if url == "" {
+		c.Writer.WriteHeader(http.StatusNoContent)
+		return
+	} else {
 		if session != nil {
 			err = session.CheckConnection()
 			if err != nil {
@@ -91,7 +91,6 @@ func getHealth(c *gin.Context) {
 			})
 			return
 		}
-
 	}
 
 	// Send a 204 reponse

@@ -67,6 +67,7 @@ func InitConfig() error {
 		adminMail                = flag.String("admin-mail", "", "Initial admin mail address")
 		s3Bucket                 = flag.String("s3-bucket", "", "S3 Bucket for uploading files")
 		s3Endpoint               = flag.String("s3-endpoint", "", "Endpoint of S3 API for file uploads")
+		s3EndpointPublic         = flag.String("s3-endpoint-public", "", "Public endpoint address of S3 API for file uploads")
 		s3Region                 = flag.String("s3-region", "default", "S3 Region for file uploads")
 		s3NoSSL                  = flag.Bool("s3-nossl", false, "Use encrypted connections to the S3 API")
 		s3PathStyle              = flag.Bool("s3-pathstyle", false, "Use path-style S3 API")
@@ -83,8 +84,8 @@ func InitConfig() error {
 		testDataPath             = flag.String("test-data-path", "", "The path to a test data json file")
 		groupsPath               = flag.String("groups-path", "", "The path to a YAML file that maps user groups to scenario IDs")
 		apiUpdateInterval        = flag.String("api-update-interval", "10s" /* 10 sec */, "Interval in which API URL is queried for status updates of ICs")
-		rancherURL               = flag.String("rancher-url", "rancher.k8s.eonerc.rwth-aachen.de", "URL of Rancher instance that is used to deploy the backend")
-		k8sCluster               = flag.String("k8s-cluster", "local", "Name of the Kubernetes cluster where the backend is deployed")
+		k8sRancherURL            = flag.String("k8s-rancher-url", "https://rancher.k8s.eonerc.rwth-aachen.de", "URL of Rancher instance that is used to deploy the backend")
+		k8sClusterName           = flag.String("k8s-cluster-name", "local", "Name of the Kubernetes cluster where the backend is deployed")
 	)
 	flag.Parse()
 
@@ -103,6 +104,7 @@ func InitConfig() error {
 		"admin.mail":                  *adminMail,
 		"s3.bucket":                   *s3Bucket,
 		"s3.endpoint":                 *s3Endpoint,
+		"s3.endpoint-public":          *s3EndpointPublic,
 		"s3.region":                   *s3Region,
 		"jwt.secret":                  *jwtSecret,
 		"jwt.expires-after":           *jwtExpiresAfter,
@@ -117,8 +119,8 @@ func InitConfig() error {
 		"groups.path":                 *groupsPath,
 		"config.file":                 *configFile,
 		"apiupdateinterval":           *apiUpdateInterval,
-		"rancherURL":                  *rancherURL,
-		"k8sCluster":                  *k8sCluster,
+		"k8s.rancher-url":             *k8sRancherURL,
+		"k8s.cluster-name":            *k8sClusterName,
 	}
 
 	if *dbClear {

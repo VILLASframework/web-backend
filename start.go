@@ -117,13 +117,13 @@ func main() {
 	routes.RegisterEndpoints(r, api)
 
 	// Start AMQP client
-	AMQPhost, _ := configuration.GlobalConfig.String("amqp.host")
-	AMQPuser, _ := configuration.GlobalConfig.String("amqp.user")
-	AMQPpass, _ := configuration.GlobalConfig.String("amqp.pass")
+	amqpHost, _ := configuration.GlobalConfig.String("amqp.host")
+	amqpUser, _ := configuration.GlobalConfig.String("amqp.user")
+	amqpPass, _ := configuration.GlobalConfig.String("amqp.pass")
 
-	if AMQPhost != "" {
+	if amqpHost != "" {
 		// create amqp URL based on username, password and host
-		amqpurl := "amqp://" + AMQPuser + ":" + AMQPpass + "@" + AMQPhost
+		amqpurl := "amqp://" + amqpUser + ":" + amqpPass + "@" + amqpHost
 		session := helper.NewAMQPSession("villas-amqp-session", amqpurl, "villas", infrastructure_component.ProcessMessage)
 		healthz.SetAMQPSession(session)                  // healthz needs to know the amqp session to check the health of the backend
 		infrastructure_component.SetAMQPSession(session) // IC needs to know the session to send amqp messages
@@ -142,7 +142,7 @@ func main() {
 	}
 
 	// Make sure that at least one admin user exists in DB
-	_, err = database.DBAddAdminUser(configuration.GlobalConfig)
+	_, err = database.AddAdminUser(configuration.GlobalConfig)
 	if err != nil {
 		fmt.Println("error: adding admin user failed:", err.Error())
 		log.Fatal(err)

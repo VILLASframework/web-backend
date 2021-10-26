@@ -103,11 +103,7 @@ func (r *addWidgetRequest) createWidget() Widget {
 func (r *updateWidgetRequest) updatedWidget(oldWidget Widget) Widget {
 	// Use the old Widget as a basis for the updated Widget `s`
 	s := oldWidget
-
-	if r.Widget.Name != "" {
-		s.Name = r.Widget.Name
-	}
-
+	s.Name = r.Widget.Name
 	s.Type = r.Widget.Type
 	s.Width = r.Widget.Width
 	s.Height = r.Widget.Height
