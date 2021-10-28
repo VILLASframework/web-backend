@@ -131,20 +131,20 @@ func (f *File) getS3Url() (string, error) {
 	svc := s3.New(sess)
 
 	req, _ := svc.GetObjectRequest(&s3.GetObjectInput{
-		Bucket:                     aws.String(bucket),
-		Key:                        aws.String(f.Key),
-		ResponseContentType:        aws.String(f.Type),
-		ResponseContentDisposition: aws.String("attachment; filename=" + f.Name),
+		Bucket:              aws.String(bucket),
+		Key:                 aws.String(f.Key),
+		ResponseContentType: aws.String(f.Type),
+		// ResponseContentDisposition: aws.String("attachment; filename=" + f.Name),
 		// ResponseContentEncoding: aws.String(),
 		// ResponseContentLanguage: aws.String(),
 		// ResponseCacheControl:    aws.String(),
 		// ResponseExpires:         aws.String(),
 	})
 
-	err = updateS3Request(req)
+	/*err = updateS3Request(req)
 	if err != nil {
 		return "", err
-	}
+	}*/
 
 	urlStr, err := req.Presign(5 * 24 * 60 * time.Minute)
 	if err != nil {
