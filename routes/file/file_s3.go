@@ -22,8 +22,11 @@
 package file
 
 import (
+	"errors"
 	"fmt"
+	"github.com/aws/aws-sdk-go/aws/request"
 	"io"
+	"net/url"
 	"time"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
@@ -128,20 +131,20 @@ func (f *File) getS3Url() (string, error) {
 	svc := s3.New(sess)
 
 	req, _ := svc.GetObjectRequest(&s3.GetObjectInput{
-		Bucket:              aws.String(bucket),
-		Key:                 aws.String(f.Key),
-		ResponseContentType: aws.String(f.Type),
-		// ResponseContentDisposition: aws.String("attachment; filename=" + f.Name),
+		Bucket:                     aws.String(bucket),
+		Key:                        aws.String(f.Key),
+		ResponseContentType:        aws.String(f.Type),
+		ResponseContentDisposition: aws.String("attachment; filename=" + f.Name),
 		// ResponseContentEncoding: aws.String(),
 		// ResponseContentLanguage: aws.String(),
 		// ResponseCacheControl:    aws.String(),
 		// ResponseExpires:         aws.String(),
 	})
 
-	/*err = updateS3Request(req)
+	err = updateS3Request(req)
 	if err != nil {
 		return "", err
-	}*/
+	}
 
 	urlStr, err := req.Presign(5 * 24 * 60 * time.Minute)
 	if err != nil {
@@ -179,7 +182,7 @@ func (f *File) deleteS3() error {
 // updateS3Request updates the request host to the public accessible S3
 // endpoint host so that presigned URLs are still valid when accessed
 // by the user
-/*func updateS3Request(req *request.Request) error {
+func updateS3Request(req *request.Request) error {
 	epURL, err := getS3EndpointURL()
 	if err != nil {
 		return err
@@ -189,9 +192,9 @@ func (f *File) deleteS3() error {
 	req.HTTPRequest.URL.Host = epURL.Host
 
 	return nil
-}*/
+}
 
-/*func getS3EndpointURL() (*url.URL, error) {
+func getS3EndpointURL() (*url.URL, error) {
 	ep, err := configuration.GlobalConfig.String("s3.endpoint-public")
 	if err != nil {
 		ep, err = configuration.GlobalConfig.String("s3.endpoint")
@@ -206,4 +209,4 @@ func (f *File) deleteS3() error {
 	}
 
 	return epURL, nil
-}*/
+}
