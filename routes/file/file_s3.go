@@ -22,16 +22,13 @@
 package file
 
 import (
-	"errors"
 	"fmt"
 	"io"
-	"net/url"
 	"time"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/request"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
@@ -182,7 +179,7 @@ func (f *File) deleteS3() error {
 // updateS3Request updates the request host to the public accessible S3
 // endpoint host so that presigned URLs are still valid when accessed
 // by the user
-func updateS3Request(req *request.Request) error {
+/*func updateS3Request(req *request.Request) error {
 	epURL, err := getS3EndpointURL()
 	if err != nil {
 		return err
@@ -192,9 +189,9 @@ func updateS3Request(req *request.Request) error {
 	req.HTTPRequest.URL.Host = epURL.Host
 
 	return nil
-}
+}*/
 
-func getS3EndpointURL() (*url.URL, error) {
+/*func getS3EndpointURL() (*url.URL, error) {
 	ep, err := configuration.GlobalConfig.String("s3.endpoint-public")
 	if err != nil {
 		ep, err = configuration.GlobalConfig.String("s3.endpoint")
@@ -209,4 +206,4 @@ func getS3EndpointURL() (*url.URL, error) {
 	}
 
 	return epURL, nil
-}
+}*/
