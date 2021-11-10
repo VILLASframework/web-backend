@@ -26,6 +26,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strconv"
 	"time"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
@@ -411,7 +412,7 @@ type JobTemplate struct {
 }
 
 type JobSpec struct {
-	Active   string      `json:"activeDeadlineSeconds"`
+	Active   int         `json:"activeDeadlineSeconds"`
 	Template JobTemplate `json:"template"`
 }
 
@@ -475,7 +476,7 @@ func duplicateIC(ic database.InfrastructureComponent, userName string, uuidstr s
 		`"type": "` + lastUpdate.Properties.Type + `",` +
 		`"uuid": "` + newUUID + `",` +
 		`"jobname": "` + lastUpdate.Properties.Job.MetaData.JobName + `-` + userName + `",` +
-		`"activeDeadlineSeconds": "` + lastUpdate.Properties.Job.Spec.Active + `",` +
+		`"activeDeadlineSeconds": "` + strconv.Itoa(lastUpdate.Properties.Job.Spec.Active) + `",` +
 		`"containername": "` + lastUpdate.Properties.Job.Spec.Template.Spec.Containers[0].Name + `-` + userName + `",` +
 		`"image": "` + lastUpdate.Properties.Job.Spec.Template.Spec.Containers[0].Image + `",` +
 		`"uuid": "` + newUUID + `"}`

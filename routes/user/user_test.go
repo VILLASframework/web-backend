@@ -1223,7 +1223,7 @@ func addIC(session *helper.AMQPsession, token string) error {
 	update.Properties.Type = newIC.Type
 	update.Properties.UUID = newIC.UUID
 	update.Properties.Job.MetaData.JobName = "myJob"
-	update.Properties.Job.Spec.Active = "70"
+	update.Properties.Job.Spec.Active = 70
 	update.Status.ManagedBy = newIC.Manager
 	update.Status.State = newIC.State
 	var container Container
