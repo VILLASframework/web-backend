@@ -100,5 +100,7 @@ deploy:
       --dockerfile ${CI_PROJECT_DIR}/Dockerfile
       --destination ${DOCKER_IMAGE}:${DOCKER_TAG}
       --snapshotMode=redo
+      --single-snapshot
   dependencies:
     - test
+

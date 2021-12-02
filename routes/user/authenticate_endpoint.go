@@ -287,10 +287,7 @@ func authenticateExternal(c *gin.Context) (User, error) {
 				}
 
 				if groupedScenario.Duplicate {
-					if err := <-duplicateScenarioForUser(so, &myUser.User, ""); err != nil {
-						log.Println(err)
-					}
-
+					duplicateScenarioForUser(so, &myUser.User, "")
 				} else { // add user to scenario
 					err = db.Model(&so).Association("Users").Append(&(myUser.User)).Error
 					if err != nil {
