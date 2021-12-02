@@ -884,13 +884,25 @@ func TestDuplicateScenarioForUser(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotEqual(t, 99, fileID)
 
-	// add IC
-	err = addIC(session, token)
+	// add ICs (kubernetes simulator plus other)
+	err = addICs(session, token)
 	assert.NoError(t, err)
 
-	// add component config
-	err = addComponentConfig(scenarioID, token)
+	// add two component configs with the same IC (ID 1)
+	// plus one component config with IC != kubernetes simulator (ID 2)
+	err = addComponentConfigs(scenarioID, token)
 	assert.NoError(t, err)
+
+	/*
+	*  component/IC test setup:
+	* C0 --> IC0
+	* C1 --> IC0
+	* C2 --> IC1
+	* ---- after duplication: ----
+	* C3 --> IC2
+	* C4 --> IC2
+	* C5 --> IC1
+	 */
 
 	// add signals
 	err = addSignals(token)
@@ -919,9 +931,7 @@ func TestDuplicateScenarioForUser(t *testing.T) {
 	err = addFakeIC(uuidDup, session, token)
 	assert.NoError(t, err)
 
-	if err := <-duplicateScenarioForUser(originalSo, &myUser.User, uuidDup); err != nil {
-		t.Fail()
-	}
+	duplicateScenarioForUser(originalSo, &myUser.User, uuidDup)
 
 	/*** Check duplicated scenario for correctness ***/
 	var dplScenarios []database.Scenario
@@ -947,15 +957,26 @@ func TestDuplicateScenarioForUser(t *testing.T) {
 	var configs []database.ComponentConfiguration
 	err = db.Find(&configs).Error
 	assert.NoError(t, err)
-	assert.Equal(t, 2, len(configs))
-	assert.Equal(t, configs[0].Name, configs[1].Name)
-	assert.Equal(t, configs[0].FileIDs, configs[1].FileIDs)
-	assert.Equal(t, configs[0].InputMapping, configs[1].InputMapping)
-	assert.Equal(t, configs[0].OutputMapping, configs[1].OutputMapping)
-	assert.Equal(t, configs[0].StartParameters, configs[1].StartParameters)
-	assert.NotEqual(t, configs[0].ScenarioID, configs[1].ScenarioID)
-	assert.NotEqual(t, configs[0].ICID, configs[1].ICID)
-	assert.NotEqual(t, configs[0].ID, configs[1].ID)
+	assert.Equal(t, 6, len(configs))
+	assert.Equal(t, configs[0].Name, configs[3].Name)
+	assert.Equal(t, configs[0].FileIDs, configs[3].FileIDs)
+	assert.Equal(t, configs[0].InputMapping, configs[3].InputMapping)
+	assert.Equal(t, configs[0].OutputMapping, configs[3].OutputMapping)
+	assert.Equal(t, configs[0].StartParameters, configs[3].StartParameters)
+	assert.NotEqual(t, configs[0].ScenarioID, configs[3].ScenarioID)
+	assert.NotEqual(t, configs[0].ICID, configs[3].ICID) // original and duplicated IC
+	assert.NotEqual(t, configs[0].ID, configs[3].ID)
+
+	assert.Equal(t, configs[0].ScenarioID, configs[1].ScenarioID)
+	assert.Equal(t, configs[0].ScenarioID, configs[2].ScenarioID)
+	assert.Equal(t, configs[3].ScenarioID, configs[4].ScenarioID)
+	assert.Equal(t, configs[3].ScenarioID, configs[5].ScenarioID)
+
+	assert.Equal(t, configs[0].ICID, configs[1].ICID) // same IC for both configs
+	assert.Equal(t, configs[3].ICID, configs[4].ICID) // same duplicated IC
+	assert.Equal(t, configs[2].ICID, configs[5].ICID) // reused (not duplicated) IC
+	assert.NotEqual(t, configs[0].ICID, configs[2].ICID)
+	assert.NotEqual(t, configs[0].ICID, configs[3].ICID)
 
 	// compare original and duplicated signals
 	var signals []database.Signal
@@ -983,17 +1004,28 @@ func TestDuplicateScenarioForUser(t *testing.T) {
 
 	// compare original and duplicated infrastructure component
 	var ics []database.InfrastructureComponent
-	err = db.Find(&ics).Error
+	err = db.Order("created_at asc").Find(&ics).Error
 	assert.NoError(t, err)
-	assert.Equal(t, 2, len(ics))
-	assert.Equal(t, ics[0].Name, ics[1].Name)
-	assert.Equal(t, ics[0].Category, ics[1].Category)
-	assert.Equal(t, ics[0].Type, ics[1].Type)
-	assert.Equal(t, ics[0].CreateParameterSchema, ics[1].CreateParameterSchema)
-	assert.Equal(t, ics[0].StartParameterSchema, ics[1].StartParameterSchema)
-	assert.Equal(t, ics[0].Manager, ics[1].Manager)
-	assert.NotEqual(t, ics[0].UUID, ics[1].UUID)
-	assert.NotEqual(t, ics[0].ID, ics[1].ID)
+	assert.Equal(t, 3, len(ics))
+	assert.Equal(t, ics[0].Category, ics[2].Category)
+	assert.Equal(t, ics[0].Type, ics[2].Type)
+	assert.Equal(t, ics[0].CreateParameterSchema, ics[2].CreateParameterSchema)
+	assert.Equal(t, ics[0].StartParameterSchema, ics[2].StartParameterSchema)
+	assert.Equal(t, ics[0].Manager, ics[2].Manager)
+	assert.NotEqual(t, ics[0].UUID, ics[2].UUID)
+	assert.NotEqual(t, ics[0].ID, ics[2].ID)
+
+	assert.NotEqual(t, ics[0].Name, ics[1].Name)
+	assert.NotEqual(t, ics[0].Category, ics[1].Category)
+	assert.NotEqual(t, ics[0].Type, ics[1].Type)
+
+	// check associations between component configs and ICs
+	assert.Equal(t, configs[0].ICID, ics[0].ID)
+	assert.Equal(t, configs[1].ICID, ics[0].ID)
+	assert.Equal(t, configs[2].ICID, ics[1].ID)
+	assert.Equal(t, configs[3].ICID, ics[2].ID)
+	assert.Equal(t, configs[4].ICID, ics[2].ID)
+	assert.Equal(t, configs[5].ICID, ics[1].ID)
 
 	// compare original and duplicated dashboards
 	err = db.Order("created_at asc").Find(&dashboards).Error
@@ -1011,13 +1043,187 @@ func TestDuplicateScenarioForUser(t *testing.T) {
 	assert.NotEqual(t, dashboards[1].ScenarioID, dashboards[3].ScenarioID)
 	assert.NotEqual(t, dashboards[1].ID, dashboards[3].ID)
 
-	// compare original and duplicated widget
+	// compare original and duplicated widget (ICstatus)
 	var widgets []database.Widget
 	err = db.Find(&widgets).Error
 	assert.NoError(t, err)
 	assert.Equal(t, 2, len(widgets))
 	assert.Equal(t, widgets[0].Name, widgets[1].Name)
-	assert.Equal(t, widgets[0].CustomProperties, widgets[1].CustomProperties)
+	assert.NotEqual(t, widgets[0].CustomProperties, widgets[1].CustomProperties)
+	assert.Equal(t, widgets[0].MinHeight, widgets[1].MinHeight)
+	assert.Equal(t, widgets[0].MinWidth, widgets[1].MinWidth)
+	assert.NotEqual(t, widgets[0].DashboardID, widgets[1].DashboardID)
+	assert.NotEqual(t, widgets[0].ID, widgets[1].ID)
+}
+
+func TestScenarioDuplicationAlreadyDuplicatedIC(t *testing.T) {
+	/*
+	* Test: IC was already duplicated, exists in DB at the time of duplication
+	**/
+	database.DropTables()
+	database.MigrateModels()
+	assert.NoError(t, database.AddTestUsers())
+
+	// connect AMQP client
+	// Make sure that AMQP_HOST, AMQP_USER, AMQP_PASS are set
+	host, _ := configuration.GlobalConfig.String("amqp.host")
+	usr, _ := configuration.GlobalConfig.String("amqp.user")
+	pass, _ := configuration.GlobalConfig.String("amqp.pass")
+	amqpURI := "amqp://" + usr + ":" + pass + "@" + host
+
+	// AMQP Connection startup is tested here
+	// Not repeated in other tests because it is only needed once
+	session = helper.NewAMQPSession("villas-test-session", amqpURI, "villas", infrastructure_component.ProcessMessage)
+	SetAMQPSession(session)
+	infrastructure_component.SetAMQPSession(session)
+
+	// authenticate as admin (needed to create original IC)
+	token, err := helper.AuthenticateForTest(router, database.AdminCredentials)
+	assert.NoError(t, err)
+
+	/*** Create original scenario and entities ***/
+	scenarioID := addScenario(token)
+	var originalSo database.Scenario
+	db := database.GetDB()
+	err = db.Find(&originalSo, scenarioID).Error
+	assert.NoError(t, err)
+
+	// add file to scenario
+	fileID, err := addFile(scenarioID, token)
+	assert.NoError(t, err)
+	assert.NotEqual(t, 99, fileID)
+
+	// add ICs (kubernetes simulator plus other)
+	err = addICs(session, token)
+	assert.NoError(t, err)
+
+	// add two component configs with the same IC (ID 1)
+	// plus one component config with IC != kubernetes simulator (ID 2)
+	err = addComponentConfigs(scenarioID, token)
+	assert.NoError(t, err)
+
+	/*
+	*  component/IC test setup:
+	* C0 --> IC0
+	* C1 --> IC0
+	* C2 --> IC1
+	* x  --> IC2
+	* ---- after duplication: ----
+	* C3 --> IC2
+	* C4 --> IC2
+	* C5 --> IC1
+	 */
+
+	// add dashboards to scenario
+	err = addTwoDashboards(scenarioID, token)
+	assert.NoError(t, err)
+	var dashboards []database.Dashboard
+	err = db.Find(&dashboards).Error
+	assert.NoError(t, err)
+	assert.Equal(t, 2, len(dashboards))
+
+	// add widgets
+	dashboardID_forAddingWidget := uint(1)
+	err = addWidget(dashboardID_forAddingWidget, token)
+	assert.NoError(t, err)
+
+	/*** Duplicate scenario for new user ***/
+	username := "Schnittlauch"
+	myUser, err := NewUser(username, "", "schnitti@lauch.de", "User", true)
+	assert.NoError(t, err)
+
+	// add IC which will be seen as the duplicate IC
+	err = addDuplicateIC(token, username)
+	assert.NoError(t, err)
+	log.Println("--------ICs before duplication ------------")
+	var icsqq []database.InfrastructureComponent
+	err = db.Order("created_at asc").Find(&icsqq).Error
+	assert.NoError(t, err)
+	assert.Equal(t, 3, len(icsqq))
+	for _, ic := range icsqq {
+		log.Printf("IC (id/name): (%d/%s)", ic.ID, ic.Name)
+	}
+	log.Println("------------------")
+
+	duplicateScenarioForUser(originalSo, &myUser.User, "")
+
+	/*** Check duplicated scenario for correctness ***/
+	var dplScenarios []database.Scenario
+	err = db.Find(&dplScenarios, "name = ?", originalSo.Name+" "+username).Error
+	assert.NoError(t, err)
+	assert.Equal(t, 1, len(dplScenarios))
+	assert.Equal(t, originalSo.StartParameters, dplScenarios[0].StartParameters)
+
+	// compare original and duplicated component configs
+	var configs []database.ComponentConfiguration
+	err = db.Find(&configs).Error
+	assert.NoError(t, err)
+	assert.Equal(t, 6, len(configs))
+	assert.Equal(t, configs[0].Name, configs[3].Name)
+	assert.Equal(t, configs[0].FileIDs, configs[3].FileIDs)
+	assert.Equal(t, configs[0].InputMapping, configs[3].InputMapping)
+	assert.Equal(t, configs[0].OutputMapping, configs[3].OutputMapping)
+	assert.Equal(t, configs[0].StartParameters, configs[3].StartParameters)
+	assert.NotEqual(t, configs[0].ScenarioID, configs[3].ScenarioID)
+	assert.NotEqual(t, configs[0].ICID, configs[3].ICID) // original and duplicated IC
+	assert.NotEqual(t, configs[0].ID, configs[3].ID)
+
+	assert.Equal(t, configs[0].ScenarioID, configs[1].ScenarioID)
+	assert.Equal(t, configs[0].ScenarioID, configs[2].ScenarioID)
+	assert.Equal(t, configs[3].ScenarioID, configs[4].ScenarioID)
+	assert.Equal(t, configs[3].ScenarioID, configs[5].ScenarioID)
+
+	assert.Equal(t, configs[0].ICID, configs[1].ICID) // same IC for both configs
+	assert.Equal(t, configs[3].ICID, configs[4].ICID) // same duplicated IC
+	assert.Equal(t, configs[2].ICID, configs[5].ICID) // reused (not duplicated) IC
+	log.Println(configs[2].ICID)
+	log.Println(configs[5].ICID)
+	assert.NotEqual(t, configs[0].ICID, configs[2].ICID)
+	assert.NotEqual(t, configs[0].ICID, configs[3].ICID)
+
+	// compare original and duplicated infrastructure component
+	var ics []database.InfrastructureComponent
+	err = db.Order("created_at asc").Find(&ics).Error
+	assert.NoError(t, err)
+	assert.Equal(t, 3, len(ics))
+	log.Println("--------ICs after duplication ------------")
+
+	for _, ic := range ics {
+		log.Printf("IC (id/name): (%d/%s)", ic.ID, ic.Name)
+	}
+	log.Println("------------------")
+
+	// check associations between component configs and ICs
+	assert.Equal(t, configs[0].ICID, ics[0].ID)
+	assert.Equal(t, configs[1].ICID, ics[0].ID)
+	assert.Equal(t, configs[2].ICID, ics[1].ID)
+	assert.Equal(t, configs[3].ICID, ics[2].ID)
+	assert.Equal(t, configs[4].ICID, ics[2].ID)
+	assert.Equal(t, configs[5].ICID, ics[1].ID)
+
+	// compare original and duplicated dashboards
+	err = db.Order("created_at asc").Find(&dashboards).Error
+	assert.NoError(t, err)
+	assert.Equal(t, 4, len(dashboards))
+	assert.Equal(t, dashboards[0].Name, dashboards[2].Name)
+	assert.Equal(t, dashboards[0].Grid, dashboards[2].Grid)
+	assert.Equal(t, dashboards[0].Height, dashboards[2].Height)
+	assert.NotEqual(t, dashboards[0].ScenarioID, dashboards[2].ScenarioID)
+	assert.NotEqual(t, dashboards[0].ID, dashboards[2].ID)
+
+	assert.Equal(t, dashboards[1].Name, dashboards[3].Name)
+	assert.Equal(t, dashboards[1].Grid, dashboards[3].Grid)
+	assert.Equal(t, dashboards[1].Height, dashboards[3].Height)
+	assert.NotEqual(t, dashboards[1].ScenarioID, dashboards[3].ScenarioID)
+	assert.NotEqual(t, dashboards[1].ID, dashboards[3].ID)
+
+	// compare original and duplicated widget (ICstatus)
+	var widgets []database.Widget
+	err = db.Find(&widgets).Error
+	assert.NoError(t, err)
+	assert.Equal(t, 2, len(widgets))
+	assert.Equal(t, widgets[0].Name, widgets[1].Name)
+	assert.NotEqual(t, widgets[0].CustomProperties, widgets[1].CustomProperties)
 	assert.Equal(t, widgets[0].MinHeight, widgets[1].MinHeight)
 	assert.Equal(t, widgets[0].MinWidth, widgets[1].MinWidth)
 	assert.NotEqual(t, widgets[0].DashboardID, widgets[1].DashboardID)
@@ -1155,17 +1361,17 @@ func addWidget(dashboardID uint, token string) error {
 	}
 
 	newWidget := WidgetRequest{
-		Name:             "My label",
-		Type:             "Label",
+		Name:             "IC Status",
+		Type:             "ICstatus",
 		Width:            100,
-		Height:           50,
-		MinWidth:         40,
-		MinHeight:        80,
+		Height:           100,
+		MinWidth:         0,
+		MinHeight:        0,
 		X:                10,
 		Y:                10,
 		Z:                200,
 		IsLocked:         false,
-		CustomProperties: postgres.Jsonb{RawMessage: json.RawMessage(`{"textSize" : "20", "fontColor" : "#4287f5", "fontColor_opacity": 1}`)},
+		CustomProperties: postgres.Jsonb{RawMessage: json.RawMessage(`{"checkedIDs" : [1]}`)},
 		SignalIDs:        []int64{},
 	}
 
@@ -1177,29 +1383,29 @@ func addWidget(dashboardID uint, token string) error {
 	return err
 }
 
-func newTrue() *bool {
-	b := true
+func newFalse() *bool {
+	b := false
 	return &b
 }
 
-func addIC(session *helper.AMQPsession, token string) error {
-	type ICRequest struct {
-		UUID                  string         `json:"uuid,omitempty"`
-		WebsocketURL          string         `json:"websocketurl,omitempty"`
-		APIURL                string         `json:"apiurl,omitempty"`
-		Type                  string         `json:"type,omitempty"`
-		Name                  string         `json:"name,omitempty"`
-		Category              string         `json:"category,omitempty"`
-		State                 string         `json:"state,omitempty"`
-		Location              string         `json:"location,omitempty"`
-		Description           string         `json:"description,omitempty"`
-		StartParameterSchema  postgres.Jsonb `json:"startparameterschema,omitempty"`
-		CreateParameterSchema postgres.Jsonb `json:"createparameterschema,omitempty"`
-		ManagedExternally     *bool          `json:"managedexternally"`
-		Manager               string         `json:"manager,omitempty"`
-	}
+type ICRequest struct {
+	UUID                  string         `json:"uuid,omitempty"`
+	WebsocketURL          string         `json:"websocketurl,omitempty"`
+	APIURL                string         `json:"apiurl,omitempty"`
+	Type                  string         `json:"type,omitempty"`
+	Name                  string         `json:"name,omitempty"`
+	Category              string         `json:"category,omitempty"`
+	State                 string         `json:"state,omitempty"`
+	Location              string         `json:"location,omitempty"`
+	Description           string         `json:"description,omitempty"`
+	StartParameterSchema  postgres.Jsonb `json:"startparameterschema,omitempty"`
+	CreateParameterSchema postgres.Jsonb `json:"createparameterschema,omitempty"`
+	ManagedExternally     *bool          `json:"managedexternally"`
+	Manager               string         `json:"manager,omitempty"`
+}
 
-	// create IC
+func addICs(session *helper.AMQPsession, token string) error {
+	// create ICs
 	var newIC = ICRequest{
 		UUID:                  "7be0322d-354e-431e-84bd-ae4c9633138b",
 		WebsocketURL:          "https://villas.k8s.eonerc.rwth-aachen.de/ws/ws_sig",
@@ -1212,7 +1418,23 @@ func addIC(session *helper.AMQPsession, token string) error {
 		Description:           "A kubernetes simulator for testing purposes",
 		StartParameterSchema:  postgres.Jsonb{json.RawMessage(`{"startprop1" : "a nice prop"}`)},
 		CreateParameterSchema: postgres.Jsonb{json.RawMessage(`{"createprop1" : "a really nice prop"}`)},
-		ManagedExternally:     newTrue(),
+		ManagedExternally:     newFalse(),
+		Manager:               "7be0322d-354e-431e-84bd-ae4c9633beef",
+	}
+
+	var newIC2 = ICRequest{
+		UUID:                  "7be0322d-354e-431e-84bd-ae4c9635558b",
+		WebsocketURL:          "https://villas.k8s.eonerc.rwth-aachen.de/ws/ws_sig",
+		APIURL:                "https://villas.k8s.eonerc.rwth-aachen.de/ws/api/v2",
+		Type:                  "villas-node",
+		Name:                  "ACS Demo Signals",
+		Category:              "gateway",
+		State:                 "idle",
+		Location:              "k8s",
+		Description:           "A signal generator for testing purposes",
+		StartParameterSchema:  postgres.Jsonb{RawMessage: json.RawMessage(`{"startprop1" : "a nice prop"}`)},
+		CreateParameterSchema: postgres.Jsonb{RawMessage: json.RawMessage(`{"createprop1" : "a really nice prop"}`)},
+		ManagedExternally:     newFalse(),
 		Manager:               "7be0322d-354e-431e-84bd-ae4c9633beef",
 	}
 
@@ -1244,10 +1466,42 @@ func addIC(session *helper.AMQPsession, token string) error {
 
 	err = session.Send(payload, newIC.Manager)
 	time.Sleep(2 * time.Second)
+
+	if err != nil {
+		return err
+	}
+
+	_, _, err = helper.TestEndpoint(router, token,
+		"/api/v2/ic", "POST", helper.KeyModels{"ic": newIC2})
 	return err
 }
 
-func addComponentConfig(scenarioID uint, token string) error {
+func addDuplicateIC(token string, username string) error {
+
+	// create IC
+	var newIC = ICRequest{
+		UUID:                  "7aaa322d-354e-431e-84bd-ae4c9633138b",
+		WebsocketURL:          "https://villas.k8s.eonerc.rwth-aachen.de/ws/ws_sig",
+		APIURL:                "https://villas.k8s.eonerc.rwth-aachen.de/ws/api/v2",
+		Type:                  "kubernetes",
+		Name:                  "Kubernetes Simulator " + username,
+		Category:              "simulator",
+		State:                 "idle",
+		Location:              "k8s",
+		Description:           "A kubernetes simulator for testing purposes",
+		StartParameterSchema:  postgres.Jsonb{json.RawMessage(`{"startprop1" : "a nice prop"}`)},
+		CreateParameterSchema: postgres.Jsonb{json.RawMessage(`{"createprop1" : "a really nice prop"}`)},
+		ManagedExternally:     newFalse(),
+		Manager:               "7be0322d-354e-431e-84bd-ae4c9633beef",
+	}
+
+	_, _, err := helper.TestEndpoint(router, token,
+		"/api/v2/ic", "POST", helper.KeyModels{"ic": newIC})
+
+	return err
+}
+
+func addComponentConfigs(scenarioID uint, token string) error {
 	type ConfigRequest struct {
 		Name            string         `json:"name,omitempty"`
 		ScenarioID      uint           `json:"scenarioID,omitempty"`
@@ -1264,8 +1518,36 @@ func addComponentConfig(scenarioID uint, token string) error {
 		FileIDs:         []int64{},
 	}
 
+	var newConfig2 = ConfigRequest{
+		Name:            "Example for Signal generator",
+		ScenarioID:      scenarioID,
+		ICID:            1,
+		StartParameters: postgres.Jsonb{RawMessage: json.RawMessage(`{"parameter1" : "testValue1A", "parameter2" : "testValue2A", "parameter3" : 42}`)},
+		FileIDs:         []int64{},
+	}
+
+	var newConfig3 = ConfigRequest{
+		Name:            "Example for Signal generator",
+		ScenarioID:      scenarioID,
+		ICID:            2,
+		StartParameters: postgres.Jsonb{RawMessage: json.RawMessage(`{"parameter1" : "testValue1A", "parameter2" : "testValue2A", "parameter3" : 42}`)},
+		FileIDs:         []int64{},
+	}
+
 	_, _, err := helper.TestEndpoint(router, token,
 		"/api/v2/configs", "POST", helper.KeyModels{"config": newConfig1})
+	if err != nil {
+		return err
+	}
+
+	_, _, err = helper.TestEndpoint(router, token,
+		"/api/v2/configs", "POST", helper.KeyModels{"config": newConfig2})
+	if err != nil {
+		return err
+	}
+
+	_, _, err = helper.TestEndpoint(router, token,
+		"/api/v2/configs", "POST", helper.KeyModels{"config": newConfig3})
 
 	return err
 }
