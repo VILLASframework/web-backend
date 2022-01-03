@@ -31,7 +31,7 @@ import (
 var validate *validator.Validate
 
 type validNewWidget struct {
-	Name             string         `form:"name" validate:"required"`
+	Name             string         `form:"name" validate:"omitempty"`
 	Type             string         `form:"type" validate:"required"`
 	Width            uint           `form:"width" validate:"required"`
 	Height           uint           `form:"height" validate:"required"`
