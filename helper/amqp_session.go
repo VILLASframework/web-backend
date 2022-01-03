@@ -150,7 +150,7 @@ func (session *AMQPsession) init(conn *amqp.Connection) error {
 	}
 
 	// add a queue for the ICs
-	ICQueue, err := sendCh.QueueDeclare("",
+	sendQueue, err := sendCh.QueueDeclare("",
 		false,
 		true,
 		true,
@@ -160,7 +160,7 @@ func (session *AMQPsession) init(conn *amqp.Connection) error {
 		return fmt.Errorf("AMQP: failed to declare the queue, error: %v", err)
 	}
 
-	err = sendCh.QueueBind(ICQueue.Name, "", session.exchange, false, nil)
+	err = sendCh.QueueBind(sendQueue.Name, "", session.exchange, false, nil)
 	if err != nil {
 		return fmt.Errorf("AMQP: failed to bind the queue, error: %v", err)
 	}
@@ -184,7 +184,7 @@ func (session *AMQPsession) init(conn *amqp.Connection) error {
 	session.recvCh.NotifyPublish(session.notifyRecvConfirm)
 
 	// start deliveries
-	messages, err := session.recvCh.Consume(ICQueue.Name,
+	messages, err := session.recvCh.Consume(sendQueue.Name,
 		"",
 		true,
 		false,
