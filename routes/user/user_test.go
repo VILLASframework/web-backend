@@ -1586,17 +1586,19 @@ func addSignals(token string) error {
 	type SignalRequest struct {
 		Name          string  `json:"name,omitempty"`
 		Unit          string  `json:"unit,omitempty"`
-		Index         uint    `json:"index,omitempty"`
+		Index         *uint   `json:"index,omitempty"`
 		Direction     string  `json:"direction,omitempty"`
 		ScalingFactor float32 `json:"scalingFactor,omitempty"`
 		ConfigID      uint    `json:"configID,omitempty"`
 	}
 
+	var signalIndex0 uint = 0
+	var signalIndex1 uint = 1
 	var newSignalOut = SignalRequest{
 		Name:      "outSignal_A",
 		Unit:      "V",
 		Direction: "out",
-		Index:     1,
+		Index:     &signalIndex0,
 		ConfigID:  1,
 	}
 
@@ -1604,7 +1606,7 @@ func addSignals(token string) error {
 		Name:      "inSignal_A",
 		Unit:      "V",
 		Direction: "in",
-		Index:     2,
+		Index:     &signalIndex1,
 		ConfigID:  1,
 	}
 

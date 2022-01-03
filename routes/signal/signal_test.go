@@ -44,7 +44,7 @@ var router *gin.Engine
 type SignalRequest struct {
 	Name          string  `json:"name,omitempty"`
 	Unit          string  `json:"unit,omitempty"`
-	Index         uint    `json:"index,omitempty"`
+	Index         *uint   `json:"index,omitempty"`
 	Direction     string  `json:"direction,omitempty"`
 	ScalingFactor float32 `json:"scalingFactor,omitempty"`
 	ConfigID      uint    `json:"configID,omitempty"`
@@ -76,11 +76,14 @@ type ScenarioRequest struct {
 	StartParameters postgres.Jsonb `json:"startParameters,omitempty"`
 }
 
+var signalIndex0 uint = 0
+var signalIndex1 uint = 1
+
 var newSignal1 = SignalRequest{
 	Name:      "outSignal_A",
 	Unit:      "V",
 	Direction: "out",
-	Index:     1,
+	Index:     &signalIndex0,
 }
 
 func newFalse() *bool {
@@ -226,6 +229,7 @@ func TestAddSignal(t *testing.T) {
 		"/api/v2/signals", "POST", helper.KeyModels{"signal": newSignal1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
+	fmt.Println(resp)
 
 	// Compare POST's response with the newSignal
 	err = helper.CompareResponse(resp, helper.KeyModels{"signal": newSignal1})
@@ -296,7 +300,7 @@ func TestUpdateSignal(t *testing.T) {
 	updatedSignal := SignalRequest{
 		Name:  "outSignal_B",
 		Unit:  "A",
-		Index: 1,
+		Index: &signalIndex1,
 	}
 
 	// authenticate as normal userB who has no access to new scenario
@@ -379,7 +383,7 @@ func TestDeleteSignal(t *testing.T) {
 		Name:      "insignalA",
 		Unit:      "s",
 		Direction: "in",
-		Index:     1,
+		Index:     &signalIndex0,
 		ConfigID:  configID,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
@@ -470,7 +474,7 @@ func TestGetAllInputSignalsOfConfig(t *testing.T) {
 		Name:      "inA",
 		Unit:      "s",
 		Direction: "in",
-		Index:     1,
+		Index:     &signalIndex0,
 		ConfigID:  configID,
 	}
 	code, resp, err := helper.TestEndpoint(router, token,
@@ -483,7 +487,7 @@ func TestGetAllInputSignalsOfConfig(t *testing.T) {
 		Name:      "inB",
 		Unit:      "m",
 		Direction: "in",
-		Index:     2,
+		Index:     &signalIndex1,
 		ConfigID:  configID,
 	}
 	code, resp, err = helper.TestEndpoint(router, token,
@@ -503,7 +507,7 @@ func TestGetAllInputSignalsOfConfig(t *testing.T) {
 		Name:      "outB",
 		Unit:      "A",
 		Direction: "out",
-		Index:     1,
+		Index:     &signalIndex1,
 		ConfigID:  configID,
 	}
 	code, resp, err = helper.TestEndpoint(router, token,

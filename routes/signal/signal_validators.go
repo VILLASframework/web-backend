@@ -30,7 +30,7 @@ var validate *validator.Validate
 type validNewSignal struct {
 	Name          string  `form:"Name" validate:"required"`
 	Unit          string  `form:"unit" validate:"omitempty"`
-	Index         uint    `form:"index" validate:"required"`
+	Index         *uint   `form:"index" validate:"required"`
 	Direction     string  `form:"direction" validate:"required,oneof=in out"`
 	ScalingFactor float32 `form:"scalingFactor" validate:"omitempty"`
 	ConfigID      uint    `form:"configID" validate:"required"`
@@ -39,7 +39,7 @@ type validNewSignal struct {
 type validUpdatedSignal struct {
 	Name          string  `form:"Name" validate:"omitempty"`
 	Unit          string  `form:"unit" validate:"omitempty"`
-	Index         uint    `form:"index" validate:"omitempty"`
+	Index         *uint   `form:"index" validate:"omitempty"`
 	ScalingFactor float32 `form:"scalingFactor" validate:"omitempty"`
 }
 
@@ -68,7 +68,7 @@ func (r *addSignalRequest) createSignal() Signal {
 
 	s.Name = r.Signal.Name
 	s.Unit = r.Signal.Unit
-	s.Index = r.Signal.Index
+	s.Index = *r.Signal.Index
 	s.Direction = r.Signal.Direction
 	s.ScalingFactor = r.Signal.ScalingFactor
 	s.ConfigID = r.Signal.ConfigID
@@ -80,18 +80,9 @@ func (r *updateSignalRequest) updatedSignal(oldSignal Signal) Signal {
 	// Use the old Signal as a basis for the updated Signal `s`
 	s := oldSignal
 
-	if r.Signal.Name != "" {
-		s.Name = r.Signal.Name
-	}
-
-	if r.Signal.Index != 0 {
-		// TODO this implies that we start indexing at 1
-		s.Index = r.Signal.Index
-	}
-
-	if r.Signal.Unit != "" {
-		s.Unit = r.Signal.Unit
-	}
+	s.Name = r.Signal.Name
+	s.Index = *r.Signal.Index
+	s.Unit = r.Signal.Unit
 
 	if r.Signal.ScalingFactor != 0 {
 		// scaling factor of 0 is not allowed
