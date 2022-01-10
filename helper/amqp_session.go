@@ -200,6 +200,11 @@ func (session *AMQPsession) init(conn *amqp.Connection) error {
 		return fmt.Errorf("AMQP: failed to declare the queue, error: %v", err)
 	}
 
+	err = sendCh.QueueBind(recvQueue.Name, "", session.exchange, false, nil)
+	if err != nil {
+		return fmt.Errorf("AMQP: failed to bind the queue, error: %v", err)
+	}
+
 	session.recvCh = recvCh
 	session.notifyRecvChanClose = make(chan *amqp.Error)
 	session.notifyRecvConfirm = make(chan amqp.Confirmation, 1)
