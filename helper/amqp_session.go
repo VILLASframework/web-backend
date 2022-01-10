@@ -177,6 +177,29 @@ func (session *AMQPsession) init(conn *amqp.Connection) error {
 		return fmt.Errorf("AMQP: failed to open a recvCh, error: %v", err)
 	}
 
+	// declare exchange
+	err = recvCh.ExchangeDeclare(session.exchange,
+		"headers",
+		true,
+		false,
+		false,
+		false,
+		nil)
+	if err != nil {
+		return fmt.Errorf("AMQP: failed to declare the exchange, error: %v", err)
+	}
+
+	//declare separate queue for receiving
+	recvQueue, err := recvCh.QueueDeclare("",
+		false,
+		true,
+		true,
+		false,
+		nil)
+	if err != nil {
+		return fmt.Errorf("AMQP: failed to declare the queue, error: %v", err)
+	}
+
 	session.recvCh = recvCh
 	session.notifyRecvChanClose = make(chan *amqp.Error)
 	session.notifyRecvConfirm = make(chan amqp.Confirmation, 1)
@@ -184,7 +207,7 @@ func (session *AMQPsession) init(conn *amqp.Connection) error {
 	session.recvCh.NotifyPublish(session.notifyRecvConfirm)
 
 	// start deliveries
-	messages, err := session.recvCh.Consume(sendQueue.Name,
+	messages, err := session.recvCh.Consume(recvQueue.Name,
 		"",
 		true,
 		false,
