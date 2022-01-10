@@ -413,7 +413,8 @@ func TestDeleteICAsAdmin(t *testing.T) {
 	// Wait until externally managed IC is created (happens async)
 	time.Sleep(waitingTime * time.Second)
 
-	// Delete the added external IC (triggers a bad request error)
+	// Delete the added external IC
+	// (triggers a bad request error since external IC is not stale and can therefore not be deleted through API)
 	code, resp, err = helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/v2/ic/%v", 2), "DELETE", nil)
 	assert.NoError(t, err)
