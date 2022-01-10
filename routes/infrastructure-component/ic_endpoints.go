@@ -243,7 +243,7 @@ func deleteIC(c *gin.Context) {
 		}
 
 		// check if external IC is stale
-		if time.Now().Sub(s.UpdatedAt).Seconds() < staleDuration.Seconds() {
+		if time.Since(s.UpdatedAt).Seconds() < staleDuration.Seconds() {
 			// IC is NOT stale, refuse deletion
 			helper.BadRequestError(c, "delete for externally managed non-stale IC not possible with this endpoint - use /ic/{ICID}/action endpoint instead to request deletion of the component")
 			return
