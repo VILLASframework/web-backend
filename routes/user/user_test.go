@@ -91,6 +91,17 @@ func TestMain(m *testing.M) {
 	file.RegisterFileEndpoints(api.Group("/files"))
 	widget.RegisterWidgetEndpoints(api.Group("/widgets"))
 
+	// connect AMQP client
+	// Make sure that AMQP_HOST, AMQP_USER, AMQP_PASS are set
+	host, _ := configuration.GlobalConfig.String("amqp.host")
+	usr, _ := configuration.GlobalConfig.String("amqp.user")
+	pass, _ := configuration.GlobalConfig.String("amqp.pass")
+	amqpURI := "amqp://" + usr + ":" + pass + "@" + host
+
+	session = helper.NewAMQPSession("villas-test-session", amqpURI, "villas", infrastructure_component.ProcessMessage)
+	SetAMQPSession(session)
+	infrastructure_component.SetAMQPSession(session)
+
 	os.Exit(m.Run())
 }
 
@@ -855,19 +866,6 @@ func TestDuplicateScenarioForUser(t *testing.T) {
 	database.MigrateModels()
 	assert.NoError(t, database.AddTestUsers())
 
-	// connect AMQP client
-	// Make sure that AMQP_HOST, AMQP_USER, AMQP_PASS are set
-	host, _ := configuration.GlobalConfig.String("amqp.host")
-	usr, _ := configuration.GlobalConfig.String("amqp.user")
-	pass, _ := configuration.GlobalConfig.String("amqp.pass")
-	amqpURI := "amqp://" + usr + ":" + pass + "@" + host
-
-	// AMQP Connection startup is tested here
-	// Not repeated in other tests because it is only needed once
-	session = helper.NewAMQPSession("villas-test-session", amqpURI, "villas", infrastructure_component.ProcessMessage)
-	SetAMQPSession(session)
-	infrastructure_component.SetAMQPSession(session)
-
 	// authenticate as admin (needed to create original IC)
 	token, err := helper.AuthenticateForTest(router, database.AdminCredentials)
 	assert.NoError(t, err)
@@ -1063,19 +1061,6 @@ func TestScenarioDuplicationAlreadyDuplicatedIC(t *testing.T) {
 	database.DropTables()
 	database.MigrateModels()
 	assert.NoError(t, database.AddTestUsers())
-
-	// connect AMQP client
-	// Make sure that AMQP_HOST, AMQP_USER, AMQP_PASS are set
-	host, _ := configuration.GlobalConfig.String("amqp.host")
-	usr, _ := configuration.GlobalConfig.String("amqp.user")
-	pass, _ := configuration.GlobalConfig.String("amqp.pass")
-	amqpURI := "amqp://" + usr + ":" + pass + "@" + host
-
-	// AMQP Connection startup is tested here
-	// Not repeated in other tests because it is only needed once
-	session = helper.NewAMQPSession("villas-test-session", amqpURI, "villas", infrastructure_component.ProcessMessage)
-	SetAMQPSession(session)
-	infrastructure_component.SetAMQPSession(session)
 
 	// authenticate as admin (needed to create original IC)
 	token, err := helper.AuthenticateForTest(router, database.AdminCredentials)
