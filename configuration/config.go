@@ -86,6 +86,7 @@ func InitConfig() error {
 		apiUpdateInterval        = flag.String("api-update-interval", "10s" /* 10 sec */, "Interval in which API URL is queried for status updates of ICs")
 		k8sRancherURL            = flag.String("k8s-rancher-url", "https://rancher.k8s.eonerc.rwth-aachen.de", "URL of Rancher instance that is used to deploy the backend")
 		k8sClusterName           = flag.String("k8s-cluster-name", "local", "Name of the Kubernetes cluster where the backend is deployed")
+		staleICTime              = flag.String("stale-ic-time", "1h" /* 1 hour */, "Time after which an IC is considered stale")
 	)
 	flag.Parse()
 
@@ -121,6 +122,7 @@ func InitConfig() error {
 		"apiupdateinterval":           *apiUpdateInterval,
 		"k8s.rancher-url":             *k8sRancherURL,
 		"k8s.cluster-name":            *k8sClusterName,
+		"staleictime":                 *staleICTime,
 	}
 
 	if *dbClear {

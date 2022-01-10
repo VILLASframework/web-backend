@@ -24,7 +24,9 @@ package infrastructure_component
 import (
 	"log"
 	"net/http"
+	"time"
 
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"github.com/gin-gonic/gin"
@@ -232,21 +234,27 @@ func deleteIC(c *gin.Context) {
 
 	// Check if IC is managed externally
 	if s.ManagedExternally {
-		// if so: refuse deletion
-		helper.BadRequestError(c, "delete for externally managed IC not possible with this endpoint - use /ic/{ICID}/action endpoint instead to request deletion of the component")
-		return
+
+		staleICTime, _ := configuration.GlobalConfig.String("staleictime")
+		staleDuration, err := time.ParseDuration(staleICTime)
+		if err != nil {
+			helper.InternalServerError(c, "deleting externally managed IC not possible, no or erroneous stale IC time parameter provided in API config")
+			return
+		}
+
+		// check if external IC is stale
+		if time.Now().Sub(s.UpdatedAt).Seconds() < staleDuration.Seconds() {
+			// IC is NOT stale, refuse deletion
+			helper.BadRequestError(c, "delete for externally managed non-stale IC not possible with this endpoint - use /ic/{ICID}/action endpoint instead to request deletion of the component")
+			return
+		}
 	}
 
 	// Delete the IC
 	err := s.delete()
-	if helper.DBError(c, err) {
-		return
-	} else if err != nil {
-		helper.InternalServerError(c, "Unable to send delete action: "+err.Error())
-		return
+	if !helper.DBError(c, err) {
+		c.JSON(http.StatusOK, gin.H{"ic": s.InfrastructureComponent})
 	}
-
-	c.JSON(http.StatusOK, gin.H{"ic": s.InfrastructureComponent})
 }
 
 // getConfigsOfIC godoc
