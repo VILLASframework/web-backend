@@ -180,7 +180,6 @@ func TestAddConfig(t *testing.T) {
 	scenarioID, ICID := addScenarioAndIC()
 
 	newConfig1.ScenarioID = scenarioID
-	newConfig1.ICID = ICID
 	// authenticate as normal userB who has no access to new scenario
 	token, err := helper.AuthenticateForTest(router, database.UserBCredentials)
 	assert.NoError(t, err)
@@ -206,7 +205,20 @@ func TestAddConfig(t *testing.T) {
 	token, err = helper.AuthenticateForTest(router, database.UserACredentials)
 	assert.NoError(t, err)
 
-	// test POST newConfig
+	// test POST newConfig without IC ID specified
+	// should work
+	code, resp, err = helper.TestEndpoint(router, token,
+		baseAPIConfigs, "POST", helper.KeyModels{"config": newConfig1})
+	assert.NoError(t, err)
+	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
+
+	// Compare POST's response with the newConfig
+	err = helper.CompareResponse(resp, helper.KeyModels{"config": newConfig1})
+	assert.NoError(t, err)
+
+	// test POST newConfig WITH IC ID specified
+	// should work
+	newConfig1.ICID = ICID
 	code, resp, err = helper.TestEndpoint(router, token,
 		baseAPIConfigs, "POST", helper.KeyModels{"config": newConfig1})
 	assert.NoError(t, err)

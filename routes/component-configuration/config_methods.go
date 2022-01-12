@@ -63,12 +63,13 @@ func (m *ComponentConfiguration) addToScenario() error {
 	// associate IC with component configuration
 	var ic database.InfrastructureComponent
 	err = db.Find(&ic, m.ICID).Error
-	if err != nil {
-		return err
-	}
-	err = db.Model(&ic).Association("ComponentConfigurations").Append(m).Error
-	if err != nil {
-		return err
+	if err == nil {
+		err = db.Model(&ic).Association("ComponentConfigurations").Append(m).Error
+		if err != nil {
+			return err
+		}
+	} else {
+		log.Println("INFO: new component config", m.Name, "(ID=", m.ID, ") could not be associated to IC; IC ID not found in DB or no IC ID provided")
 	}
 
 	// associate component configuration with scenario

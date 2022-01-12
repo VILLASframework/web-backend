@@ -33,7 +33,7 @@ var validate *validator.Validate
 type validNewConfig struct {
 	Name            string         `form:"Name" validate:"required"`
 	ScenarioID      uint           `form:"ScenarioID" validate:"required"`
-	ICID            uint           `form:"ICID" validate:"required"`
+	ICID            uint           `form:"ICID" validate:"omitempty"`
 	StartParameters postgres.Jsonb `form:"StartParameters" validate:"required"`
 	FileIDs         []int64        `form:"FileIDs" validate:"omitempty"`
 }
