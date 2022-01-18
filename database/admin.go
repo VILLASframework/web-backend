@@ -22,10 +22,11 @@
 package database
 
 import (
-	"fmt"
 	"math/rand"
 	"strings"
 	"time"
+
+	"log"
 
 	"github.com/zpatrick/go-config"
 	"golang.org/x/crypto/bcrypt"
@@ -61,9 +62,9 @@ func AddAdminUser(cfg *config.Config) (string, error) {
 	}
 
 	if len(users) == 0 {
-		fmt.Println("No admin user found in DB, adding default admin user.")
+		log.Println("No admin user found in DB, adding default admin user.")
 		if generatedPW {
-			fmt.Printf("  Generated admin password: %s for admin user %s\n", adminPW, adminName)
+			log.Printf("  Generated admin password: %s for admin user %s\n", adminPW, adminName)
 		}
 
 		user := User{
@@ -80,7 +81,7 @@ func AddAdminUser(cfg *config.Config) (string, error) {
 			return "", err
 		}
 	} else if updatedPW {
-		fmt.Println("Found existing admin user in DB, updating user from CLI parameters.")
+		log.Println("Found existing admin user in DB, updating user from CLI parameters.")
 
 		user := users[0]
 
