@@ -428,6 +428,18 @@ func TestDeleteScenario(t *testing.T) {
 	newScenarioID, err := helper.GetResponseID(resp)
 	assert.NoError(t, err)
 
+	// add file to the scenario
+
+	// add result to the scenario
+
+	// add dashboard to the scenario
+
+	// add widget to the dashboard
+
+	// add component config to the scenario
+
+	// add signal to the component config
+
 	// add guest user to new scenario
 	code, resp, err = helper.TestEndpoint(router, token,
 		fmt.Sprintf("/api/v2/scenarios/%v/user?username=User_C", newScenarioID), "PUT", nil)

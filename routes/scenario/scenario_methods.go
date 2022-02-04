@@ -23,6 +23,7 @@ package scenario
 
 import (
 	"fmt"
+	"log"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"github.com/jinzhu/gorm"
@@ -121,27 +122,169 @@ func (s *Scenario) deleteUser(username string) error {
 	return nil
 }
 
-func (s *Scenario) delete() error {
+func (s *Scenario) delete() []error {
 	db := database.GetDB()
+
+	var errs []error
+
+	// delete all files of the scenario
+	var files []database.File
+	err := db.Order("ID asc").Model(s).Related(&files, "Files").Error
+	if err != nil {
+		errs = append(errs, err)
+	}
+
+	for _, f := range files {
+		// delete file from s3 bucket
+		if f.Key != "" {
+			// TODO we do not delete the file from s3 object storage
+			// to ensure that no data is lost if multiple File objects reference the same S3 data object
+			// This behavior should be replaced by a different file handling in the future
+			//err = f.deleteS3()
+			//if err != nil {
+			//	return err
+			//}
+			//log.Println("Deleted file in S3 object storage")
+			log.Printf("Did NOT delete file with key %v in S3 object storage!\n", f.Key)
+		}
+
+		log.Println("DELETE file ", f.ID, "(name="+f.Name+")")
+		err = db.Delete(&f).Error
+		if err != nil {
+			errs = append(errs, err)
+		}
+	}
+
+	// delete all results of the scenario
+	var results []database.Result
+	err = db.Order("ID asc").Model(s).Related(&results, "Results").Error
+	if err != nil {
+		errs = append(errs, err)
+	}
+
+	for _, r := range results {
+		log.Println("DELETE result ", r.ID, "(desc="+r.Description+")")
+		err = db.Delete(&r).Error
+		if err != nil {
+			errs = append(errs, err)
+		}
+	}
+
+	// delete all dashboards (and widgets) of the scenario
+	var dab []database.Dashboard
+	err = db.Order("ID asc").Model(s).Related(&dab, "Dashboards").Error
+	if err != nil {
+		errs = append(errs, err)
+	}
+
+	for _, d := range dab {
+		// get all widgets of the dashboard
+		var widgets []database.Widget
+		err = db.Order("ID asc").Model(&d).Related(&widgets, "Widgets").Error
+		if err != nil {
+			errs = append(errs, err)
+		}
+
+		// Delete widgets
+		for _, widget := range widgets {
+			log.Println("DELETE widget ", widget.ID, "(name="+widget.Name+")")
+			err = db.Delete(&widget).Error
+			if err != nil {
+				errs = append(errs, err)
+			}
+		}
+
+		// Delete dashboard
+		log.Println("DELETE dashboard ", d.ID, "(name="+d.Name+")")
+		err = db.Delete(&d).Error
+		if err != nil {
+			errs = append(errs, err)
+		}
+	}
+
+	// delete all component configs (and signals) of the scenario
+	var configs []database.ComponentConfiguration
+	err = db.Order("ID asc").Model(s).Related(&configs, "ComponentConfigurations").Error
+	if err != nil {
+		errs = append(errs, err)
+	}
+
+	for _, config := range configs {
+		var ic database.InfrastructureComponent
+		err = db.Find(&ic, config.ICID).Error
+		if err != nil {
+			errs = append(errs, err)
+		}
+
+		// remove association between Infrastructure component and config
+		log.Println("DELETE ASSOCIATION to IC ", ic.ID, "(name="+ic.Name+")")
+		err = db.Model(&ic).Association("ComponentConfigurations").Delete(&config).Error
+		if err != nil {
+			errs = append(errs, err)
+		}
+
+		// Get Signals of InputMapping and delete them
+		var InputMappingSignals []database.Signal
+		err = db.Model(&config).Related(&InputMappingSignals, "InputMapping").Error
+		if err != nil {
+			errs = append(errs, err)
+		}
+		for _, sig := range InputMappingSignals {
+			log.Println("DELETE signal ", sig.ID, "(name="+sig.Name+")")
+			err = db.Delete(&sig).Error
+			if err != nil {
+				errs = append(errs, err)
+			}
+		}
+
+		// Get Signals of OutputMapping and delete them
+		var OutputMappingSignals []database.Signal
+		err = db.Model(&config).Related(&OutputMappingSignals, "OutputMapping").Error
+		if err != nil {
+			errs = append(errs, err)
+		}
+		for _, sig := range OutputMappingSignals {
+			log.Println("DELETE signal ", sig.ID, "(name="+sig.Name+")")
+			err = db.Delete(&sig).Error
+			if err != nil {
+				errs = append(errs, err)
+			}
+		}
+
+		// delete component configuration
+		log.Println("DELETE component config ", config.ID, "(name="+config.Name+")")
+		err = db.Delete(&config).Error
+		if err != nil {
+			errs = append(errs, err)
+		}
+
+		// if IC has state gone and there is no component configuration associated with it: delete IC
+		no_configs := db.Model(&ic).Association("ComponentConfigurations").Count()
+		if no_configs == 0 && ic.State == "gone" {
+			log.Println("DELETE IC with state gone, last component config deleted", ic.UUID)
+			err = db.Delete(&ic).Error
+			errs = append(errs, err)
+		}
+	}
 
 	// delete scenario from all users and vice versa
 
 	users, no_users, err := s.getUsers()
 	if err != nil {
-		return err
+		errs = append(errs, err)
 	}
-
 	if no_users > 0 {
 		for _, u := range users {
 			// remove user from scenario
+			log.Println("DELETE ASSOCIATION to user", u.ID, "(name="+u.Username+")")
 			err = db.Model(s).Association("Users").Delete(&u).Error
 			if err != nil {
-				return err
+				errs = append(errs, err)
 			}
 			// remove scenario from user
 			err = db.Model(&u).Association("Scenarios").Delete(s).Error
 			if err != nil {
-				return err
+				errs = append(errs, err)
 			}
 		}
 	}
@@ -149,8 +292,8 @@ func (s *Scenario) delete() error {
 	// Delete scenario
 	err = db.Delete(s).Error
 	if err != nil {
-		return err
+		errs = append(errs, err)
 	}
 
-	return nil
+	return errs
 }
