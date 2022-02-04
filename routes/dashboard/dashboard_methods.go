@@ -23,6 +23,7 @@ package dashboard
 
 import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
+	"log"
 )
 
 type Dashboard struct {
@@ -100,7 +101,8 @@ func (d *Dashboard) delete() error {
 	}
 
 	// Delete widgets
-	for widget := range widgets {
+	for _, widget := range widgets {
+		log.Println("DELETE widget ", widget.ID, "(name="+widget.Name+")")
 		err = db.Delete(&widget).Error
 		if err != nil {
 			return err

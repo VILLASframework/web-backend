@@ -416,6 +416,12 @@ func TestDeleteConfig(t *testing.T) {
 		fmt.Sprintf("%v?scenarioID=%v", baseAPIConfigs, scenarioID), "GET", nil)
 	assert.NoError(t, err)
 
+	// Count the number of configs associated with IC, should be 1 at this point
+	initialConfigsofIC, err := helper.LengthOfResponse(router, token,
+		fmt.Sprintf("/api/v2/ic/%v/configs", ICID), "GET", nil)
+	assert.NoError(t, err)
+	assert.Equalf(t, 1, initialConfigsofIC, "IC should have 1 associated config, has %v", initialConfigsofIC)
+
 	// Delete the added newConfig
 	code, resp, err = helper.TestEndpoint(router, token,
 		fmt.Sprintf("%v/%v", baseAPIConfigs, newConfigID), "DELETE", nil)
@@ -432,6 +438,23 @@ func TestDeleteConfig(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.Equal(t, initialNumber-1, finalNumber)
+
+	// Count final the number of configs associated with IC, should be 0 at this point
+	finalConfigsofIC, err := helper.LengthOfResponse(router, token,
+		fmt.Sprintf("/api/v2/ic/%v/configs", ICID), "GET", nil)
+	assert.NoError(t, err)
+	assert.Equalf(t, 0, finalConfigsofIC, "IC should have 0 associated config, has %v", finalConfigsofIC)
+
+	// authenticate as admin user to be able to delete IC
+	token, err = helper.AuthenticateForTest(router, database.AdminCredentials)
+	assert.NoError(t, err)
+
+	// Delete IC (should work because there is no config associated to it)
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/v2/ic/%v", ICID), "DELETE", nil)
+	assert.NoError(t, err)
+	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
+
 }
 
 func TestGetAllConfigsOfScenario(t *testing.T) {

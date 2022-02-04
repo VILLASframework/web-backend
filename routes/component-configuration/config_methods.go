@@ -133,12 +133,14 @@ func (m *ComponentConfiguration) delete() error {
 	}
 
 	// remove association between ComponentConfiguration and Scenario
+	log.Println("DELETE ASSOCIATION to scenario ", so.ID, "(name="+so.Name+")")
 	err = db.Model(&so).Association("ComponentConfigurations").Delete(m).Error
 	if err != nil {
 		return err
 	}
 
 	// remove association between Infrastructure component and config
+	log.Println("DELETE ASSOCIATION to IC ", ic.ID, "(name="+ic.Name+")")
 	err = db.Model(&ic).Association("ComponentConfigurations").Delete(m).Error
 	if err != nil {
 		return err
@@ -150,7 +152,8 @@ func (m *ComponentConfiguration) delete() error {
 	if err != nil {
 		return err
 	}
-	for sig := range InputMappingSignals {
+	for _, sig := range InputMappingSignals {
+		log.Println("DELETE signal ", sig.ID, "(name="+sig.Name+")")
 		err = db.Delete(&sig).Error
 		if err != nil {
 			return err
@@ -163,7 +166,8 @@ func (m *ComponentConfiguration) delete() error {
 	if err != nil {
 		return err
 	}
-	for sig := range OutputMappingSignals {
+	for _, sig := range OutputMappingSignals {
+		log.Println("DELETE signal ", sig.ID, "(name="+sig.Name+")")
 		err = db.Delete(&sig).Error
 		if err != nil {
 			return err
@@ -177,10 +181,10 @@ func (m *ComponentConfiguration) delete() error {
 	}
 
 	// if IC has state gone and there is no component configuration associated with it: delete IC
-	no_configs := db.Model(ic).Association("ComponentConfigurations").Count()
+	no_configs := db.Model(&ic).Association("ComponentConfigurations").Count()
 	if no_configs == 0 && ic.State == "gone" {
-		log.Println("Deleting IC with state gone, last component config deleted", ic.UUID)
-		err = db.Delete(ic).Error
+		log.Println("DELETE IC with state gone, last component config deleted", ic.UUID)
+		err = db.Delete(&ic).Error
 		return err
 	}
 
