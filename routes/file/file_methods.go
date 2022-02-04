@@ -244,7 +244,7 @@ func (f *File) Delete() error {
 		//	return err
 		//}
 		//log.Println("Deleted file in S3 object storage")
-		log.Println("Did NOT delete file in S3 object storage!")
+		log.Printf("Did NOT delete file with Key %v in S3 object storage!\n", f.Key)
 	}
 
 	err = db.Model(&so).Association("Files").Delete(f).Error
