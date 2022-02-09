@@ -22,6 +22,7 @@
 package component_configuration
 
 import (
+	"github.com/jinzhu/gorm"
 	"log"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
@@ -126,22 +127,9 @@ func (m *ComponentConfiguration) delete() error {
 		return err
 	}
 
-	var ic database.InfrastructureComponent
-	err = db.Find(&ic, m.ICID).Error
-	if err != nil {
-		return err
-	}
-
 	// remove association between ComponentConfiguration and Scenario
 	log.Println("DELETE ASSOCIATION to scenario ", so.ID, "(name="+so.Name+")")
 	err = db.Model(&so).Association("ComponentConfigurations").Delete(m).Error
-	if err != nil {
-		return err
-	}
-
-	// remove association between Infrastructure component and config
-	log.Println("DELETE ASSOCIATION to IC ", ic.ID, "(name="+ic.Name+")")
-	err = db.Model(&ic).Association("ComponentConfigurations").Delete(m).Error
 	if err != nil {
 		return err
 	}
@@ -174,17 +162,34 @@ func (m *ComponentConfiguration) delete() error {
 		}
 	}
 
+	var ic database.InfrastructureComponent
+	err = db.Find(&ic, m.ICID).Error
+	if err == nil {
+		// remove association between Infrastructure component and config
+		log.Println("DELETE ASSOCIATION to IC ", ic.ID, "(name="+ic.Name+")")
+		err = db.Model(&ic).Association("ComponentConfigurations").Delete(m).Error
+		if err != nil {
+			return err
+		}
+
+		// if IC has state gone and there is no component configuration associated with it: delete IC
+		no_configs := db.Model(&ic).Association("ComponentConfigurations").Count()
+		if no_configs == 0 && ic.State == "gone" {
+			log.Println("DELETE IC with state gone, last component config deleted", ic.UUID)
+			err = db.Delete(&ic).Error
+			return err
+		}
+	} else {
+		if err == gorm.ErrRecordNotFound {
+			log.Printf("SKIPPING IC association removal, IC with id=%v not found\n", m.ICID)
+		} else {
+			return err
+		}
+	}
+
 	// delete component configuration
 	err = db.Delete(m).Error
 	if err != nil {
-		return err
-	}
-
-	// if IC has state gone and there is no component configuration associated with it: delete IC
-	no_configs := db.Model(&ic).Association("ComponentConfigurations").Count()
-	if no_configs == 0 && ic.State == "gone" {
-		log.Println("DELETE IC with state gone, last component config deleted", ic.UUID)
-		err = db.Delete(&ic).Error
 		return err
 	}
 

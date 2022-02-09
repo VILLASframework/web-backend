@@ -238,8 +238,15 @@ func deleteScenario(c *gin.Context) {
 	var so Scenario
 	so.Scenario = so_r
 
-	err := so.delete()
-	if helper.DBError(c, err) {
+	errs := so.delete()
+	if len(errs) > 0 {
+		var errorString = "DB errors:"
+		for _, e := range errs {
+			if e != nil {
+				errorString += ", " + e.Error()
+			}
+		}
+		helper.InternalServerError(c, errorString)
 		return
 	}
 
