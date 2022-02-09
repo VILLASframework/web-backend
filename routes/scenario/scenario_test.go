@@ -34,7 +34,6 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/widget"
 	"io"
 	"io/ioutil"
-	"log"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -516,9 +515,72 @@ func TestDeleteScenario(t *testing.T) {
 
 	assert.Equal(t, finalNumber, initialNumber-1)
 
-	// TODO check if dashboard, result, file, etc still exists (use API)
-	// TODO make sure everything is properly deleted
-	log.Println(fileID, resultID, dashboardID, widgetID, componentConfig1ID, componentConfig2ID, signalInID, signalOutID, ic1ID, ic2ID)
+	// check if dashboard, result, file, etc. still exists
+	// make sure everything is properly deleted
+
+	// Get the file
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/v2/files/%v", fileID), "GET", nil)
+	assert.NoError(t, err)
+	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
+
+	// Get the result
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/v2/results/%v", resultID), "GET", nil)
+	assert.NoError(t, err)
+	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
+
+	// Get the dashboard
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/v2/dashboards/%v", dashboardID), "GET", nil)
+	assert.NoError(t, err)
+	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
+
+	// Get the widget
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/v2/widgets/%v", widgetID), "GET", nil)
+	assert.NoError(t, err)
+	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
+
+	// Get the configs
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/v2/configs/%v", componentConfig1ID), "GET", nil)
+	assert.NoError(t, err)
+	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/v2/configs/%v", componentConfig2ID), "GET", nil)
+	assert.NoError(t, err)
+	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
+
+	// Get the signals
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/v2/signals/%v", signalInID), "GET", nil)
+	assert.NoError(t, err)
+	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/v2/signals/%v", signalOutID), "GET", nil)
+	assert.NoError(t, err)
+	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
+
+	// Get IC1 (should be in DB)
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/v2/ic/%v", ic1ID), "GET", nil)
+	assert.NoError(t, err)
+	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
+
+	// Get number of configs of IC1 (should be zero)
+	numberOfConfigs, err := helper.LengthOfResponse(router, token,
+		fmt.Sprintf("/api/v2/ic/%v/configs", ic1ID), "GET", nil)
+	assert.NoError(t, err)
+	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
+	assert.Equal(t, 0, numberOfConfigs)
+
+	// Get IC2 (should be deleted)
+	code, resp, err = helper.TestEndpoint(router, token,
+		fmt.Sprintf("/api/v2/ic/%v", ic2ID), "GET", nil)
+	assert.NoError(t, err)
+	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
+	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
 }
 
 func TestAddUserToScenario(t *testing.T) {
