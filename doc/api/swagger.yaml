@@ -65,7 +65,6 @@ definitions:
       StartParameters:
         $ref: '#/definitions/postgres.Jsonb'
     required:
-    - ICID
     - Name
     - ScenarioID
     - StartParameters
@@ -85,12 +84,48 @@ definitions:
     type: object
   config.Config:
     properties:
-      Providers:
-        items:
-          $ref: '#/definitions/config.Provider'
-        type: array
+      authentication:
+        $ref: '#/definitions/config.ConfigAuthentication'
+      contact:
+        $ref: '#/definitions/config.ConfigContact'
+      kubernetes:
+        $ref: '#/definitions/config.ConfigKubernetes'
+      mode:
+        type: string
+      sub_title:
+        type: string
+      title:
+        type: string
     type: object
-  config.Provider:
+  config.ConfigAuthentication:
+    properties:
+      external:
+        $ref: '#/definitions/config.ConfigAuthenticationExternal'
+      logout_url:
+        type: string
+    type: object
+  config.ConfigAuthenticationExternal:
+    properties:
+      authorize_url:
+        type: string
+      enabled:
+        type: boolean
+      provider_name:
+        type: string
+    type: object
+  config.ConfigContact:
+    properties:
+      mail:
+        type: string
+      name:
+        type: string
+    type: object
+  config.ConfigKubernetes:
+    properties:
+      cluster_name:
+        type: string
+      rancher_url:
+        type: string
     type: object
   dashboard.addDashboardRequest:
     properties:
@@ -413,7 +448,6 @@ definitions:
     required:
     - DashboardID
     - Height
-    - Name
     - Type
     - Width
     type: object
@@ -448,8 +482,7 @@ definitions:
     type: object
 info:
   contact:
-    email: sonja.happ@eonerc.rwth-aachen.de
-    name: Sonja Happ
+    name: Institute for Automation of Complex Power Systems, RWTH Aachen University
   description: |-
     This is the [VILLASweb Backend](https://git.rwth-aachen.de/acs/public/villas/web-backend-go) API v2.0.
     This documentation is auto-generated based on the API documentation in the code. The tool [swag](https://github.com/swaggo/swag) is used to auto-generate API docs for the [gin-gonic](https://github.com/gin-gonic/gin) framework.

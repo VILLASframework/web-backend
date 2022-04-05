@@ -44,23 +44,23 @@ to get a list of available parameters and default values
 
 ## Environment variables
 
-| Variable		| Description										|
-|:--			|:--												|
-| `DB_HOST`		| PostgreSQL hostname								|
-| `DB_NAME`		| PostgreSQL database								|
-| `DB_USER`		| PostgreSQL username								|
-| `DB_PASS`		| PostgreSQL password								|
-| `DB_SSLMODE`	| PostgreSQL SSL enabled							|
-| `AMQP_HOST`	| AMQP hostname										|
-| `AMQP_USER`	| AMQP username										|
-| `AMQP_PASS`	| AMQP password										|
-| `BASE_HOST`	| Hostname of VILLASweb								|
-| `BASE_PATH`	| Base URL of VILLASweb								|
-| `MODE`		| Mode: debug/release/test							|
-| `PORT`		| Port on which the internal HTTP server listens	|
-| `ADMIN_USER`	| Username for initial admin user					|
-| `ADMIN_PASS`	| Password for initial admin user					|
-| `ADMIN_MAIL`	| Mail for initial admin user						|
+| Variable		| Description										                               |
+|---------------|-----------------------------------------------------|
+| `DB_HOST`		| PostgreSQL hostname								                         |
+| `DB_NAME`		| PostgreSQL database								                         |
+| `DB_USER`		| PostgreSQL username								                         |
+| `DB_PASS`		| PostgreSQL password								                         |
+| `DB_SSLMODE`	| PostgreSQL SSL enabled							                       |
+| `AMQP_HOST`	| AMQP hostname										                             |
+| `AMQP_USER`	| AMQP username										                             |
+| `AMQP_PASS`	| AMQP password										                             |
+| `BASE_HOST`	| Hostname of VILLASweb								                       |
+| `BASE_PATH`	| Base URL of VILLASweb								                       |
+| `MODE`		| Mode: debug/release/test							                     |
+| `PORT`		| Port on which the internal HTTP server listens	     |
+| `ADMIN_USER`	| Username for initial admin user					                |
+| `ADMIN_PASS`	| Password for initial admin user					                |
+| `ADMIN_MAIL`	| Mail for initial admin user						                   |
 
 ## PostgreSQL Database
 Before running the application the user has to setup and configure
@@ -113,7 +113,7 @@ $ sudo vim /var/lib/pgsql/11/data/pg_hba.conf
 
 ## Copyright
 
-2020, Institute for Automation of Complex Power Systems, EONERC  
+2022, Institute for Automation of Complex Power Systems, RWTH Aachen University
 
 ## License
 
@@ -139,8 +139,6 @@ For other licensing options please consult [Prof. Antonello Monti](mailto:amonti
 ## Contact
 
 [![EONERC ACS Logo](doc/pictures/eonerc_logo.png)](http://www.acs.eonerc.rwth-aachen.de)
-
- - Sonja Happ: <sonja.happ@eonerc.rwth-aachen.de>
 
 [Institute for Automation of Complex Power Systems (ACS)](http://www.acs.eonerc.rwth-aachen.de)  
 [EON Energy Research Center (EONERC)](http://www.eonerc.rwth-aachen.de)  

@@ -1,10 +1,5 @@
-/** Main package.
-*
-* @author Sonja Happ <sonja.happ@eonerc.rwth-aachen.de>
-* @copyright 2014-2019, Institute for Automation of Complex Power Systems, EONERC
-* @license GNU General Public License (version 3)
-*
-* VILLASweb-backend-go
+/**
+* This file is part of VILLASweb-backend-go
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -65,8 +60,7 @@ func addData(router *gin.Engine, cfg *config.Config) error {
 // @description This is the [VILLASweb Backend](https://git.rwth-aachen.de/acs/public/villas/web-backend-go) API v2.0.
 // @description This documentation is auto-generated based on the API documentation in the code. The tool [swag](https://github.com/swaggo/swag) is used to auto-generate API docs for the [gin-gonic](https://github.com/gin-gonic/gin) framework.
 // @description Authentication: Use the authenticate endpoint below to obtain a token for your user account, copy the token into to the value field of the dialog showing up for the green Authorize button below and confirm with Done.
-// @contact.name Sonja Happ
-// @contact.email sonja.happ@eonerc.rwth-aachen.de
+// @contact.name Institute for Automation of Complex Power Systems, RWTH Aachen University
 // @license.name GNU GPL 3.0
 // @license.url http://www.gnu.de/documents/gpl-3.0.en.html
 // @BasePath /api/v2

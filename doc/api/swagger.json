@@ -4,8 +4,7 @@
         "description": "This is the [VILLASweb Backend](https://git.rwth-aachen.de/acs/public/villas/web-backend-go) API v2.0.\nThis documentation is auto-generated based on the API documentation in the code. The tool [swag](https://github.com/swaggo/swag) is used to auto-generate API docs for the [gin-gonic](https://github.com/gin-gonic/gin) framework.\nAuthentication: Use the authenticate endpoint below to obtain a token for your user account, copy the token into to the value field of the dialog showing up for the green Authorize button below and confirm with Done.",
         "title": "VILLASweb Backend API",
         "contact": {
-            "name": "Sonja Happ",
-            "email": "sonja.happ@eonerc.rwth-aachen.de"
+            "name": "Institute for Automation of Complex Power Systems, RWTH Aachen University"
         },
         "license": {
             "name": "GNU GPL 3.0",
@@ -3350,7 +3349,6 @@
         "component_configuration.validNewConfig": {
             "type": "object",
             "required": [
-                "ICID",
                 "Name",
                 "ScenarioID",
                 "StartParameters"
@@ -3399,16 +3397,72 @@
         "config.Config": {
             "type": "object",
             "properties": {
-                "Providers": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/config.Provider"
-                    }
+                "authentication": {
+                    "$ref": "#/definitions/config.ConfigAuthentication"
+                },
+                "contact": {
+                    "$ref": "#/definitions/config.ConfigContact"
+                },
+                "kubernetes": {
+                    "$ref": "#/definitions/config.ConfigKubernetes"
+                },
+                "mode": {
+                    "type": "string"
+                },
+                "sub_title": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
                 }
             }
         },
-        "config.Provider": {
-            "type": "object"
+        "config.ConfigAuthentication": {
+            "type": "object",
+            "properties": {
+                "external": {
+                    "$ref": "#/definitions/config.ConfigAuthenticationExternal"
+                },
+                "logout_url": {
+                    "type": "string"
+                }
+            }
+        },
+        "config.ConfigAuthenticationExternal": {
+            "type": "object",
+            "properties": {
+                "authorize_url": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "provider_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "config.ConfigContact": {
+            "type": "object",
+            "properties": {
+                "mail": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "config.ConfigKubernetes": {
+            "type": "object",
+            "properties": {
+                "cluster_name": {
+                    "type": "string"
+                },
+                "rancher_url": {
+                    "type": "string"
+                }
+            }
         },
         "dashboard.addDashboardRequest": {
             "type": "object",
@@ -3854,7 +3908,6 @@
             "required": [
                 "DashboardID",
                 "Height",
-                "Name",
                 "Type",
                 "Width"
             ],

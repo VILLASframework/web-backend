@@ -1,10 +1,5 @@
-/** Dashboard package, methods.
-*
-* @author Sonja Happ <sonja.happ@eonerc.rwth-aachen.de>
-* @copyright 2014-2019, Institute for Automation of Complex Power Systems, EONERC
-* @license GNU General Public License (version 3)
-*
-* VILLASweb-backend-go
+/**
+* This file is part of VILLASweb-backend-go
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -19,6 +14,7 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
+
 package dashboard
 
 import (
