@@ -19,7 +19,6 @@ package database
 
 import (
 	"os"
-	"strings"
 	"testing"
 
 	"github.com/zpatrick/go-config"
@@ -50,20 +49,13 @@ func TestInitDB(t *testing.T) {
 	err = InitDB(ownConfig, true)
 	assert.Error(t, err)
 
-	//dbOptions := []string{"db.name", "db.host", "db.user", "db.pass", "db.ssl"}
-	dbOptions := []string{"db.name", "db.host", "db.ssl"}
+	dbOptions := []string{"db.name", "db.host", "db.user", "db.pass", "db.ssl"}
+	//dbOptions := []string{"db.name", "db.host", "db.ssl"} // use this line for local testing only
 	for _, opt := range dbOptions {
 		val, err := configuration.GlobalConfig.String(opt)
 		assert.NoError(t, err)
 		static[opt] = val
-
-		envName := strings.ReplaceAll(opt, ".", "_")
-		envName = strings.ReplaceAll(envName, "-", "_")
-		envName = strings.ToUpper(envName)
-
-		mappings[envName] = opt
-
-		ownConfig = config.NewConfig([]config.Provider{config.NewStatic(static), config.NewEnvironment(mappings)})
+		ownConfig = config.NewConfig([]config.Provider{defaults, env})
 		err = InitDB(ownConfig, true)
 
 		if opt == "db.ssl" {
