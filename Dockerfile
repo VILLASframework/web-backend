@@ -6,7 +6,7 @@ WORKDIR /build
 # Make use of layer caching
 ADD go.* ./
 RUN go mod download
-RUN go install github.com/swaggo/swag/cmd/swag
+RUN go install github.com/swaggo/swag/cmd/swag@v1.7.0
 
 ADD . .
 
