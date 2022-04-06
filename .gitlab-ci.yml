@@ -12,7 +12,7 @@ stages:
 
 staticcheck:
   stage: test
-  image: golang:1.17-buster
+  image: golang:1.18-buster
   before_script:
     - go install honnef.co/go/tools/cmd/staticcheck@latest
   script:
@@ -20,7 +20,7 @@ staticcheck:
 
 test:
   stage: test
-  image: golang:1.17-buster
+  image: golang:1.18-buster
   variables:
     GOPATH: $CI_PROJECT_DIR/.go
     POSTGRES_DB: testvillasdb
