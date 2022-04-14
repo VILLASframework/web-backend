@@ -62,7 +62,7 @@ test:
     - mc mb gitlab/${S3_BUCKET}
   script:
     - go mod tidy
-    - go get github.com/swaggo/swag/cmd/swag@v1.7.0
+    - go get github.com/swaggo/swag/cmd/swag@v1.8.1
     - go install github.com/swaggo/swag/cmd/swag
     - ${GOPATH}/bin/swag init --propertyStrategy pascalcase
       --generalInfo "start.go"
