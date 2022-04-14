@@ -27,34 +27,41 @@ func RegisterConfigEndpoint(r *gin.RouterGroup) {
 	r.GET("", getConfig)
 }
 
-type ConfigAuthenticationExternal struct {
+type AuthenticationExternal struct {
 	Enabled      bool   `json:"enabled"`
 	ProviderName string `json:"provider_name"`
 	LoginURL     string `json:"authorize_url"`
 }
 
-type ConfigAuthentication struct {
-	External  ConfigAuthenticationExternal `json:"external"`
-	LogoutURL string                       `json:"logout_url"`
+type Authentication struct {
+	External  AuthenticationExternal `json:"external"`
+	LogoutURL string                 `json:"logout_url"`
 }
 
-type ConfigContact struct {
+type Contact struct {
 	Name string `json:"name"`
 	Mail string `json:"mail"`
 }
 
-type ConfigKubernetes struct {
+type Kubernetes struct {
 	RancherURL  string `json:"rancher_url"`
 	ClusterName string `json:"cluster_name"`
 }
 
+type WebRTC struct {
+	ICEUsername string `json:"ice_username"`
+	ICEPassword string `json:"ice_password"`
+	ICEURLs     string `json:"ice_urls"`
+}
+
 type Config struct {
-	Title          string               `json:"title"`
-	SubTitle       string               `json:"sub_title"`
-	Mode           string               `json:"mode"`
-	Contact        ConfigContact        `json:"contact"`
-	Authentication ConfigAuthentication `json:"authentication"`
-	Kubernetes     ConfigKubernetes     `json:"kubernetes"`
+	Title          string         `json:"title"`
+	SubTitle       string         `json:"sub_title"`
+	Mode           string         `json:"mode"`
+	Contact        Contact        `json:"contact"`
+	Authentication Authentication `json:"authentication"`
+	Kubernetes     Kubernetes     `json:"kubernetes"`
+	WebRTC         WebRTC         `json:"webrtc"`
 }
 
 // getHealth godoc
@@ -81,6 +88,9 @@ func getConfig(c *gin.Context) {
 	resp.Contact.Mail, _ = cfg.String("contact.mail")
 	resp.Kubernetes.RancherURL, _ = cfg.String("k8s.rancher-url")
 	resp.Kubernetes.ClusterName, _ = cfg.String("k8s.cluster-name")
+	resp.WebRTC.ICEUsername, _ = cfg.String("webrtc.ice-username")
+	resp.WebRTC.ICEPassword, _ = cfg.String("webrtc.ice-pass")
+	resp.WebRTC.ICEURLs, _ = cfg.String("webrtc.ice-urls")
 
 	c.JSON(200, resp)
 }

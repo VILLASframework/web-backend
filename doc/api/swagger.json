@@ -3394,41 +3394,18 @@
                 }
             }
         },
-        "config.Config": {
-            "type": "object",
-            "properties": {
-                "authentication": {
-                    "$ref": "#/definitions/config.ConfigAuthentication"
-                },
-                "contact": {
-                    "$ref": "#/definitions/config.ConfigContact"
-                },
-                "kubernetes": {
-                    "$ref": "#/definitions/config.ConfigKubernetes"
-                },
-                "mode": {
-                    "type": "string"
-                },
-                "sub_title": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                }
-            }
-        },
-        "config.ConfigAuthentication": {
+        "config.Authentication": {
             "type": "object",
             "properties": {
                 "external": {
-                    "$ref": "#/definitions/config.ConfigAuthenticationExternal"
+                    "$ref": "#/definitions/config.AuthenticationExternal"
                 },
                 "logout_url": {
                     "type": "string"
                 }
             }
         },
-        "config.ConfigAuthenticationExternal": {
+        "config.AuthenticationExternal": {
             "type": "object",
             "properties": {
                 "authorize_url": {
@@ -3442,7 +3419,33 @@
                 }
             }
         },
-        "config.ConfigContact": {
+        "config.Config": {
+            "type": "object",
+            "properties": {
+                "authentication": {
+                    "$ref": "#/definitions/config.Authentication"
+                },
+                "contact": {
+                    "$ref": "#/definitions/config.Contact"
+                },
+                "kubernetes": {
+                    "$ref": "#/definitions/config.Kubernetes"
+                },
+                "mode": {
+                    "type": "string"
+                },
+                "sub_title": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "webrtc": {
+                    "$ref": "#/definitions/config.WebRTC"
+                }
+            }
+        },
+        "config.Contact": {
             "type": "object",
             "properties": {
                 "mail": {
@@ -3453,13 +3456,27 @@
                 }
             }
         },
-        "config.ConfigKubernetes": {
+        "config.Kubernetes": {
             "type": "object",
             "properties": {
                 "cluster_name": {
                     "type": "string"
                 },
                 "rancher_url": {
+                    "type": "string"
+                }
+            }
+        },
+        "config.WebRTC": {
+            "type": "object",
+            "properties": {
+                "ice_password": {
+                    "type": "string"
+                },
+                "ice_urls": {
+                    "type": "string"
+                },
+                "ice_username": {
                     "type": "string"
                 }
             }
@@ -3777,7 +3794,11 @@
                     "type": "integer"
                 },
                 "Direction": {
-                    "type": "string"
+                    "type": "string",
+                    "enum": [
+                        "in",
+                        "out"
+                    ]
                 },
                 "Index": {
                     "type": "integer"
@@ -3854,13 +3875,20 @@
                     "type": "string"
                 },
                 "Password": {
-                    "type": "string"
+                    "type": "string",
+                    "minLength": 6
                 },
                 "Role": {
-                    "type": "string"
+                    "type": "string",
+                    "enum": [
+                        "Admin",
+                        "User",
+                        "Guest"
+                    ]
                 },
                 "Username": {
-                    "type": "string"
+                    "type": "string",
+                    "minLength": 3
                 }
             }
         },
@@ -3868,22 +3896,34 @@
             "type": "object",
             "properties": {
                 "Active": {
-                    "type": "string"
+                    "type": "string",
+                    "enum": [
+                        "yes",
+                        "no"
+                    ]
                 },
                 "Mail": {
                     "type": "string"
                 },
                 "OldPassword": {
-                    "type": "string"
+                    "type": "string",
+                    "minLength": 6
                 },
                 "Password": {
-                    "type": "string"
+                    "type": "string",
+                    "minLength": 6
                 },
                 "Role": {
-                    "type": "string"
+                    "type": "string",
+                    "enum": [
+                        "Admin",
+                        "User",
+                        "Guest"
+                    ]
                 },
                 "Username": {
-                    "type": "string"
+                    "type": "string",
+                    "minLength": 3
                 }
             }
         },
