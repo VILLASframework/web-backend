@@ -328,6 +328,9 @@ definitions:
       ConfigID:
         type: integer
       Direction:
+        enum:
+        - in
+        - out
         type: string
       Index:
         type: integer
@@ -379,10 +382,16 @@ definitions:
       Mail:
         type: string
       Password:
+        minLength: 6
         type: string
       Role:
+        enum:
+        - Admin
+        - User
+        - Guest
         type: string
       Username:
+        minLength: 3
         type: string
     required:
     - Mail
@@ -393,16 +402,26 @@ definitions:
   user.validUpdatedRequest:
     properties:
       Active:
+        enum:
+        - "yes"
+        - "no"
         type: string
       Mail:
         type: string
       OldPassword:
+        minLength: 6
         type: string
       Password:
+        minLength: 6
         type: string
       Role:
+        enum:
+        - Admin
+        - User
+        - Guest
         type: string
       Username:
+        minLength: 3
         type: string
     type: object
   widget.addWidgetRequest:
@@ -502,7 +521,8 @@ paths:
       - application/json
       responses:
         "200":
-          description: JSON web token, success status, message and authenticated user object
+          description: JSON web token, success status, message and authenticated user
+            object
           schema:
             $ref: '#/definitions/api.ResponseAuthenticate'
         "401":
@@ -513,7 +533,8 @@ paths:
           description: Internal server error.
           schema:
             $ref: '#/definitions/api.ResponseError'
-      summary: Check if user is authenticated and provide details on how the user can authenticate
+      summary: Check if user is authenticated and provide details on how the user
+        can authenticate
       tags:
       - authentication
   /authenticate/{mechanism}:
@@ -540,7 +561,8 @@ paths:
       - application/json
       responses:
         "200":
-          description: JSON web token, success status, message and authenticated user object
+          description: JSON web token, success status, message and authenticated user
+            object
           schema:
             $ref: '#/definitions/api.ResponseAuthenticate'
         "401":
@@ -605,7 +627,8 @@ paths:
       - application/json
       operationId: addConfig
       parameters:
-      - description: component configuration to be added incl. IDs of scenario and IC
+      - description: component configuration to be added incl. IDs of scenario and
+          IC
         in: body
         name: inputConfig
         required: true
@@ -1170,7 +1193,8 @@ paths:
       - application/json
       responses:
         "204":
-          description: Backend is healthy, database and AMQP broker connections are alive
+          description: Backend is healthy, database and AMQP broker connections are
+            alive
           schema:
             type: string
         "500":
@@ -1402,7 +1426,8 @@ paths:
             $ref: '#/definitions/api.ResponseError'
       security:
       - Bearer: []
-      summary: Send an action to IC (only available if backend server is started with -amqp parameter)
+      summary: Send an action to IC (only available if backend server is started with
+        -amqp parameter)
       tags:
       - infrastructure-components
   /ic/{ICID}/configs:
@@ -1670,6 +1695,7 @@ paths:
       - application/msexcel
       - application/xml
       - application/x-bag
+      - multipart/form-data
       operationId: addResultFile
       parameters:
       - description: File to be uploaded
@@ -2078,7 +2104,8 @@ paths:
       - application/json
       operationId: AddSignal
       parameters:
-      - description: A signal to be added to the component configuration incl. direction and config ID to which signal shall be added
+      - description: A signal to be added to the component configuration incl. direction
+          and config ID to which signal shall be added
         in: body
         name: inputSignal
         required: true
@@ -2363,7 +2390,8 @@ paths:
       - application/json
       operationId: UpdateUser
       parameters:
-      - description: User to be updated (anything except for ID can be changed, role can only be change by admin)
+      - description: User to be updated (anything except for ID can be changed, role
+          can only be change by admin)
         in: body
         name: inputUser
         required: true

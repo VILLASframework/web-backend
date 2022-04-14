@@ -1827,7 +1827,8 @@
                     "application/zip",
                     "application/msexcel",
                     "application/xml",
-                    "application/x-bag"
+                    "application/x-bag",
+                    "multipart/form-data"
                 ],
                 "produces": [
                     "application/json"
@@ -3777,7 +3778,11 @@
                     "type": "integer"
                 },
                 "Direction": {
-                    "type": "string"
+                    "type": "string",
+                    "enum": [
+                        "in",
+                        "out"
+                    ]
                 },
                 "Index": {
                     "type": "integer"
@@ -3854,13 +3859,20 @@
                     "type": "string"
                 },
                 "Password": {
-                    "type": "string"
+                    "type": "string",
+                    "minLength": 6
                 },
                 "Role": {
-                    "type": "string"
+                    "type": "string",
+                    "enum": [
+                        "Admin",
+                        "User",
+                        "Guest"
+                    ]
                 },
                 "Username": {
-                    "type": "string"
+                    "type": "string",
+                    "minLength": 3
                 }
             }
         },
@@ -3868,22 +3880,34 @@
             "type": "object",
             "properties": {
                 "Active": {
-                    "type": "string"
+                    "type": "string",
+                    "enum": [
+                        "yes",
+                        "no"
+                    ]
                 },
                 "Mail": {
                     "type": "string"
                 },
                 "OldPassword": {
-                    "type": "string"
+                    "type": "string",
+                    "minLength": 6
                 },
                 "Password": {
-                    "type": "string"
+                    "type": "string",
+                    "minLength": 6
                 },
                 "Role": {
-                    "type": "string"
+                    "type": "string",
+                    "enum": [
+                        "Admin",
+                        "User",
+                        "Guest"
+                    ]
                 },
                 "Username": {
-                    "type": "string"
+                    "type": "string",
+                    "minLength": 3
                 }
             }
         },
