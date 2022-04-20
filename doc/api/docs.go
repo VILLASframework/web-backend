@@ -3465,6 +3465,20 @@ const docTemplate = `{
                 }
             }
         },
+        "config.ICEServer": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
         "config.Kubernetes": {
             "type": "object",
             "properties": {
@@ -3479,14 +3493,11 @@ const docTemplate = `{
         "config.WebRTC": {
             "type": "object",
             "properties": {
-                "ice_password": {
-                    "type": "string"
-                },
-                "ice_urls": {
-                    "type": "string"
-                },
-                "ice_username": {
-                    "type": "string"
+                "ice_servers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/config.ICEServer"
+                    }
                 }
             }
         },

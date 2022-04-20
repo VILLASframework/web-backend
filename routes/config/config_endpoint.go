@@ -20,6 +20,8 @@ package config
 import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
 	"github.com/gin-gonic/gin"
+	"log"
+	"strings"
 )
 
 func RegisterConfigEndpoint(r *gin.RouterGroup) {
@@ -49,9 +51,13 @@ type Kubernetes struct {
 }
 
 type WebRTC struct {
-	ICEUsername string `json:"ice_username"`
-	ICEPassword string `json:"ice_password"`
-	ICEURLs     string `json:"ice_urls"`
+	ICEServers []ICEServer `json:"ice_servers"`
+}
+
+type ICEServer struct {
+	URL      string `json:"url"`
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
 type Config struct {
@@ -88,9 +94,43 @@ func getConfig(c *gin.Context) {
 	resp.Contact.Mail, _ = cfg.String("contact.mail")
 	resp.Kubernetes.RancherURL, _ = cfg.String("k8s.rancher-url")
 	resp.Kubernetes.ClusterName, _ = cfg.String("k8s.cluster-name")
-	resp.WebRTC.ICEUsername, _ = cfg.String("webrtc.ice-username")
-	resp.WebRTC.ICEPassword, _ = cfg.String("webrtc.ice-pass")
-	resp.WebRTC.ICEURLs, _ = cfg.String("webrtc.ice-urls")
+
+	var servers []ICEServer
+
+	// read config param webrtc.ice-urls and transform into data structure resp.WebRTC
+	var ICEurlsRaw, err = cfg.String("webrtc.ice-urls")
+	if err == nil {
+		ICEurls := strings.Split(ICEurlsRaw, ",")
+
+		for _, url := range ICEurls {
+			elements := strings.Split(url, "@")
+			if len(elements) == 1 {
+				// anonymous server, no username and password
+				server := ICEServer{URL: elements[0], Username: "", Password: ""}
+				servers = append(servers, server)
+
+			} else if len(elements) == 2 {
+				// server requires username and password
+				// split username and password
+				credentials := strings.Split(elements[0], ":")
+				if len(credentials) != 2 {
+					// error
+					log.Println("Error parsing WebRTC ICE URLs provided in config. Please check correct format of username and password of", url)
+					break
+				}
+				server := ICEServer{URL: elements[1], Username: credentials[0], Password: credentials[1]}
+				servers = append(servers, server)
+
+			} else {
+				// error
+				log.Println("Error parsing WebRTC ICE URLs provided in config. Please check correct format of", url)
+				break
+			}
+		}
+		resp.WebRTC.ICEServers = servers
+	} else {
+		log.Println("Error parsing WeRTC ICE URLs:", err)
+	}
 
 	c.JSON(200, resp)
 }

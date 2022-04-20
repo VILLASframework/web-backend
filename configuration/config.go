@@ -83,9 +83,9 @@ func InitConfig() error {
 		k8sRancherURL            = flag.String("k8s-rancher-url", "https://rancher.k8s.eonerc.rwth-aachen.de", "URL of Rancher instance that is used to deploy the backend")
 		k8sClusterName           = flag.String("k8s-cluster-name", "local", "Name of the Kubernetes cluster where the backend is deployed")
 		staleICTime              = flag.String("stale-ic-time", "1h" /* 1 hour */, "Time after which an IC is considered stale")
-		webRTCiceUsername        = flag.String("webrtc-ice-user", "villas" /*  */, "WebRTC ICE username")
-		webRTCicePass            = flag.String("webrtc-ice-pass", "villas" /*  */, "WebRTC ICE password")
-		webRTCiceUrls            = flag.String("webrtc-ice-urls", "" /*  */, "WebRTC ICE URLs (comma-separated list)")
+		webRTCiceUrls            = flag.String("webrtc-ice-urls",
+			"stun:stun.l.google.com:19302,villas:villas@stun:stun.0l.de,villas:villas@turn:turn.0l.de?transport=udp,villas:villas@turn:turn.0l.de?transport=tcp",
+			"WebRTC ICE URLs (comma-separated list, use username:password@url style for non-anonymous URLs)")
 	)
 	flag.Parse()
 
@@ -122,8 +122,6 @@ func InitConfig() error {
 		"k8s.rancher-url":             *k8sRancherURL,
 		"k8s.cluster-name":            *k8sClusterName,
 		"staleictime":                 *staleICTime,
-		"webrtc.ice-username":         *webRTCiceUsername,
-		"webrtc.ice-pass":             *webRTCicePass,
 		"webrtc.ice-urls":             *webRTCiceUrls,
 	}
 

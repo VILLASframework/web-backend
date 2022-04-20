@@ -122,6 +122,15 @@ definitions:
       name:
         type: string
     type: object
+  config.ICEServer:
+    properties:
+      password:
+        type: string
+      url:
+        type: string
+      username:
+        type: string
+    type: object
   config.Kubernetes:
     properties:
       cluster_name:
@@ -131,12 +140,10 @@ definitions:
     type: object
   config.WebRTC:
     properties:
-      ice_password:
-        type: string
-      ice_urls:
-        type: string
-      ice_username:
-        type: string
+      ice_servers:
+        items:
+          $ref: '#/definitions/config.ICEServer'
+        type: array
     type: object
   dashboard.addDashboardRequest:
     properties:
