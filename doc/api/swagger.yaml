@@ -1706,6 +1706,7 @@ paths:
       - application/msexcel
       - application/xml
       - application/x-bag
+      - multipart/form-data
       operationId: addResultFile
       parameters:
       - description: File to be uploaded

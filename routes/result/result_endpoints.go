@@ -229,6 +229,7 @@ func deleteResult(c *gin.Context) {
 // @Accept application/msexcel
 // @Accept application/xml
 // @Accept application/x-bag
+// @Accept multipart/form-data
 // @Produce json
 // @Success 200 {object} api.ResponseResult "Result that was updated"
 // @Failure 400 {object} api.ResponseError "Bad request"

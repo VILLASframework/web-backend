@@ -1835,7 +1835,8 @@ const docTemplate = `{
                     "application/zip",
                     "application/msexcel",
                     "application/xml",
-                    "application/x-bag"
+                    "application/x-bag",
+                    "multipart/form-data"
                 ],
                 "produces": [
                     "application/json"
