@@ -20,6 +20,8 @@ package config
 import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
 	"github.com/gin-gonic/gin"
+	"log"
+	"strings"
 )
 
 func RegisterConfigEndpoint(r *gin.RouterGroup) {
@@ -27,34 +29,45 @@ func RegisterConfigEndpoint(r *gin.RouterGroup) {
 	r.GET("", getConfig)
 }
 
-type ConfigAuthenticationExternal struct {
+type AuthenticationExternal struct {
 	Enabled      bool   `json:"enabled"`
 	ProviderName string `json:"provider_name"`
 	LoginURL     string `json:"authorize_url"`
 }
 
-type ConfigAuthentication struct {
-	External  ConfigAuthenticationExternal `json:"external"`
-	LogoutURL string                       `json:"logout_url"`
+type Authentication struct {
+	External  AuthenticationExternal `json:"external"`
+	LogoutURL string                 `json:"logout_url"`
 }
 
-type ConfigContact struct {
+type Contact struct {
 	Name string `json:"name"`
 	Mail string `json:"mail"`
 }
 
-type ConfigKubernetes struct {
+type Kubernetes struct {
 	RancherURL  string `json:"rancher_url"`
 	ClusterName string `json:"cluster_name"`
 }
 
+type WebRTC struct {
+	ICEServers []ICEServer `json:"ice_servers"`
+}
+
+type ICEServer struct {
+	URL      string `json:"url"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
 type Config struct {
-	Title          string               `json:"title"`
-	SubTitle       string               `json:"sub_title"`
-	Mode           string               `json:"mode"`
-	Contact        ConfigContact        `json:"contact"`
-	Authentication ConfigAuthentication `json:"authentication"`
-	Kubernetes     ConfigKubernetes     `json:"kubernetes"`
+	Title          string         `json:"title"`
+	SubTitle       string         `json:"sub_title"`
+	Mode           string         `json:"mode"`
+	Contact        Contact        `json:"contact"`
+	Authentication Authentication `json:"authentication"`
+	Kubernetes     Kubernetes     `json:"kubernetes"`
+	WebRTC         WebRTC         `json:"webrtc"`
 }
 
 // getHealth godoc
@@ -81,6 +94,43 @@ func getConfig(c *gin.Context) {
 	resp.Contact.Mail, _ = cfg.String("contact.mail")
 	resp.Kubernetes.RancherURL, _ = cfg.String("k8s.rancher-url")
 	resp.Kubernetes.ClusterName, _ = cfg.String("k8s.cluster-name")
+
+	var servers []ICEServer
+
+	// read config param webrtc.ice-urls and transform into data structure resp.WebRTC
+	var ICEurlsRaw, err = cfg.String("webrtc.ice-urls")
+	if err == nil {
+		ICEurls := strings.Split(ICEurlsRaw, ",")
+
+		for _, url := range ICEurls {
+			elements := strings.Split(url, "@")
+			if len(elements) == 1 {
+				// anonymous server, no username and password
+				server := ICEServer{URL: elements[0], Username: "", Password: ""}
+				servers = append(servers, server)
+
+			} else if len(elements) == 2 {
+				// server requires username and password
+				// split username and password
+				credentials := strings.Split(elements[0], ":")
+				if len(credentials) != 2 {
+					// error
+					log.Println("Error parsing WebRTC ICE URLs provided in config. Please check correct format of username and password of", url)
+					break
+				}
+				server := ICEServer{URL: elements[1], Username: credentials[0], Password: credentials[1]}
+				servers = append(servers, server)
+
+			} else {
+				// error
+				log.Println("Error parsing WebRTC ICE URLs provided in config. Please check correct format of", url)
+				break
+			}
+		}
+		resp.WebRTC.ICEServers = servers
+	} else {
+		log.Println("Error parsing WeRTC ICE URLs:", err)
+	}
 
 	c.JSON(200, resp)
 }

@@ -82,29 +82,14 @@ definitions:
       StartParameters:
         $ref: '#/definitions/postgres.Jsonb'
     type: object
-  config.Config:
-    properties:
-      authentication:
-        $ref: '#/definitions/config.ConfigAuthentication'
-      contact:
-        $ref: '#/definitions/config.ConfigContact'
-      kubernetes:
-        $ref: '#/definitions/config.ConfigKubernetes'
-      mode:
-        type: string
-      sub_title:
-        type: string
-      title:
-        type: string
-    type: object
-  config.ConfigAuthentication:
+  config.Authentication:
     properties:
       external:
-        $ref: '#/definitions/config.ConfigAuthenticationExternal'
+        $ref: '#/definitions/config.AuthenticationExternal'
       logout_url:
         type: string
     type: object
-  config.ConfigAuthenticationExternal:
+  config.AuthenticationExternal:
     properties:
       authorize_url:
         type: string
@@ -113,19 +98,52 @@ definitions:
       provider_name:
         type: string
     type: object
-  config.ConfigContact:
+  config.Config:
+    properties:
+      authentication:
+        $ref: '#/definitions/config.Authentication'
+      contact:
+        $ref: '#/definitions/config.Contact'
+      kubernetes:
+        $ref: '#/definitions/config.Kubernetes'
+      mode:
+        type: string
+      sub_title:
+        type: string
+      title:
+        type: string
+      webrtc:
+        $ref: '#/definitions/config.WebRTC'
+    type: object
+  config.Contact:
     properties:
       mail:
         type: string
       name:
         type: string
     type: object
-  config.ConfigKubernetes:
+  config.ICEServer:
+    properties:
+      password:
+        type: string
+      url:
+        type: string
+      username:
+        type: string
+    type: object
+  config.Kubernetes:
     properties:
       cluster_name:
         type: string
       rancher_url:
         type: string
+    type: object
+  config.WebRTC:
+    properties:
+      ice_servers:
+        items:
+          $ref: '#/definitions/config.ICEServer'
+        type: array
     type: object
   dashboard.addDashboardRequest:
     properties:

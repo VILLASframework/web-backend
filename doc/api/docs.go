@@ -3403,41 +3403,18 @@ const docTemplate = `{
                 }
             }
         },
-        "config.Config": {
-            "type": "object",
-            "properties": {
-                "authentication": {
-                    "$ref": "#/definitions/config.ConfigAuthentication"
-                },
-                "contact": {
-                    "$ref": "#/definitions/config.ConfigContact"
-                },
-                "kubernetes": {
-                    "$ref": "#/definitions/config.ConfigKubernetes"
-                },
-                "mode": {
-                    "type": "string"
-                },
-                "sub_title": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                }
-            }
-        },
-        "config.ConfigAuthentication": {
+        "config.Authentication": {
             "type": "object",
             "properties": {
                 "external": {
-                    "$ref": "#/definitions/config.ConfigAuthenticationExternal"
+                    "$ref": "#/definitions/config.AuthenticationExternal"
                 },
                 "logout_url": {
                     "type": "string"
                 }
             }
         },
-        "config.ConfigAuthenticationExternal": {
+        "config.AuthenticationExternal": {
             "type": "object",
             "properties": {
                 "authorize_url": {
@@ -3451,7 +3428,33 @@ const docTemplate = `{
                 }
             }
         },
-        "config.ConfigContact": {
+        "config.Config": {
+            "type": "object",
+            "properties": {
+                "authentication": {
+                    "$ref": "#/definitions/config.Authentication"
+                },
+                "contact": {
+                    "$ref": "#/definitions/config.Contact"
+                },
+                "kubernetes": {
+                    "$ref": "#/definitions/config.Kubernetes"
+                },
+                "mode": {
+                    "type": "string"
+                },
+                "sub_title": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "webrtc": {
+                    "$ref": "#/definitions/config.WebRTC"
+                }
+            }
+        },
+        "config.Contact": {
             "type": "object",
             "properties": {
                 "mail": {
@@ -3462,7 +3465,21 @@ const docTemplate = `{
                 }
             }
         },
-        "config.ConfigKubernetes": {
+        "config.ICEServer": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "config.Kubernetes": {
             "type": "object",
             "properties": {
                 "cluster_name": {
@@ -3470,6 +3487,17 @@ const docTemplate = `{
                 },
                 "rancher_url": {
                     "type": "string"
+                }
+            }
+        },
+        "config.WebRTC": {
+            "type": "object",
+            "properties": {
+                "ice_servers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/config.ICEServer"
+                    }
                 }
             }
         },
