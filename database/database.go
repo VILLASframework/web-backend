@@ -40,6 +40,11 @@ func InitDB(cfg *config.Config, clear bool) error {
 		return err
 	}
 
+	port, err := cfg.IntOr("db.port", -1)
+	if err != nil {
+		return err
+	}
+
 	user, err := cfg.StringOr("db.user", "")
 	if err != nil {
 		return err
@@ -59,8 +64,13 @@ func InitDB(cfg *config.Config, clear bool) error {
 	}
 
 	dbinfo := fmt.Sprintf("host=%s sslmode=%s dbname=%s", host, sslmode, name)
+
 	if user != "" && pass != "" {
 		dbinfo += fmt.Sprintf(" user=%s password=%s", user, pass)
+	}
+
+	if port > 0 {
+		dbinfo += fmt.Sprintf(" port=%d", port)
 	}
 
 	db, err := gorm.Open("postgres", dbinfo)

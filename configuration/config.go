@@ -48,6 +48,7 @@ func InitConfig() error {
 
 	var (
 		dbHost                   = flag.String("db-host", "/var/run/postgresql", "Host of the PostgreSQL database (default is /var/run/postgresql for localhost DB on Ubuntu systems)")
+		dbPort                   = flag.Int("db-port", -1, "Port of the PostgreSQL server")
 		dbName                   = flag.String("db-name", "villasdb", "Name of the database to use (default is villasdb)")
 		dbUser                   = flag.String("db-user", "", "Username of database connection (default is <empty>)")
 		dbPass                   = flag.String("db-pass", "", "Password of database connection (default is <empty>)")
@@ -91,6 +92,7 @@ func InitConfig() error {
 
 	static := map[string]string{
 		"db.host":                     *dbHost,
+		"db.port":                     fmt.Sprint(*dbPort),
 		"db.name":                     *dbName,
 		"db.user":                     *dbUser,
 		"db.pass":                     *dbPass,
