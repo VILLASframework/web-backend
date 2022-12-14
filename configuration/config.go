@@ -77,7 +77,7 @@ func InitConfig() error {
 		title                    = flag.String("title", "VILLASweb", "Title shown in the frontend")
 		subTitle                 = flag.String("sub-title", "", "Sub-title shown in the frontend")
 		contactName              = flag.String("contact-name", "Steffen Vogel", "Name of the administrative contact")
-		contactMail              = flag.String("contact-mail", "svogel2@eonerc.rwth-aachen.de", "EMail of the administrative contact")
+		contactMail              = flag.String("contact-mail", "post@steffenvogel.de", "EMail of the administrative contact")
 		testDataPath             = flag.String("test-data-path", "", "The path to a test data json file")
 		groupsPath               = flag.String("groups-path", "", "The path to a YAML file that maps user groups to scenario IDs")
 		apiUpdateInterval        = flag.String("api-update-interval", "10s" /* 10 sec */, "Interval in which API URL is queried for status updates of ICs")
@@ -199,7 +199,6 @@ func remove(arr []GroupedScenario, index int) []GroupedScenario {
 }
 
 func ReadGroupsFile(path string) error {
-
 	_, err := os.Stat(path)
 	if err != nil {
 		return err
