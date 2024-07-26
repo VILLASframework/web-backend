@@ -57,7 +57,7 @@ func getConfigs(c *gin.Context) {
 	db := database.GetDB()
 	var configs []database.ComponentConfiguration
 	err := db.Order("ID asc").Model(so).Related(&configs, "ComponentConfigurations").Error
-	if !helper.DBError(c, err) {
+	if !database.DBError(c, err, nil) {
 		c.JSON(http.StatusOK, gin.H{"configs": configs})
 	}
 
@@ -104,7 +104,7 @@ func addConfig(c *gin.Context) {
 
 	// add the new Component Configuration to the scenario
 	err = newConfig.addToScenario()
-	if !helper.DBError(c, err) {
+	if !database.DBError(c, err, newConfig.ComponentConfiguration) {
 		c.JSON(http.StatusOK, gin.H{"config": newConfig.ComponentConfiguration})
 	}
 
@@ -154,7 +154,7 @@ func updateConfig(c *gin.Context) {
 
 	// Finally, update the Component Configuration
 	err = oldConfig.Update(updatedConfig)
-	if !helper.DBError(c, err) {
+	if !database.DBError(c, err, updatedConfig.ComponentConfiguration) {
 		c.JSON(http.StatusOK, gin.H{"config": updatedConfig.ComponentConfiguration})
 	}
 
@@ -207,7 +207,7 @@ func deleteConfig(c *gin.Context) {
 	m.ComponentConfiguration = m_r
 
 	err := m.delete()
-	if !helper.DBError(c, err) {
+	if !database.DBError(c, err, m) {
 		c.JSON(http.StatusOK, gin.H{"config": m.ComponentConfiguration})
 	}
 }

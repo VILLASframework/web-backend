@@ -18,11 +18,15 @@
 package database
 
 import (
+	"reflect"
 	"time"
 
+	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
+	"github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/lib/pq"
 
-	"github.com/jinzhu/gorm/dialects/postgres"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 )
 
 // The type Model is exactly the same with gorm.Model (see jinzhu/gorm)
@@ -32,6 +36,23 @@ type Model struct {
 	CreatedAt time.Time  `json:"createdAt"`
 	UpdatedAt time.Time  `json:"updatedAt"`
 	DeletedAt *time.Time `json:"-" sql:"index"`
+}
+
+func DBError(c *gin.Context, err error, model interface{}) bool {
+	if err != nil {
+		val := reflect.ValueOf(model)
+		if err == gorm.ErrRecordNotFound {
+			if (model == nil) || (val.Kind() == reflect.Slice && val.Len() == 0) {
+				helper.NotFoundError(c, "Record not Found in DB: type "+err.Error())
+			} else {
+				helper.NotFoundError(c, "Record not Found in DB: ID '"+val.FieldByName("ID").String()+"', type "+reflect.TypeOf(model).String())
+			}
+		} else {
+			helper.InternalServerError(c, "Error on DB Query or transaction: "+err.Error())
+		}
+		return true // Error
+	}
+	return false // No error
 }
 
 // User data model

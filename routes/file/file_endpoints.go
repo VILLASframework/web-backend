@@ -58,7 +58,7 @@ func getFiles(c *gin.Context) {
 	db := database.GetDB()
 	var files []database.File
 	err := db.Order("ID asc").Model(so).Related(&files, "Files").Error
-	if !helper.DBError(c, err) {
+	if !database.DBError(c, err, nil) {
 		c.JSON(http.StatusOK, gin.H{"files": files})
 	}
 
@@ -101,7 +101,7 @@ func addFile(c *gin.Context) {
 
 	var newFile File
 	err = newFile.Register(fileHeader, so.ID)
-	if !helper.DBError(c, err) {
+	if !database.DBError(c, err, newFile) {
 		c.JSON(http.StatusOK, gin.H{"file": newFile.File})
 	}
 
@@ -146,7 +146,7 @@ func getFile(c *gin.Context) {
 	f.File = f_r
 
 	err := f.download(c)
-	helper.DBError(c, err)
+	database.DBError(c, err, f)
 }
 
 // updateFile godoc
@@ -189,7 +189,7 @@ func updateFile(c *gin.Context) {
 	}
 
 	err = f.update(fileHeader)
-	if !helper.DBError(c, err) {
+	if !database.DBError(c, err, f) {
 		c.JSON(http.StatusOK, gin.H{"file": f.File})
 	}
 }
@@ -219,7 +219,7 @@ func deleteFile(c *gin.Context) {
 	f.File = f_r
 
 	err := f.Delete()
-	if !helper.DBError(c, err) {
+	if !database.DBError(c, err, f) {
 		c.JSON(http.StatusOK, gin.H{"file": f.File})
 	}
 
