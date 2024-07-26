@@ -52,7 +52,7 @@ func getHealth(c *gin.Context) {
 	// check if DB connection is active
 	db := database.GetDB()
 	err := db.DB().Ping()
-	if helper.DBError(c, err) {
+	if database.DBError(c, err, nil) {
 		return
 	}
 

@@ -19,6 +19,7 @@ package database
 
 import (
 	"fmt"
+
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"github.com/gin-gonic/gin"
 )
@@ -46,7 +47,7 @@ func CheckScenarioPermissions(c *gin.Context, operation CRUD, scenarioIDsource s
 
 	db := GetDB()
 	err = db.Find(&so, uint(scenarioID)).Error
-	if helper.DBError(c, err) {
+	if DBError(c, err, so) {
 		return false, so
 	}
 
@@ -97,7 +98,7 @@ func CheckComponentConfigPermissions(c *gin.Context, operation CRUD, configIDSou
 
 	db := GetDB()
 	err = db.Find(&m, uint(configID)).Error
-	if helper.DBError(c, err) {
+	if DBError(c, err, m) {
 		return false, m
 	}
 
@@ -127,7 +128,7 @@ func CheckSignalPermissions(c *gin.Context, operation CRUD) (bool, Signal) {
 
 	db := GetDB()
 	err = db.Find(&sig, uint(signalID)).Error
-	if helper.DBError(c, err) {
+	if DBError(c, err, sig) {
 		return false, sig
 	}
 
@@ -157,7 +158,7 @@ func CheckDashboardPermissions(c *gin.Context, operation CRUD, dabIDSource strin
 
 	db := GetDB()
 	err = db.Find(&dab, uint(dabID)).Error
-	if helper.DBError(c, err) {
+	if DBError(c, err, dab) {
 		return false, dab
 	}
 
@@ -192,7 +193,7 @@ func CheckWidgetPermissions(c *gin.Context, operation CRUD, widgetIDBody int) (b
 
 	db := GetDB()
 	err = db.Find(&w, uint(widgetID)).Error
-	if helper.DBError(c, err) {
+	if DBError(c, err, w) {
 		return false, w
 	}
 
@@ -221,7 +222,7 @@ func CheckFilePermissions(c *gin.Context, operation CRUD) (bool, File) {
 
 	db := GetDB()
 	err = db.Find(&f, uint(fileID)).Error
-	if helper.DBError(c, err) {
+	if DBError(c, err, f) {
 		return false, f
 	}
 
@@ -253,7 +254,7 @@ func CheckResultPermissions(c *gin.Context, operation CRUD, resultIDSource strin
 
 	db := GetDB()
 	err = db.Find(&result, uint(resultID)).Error
-	if helper.DBError(c, err) {
+	if DBError(c, err, result) {
 		return false, result
 	}
 
@@ -283,7 +284,7 @@ func CheckICPermissions(c *gin.Context, modeltype ModelName, operation CRUD, has
 		}
 		db := GetDB()
 		err = db.Find(&s, uint(ICID)).Error
-		if helper.DBError(c, err) {
+		if DBError(c, err, s) {
 			return false, s
 		}
 	}

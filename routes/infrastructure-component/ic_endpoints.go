@@ -62,7 +62,7 @@ func getICs(c *gin.Context) {
 	db := database.GetDB()
 	var ics []database.InfrastructureComponent
 	err := db.Order("ID asc").Find(&ics).Error
-	if !helper.DBError(c, err) {
+	if !database.DBError(c, err, nil) {
 		c.JSON(http.StatusOK, gin.H{"ics": ics})
 	}
 
@@ -120,7 +120,7 @@ func addIC(c *gin.Context) {
 		// Save new IC to DB if not managed externally
 		err = newIC.save()
 
-		if helper.DBError(c, err) {
+		if database.DBError(c, err, newIC) {
 			return
 		}
 	}
@@ -176,7 +176,7 @@ func updateIC(c *gin.Context) {
 
 	// Finally update the IC in the DB
 	err = oldIC.update(updatedIC)
-	if !helper.DBError(c, err) {
+	if !database.DBError(c, err, updatedIC) {
 		c.JSON(http.StatusOK, gin.H{"ic": updatedIC.InfrastructureComponent})
 	}
 
@@ -248,7 +248,7 @@ func deleteIC(c *gin.Context) {
 
 	// Delete the IC
 	err := s.delete()
-	if !helper.DBError(c, err) {
+	if !database.DBError(c, err, s) {
 		c.JSON(http.StatusOK, gin.H{"ic": s.InfrastructureComponent})
 	}
 }
@@ -278,7 +278,7 @@ func getConfigsOfIC(c *gin.Context) {
 
 	// get all associated configurations
 	allConfigs, _, err := s.getConfigs()
-	if !helper.DBError(c, err) {
+	if !database.DBError(c, err, s) {
 		c.JSON(http.StatusOK, gin.H{"configs": allConfigs})
 	}
 
