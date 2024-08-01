@@ -18,10 +18,12 @@
 package scenario
 
 import (
+	"net/http"
+	"strconv"
+
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 func RegisterScenarioEndpoints(r *gin.RouterGroup) {
@@ -55,7 +57,7 @@ func getScenarios(c *gin.Context) {
 	db := database.GetDB()
 	var u database.User
 	err := db.Find(&u, userID.(uint)).Error
-	if helper.DBError(c, err) {
+	if helper.DBNotFoundError(c, err, strconv.FormatUint(uint64(userID.(uint)), 10), "User") {
 		return
 	}
 
@@ -104,7 +106,7 @@ func addScenario(c *gin.Context) {
 	db := database.GetDB()
 	var u database.User
 	err := db.Find(&u, userID.(uint)).Error
-	if helper.DBError(c, err) {
+	if helper.DBNotFoundError(c, err, strconv.FormatUint(uint64(userID.(uint)), 10), "User") {
 		return
 	}
 
@@ -307,7 +309,7 @@ func addUserToScenario(c *gin.Context) {
 	var u database.User
 	db := database.GetDB()
 	err := db.Find(&u, "Username = ?", username).Error
-	if helper.DBError(c, err) {
+	if helper.DBNotFoundError(c, err, username, "User") {
 		return
 	}
 
@@ -351,7 +353,7 @@ func deleteUserFromScenario(c *gin.Context) {
 	var u database.User
 	db := database.GetDB()
 	err := db.Find(&u, "Username = ?", username).Error
-	if helper.DBError(c, err) {
+	if helper.DBNotFoundError(c, err, username, "User") {
 		return
 	}
 

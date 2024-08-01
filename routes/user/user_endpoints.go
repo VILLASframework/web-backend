@@ -20,6 +20,7 @@ package user
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 
@@ -175,7 +176,7 @@ func updateUser(c *gin.Context) {
 	// Find the user
 	var oldUser User
 	err = oldUser.byID(uint(toBeUpdatedID))
-	if helper.DBError(c, err) {
+	if helper.DBNotFoundError(c, err, strconv.Itoa(toBeUpdatedID), "User") {
 		return
 	}
 
@@ -238,7 +239,7 @@ func getUser(c *gin.Context) {
 
 	var user User
 	err = user.byID(uint(id))
-	if !helper.DBError(c, err) {
+	if !helper.DBNotFoundError(c, err, strconv.Itoa(id), "User") {
 		c.JSON(http.StatusOK, gin.H{"user": user.User})
 	}
 
@@ -272,7 +273,7 @@ func deleteUser(c *gin.Context) {
 
 	// Check that the user exist
 	err = user.byID(uint(id))
-	if helper.DBError(c, err) {
+	if helper.DBNotFoundError(c, err, strconv.FormatUint(uint64(id), 10), "User") {
 		return
 	}
 

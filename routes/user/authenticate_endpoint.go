@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -71,7 +72,7 @@ func authenticated(c *gin.Context) {
 
 		var user User
 		err := user.byID(userID.(uint))
-		if helper.DBError(c, err) {
+		if helper.DBNotFoundError(c, err, strconv.FormatUint(uint64(userID.(uint)), 10), "User") {
 			return
 		}
 

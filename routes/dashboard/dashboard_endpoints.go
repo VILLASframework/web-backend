@@ -58,7 +58,7 @@ func getDashboards(c *gin.Context) {
 	db := database.GetDB()
 	var dab []database.Dashboard
 	err := db.Order("ID asc").Model(sim).Related(&dab, "Dashboards").Error
-	if !database.DBError(c, err, nil) {
+	if !helper.DBError(c, err) {
 		c.JSON(http.StatusOK, gin.H{"dashboards": dab})
 	}
 
@@ -104,7 +104,7 @@ func addDashboard(c *gin.Context) {
 
 	// add dashboard to DB and add association to scenario
 	err := newDashboard.addToScenario()
-	if !database.DBError(c, err, newDashboard) {
+	if !helper.DBError(c, err) {
 		c.JSON(http.StatusOK, gin.H{"dashboard": newDashboard.Dashboard})
 	}
 
@@ -151,7 +151,7 @@ func updateDashboard(c *gin.Context) {
 
 	// update the dashboard in the DB
 	err := oldDashboard.update(updatedDashboard)
-	if !database.DBError(c, err, updatedDashboard.Dashboard) {
+	if !helper.DBError(c, err) {
 		c.JSON(http.StatusOK, gin.H{"dashboard": updatedDashboard.Dashboard})
 	}
 
@@ -203,7 +203,7 @@ func deleteDashboard(c *gin.Context) {
 	dab.Dashboard = dab_r
 
 	err := dab.delete()
-	if !database.DBError(c, err, dab) {
+	if !helper.DBError(c, err) {
 		c.JSON(http.StatusOK, gin.H{"dashboard": dab.Dashboard})
 	}
 
