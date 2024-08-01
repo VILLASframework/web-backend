@@ -19,6 +19,7 @@ package database
 
 import (
 	"fmt"
+	"strconv"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"github.com/gin-gonic/gin"
@@ -47,7 +48,7 @@ func CheckScenarioPermissions(c *gin.Context, operation CRUD, scenarioIDsource s
 
 	db := GetDB()
 	err = db.Find(&so, uint(scenarioID)).Error
-	if DBError(c, err, so) {
+	if helper.DBNotFoundError(c, err, strconv.Itoa(scenarioID), "Scenario") {
 		return false, so
 	}
 
@@ -98,7 +99,7 @@ func CheckComponentConfigPermissions(c *gin.Context, operation CRUD, configIDSou
 
 	db := GetDB()
 	err = db.Find(&m, uint(configID)).Error
-	if DBError(c, err, m) {
+	if helper.DBNotFoundError(c, err, strconv.Itoa(configID), "Component Configuration") {
 		return false, m
 	}
 
@@ -128,7 +129,7 @@ func CheckSignalPermissions(c *gin.Context, operation CRUD) (bool, Signal) {
 
 	db := GetDB()
 	err = db.Find(&sig, uint(signalID)).Error
-	if DBError(c, err, sig) {
+	if helper.DBNotFoundError(c, err, strconv.Itoa(signalID), "Signal") {
 		return false, sig
 	}
 
@@ -158,7 +159,7 @@ func CheckDashboardPermissions(c *gin.Context, operation CRUD, dabIDSource strin
 
 	db := GetDB()
 	err = db.Find(&dab, uint(dabID)).Error
-	if DBError(c, err, dab) {
+	if helper.DBNotFoundError(c, err, strconv.Itoa(dabID), "Dashboard") {
 		return false, dab
 	}
 
@@ -168,7 +169,6 @@ func CheckDashboardPermissions(c *gin.Context, operation CRUD, dabIDSource strin
 	}
 
 	return true, dab
-
 }
 
 func CheckWidgetPermissions(c *gin.Context, operation CRUD, widgetIDBody int) (bool, Widget) {
@@ -193,7 +193,7 @@ func CheckWidgetPermissions(c *gin.Context, operation CRUD, widgetIDBody int) (b
 
 	db := GetDB()
 	err = db.Find(&w, uint(widgetID)).Error
-	if DBError(c, err, w) {
+	if helper.DBNotFoundError(c, err, strconv.Itoa(widgetID), "Widget") {
 		return false, w
 	}
 
@@ -222,7 +222,7 @@ func CheckFilePermissions(c *gin.Context, operation CRUD) (bool, File) {
 
 	db := GetDB()
 	err = db.Find(&f, uint(fileID)).Error
-	if DBError(c, err, f) {
+	if helper.DBNotFoundError(c, err, strconv.Itoa(fileID), "File") {
 		return false, f
 	}
 
@@ -254,7 +254,7 @@ func CheckResultPermissions(c *gin.Context, operation CRUD, resultIDSource strin
 
 	db := GetDB()
 	err = db.Find(&result, uint(resultID)).Error
-	if DBError(c, err, result) {
+	if helper.DBNotFoundError(c, err, strconv.Itoa(resultID), "Result") {
 		return false, result
 	}
 
@@ -284,7 +284,7 @@ func CheckICPermissions(c *gin.Context, modeltype ModelName, operation CRUD, has
 		}
 		db := GetDB()
 		err = db.Find(&s, uint(ICID)).Error
-		if DBError(c, err, s) {
+		if helper.DBNotFoundError(c, err, strconv.Itoa(ICID), "Infrastructure Component") {
 			return false, s
 		}
 	}
