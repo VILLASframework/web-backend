@@ -60,6 +60,10 @@ type ResponseScenario struct {
 	scenario database.Scenario
 }
 
+type ResponseUserGroup struct {
+	scenario database.UserGroup
+}
+
 type ResponseConfigs struct {
 	configs []database.ComponentConfiguration
 }

@@ -2702,6 +2702,69 @@ const docTemplate = `{
                 }
             }
         },
+        "/usergroups": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "usergroups"
+                ],
+                "summary": "Add a user group",
+                "operationId": "addUserGroup",
+                "parameters": [
+                    {
+                        "description": "User group to be added",
+                        "name": "inputUserGroup",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/usergroup.addUserGroupRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "user group that was added",
+                        "schema": {
+                            "$ref": "#/definitions/api.ResponseUserGroup"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/api.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "$ref": "#/definitions/api.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "$ref": "#/definitions/api.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/api.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
         "/users": {
             "get": {
                 "security": [
@@ -3330,6 +3393,9 @@ const docTemplate = `{
         "api.ResponseUser": {
             "type": "object"
         },
+        "api.ResponseUserGroup": {
+            "type": "object"
+        },
         "api.ResponseUsers": {
             "type": "object"
         },
@@ -3358,27 +3424,27 @@ const docTemplate = `{
         "component_configuration.validNewConfig": {
             "type": "object",
             "required": [
-                "Name",
-                "ScenarioID",
-                "StartParameters"
+                "name",
+                "scenarioID",
+                "startParameters"
             ],
             "properties": {
-                "FileIDs": {
+                "fileIDs": {
                     "type": "array",
                     "items": {
                         "type": "integer"
                     }
                 },
-                "ICID": {
+                "icid": {
                     "type": "integer"
                 },
-                "Name": {
+                "name": {
                     "type": "string"
                 },
-                "ScenarioID": {
+                "scenarioID": {
                     "type": "integer"
                 },
-                "StartParameters": {
+                "startParameters": {
                     "$ref": "#/definitions/postgres.Jsonb"
                 }
             }
@@ -3386,19 +3452,19 @@ const docTemplate = `{
         "component_configuration.validUpdatedConfig": {
             "type": "object",
             "properties": {
-                "FileIDs": {
+                "fileIDs": {
                     "type": "array",
                     "items": {
                         "type": "integer"
                     }
                 },
-                "ICID": {
+                "icid": {
                     "type": "integer"
                 },
-                "Name": {
+                "name": {
                     "type": "string"
                 },
-                "StartParameters": {
+                "startParameters": {
                     "$ref": "#/definitions/postgres.Jsonb"
                 }
             }
@@ -3520,21 +3586,21 @@ const docTemplate = `{
         "dashboard.validNewDashboard": {
             "type": "object",
             "required": [
-                "Grid",
-                "Name",
-                "ScenarioID"
+                "grid",
+                "name",
+                "scenarioID"
             ],
             "properties": {
-                "Grid": {
+                "grid": {
                     "type": "integer"
                 },
-                "Height": {
+                "height": {
                     "type": "integer"
                 },
-                "Name": {
+                "name": {
                     "type": "string"
                 },
-                "ScenarioID": {
+                "scenarioID": {
                     "type": "integer"
                 }
             }
@@ -3572,55 +3638,55 @@ const docTemplate = `{
         "infrastructure_component.validNewIC": {
             "type": "object",
             "required": [
-                "Category",
-                "ManagedExternally",
-                "Name",
-                "Type"
+                "category",
+                "managedExternally",
+                "name",
+                "type"
             ],
             "properties": {
-                "APIURL": {
+                "apiurl": {
                     "type": "string"
                 },
-                "Category": {
+                "category": {
                     "type": "string"
                 },
-                "CreateParameterSchema": {
+                "createParameterSchema": {
                     "$ref": "#/definitions/postgres.Jsonb"
                 },
-                "Description": {
+                "description": {
                     "type": "string"
                 },
-                "Location": {
+                "location": {
                     "type": "string"
                 },
-                "ManagedExternally": {
+                "managedExternally": {
                     "type": "boolean"
                 },
-                "Manager": {
+                "manager": {
                     "type": "string"
                 },
-                "Name": {
+                "name": {
                     "type": "string"
                 },
-                "StartParameterSchema": {
+                "startParameterSchema": {
                     "$ref": "#/definitions/postgres.Jsonb"
                 },
-                "State": {
+                "state": {
                     "type": "string"
                 },
-                "StatusUpdateRaw": {
+                "statusUpdateRaw": {
                     "$ref": "#/definitions/postgres.Jsonb"
                 },
-                "Type": {
+                "type": {
                     "type": "string"
                 },
-                "UUID": {
-                    "type": "string"
-                },
-                "Uptime": {
+                "uptime": {
                     "type": "number"
                 },
-                "WebsocketURL": {
+                "uuid": {
+                    "type": "string"
+                },
+                "websocketURL": {
                     "type": "string"
                 }
             }
@@ -3628,46 +3694,46 @@ const docTemplate = `{
         "infrastructure_component.validUpdatedIC": {
             "type": "object",
             "properties": {
-                "APIURL": {
+                "apiurl": {
                     "type": "string"
                 },
-                "Category": {
+                "category": {
                     "type": "string"
                 },
-                "CreateParameterSchema": {
+                "createParameterSchema": {
                     "$ref": "#/definitions/postgres.Jsonb"
                 },
-                "Description": {
+                "description": {
                     "type": "string"
                 },
-                "Location": {
+                "location": {
                     "type": "string"
                 },
-                "Manager": {
+                "manager": {
                     "type": "string"
                 },
-                "Name": {
+                "name": {
                     "type": "string"
                 },
-                "StartParameterSchema": {
+                "startParameterSchema": {
                     "$ref": "#/definitions/postgres.Jsonb"
                 },
-                "State": {
+                "state": {
                     "type": "string"
                 },
-                "StatusUpdateRaw": {
+                "statusUpdateRaw": {
                     "$ref": "#/definitions/postgres.Jsonb"
                 },
-                "Type": {
+                "type": {
                     "type": "string"
                 },
-                "UUID": {
-                    "type": "string"
-                },
-                "Uptime": {
+                "uptime": {
                     "type": "number"
                 },
-                "WebsocketURL": {
+                "uuid": {
+                    "type": "string"
+                },
+                "websocketURL": {
                     "type": "string"
                 }
             }
@@ -3702,23 +3768,23 @@ const docTemplate = `{
         "result.validNewResult": {
             "type": "object",
             "required": [
-                "ConfigSnapshots",
-                "ScenarioID"
+                "configSnapshots",
+                "scenarioID"
             ],
             "properties": {
-                "ConfigSnapshots": {
+                "configSnapshots": {
                     "$ref": "#/definitions/postgres.Jsonb"
                 },
-                "Description": {
+                "description": {
                     "type": "string"
                 },
-                "ResultFileIDs": {
+                "resultFileIDs": {
                     "type": "array",
                     "items": {
                         "type": "integer"
                     }
                 },
-                "ScenarioID": {
+                "scenarioID": {
                     "type": "integer"
                 }
             }
@@ -3759,14 +3825,14 @@ const docTemplate = `{
         "scenario.validNewScenario": {
             "type": "object",
             "required": [
-                "Name",
-                "StartParameters"
+                "name",
+                "startParameters"
             ],
             "properties": {
-                "Name": {
+                "name": {
                     "type": "string"
                 },
-                "StartParameters": {
+                "startParameters": {
                     "$ref": "#/definitions/postgres.Jsonb"
                 }
             }
@@ -3774,13 +3840,13 @@ const docTemplate = `{
         "scenario.validUpdatedScenario": {
             "type": "object",
             "properties": {
-                "IsLocked": {
+                "isLocked": {
                     "type": "boolean"
                 },
-                "Name": {
+                "name": {
                     "type": "string"
                 },
-                "StartParameters": {
+                "startParameters": {
                     "$ref": "#/definitions/postgres.Jsonb"
                 }
             }
@@ -3804,32 +3870,32 @@ const docTemplate = `{
         "signal.validNewSignal": {
             "type": "object",
             "required": [
-                "ConfigID",
-                "Direction",
-                "Index",
-                "Name"
+                "configID",
+                "direction",
+                "index",
+                "name"
             ],
             "properties": {
-                "ConfigID": {
+                "configID": {
                     "type": "integer"
                 },
-                "Direction": {
+                "direction": {
                     "type": "string",
                     "enum": [
                         "in",
                         "out"
                     ]
                 },
-                "Index": {
+                "index": {
                     "type": "integer"
                 },
-                "Name": {
+                "name": {
                     "type": "string"
                 },
-                "ScalingFactor": {
+                "scalingFactor": {
                     "type": "number"
                 },
-                "Unit": {
+                "unit": {
                     "type": "string"
                 }
             }
@@ -3837,16 +3903,16 @@ const docTemplate = `{
         "signal.validUpdatedSignal": {
             "type": "object",
             "properties": {
-                "Index": {
+                "index": {
                     "type": "integer"
                 },
-                "Name": {
+                "name": {
                     "type": "string"
                 },
-                "ScalingFactor": {
+                "scalingFactor": {
                     "type": "number"
                 },
-                "Unit": {
+                "unit": {
                     "type": "string"
                 }
             }
@@ -3862,14 +3928,14 @@ const docTemplate = `{
         "user.loginRequest": {
             "type": "object",
             "required": [
-                "Password",
-                "Username"
+                "password",
+                "username"
             ],
             "properties": {
-                "Password": {
+                "password": {
                     "type": "string"
                 },
-                "Username": {
+                "username": {
                     "type": "string"
                 }
             }
@@ -3885,20 +3951,20 @@ const docTemplate = `{
         "user.validNewUser": {
             "type": "object",
             "required": [
-                "Mail",
-                "Password",
-                "Role",
-                "Username"
+                "mail",
+                "password",
+                "role",
+                "username"
             ],
             "properties": {
-                "Mail": {
+                "mail": {
                     "type": "string"
                 },
-                "Password": {
+                "password": {
                     "type": "string",
                     "minLength": 6
                 },
-                "Role": {
+                "role": {
                     "type": "string",
                     "enum": [
                         "Admin",
@@ -3906,7 +3972,7 @@ const docTemplate = `{
                         "Guest"
                     ]
                 },
-                "Username": {
+                "username": {
                     "type": "string",
                     "minLength": 3
                 }
@@ -3915,25 +3981,25 @@ const docTemplate = `{
         "user.validUpdatedRequest": {
             "type": "object",
             "properties": {
-                "Active": {
+                "active": {
                     "type": "string",
                     "enum": [
                         "yes",
                         "no"
                     ]
                 },
-                "Mail": {
+                "mail": {
                     "type": "string"
                 },
-                "OldPassword": {
+                "oldPassword": {
                     "type": "string",
                     "minLength": 6
                 },
-                "Password": {
+                "password": {
                     "type": "string",
                     "minLength": 6
                 },
-                "Role": {
+                "role": {
                     "type": "string",
                     "enum": [
                         "Admin",
@@ -3941,9 +4007,49 @@ const docTemplate = `{
                         "Guest"
                     ]
                 },
-                "Username": {
+                "username": {
                     "type": "string",
                     "minLength": 3
+                }
+            }
+        },
+        "usergroup.addUserGroupRequest": {
+            "type": "object",
+            "properties": {
+                "userGroup": {
+                    "$ref": "#/definitions/usergroup.validNewUserGroup"
+                }
+            }
+        },
+        "usergroup.validNewScenarioMapping": {
+            "type": "object",
+            "required": [
+                "scenarioID"
+            ],
+            "properties": {
+                "duplicate": {
+                    "type": "boolean"
+                },
+                "scenarioID": {
+                    "type": "integer"
+                }
+            }
+        },
+        "usergroup.validNewUserGroup": {
+            "type": "object",
+            "required": [
+                "name",
+                "scenarioMappings"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "scenarioMappings": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/usergroup.validNewScenarioMapping"
+                    }
                 }
             }
         },
@@ -3966,52 +4072,52 @@ const docTemplate = `{
         "widget.validNewWidget": {
             "type": "object",
             "required": [
-                "DashboardID",
-                "Height",
-                "Type",
-                "Width"
+                "dashboardID",
+                "height",
+                "type",
+                "width"
             ],
             "properties": {
-                "CustomProperties": {
+                "customProperties": {
                     "$ref": "#/definitions/postgres.Jsonb"
                 },
-                "DashboardID": {
+                "dashboardID": {
                     "type": "integer"
                 },
-                "Height": {
+                "height": {
                     "type": "integer"
                 },
-                "IsLocked": {
+                "isLocked": {
                     "type": "boolean"
                 },
-                "MinHeight": {
+                "minHeight": {
                     "type": "integer"
                 },
-                "MinWidth": {
+                "minWidth": {
                     "type": "integer"
                 },
-                "Name": {
+                "name": {
                     "type": "string"
                 },
-                "SignalIDs": {
+                "signalIDs": {
                     "type": "array",
                     "items": {
                         "type": "integer"
                     }
                 },
-                "Type": {
+                "type": {
                     "type": "string"
                 },
-                "Width": {
+                "width": {
                     "type": "integer"
                 },
-                "X": {
+                "x": {
                     "type": "integer"
                 },
-                "Y": {
+                "y": {
                     "type": "integer"
                 },
-                "Z": {
+                "z": {
                     "type": "integer"
                 }
             }
@@ -4019,43 +4125,43 @@ const docTemplate = `{
         "widget.validUpdatedWidget": {
             "type": "object",
             "properties": {
-                "CustomProperties": {
+                "customProperties": {
                     "$ref": "#/definitions/postgres.Jsonb"
                 },
-                "Height": {
+                "height": {
                     "type": "integer"
                 },
-                "IsLocked": {
+                "isLocked": {
                     "type": "boolean"
                 },
-                "MinHeight": {
+                "minHeight": {
                     "type": "integer"
                 },
-                "MinWidth": {
+                "minWidth": {
                     "type": "integer"
                 },
-                "Name": {
+                "name": {
                     "type": "string"
                 },
-                "SignalIDs": {
+                "signalIDs": {
                     "type": "array",
                     "items": {
                         "type": "integer"
                     }
                 },
-                "Type": {
+                "type": {
                     "type": "string"
                 },
-                "Width": {
+                "width": {
                     "type": "integer"
                 },
-                "X": {
+                "x": {
                     "type": "integer"
                 },
-                "Y": {
+                "y": {
                     "type": "integer"
                 },
-                "Z": {
+                "z": {
                     "type": "integer"
                 }
             }
