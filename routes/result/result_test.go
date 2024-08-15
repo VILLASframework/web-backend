@@ -22,7 +22,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -374,7 +373,7 @@ func TestAddDeleteResultFile(t *testing.T) {
 
 	// create a testfile.txt in local folder
 	c1 := []byte("a,few,values\n1,2,3\n")
-	err = ioutil.WriteFile("testfile.csv", c1, 0644)
+	err = os.WriteFile("testfile.csv", c1, 0644)
 	assert.NoError(t, err)
 
 	bodyBuf := &bytes.Buffer{}

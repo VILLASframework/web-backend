@@ -22,7 +22,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"mime/multipart"
 	"net/http"
@@ -1244,7 +1243,7 @@ func addFile(scenarioID uint, token string) (uint, error) {
 		<circle cx="100" cy="100" r="50" stroke="black"
 			stroke-width="5" fill="red" />
 	</svg>`)
-	err := ioutil.WriteFile("circle.svg", c1, 0644)
+	err := os.WriteFile("circle.svg", c1, 0644)
 	if err != nil {
 		return 99, err
 	}
