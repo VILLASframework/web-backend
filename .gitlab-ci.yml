@@ -10,9 +10,9 @@ stages:
 
 staticcheck:
   stage: test
-  image: golang:1.18-buster
+  image: golang:1.21-bullseye
   before_script:
-    - go install honnef.co/go/tools/cmd/staticcheck@latest
+    - go install honnef.co/go/tools/cmd/staticcheck@v0.4.4
   script:
     - staticcheck ./...
 
