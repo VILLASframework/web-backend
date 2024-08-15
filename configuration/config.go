@@ -20,7 +20,7 @@ package configuration
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 	"sort"
@@ -212,7 +212,7 @@ func ReadGroupsFile(path string) error {
 
 	defer yamlFile.Close()
 
-	byteValue, _ := ioutil.ReadAll(yamlFile)
+	byteValue, _ := io.ReadAll(yamlFile)
 
 	err = yaml.Unmarshal(byteValue, &ScenarioGroupMap)
 	if err != nil {

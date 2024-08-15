@@ -21,6 +21,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
+	"mime/multipart"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"testing"
+
 	component_configuration "git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/component-configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/dashboard"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/file"
@@ -28,13 +35,6 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/result"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/signal"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/widget"
-	"io"
-	"io/ioutil"
-	"mime/multipart"
-	"net/http"
-	"net/http/httptest"
-	"os"
-	"testing"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
@@ -825,7 +825,7 @@ func TestRemoveUserFromScenario(t *testing.T) {
 func addFile(t *testing.T, token string, scenarioID int) int {
 	// create a testfile.txt in local folder
 	c1 := []byte("This is my testfile\n")
-	err := ioutil.WriteFile("testfile.txt", c1, 0644)
+	err := os.WriteFile("testfile.txt", c1, 0644)
 	assert.NoError(t, err)
 
 	// test POST files

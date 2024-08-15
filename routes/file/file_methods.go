@@ -23,7 +23,7 @@ import (
 	_ "image/gif"
 	_ "image/jpeg"
 	_ "image/png"
-	"io/ioutil"
+	"io"
 	"log"
 	"mime/multipart"
 	"net/http"
@@ -97,7 +97,7 @@ func (f *File) Register(fileHeader *multipart.FileHeader, scenarioID uint) error
 	if err != nil || bucket == "" {
 		// s3 object storage not used, s3.bucket param is empty
 		// save file to postgres DB
-		f.FileData, err = ioutil.ReadAll(fileContent)
+		f.FileData, err = io.ReadAll(fileContent)
 		if err != nil {
 			return err
 		}
@@ -164,7 +164,7 @@ func (f *File) update(fileHeader *multipart.FileHeader) error {
 	if err != nil || bucket == "" {
 		// s3 object storage not used, s3.bucket param is empty
 		// save file to postgres DB
-		f.FileData, err = ioutil.ReadAll(fileContent)
+		f.FileData, err = io.ReadAll(fileContent)
 		if err != nil {
 			return err
 		}

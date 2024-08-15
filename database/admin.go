@@ -96,7 +96,7 @@ func AddAdminUser(cfg *config.Config) (string, error) {
 }
 
 func generatePassword(Len int) string {
-	rand.Seed(time.Now().UnixNano())
+	rand.NewSource(time.Now().UnixNano())
 	chars := []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
 		"abcdefghijklmnopqrstuvwxyz" +
 		"0123456789")
