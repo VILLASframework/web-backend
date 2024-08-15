@@ -18,7 +18,7 @@ staticcheck:
 
 test:
   stage: test
-  image: golang:1.18-buster
+  image: golang:1.21-bullseye
   variables:
     GOPATH: $CI_PROJECT_DIR/.go
     POSTGRES_DB: testvillasdb
@@ -60,7 +60,7 @@ test:
     - mc mb gitlab/${S3_BUCKET}
   script:
     - go mod tidy
-    - go get github.com/swaggo/swag/cmd/swag@v1.8.1
+    - go get github.com/swaggo/swag/cmd/swag@v1.8.3
     - go install github.com/swaggo/swag/cmd/swag
     - ${GOPATH}/bin/swag init --propertyStrategy pascalcase
       --generalInfo "start.go"
