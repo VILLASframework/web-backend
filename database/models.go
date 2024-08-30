@@ -44,20 +44,22 @@ type User struct {
 	Mail string `json:"mail" gorm:"default:''"`
 	// Role of user
 	Role string `json:"role" gorm:"default:'user'"`
-	// Group of user by which the user is added to scenarios
-	Group string `json:"group" gorm:"default:''"`
 	// Indicating status of user (false means user is inactive and should not be able to login)
 	Active bool `json:"active" gorm:"default:true"`
 	// Scenarios to which user has access
 	Scenarios []*Scenario `json:"-" gorm:"many2many:user_scenarios;"`
+	// Groups of user
+	UserGroup []*UserGroup `json:"-" gorm:"many2many:user_groups;"`
 }
 
 // ScenarioMapping data model
 type ScenarioMapping struct {
 	Model
-	// ID of Scenario
-	ScenarioID uint `json:"scenarioID"`
-	// Duplicate Scenario or add to existing Scenario
+	ScenarioID  uint      `json:"scenarioID" ` // Foreign key to Scenario
+	Scenario    Scenario  `json:"-" gorm:"foreignkey:ScenarioID"`
+	UserGroupID uint      `json:"-"` // Foreign key to UserGroup
+	UserGroup   UserGroup `json:"-" gorm:"foreignkey:UserGroupID"`
+	// Whether to duplicate Scenario or add users to existing Scenario
 	Duplicate bool `json:"duplicate"`
 }
 
@@ -67,7 +69,9 @@ type UserGroup struct {
 	// Name of user group
 	Name string `json:"name" gorm:"unique;not null"`
 	// Scenarios that belong to the user group
-	ScenarioMappings []*ScenarioMapping `json:"scenarioMappings" gorm:"foreignkey:UserGroupID"`
+	ScenarioMappings []ScenarioMapping `json:"scenarioMappings" gorm:"foreignkey:UserGroupID"`
+	// Users that belong to the user group
+	Users []*User `json:"users" gorm:"many2many:user_groups;"`
 }
 
 // Scenario data model

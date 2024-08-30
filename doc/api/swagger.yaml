@@ -36,6 +36,8 @@ definitions:
     type: object
   api.ResponseUserGroup:
     type: object
+  api.ResponseUserGroups:
+    type: object
   api.ResponseUsers:
     type: object
   api.ResponseWidget:
@@ -449,6 +451,11 @@ definitions:
       userGroup:
         $ref: '#/definitions/usergroup.validNewUserGroup'
     type: object
+  usergroup.updateUserGroupRequest:
+    properties:
+      userGroup:
+        $ref: '#/definitions/usergroup.validUpdatedUserGroup'
+    type: object
   usergroup.validNewScenarioMapping:
     properties:
       duplicate:
@@ -461,6 +468,8 @@ definitions:
   usergroup.validNewUserGroup:
     properties:
       name:
+        maxLength: 100
+        minLength: 3
         type: string
       scenarioMappings:
         items:
@@ -468,7 +477,22 @@ definitions:
         type: array
     required:
     - name
-    - scenarioMappings
+    type: object
+  usergroup.validUpdatedScenarioMapping:
+    properties:
+      duplicate:
+        type: boolean
+      scenarioID:
+        type: integer
+    type: object
+  usergroup.validUpdatedUserGroup:
+    properties:
+      name:
+        type: string
+      scenarioMappings:
+        items:
+          $ref: '#/definitions/usergroup.validUpdatedScenarioMapping'
+        type: array
     type: object
   widget.addWidgetRequest:
     properties:
@@ -2301,6 +2325,32 @@ paths:
       tags:
       - signals
   /usergroups:
+    get:
+      operationId: getUserGroups
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of user groups
+          schema:
+            $ref: '#/definitions/api.ResponseUserGroups'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+      security:
+      - Bearer: []
+      summary: Get all user groups
+      tags:
+      - usergroups
     post:
       consumes:
       - application/json
@@ -2338,6 +2388,119 @@ paths:
       security:
       - Bearer: []
       summary: Add a user group
+      tags:
+      - usergroups
+  /usergroups/{usergroupID}:
+    delete:
+      operationId: deleteUserGroup
+      parameters:
+      - description: User group ID
+        in: path
+        name: usergroupID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: deleted user group
+          schema:
+            $ref: '#/definitions/api.ResponseUserGroup'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+      security:
+      - Bearer: []
+      summary: Delete a user group
+      tags:
+      - usergroups
+    get:
+      operationId: getUserGroup
+      parameters:
+      - description: User group ID
+        in: path
+        name: usergroupID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: requested user group
+          schema:
+            $ref: '#/definitions/api.ResponseUserGroup'
+        "403":
+          description: Access forbidden.
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+      security:
+      - Bearer: []
+      summary: Get user group by ID
+      tags:
+      - usergroups
+    put:
+      consumes:
+      - application/json
+      operationId: updateUserGroup
+      parameters:
+      - description: User group to be updated
+        in: body
+        name: inputUserGroup
+        required: true
+        schema:
+          $ref: '#/definitions/usergroup.updateUserGroupRequest'
+      - description: User group ID
+        in: path
+        name: usergroupID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User group that was updated
+          schema:
+            $ref: '#/definitions/api.ResponseUserGroup'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+      security:
+      - Bearer: []
+      summary: Update a user group
       tags:
       - usergroups
   /users:

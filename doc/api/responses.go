@@ -61,7 +61,11 @@ type ResponseScenario struct {
 }
 
 type ResponseUserGroup struct {
-	scenario database.UserGroup
+	usergroup database.UserGroup
+}
+
+type ResponseUserGroups struct {
+	usergroup []database.UserGroup
 }
 
 type ResponseConfigs struct {
