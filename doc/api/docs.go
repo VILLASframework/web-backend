@@ -2703,6 +2703,47 @@ const docTemplate = `{
             }
         },
         "/usergroups": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "usergroups"
+                ],
+                "summary": "Get all user groups",
+                "operationId": "getUserGroups",
+                "responses": {
+                    "200": {
+                        "description": "List of user groups",
+                        "schema": {
+                            "$ref": "#/definitions/api.ResponseUserGroups"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "$ref": "#/definitions/api.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "$ref": "#/definitions/api.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/api.ResponseError"
+                        }
+                    }
+                }
+            },
             "post": {
                 "security": [
                     {
@@ -2742,6 +2783,182 @@ const docTemplate = `{
                         "description": "Bad request",
                         "schema": {
                             "$ref": "#/definitions/api.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "$ref": "#/definitions/api.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "$ref": "#/definitions/api.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/api.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/usergroups/{usergroupID}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "usergroups"
+                ],
+                "summary": "Get user group by ID",
+                "operationId": "getUserGroup",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User group ID",
+                        "name": "usergroupID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "requested user group",
+                        "schema": {
+                            "$ref": "#/definitions/api.ResponseUserGroup"
+                        }
+                    },
+                    "403": {
+                        "description": "Access forbidden.",
+                        "schema": {
+                            "$ref": "#/definitions/api.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "$ref": "#/definitions/api.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "$ref": "#/definitions/api.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/api.ResponseError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "usergroups"
+                ],
+                "summary": "Update a user group",
+                "operationId": "updateUserGroup",
+                "parameters": [
+                    {
+                        "description": "User group to be updated",
+                        "name": "inputUserGroup",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/usergroup.updateUserGroupRequest"
+                        }
+                    },
+                    {
+                        "type": "integer",
+                        "description": "User group ID",
+                        "name": "usergroupID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User group that was updated",
+                        "schema": {
+                            "$ref": "#/definitions/api.ResponseUserGroup"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/api.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "$ref": "#/definitions/api.ResponseError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable entity",
+                        "schema": {
+                            "$ref": "#/definitions/api.ResponseError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/api.ResponseError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "usergroups"
+                ],
+                "summary": "Delete a user group",
+                "operationId": "deleteUserGroup",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User group ID",
+                        "name": "usergroupID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "deleted user group",
+                        "schema": {
+                            "$ref": "#/definitions/api.ResponseUserGroup"
                         }
                     },
                     "404": {
@@ -3396,6 +3613,9 @@ const docTemplate = `{
         "api.ResponseUserGroup": {
             "type": "object"
         },
+        "api.ResponseUserGroups": {
+            "type": "object"
+        },
         "api.ResponseUsers": {
             "type": "object"
         },
@@ -4021,6 +4241,14 @@ const docTemplate = `{
                 }
             }
         },
+        "usergroup.updateUserGroupRequest": {
+            "type": "object",
+            "properties": {
+                "userGroup": {
+                    "$ref": "#/definitions/usergroup.validUpdatedUserGroup"
+                }
+            }
+        },
         "usergroup.validNewScenarioMapping": {
             "type": "object",
             "required": [
@@ -4038,9 +4266,35 @@ const docTemplate = `{
         "usergroup.validNewUserGroup": {
             "type": "object",
             "required": [
-                "name",
-                "scenarioMappings"
+                "name"
             ],
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 3
+                },
+                "scenarioMappings": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/usergroup.validNewScenarioMapping"
+                    }
+                }
+            }
+        },
+        "usergroup.validUpdatedScenarioMapping": {
+            "type": "object",
+            "properties": {
+                "duplicate": {
+                    "type": "boolean"
+                },
+                "scenarioID": {
+                    "type": "integer"
+                }
+            }
+        },
+        "usergroup.validUpdatedUserGroup": {
+            "type": "object",
             "properties": {
                 "name": {
                     "type": "string"
@@ -4048,7 +4302,7 @@ const docTemplate = `{
                 "scenarioMappings": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/usergroup.validNewScenarioMapping"
+                        "$ref": "#/definitions/usergroup.validUpdatedScenarioMapping"
                     }
                 }
             }

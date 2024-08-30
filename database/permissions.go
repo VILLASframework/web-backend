@@ -142,7 +142,7 @@ func CheckSignalPermissions(c *gin.Context, operation CRUD) (bool, Signal) {
 
 }
 
-func CheckUserGroupPermissions(c *gin.Context, operation CRUD, userGroupSourceID string, dabIDBody int) (bool, UserGroup) {
+func CheckUserGroupPermissions(c *gin.Context, operation CRUD, userGroupIDSource string, usergroupIDBody int) (bool, UserGroup) {
 
 	var usrgrp UserGroup
 
@@ -152,13 +152,18 @@ func CheckUserGroupPermissions(c *gin.Context, operation CRUD, userGroupSourceID
 		return false, usrgrp
 	}
 
-	groupID, err := helper.GetIDOfElement(c, "usergroupID", userGroupSourceID, dabIDBody)
+	if operation == Create {
+		return true, usrgrp
+	}
+
+	groupID, err := helper.GetIDOfElement(c, "userGroupID", userGroupIDSource, usergroupIDBody)
 	if err != nil {
 		return false, usrgrp
 	}
 
 	db := GetDB()
-	err = db.Find(&usrgrp, uint(groupID)).Error
+	err = db.Preload("ScenarioMappings.Scenario").First(&usrgrp, groupID).Error
+
 	if helper.DBNotFoundError(c, err, strconv.Itoa(groupID), "UserGroup") {
 		return false, usrgrp
 	}
