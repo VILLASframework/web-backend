@@ -30,7 +30,7 @@ import (
 	"github.com/jinzhu/gorm/dialects/postgres"
 )
 
-func duplicateScenarioForUser(s database.Scenario, user *database.User, uuidstr string) {
+func DuplicateScenarioForUser(s database.Scenario, user *database.User, uuidstr string) {
 
 	// get all component configs of the scenario
 	db := database.GetDB()

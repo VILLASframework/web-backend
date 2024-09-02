@@ -49,7 +49,7 @@ type User struct {
 	// Scenarios to which user has access
 	Scenarios []*Scenario `json:"-" gorm:"many2many:user_scenarios;"`
 	// Groups of user
-	UserGroup []*UserGroup `json:"-" gorm:"many2many:user_groups;"`
+	UserGroups []*UserGroup `json:"-" gorm:"many2many:user_groups_users;"`
 }
 
 // ScenarioMapping data model
@@ -71,7 +71,7 @@ type UserGroup struct {
 	// Scenarios that belong to the user group
 	ScenarioMappings []ScenarioMapping `json:"scenarioMappings" gorm:"foreignkey:UserGroupID"`
 	// Users that belong to the user group
-	Users []*User `json:"users" gorm:"many2many:user_groups;"`
+	Users []*User `json:"users" gorm:"many2many:user_groups_users;"`
 }
 
 // Scenario data model
