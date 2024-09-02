@@ -1,4 +1,4 @@
-FROM golang:1.18-buster AS builder
+FROM golang:1.21-bullseye AS builder
 
 RUN mkdir /build
 WORKDIR /build
@@ -6,7 +6,7 @@ WORKDIR /build
 # Make use of layer caching
 ADD go.* ./
 RUN go mod download
-RUN go install github.com/swaggo/swag/cmd/swag@v1.8.1
+RUN go install github.com/swaggo/swag/cmd/swag@v1.8.3
 
 ADD . .
 
@@ -20,11 +20,12 @@ RUN swag init --propertyStrategy pascalcase \
 
 RUN go build -o villasweb-backend
 
-FROM debian:buster
+FROM debian:bullseye-slim
 
 RUN apt-get update && \
     apt-get install -y \
-        ca-certificates
+        ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /build/villasweb-backend /usr/bin
 

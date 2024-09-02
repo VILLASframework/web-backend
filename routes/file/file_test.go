@@ -22,7 +22,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -138,7 +137,7 @@ func TestAddFile(t *testing.T) {
 
 	// create a testfile.txt in local folder
 	c1 := []byte("This is my testfile\n")
-	err = ioutil.WriteFile("testfile.txt", c1, 0644)
+	err = os.WriteFile("testfile.txt", c1, 0644)
 	assert.NoError(t, err)
 
 	// test POST files
@@ -197,7 +196,7 @@ func TestUpdateFile(t *testing.T) {
 
 	// create a testfile.txt in local folder
 	c1 := []byte("This is my testfile\n")
-	err = ioutil.WriteFile("testfile.txt", c1, 0644)
+	err = os.WriteFile("testfile.txt", c1, 0644)
 	assert.NoError(t, err)
 
 	bodyBuf := &bytes.Buffer{}
@@ -269,7 +268,7 @@ func TestUpdateFile(t *testing.T) {
 
 	// create a testfile_updated.txt in local folder
 	c2 := []byte("This is my updated testfile\n")
-	err = ioutil.WriteFile("testfileupdated.txt", c2, 0644)
+	err = os.WriteFile("testfileupdated.txt", c2, 0644)
 	assert.NoError(t, err)
 
 	bodyBufUpdated := &bytes.Buffer{}
@@ -327,7 +326,7 @@ func TestDeleteFile(t *testing.T) {
 
 	// create a testfile.txt in local folder
 	c1 := []byte("This is my testfile\n")
-	err = ioutil.WriteFile("testfile.txt", c1, 0644)
+	err = os.WriteFile("testfile.txt", c1, 0644)
 	assert.NoError(t, err)
 
 	// open file handle
@@ -481,7 +480,7 @@ func TestGetAllFilesOfScenario(t *testing.T) {
 
 	// create a testfile.txt in local folder
 	c1 := []byte("This is my testfile\n")
-	err = ioutil.WriteFile("testfile.txt", c1, 0644)
+	err = os.WriteFile("testfile.txt", c1, 0644)
 	assert.NoError(t, err)
 
 	// open file handle

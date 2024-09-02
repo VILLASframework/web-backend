@@ -27,7 +27,11 @@ import (
 
 func DBError(c *gin.Context, err error) bool {
 	if err != nil {
-		InternalServerError(c, "Error on DB Query or transaction: "+err.Error())
+		if err == gorm.ErrRecordNotFound {
+			NotFoundError(c, "Record not Found in DB: type "+err.Error())
+		} else {
+			InternalServerError(c, "Error on DB Query or transaction: "+err.Error())
+		}
 		return true // Error
 	}
 	return false // No error
