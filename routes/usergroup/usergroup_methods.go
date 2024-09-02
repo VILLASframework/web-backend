@@ -19,6 +19,7 @@ package usergroup
 
 import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
+	"github.com/jinzhu/gorm"
 )
 
 type UserGroup struct {
@@ -110,4 +111,46 @@ func (u *UserGroup) remove() error {
 	db := database.GetDB()
 	err := db.Delete(u).Error
 	return err
+}
+
+func (ug *UserGroup) getUsers() ([]database.User, int, error) {
+	db := database.GetDB()
+	var users []database.User
+	err := db.Order("ID asc").Model(ug).Where("Active = ?", true).Related(&users, "Users").Error
+	return users, len(users), err
+}
+
+func (ug *UserGroup) addUser(u *database.User) error {
+	db := database.GetDB()
+	err := db.Model(ug).Association("Users").Append(u).Error
+	return err
+}
+
+func (ug *UserGroup) deleteUser(username string) error {
+	db := database.GetDB()
+
+	var deletedUser database.User
+	err := db.Find(&deletedUser, "Username = ?", username).Error
+	if err != nil {
+		return err
+	}
+
+	no_users := db.Model(ug).Association("Users").Count()
+
+	if no_users > 0 {
+		// remove user from user group
+		err = db.Model(ug).Association("Users").Delete(&deletedUser).Error
+		if err != nil {
+			return err
+		}
+		// remove user group from user
+		err = db.Model(&deletedUser).Association("UserGroups").Delete(ug).Error
+		if err != nil {
+			return err
+		}
+	} else {
+		return gorm.ErrRecordNotFound
+	}
+
+	return nil
 }

@@ -2503,6 +2503,114 @@ paths:
       summary: Update a user group
       tags:
       - usergroups
+  /usergroups/{usergroupID}/user:
+    delete:
+      operationId: deleteUserFromUserGroup
+      parameters:
+      - description: User group ID
+        in: path
+        name: usergroupID
+        required: true
+        type: integer
+      - description: User name
+        in: query
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User that was deleted from user group
+          schema:
+            $ref: '#/definitions/api.ResponseUser'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+      security:
+      - Bearer: []
+      summary: Delete a user from a user group
+      tags:
+      - usergroups
+    put:
+      operationId: addUserToUserGroup
+      parameters:
+      - description: User group ID
+        in: path
+        name: usergroupID
+        required: true
+        type: integer
+      - description: User name
+        in: query
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User that was added to user group
+          schema:
+            $ref: '#/definitions/api.ResponseUser'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+      security:
+      - Bearer: []
+      summary: Add a user to a a user group
+      tags:
+      - usergroups
+  /usergroups/{usergroupID}/users/:
+    get:
+      operationId: getUserGroupUsers
+      parameters:
+      - description: User group ID
+        in: path
+        name: usergroupID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Array of users that are in the user group
+          schema:
+            $ref: '#/definitions/api.ResponseUsers'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+      security:
+      - Bearer: []
+      summary: Get users of a user group
+      tags:
+      - usergroups
   /users:
     get:
       operationId: GetUsers

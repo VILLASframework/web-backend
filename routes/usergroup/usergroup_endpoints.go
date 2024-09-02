@@ -18,10 +18,14 @@
 package usergroup
 
 import (
+	"fmt"
+	"log"
 	"net/http"
+	"strconv"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/user"
 	"github.com/gin-gonic/gin"
 )
 
@@ -31,6 +35,9 @@ func RegisterUserGroupEndpoints(r *gin.RouterGroup) {
 	r.GET("", getUserGroups)
 	r.GET("/:userGroupID", getUserGroup)
 	r.DELETE("/:userGroupID", deleteUserGroup)
+	r.GET("/:userGroupID/users", getUserGroupUsers)
+	r.PUT("/:userGroupID/user", addUserToUserGroup)
+	r.DELETE("/:userGroupID/user", deleteUserFromUserGroup)
 }
 
 // addUserGroup godoc
@@ -195,4 +202,143 @@ func deleteUserGroup(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"usergroup": ug})
 	}
 
+}
+
+// getUserGroupUsers godoc
+// @Summary Get users of a user group
+// @ID getUserGroupUsers
+// @Produce  json
+// @Tags usergroups
+// @Success 200 {object} api.ResponseUsers "Array of users that are in the user group"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
+// @Param usergroupID path int true "User group ID"
+// @Router /usergroups/{usergroupID}/users/ [get]
+// @Security Bearer
+func getUserGroupUsers(c *gin.Context) {
+
+	ok, ug_r := database.CheckUserGroupPermissions(c, database.Read, "path", -1)
+	if !ok {
+		return
+	}
+
+	var ug UserGroup
+	ug.UserGroup = ug_r
+
+	// Find all users of user group
+	allUsers, _, err := ug.getUsers()
+	if helper.DBError(c, err) {
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"users": allUsers})
+}
+
+// addUserToUserGroup godoc
+// @Summary Add a user to a a user group
+// @ID addUserToUserGroup
+// @Tags usergroups
+// @Produce json
+// @Success 200 {object} api.ResponseUser "User that was added to user group"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
+// @Param usergroupID path int true "User group ID"
+// @Param username query string true "User name"
+// @Router /usergroups/{usergroupID}/user [put]
+// @Security Bearer
+func addUserToUserGroup(c *gin.Context) {
+
+	ok, ug_r := database.CheckUserGroupPermissions(c, database.Update, "path", -1)
+	if !ok {
+		return
+	}
+
+	var ug UserGroup
+	ug.UserGroup = ug_r
+
+	username := c.Request.URL.Query().Get("username")
+	var u database.User
+	db := database.GetDB()
+	err := db.Find(&u, "Username = ?", username).Error
+	if helper.DBNotFoundError(c, err, username, "User") {
+		return
+	}
+
+	if !u.Active {
+		helper.BadRequestError(c, "bad user")
+		return
+	}
+
+	err = ug.addUser(&(u))
+	if helper.DBError(c, err) {
+		return
+	}
+
+	for _, sm := range ug.ScenarioMappings {
+		var s database.Scenario
+		err = db.Find(&s, "ID = ?", sm.ScenarioID).Error
+		if helper.DBNotFoundError(c, err, strconv.Itoa(int(sm.ScenarioID)), "Scenario") {
+			return
+		}
+
+		duplicateName := fmt.Sprintf("%s %s", s.Name, u.Username)
+		alreadyDuplicated := user.IsAlreadyDuplicated(duplicateName)
+		if alreadyDuplicated {
+			log.Printf("Scenario %d already duplicated for user %s", s.ID, u.Username)
+		}
+
+		if sm.Duplicate {
+			// Duplicate scenario
+			user.DuplicateScenarioForUser(s, &u, "")
+		} else {
+			// Add user to scenario
+			err = db.Model(&s).Association("Users").Append(&u).Error
+			if helper.DBError(c, err) {
+				return
+			}
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{"user": u})
+}
+
+// deleteUserFromUserGroup godoc
+// @Summary Delete a user from a user group
+// @ID deleteUserFromUserGroup
+// @Tags usergroups
+// @Produce json
+// @Success 200 {object} api.ResponseUser "User that was deleted from user group"
+// @Failure 404 {object} api.ResponseError "Not found"
+// @Failure 422 {object} api.ResponseError "Unprocessable entity"
+// @Failure 500 {object} api.ResponseError "Internal server error"
+// @Param usergroupID path int true "User group ID"
+// @Param username query string true "User name"
+// @Router /usergroups/{usergroupID}/user [delete]
+// @Security Bearer
+func deleteUserFromUserGroup(c *gin.Context) {
+
+	ok, ug_r := database.CheckUserGroupPermissions(c, database.Update, "path", -1)
+	if !ok {
+		return
+	}
+
+	var ug UserGroup
+	ug.UserGroup = ug_r
+
+	username := c.Request.URL.Query().Get("username")
+	var u database.User
+	db := database.GetDB()
+	err := db.Find(&u, "Username = ?", username).Error
+	if helper.DBNotFoundError(c, err, username, "User") {
+		return
+	}
+
+	err = ug.deleteUser(username)
+	if helper.DBError(c, err) {
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"user": u})
 }

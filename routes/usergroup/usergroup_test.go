@@ -51,6 +51,20 @@ var newUserGroupOneMapping = UserGroupRequest{
 	},
 }
 
+var newUserGroupTwoMappings = UserGroupRequest{
+	Name: "UserGroup2",
+	ScenarioMappings: []ScenarioMappingRequest{
+		{
+			ScenarioID: 1,
+			Duplicate:  false,
+		},
+		{
+			ScenarioID: 2,
+			Duplicate:  true,
+		},
+	},
+}
+
 func TestMain(m *testing.M) {
 	err := configuration.InitConfig()
 	if err != nil {
@@ -92,12 +106,18 @@ func TestAddUserGroup(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 
-	// Test with valid user group
+	// Test with valid user group with one scenario mapping
 	code, resp, err = helper.TestEndpoint(router, token, "/api/v2/usergroups",
 		"POST", helper.KeyModels{"usergroup": newUserGroupOneMapping})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
-	// Test with valid user group and one mapping
+
+	// Test with valid user group and two scenario mappings
+	code, resp, err = helper.TestEndpoint(router, token, "/api/v2/usergroups",
+		"POST", helper.KeyModels{"usergroup": newUserGroupTwoMappings})
+	assert.NoError(t, err)
+	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
+
 	// Test with valid user group and multiple mappings
 	// Test with invalid user group
 	// Test with invalid user group and one mapping
