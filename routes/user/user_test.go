@@ -924,7 +924,7 @@ func TestDuplicateScenarioForUser(t *testing.T) {
 	err = addFakeIC(uuidDup, session, token)
 	assert.NoError(t, err)
 
-	duplicateScenarioForUser(originalSo, &myUser.User, uuidDup)
+	DuplicateScenarioForUser(originalSo, &myUser.User, uuidDup)
 
 	/*** Check duplicated scenario for correctness ***/
 	var dplScenarios []database.Scenario
@@ -1125,7 +1125,7 @@ func TestScenarioDuplicationAlreadyDuplicatedIC(t *testing.T) {
 	}
 	log.Println("------------------")
 
-	duplicateScenarioForUser(originalSo, &myUser.User, "")
+	DuplicateScenarioForUser(originalSo, &myUser.User, "")
 
 	/*** Check duplicated scenario for correctness ***/
 	var dplScenarios []database.Scenario
