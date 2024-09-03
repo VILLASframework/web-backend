@@ -101,12 +101,6 @@ func updateScenarioMappings(groupID uint, reqScenarioMappings []validUpdatedScen
 	return nil
 }
 
-func (ug *UserGroup) byID(id uint) error {
-	db := database.GetDB()
-	err := db.Find(ug, id).Error
-	return err
-}
-
 func (u *UserGroup) remove() error {
 	db := database.GetDB()
 	err := db.Delete(u).Error
