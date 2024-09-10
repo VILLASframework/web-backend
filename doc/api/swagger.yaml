@@ -34,6 +34,10 @@ definitions:
     type: object
   api.ResponseUser:
     type: object
+  api.ResponseUserGroup:
+    type: object
+  api.ResponseUserGroups:
+    type: object
   api.ResponseUsers:
     type: object
   api.ResponseWidget:
@@ -52,34 +56,34 @@ definitions:
     type: object
   component_configuration.validNewConfig:
     properties:
-      FileIDs:
+      fileIDs:
         items:
           type: integer
         type: array
-      ICID:
+      icid:
         type: integer
-      Name:
+      name:
         type: string
-      ScenarioID:
+      scenarioID:
         type: integer
-      StartParameters:
+      startParameters:
         $ref: '#/definitions/postgres.Jsonb'
     required:
-    - Name
-    - ScenarioID
-    - StartParameters
+    - name
+    - scenarioID
+    - startParameters
     type: object
   component_configuration.validUpdatedConfig:
     properties:
-      FileIDs:
+      fileIDs:
         items:
           type: integer
         type: array
-      ICID:
+      icid:
         type: integer
-      Name:
+      name:
         type: string
-      StartParameters:
+      startParameters:
         $ref: '#/definitions/postgres.Jsonb'
     type: object
   config.Authentication:
@@ -157,18 +161,18 @@ definitions:
     type: object
   dashboard.validNewDashboard:
     properties:
-      Grid:
+      grid:
         type: integer
-      Height:
+      height:
         type: integer
-      Name:
+      name:
         type: string
-      ScenarioID:
+      scenarioID:
         type: integer
     required:
-    - Grid
-    - Name
-    - ScenarioID
+    - grid
+    - name
+    - scenarioID
     type: object
   dashboard.validUpdatedDashboard:
     properties:
@@ -191,71 +195,71 @@ definitions:
     type: object
   infrastructure_component.validNewIC:
     properties:
-      APIURL:
+      apiurl:
         type: string
-      Category:
+      category:
         type: string
-      CreateParameterSchema:
+      createParameterSchema:
         $ref: '#/definitions/postgres.Jsonb'
-      Description:
+      description:
         type: string
-      Location:
+      location:
         type: string
-      ManagedExternally:
+      managedExternally:
         type: boolean
-      Manager:
+      manager:
         type: string
-      Name:
+      name:
         type: string
-      StartParameterSchema:
+      startParameterSchema:
         $ref: '#/definitions/postgres.Jsonb'
-      State:
+      state:
         type: string
-      StatusUpdateRaw:
+      statusUpdateRaw:
         $ref: '#/definitions/postgres.Jsonb'
-      Type:
+      type:
         type: string
-      UUID:
-        type: string
-      Uptime:
+      uptime:
         type: number
-      WebsocketURL:
+      uuid:
+        type: string
+      websocketURL:
         type: string
     required:
-    - Category
-    - ManagedExternally
-    - Name
-    - Type
+    - category
+    - managedExternally
+    - name
+    - type
     type: object
   infrastructure_component.validUpdatedIC:
     properties:
-      APIURL:
+      apiurl:
         type: string
-      Category:
+      category:
         type: string
-      CreateParameterSchema:
+      createParameterSchema:
         $ref: '#/definitions/postgres.Jsonb'
-      Description:
+      description:
         type: string
-      Location:
+      location:
         type: string
-      Manager:
+      manager:
         type: string
-      Name:
+      name:
         type: string
-      StartParameterSchema:
+      startParameterSchema:
         $ref: '#/definitions/postgres.Jsonb'
-      State:
+      state:
         type: string
-      StatusUpdateRaw:
+      statusUpdateRaw:
         $ref: '#/definitions/postgres.Jsonb'
-      Type:
+      type:
         type: string
-      UUID:
-        type: string
-      Uptime:
+      uptime:
         type: number
-      WebsocketURL:
+      uuid:
+        type: string
+      websocketURL:
         type: string
     type: object
   postgres.Jsonb:
@@ -277,19 +281,19 @@ definitions:
     type: object
   result.validNewResult:
     properties:
-      ConfigSnapshots:
+      configSnapshots:
         $ref: '#/definitions/postgres.Jsonb'
-      Description:
+      description:
         type: string
-      ResultFileIDs:
+      resultFileIDs:
         items:
           type: integer
         type: array
-      ScenarioID:
+      scenarioID:
         type: integer
     required:
-    - ConfigSnapshots
-    - ScenarioID
+    - configSnapshots
+    - scenarioID
     type: object
   result.validUpdatedResult:
     properties:
@@ -314,21 +318,21 @@ definitions:
     type: object
   scenario.validNewScenario:
     properties:
-      Name:
+      name:
         type: string
-      StartParameters:
+      startParameters:
         $ref: '#/definitions/postgres.Jsonb'
     required:
-    - Name
-    - StartParameters
+    - name
+    - startParameters
     type: object
   scenario.validUpdatedScenario:
     properties:
-      IsLocked:
+      isLocked:
         type: boolean
-      Name:
+      name:
         type: string
-      StartParameters:
+      startParameters:
         $ref: '#/definitions/postgres.Jsonb'
     type: object
   signal.addSignalRequest:
@@ -343,36 +347,36 @@ definitions:
     type: object
   signal.validNewSignal:
     properties:
-      ConfigID:
+      configID:
         type: integer
-      Direction:
+      direction:
         enum:
         - in
         - out
         type: string
-      Index:
+      index:
         type: integer
-      Name:
+      name:
         type: string
-      ScalingFactor:
+      scalingFactor:
         type: number
-      Unit:
+      unit:
         type: string
     required:
-    - ConfigID
-    - Direction
-    - Index
-    - Name
+    - configID
+    - direction
+    - index
+    - name
     type: object
   signal.validUpdatedSignal:
     properties:
-      Index:
+      index:
         type: integer
-      Name:
+      name:
         type: string
-      ScalingFactor:
+      scalingFactor:
         type: number
-      Unit:
+      unit:
         type: string
     type: object
   user.addUserRequest:
@@ -382,13 +386,13 @@ definitions:
     type: object
   user.loginRequest:
     properties:
-      Password:
+      password:
         type: string
-      Username:
+      username:
         type: string
     required:
-    - Password
-    - Username
+    - password
+    - username
     type: object
   user.updateUserRequest:
     properties:
@@ -397,50 +401,98 @@ definitions:
     type: object
   user.validNewUser:
     properties:
-      Mail:
+      mail:
         type: string
-      Password:
+      password:
         minLength: 6
         type: string
-      Role:
+      role:
         enum:
         - Admin
         - User
         - Guest
         type: string
-      Username:
+      username:
         minLength: 3
         type: string
     required:
-    - Mail
-    - Password
-    - Role
-    - Username
+    - mail
+    - password
+    - role
+    - username
     type: object
   user.validUpdatedRequest:
     properties:
-      Active:
+      active:
         enum:
         - "yes"
         - "no"
         type: string
-      Mail:
+      mail:
         type: string
-      OldPassword:
+      oldPassword:
         minLength: 6
         type: string
-      Password:
+      password:
         minLength: 6
         type: string
-      Role:
+      role:
         enum:
         - Admin
         - User
         - Guest
         type: string
-      Username:
+      username:
         minLength: 3
         type: string
+    type: object
+  usergroup.addUserGroupRequest:
+    properties:
+      userGroup:
+        $ref: '#/definitions/usergroup.validNewUserGroup'
+    type: object
+  usergroup.updateUserGroupRequest:
+    properties:
+      userGroup:
+        $ref: '#/definitions/usergroup.validUpdatedUserGroup'
+    type: object
+  usergroup.validNewScenarioMapping:
+    properties:
+      duplicate:
+        type: boolean
+      scenarioID:
+        type: integer
+    required:
+    - scenarioID
+    type: object
+  usergroup.validNewUserGroup:
+    properties:
+      name:
+        maxLength: 100
+        minLength: 3
+        type: string
+      scenarioMappings:
+        items:
+          $ref: '#/definitions/usergroup.validNewScenarioMapping'
+        type: array
+    required:
+    - name
+    type: object
+  usergroup.validUpdatedScenarioMapping:
+    properties:
+      duplicate:
+        type: boolean
+      scenarioID:
+        type: integer
+    type: object
+  usergroup.validUpdatedUserGroup:
+    properties:
+      name:
+        type: string
+      scenarioMappings:
+        items:
+          $ref: '#/definitions/usergroup.validUpdatedScenarioMapping'
+        type: array
     type: object
   widget.addWidgetRequest:
     properties:
@@ -454,67 +506,67 @@ definitions:
     type: object
   widget.validNewWidget:
     properties:
-      CustomProperties:
+      customProperties:
         $ref: '#/definitions/postgres.Jsonb'
-      DashboardID:
+      dashboardID:
         type: integer
-      Height:
+      height:
         type: integer
-      IsLocked:
+      isLocked:
         type: boolean
-      MinHeight:
+      minHeight:
         type: integer
-      MinWidth:
+      minWidth:
         type: integer
-      Name:
+      name:
         type: string
-      SignalIDs:
+      signalIDs:
         items:
           type: integer
         type: array
-      Type:
+      type:
         type: string
-      Width:
+      width:
         type: integer
-      X:
+      x:
         type: integer
-      "Y":
+      "y":
         type: integer
-      Z:
+      z:
         type: integer
     required:
-    - DashboardID
-    - Height
-    - Type
-    - Width
+    - dashboardID
+    - height
+    - type
+    - width
     type: object
   widget.validUpdatedWidget:
     properties:
-      CustomProperties:
+      customProperties:
         $ref: '#/definitions/postgres.Jsonb'
-      Height:
+      height:
         type: integer
-      IsLocked:
+      isLocked:
         type: boolean
-      MinHeight:
+      minHeight:
         type: integer
-      MinWidth:
+      minWidth:
         type: integer
-      Name:
+      name:
         type: string
-      SignalIDs:
+      signalIDs:
         items:
           type: integer
         type: array
-      Type:
+      type:
         type: string
-      Width:
+      width:
         type: integer
-      X:
+      x:
         type: integer
-      "Y":
+      "y":
         type: integer
-      Z:
+      z:
         type: integer
     type: object
 info:
@@ -2272,6 +2324,293 @@ paths:
       summary: Update a signal
       tags:
       - signals
+  /usergroups:
+    get:
+      operationId: getUserGroups
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of user groups
+          schema:
+            $ref: '#/definitions/api.ResponseUserGroups'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+      security:
+      - Bearer: []
+      summary: Get all user groups
+      tags:
+      - usergroups
+    post:
+      consumes:
+      - application/json
+      operationId: addUserGroup
+      parameters:
+      - description: User group to be added
+        in: body
+        name: inputUserGroup
+        required: true
+        schema:
+          $ref: '#/definitions/usergroup.addUserGroupRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: user group that was added
+          schema:
+            $ref: '#/definitions/api.ResponseUserGroup'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+      security:
+      - Bearer: []
+      summary: Add a user group
+      tags:
+      - usergroups
+  /usergroups/{usergroupID}:
+    delete:
+      operationId: deleteUserGroup
+      parameters:
+      - description: User group ID
+        in: path
+        name: usergroupID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: deleted user group
+          schema:
+            $ref: '#/definitions/api.ResponseUserGroup'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+      security:
+      - Bearer: []
+      summary: Delete a user group
+      tags:
+      - usergroups
+    get:
+      operationId: getUserGroup
+      parameters:
+      - description: User group ID
+        in: path
+        name: usergroupID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: requested user group
+          schema:
+            $ref: '#/definitions/api.ResponseUserGroup'
+        "403":
+          description: Access forbidden.
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+      security:
+      - Bearer: []
+      summary: Get user group by ID
+      tags:
+      - usergroups
+    put:
+      consumes:
+      - application/json
+      operationId: updateUserGroup
+      parameters:
+      - description: User group to be updated
+        in: body
+        name: inputUserGroup
+        required: true
+        schema:
+          $ref: '#/definitions/usergroup.updateUserGroupRequest'
+      - description: User group ID
+        in: path
+        name: usergroupID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User group that was updated
+          schema:
+            $ref: '#/definitions/api.ResponseUserGroup'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+      security:
+      - Bearer: []
+      summary: Update a user group
+      tags:
+      - usergroups
+  /usergroups/{usergroupID}/user:
+    delete:
+      operationId: deleteUserFromUserGroup
+      parameters:
+      - description: User group ID
+        in: path
+        name: usergroupID
+        required: true
+        type: integer
+      - description: User name
+        in: query
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User that was deleted from user group
+          schema:
+            $ref: '#/definitions/api.ResponseUser'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+      security:
+      - Bearer: []
+      summary: Delete a user from a user group
+      tags:
+      - usergroups
+    put:
+      operationId: addUserToUserGroup
+      parameters:
+      - description: User group ID
+        in: path
+        name: usergroupID
+        required: true
+        type: integer
+      - description: User name
+        in: query
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User that was added to user group
+          schema:
+            $ref: '#/definitions/api.ResponseUser'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+      security:
+      - Bearer: []
+      summary: Add a user to a a user group
+      tags:
+      - usergroups
+  /usergroups/{usergroupID}/users/:
+    get:
+      operationId: getUserGroupUsers
+      parameters:
+      - description: User group ID
+        in: path
+        name: usergroupID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Array of users that are in the user group
+          schema:
+            $ref: '#/definitions/api.ResponseUsers'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+        "422":
+          description: Unprocessable entity
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/api.ResponseError'
+      security:
+      - Bearer: []
+      summary: Get users of a user group
+      tags:
+      - usergroups
   /users:
     get:
       operationId: GetUsers

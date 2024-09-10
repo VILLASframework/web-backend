@@ -277,14 +277,14 @@ func authenticateExternal(c *gin.Context) (User, error) {
 				}
 
 				duplicateName := fmt.Sprintf("%s %s", so.Name, myUser.Username)
-				alreadyDuplicated := isAlreadyDuplicated(duplicateName)
+				alreadyDuplicated := IsAlreadyDuplicated(duplicateName)
 				if alreadyDuplicated {
 					log.Printf("Scenario %d already duplicated for user %s", so.ID, myUser.Username)
 					return myUser, nil
 				}
 
 				if groupedScenario.Duplicate {
-					duplicateScenarioForUser(so, &myUser.User, "")
+					DuplicateScenarioForUser(so, &myUser.User, "")
 				} else { // add user to scenario
 					err = db.Model(&so).Association("Users").Append(&(myUser.User)).Error
 					if err != nil {
@@ -300,7 +300,7 @@ func authenticateExternal(c *gin.Context) (User, error) {
 	return myUser, nil
 }
 
-func isAlreadyDuplicated(duplicatedName string) bool {
+func IsAlreadyDuplicated(duplicatedName string) bool {
 	db := database.GetDB()
 	var scenarios []database.Scenario
 	db.Find(&scenarios, "name = ?", duplicatedName)

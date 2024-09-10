@@ -19,6 +19,7 @@ package database
 
 import (
 	"fmt"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -33,6 +34,7 @@ type ModelName string
 const ModelUser = ModelName("user")
 const ModelUsers = ModelName("users")
 const ModelScenario = ModelName("scenario")
+const ModelUserGroup = ModelName("usergroup")
 const ModelInfrastructureComponent = ModelName("ic")
 const ModelInfrastructureComponentAction = ModelName("icaction")
 const ModelDashboard = ModelName("dashboard")
@@ -73,6 +75,7 @@ var Roles = RoleActions{
 		ModelUser:                          crud,
 		ModelUsers:                         crud,
 		ModelScenario:                      crud,
+		ModelUserGroup:                     crud,
 		ModelComponentConfiguration:        crud,
 		ModelInfrastructureComponent:       crud,
 		ModelInfrastructureComponentAction: crud,
@@ -86,6 +89,7 @@ var Roles = RoleActions{
 		ModelUser:                          _ru_,
 		ModelUsers:                         none,
 		ModelScenario:                      crud,
+		ModelUserGroup:                     _r__,
 		ModelComponentConfiguration:        crud,
 		ModelInfrastructureComponent:       _r__,
 		ModelInfrastructureComponentAction: _ru_,
@@ -117,6 +121,7 @@ var Roles = RoleActions{
 		ModelInfrastructureComponentAction: none,
 		ModelUser:                          none,
 		ModelUsers:                         none,
+		ModelUserGroup:                     none,
 		ModelSignal:                        none,
 		ModelFile:                          _r__,
 		ModelResult:                        none,

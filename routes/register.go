@@ -42,6 +42,7 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/scenario"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/signal"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/user"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/usergroup"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/widget"
 	"github.com/gin-gonic/gin"
 	"github.com/zpatrick/go-config"
@@ -83,6 +84,7 @@ func RegisterEndpoints(router *gin.Engine, api *gin.RouterGroup) {
 	api.Use(user.Authentication())
 
 	scenario.RegisterScenarioEndpoints(api.Group("/scenarios"))
+	usergroup.RegisterUserGroupEndpoints(api.Group("/usergroups"))
 	component_configuration.RegisterComponentConfigurationEndpoints(api.Group("/configs"))
 	signal.RegisterSignalEndpoints(api.Group("/signals"))
 	dashboard.RegisterDashboardEndpoints(api.Group("/dashboards"))
