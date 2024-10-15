@@ -23,6 +23,7 @@ import (
 	"os"
 	"strconv"
 	"testing"
+	"time"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
@@ -191,4 +192,61 @@ func TestAddUserToGroup(t *testing.T) {
 		}
 	}
 
+}
+
+func TestDeleteUserFromGroup(t *testing.T) {
+	// Prep DB
+	database.DropTables()
+	database.MigrateModels()
+	adminpw, _ := database.AddAdminUser(configuration.GlobalConfig)
+
+	//Auth
+	token, _ := helper.AuthenticateForTest(router, database.Credentials{Username: "admin", Password: adminpw})
+
+	//Post necessities
+	helper.TestEndpoint(router, token, "/api/v2/scenarios", "POST", helper.KeyModels{"scenario": database.Scenario{Name: "scenarioNoDups"}})
+	helper.TestEndpoint(router, token, "/api/v2/scenarios", "POST", helper.KeyModels{"scenario": database.Scenario{Name: "scenarioDups"}})
+	helper.TestEndpoint(router, token, "/api/v2/usergroups", "POST", helper.KeyModels{"usergroup": newUserGroupTwoMappings})
+
+	//Add 2 users
+	for n_users := 0; n_users < 2; n_users++ {
+		//Add user
+		n := strconv.Itoa(n_users + 1)
+		usr := UserRequest{Username: "usr" + n, Password: "legendre" + n, Role: "User", Mail: "usr" + n + "@harmonics.de"}
+		helper.TestEndpoint(router, token, "/api/v2/users", "POST", helper.KeyModels{"user": usr})
+		code, _, err := helper.TestEndpoint(router, token, "/api/v2/usergroups/1/user?username=usr"+n, "PUT", struct{}{})
+		assert.Equal(t, 200, code)
+		assert.NoError(t, err)
+	}
+	time.Sleep(time.Second)
+	//Delete one
+	helper.TestEndpoint(router, token, "/api/v2/usergroups/1/user?username=usr1", "DELETE", struct{}{})
+	//get scenarios
+	_, res, _ := helper.TestEndpoint(router, token, "/api/v2/scenarios", "GET", struct{}{})
+	var scenariosMap map[string]([]database.Scenario)
+	json.Unmarshal(res.Bytes(), &scenariosMap)
+	scenarios := scenariosMap["scenarios"]
+
+	//Actual checks
+	assert.Equal(t, 3, len(scenarios))
+	for _, v := range scenarios {
+		path := fmt.Sprintf("/api/v2/scenarios/%d/users", v.ID)
+		var usersMap map[string]([]database.User)
+		_, res, _ = helper.TestEndpoint(router, token, path, "GET", struct{}{})
+		json.Unmarshal(res.Bytes(), &usersMap)
+		users := usersMap["users"]
+		switch v.ID {
+		case 1: //no dups
+			assert.Equal(t, "scenarioNoDups", v.Name)
+			assert.Equal(t, 2, len(users))
+		case 2: // with dups
+			assert.Equal(t, "scenarioDups", v.Name)
+			assert.Equal(t, 1, len(users))
+			assert.Equal(t, "admin", users[0].Username)
+		default: // remaining duped scenario
+			assert.Equal(t, "scenarioDups usr2", v.Name)
+			assert.Equal(t, 1, len(users))
+			assert.Equal(t, "usr2", users[0].Username)
+		}
+	}
 }
