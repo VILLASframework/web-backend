@@ -18,6 +18,8 @@
 package usergroup
 
 import (
+	"encoding/json"
+	"fmt"
 	"os"
 	"testing"
 
@@ -39,6 +41,15 @@ type ScenarioMappingRequest struct {
 type UserGroupRequest struct {
 	Name             string                   `json:"name"`
 	ScenarioMappings []ScenarioMappingRequest `json:"scenarioMappings"`
+}
+
+type UserRequest struct {
+	Username    string `json:"username,omitempty"`
+	Password    string `json:"password,omitempty"`
+	OldPassword string `json:"oldPassword,omitempty"`
+	Mail        string `json:"mail,omitempty"`
+	Role        string `json:"role,omitempty"`
+	Active      string `json:"active,omitempty"`
 }
 
 var newUserGroupOneMapping = UserGroupRequest{
@@ -122,4 +133,58 @@ func TestAddUserGroup(t *testing.T) {
 	// Test with invalid user group
 	// Test with invalid user group and one mapping
 	// Test with invalid user group and multiple mappings
+}
+
+func TestAddUserToGroup(t *testing.T) {
+	// Prep DB
+	database.DropTables()
+	database.MigrateModels()
+	adminpw, _ := database.AddAdminUser(configuration.GlobalConfig)
+
+	//Auth
+	token, _ := helper.AuthenticateForTest(router, database.Credentials{Username: "admin", Password: adminpw})
+
+	//Post necessities
+	usr := UserRequest{Username: "adrienmarie", Password: "Legendre", Role: "User", Mail: "lsq@harmonics.de"}
+	helper.TestEndpoint(router, token, "/api/v2/users", "POST", helper.KeyModels{"user": usr})
+	helper.TestEndpoint(router, token, "/api/v2/scenarios", "POST", helper.KeyModels{"scenario": database.Scenario{Name: "scenarioNoDups"}})
+	helper.TestEndpoint(router, token, "/api/v2/scenarios", "POST", helper.KeyModels{"scenario": database.Scenario{Name: "scenarioDups"}})
+	helper.TestEndpoint(router, token, "/api/v2/usergroups", "POST", helper.KeyModels{"usergroup": newUserGroupTwoMappings})
+
+	//Add user
+	code, _, err := helper.TestEndpoint(router, token, "/api/v2/usergroups/1/user?username=adrienmarie", "PUT", struct{}{})
+	assert.Equal(t, 200, code)
+	assert.NoError(t, err)
+
+	//get scenarios
+	_, res, _ := helper.TestEndpoint(router, token, "/api/v2/scenarios", "GET", struct{}{})
+	var scenariosMap map[string]([]database.Scenario)
+	json.Unmarshal(res.Bytes(), &scenariosMap)
+	scenarios := scenariosMap["scenarios"]
+
+	//Actual checks
+	assert.Equal(t, 3, len(scenarios))
+	for _, v := range scenarios {
+		path := fmt.Sprintf("/api/v2/scenarios/%d/users", v.ID)
+		var usersMap map[string]([]database.User)
+		_, res, _ = helper.TestEndpoint(router, token, path, "GET", struct{}{})
+		json.Unmarshal(res.Bytes(), &usersMap)
+		users := usersMap["users"]
+		switch v.ID {
+		case 1: //no dups
+			assert.Equal(t, "scenarioNoDups", v.Name)
+			assert.Equal(t, 2, len(users))
+		case 2: // with dups
+			assert.Equal(t, "scenarioDups", v.Name)
+			assert.Equal(t, 1, len(users))
+			assert.Equal(t, "admin", users[0].Username)
+		case 3: // duped scenario
+			assert.Equal(t, "scenarioDups adrienmarie", v.Name)
+			assert.Equal(t, 1, len(users))
+			assert.Equal(t, "adrienmarie", users[0].Username)
+		default:
+			// should not happen, fail manually
+			assert.Equal(t, 0, 1)
+		}
+	}
 }
