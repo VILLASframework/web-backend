@@ -340,5 +340,34 @@ func deleteUserFromUserGroup(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"user": u})
+	for _, sm := range ug.ScenarioMappings {
+		var sc database.Scenario
+		err = db.Find(&sc, "ID = ?", sm.ScenarioID).Error
+		if sm.Duplicate {
+			//scenario not found, only referenced by id in group
+			if helper.DBError(c, err) {
+				continue
+			}
+
+			duplicateName := fmt.Sprintf("%s %s", sc.Name, username)
+			err = db.Find(&sc, "Name = ?", duplicateName).Error
+			//duplicate not found, likely does not exist, continue
+			if helper.DBError(c, err) {
+				continue
+			}
+
+			err = db.Delete(&sc).Error
+			//could not delete duplicate, highly unlikely after previous check
+			//check anyway
+			if helper.DBError(c, err) {
+				continue
+			}
+		} else {
+			err = db.Model(&sc).Association("Users").Delete(&u).Error
+			if helper.DBError(c, err) { // only if user already not associated, continue
+				continue
+			}
+		}
+	}
+	c.JSON(http.StatusOK, gin.H{"usergroup": ug})
 }
