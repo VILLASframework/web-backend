@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strconv"
 	"testing"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
@@ -145,16 +146,19 @@ func TestAddUserToGroup(t *testing.T) {
 	token, _ := helper.AuthenticateForTest(router, database.Credentials{Username: "admin", Password: adminpw})
 
 	//Post necessities
-	usr := UserRequest{Username: "adrienmarie", Password: "Legendre", Role: "User", Mail: "lsq@harmonics.de"}
-	helper.TestEndpoint(router, token, "/api/v2/users", "POST", helper.KeyModels{"user": usr})
 	helper.TestEndpoint(router, token, "/api/v2/scenarios", "POST", helper.KeyModels{"scenario": database.Scenario{Name: "scenarioNoDups"}})
 	helper.TestEndpoint(router, token, "/api/v2/scenarios", "POST", helper.KeyModels{"scenario": database.Scenario{Name: "scenarioDups"}})
 	helper.TestEndpoint(router, token, "/api/v2/usergroups", "POST", helper.KeyModels{"usergroup": newUserGroupTwoMappings})
 
-	//Add user
-	code, _, err := helper.TestEndpoint(router, token, "/api/v2/usergroups/1/user?username=adrienmarie", "PUT", struct{}{})
-	assert.Equal(t, 200, code)
-	assert.NoError(t, err)
+	for n_users := 0; n_users < 3; n_users++ {
+		//Add user
+		n := strconv.Itoa(n_users + 1)
+		usr := UserRequest{Username: "usr" + n, Password: "legendre" + n, Role: "User", Mail: "usr" + n + "@harmonics.de"}
+		helper.TestEndpoint(router, token, "/api/v2/users", "POST", helper.KeyModels{"user": usr})
+		code, _, err := helper.TestEndpoint(router, token, "/api/v2/usergroups/1/user?username=usr"+n, "PUT", struct{}{})
+		assert.Equal(t, 200, code)
+		assert.NoError(t, err)
+	}
 
 	//get scenarios
 	_, res, _ := helper.TestEndpoint(router, token, "/api/v2/scenarios", "GET", struct{}{})
@@ -163,7 +167,8 @@ func TestAddUserToGroup(t *testing.T) {
 	scenarios := scenariosMap["scenarios"]
 
 	//Actual checks
-	assert.Equal(t, 3, len(scenarios))
+	assert.Equal(t, 5, len(scenarios))
+
 	for _, v := range scenarios {
 		path := fmt.Sprintf("/api/v2/scenarios/%d/users", v.ID)
 		var usersMap map[string]([]database.User)
@@ -173,18 +178,17 @@ func TestAddUserToGroup(t *testing.T) {
 		switch v.ID {
 		case 1: //no dups
 			assert.Equal(t, "scenarioNoDups", v.Name)
-			assert.Equal(t, 2, len(users))
+			assert.Equal(t, 4, len(users))
 		case 2: // with dups
 			assert.Equal(t, "scenarioDups", v.Name)
 			assert.Equal(t, 1, len(users))
 			assert.Equal(t, "admin", users[0].Username)
-		case 3: // duped scenario
-			assert.Equal(t, "scenarioDups adrienmarie", v.Name)
-			assert.Equal(t, 1, len(users))
-			assert.Equal(t, "adrienmarie", users[0].Username)
 		default:
-			// should not happen, fail manually
-			assert.Equal(t, 0, 1)
+			usr := "usr" + strconv.Itoa(int(v.ID-2)) // shift ids by the first two scenarios
+			assert.Equal(t, "scenarioDups "+usr, v.Name)
+			assert.Equal(t, 1, len(users))
+			assert.Equal(t, usr, users[0].Username)
 		}
 	}
+
 }
