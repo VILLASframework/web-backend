@@ -30,8 +30,39 @@ import (
 	"github.com/jinzhu/gorm/dialects/postgres"
 )
 
-func DuplicateScenarioForUser(s database.Scenario, user *database.User, uuidstr string) {
+func IsAlreadyDuplicated(sc *database.Scenario, u *database.User) bool {
+	duplicateName := fmt.Sprintf("%s %s", sc.Name, u.Username)
+	db := database.GetDB()
+	var scenarios []database.Scenario
+	db.Find(&scenarios, "name = ?", duplicateName)
 
+	return (len(scenarios) > 0)
+}
+
+// check if access of U to SC is exclusively granted by UG
+func IsExclusiveAccess(sc *database.Scenario, u *database.User, ug *database.UserGroup) bool {
+	db := database.GetDB()
+	var ugs []database.UserGroup
+	db.Model(u).Association("UserGroups").Find(&ugs)
+	for _, asc_ug := range ugs {
+		if ug.ID == asc_ug.ID {
+			continue
+		}
+		var sms []database.ScenarioMapping
+		db.Model(&asc_ug).Association("ScenarioMappings").Find(&sms)
+		for _, sm := range sms {
+			if sm.ScenarioID == sc.ID {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+func DuplicateScenarioForUser(s database.Scenario, user *database.User, uuidstr string) {
+	if IsAlreadyDuplicated(&s, user) {
+		return
+	}
 	// get all component configs of the scenario
 	db := database.GetDB()
 	var configs []database.ComponentConfiguration
@@ -122,6 +153,33 @@ func DuplicateScenarioForUser(s database.Scenario, user *database.User, uuidstr 
 			}
 		}
 	}
+}
+
+func RemoveDuplicate(sc *database.Scenario, u *database.User) error {
+	db := database.GetDB()
+
+	var nsc database.Scenario
+	duplicateName := fmt.Sprintf("%s %s", sc.Name, u.Username)
+	err := db.Find(&nsc, "Name = ?", duplicateName).Error
+	if err != nil {
+		return err
+	}
+
+	err = db.Delete(&nsc).Error
+	return err
+}
+
+func RemoveAccess(sc *database.Scenario, u *database.User, ug *database.UserGroup) error {
+	if !IsExclusiveAccess(sc, u, ug) {
+		return nil
+	}
+	db := database.GetDB()
+	err := db.Model(&sc).Association("Users").Delete(&u).Error
+	if err != nil {
+		return err
+	}
+	err = db.Model(&u).Association("Scenarios").Delete(&sc).Error
+	return err
 }
 
 func duplicateScenario(s database.Scenario, icIds map[uint]uint, user *database.User) error {
