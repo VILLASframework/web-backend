@@ -206,9 +206,37 @@ func deleteUserGroup(c *gin.Context) {
 
 	var ug UserGroup
 	ug.UserGroup = ug_r
+	users, _, err := ug.getUsers()
+	if helper.DBError(c, err) {
+		return
+	}
 
+	scenarioMappings := ug.ScenarioMappings
+	db := database.GetDB()
+	for _, sm := range scenarioMappings {
+		if sm.Duplicate {
+			var sc database.Scenario
+			err = db.Find(&sc, "ID = ?", sm.ScenarioID).Error
+			if helper.DBError(c, err) {
+				return
+			}
+
+			for _, u := range users {
+				duplicateName := fmt.Sprintf("%s %s", sc.Name, u.Username)
+				var nsc database.Scenario
+				err = db.Find(&nsc, "Name = ?", duplicateName).Error
+				if helper.DBError(c, err) {
+					return
+				}
+				err = db.Delete(&nsc).Error
+				if helper.DBError(c, err) {
+					return
+				}
+			}
+		}
+	}
 	// Try to remove user group
-	err := ug.remove()
+	err = ug.remove()
 	if !helper.DBError(c, err) {
 		c.JSON(http.StatusOK, gin.H{"usergroup": ug})
 	}
