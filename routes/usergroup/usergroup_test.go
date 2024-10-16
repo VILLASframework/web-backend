@@ -78,6 +78,24 @@ var newUserGroupTwoMappings = UserGroupRequest{
 	},
 }
 
+var deleteTestUg = UserGroupRequest{
+	Name: "UserGroup3",
+	ScenarioMappings: []ScenarioMappingRequest{
+		{
+			ScenarioID: 1,
+			Duplicate:  false,
+		},
+		{
+			ScenarioID: 2,
+			Duplicate:  true,
+		},
+		{
+			ScenarioID: 3,
+			Duplicate:  true,
+		},
+	},
+}
+
 func TestMain(m *testing.M) {
 	err := configuration.InitConfig()
 	if err != nil {
@@ -256,4 +274,54 @@ func TestDeleteUserFromGroup(t *testing.T) {
 			assert.Equal(t, "usr2", users[0].Username)
 		}
 	}
+}
+
+func TestDeleteUserGroup(t *testing.T) {
+	// Prep DB
+	database.DropTables()
+	database.MigrateModels()
+	adminpw, _ := database.AddAdminUser(configuration.GlobalConfig)
+
+	//Auth
+	token, _ := helper.AuthenticateForTest(router, database.Credentials{Username: "admin", Password: adminpw})
+
+	//Post necessities
+	helper.TestEndpoint(router, token, "/api/v2/scenarios", "POST", helper.KeyModels{"scenario": database.Scenario{Name: "scenarioNoDups"}})
+	helper.TestEndpoint(router, token, "/api/v2/scenarios", "POST", helper.KeyModels{"scenario": database.Scenario{Name: "scenarioDups1"}})
+	helper.TestEndpoint(router, token, "/api/v2/scenarios", "POST", helper.KeyModels{"scenario": database.Scenario{Name: "scenarioDups2"}})
+	helper.TestEndpoint(router, token, "/api/v2/usergroups", "POST", helper.KeyModels{"usergroup": deleteTestUg})
+
+	//Add 2 users
+	for n_users := 0; n_users < 2; n_users++ {
+		//Add user
+		n := strconv.Itoa(n_users + 1)
+		usr := UserRequest{Username: "usr" + n, Password: "legendre" + n, Role: "User", Mail: "usr" + n + "@harmonics.de"}
+		helper.TestEndpoint(router, token, "/api/v2/users", "POST", helper.KeyModels{"user": usr})
+		helper.TestEndpoint(router, token, "/api/v2/usergroups/1/user?username=usr"+n, "PUT", struct{}{})
+	}
+
+	//delete usergroup
+	code, _, err := helper.TestEndpoint(router, token, "/api/v2/usergroups/1", "DELETE", struct{}{})
+	assert.Equal(t, 200, code)
+	assert.NoError(t, err)
+
+	//get scenarios
+	_, res, _ := helper.TestEndpoint(router, token, "/api/v2/scenarios", "GET", struct{}{})
+	var scenariosMap map[string]([]database.Scenario)
+	json.Unmarshal(res.Bytes(), &scenariosMap)
+	scenarios := scenariosMap["scenarios"]
+
+	//Actual checks
+	assert.Equal(t, 3, len(scenarios))
+	var names []string
+	for _, sc := range scenarios {
+		names = append(names, sc.Name)
+	}
+	assert.Contains(t, names, "scenarioNoDups")
+	assert.Contains(t, names, "scenarioDups1")
+	assert.Contains(t, names, "scenarioDups2")
+	assert.NotContains(t, names, "scenarioDups1 usr1")
+	assert.NotContains(t, names, "scenarioDups2 usr1")
+	assert.NotContains(t, names, "scenarioDups1 usr2")
+	assert.NotContains(t, names, "scenarioDups2 usr2")
 }
