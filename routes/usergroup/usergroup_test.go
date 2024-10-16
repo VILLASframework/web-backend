@@ -23,11 +23,11 @@ import (
 	"os"
 	"strconv"
 	"testing"
-	"time"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/scenario"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/user"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -95,7 +95,7 @@ func TestMain(m *testing.M) {
 
 	user.RegisterAuthenticate(api.Group("/authenticate"))
 	api.Use(user.Authentication())
-
+	scenario.RegisterScenarioEndpoints(api.Group("/scenarios"))
 	// user endpoints required to set user to inactive
 	user.RegisterUserEndpoints(api.Group("/users"))
 	RegisterUserGroupEndpoints(api.Group("/usergroups"))
@@ -218,7 +218,6 @@ func TestDeleteUserFromGroup(t *testing.T) {
 		assert.Equal(t, 200, code)
 		assert.NoError(t, err)
 	}
-	time.Sleep(time.Second)
 	//Delete one
 	helper.TestEndpoint(router, token, "/api/v2/usergroups/1/user?username=usr1", "DELETE", struct{}{})
 	//get scenarios
