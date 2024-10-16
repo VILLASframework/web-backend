@@ -119,7 +119,15 @@ func TestAddUserGroup(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 
+	//Test with inexitent scenario
+	code, resp, err = helper.TestEndpoint(router, token, "/api/v2/usergroups",
+		"POST", helper.KeyModels{"usergroup": newUserGroupOneMapping})
+	assert.NoError(t, err)
+	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
+
 	// Test with valid user group with one scenario mapping
+	helper.TestEndpoint(router, token, "/api/v2/scenarios", "POST", helper.KeyModels{"scenario": database.Scenario{Name: "scenario1"}})
+	helper.TestEndpoint(router, token, "/api/v2/scenarios", "POST", helper.KeyModels{"scenario": database.Scenario{Name: "scenario2"}})
 	code, resp, err = helper.TestEndpoint(router, token, "/api/v2/usergroups",
 		"POST", helper.KeyModels{"usergroup": newUserGroupOneMapping})
 	assert.NoError(t, err)
