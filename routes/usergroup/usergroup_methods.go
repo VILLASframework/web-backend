@@ -120,20 +120,12 @@ func (ug *UserGroup) addUser(u *database.User) error {
 	return err
 }
 
-func (ug *UserGroup) deleteUser(username string) error {
+func (ug *UserGroup) deleteUser(deletedUser *database.User) error {
 	db := database.GetDB()
-
-	var deletedUser database.User
-	err := db.Find(&deletedUser, "Username = ?", username).Error
-	if err != nil {
-		return err
-	}
-
 	no_users := db.Model(ug).Association("Users").Count()
-
 	if no_users > 0 {
 		// remove user from user group
-		err = db.Model(ug).Association("Users").Delete(&deletedUser).Error
+		err := db.Model(ug).Association("Users").Delete(&deletedUser).Error
 		if err != nil {
 			return err
 		}

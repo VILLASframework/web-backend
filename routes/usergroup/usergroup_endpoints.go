@@ -19,8 +19,6 @@ package usergroup
 
 import (
 	"errors"
-	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -214,21 +212,21 @@ func deleteUserGroup(c *gin.Context) {
 	scenarioMappings := ug.ScenarioMappings
 	db := database.GetDB()
 	for _, sm := range scenarioMappings {
+		var sc database.Scenario
+		err = db.Find(&sc, "ID = ?", sm.ScenarioID).Error
+		if helper.DBError(c, err) {
+			return
+		}
 		if sm.Duplicate {
-			var sc database.Scenario
-			err = db.Find(&sc, "ID = ?", sm.ScenarioID).Error
-			if helper.DBError(c, err) {
-				return
-			}
-
 			for _, u := range users {
-				duplicateName := fmt.Sprintf("%s %s", sc.Name, u.Username)
-				var nsc database.Scenario
-				err = db.Find(&nsc, "Name = ?", duplicateName).Error
+				err = user.RemoveDuplicate(&sc, &u)
 				if helper.DBError(c, err) {
 					return
 				}
-				err = db.Delete(&nsc).Error
+			}
+		} else {
+			for _, u := range users {
+				err = user.RemoveAccess(&sc, &u, &ug_r)
 				if helper.DBError(c, err) {
 					return
 				}
@@ -322,12 +320,6 @@ func addUserToUserGroup(c *gin.Context) {
 			return
 		}
 
-		duplicateName := fmt.Sprintf("%s %s", s.Name, u.Username)
-		alreadyDuplicated := user.IsAlreadyDuplicated(duplicateName)
-		if alreadyDuplicated {
-			log.Printf("Scenario %d already duplicated for user %s", s.ID, u.Username)
-		}
-
 		if sm.Duplicate {
 			// Duplicate scenario
 			user.DuplicateScenarioForUser(s, &u, "")
@@ -379,36 +371,31 @@ func deleteUserFromUserGroup(c *gin.Context) {
 		return
 	}
 
-	err = ug.deleteUser(username)
-	if helper.DBError(c, err) {
-		return
-	}
 	for _, sm := range ug.ScenarioMappings {
+
 		var sc database.Scenario
-		err = db.Find(&sc, "ID = ?", sm.ScenarioID).Error
+		err := db.Find(&sc, "ID = ?", sm.ScenarioID).Error
 		if helper.DBError(c, err) {
 			return
 		}
 
 		if sm.Duplicate {
-			var nsc database.Scenario
-			duplicateName := fmt.Sprintf("%s %s", sc.Name, u.Username)
-			err = db.Find(&nsc, "Name = ?", duplicateName).Error
-			if helper.DBError(c, err) {
-				return
-			}
-
-			err = db.Delete(&nsc).Error
+			err = user.RemoveDuplicate(&sc, &u)
 			if helper.DBError(c, err) {
 				return
 			}
 
 		} else {
-			err = db.Model(&sc).Association("Users").Delete(&u).Error
+			err = user.RemoveAccess(&sc, &u, &ug.UserGroup)
 			if helper.DBError(c, err) {
 				return
 			}
 		}
+
+	}
+	err = ug.deleteUser(&u)
+	if helper.DBError(c, err) {
+		return
 	}
 	c.JSON(http.StatusOK, gin.H{"usergroup": ug})
 }
