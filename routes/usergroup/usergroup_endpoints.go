@@ -18,6 +18,7 @@
 package usergroup
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -27,6 +28,7 @@ import (
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/helper"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/user"
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 )
 
 func RegisterUserGroupEndpoints(r *gin.RouterGroup) {
@@ -74,6 +76,15 @@ func addUserGroup(c *gin.Context) {
 
 	// Create the new user group from the request
 	newUserGroup := req.createUserGroup()
+	db := database.GetDB()
+	for _, sm := range newUserGroup.ScenarioMappings {
+		var sc database.Scenario
+		if err := db.Find(&sc, "ID = ?", sm.ScenarioID).Error; errors.Is(err, gorm.ErrRecordNotFound) {
+			helper.NotFoundError(c,
+				"Scenario mappings referencing inexistent scenario ID: "+strconv.Itoa(int(sm.ScenarioID)))
+			return
+		}
+	}
 
 	// Save the new user group to the database
 	err := newUserGroup.save()
