@@ -164,8 +164,25 @@ func RemoveDuplicate(sc *database.Scenario, u *database.User) error {
 	if err != nil {
 		return err
 	}
+	var configs []database.ComponentConfiguration
+	err = db.Model(&sc).Related(&configs, "ComponentConfigurations").Error
+	if err != nil {
+		return err
+	}
+	//if ic is kubernetes simulator and already duplicated => delete
+	for _, config := range configs {
+		var ic database.InfrastructureComponent
+		err = db.Find(&ic, config.ICID).Error
+		if err != nil {
+			return err
+		}
 
-	err = db.Delete(&nsc).Error
+		if ic.Type == "kubernetes" && ic.Category == "simulator" && strings.Contains(ic.Name, u.Username) {
+			db.Delete(&ic)
+		}
+	}
+	err = db.Select("Files", "Dashboards", "ComponentConfigurations").Delete(&nsc).Error
+
 	return err
 }
 

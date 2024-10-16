@@ -244,8 +244,13 @@ func TestDeleteUserFromGroup(t *testing.T) {
 		assert.Equal(t, 200, code)
 		assert.NoError(t, err)
 	}
+	//we add usr1 to a group that doubles its right of acces to scenario 1
+	helper.TestEndpoint(router, token, "/api/v2/usergroups", "POST", helper.KeyModels{"usergroup": newUserGroupOneMapping})
+	helper.TestEndpoint(router, token, "/api/v2/usergroups/2/user?username=usr1", "PUT", struct{}{})
+
 	//Delete one
 	helper.TestEndpoint(router, token, "/api/v2/usergroups/1/user?username=usr1", "DELETE", struct{}{})
+
 	//get scenarios
 	_, res, _ := helper.TestEndpoint(router, token, "/api/v2/scenarios", "GET", struct{}{})
 	var scenariosMap map[string]([]database.Scenario)
@@ -261,9 +266,9 @@ func TestDeleteUserFromGroup(t *testing.T) {
 		json.Unmarshal(res.Bytes(), &usersMap)
 		users := usersMap["users"]
 		switch v.ID {
-		case 1: //no dups
+		case 1: //no dups should still contain usr1 through ug2
 			assert.Equal(t, "scenarioNoDups", v.Name)
-			assert.Equal(t, 2, len(users))
+			assert.Equal(t, 3, len(users))
 		case 2: // with dups
 			assert.Equal(t, "scenarioDups", v.Name)
 			assert.Equal(t, 1, len(users))
@@ -273,6 +278,24 @@ func TestDeleteUserFromGroup(t *testing.T) {
 			assert.Equal(t, 1, len(users))
 			assert.Equal(t, "usr2", users[0].Username)
 		}
+	}
+	//Delete from other
+	helper.TestEndpoint(router, token, "/api/v2/usergroups/2/user?username=usr1", "DELETE", struct{}{})
+
+	_, res, _ = helper.TestEndpoint(router, token, "/api/v2/scenarios/1", "GET", struct{}{})
+	var scenarioMap map[string](database.Scenario)
+	json.Unmarshal(res.Bytes(), &scenarioMap)
+	scenario := scenarioMap["scenario"]
+
+	path := fmt.Sprintf("/api/v2/scenarios/%d/users", scenario.ID)
+	var usersMap map[string]([]database.User)
+	_, res, _ = helper.TestEndpoint(router, token, path, "GET", struct{}{})
+	json.Unmarshal(res.Bytes(), &usersMap)
+	users := usersMap["users"]
+
+	assert.Equal(t, 2, len(users))
+	for _, u := range users {
+		assert.NotEqual(t, "usr1", u.Username)
 	}
 }
 
@@ -300,6 +323,10 @@ func TestDeleteUserGroup(t *testing.T) {
 		helper.TestEndpoint(router, token, "/api/v2/usergroups/1/user?username=usr"+n, "PUT", struct{}{})
 	}
 
+	//we add usr1 to a group that doubles its right of acces to scenario 1
+	helper.TestEndpoint(router, token, "/api/v2/usergroups", "POST", helper.KeyModels{"usergroup": newUserGroupOneMapping})
+	helper.TestEndpoint(router, token, "/api/v2/usergroups/2/user?username=usr1", "PUT", struct{}{})
+
 	//delete usergroup
 	code, _, err := helper.TestEndpoint(router, token, "/api/v2/usergroups/1", "DELETE", struct{}{})
 	assert.Equal(t, 200, code)
@@ -313,15 +340,42 @@ func TestDeleteUserGroup(t *testing.T) {
 
 	//Actual checks
 	assert.Equal(t, 3, len(scenarios))
-	var names []string
+	var exists []string = []string{"scenarioNoDups", "scenarioDups1", "scenarioDups2"}
+	var deleted []string = []string{"scenarioDups1 usr1", "scenarioDups2 usr1", "scenarioDups1 usr2", "scenarioDups2 usr2"}
 	for _, sc := range scenarios {
-		names = append(names, sc.Name)
+		assert.Contains(t, exists, sc.Name)
+		assert.NotContains(t, deleted, sc.Name)
+		if sc.Name == "scenarioNoDups" {
+			_, res, _ = helper.TestEndpoint(router, token, "/api/v2/scenarios/1", "GET", struct{}{})
+			var scenarioMap map[string](database.Scenario)
+			json.Unmarshal(res.Bytes(), &scenarioMap)
+			scenario := scenarioMap["scenario"]
+
+			path := fmt.Sprintf("/api/v2/scenarios/%d/users", scenario.ID)
+			var usersMap map[string]([]database.User)
+			_, res, _ = helper.TestEndpoint(router, token, path, "GET", struct{}{})
+			json.Unmarshal(res.Bytes(), &usersMap)
+			users := usersMap["users"]
+			assert.Equal(t, 2, len(users))
+		}
 	}
-	assert.Contains(t, names, "scenarioNoDups")
-	assert.Contains(t, names, "scenarioDups1")
-	assert.Contains(t, names, "scenarioDups2")
-	assert.NotContains(t, names, "scenarioDups1 usr1")
-	assert.NotContains(t, names, "scenarioDups2 usr1")
-	assert.NotContains(t, names, "scenarioDups1 usr2")
-	assert.NotContains(t, names, "scenarioDups2 usr2")
+	//Delete from other
+	helper.TestEndpoint(router, token, "/api/v2/usergroups/2/user?username=usr1", "DELETE", struct{}{})
+
+	_, res, _ = helper.TestEndpoint(router, token, "/api/v2/scenarios/1", "GET", struct{}{})
+	var scenarioMap map[string](database.Scenario)
+	json.Unmarshal(res.Bytes(), &scenarioMap)
+	scenario := scenarioMap["scenario"]
+
+	path := fmt.Sprintf("/api/v2/scenarios/%d/users", scenario.ID)
+	var usersMap map[string]([]database.User)
+	_, res, _ = helper.TestEndpoint(router, token, path, "GET", struct{}{})
+	json.Unmarshal(res.Bytes(), &usersMap)
+	users := usersMap["users"]
+
+	assert.Equal(t, 1, len(users))
+	for _, u := range users {
+		assert.NotEqual(t, "usr1", u.Username)
+		assert.NotEqual(t, "usr2", u.Username)
+	}
 }
