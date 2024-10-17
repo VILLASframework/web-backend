@@ -491,6 +491,7 @@ func TestUpdateUserGroup(t *testing.T) {
 		assert.Equal(t, 1, len(users))
 
 		sc, exists = scenariosMap[name+" usr1"]
+		path = fmt.Sprintf("/api/v2/scenarios/%d/users", sc.ID)
 		assert.True(t, exists)
 		_, res, _ = helper.TestEndpoint(router, token, path, "GET", struct{}{})
 		json.Unmarshal(res.Bytes(), &usersMap)
