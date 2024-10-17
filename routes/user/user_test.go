@@ -27,7 +27,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"strings"
 	"testing"
 	"time"
 
@@ -157,43 +156,6 @@ func TestAuthenticate(t *testing.T) {
 	_, err = helper.AuthenticateForTest(router, database.Credentials{Username: "admin", Password: adminpw})
 	assert.NoError(t, err)
 
-}
-
-func TestUserGroups(t *testing.T) {
-	// Create new user
-	// (user, email and groups are read from request headers in real case)
-	var myUser User
-	username := "Fridolin"
-	email := "Fridolin@rwth-aachen.de"
-	role := "User"
-	userGroups := strings.Split("testGroup1,testGroup2", ",")
-
-	err := myUser.byUsername(username)
-	assert.Error(t, err)
-	myUser, err = NewUser(username, "", email, role, true)
-	assert.NoError(t, err)
-
-	// Read groups file
-	err = configuration.ReadGroupsFile("notexisting.yaml")
-	assert.Error(t, err)
-
-	err = configuration.ReadGroupsFile("../../configuration/groups.yaml")
-	assert.NoError(t, err)
-
-	// Check whether duplicate flag is saved correctly in configuration
-	for _, group := range userGroups {
-		if gsarray, ok := configuration.ScenarioGroupMap[group]; ok {
-			for _, groupedScenario := range gsarray {
-				if group == "testGroup1" && groupedScenario.Scenario == 1 {
-					assert.Equal(t, true, groupedScenario.Duplicate)
-				} else if group == "testGroup2" && groupedScenario.Scenario == 4 {
-					assert.Equal(t, true, groupedScenario.Duplicate)
-				} else {
-					assert.Equal(t, false, groupedScenario.Duplicate)
-				}
-			}
-		}
-	}
 }
 
 func TestAuthenticateQueryToken(t *testing.T) {

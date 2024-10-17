@@ -20,13 +20,10 @@ package configuration
 import (
 	"flag"
 	"fmt"
-	"io"
 	"log"
 	"os"
 	"sort"
 	"strings"
-
-	"gopkg.in/yaml.v3"
 
 	"github.com/zpatrick/go-config"
 )
@@ -196,41 +193,4 @@ func InitConfig() error {
 func remove(arr []GroupedScenario, index int) []GroupedScenario {
 	arr[index] = arr[len(arr)-1]
 	return arr[:len(arr)-1]
-}
-
-func ReadGroupsFile(path string) error {
-	_, err := os.Stat(path)
-	if err != nil {
-		return err
-	}
-
-	yamlFile, err := os.Open(path)
-	if err != nil {
-		return fmt.Errorf("error opening yaml file for groups: %v", err)
-	}
-	log.Println("Successfully opened yaml groups file", path)
-
-	defer yamlFile.Close()
-
-	byteValue, _ := io.ReadAll(yamlFile)
-
-	err = yaml.Unmarshal(byteValue, &ScenarioGroupMap)
-	if err != nil {
-		return fmt.Errorf("error unmarshalling yaml into ScenarioGroupMap: %v", err)
-	}
-
-	for _, group := range ScenarioGroupMap {
-		for i, scenario := range group {
-			// remove invalid values that might have been introduced by typos
-			// (Unmarshal sets default values when it doesn't find a field)
-			if scenario.Scenario == 0 {
-				log.Println("Removing entry from ScenarioGroupMap, check for typos in the yaml!")
-				remove(group, i)
-			}
-		}
-	}
-
-	log.Println("ScenarioGroupMap", ScenarioGroupMap)
-
-	return nil
 }
