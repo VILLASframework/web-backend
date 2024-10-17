@@ -179,8 +179,6 @@ func RemoveDuplicate(sc *database.Scenario, u *database.User) error {
 
 		if ic.Type == "kubernetes" && ic.Category == "simulator" && strings.Contains(ic.Name, u.Username) {
 
-			msg := `{"uuid": "` + ic.UUID + `"}`
-
 			type Action struct {
 				Act        string          `json:"action"`
 				When       int64           `json:"when"`
@@ -192,7 +190,7 @@ func RemoveDuplicate(sc *database.Scenario, u *database.User) error {
 			actionCreate := Action{
 				Act:        "delete",
 				When:       time.Now().Unix(),
-				Parameters: json.RawMessage(msg),
+				Parameters: json.RawMessage(`{"uuid": "` + ic.UUID + `"}`),
 			}
 
 			payload, err := json.Marshal(actionCreate)

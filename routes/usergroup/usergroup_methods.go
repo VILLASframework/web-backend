@@ -18,7 +18,10 @@
 package usergroup
 
 import (
+	"fmt"
+
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/user"
 	"github.com/jinzhu/gorm"
 )
 
@@ -51,13 +54,20 @@ func (ug *UserGroup) update(updatedUserGroup UserGroup, reqScenarioMappings []va
 		}
 	*/
 
-	return updateScenarioMappings(ug.ID, reqScenarioMappings)
+	return ug.updateScenarioMappings(ug.ID, reqScenarioMappings)
 }
 
-func updateScenarioMappings(groupID uint, reqScenarioMappings []validUpdatedScenarioMapping) error {
+func (ug *UserGroup) updateScenarioMappings(groupID uint, reqScenarioMappings []validUpdatedScenarioMapping) error {
 	var oldMappings []database.ScenarioMapping
 	db := database.GetDB()
 	err := db.Where("user_group_id = ?", groupID).Find(&oldMappings).Error
+	if err != nil {
+		return err
+	}
+
+	var users []database.User
+	err = db.Model(ug).Association("Users").Find(&users).Error
+	fmt.Println(users)
 	if err != nil {
 		return err
 	}
@@ -69,8 +79,33 @@ func updateScenarioMappings(groupID uint, reqScenarioMappings []validUpdatedScen
 
 	// Handle ScenarioMappings (add/update/delete)
 	for _, reqMapping := range reqScenarioMappings {
+		var sc database.Scenario
+		err = db.Find(&sc, "ID = ?", reqMapping.ScenarioID).Error
+		if err != nil {
+			return err
+		}
 		if oldMapping, exists := oldMappingsMap[reqMapping.ScenarioID]; exists {
 			// Update
+			if oldMapping.Duplicate != reqMapping.Duplicate {
+				if reqMapping.Duplicate {
+					for _, u := range users {
+						user.RemoveAccess(&sc, &u, &ug.UserGroup)
+						user.DuplicateScenarioForUser(sc, &u, "")
+					}
+				} else {
+					for _, u := range users {
+						err = user.RemoveDuplicate(&sc, &u)
+						if err != nil {
+							return err
+						}
+						err = db.Model(&sc).Association("Users").Append(&u).Error
+						if err != nil {
+							return err
+						}
+
+					}
+				}
+			}
 			oldMapping.Duplicate = reqMapping.Duplicate
 			err = db.Save(&oldMapping).Error
 			if err != nil {
@@ -84,6 +119,20 @@ func updateScenarioMappings(groupID uint, reqScenarioMappings []validUpdatedScen
 				UserGroupID: groupID,
 				Duplicate:   reqMapping.Duplicate,
 			}
+
+			if reqMapping.Duplicate {
+				for _, u := range users {
+					user.DuplicateScenarioForUser(sc, &u, "")
+				}
+			} else {
+				for _, u := range users {
+					err = db.Model(&sc).Association("Users").Append(&u).Error
+					if err != nil {
+						return err
+					}
+
+				}
+			}
 			err = db.Create(&newMapping).Error
 			if err != nil {
 				return err
@@ -93,6 +142,23 @@ func updateScenarioMappings(groupID uint, reqScenarioMappings []validUpdatedScen
 
 	// Delete old mappings that were not in the request
 	for _, mapping := range oldMappingsMap {
+		var nsc database.Scenario
+		err = db.Find(&nsc, "ID = ?", mapping.ScenarioID).Error
+		if err != nil {
+			return err
+		}
+		if mapping.Duplicate {
+			for _, u := range users {
+				err = user.RemoveDuplicate(&nsc, &u)
+				if err != nil {
+					return err
+				}
+			}
+		} else {
+			for _, u := range users {
+				user.RemoveAccess(&nsc, &u, &ug.UserGroup)
+			}
+		}
 		err = db.Delete(&mapping).Error
 		if err != nil {
 			return err
