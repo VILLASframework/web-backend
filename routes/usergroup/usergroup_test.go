@@ -96,6 +96,66 @@ var deleteTestUg = UserGroupRequest{
 	},
 }
 
+var initUpdateTestUg = UserGroupRequest{
+	Name: "UserGroup4",
+	ScenarioMappings: []ScenarioMappingRequest{
+		{
+			ScenarioID: 1,
+			Duplicate:  true,
+		},
+		{
+			ScenarioID: 2,
+			Duplicate:  false,
+		},
+		{
+			ScenarioID: 3,
+			Duplicate:  true,
+		},
+		{
+			ScenarioID: 4,
+			Duplicate:  false,
+		},
+		{
+			ScenarioID: 5,
+			Duplicate:  true,
+		},
+		{
+			ScenarioID: 6,
+			Duplicate:  false,
+		},
+	},
+}
+
+var updateTestUg = UserGroupRequest{
+	Name: "UserGroup4",
+	ScenarioMappings: []ScenarioMappingRequest{
+		{
+			ScenarioID: 1,
+			Duplicate:  false,
+		},
+		{
+			ScenarioID: 2,
+			Duplicate:  true,
+		},
+		{
+			ScenarioID: 5,
+			Duplicate:  true,
+		},
+		{
+			ScenarioID: 6,
+			Duplicate:  false,
+		},
+		{
+			ScenarioID: 7,
+			Duplicate:  true,
+		},
+		{
+			ScenarioID: 8,
+			Duplicate:  false,
+		},
+	},
+}
+
 func TestMain(m *testing.M) {
 	err := configuration.InitConfig()
 	if err != nil {
@@ -378,4 +438,94 @@ func TestDeleteUserGroup(t *testing.T) {
 		assert.NotEqual(t, "usr1", u.Username)
 		assert.NotEqual(t, "usr2", u.Username)
 	}
+}
+
+func TestUpdateUserGroup(t *testing.T) {
+	// Prep DB
+	database.DropTables()
+	database.MigrateModels()
+	adminpw, _ := database.AddAdminUser(configuration.GlobalConfig)
+
+	//Auth
+	token, _ := helper.AuthenticateForTest(router, database.Credentials{Username: "admin", Password: adminpw})
+
+	//Post necessities
+	helper.TestEndpoint(router, token, "/api/v2/scenarios", "POST", helper.KeyModels{"scenario": database.Scenario{Name: "changeDups"}})
+	helper.TestEndpoint(router, token, "/api/v2/scenarios", "POST", helper.KeyModels{"scenario": database.Scenario{Name: "changeNoDups"}})
+	helper.TestEndpoint(router, token, "/api/v2/scenarios", "POST", helper.KeyModels{"scenario": database.Scenario{Name: "removeDups"}})
+	helper.TestEndpoint(router, token, "/api/v2/scenarios", "POST", helper.KeyModels{"scenario": database.Scenario{Name: "removeNoDups"}})
+	helper.TestEndpoint(router, token, "/api/v2/scenarios", "POST", helper.KeyModels{"scenario": database.Scenario{Name: "unchangedDups"}})
+	helper.TestEndpoint(router, token, "/api/v2/scenarios", "POST", helper.KeyModels{"scenario": database.Scenario{Name: "unchangedNoDups"}})
+	helper.TestEndpoint(router, token, "/api/v2/scenarios", "POST", helper.KeyModels{"scenario": database.Scenario{Name: "addDups"}})
+	helper.TestEndpoint(router, token, "/api/v2/scenarios", "POST", helper.KeyModels{"scenario": database.Scenario{Name: "addNoDups"}})
+	helper.TestEndpoint(router, token, "/api/v2/usergroups", "POST", helper.KeyModels{"usergroup": initUpdateTestUg})
+
+	//Add user
+	usr := UserRequest{Username: "usr1", Password: "legendre1", Role: "User", Mail: "usr1@harmonics.de"}
+	helper.TestEndpoint(router, token, "/api/v2/users", "POST", helper.KeyModels{"user": usr})
+	helper.TestEndpoint(router, token, "/api/v2/usergroups/1/user?username=usr1", "PUT", struct{}{})
+
+	//update group
+	helper.TestEndpoint(router, token, "/api/v2/usergroups/1", "PUT", helper.KeyModels{"usergroup": updateTestUg})
+
+	//get scenarios
+	_, res, _ := helper.TestEndpoint(router, token, "/api/v2/scenarios", "GET", struct{}{})
+	var scenariosRes map[string]([]database.Scenario)
+	json.Unmarshal(res.Bytes(), &scenariosRes)
+	scenarios := scenariosRes["scenarios"]
+	assert.Equal(t, 11, len(scenarios))
+	var scenariosMap map[string](database.Scenario) = make(map[string](database.Scenario))
+	for _, s := range scenarios {
+		scenariosMap[s.Name] = s
+	}
+
+	//scenarios that transformed into/remained/got added as duplicated (6)
+	for _, name := range []string{"addDups", "unchangedDups", "changeNoDups"} {
+		sc, exists := scenariosMap[name]
+		assert.True(t, exists)
+		path := fmt.Sprintf("/api/v2/scenarios/%d/users", sc.ID)
+		var usersMap map[string]([]database.User)
+		_, res, _ = helper.TestEndpoint(router, token, path, "GET", struct{}{})
+		json.Unmarshal(res.Bytes(), &usersMap)
+		users := usersMap["users"]
+		assert.Equal(t, 1, len(users))
+
+		sc, exists = scenariosMap[name+" usr1"]
+		assert.True(t, exists)
+		_, res, _ = helper.TestEndpoint(router, token, path, "GET", struct{}{})
+		json.Unmarshal(res.Bytes(), &usersMap)
+		users = usersMap["users"]
+		assert.Equal(t, 1, len(users))
+	}
+
+	//scenarios that transformed into/remained/got added as single (+3)
+	for _, name := range []string{"addNoDups", "unchangedNoDups", "changeDups"} {
+		sc, exists := scenariosMap[name]
+		assert.True(t, exists)
+		path := fmt.Sprintf("/api/v2/scenarios/%d/users", sc.ID)
+		var usersMap map[string]([]database.User)
+		_, res, _ = helper.TestEndpoint(router, token, path, "GET", struct{}{})
+		json.Unmarshal(res.Bytes(), &usersMap)
+		users := usersMap["users"]
+		assert.Equal(t, 2, len(users))
+
+		_, exists = scenariosMap[name+" usr1"]
+		assert.False(t, exists)
+	}
+
+	//scenarios that got removed (+2 = 11)
+	for _, name := range []string{"removeDups", "removeNoDups"} {
+		sc, exists := scenariosMap[name]
+		assert.True(t, exists)
+		path := fmt.Sprintf("/api/v2/scenarios/%d/users", sc.ID)
+		var usersMap map[string]([]database.User)
+		_, res, _ = helper.TestEndpoint(router, token, path, "GET", struct{}{})
+		json.Unmarshal(res.Bytes(), &usersMap)
+		users := usersMap["users"]
+		assert.Equal(t, 1, len(users))
+
+		_, exists = scenariosMap[name+" usr1"]
+		assert.False(t, exists)
+	}
+
 }
