@@ -189,8 +189,3 @@ func InitConfig() error {
 	}
 	return nil
 }
-
-func remove(arr []GroupedScenario, index int) []GroupedScenario {
-	arr[index] = arr[len(arr)-1]
-	return arr[:len(arr)-1]
-}
