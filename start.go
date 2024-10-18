@@ -18,9 +18,10 @@ package main
 
 import (
 	"fmt"
-	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/user"
 	"log"
 	"time"
+
+	"git.rwth-aachen.de/acs/public/villas/web-backend-go/routes/user"
 
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/configuration"
 	"git.rwth-aachen.de/acs/public/villas/web-backend-go/database"
@@ -83,17 +84,6 @@ func main() {
 	port, err := configuration.GlobalConfig.String("port")
 	if err != nil {
 		log.Fatalf("Error reading port from global configuration: %s, aborting.", err)
-	}
-
-	gPath, _ := configuration.GlobalConfig.String("groups.path")
-
-	if gPath != "" {
-		err = configuration.ReadGroupsFile(gPath)
-		if err != nil {
-			log.Fatalf("Error reading groups YAML file: %s, aborting.", err)
-		}
-	} else {
-		log.Println("WARNING: path to groups yaml file not set, I am not initializing the scenario-groups mapping.")
 	}
 
 	// Init database

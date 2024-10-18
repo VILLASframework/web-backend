@@ -42,6 +42,11 @@ go run start.go --help
 ```
 to get a list of available parameters and default values
 
+### Generating Docs
+```bash
+$(go env GOPATH)/bin/swag init --generalInfo start.go --output ./doc/api --parseDependency
+```
+
 ## Environment variables
 
 | Variable		| Description										                               |

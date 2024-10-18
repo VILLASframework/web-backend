@@ -48,6 +48,30 @@ type User struct {
 	Active bool `json:"active" gorm:"default:true"`
 	// Scenarios to which user has access
 	Scenarios []*Scenario `json:"-" gorm:"many2many:user_scenarios;"`
+	// Groups of user
+	UserGroups []*UserGroup `json:"-" gorm:"many2many:user_groups_users;"`
+}
+
+// ScenarioMapping data model
+type ScenarioMapping struct {
+	Model
+	ScenarioID  uint      `json:"scenarioID" ` // Foreign key to Scenario
+	Scenario    Scenario  `json:"-" gorm:"foreignkey:ScenarioID"`
+	UserGroupID uint      `json:"-"` // Foreign key to UserGroup
+	UserGroup   UserGroup `json:"-" gorm:"foreignkey:UserGroupID"`
+	// Whether to duplicate Scenario or add users to existing Scenario
+	Duplicate bool `json:"duplicate"`
+}
+
+// UserGroup data model
+type UserGroup struct {
+	Model
+	// Name of user group
+	Name string `json:"name" gorm:"unique;not null"`
+	// Scenarios that belong to the user group
+	ScenarioMappings []ScenarioMapping `json:"scenarioMappings" gorm:"foreignkey:UserGroupID"`
+	// Users that belong to the user group
+	Users []*User `json:"users" gorm:"many2many:user_groups_users;"`
 }
 
 // Scenario data model

@@ -142,6 +142,35 @@ func CheckSignalPermissions(c *gin.Context, operation CRUD) (bool, Signal) {
 
 }
 
+func CheckUserGroupPermissions(c *gin.Context, operation CRUD, userGroupIDSource string, usergroupIDBody int) (bool, UserGroup) {
+
+	var usrgrp UserGroup
+
+	err := ValidateRole(c, ModelUserGroup, operation)
+	if err != nil {
+		helper.UnprocessableEntityError(c, fmt.Sprintf("Access denied (role validation failed): %v", err.Error()))
+		return false, usrgrp
+	}
+
+	if operation == Create {
+		return true, usrgrp
+	}
+
+	groupID, err := helper.GetIDOfElement(c, "userGroupID", userGroupIDSource, usergroupIDBody)
+	if err != nil {
+		return false, usrgrp
+	}
+
+	db := GetDB()
+	err = db.Preload("ScenarioMappings.Scenario").First(&usrgrp, groupID).Error
+
+	if helper.DBNotFoundError(c, err, strconv.Itoa(groupID), "UserGroup") {
+		return false, usrgrp
+	}
+
+	return true, usrgrp
+}
+
 func CheckDashboardPermissions(c *gin.Context, operation CRUD, dabIDSource string, dabIDBody int) (bool, Dashboard) {
 
 	var dab Dashboard
