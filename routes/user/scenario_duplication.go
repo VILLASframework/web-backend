@@ -165,7 +165,7 @@ func RemoveDuplicate(sc *database.Scenario, u *database.User) error {
 		return err
 	}
 	var configs []database.ComponentConfiguration
-	err = db.Model(&sc).Related(&configs, "ComponentConfigurations").Error
+	err = db.Model(&nsc).Related(&configs, "ComponentConfigurations").Error
 	if err != nil {
 		return err
 	}
@@ -176,8 +176,9 @@ func RemoveDuplicate(sc *database.Scenario, u *database.User) error {
 		if err != nil {
 			return err
 		}
-
 		if ic.Type == "kubernetes" && ic.Category == "simulator" && strings.Contains(ic.Name, u.Username) {
+
+			msg := `{"uuid": "` + ic.UUID + `"}`
 
 			type Action struct {
 				Act        string          `json:"action"`
@@ -190,7 +191,7 @@ func RemoveDuplicate(sc *database.Scenario, u *database.User) error {
 			actionCreate := Action{
 				Act:        "delete",
 				When:       time.Now().Unix(),
-				Parameters: json.RawMessage(`{"uuid": "` + ic.UUID + `"}`),
+				Parameters: json.RawMessage(msg),
 			}
 
 			payload, err := json.Marshal(actionCreate)
@@ -202,9 +203,13 @@ func RemoveDuplicate(sc *database.Scenario, u *database.User) error {
 				if session.IsReady {
 					err = session.Send(payload, ic.Manager)
 					if err != nil {
-						db.Delete(&ic)
+						return err
 					}
-					return err
+					err = db.Delete(&ic).Error
+					if err != nil {
+						return err
+					}
+
 				} else {
 					return fmt.Errorf("could not send IC create action, AMQP session is not ready")
 				}
