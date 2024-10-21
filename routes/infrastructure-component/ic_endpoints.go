@@ -313,8 +313,22 @@ func sendActionToIC(c *gin.Context) {
 	}
 
 	for _, action := range actions {
-		if (action.Act == "delete" || action.Act == "create") && s.Category != "manager" {
-			helper.BadRequestError(c, "cannot send a delete or create action to an IC of category "+s.Category)
+		switch action.Act {
+		case "create", "delete": // needs to be a kubernetes, generic or miob manager
+			if s.Category != "manager" || (s.Type != "kubernetes" && s.Type != "generic" && s.Type != "miob") {
+				helper.BadRequestError(c, "cannot send a delete or create action to an IC of category "+s.Category)
+				return
+			}
+		case "start", "stop", "pause", "resume": //needs to be a NON rscad/rtlab simulator OR a node manager/gateway
+			if !(((s.Category == "manager" || s.Category == "gateway") && s.Type == "node") || (s.Category == "simulator" && s.Type != "rtlab" && s.Type != "rscad")) {
+				helper.BadRequestError(c, "cannot send a start, stop pause or resume action to an IC of category "+s.Category+" and type "+s.Type)
+				return
+			}
+		case "ping", "reset": //Should be valid for all
+
+		default:
+			helper.BadRequestError(c, "Action was not recognized "+action.Act)
+			return
 		}
 		err = sendActionAMQP(action, s.UUID)
 		if err != nil {
