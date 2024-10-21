@@ -320,7 +320,7 @@ func sendActionToIC(c *gin.Context) {
 				return
 			}
 		case "start", "stop", "pause", "resume": //needs to be a NON rscad/rtlab simulator OR a node manager/gateway
-			if !(((s.Category == "manager" || s.Category == "gateway") && s.Type == "node") || (s.Category == "simulator" && s.Type != "rtlab" && s.Type != "rscad")) {
+			if !(((s.Category == "manager" || s.Category == "gateway") && s.Type == "villas-node") || (s.Category == "simulator" && s.Type != "rtlab" && s.Type != "rscad")) {
 				helper.BadRequestError(c, "cannot send a start, stop pause or resume action to an IC of category "+s.Category+" and type "+s.Type)
 				return
 			}
