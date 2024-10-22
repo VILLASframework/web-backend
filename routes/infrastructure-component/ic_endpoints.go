@@ -315,7 +315,7 @@ func sendActionToIC(c *gin.Context) {
 	for _, action := range actions {
 		switch action.Act {
 		case "create", "delete": // needs to be a kubernetes, generic or miob manager
-			if s.Category != "manager" || (s.Type != "kubernetes" && s.Type != "generic" && s.Type != "miob") {
+			if s.Category != "manager" || (s.Type != "kubernetes-simple" && s.Type != "kubernetes" && s.Type != "generic" && s.Type != "miob") {
 				helper.BadRequestError(c, "cannot send a delete or create action to an IC of category "+s.Category)
 				return
 			}
