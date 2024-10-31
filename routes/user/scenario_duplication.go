@@ -169,12 +169,12 @@ func RemoveDuplicate(sc *database.Scenario, u *database.User) error {
 	if err != nil {
 		return err
 	}
-	//if ic is kubernetes simulator and already duplicated => delete
+
 	for _, config := range configs {
 		var ic database.InfrastructureComponent
 		err = db.Find(&ic, config.ICID).Error
 		if err != nil {
-			return err
+			continue
 		}
 		if ic.Type == "kubernetes" && ic.Category == "simulator" && strings.Contains(ic.Name, u.Username) {
 
@@ -196,18 +196,18 @@ func RemoveDuplicate(sc *database.Scenario, u *database.User) error {
 
 			payload, err := json.Marshal(actionCreate)
 			if err != nil {
-				return err
+				continue
 			}
 
 			if session != nil {
 				if session.IsReady {
 					err = session.Send(payload, ic.Manager)
 					if err != nil {
-						return err
+						continue
 					}
 					err = db.Delete(&ic).Error
 					if err != nil {
-						return err
+						continue
 					}
 
 				} else {
@@ -227,11 +227,8 @@ func RemoveAccess(sc *database.Scenario, u *database.User, ug *database.UserGrou
 		return nil
 	}
 	db := database.GetDB()
-	err := db.Model(&sc).Association("Users").Delete(&u).Error
-	if err != nil {
-		return err
-	}
-	err = db.Model(&u).Association("Scenarios").Delete(&sc).Error
+	db.Model(&sc).Association("Users").Delete(&u)
+	err := db.Model(&u).Association("Scenarios").Delete(&sc).Error
 	return err
 }
 
@@ -692,7 +689,7 @@ func duplicateIC(ic database.InfrastructureComponent, userName string, uuidstr s
 		`"category": "` + lastUpdate.Properties.Category + `",` +
 		`"type": "` + lastUpdate.Properties.Type + `",` +
 		`"uuid": "` + newUUID + `",` +
-		`"jobname": "` + lastUpdate.Properties.Job.MetaData.JobName + `-` + userName + `",` +
+		`"jobname": "` + strings.ToLower(lastUpdate.Properties.Job.MetaData.JobName) + `-` + strings.ToLower(userName) + `",` +
 		`"activeDeadlineSeconds": "` + strconv.Itoa(lastUpdate.Properties.Job.Spec.Active) + `",` +
 		`"containername": "` + lastUpdate.Properties.Job.Spec.Template.Spec.Containers[0].Name + `-` + userName + `",` +
 		`"image": "` + lastUpdate.Properties.Job.Spec.Template.Spec.Containers[0].Image + `",` +

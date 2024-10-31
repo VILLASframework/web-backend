@@ -214,21 +214,21 @@ func deleteUserGroup(c *gin.Context) {
 	for _, sm := range scenarioMappings {
 		var sc database.Scenario
 		err = db.Find(&sc, "ID = ?", sm.ScenarioID).Error
-		if helper.DBError(c, err) {
-			return
+		if err != nil {
+			continue
 		}
 		if sm.Duplicate {
 			for _, u := range users {
 				err = user.RemoveDuplicate(&sc, &u)
-				if helper.DBError(c, err) {
-					return
+				if err != nil {
+					continue
 				}
 			}
 		} else {
 			for _, u := range users {
 				err = user.RemoveAccess(&sc, &u, &ug_r)
-				if helper.DBError(c, err) {
-					return
+				if err != nil {
+					continue
 				}
 			}
 		}
@@ -375,20 +375,20 @@ func deleteUserFromUserGroup(c *gin.Context) {
 
 		var sc database.Scenario
 		err := db.Find(&sc, "ID = ?", sm.ScenarioID).Error
-		if helper.DBError(c, err) {
-			return
+		if err != nil {
+			continue
 		}
 
 		if sm.Duplicate {
 			err = user.RemoveDuplicate(&sc, &u)
-			if helper.DBError(c, err) {
-				return
+			if err != nil {
+				continue
 			}
 
 		} else {
 			err = user.RemoveAccess(&sc, &u, &ug.UserGroup)
-			if helper.DBError(c, err) {
-				return
+			if err != nil {
+				continue
 			}
 		}
 
