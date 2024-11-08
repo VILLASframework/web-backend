@@ -689,7 +689,7 @@ func duplicateIC(ic database.InfrastructureComponent, userName string, uuidstr s
 		`"category": "` + lastUpdate.Properties.Category + `",` +
 		`"type": "` + lastUpdate.Properties.Type + `",` +
 		`"uuid": "` + newUUID + `",` +
-		`"jobname": "` + strings.ToLower(lastUpdate.Properties.Job.MetaData.JobName) + `-` + strings.ToLower(userName) + `",` +
+		`"jobname": "` + strings.Replace(strings.ToLower(lastUpdate.Properties.Job.MetaData.JobName), "_", "-", -1) + `-` + strings.Replace(strings.ToLower(userName), "_", "-", -1) + `",` +
 		`"activeDeadlineSeconds": "` + strconv.Itoa(lastUpdate.Properties.Job.Spec.Active) + `",` +
 		`"containername": "` + lastUpdate.Properties.Job.Spec.Template.Spec.Containers[0].Name + `-` + userName + `",` +
 		`"image": "` + lastUpdate.Properties.Job.Spec.Template.Spec.Containers[0].Image + `",` +
