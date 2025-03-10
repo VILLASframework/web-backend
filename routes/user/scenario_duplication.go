@@ -39,7 +39,7 @@ func IsAlreadyDuplicated(sc *database.Scenario, u *database.User) bool {
 	return (len(scenarios) > 0)
 }
 
-// check if access of U to SC is exclusively granted by UG
+// check if access of user to scenario is granted exclusively by usergroup
 func IsExclusiveAccess(sc *database.Scenario, u *database.User, ug *database.UserGroup) bool {
 	db := database.GetDB()
 	var ugs []database.UserGroup
@@ -188,13 +188,13 @@ func RemoveDuplicate(sc *database.Scenario, u *database.User) error {
 				Results    json.RawMessage `json:"results,omitempty"`
 			}
 
-			actionCreate := Action{
+			actionDelete := Action{
 				Act:        "delete",
 				When:       time.Now().Unix(),
 				Parameters: json.RawMessage(msg),
 			}
 
-			payload, err := json.Marshal(actionCreate)
+			payload, err := json.Marshal(actionDelete)
 			if err != nil {
 				continue
 			}
@@ -211,10 +211,10 @@ func RemoveDuplicate(sc *database.Scenario, u *database.User) error {
 					}
 
 				} else {
-					return fmt.Errorf("could not send IC create action, AMQP session is not ready")
+					return fmt.Errorf("could not send IC DELETE action, AMQP session is not ready")
 				}
 			} else {
-				return fmt.Errorf("could not send IC create action, AMQP session is nil")
+				return fmt.Errorf("could not send IC DELETE action, AMQP session is nil")
 			}
 		}
 	}
