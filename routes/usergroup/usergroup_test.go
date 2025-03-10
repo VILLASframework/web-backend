@@ -54,7 +54,11 @@ type UserRequest struct {
 	Active      string `json:"active,omitempty"`
 }
 
-var newUserGroupOneMapping = UserGroupRequest{
+var newUserGroupNoMapping = UserGroupRequest{
+	Name: "UserGroupNoMapping",
+}
+
+var ug_AddScenario1 = UserGroupRequest{
 	Name: "UserGroup1",
 	ScenarioMappings: []ScenarioMappingRequest{
 		{
@@ -64,7 +68,7 @@ var newUserGroupOneMapping = UserGroupRequest{
 	},
 }
 
-var newUserGroupTwoMappings = UserGroupRequest{
+var ug_AddScenario1_DuplicateScenario2 = UserGroupRequest{
 	Name: "UserGroup2",
 	ScenarioMappings: []ScenarioMappingRequest{
 		{
@@ -197,30 +201,31 @@ func TestAddUserGroup(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equalf(t, 400, code, "Response body: \n%v\n", resp)
 
-	//Test with inexitent scenario
+	//Test with inexistent scenario
 	code, resp, err = helper.TestEndpoint(router, token, "/api/v2/usergroups",
-		"POST", helper.KeyModels{"usergroup": newUserGroupOneMapping})
+		"POST", helper.KeyModels{"usergroup": ug_AddScenario1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 404, code, "Response body: \n%v\n", resp)
+
+	// Test with valid user group with no scenario mappings
+	code, resp, err = helper.TestEndpoint(router, token, "/api/v2/usergroups",
+		"POST", helper.KeyModels{"usergroup": newUserGroupNoMapping})
+	assert.NoError(t, err)
+	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// Test with valid user group with one scenario mapping
 	helper.TestEndpoint(router, token, "/api/v2/scenarios", "POST", helper.KeyModels{"scenario": database.Scenario{Name: "scenario1"}})
 	helper.TestEndpoint(router, token, "/api/v2/scenarios", "POST", helper.KeyModels{"scenario": database.Scenario{Name: "scenario2"}})
 	code, resp, err = helper.TestEndpoint(router, token, "/api/v2/usergroups",
-		"POST", helper.KeyModels{"usergroup": newUserGroupOneMapping})
+		"POST", helper.KeyModels{"usergroup": ug_AddScenario1})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
 
 	// Test with valid user group and two scenario mappings
 	code, resp, err = helper.TestEndpoint(router, token, "/api/v2/usergroups",
-		"POST", helper.KeyModels{"usergroup": newUserGroupTwoMappings})
+		"POST", helper.KeyModels{"usergroup": ug_AddScenario1_DuplicateScenario2})
 	assert.NoError(t, err)
 	assert.Equalf(t, 200, code, "Response body: \n%v\n", resp)
-
-	// Test with valid user group and multiple mappings
-	// Test with invalid user group
-	// Test with invalid user group and one mapping
-	// Test with invalid user group and multiple mappings
 }
 
 func TestAddUserToGroup(t *testing.T) {
@@ -235,11 +240,12 @@ func TestAddUserToGroup(t *testing.T) {
 	//Post necessities
 	helper.TestEndpoint(router, token, "/api/v2/scenarios", "POST", helper.KeyModels{"scenario": database.Scenario{Name: "scenarioNoDups"}})
 	helper.TestEndpoint(router, token, "/api/v2/scenarios", "POST", helper.KeyModels{"scenario": database.Scenario{Name: "scenarioDups"}})
-	helper.TestEndpoint(router, token, "/api/v2/usergroups", "POST", helper.KeyModels{"usergroup": newUserGroupTwoMappings})
+	helper.TestEndpoint(router, token, "/api/v2/usergroups", "POST", helper.KeyModels{"usergroup": ug_AddScenario1_DuplicateScenario2})
 
-	for n_users := 0; n_users < 3; n_users++ {
-		//Add user
-		n := strconv.Itoa(n_users + 1)
+	n_users := 3
+	for n := 1; n <= n_users; n++ {
+		//Add user to usergroup
+		n := strconv.Itoa(n)
 		usr := UserRequest{Username: "usr" + n, Password: "legendre" + n, Role: "User", Mail: "usr" + n + "@harmonics.de"}
 		helper.TestEndpoint(router, token, "/api/v2/users", "POST", helper.KeyModels{"user": usr})
 		code, _, err := helper.TestEndpoint(router, token, "/api/v2/usergroups/1/user?username=usr"+n, "PUT", struct{}{})
@@ -253,31 +259,30 @@ func TestAddUserToGroup(t *testing.T) {
 	json.Unmarshal(res.Bytes(), &scenariosMap)
 	scenarios := scenariosMap["scenarios"]
 
-	//Actual checks
-	assert.Equal(t, 5, len(scenarios))
+	//Actually check whether the users are in the scenarios
+	assert.Equal(t, 2+n_users, len(scenarios)) // 2 original scenarios + 1 duplicate for each user
 
-	for _, v := range scenarios {
-		path := fmt.Sprintf("/api/v2/scenarios/%d/users", v.ID)
+	for _, scenario := range scenarios {
+		path := fmt.Sprintf("/api/v2/scenarios/%d/users", scenario.ID)
 		var usersMap map[string]([]database.User)
 		_, res, _ = helper.TestEndpoint(router, token, path, "GET", struct{}{})
 		json.Unmarshal(res.Bytes(), &usersMap)
 		users := usersMap["users"]
-		switch v.ID {
-		case 1: //no dups
-			assert.Equal(t, "scenarioNoDups", v.Name)
-			assert.Equal(t, 4, len(users))
-		case 2: // with dups
-			assert.Equal(t, "scenarioDups", v.Name)
+		switch scenario.ID {
+		case 1: // Scenario "scenarioNoDups"
+			assert.Equal(t, "scenarioNoDups", scenario.Name)
+			assert.Equal(t, 4, len(users)) // 3 users + admin
+		case 2: // Scenario "scenarioDups"
+			assert.Equal(t, "scenarioDups", scenario.Name)
 			assert.Equal(t, 1, len(users))
 			assert.Equal(t, "admin", users[0].Username)
-		default:
-			usr := "usr" + strconv.Itoa(int(v.ID-2)) // shift ids by the first two scenarios
-			assert.Equal(t, "scenarioDups "+usr, v.Name)
+		default: // duplicated scenarios
+			usr := "usr" + strconv.Itoa(int(scenario.ID-2)) // shift ids by the first two scenarios
+			assert.Equal(t, "scenarioDups "+usr, scenario.Name)
 			assert.Equal(t, 1, len(users))
 			assert.Equal(t, usr, users[0].Username)
 		}
 	}
-
 }
 
 func TestDeleteUserFromGroup(t *testing.T) {
@@ -292,26 +297,27 @@ func TestDeleteUserFromGroup(t *testing.T) {
 	//Post necessities
 	helper.TestEndpoint(router, token, "/api/v2/scenarios", "POST", helper.KeyModels{"scenario": database.Scenario{Name: "scenarioNoDups"}})
 	helper.TestEndpoint(router, token, "/api/v2/scenarios", "POST", helper.KeyModels{"scenario": database.Scenario{Name: "scenarioDups"}})
-	helper.TestEndpoint(router, token, "/api/v2/usergroups", "POST", helper.KeyModels{"usergroup": newUserGroupTwoMappings})
+	helper.TestEndpoint(router, token, "/api/v2/usergroups", "POST", helper.KeyModels{"usergroup": ug_AddScenario1_DuplicateScenario2})
 
-	//Add 2 users
-	for n_users := 0; n_users < 2; n_users++ {
+	// Create users and add them to the scenarios via usergroup
+	n_users := 2
+	for n := 1; n <= n_users; n++ {
 		//Add user
-		n := strconv.Itoa(n_users + 1)
+		n := strconv.Itoa(n)
 		usr := UserRequest{Username: "usr" + n, Password: "legendre" + n, Role: "User", Mail: "usr" + n + "@harmonics.de"}
 		helper.TestEndpoint(router, token, "/api/v2/users", "POST", helper.KeyModels{"user": usr})
 		code, _, err := helper.TestEndpoint(router, token, "/api/v2/usergroups/1/user?username=usr"+n, "PUT", struct{}{})
 		assert.Equal(t, 200, code)
 		assert.NoError(t, err)
 	}
-	//we add usr1 to a group that doubles its right of acces to scenario 1
-	helper.TestEndpoint(router, token, "/api/v2/usergroups", "POST", helper.KeyModels{"usergroup": newUserGroupOneMapping})
+	// add usr1 to usergroup 2, which doubles the access to scenario 1
+	helper.TestEndpoint(router, token, "/api/v2/usergroups", "POST", helper.KeyModels{"usergroup": ug_AddScenario1})
 	helper.TestEndpoint(router, token, "/api/v2/usergroups/2/user?username=usr1", "PUT", struct{}{})
 
-	//Delete one
+	//Delete user usr1 from usergroup 1, this will also delete the user's duplicate of scenario 2
 	helper.TestEndpoint(router, token, "/api/v2/usergroups/1/user?username=usr1", "DELETE", struct{}{})
 
-	//get scenarios
+	//get all scenarios
 	_, res, _ := helper.TestEndpoint(router, token, "/api/v2/scenarios", "GET", struct{}{})
 	var scenariosMap map[string]([]database.Scenario)
 	json.Unmarshal(res.Bytes(), &scenariosMap)
@@ -326,20 +332,20 @@ func TestDeleteUserFromGroup(t *testing.T) {
 		json.Unmarshal(res.Bytes(), &usersMap)
 		users := usersMap["users"]
 		switch v.ID {
-		case 1: //no dups should still contain usr1 through ug2
+		case 1: // scenario "scenarioNoDups" should still contain usr1 through usergroup 2
 			assert.Equal(t, "scenarioNoDups", v.Name)
 			assert.Equal(t, 3, len(users))
-		case 2: // with dups
+		case 2: // scenario "scenarioDups" should only contain admin, gets duplicated for users in usergroup 1
 			assert.Equal(t, "scenarioDups", v.Name)
 			assert.Equal(t, 1, len(users))
 			assert.Equal(t, "admin", users[0].Username)
-		default: // remaining duped scenario
+		default: // remaining duplicated scenario
 			assert.Equal(t, "scenarioDups usr2", v.Name)
 			assert.Equal(t, 1, len(users))
 			assert.Equal(t, "usr2", users[0].Username)
 		}
 	}
-	//Delete from other
+	// delete usr1 from usergroup 2
 	helper.TestEndpoint(router, token, "/api/v2/usergroups/2/user?username=usr1", "DELETE", struct{}{})
 
 	_, res, _ = helper.TestEndpoint(router, token, "/api/v2/scenarios/1", "GET", struct{}{})
@@ -353,6 +359,7 @@ func TestDeleteUserFromGroup(t *testing.T) {
 	json.Unmarshal(res.Bytes(), &usersMap)
 	users := usersMap["users"]
 
+	// make sure that usr1 is not in the scenario anymore
 	assert.Equal(t, 2, len(users))
 	for _, u := range users {
 		assert.NotEqual(t, "usr1", u.Username)
@@ -383,8 +390,8 @@ func TestDeleteUserGroup(t *testing.T) {
 		helper.TestEndpoint(router, token, "/api/v2/usergroups/1/user?username=usr"+n, "PUT", struct{}{})
 	}
 
-	//we add usr1 to a group that doubles its right of acces to scenario 1
-	helper.TestEndpoint(router, token, "/api/v2/usergroups", "POST", helper.KeyModels{"usergroup": newUserGroupOneMapping})
+	//we add usr1 to a group that doubles its right of access to scenario 1
+	helper.TestEndpoint(router, token, "/api/v2/usergroups", "POST", helper.KeyModels{"usergroup": ug_AddScenario1})
 	helper.TestEndpoint(router, token, "/api/v2/usergroups/2/user?username=usr1", "PUT", struct{}{})
 
 	//delete usergroup
@@ -416,7 +423,7 @@ func TestDeleteUserGroup(t *testing.T) {
 			_, res, _ = helper.TestEndpoint(router, token, path, "GET", struct{}{})
 			json.Unmarshal(res.Bytes(), &usersMap)
 			users := usersMap["users"]
-			assert.Equal(t, 2, len(users))
+			assert.Equal(t, 2, len(users)) // admin and usr1
 		}
 	}
 	//Delete from other
@@ -465,7 +472,7 @@ func TestUpdateUserGroup(t *testing.T) {
 	helper.TestEndpoint(router, token, "/api/v2/users", "POST", helper.KeyModels{"user": usr})
 	helper.TestEndpoint(router, token, "/api/v2/usergroups/1/user?username=usr1", "PUT", struct{}{})
 
-	//update group
+	// update group
 	helper.TestEndpoint(router, token, "/api/v2/usergroups/1", "PUT", helper.KeyModels{"usergroup": updateTestUg})
 
 	//get scenarios
