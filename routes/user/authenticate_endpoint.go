@@ -229,20 +229,25 @@ func authenticateInternal(c *gin.Context) (User, error) {
 
 func authenticateExternal(c *gin.Context) (User, error) {
 	var myUser User
-	username := c.Request.Header.Get("X-Forwarded-User")
-	if username == "" {
+	subject := c.Request.Header.Get("X-Forwarded-User")
+	if subject == "" {
 		helper.UnauthorizedAbort(c, "Authentication failed (X-Forwarded-User headers)")
-		return myUser, fmt.Errorf("no username")
+		return myUser, fmt.Errorf("no subject")
+	}
+
+	username := c.Request.Header.Get("X-Forwarded-Preferred-Username")
+	if username == "" {
+		username = subject
 	}
 
 	email := c.Request.Header.Get("X-Forwarded-Email")
+	
 	if email == "" {
 		helper.UnauthorizedAbort(c, "Authentication failed (X-Forwarded-Email headers)")
 		return myUser, fmt.Errorf("no email")
 	}
 
 	groups := strings.Split(c.Request.Header.Get("X-Forwarded-Groups"), ",")
-	// preferred_username := c.Request.Header.Get("X-Forwarded-Preferred-Username")
 
 	// check if user already exists
 	err := myUser.byUsername(username)
